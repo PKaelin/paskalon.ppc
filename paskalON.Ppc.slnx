@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/paskalON.Common/">
+    <Project Path="paskalON.Maths.IntegrationTest/paskalON.Maths.IntegrationTest.csproj" Id="c27ac8f8-1146-486e-bed0-998db4dae9fd" />
+    <Project Path="paskalON.Maths.UnitTest/paskalON.Maths.UnitTest.csproj" Id="77a8779a-e0e1-49e9-b643-4a9bfd0dd042" />
+    <Project Path="paskalON.Maths/paskalON.Maths.csproj" Id="e3f7a119-97d9-4789-9dbd-ae675832db91" />
+    <Project Path="paskalON.PhysicalUnits.UnitTest/paskalON.PhysicalUnits.UnitTest.csproj" Id="96fe2f64-bcc0-4a8a-9871-c15675d65eaa" />
+    <Project Path="paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" Id="6387cd34-9cf4-4742-80a8-1b162098ef1b" />
+  </Folder>
+  <Folder Name="/paskalON.Ppc.Devices/" />
+  <Folder Name="/paskalON.Ppc.OperatingModes/" />
+  <Folder Name="/paskalON.Ppc.PowerControls/" />
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+</Solution>
