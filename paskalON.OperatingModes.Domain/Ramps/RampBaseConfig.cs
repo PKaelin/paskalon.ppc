@@ -1,0 +1,22 @@
+﻿using paskalON.Domains;
+
+namespace paskalON.OperatingModes.Domain.Ramps
+{
+    /// <summary>
+    /// Configuration for base for ramp ramp models.
+    /// </summary>
+    public class RampBaseConfig : DomainBase
+    {
+        /// <summary>
+        /// Ramp timeout period (in seconds) between enabling the operating mode and the automatic disablement of the mode.
+        /// </summary>
+        /// <remarks></remarks>
+        public int RampTimeoutSeconds { get; set; }
+
+
+        /// <summary>
+        /// Ramp time in seconds between enabling the operating mode and start of ramp according to model.
+        /// </summary>
+        public int RampTimeSeconds { get; set; }
+    }
+}
