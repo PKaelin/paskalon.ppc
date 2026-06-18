@@ -11,10 +11,12 @@
         /// </summary>
         public PiecewiseFunctionType Type { get; set; }
 
+
         /// <summary>
         /// X point of definition
         /// </summary>
         public double X { get; set; }
+
 
         /// <summary>
         /// Y point of definition
@@ -26,6 +28,7 @@
         /// Precision to round the output to
         /// </summary>
         public int Precision { get; set; } = 3;
+
 
         /// <summary>
         /// Minimum of noise range that gets applied
@@ -40,12 +43,13 @@
 
 
         /// <summary>
-        /// Constructor
+        /// Constructor of <see cref="PiecewisePoint"/>.
         /// </summary>
         public PiecewisePoint() { }
 
+
         /// <summary>
-        /// Constructor
+        /// Constructor of <see cref="PiecewisePoint"/>.
         /// </summary>
         /// <param name="type">Type of the function to use</param>
         /// <param name="x">X point definition</param>
@@ -55,6 +59,16 @@
             Type = type;
             X = x;
             Y = y;
+        }
+
+
+        /// <summary>
+        /// Returns a string representation of this instance.
+        /// </summary>
+        /// <returns>String representation of this instance.</returns>
+        public override string ToString()
+        {
+            return $"{Type}({X},{Y})";
         }
     }
 }

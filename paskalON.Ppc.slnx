@@ -9,6 +9,7 @@
   </Folder>
   <Folder Name="/paskalON.Ppc.Devices/" />
   <Folder Name="/paskalON.Ppc.OperatingModes/">
+    <Project Path="paskalON.OperatingModes.Domain.UnitTest/paskalON.OperatingModes.Domain.UnitTest.csproj" Id="76e9cc70-599c-4b56-ac03-d5d264b0fab8" />
     <Project Path="paskalON.OperatingModes.Domain/paskalON.OperatingModes.Domain.csproj" Id="c8f9cc1f-f95e-4259-acfb-1ef7341d0cd8" />
   </Folder>
   <Folder Name="/paskalON.Ppc.PowerControls/" />

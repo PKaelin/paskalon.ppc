@@ -47,7 +47,7 @@ namespace paskalON.Maths.IntegrationTest.Calculuses.Coordinates
             {
                 for (int x = xStart; x < xEnd; x++)
                 {
-                    sw.WriteLine($"{x},{linearPointFunction.CalculateOutput(x)}");
+                    sw.WriteLine($"{x},{linearPointFunction.CalculateOutputPrecision(x)}");
                 }
             }
         }

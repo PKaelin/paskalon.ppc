@@ -8,7 +8,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
     public class EuclideanDistance
     {
         /// <summary>
-        /// Logger for the EuclideanDistance class, used to log errors and information during distance calculations.
+        /// ILogger for handling application logging and diagnostics.
         /// </summary>
         private readonly ILogger<EuclideanDistance> _logger;
 

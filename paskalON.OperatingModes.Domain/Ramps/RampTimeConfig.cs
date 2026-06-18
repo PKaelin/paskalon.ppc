@@ -5,14 +5,17 @@
     /// </summary>
     public class RampTimeConfig : RampBaseConfig
     {
-
         /// <summary>
         /// Ramp up time in seconds between current setpoint and target setpoint.
         /// </summary>
         /// <example>
         /// Current: 0, Target: 60, RampUpTimeSeconds: 30 = Ramp reaches target of 60 in 30 seconds.
         /// </example>
-        public int RampUpTimeSeconds { get; set; }
+        public int RampUpTimeSeconds
+        {
+            get { return field; }
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+        }
 
 
         /// <summary>
@@ -21,7 +24,11 @@
         /// <example>
         /// Current: 60, Target: 0, RampDownTimeSeconds: 30 = Ramp reaches target of 0 in 30 seconds.
         /// </example>
-        public int RampDownTimeSeconds { get; set; }
+        public int RampDownTimeSeconds
+        {
+            get { return field; }
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+        }
 
     }
 }

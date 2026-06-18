@@ -1,7 +1,7 @@
 ﻿namespace paskalON.OperatingModes.Domain
 {
     /// <summary>
-    /// <see cref="OperatingModeState"/> enum to track the state of the operating mode.
+    /// Operating mode states to track the state of the operating mode.
     /// </summary>
     public enum OperatingModeState
     {

@@ -8,7 +8,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
     public class VectorGenerator
     {
         /// <summary>
-        /// Logger for logging the parameters used in vector generation and file creation.
+        /// ILogger for handling application logging and diagnostics.
         /// </summary>
         private readonly ILogger<VectorGenerator> _logger;
 

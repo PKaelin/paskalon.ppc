@@ -8,31 +8,37 @@ namespace paskalON.Maths.Calculuses.Curves
     /// Each piecewise point specifies the type of function to use for interpolation between points, as well as the X and Y coordinates. 
     /// The class calculates the output for a given input X by determining which piecewise function to use based on the defined points and applying the appropriate interpolation method.
     /// </summary>
-    public class PiecewiseFunction
+    public class PiecewiseFunction : ICalculateOutputFunction
     {
         /// <summary>
         /// Dictionary to store the piecewise functions.
         /// </summary>
-        private Dictionary<double, IPiecewiseFunction> _functions = new Dictionary<double, IPiecewiseFunction>();
+        private Dictionary<double, ICalculateOutputFunction> _functions = new Dictionary<double, ICalculateOutputFunction>();
 
 
         /// <summary>
-        /// Definition of linear points X and Y
+        /// Definition of linear points X and Y.
         /// </summary>
         public List<PiecewisePoint> PiecewisePoints { get; private set; } = new List<PiecewisePoint>();
 
 
         /// <summary>
-        /// Adds an offset to f(x)
+        /// Adds an offset to f(x).
         /// </summary>
         public double Offset { get; set; } = 0;
 
 
         /// <summary>
-        /// Constructor
+        /// Precision to round the output to.
         /// </summary>
-        /// <param name="piecewisePoints">List of picewiese points</param>
-        public PiecewiseFunction(List<PiecewisePoint> piecewisePoints, double offset = 0)
+        public int Precision { get; set; }
+
+
+        /// <summary>
+        /// Constructor of <see cref="PiecewiseFunction"/>.
+        /// </summary>
+        /// <param name="piecewisePoints">List of piecewise points.</param>
+        public PiecewiseFunction(List<PiecewisePoint> piecewisePoints, double offset = 0, int precision = 3)
         {
             if ((piecewisePoints == null) || (piecewisePoints.Count == 0))
             {
@@ -43,14 +49,15 @@ namespace paskalON.Maths.Calculuses.Curves
             PiecewisePoints.Sort((l1, l2) => l1.X.CompareTo(l2.X));
             Offset = offset;
             InitializeFunctions();
+            Precision = precision;
         }
 
 
         /// <summary>
         /// Calculates the output for a given input X by determining which piecewise function to use based on the defined points and applying the appropriate interpolation method.
         /// </summary>
-        /// <param name="x">Input value for which to calculate the output</param>
-        /// <returns>Output value corresponding to the input X</returns>
+        /// <param name="x">Input value for which to calculate the output.</param>
+        /// <returns>Output value corresponding to the input X.</returns>
         public double CalculateOutput(double x)
         {
             double key = _functions.Keys.Aggregate((k1, k2) => Math.Abs(k1 - x) < Math.Abs(k2 - x) ? (k1 > x && x > 0 ? k2 : k1) : (k2 > x ? k1 : k2));
@@ -70,6 +77,17 @@ namespace paskalON.Maths.Calculuses.Curves
             }
 
             return _functions[(double)key].CalculateOutput(x);
+        }
+
+
+        /// <summary>
+        /// Calculates the output for a given input X by determining which piecewise function to use based on the defined points and applying the appropriate interpolation method.
+        /// </summary>
+        /// <param name="x">Input value for which to calculate the output.</param>
+        /// <returns>Output value corresponding to the input X.</returns>
+        public double CalculateOutputPrecision(double x)
+        {
+            return Math.Round(CalculateOutput(x), Precision);
         }
 
 
@@ -109,5 +127,16 @@ namespace paskalON.Maths.Calculuses.Curves
                 }
             }
         }
+
+
+        /// <summary>
+        /// Returns a string representation of this instance.
+        /// </summary>
+        /// <returns>String representation of this instance.</returns>
+        public override string ToString()
+        {
+            return $"{nameof(PiecewiseFunction)} Offset: {Offset} Points: {string.Join(',', PiecewisePoints.Select(p => p.ToString()))}";
+        }
+
     }
 }

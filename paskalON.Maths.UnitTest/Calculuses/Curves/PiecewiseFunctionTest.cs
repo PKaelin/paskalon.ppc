@@ -10,8 +10,7 @@ namespace paskalON.Maths.UnitTest.Calculuses.Curves
         public void EmptyListTest()
         {
             List<PiecewisePoint> points = new List<PiecewisePoint>();
-            PiecewiseFunction pf = new PiecewiseFunction(points);
-            Assert.ThrowsExactly<ArgumentException>(() => pf.CalculateOutput(0));
+            Assert.ThrowsExactly<ArgumentException>(() => new PiecewiseFunction(points));
         }
 
 
@@ -22,9 +21,9 @@ namespace paskalON.Maths.UnitTest.Calculuses.Curves
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 10, 10));
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 20, 40));
             PiecewiseFunction pf = new PiecewiseFunction(points);
-            Assert.AreEqual(0d, pf.CalculateOutput(-10));
-            Assert.AreEqual(0d, pf.CalculateOutput(-5));
-            Assert.AreEqual(0, pf.CalculateOutput(0));
+            Assert.AreEqual(0d, pf.CalculateOutputPrecision(-10));
+            Assert.AreEqual(0d, pf.CalculateOutputPrecision(-5));
+            Assert.AreEqual(0, pf.CalculateOutputPrecision(0));
         }
 
 
@@ -35,7 +34,7 @@ namespace paskalON.Maths.UnitTest.Calculuses.Curves
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 10, 10));
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 20, 40));
             PiecewiseFunction pf = new PiecewiseFunction(points);
-            Assert.AreEqual(10, pf.CalculateOutput(10));
+            Assert.AreEqual(10, pf.CalculateOutputPrecision(10));
         }
 
 
@@ -46,9 +45,9 @@ namespace paskalON.Maths.UnitTest.Calculuses.Curves
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 10, 10));
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 20, 40));
             PiecewiseFunction pf = new PiecewiseFunction(points);
-            Assert.AreEqual(40d, pf.CalculateOutput(50));
-            Assert.AreEqual(40d, pf.CalculateOutput(55));
-            Assert.AreEqual(40d, pf.CalculateOutput(60));
+            Assert.AreEqual(40d, pf.CalculateOutputPrecision(50));
+            Assert.AreEqual(40d, pf.CalculateOutputPrecision(55));
+            Assert.AreEqual(40d, pf.CalculateOutputPrecision(60));
         }
 
 
@@ -63,13 +62,13 @@ namespace paskalON.Maths.UnitTest.Calculuses.Curves
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 50, 0));
             PiecewiseFunction pf = new PiecewiseFunction(points);
 
-            Assert.AreEqual(0d, pf.CalculateOutput(0));
-            Assert.AreEqual(5d, pf.CalculateOutput(5));
-            Assert.AreEqual(25d, pf.CalculateOutput(15));
-            Assert.AreEqual(60d, pf.CalculateOutput(30));
-            Assert.AreEqual(40d, pf.CalculateOutput(45));
-            Assert.AreEqual(0d, pf.CalculateOutput(50));
-            Assert.AreEqual(0d, pf.CalculateOutput(51));
+            Assert.AreEqual(0d, pf.CalculateOutputPrecision(0));
+            Assert.AreEqual(5d, pf.CalculateOutputPrecision(5));
+            Assert.AreEqual(25d, pf.CalculateOutputPrecision(15));
+            Assert.AreEqual(60d, pf.CalculateOutputPrecision(30));
+            Assert.AreEqual(40d, pf.CalculateOutputPrecision(45));
+            Assert.AreEqual(0d, pf.CalculateOutputPrecision(50));
+            Assert.AreEqual(0d, pf.CalculateOutputPrecision(51));
         }
 
 
@@ -85,7 +84,7 @@ namespace paskalON.Maths.UnitTest.Calculuses.Curves
 
             for (int x = 0; x < 10; x++)
             {
-                double output = pf.CalculateOutput(x);
+                double output = pf.CalculateOutputPrecision(x);
                 results.Add(output);
             }
 

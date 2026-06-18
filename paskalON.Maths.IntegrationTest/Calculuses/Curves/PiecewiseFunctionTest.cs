@@ -45,7 +45,7 @@ namespace paskalON.Maths.IntegrationTest.Calculuses.Curves
             List<PiecewisePoint> points = new List<PiecewisePoint>();
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 10, 10));
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 20, 100));
-            points.Add(new PiecewisePoint(PiecewiseFunctionType.Exponential2PointFunction, 30, 0));
+            points.Add(new PiecewisePoint(PiecewiseFunctionType.Exponential2PointFunction, 30, 300));
             points.Add(new PiecewisePoint(PiecewiseFunctionType.Exponential2PointFunction, 40, 400));
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 50, 100));
             PiecewiseFunction pf = new PiecewiseFunction(points);
@@ -61,7 +61,7 @@ namespace paskalON.Maths.IntegrationTest.Calculuses.Curves
             {
                 for (int x = xStart; x < xEnd; x++)
                 {
-                    sw.WriteLine($"{x},{picewiseFunction.CalculateOutput(x)}");
+                    sw.WriteLine($"{x},{picewiseFunction.CalculateOutputPrecision(x)}");
                 }
             }
         }

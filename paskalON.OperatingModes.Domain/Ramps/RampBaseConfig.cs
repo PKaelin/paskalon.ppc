@@ -11,12 +11,20 @@ namespace paskalON.OperatingModes.Domain.Ramps
         /// Ramp timeout period (in seconds) between enabling the operating mode and the automatic disablement of the mode.
         /// </summary>
         /// <remarks></remarks>
-        public int RampTimeoutSeconds { get; set; }
+        public int RampTimeoutSeconds
+        {
+            get { return field; }
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+        }
 
 
         /// <summary>
         /// Ramp time in seconds between enabling the operating mode and start of ramp according to model.
         /// </summary>
-        public int RampTimeSeconds { get; set; }
+        public int RampTimeSeconds
+        {
+            get { return field; }
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+        }
     }
 }

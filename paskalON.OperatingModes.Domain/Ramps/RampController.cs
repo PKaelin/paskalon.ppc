@@ -1,0 +1,251 @@
+﻿using Microsoft.Extensions.Logging;
+using paskalON.Maths.Calculuses;
+using paskalON.Maths.Calculuses.Coordinates;
+using paskalON.Maths.Calculuses.Logarithmics;
+
+namespace paskalON.OperatingModes.Domain.Ramps
+{
+    /// <summary>
+    /// Ramp controller for controlling ramps according to its configurations.
+    /// </summary>
+    public class RampController
+    {
+        /// <summary>
+        /// ILogger for handling application logging and diagnostics.
+        /// </summary>
+        private readonly ILogger<RampController> _logger;
+
+
+        /// <summary>
+        /// Time provider for system time abstraction.
+        /// </summary>
+        private readonly TimeProvider _timeProvider;
+
+
+        /// <summary>
+        /// Ramp base configuration containing concrete ramp configuration.
+        /// </summary>
+        private readonly RampBaseConfig _rampBaseConfig;
+
+
+        /// <summary>
+        /// Ramp function for ramp controller.
+        /// </summary>
+        private ICalculateOutputFunction? _rampFunction;
+
+
+        /// <summary>
+        /// Gets the start value of the ramp.
+        /// </summary>
+        public double StartValue { get; private set; }
+
+
+        /// <summary>
+        /// Gets the target value of the ramp.
+        /// </summary>
+        public double TargetValue { get; private set; }
+
+
+        /// <summary>
+        /// Gets the current value of the ramp.
+        /// </summary>
+        public double CurrentValue { get; private set; }
+
+
+        /// <summary>
+        /// Get the start date of the ramp when it was started.
+        /// </summary>
+        public DateTimeOffset StartDate { get; private set; } = DateTimeOffset.MinValue;
+
+
+        /// <summary>
+        /// Constructor of <see cref="RampController"/>
+        /// </summary>
+        /// <param name="logger">ILogger for handling application logging and diagnostics.</param>
+        /// <param name="rampBaseConfig">Ramp base configuration containing concrete ramp configuration.</param>
+        public RampController(ILogger<RampController> logger, TimeProvider timeProvider, RampBaseConfig rampBaseConfig)
+        {
+            ArgumentNullException.ThrowIfNull(logger);
+            ArgumentNullException.ThrowIfNull(timeProvider);
+            ArgumentNullException.ThrowIfNull(rampBaseConfig);
+
+            _logger = logger;
+            _timeProvider = timeProvider;
+            _rampBaseConfig = rampBaseConfig;
+        }
+
+
+        /// <summary>
+        /// Starts the ramping.
+        /// </summary>
+        /// <param name="startValue">Start value of the ramp.</param>
+        /// <param name="targetValue">Target value of the ramp.</param>
+        public void Start(double startValue, double targetValue)
+        {
+            StartDate = _timeProvider.GetUtcNow();
+            StartValue = startValue;
+            TargetValue = targetValue;
+            CurrentValue = startValue;
+            Initialize();
+        }
+
+
+        /// <summary>
+        /// Stops the ramping regardless of its current position.
+        /// </summary>
+        public void Stop()
+        {
+            StartDate = DateTimeOffset.MinValue;
+        }
+
+
+        /// <summary>
+        /// Calculate current ramp.
+        /// </summary>
+        /// <returns>Current value of the ramp which is also assigned to the CurrentValue property.</returns>
+        /// <exception cref="NotImplementedException">Returns exception if the ramp configuration is not implemented.</exception>
+        public double Calculate()
+        {
+            lock (_rampBaseConfig)
+            {
+                if (StartDate == DateTimeOffset.MinValue)
+                {
+                    return CurrentValue;
+                }
+
+                if (((_rampBaseConfig is RampRateConfig) || (_rampBaseConfig is RampRatePercentageConfig) ||
+                    (_rampBaseConfig is RampTimeConfig) || (_rampBaseConfig is RampTimeConstantConfig)) && (_rampFunction != null))
+                {
+                    // Long to double conversion. Double can hold 5.7 x 10^308. 
+                    CurrentValue = _rampFunction.CalculateOutput(_timeProvider.GetUtcNow().Ticks);
+                }
+                else
+                {
+                    throw new NotImplementedException($"Ramp controller for type: {_rampBaseConfig.GetType()} has not been implemented");
+                }
+            }
+
+            return CurrentValue;
+        }
+
+
+        /// <summary>
+        /// Initializes the ramp controller
+        /// </summary>
+        /// <exception cref="NotImplementedException">Returns exception if the ramp configuration is not implemented.</exception>
+        private void Initialize()
+        {
+            lock (_rampBaseConfig)
+            {
+                if (_rampBaseConfig is RampRateConfig)
+                {
+                    List<LinearPoint> linearPoints = new List<LinearPoint>();
+                    linearPoints.Add(new LinearPoint(StartDate.UtcTicks, StartValue));
+                    double rampStepValue = StartValue;
+
+                    if (StartValue >= TargetValue)
+                    {
+                        while (rampStepValue < TargetValue)
+                        {
+                            rampStepValue += ((RampRateConfig)_rampBaseConfig).RampUpRatePerSecond;
+                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(1).UtcTicks, rampStepValue));
+                        }
+
+                        linearPoints.Last().Y = TargetValue;
+                    }
+                    else
+                    {
+                        while (rampStepValue > TargetValue)
+                        {
+                            rampStepValue -= ((RampRateConfig)_rampBaseConfig).RampUpRatePerSecond;
+                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(1).UtcTicks, rampStepValue));
+                        }
+
+                        linearPoints.Last().Y = TargetValue;
+                    }
+
+                    _rampFunction = new LinearPointFunction(linearPoints);
+                }
+                else if (_rampBaseConfig is RampRatePercentageConfig)
+                {
+                    List<LinearPoint> linearPoints = new List<LinearPoint>();
+                    linearPoints.Add(new LinearPoint(StartDate.UtcTicks, StartValue));
+                    double rampStepValue = StartValue;
+
+                    if (StartValue >= TargetValue)
+                    {
+                        double rampRate = ((RampRatePercentageConfig)_rampBaseConfig).RampUpRatePercentPerSecond == 0 ? 100 : ((RampRatePercentageConfig)_rampBaseConfig).RampUpRatePercentPerSecond;
+
+                        while (rampStepValue < TargetValue)
+                        {
+                            rampStepValue = rampStepValue / rampRate * 100;
+                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(1).UtcTicks, rampStepValue));
+                        }
+
+                        linearPoints.Last().Y = TargetValue;
+                    }
+                    else
+                    {
+                        double rampRate = ((RampRatePercentageConfig)_rampBaseConfig).RampDownRatePercentPerSecond == 0 ? 100 : ((RampRatePercentageConfig)_rampBaseConfig).RampDownRatePercentPerSecond;
+
+                        while (rampStepValue > TargetValue)
+                        {
+                            rampStepValue = rampStepValue / rampRate * 100;
+                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(1).UtcTicks, rampStepValue));
+                        }
+
+                        linearPoints.Last().Y = TargetValue;
+                    }
+
+                    _rampFunction = new LinearPointFunction(linearPoints);
+                }
+                else if (_rampBaseConfig is RampTimeConfig)
+                {
+                    List<LinearPoint> linearPoints = new List<LinearPoint>();
+                    linearPoints.Add(new LinearPoint(StartDate.UtcTicks, StartValue));
+
+                    if (StartValue <= TargetValue)
+                    {
+                        linearPoints.Add(new LinearPoint(StartDate.AddSeconds(((RampTimeConfig)_rampBaseConfig).RampUpTimeSeconds).UtcTicks, TargetValue));
+                    }
+                    else
+                    {
+                        linearPoints.Add(new LinearPoint(StartDate.AddSeconds(((RampTimeConfig)_rampBaseConfig).RampDownTimeSeconds).UtcTicks, TargetValue));
+                    }
+
+                    _rampFunction = new LinearPointFunction(linearPoints);
+                }
+                else if (_rampBaseConfig is RampTimeConstantConfig)
+                {
+                    if (StartValue <= TargetValue)
+                    {
+                        _rampFunction = new LogarithmicFunction(StartDate.UtcTicks, StartDate.AddSeconds(((RampTimeConstantConfig)_rampBaseConfig).RampUpTimeConstantSeconds).UtcTicks);
+                    }
+                    else
+                    {
+                        _rampFunction = new LogarithmicFunction(StartDate.UtcTicks, StartDate.AddSeconds(((RampTimeConstantConfig)_rampBaseConfig).RampDownTimeConstantSeconds).UtcTicks);
+                    }
+                }
+                else
+                {
+                    throw new NotImplementedException($"Ramp controller for type: {_rampBaseConfig.GetType()} has not been implemented");
+                }
+            }
+
+            if (_rampFunction != null)
+            {
+                _logger.LogDebug("{Class} initialized: {context}", nameof(RampController), _rampFunction.ToString());
+            }
+        }
+
+
+        /// <summary>
+        /// Returns a string representation of this instance.
+        /// </summary>
+        /// <returns>String representation of this instance.</returns>
+        public override string ToString()
+        {
+            return $"{_rampBaseConfig.ToString()} StartDate: {StartDate}, StartValue: {StartValue} TargetValue: {TargetValue} CurrentValue: {CurrentValue}";
+        }
+    }
+}

@@ -10,6 +10,7 @@
         /// </summary>
         public double X { get; set; }
 
+
         /// <summary>
         /// Y point of a linear definition
         /// </summary>
@@ -25,6 +26,16 @@
         {
             X = x;
             Y = y;
+        }
+
+
+        /// <summary>
+        /// Returns a string representation of this instance.
+        /// </summary>
+        /// <returns>String representation of this instance.</returns>
+        public override string ToString()
+        {
+            return $"({X},{Y})";
         }
     }
 }

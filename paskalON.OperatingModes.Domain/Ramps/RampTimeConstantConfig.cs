@@ -11,7 +11,11 @@
         /// <example>
         /// Current: 0, Target: 60, RampUpTimeConstantSeconds: 30 = Ramp reaches target of 60 in 30 seconds using logarithmic ramp.
         /// </example>
-        public int RampUpTimeConstantSeconds { get; set; }
+        public int RampUpTimeConstantSeconds
+        {
+            get { return field; }
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+        }
 
 
         /// <summary>
@@ -20,16 +24,11 @@
         /// <example>
         /// Current: 60, Target: 0, RampDownTimeConstantSeconds: 30 = Ramp reaches target of 0 in 30 seconds using logarithmic ramp.
         /// </example>
-        public int RampDownTimeConstantSeconds { get; set; }
-
-
-        /// <summary>
-        /// Ramp rate percision for rounding ramp up and ramp down constant.
-        /// </summary>
-        /// <example>
-        /// Ramp rates in logarithmic ramps are very flat at the end and it is therefore recommended to cut the ramp off at some point.
-        /// </example>
-        public int RampTimeConstantPercision { get; set; } = 1;
+        public int RampDownTimeConstantSeconds
+        {
+            get { return field; }
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+        }
 
     }
 }

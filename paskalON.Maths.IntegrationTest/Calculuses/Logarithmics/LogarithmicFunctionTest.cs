@@ -14,7 +14,7 @@ namespace paskalON.Maths.IntegrationTest.Calculuses.Logarithmics
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    double output = lf.CalculateOutput(i);
+                    double output = lf.CalculateOutputPrecision(i);
                     sw.WriteLine($"{i}, {output}");
                 }
             }

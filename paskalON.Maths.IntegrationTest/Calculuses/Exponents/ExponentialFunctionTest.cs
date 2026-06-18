@@ -14,7 +14,7 @@ namespace paskalON.Maths.IntegrationTest.Calculuses.Exponents
             {
                 for (int x = 0; x < 15; x++)
                 {
-                    sw.WriteLine($"{x},{ef.CalculateOutput(x)}");
+                    sw.WriteLine($"{x},{ef.CalculateOutputPrecision(x)}");
                 }
             }
         }
