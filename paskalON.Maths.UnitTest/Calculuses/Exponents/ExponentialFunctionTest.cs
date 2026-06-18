@@ -67,33 +67,33 @@ namespace paskalON.Maths.UnitTest.Calculuses.Exponents
         [TestMethod]
         public void DecayByMultiplierTest()
         {
-            ExponentialFunction ef = new ExponentialFunction(9000, 0.925, 0, 2);
+            ExponentialFunction ef = new ExponentialFunction(9000, 0.925, 0);
             // Value decrease is 7.5% each X
-            Assert.AreEqual(9000, ef.CalculateOutputPrecision(0));
-            Assert.AreEqual(8325, ef.CalculateOutputPrecision(1));
-            Assert.AreEqual(7700.63, ef.CalculateOutputPrecision(2));
-            Assert.AreEqual(7123.08, ef.CalculateOutputPrecision(3));
-            Assert.AreEqual(6588.85, ef.CalculateOutputPrecision(4));
+            Assert.AreEqual(9000, ef.CalculateOutputPrecision(0, 2));
+            Assert.AreEqual(8325, ef.CalculateOutputPrecision(1, 2));
+            Assert.AreEqual(7700.63, ef.CalculateOutputPrecision(2, 2));
+            Assert.AreEqual(7123.08, ef.CalculateOutputPrecision(3, 2));
+            Assert.AreEqual(6588.85, ef.CalculateOutputPrecision(4, 2));
         }
 
 
         [TestMethod]
         public void DecayByMultiplierInitialNegativeTest()
         {
-            ExponentialFunction ef = new ExponentialFunction(-9000, 0.925, 0, 2);
+            ExponentialFunction ef = new ExponentialFunction(-9000, 0.925, 0);
             // Value decrease is 7.5% each X
-            Assert.AreEqual(-9000, ef.CalculateOutputPrecision(0));
-            Assert.AreEqual(-8325, ef.CalculateOutputPrecision(1));
-            Assert.AreEqual(-7700.63, ef.CalculateOutputPrecision(2));
-            Assert.AreEqual(-7123.08, ef.CalculateOutputPrecision(3));
-            Assert.AreEqual(-6588.85, ef.CalculateOutputPrecision(4));
+            Assert.AreEqual(-9000, ef.CalculateOutputPrecision(0, 2));
+            Assert.AreEqual(-8325, ef.CalculateOutputPrecision(1, 2));
+            Assert.AreEqual(-7700.63, ef.CalculateOutputPrecision(2, 2));
+            Assert.AreEqual(-7123.08, ef.CalculateOutputPrecision(3, 2));
+            Assert.AreEqual(-6588.85, ef.CalculateOutputPrecision(4, 2));
         }
 
 
         [TestMethod]
         public void GrowthByDoubleNoiseAddedTest()
         {
-            ExponentialFunction ef = new ExponentialFunction(520, 2, 0, -1, 1, 2);
+            ExponentialFunction ef = new ExponentialFunction(520, 2, 0, -1, 1);
 
             double value = ef.CalculateOutputPrecision(0);
             Assert.IsTrue(value > 519 && value < 521);

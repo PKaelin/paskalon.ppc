@@ -16,7 +16,7 @@ namespace paskalON.Maths.Calculuses.Exponents
 
 
         /// <summary>
-        /// Coefficient, initial value, starting point, constant.
+        /// Initial value, starting point.
         /// </summary>
         public double A { get; init; }
 
@@ -30,25 +30,19 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// <summary>
         /// Adds an offset to f(x).
         /// </summary>
-        public double Offset { get; set; } = 0;
-
-
-        /// <summary>
-        /// Precision to round the output to.
-        /// </summary>
-        public int Precision { get; set; }
+        public double Offset { get; init; } = 0;
 
 
         /// <summary>
         /// Minimum of noise range that gets applied.
         /// </summary>
-        public double NoiseMin { get; set; } = 0;
+        public double NoiseMin { get; init; } = 0;
 
 
         /// <summary>
         /// Maximum of noise range that gets applied.
         /// </summary>
-        public double NoiseMax { get; set; } = 0;
+        public double NoiseMax { get; init; } = 0;
 
 
         /// <summary>
@@ -57,9 +51,8 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// <param name="initialValue">Initial value (a) used in the calculation.</param>
         /// <param name="factor">Factor (b) used in the calculation.</param>
         /// <param name="offset">Offset to f(x).</param>
-        /// <param name="precision">Precision to round the output to.</param>
-        public ExponentialFunction(double initialValue, double factor, double offset = 0, int precision = 3)
-            : this(initialValue, factor, offset, 0, 0, precision)
+        public ExponentialFunction(double initialValue, double factor, double offset = 0)
+            : this(initialValue, factor, offset, 0, 0)
         {
         }
 
@@ -72,8 +65,7 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// <param name="offset">Offset to f(x)</param>
         /// <param name="noiseMin">Minimum of noise range that gets applied</param>
         /// <param name="noiseMax">Maximum of noise range that gets applied</param>
-        /// <param name="precision">Precision to round the output to</param>
-        public ExponentialFunction(double initialValue, double factor, double offset, double noiseMin, double noiseMax, int precision = 3)
+        public ExponentialFunction(double initialValue, double factor, double offset, double noiseMin, double noiseMax)
         {
             if (factor < 0)
             {
@@ -82,7 +74,6 @@ namespace paskalON.Maths.Calculuses.Exponents
 
             A = initialValue;
             B = factor;
-            Precision = precision;
             NoiseMin = noiseMin;
             NoiseMax = noiseMax;
             Offset = offset;
@@ -132,25 +123,9 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// </summary>
         /// <param name="x">X input</param>
         /// <returns>"f(x) Output (Y) from the calculated curve</returns>
-        /// <remarks>
-        /// Few possible basic formulas for exponential function:
-        /// f(x) = b^x
-        /// f(x) = ab^x (this methods implementation)
-        /// f(x) = ab^kx
-        /// f(x) = a(1 + r)^x
-        /// 
-        /// x: x-axis, time, is a variable
-        /// a: coefficient, initial value, starting point, constant
-        /// b: growth or decay factor. E.g. b=2 results in double (multiplying) when x is 1,2,3,4
-        /// Exponential growth: If b > 1 then starting amount (a) is multiplied by a number greater than 1 and will increase as x increases
-        /// In exponential growth, a quantity slowly increases in the beginning and then it increases rapidly.
-        /// Exponential decay: If 0 < b < 1 then starting amount (a) is multiplied by a number between 0 and 1 and will decrease as x increases         
-        /// In exponential decay, a quantity decreases very rapidly in the beginning, and then it decreases slowly.
-        /// Analyse Y points in a curve to figure out the grow factor
-        /// </remarks>
-        public double CalculateOutputPrecision(double x)
+        public double CalculateOutputPrecision(double x, int precision = 3)
         {
-            return Math.Round(CalculateOutput(x), Precision);
+            return Math.Round(CalculateOutput(x), precision);
         }
     }
 }

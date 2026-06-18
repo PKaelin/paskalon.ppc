@@ -30,5 +30,19 @@
             set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
         }
 
+
+        /// <summary>
+        /// Tuning value (controls the shape).
+        /// </summary>
+        /// <example>
+        /// 1 = almost linear
+        /// 5 = moderate logarithmic curve
+        /// 9 = strong logarithmic curve (default)
+        /// </example>
+        public int TuningValue
+        {
+            get { if (field == 0) return 9; else return field; }
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+        }
     }
 }

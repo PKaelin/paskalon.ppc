@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Maths.Calculuses;
 using paskalON.Maths.Calculuses.Coordinates;
-using paskalON.Maths.Calculuses.Logarithmics;
+using paskalON.Maths.IntegrationTest.Calculuses.Logarithmics;
 
 namespace paskalON.OperatingModes.Domain.Ramps
 {
@@ -130,6 +130,18 @@ namespace paskalON.OperatingModes.Domain.Ramps
 
 
         /// <summary>
+        /// Calculate current ramp.
+        /// </summary>
+        /// <param name="precision">Precision of the current value.</param>
+        /// <returns>Current value of the ramp which is also assigned to the CurrentValue property.</returns>
+        /// <exception cref="NotImplementedException">Returns exception if the ramp configuration is not implemented.</exception>
+        public double CalculatePrecision(int precision = 3)
+        {
+            return Math.Round(Calculate(), precision);
+        }
+
+
+        /// <summary>
         /// Initializes the ramp controller
         /// </summary>
         /// <exception cref="NotImplementedException">Returns exception if the ramp configuration is not implemented.</exception>
@@ -219,11 +231,13 @@ namespace paskalON.OperatingModes.Domain.Ramps
                 {
                     if (StartValue <= TargetValue)
                     {
-                        _rampFunction = new LogarithmicFunction(StartDate.UtcTicks, StartDate.AddSeconds(((RampTimeConstantConfig)_rampBaseConfig).RampUpTimeConstantSeconds).UtcTicks);
+                        long period = TimeSpan.FromSeconds(((RampTimeConstantConfig)_rampBaseConfig).RampUpTimeConstantSeconds).Ticks;
+                        _rampFunction = new LogarithmicEasingFunction(StartValue, TargetValue, period, StartDate.UtcTicks, ((RampTimeConstantConfig)_rampBaseConfig).TuningValue);
                     }
                     else
                     {
-                        _rampFunction = new LogarithmicFunction(StartDate.UtcTicks, StartDate.AddSeconds(((RampTimeConstantConfig)_rampBaseConfig).RampDownTimeConstantSeconds).UtcTicks);
+                        long period = TimeSpan.FromSeconds(((RampTimeConstantConfig)_rampBaseConfig).RampDownTimeConstantSeconds).Ticks;
+                        _rampFunction = new LogarithmicEasingFunction(StartValue, TargetValue, period, StartDate.UtcTicks, ((RampTimeConstantConfig)_rampBaseConfig).TuningValue);
                     }
                 }
                 else

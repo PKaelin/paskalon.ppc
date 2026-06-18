@@ -83,15 +83,15 @@ namespace paskalON.Maths.UnitTest.Calculuses.Exponents
             // a = 3.4471, b = 1.0772 => f(x) = 3.4471 * 1.0772^x
             Exponential2PointFunction ef = new Exponential2PointFunction((2, 4), (5, 5));
             Assert.AreEqual(4, ef.CalculateOutputPrecision(2));         // 4
-            Assert.AreEqual(4.642, ef.CalculateOutputPrecision(4));     // 4.64158883361278		
-            Assert.AreEqual(5.386, ef.CalculateOutputPrecision(6));     // 5.3860867250797106
-            Assert.AreEqual(6.733, ef.CalculateOutputPrecision(9));     // 6.7326084063496383
+            Assert.AreEqual(4.642, ef.CalculateOutputPrecision(4, 3));     // 4.64158883361278		
+            Assert.AreEqual(5.386, ef.CalculateOutputPrecision(6, 3));     // 5.3860867250797106
+            Assert.AreEqual(6.733, ef.CalculateOutputPrecision(9, 3));     // 6.7326084063496383
 
             // a = 0.5, b = 1.3493 => f(x) = 0.5 * 1.3493^x
-            ef = new Exponential2PointFunction((10, 10), (20, 200), 0, 2);
-            Assert.AreEqual(10d, ef.CalculateOutputPrecision(10));
-            Assert.AreEqual(18.21d, ef.CalculateOutputPrecision(12));
-            Assert.AreEqual(44.72d, ef.CalculateOutputPrecision(15));
+            ef = new Exponential2PointFunction((10, 10), (20, 200));
+            Assert.AreEqual(10d, ef.CalculateOutputPrecision(10, 2));
+            Assert.AreEqual(18.21, ef.CalculateOutputPrecision(12, 2));
+            Assert.AreEqual(44.72, ef.CalculateOutputPrecision(15, 2));
         }
 
 
@@ -140,7 +140,7 @@ namespace paskalON.Maths.UnitTest.Calculuses.Exponents
         public void Exponential2PointNoiseAddedTest()
         {
             // a = 0.5, b = 1.3493 => f(x) = 0.5 * 1.3493^x
-            Exponential2PointFunction ef = new Exponential2PointFunction((10, 10), (20, 200), 0, -1, 1, 2);
+            Exponential2PointFunction ef = new Exponential2PointFunction((10, 10), (20, 200), 0, -1, 1);
             double value = ef.CalculateOutputPrecision(10);
             Assert.IsTrue(value > 9 && value < 11);
 

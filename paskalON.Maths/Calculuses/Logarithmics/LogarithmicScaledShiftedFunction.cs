@@ -3,9 +3,14 @@
 namespace paskalON.Maths.Calculuses.Logarithmics
 {
     /// <summary>
-    /// Class representing a logarithmic function, which is defined by an initial value (A) and a growth or decay factor (B).
+    /// Class representing a scaled and shifted base-10 logarithmic function,
+    /// which is defined by an initial value (A) and a growth or decay factor (B).
     /// </summary>
-    public class LogarithmicFunction : ICalculateOutputFunction
+    /// <remarks>
+    /// While its rate of growth slows down significantly as A gets larger,
+    /// it never reaches a horizontal asymptote and will continue to grow without bound.
+    /// </remarks>
+    public class LogarithmicScaledShiftedFunction : ICalculateOutputFunction
     {
         /// <summary>
         /// Used for random noise.
@@ -14,7 +19,7 @@ namespace paskalON.Maths.Calculuses.Logarithmics
 
 
         /// <summary>
-        /// Coefficient, initial value, starting point, constant.
+        /// Initial value, starting point.
         /// </summary>
         public double A { get; init; }
 
@@ -28,53 +33,44 @@ namespace paskalON.Maths.Calculuses.Logarithmics
         /// <summary>
         /// Adds an offset to f(x).
         /// </summary>
-        public double Offset { get; set; } = 0;
-
-
-        /// <summary>
-        /// Precision to round the output to.
-        /// </summary>
-        public int Precision { get; set; }
+        public double Offset { get; init; } = 0;
 
 
         /// <summary>
         /// Minimum of noise range that gets applied.
         /// </summary>
-        public double NoiseMin { get; set; } = 0;
+        public double NoiseMin { get; init; } = 0;
 
 
         /// <summary>
         /// Maximum of noise range that gets applied.
         /// </summary>
-        public double NoiseMax { get; set; } = 0;
+        public double NoiseMax { get; init; } = 0;
 
 
         /// <summary>
-        /// Constructor of <see cref="LogarithmicFunction"/>.
+        /// Constructor of <see cref="LogarithmicScaledShiftedFunction"/>.
         /// </summary>
         /// <param name="initialValue">Initial value (a) used in the calculation.</param>
         /// <param name="factor">Factor (b) used in the calculation.</param>
         /// <param name="offset">Offset to f(x).</param>
-        /// <param name="precision">Precision to round the output to.</param>
-        public LogarithmicFunction(double initialValue, double factor, double offset = 0, int precision = 3) : this(initialValue, factor, offset, 0, 0, precision)
+        public LogarithmicScaledShiftedFunction(double initialValue, double factor, double offset = 0) : this(initialValue, factor, offset, 0, 0)
         {
         }
 
 
         /// <summary>
-        /// Constructor of <see cref="LogarithmicFunction"/>
+        /// Constructor of <see cref="LogarithmicScaledShiftedFunction"/>
         /// </summary>
         /// <param name="initialValue">Initial value (a) used in the calculation.</param>
         /// <param name="factor">Factor (b) used in the calculation.</param>
         /// <param name="offset">Offset to f(x).</param>
         /// <param name="noiseMin">Minimum of noise range that gets applied.</param>
         /// <param name="noiseMax">Maximum of noise range that gets applied.</param>
-        /// <param name="precision">Precision to round the output to.</param>
-        public LogarithmicFunction(double initialValue, double factor, double offset, double noiseMin, double noiseMax, int precision = 3)
+        public LogarithmicScaledShiftedFunction(double initialValue, double factor, double offset, double noiseMin, double noiseMax)
         {
             A = initialValue;
             B = factor;
-            Precision = precision;
             NoiseMin = noiseMin;
             NoiseMax = noiseMax;
             Offset = offset;
@@ -111,14 +107,11 @@ namespace paskalON.Maths.Calculuses.Logarithmics
         /// Calculates the output from the logarithmic function.
         /// </summary>
         /// <param name="x">X input.</param>
+        /// <param name="precision">Precision of the returned value.</param>
         /// <returns>"f(x) Output (Y) from the calculated curve.</returns>
-        /// <remarks>
-        /// Formula:
-        /// f(x) = A + B * log(t)
-        /// </remarks>
-        public double CalculateOutputPrecision(double x)
+        public double CalculateOutputPrecision(double x, int precision = 3)
         {
-            return Math.Round(CalculateOutput(x), Precision);
+            return Math.Round(CalculateOutput(x), precision);
         }
 
 
@@ -128,7 +121,7 @@ namespace paskalON.Maths.Calculuses.Logarithmics
         /// <returns>String representation of this instance.</returns>
         public override string ToString()
         {
-            return $"{nameof(LogarithmicFunction)} Offset: {Offset} Precision: {Precision} A: {A} B: {B}";
+            return $"{nameof(LogarithmicScaledShiftedFunction)} Offset: {Offset} A: {A} B: {B}";
         }
     }
 }

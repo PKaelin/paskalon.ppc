@@ -3,14 +3,14 @@
 namespace paskalON.Maths.IntegrationTest.Calculuses.Logarithmics
 {
     [TestClass]
-    public class LogarithmicFunctionTest
+    public class LogarithmicScaledShiftedFunctionTest
     {
         [TestMethod]
-        public void LogarithmicFunctionToFileTest()
+        public void LogarithmicScaledShiftedFunctionToFileTest()
         {
-            LogarithmicFunction lf = new LogarithmicFunction(100, 200, 0, 0, 0, 0);
+            LogarithmicScaledShiftedFunction lf = new LogarithmicScaledShiftedFunction(100, 200, 0, 0, 0);
 
-            using (StreamWriter sw = new StreamWriter("LogarithmicFunctionTest.csv"))
+            using (StreamWriter sw = new StreamWriter("LogarithmicScaledShiftedFunctionTest.csv"))
             {
                 for (int i = 0; i < 100; i++)
                 {

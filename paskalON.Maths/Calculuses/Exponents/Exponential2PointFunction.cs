@@ -30,25 +30,19 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// <summary>
         /// Adds an offset to f(x).
         /// </summary>
-        public double Offset { get; set; } = 0;
-
-
-        /// <summary>
-        /// Precision to round the output to.
-        /// </summary>
-        public int Precision { get; set; }
+        public double Offset { get; init; } = 0;
 
 
         /// <summary>
         /// Minimum of noise range that gets applied.
         /// </summary>
-        public double NoiseMin { get; set; } = 0;
+        public double NoiseMin { get; init; } = 0;
 
 
         /// <summary>
         /// Maximum of noise range that gets applied.
         /// </summary>
-        public double NoiseMax { get; set; } = 0;
+        public double NoiseMax { get; init; } = 0;
 
 
         /// <summary>
@@ -57,9 +51,8 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// <param name="point1">Point 1 of the exponential function calculation.</param>
         /// <param name="point2">Point 2 of the exponential function calculation.</param>
         /// <param name="offset">Offset to f(x).</param>
-        /// <param name="precision">Precision to round the output to.</param>
-        public Exponential2PointFunction((double X, double Y) point1, (double X, double Y) point2, double offset = 0, int precision = 3)
-            : this(point1, point2, offset, 0, 0, precision)
+        public Exponential2PointFunction((double X, double Y) point1, (double X, double Y) point2, double offset = 0)
+            : this(point1, point2, offset, 0, 0)
         {
         }
 
@@ -72,8 +65,7 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// <param name="offset">Offset to f(x).</param>
         /// <param name="noiseMin">Minimum of noise range that gets applied.</param>
         /// <param name="noiseMax">Maximum of noise range that gets applied.</param>
-        /// <param name="precision">Precision to round the output to.</param>
-        public Exponential2PointFunction((double X, double Y) point1, (double X, double Y) point2, double offset, double noiseMin, double noiseMax, int precision = 3)
+        public Exponential2PointFunction((double X, double Y) point1, (double X, double Y) point2, double offset, double noiseMin, double noiseMax)
         {
             if (point1.X == point2.X)
             {
@@ -95,7 +87,6 @@ namespace paskalON.Maths.Calculuses.Exponents
             Offset = offset;
             NoiseMin = noiseMin;
             NoiseMax = noiseMax;
-            Precision = precision;
         }
 
 
@@ -131,18 +122,11 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// Calculates the output from the piecewise exponential curve from two points.
         /// </summary>
         /// <param name="x">X input.</param>
+        /// <param name="precision">Precision of the returned value.</param>
         /// <returns>"Y Output from the calculated curve.</returns>
-        /// <remarks>
-        /// Exponential equation from two points (x1, y1) and (x2, y2) 
-        /// Formula: f(x) = ab^x
-        /// Compute b: y1=ab^x1 and y2=ab^x2 algebra to y1/y2=(ab^x1/ab^x2) to y1/y2=b^(x1-x2) to b=(y1/y2)^((x1-x2)^-1)
-        /// Compute a: a=y1/b^x1 = y2/b^x2
-        /// x: x-axis, time, is a variable
-        /// Limitations: x1 and x2 cannot be equal, y1 and 2 can be the same, y2 cannot be 0, y1 and y2 must have the same sign.
-        /// </remarks>
-        public double CalculateOutputPrecision(double x)
+        public double CalculateOutputPrecision(double x, int precision = 3)
         {
-            return Math.Round(CalculateOutput(x), Precision);
+            return Math.Round(CalculateOutput(x), precision);
         }
     }
 }

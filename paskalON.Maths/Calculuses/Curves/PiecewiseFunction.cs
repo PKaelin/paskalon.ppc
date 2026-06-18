@@ -25,20 +25,15 @@ namespace paskalON.Maths.Calculuses.Curves
         /// <summary>
         /// Adds an offset to f(x).
         /// </summary>
-        public double Offset { get; set; } = 0;
-
-
-        /// <summary>
-        /// Precision to round the output to.
-        /// </summary>
-        public int Precision { get; set; }
+        public double Offset { get; init; } = 0;
 
 
         /// <summary>
         /// Constructor of <see cref="PiecewiseFunction"/>.
         /// </summary>
         /// <param name="piecewisePoints">List of piecewise points.</param>
-        public PiecewiseFunction(List<PiecewisePoint> piecewisePoints, double offset = 0, int precision = 3)
+        /// <param name="offset">Offset to apply.</param>
+        public PiecewiseFunction(List<PiecewisePoint> piecewisePoints, double offset = 0)
         {
             if ((piecewisePoints == null) || (piecewisePoints.Count == 0))
             {
@@ -49,7 +44,6 @@ namespace paskalON.Maths.Calculuses.Curves
             PiecewisePoints.Sort((l1, l2) => l1.X.CompareTo(l2.X));
             Offset = offset;
             InitializeFunctions();
-            Precision = precision;
         }
 
 
@@ -84,10 +78,11 @@ namespace paskalON.Maths.Calculuses.Curves
         /// Calculates the output for a given input X by determining which piecewise function to use based on the defined points and applying the appropriate interpolation method.
         /// </summary>
         /// <param name="x">Input value for which to calculate the output.</param>
+        /// <param name="precision">Precision of the returned value.</param>
         /// <returns>Output value corresponding to the input X.</returns>
-        public double CalculateOutputPrecision(double x)
+        public double CalculateOutputPrecision(double x, int precision = 3)
         {
-            return Math.Round(CalculateOutput(x), Precision);
+            return Math.Round(CalculateOutput(x), precision);
         }
 
 
@@ -117,12 +112,12 @@ namespace paskalON.Maths.Calculuses.Curves
                     if (PiecewisePoints[i].Type == PiecewiseFunctionType.LinearPointFunction)
                     {
                         List<LinearPoint> points = new List<LinearPoint> { new(PiecewisePoints[i].X, PiecewisePoints[i].Y), new(endpoint.x, endpoint.y) };
-                        _functions.Add(PiecewisePoints[i].X, new LinearPointFunction(points, Offset, PiecewisePoints[i].NoiseMin, PiecewisePoints[i].NoiseMax, PiecewisePoints[i].Precision));
+                        _functions.Add(PiecewisePoints[i].X, new LinearPointFunction(points, Offset, PiecewisePoints[i].NoiseMin, PiecewisePoints[i].NoiseMax));
                     }
                     else if ((PiecewisePoints[i].Type == PiecewiseFunctionType.Exponential2PointFunction) && (i < PiecewisePoints.Count - 1))
                     {
                         _functions.Add(PiecewisePoints[i].X, new Exponential2PointFunction((PiecewisePoints[i].X, PiecewisePoints[i].Y), (endpoint.x, endpoint.y),
-                            Offset, PiecewisePoints[i].NoiseMin, PiecewisePoints[i].NoiseMax, PiecewisePoints[i].Precision));
+                            Offset, PiecewisePoints[i].NoiseMin, PiecewisePoints[i].NoiseMax));
                     }
                 }
             }

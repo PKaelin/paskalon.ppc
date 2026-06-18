@@ -142,8 +142,8 @@ namespace paskalON.Maths.UnitTest.Calculuses.Coordinates
         public void PrecisionRoundTest()
         {
             List<LinearPoint> points = new List<LinearPoint> { new LinearPoint(10, 10.25), new LinearPoint(20, 20.75) };
-            LinearPointFunction lf = new LinearPointFunction(points, 0, 2);
-            Assert.AreEqual(11.04d, lf.CalculateOutputPrecision(10.75));    // 10.25 + (10.75 - 10) * ((20.75 - 10.25) / (20 - 10)) = 11.3
+            LinearPointFunction lf = new LinearPointFunction(points);
+            Assert.AreEqual(11.04d, lf.CalculateOutputPrecision(10.75, 2));    // 10.25 + (10.75 - 10) * ((20.75 - 10.25) / (20 - 10)) = 11.3
         }
 
 
@@ -151,7 +151,7 @@ namespace paskalON.Maths.UnitTest.Calculuses.Coordinates
         public void TwoSameXTest()
         {
             List<LinearPoint> points = new List<LinearPoint> { new LinearPoint(10, 10), new LinearPoint(10, 20) };
-            LinearPointFunction lf = new LinearPointFunction(points, 0, 2);
+            LinearPointFunction lf = new LinearPointFunction(points);
             Assert.AreEqual(0, lf.CalculateOutputPrecision(8));
             Assert.AreEqual(10, lf.CalculateOutputPrecision(10));
             Assert.AreEqual(20, lf.CalculateOutputPrecision(12));

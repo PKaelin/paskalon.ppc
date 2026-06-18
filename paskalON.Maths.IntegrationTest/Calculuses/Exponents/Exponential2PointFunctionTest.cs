@@ -88,10 +88,10 @@ namespace paskalON.Maths.IntegrationTest.Calculuses.Exponents
             Assert.AreEqual(6.733, ef.CalculateOutputPrecision(9));     // 6.7326084063496383
 
             // a = 0.5, b = 1.3493 => f(x) = 0.5 * 1.3493^x
-            ef = new Exponential2PointFunction((10, 10), (20, 200), 0, 2);
-            Assert.AreEqual(10d, ef.CalculateOutputPrecision(10));
-            Assert.AreEqual(18.21d, ef.CalculateOutputPrecision(12));
-            Assert.AreEqual(44.72d, ef.CalculateOutputPrecision(15));
+            ef = new Exponential2PointFunction((10, 10), (20, 200), 0);
+            Assert.AreEqual(10d, ef.CalculateOutputPrecision(10, 2));
+            Assert.AreEqual(18.21d, ef.CalculateOutputPrecision(12, 2));
+            Assert.AreEqual(44.72d, ef.CalculateOutputPrecision(15, 2));
         }
 
 
@@ -135,27 +135,27 @@ namespace paskalON.Maths.IntegrationTest.Calculuses.Exponents
             Assert.AreEqual(0.002, ef.CalculateOutputPrecision(-100));  // 0.002031512077
         }
 
-        // TODO: Test predictability better
-        //[TestMethod]
-        //public void Exponential2PointNoiseAddedTest()
-        //{
-        //    // a = 0.5, b = 1.3493 => f(x) = 0.5 * 1.3493^x
-        //    Exponential2PointFunction ef = new Exponential2PointFunction((10, 10), (20, 200), 0, -1, 1, 2);
-        //    double value = ef.CalculateOutputPrecision(10);
-        //    Assert.IsTrue(value > 9 && value < 11);
 
-        //    for (int i = 0; i < 10; i++)
-        //    {
-        //        value = ef.CalculateOutputPrecision(12);
-        //        Assert.IsTrue(value > 17d && value < 19d);
-        //    }
+        [TestMethod]
+        public void Exponential2PointNoiseAddedTest()
+        {
+            // a = 0.5, b = 1.3493 => f(x) = 0.5 * 1.3493^x
+            Exponential2PointFunction ef = new Exponential2PointFunction((10, 10), (20, 200), 0, -1, 1);
+            double value = ef.CalculateOutputPrecision(10);
+            Assert.IsTrue(value > 9 && value < 11);
 
-        //    for (int i = 0; i < 10; i++)
-        //    {
-        //        value = ef.CalculateOutputPrecision(15);
-        //        Assert.IsTrue(value > 43d && value < 45d);
-        //    }
-        //}
+            for (int i = 0; i < 10; i++)
+            {
+                value = ef.CalculateOutputPrecision(12);
+                Assert.IsTrue(value > 17.2d && value < 19.3d);
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                value = ef.CalculateOutputPrecision(15);
+                Assert.IsTrue(value > 43.7d && value < 45.8d);
+            }
+        }
 
 
         [TestMethod]

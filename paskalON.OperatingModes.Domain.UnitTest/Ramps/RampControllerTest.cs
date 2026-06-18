@@ -54,7 +54,15 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
 
 
         [TestMethod]
-        public void RampControllerRampTimeCalculateTest()
+        [DataRow(0, 0)]
+        [DataRow(2, 2)]
+        [DataRow(10, 10)]
+        [DataRow(21, 21)]
+        [DataRow(50, 50)]
+        [DataRow(60, 60)]
+        [DataRow(100, 60)]
+        [DataRow(int.MaxValue, 60)]
+        public void RampControllerRampTimeCalculateRampUpTest(int timeSpan, double expectedValue)
         {
             RampTimeConfig config = new RampTimeConfig
             {
@@ -71,28 +79,73 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
             Assert.IsNotNull(ramp);
 
             ramp.Start(0, 60);
-            Assert.AreEqual(0, ramp.CurrentValue);
-            Assert.AreEqual(0, ramp.StartValue);
-            Assert.AreEqual(60, ramp.TargetValue);
-            // Still on now
-            Assert.AreEqual(0, ramp.Calculate());
             // Move forward seconds
-            timeProvider.Advance(TimeSpan.FromSeconds(1));
-            Assert.AreEqual(1, ramp.Calculate());
-            timeProvider.Advance(TimeSpan.FromSeconds(1));
-            Assert.AreEqual(2, ramp.Calculate());
-            timeProvider.Advance(TimeSpan.FromSeconds(8));
-            Assert.AreEqual(10, ramp.Calculate());
-            timeProvider.Advance(TimeSpan.FromSeconds(10));
-            Assert.AreEqual(20, ramp.Calculate());
-            timeProvider.Advance(TimeSpan.FromSeconds(30));
-            Assert.AreEqual(50, ramp.Calculate());
-            timeProvider.Advance(TimeSpan.FromSeconds(10));
-            Assert.AreEqual(60, ramp.Calculate());
-            timeProvider.Advance(TimeSpan.FromSeconds(10));
-            Assert.AreEqual(60, ramp.Calculate());
+            timeProvider.Advance(TimeSpan.FromSeconds(timeSpan));
+            Assert.AreEqual(expectedValue, ramp.CalculatePrecision());
         }
 
 
+
+        [TestMethod]
+        [DataRow(0, 60)]
+        [DataRow(2, 56)]
+        [DataRow(10, 40)]
+        [DataRow(21, 18)]
+        [DataRow(30, 0)]
+        [DataRow(100, 0)]
+        [DataRow(int.MaxValue, 0)]
+        public void RampControllerRampTimeCalculateRampDownTest(int timeSpan, double expectedValue)
+        {
+            RampTimeConfig config = new RampTimeConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampTimeoutSeconds = 0,
+                RampUpTimeSeconds = 60,
+                RampDownTimeSeconds = 30,
+            };
+
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            Assert.IsNotNull(ramp);
+
+            ramp.Start(60, 0);
+            // Move forward seconds
+            timeProvider.Advance(TimeSpan.FromSeconds(timeSpan));
+            Assert.AreEqual(expectedValue, ramp.CalculatePrecision());
+        }
+
+
+        [TestMethod]
+        [DataRow(0, 0)]
+        [DataRow(10, 79.588)]
+        [DataRow(15, 102.377)]
+        [DataRow(40, 169.02)]
+        [DataRow(50, 185.884)]
+        [DataRow(60, 200)]
+        [DataRow(int.MaxValue, 200)]
+        public void RampControllerRampTimeConstantCalculateRampUpTest(int timeSpan, double expectedValue)
+        {
+            RampTimeConstantConfig config = new RampTimeConstantConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampTimeoutSeconds = 0,
+                RampUpTimeConstantSeconds = 60,
+                RampDownTimeConstantSeconds = 30,
+                TuningValue = 9
+            };
+
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            Assert.IsNotNull(ramp);
+
+            ramp.Start(0, 200);
+            // Move forward seconds
+            timeProvider.Advance(TimeSpan.FromSeconds(timeSpan));
+            Assert.AreEqual(expectedValue, ramp.CalculatePrecision());
+        }
     }
 }

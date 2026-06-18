@@ -34,12 +34,6 @@ namespace paskalON.Maths.Calculuses.Coordinates
 
 
         /// <summary>
-        /// Precision to round the output to.
-        /// </summary>
-        public int Precision { get; set; }
-
-
-        /// <summary>
         /// Minimum of noise range that gets applied.
         /// </summary>
         public double NoiseMin { get; set; } = 0;
@@ -56,8 +50,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
         /// </summary>
         /// <param name="linearPoints">Definition of linear points.</param>
         /// <param name="offset">Offset to f(x).</param>
-        /// <param name="precision">Precision to round the output to.</param>
-        public LinearPointFunction(List<LinearPoint> linearPoints, double offset = 0, int precision = 3) : this(linearPoints, offset, 0, 0, precision)
+        public LinearPointFunction(List<LinearPoint> linearPoints, double offset = 0) : this(linearPoints, offset, 0, 0)
         {
         }
 
@@ -69,8 +62,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
         /// <param name="offset">Offset to f(x).</param>        
         /// <param name="noiseMin">Minimum of noise range that gets applied.</param>
         /// <param name="noiseMax">Maximum of noise range that gets applied.</param>
-        /// <param name="precision">Precision to round the output to.</param>
-        public LinearPointFunction(List<LinearPoint> linearPoints, double offset, double noiseMin, double noiseMax, int precision = 3)
+        public LinearPointFunction(List<LinearPoint> linearPoints, double offset, double noiseMin, double noiseMax)
         {
             ArgumentNullException.ThrowIfNull(linearPoints);
 
@@ -80,7 +72,6 @@ namespace paskalON.Maths.Calculuses.Coordinates
             Offset = offset;
             NoiseMin = noiseMin;
             NoiseMax = noiseMax;
-            Precision = precision;
         }
 
 
@@ -161,16 +152,12 @@ namespace paskalON.Maths.Calculuses.Coordinates
         /// Calculates the output from the piecewise linear curve
         /// </summary>
         /// <param name="x">X input</param>
+        /// <param name="precision">Precision of the returned value.</param>
         /// <returns>"Y absolute output from the calculated curve</returns>
-        /// <remarks>
-        /// Linear equation from two points (x1, y1) and (x2, y2) in the slope-Intercept form
-        /// Formula: y = ax + b
-        /// Slope: a = (y2-y1) / (x2-x1)
-        /// Intercept: b = y1 for absolute and b = y1 - a * x1 for relative
-        /// </remarks>
-        public double CalculateOutputPrecision(double x)
+
+        public double CalculateOutputPrecision(double x, int precision = 3)
         {
-            return Math.Round(CalculateOutput(x), Precision);
+            return Math.Round(CalculateOutput(x), precision);
         }
 
 
@@ -180,7 +167,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
         /// <returns>String representation of this instance.</returns>
         public override string ToString()
         {
-            return $"{nameof(LinearPointFunction)} Offset: {Offset} Precision: {Precision} Points: {string.Join(',', LinearPoints.Select(p => p.ToString()))}";
+            return $"{nameof(LinearPointFunction)} Offset: {Offset} Points: {string.Join(',', LinearPoints.Select(p => p.ToString()))}";
         }
     }
 }
