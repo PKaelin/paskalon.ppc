@@ -9,7 +9,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         public void ReactivePowerConstructorTest()
         {
             ReactivePower reactivePower = new ReactivePower(12.345678901);
-            Assert.AreEqual(12.34568, reactivePower.VoltAmperesReactivePercision);
+            Assert.AreEqual(12.34568, reactivePower.VoltAmperesReactivePrecision);
             Assert.AreEqual(5, reactivePower.Precision);
         }
 
@@ -18,7 +18,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         public void ReactivePowerKiloVoltAmperesReactiveTest()
         {
             ReactivePower reactivePower = new ReactivePower(12345.678);
-            Assert.AreEqual(12.34568, reactivePower.KiloVoltAmperesReactivePercision);
+            Assert.AreEqual(12.34568, reactivePower.KiloVoltAmperesReactivePrecision);
         }
 
 
@@ -26,7 +26,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         public void ReactivePowerMegaVoltAmperesReactiveTest()
         {
             ReactivePower reactivePower = new ReactivePower(12345678.901);
-            Assert.AreEqual(12.34568, reactivePower.MegaVoltAmperesReactivePercision);
+            Assert.AreEqual(12.34568, reactivePower.MegaVoltAmperesReactivePrecision);
         }
 
 
@@ -92,7 +92,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             ReactivePower rp1 = new ReactivePower(reactivePower1);
             ReactivePower rp2 = new ReactivePower(reactivePower2);
             ReactivePower power = rp1 + rp2;
-            Assert.AreEqual(expected, power.VoltAmperesReactivePercision);
+            Assert.AreEqual(expected, power.VoltAmperesReactivePrecision);
         }
 
 
@@ -106,7 +106,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             ReactivePower rp1 = new ReactivePower(reactivePower1);
             ReactivePower rp2 = new ReactivePower(reactivePower2);
             ReactivePower power = rp1 - rp2;
-            Assert.AreEqual(expected, power.VoltAmperesReactivePercision);
+            Assert.AreEqual(expected, power.VoltAmperesReactivePrecision);
         }
 
 
@@ -120,7 +120,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             ReactivePower rp1 = new ReactivePower(reactivePower1);
             ReactivePower rp2 = new ReactivePower(reactivePower2);
             ReactivePower power = rp1 * rp2;
-            Assert.AreEqual(expected, power.VoltAmperesReactivePercision);
+            Assert.AreEqual(expected, power.VoltAmperesReactivePrecision);
         }
 
 
@@ -135,7 +135,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             ReactivePower rp1 = new ReactivePower(reactivePower1);
             ReactivePower rp2 = new ReactivePower(reactivePower2);
             ReactivePower power = rp1 / rp2;
-            Assert.AreEqual(expected, power.VoltAmperesReactivePercision);
+            Assert.AreEqual(expected, power.VoltAmperesReactivePrecision);
         }
 
 

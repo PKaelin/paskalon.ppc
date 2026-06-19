@@ -34,14 +34,14 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public double VoltAmperesReactivePercision { get => Math.Round(VoltAmperesReactive, Precision); }
+        public readonly double VoltAmperesReactivePrecision { get => Math.Round(VoltAmperesReactive, Precision); }
 
 
         /// <summary>
         /// Value of the current <see cref="ReactivePower"/> structure. 
         /// </summary>
         /// <value>Total Kilo-VoltAmperesReactive (kVAR).</value>
-        public double KiloVoltAmperesReactive { get { return VoltAmperesReactive / 1000; } }
+        public readonly double KiloVoltAmperesReactive { get => VoltAmperesReactive / 1000; }
 
 
         /// <summary>
@@ -51,14 +51,14 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public double KiloVoltAmperesReactivePercision { get { return Math.Round(KiloVoltAmperesReactive, Precision); } }
+        public readonly double KiloVoltAmperesReactivePrecision { get => Math.Round(KiloVoltAmperesReactive, Precision); }
 
 
         /// <summary>
         /// Value of the current <see cref="ReactivePower"/> structure. 
         /// </summary>
         /// <value>Total Mega-VoltAmperesReactive (mVAR).</value>
-        public double MegaVoltAmperesReactive { get { return VoltAmperesReactive / 1000000; } }
+        public readonly double MegaVoltAmperesReactive { get => VoltAmperesReactive / 1000000; }
 
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public double MegaVoltAmperesReactivePercision { get { return Math.Round(MegaVoltAmperesReactive, Precision); } }
+        public readonly double MegaVoltAmperesReactivePrecision { get => Math.Round(MegaVoltAmperesReactive, Precision); }
 
 
         /// <summary>
@@ -95,9 +95,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
-        /// <returns>
-        /// Integer hash code.
-        /// </returns>
+        /// <returns>Integer hash code.</returns>
         public override int GetHashCode() => VoltAmperesReactive.GetHashCode();
 
 
@@ -140,17 +138,17 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <summary>
         /// Adds two <see cref="ReactivePower" instances./>
         /// </summary>
-        /// <param name="rp1">The first reactive power value to compare.</param>
-        /// <param name="rp2">The second reactive power value to compare.</param>
+        /// <param name="rp1">The first reactive power value to add to.</param>
+        /// <param name="rp2">The second reactive power value to add to.</param>
         /// <returns>Sum of the two <see cref="ReactivePower"./></returns>
         public static ReactivePower operator +(ReactivePower rp1, ReactivePower rp2) => new(rp1.VoltAmperesReactive + rp2.VoltAmperesReactive);
 
 
         /// <summary>
-        /// Substracts second <see cref="ReactivePower" instance from the first <see cref="ReactivePower" instance./>
+        /// Subtracts second <see cref="ReactivePower" instance from the first <see cref="ReactivePower" instance./>
         /// </summary>
         /// <param name="rp1">The first reactive power value.</param>
-        /// <param name="rp2">The second reactive power value to substract.</param>
+        /// <param name="rp2">The second reactive power value to subtract.</param>
         /// <returns>Sum of the two <see cref="ReactivePower"./></returns>
         public static ReactivePower operator -(ReactivePower rp1, ReactivePower rp2) => new(rp1.VoltAmperesReactive - rp2.VoltAmperesReactive);
 

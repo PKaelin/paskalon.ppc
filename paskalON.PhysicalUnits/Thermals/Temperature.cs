@@ -113,9 +113,7 @@ namespace paskalON.PhysicalUnits.Thermals
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
-        /// <returns>
-        /// Integer hash code.
-        /// </returns>
+        /// <returns>Integer hash code.</returns>
         public override int GetHashCode() => temperature.GetHashCode();
 
 
@@ -156,20 +154,20 @@ namespace paskalON.PhysicalUnits.Thermals
 
 
         /// <summary>
-        /// Adds two <see cref="Temperature" instances./>
+        /// Adds two <see cref="Temperature"/> instances.
         /// </summary>
-        /// <param name="temp1">The first temperature value to compare.</param>
-        /// <param name="temp2">The second temperature value to compare.</param>
+        /// <param name="temp1">The first temperature value to add to.</param>
+        /// <param name="temp2">The second temperature value to add to.</param>
         /// <returns>Sum of the two <see cref="Temperature"./></returns>
         public static Temperature operator +(Temperature temp1, Temperature temp2) =>
             new(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ? temp1.Celsius + temp2.Celsius : temp1.Fahrenheit + temp2.Fahrenheit);
 
 
         /// <summary>
-        /// Substracts second <see cref="Temperature" instance from the first <see cref="Temperature" instance./>
+        /// Subtracts second <see cref="Temperature" instance from the first <see cref="Temperature" instance./>
         /// </summary>
         /// <param name="temp1">The first temperature value.</param>
-        /// <param name="temp2">The second temperature value to substract.</param>
+        /// <param name="temp2">The second temperature value to subtract.</param>
         /// <returns>Sum of the two <see cref="Temperature"./></returns>
         public static Temperature operator -(Temperature temp1, Temperature temp2) =>
             new(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ? temp1.Celsius - temp2.Celsius : temp1.Fahrenheit - temp2.Fahrenheit);

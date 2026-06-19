@@ -38,7 +38,7 @@
         /// <value>
         /// The total number of KiloVoltAmperesReactiveHours represented by this instance.
         /// </value>
-        public double KiloVoltAmperesReactiveHours { get => VoltAmperesReactiveHours / VoltAmperesReactiveHoursPerKiloVarHour; }
+        public readonly double KiloVoltAmperesReactiveHours { get => VoltAmperesReactiveHours / VoltAmperesReactiveHoursPerKiloVarHour; }
 
 
         /// <summary>
@@ -47,7 +47,7 @@
         /// <value>
         /// The total number of MegaVoltAmperesReactiveHours represented by this instance.
         /// </value>
-        public double MegaVoltAmperesReactiveHours { get => VoltAmperesReactiveHours / VoltAmperesReactiveHoursPerMegaVarHour; }
+        public readonly double MegaVoltAmperesReactiveHours { get => VoltAmperesReactiveHours / VoltAmperesReactiveHoursPerMegaVarHour; }
 
 
         /// <summary>
@@ -56,7 +56,7 @@
         /// <value>
         /// The total number of VoltAmperesReactiveSeconds represented by this instance.
         /// </value>
-        public double VoltAmperesReactiveSeconds { get => VoltAmperesReactiveHours * VoltAmperesReactiveSecondsPerVarHour; }
+        public readonly double VoltAmperesReactiveSeconds { get => VoltAmperesReactiveHours * VoltAmperesReactiveSecondsPerVarHour; }
 
 
         /// <summary>

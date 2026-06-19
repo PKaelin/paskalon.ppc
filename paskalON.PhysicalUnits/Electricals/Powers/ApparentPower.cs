@@ -34,14 +34,14 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public double VoltAmperesPrecision { get => Math.Round(VoltAmperes, Precision); }
+        public readonly double VoltAmperesPrecision { get => Math.Round(VoltAmperes, Precision); }
 
 
         /// <summary>
         /// Value of the current <see cref="ApparentPower"/> structure. 
         /// </summary>
         /// <value>Total Kilo-VoltAmperes (kVA).</value>
-        public double KiloVoltAmperes { get { return VoltAmperes / 1000; } }
+        public readonly double KiloVoltAmperes { get => VoltAmperes / 1000; }
 
 
         /// <summary>
@@ -51,14 +51,14 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public double KiloVoltAmperesPrecision { get { return Math.Round(KiloVoltAmperes, Precision); } }
+        public readonly double KiloVoltAmperesPrecision { get => Math.Round(KiloVoltAmperes, Precision); }
 
 
         /// <summary>
         /// Value of the current <see cref="ApparentPower"/> structure. 
         /// </summary>
         /// <value>Total Mega-VoltAmperes (MVA).</value>
-        public double MegaVoltAmperes { get { return VoltAmperes / 1000000; } }
+        public readonly double MegaVoltAmperes { get => VoltAmperes / 1000000; }
 
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public double MegaVoltAmperesPrecision { get { return Math.Round(MegaVoltAmperes, Precision); } }
+        public readonly double MegaVoltAmperesPrecision { get => Math.Round(MegaVoltAmperes, Precision); }
 
 
         /// <summary>
@@ -107,9 +107,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
-        /// <returns>
-        /// Integer hash code.
-        /// </returns>
+        /// <returns>Integer hash code.</returns>
         public override int GetHashCode() => VoltAmperes.GetHashCode();
 
 
@@ -152,17 +150,17 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <summary>
         /// Adds two <see cref="ApparentPower" instances./>
         /// </summary>
-        /// <param name="rp1">The first apparent power value to compare.</param>
-        /// <param name="rp2">The second apparent power value to compare.</param>
+        /// <param name="rp1">The first apparent power value to add to.</param>
+        /// <param name="rp2">The second apparent power value to add to.</param>
         /// <returns>Sum of the two <see cref="ApparentPower"./></returns>
         public static ApparentPower operator +(ApparentPower rp1, ApparentPower rp2) => new(rp1.VoltAmperes + rp2.VoltAmperes);
 
 
         /// <summary>
-        /// Substracts second <see cref="ApparentPower" instance from the first <see cref="ApparentPower" instance./>
+        /// Subtracts second <see cref="ApparentPower" instance from the first <see cref="ApparentPower" instance./>
         /// </summary>
         /// <param name="rp1">The first apparent power value.</param>
-        /// <param name="rp2">The second apparent power value to substract.</param>
+        /// <param name="rp2">The second apparent power value to subtract.</param>
         /// <returns>Sum of the two <see cref="ApparentPower"./></returns>
         public static ApparentPower operator -(ApparentPower rp1, ApparentPower rp2) => new(rp1.VoltAmperes - rp2.VoltAmperes);
 

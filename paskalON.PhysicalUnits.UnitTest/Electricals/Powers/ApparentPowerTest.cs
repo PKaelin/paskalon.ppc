@@ -1,5 +1,4 @@
-﻿using paskalON.PhysicalUnits.Electricals;
-using paskalON.PhysicalUnits.Electricals.Powers;
+﻿using paskalON.PhysicalUnits.Electricals.Powers;
 
 namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
 {
@@ -52,9 +51,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.34544, false)]
         public void ApparentPowerEqualsTest(double apparentPower1, double apparentPower2, bool expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            Assert.AreEqual(expected, rp1.Equals(rp2));
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            Assert.AreEqual(expected, ap1.Equals(ap2));
         }
 
 
@@ -65,9 +64,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.34544, false)]
         public void ApparentPowerEqualsObjectTest(double apparentPower1, double apparentPower2, bool expected)
         {
-            object rp1 = new ApparentPower(apparentPower1);
-            object rp2 = new ApparentPower(apparentPower2);
-            Assert.AreEqual(expected, rp1.Equals(rp2));
+            object ap1 = new ApparentPower(apparentPower1);
+            object ap2 = new ApparentPower(apparentPower2);
+            Assert.AreEqual(expected, ap1.Equals(ap2));
         }
 
 
@@ -78,9 +77,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.34544, false)]
         public void ApparentPowerEqualsOperatorTest(double apparentPower1, double apparentPower2, bool expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            Assert.AreEqual(expected, rp1 == rp2);
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            Assert.AreEqual(expected, ap1 == ap2);
         }
 
 
@@ -91,9 +90,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.34544, true)]
         public void ApparentPowerNotEqualsOperatorTest(double apparentPower1, double apparentPower2, bool expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            Assert.AreEqual(expected, rp1 != rp2);
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            Assert.AreEqual(expected, ap1 != ap2);
         }
 
 
@@ -104,9 +103,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.34544, 24.69111)]
         public void ApparentPowerAddOperatorTest(double apparentPower1, double apparentPower2, double expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            ApparentPower power = rp1 + rp2;
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            ApparentPower power = ap1 + ap2;
             Assert.AreEqual(expected, power.VoltAmperesPrecision);
         }
 
@@ -118,9 +117,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.34544, 0.00023)]
         public void ApparentPowerMinusOperatorTest(double apparentPower1, double apparentPower2, double expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            ApparentPower power = rp1 - rp2;
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            ApparentPower power = ap1 - ap2;
             Assert.AreEqual(expected, power.VoltAmperesPrecision);
         }
 
@@ -132,9 +131,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.34544, 152.41273)]
         public void ApparentPowerMultiplyOperatorTest(double apparentPower1, double apparentPower2, double expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            ApparentPower power = rp1 * rp2;
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            ApparentPower power = ap1 * ap2;
             Assert.AreEqual(expected, power.VoltAmperesPrecision);
         }
 
@@ -147,9 +146,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 0, double.NaN)]
         public void ApparentPowerDevisionOperatorTest(double apparentPower1, double apparentPower2, double expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            ApparentPower power = rp1 / rp2;
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            ApparentPower power = ap1 / ap2;
             Assert.AreEqual(expected, power.VoltAmperesPrecision);
         }
 
@@ -162,9 +161,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.999999, true)]
         public void ApparentPowerSmallerOperatorTest(double apparentPower1, double apparentPower2, bool expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            Assert.AreEqual(expected, rp1 < rp2);
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            Assert.AreEqual(expected, ap1 < ap2);
         }
 
 
@@ -177,9 +176,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.999999, true)]
         public void ApparentPowerSmallerEqualOperatorTest(double apparentPower1, double apparentPower2, bool expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            Assert.AreEqual(expected, rp1 <= rp2);
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            Assert.AreEqual(expected, ap1 <= ap2);
         }
 
 
@@ -191,9 +190,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.999999, false)]
         public void ApparentPowerGreaterOperatorTest(double apparentPower1, double apparentPower2, bool expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            Assert.AreEqual(expected, rp1 > rp2);
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            Assert.AreEqual(expected, ap1 > ap2);
         }
 
 
@@ -206,9 +205,9 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 12.999999, false)]
         public void ApparentPowerGreaterEqualOperatorTest(double apparentPower1, double apparentPower2, bool expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            ApparentPower rp2 = new ApparentPower(apparentPower2);
-            Assert.AreEqual(expected, rp1 >= rp2);
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            ApparentPower ap2 = new ApparentPower(apparentPower2);
+            Assert.AreEqual(expected, ap1 >= ap2);
         }
 
 
@@ -219,8 +218,8 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(double.MaxValue, false)]
         public void ApparentPowerIsNaNOperatorTest(double apparentPower1, bool expected)
         {
-            ApparentPower rp1 = new ApparentPower(apparentPower1);
-            Assert.AreEqual(expected, rp1.IsNaN());
+            ApparentPower ap1 = new ApparentPower(apparentPower1);
+            Assert.AreEqual(expected, ap1.IsNaN());
         }
 
     }

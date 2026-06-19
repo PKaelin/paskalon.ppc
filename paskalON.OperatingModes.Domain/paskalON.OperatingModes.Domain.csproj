@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\paskalON.Domains\paskalON.Domains.csproj" />
     <ProjectReference Include="..\paskalON.Maths\paskalON.Maths.csproj" />
+    <ProjectReference Include="..\paskalON.PhysicalUnits\paskalON.PhysicalUnits.csproj" />
   </ItemGroup>
 
 </Project>

@@ -38,7 +38,7 @@
         /// <value>
         /// The total number of KiloWattHours represented by this instance.
         /// </value>
-        public double KiloWattHours { get => WattHours / WattHoursPerKiloWattHour; }
+        public readonly double KiloWattHours { get => WattHours / WattHoursPerKiloWattHour; }
 
 
         /// <summary>
@@ -47,7 +47,7 @@
         /// <value>
         /// The total number of MegaWattHours represented by this instance.
         /// </value>
-        public double MegaWattHours { get => WattHours / WattHoursPerMegaWattHour; }
+        public readonly double MegaWattHours { get => WattHours / WattHoursPerMegaWattHour; }
 
 
         /// <summary>
@@ -56,7 +56,7 @@
         /// <value>
         /// The total number of WattSeconds represented by this instance.
         /// </value>
-        public double WattSeconds { get => WattHours * WattSecondsPerWattHour; }
+        public readonly double WattSeconds { get => WattHours * WattSecondsPerWattHour; }
 
 
         /// <summary>

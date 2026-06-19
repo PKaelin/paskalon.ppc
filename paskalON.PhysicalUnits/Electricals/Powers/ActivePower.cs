@@ -34,14 +34,14 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public double WattsPrecision { get => Math.Round(Watts, Precision); }
+        public readonly double WattsPrecision { get => Math.Round(Watts, Precision); }
 
 
         /// <summary>
         /// Value of the current <see cref="ActivePower"/> structure. 
         /// </summary>
         /// <value>Total Kilo-Watts (kW).</value>
-        public double KiloWatts { get => Watts / 1000; }
+        public readonly double KiloWatts { get => Watts / 1000; }
 
 
         /// <summary>
@@ -51,14 +51,14 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public double KiloWattsPrecision { get => Math.Round(KiloWatts, Precision); }
+        public readonly double KiloWattsPrecision { get => Math.Round(KiloWatts, Precision); }
 
 
         /// <summary>
         /// Value of the current <see cref="ActivePower"/> structure. 
         /// </summary>
         /// <value>Total Mega-Watts (mW).</value>
-        public double MegaWatts { get => Watts / 1000000; }
+        public readonly double MegaWatts { get => Watts / 1000000; }
 
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public double MegaWattsPrecision { get => Math.Round(MegaWatts, Precision); }
+        public readonly double MegaWattsPrecision { get => Math.Round(MegaWatts, Precision); }
 
 
         /// <summary>
@@ -95,9 +95,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
-        /// <returns>
-        /// Integer hash code.
-        /// </returns>
+        /// <returns>Integer hash code.</returns>
         public override int GetHashCode() => Watts.GetHashCode();
 
 
@@ -140,17 +138,17 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <summary>
         /// Adds two <see cref="ActivePower" instances./>
         /// </summary>
-        /// <param name="ap1">The first active power value to compare.</param>
-        /// <param name="ap2">The second active power value to compare.</param>
+        /// <param name="ap1">The first active power value to add to.</param>
+        /// <param name="ap2">The second active power value to add to.</param>
         /// <returns>Sum of the two <see cref="ActivePower"./></returns>
         public static ActivePower operator +(ActivePower ap1, ActivePower ap2) => new(ap1.Watts + ap2.Watts);
 
 
         /// <summary>
-        /// Substracts second <see cref="ActivePower" instance from the first <see cref="ActivePower" instance./>
+        /// Subtracts second <see cref="ActivePower" instance from the first <see cref="ActivePower" instance./>
         /// </summary>
         /// <param name="ap1">The first active power value.</param>
-        /// <param name="ap2">The second active power value to substract.</param>
+        /// <param name="ap2">The second active power value to subtract.</param>
         /// <returns>Sum of the two <see cref="ActivePower"./></returns>
         public static ActivePower operator -(ActivePower ap1, ActivePower ap2) => new(ap1.Watts - ap2.Watts);
 

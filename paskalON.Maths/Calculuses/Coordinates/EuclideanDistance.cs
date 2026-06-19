@@ -24,7 +24,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
 
 
         /// <summary>
-        /// Calculates one dimension two point euclidean distance.
+        /// Calculates one dimension two point Euclidean distance.
         /// Derived from the Pythagorean theorem, it measures the shortest path connecting two coordinates.
         /// </summary>
         /// <param name="x1">Point x1</param>
@@ -37,7 +37,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
 
 
         /// <summary>
-        /// Calculates two dimension two point euclidean distance
+        /// Calculates two dimension two point Euclidean distance
         /// </summary>
         /// <param name="x1">Point x1</param>
         /// <param name="y1">Point y1</param>
@@ -51,7 +51,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
 
 
         /// <summary>
-        /// Calculates the euclidean distance between to RGB (red, green blue) values 
+        /// Calculates the Euclidean distance between to RGB (red, green blue) values 
         /// </summary>
         /// <param name="r1">Red 1</param>
         /// <param name="g1">Green 1</param>
@@ -86,7 +86,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
 
             if (p1.Length != p2.Length)
             {
-                _logger.LogError("{MethodName} lenght of parameters are not equal. P1: {P1s} - P2: {P2s}", nameof(GetEuclideanDistance), string.Join(',', p1.Select(op1 => op1)), string.Join(',', p2.Select(op2 => op2)));
+                _logger.LogError("{MethodName} length of parameters are not equal. P1: {P1s} - P2: {P2s}", nameof(GetEuclideanDistance), string.Join(',', p1.Select(op1 => op1)), string.Join(',', p2.Select(op2 => op2)));
 
                 return double.MaxValue;
             }
@@ -153,7 +153,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
 
             if (p1.Length != p2.Length)
             {
-                _logger.LogError("{MethodName} lenght of parameters are not equal. P1: {P1s} - P2: {P2s}", nameof(GetEuclideanDistance), string.Join(',', p1.Select(op1 => op1)), string.Join(',', p2.Select(op2 => op2)));
+                _logger.LogError("{MethodName} length of parameters are not equal. P1: {P1s} - P2: {P2s}", nameof(GetEuclideanDistance), string.Join(',', p1.Select(op1 => op1)), string.Join(',', p2.Select(op2 => op2)));
 
                 return double.MinValue;
             }
@@ -169,11 +169,11 @@ namespace paskalON.Maths.Calculuses.Coordinates
 
 
         /// <summary>
-        /// Get closest vector from file using euclidean distance. The file should contain one vector per line with comma separated values.
+        /// Get closest vector from file using Euclidean distance. The file should contain one vector per line with comma separated values.
         /// </summary>
         /// <param name="input">Input vector</param>
         /// <param name="filename">File name containing a list of vectors</param>
-        /// <param name="paging">With very big files paging is recommended instead of loading it all into memeory</param>
+        /// <param name="paging">With very big files paging is recommended instead of loading it all into memory</param>
         /// <returns>Closest vector from file in relation to the input vector</returns>
         /// <exception cref="ApplicationException"></exception>
         public (int[]?, double) GetClosestVectorFromFile(int[] input, string filename, int paging = 10000)
