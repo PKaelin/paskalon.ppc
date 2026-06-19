@@ -144,7 +144,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 2.5, 4.93827)]
         [DataRow(12.34567, 12, 1.02881)]
         [DataRow(12.34567, 0, double.NaN)]
-        public void ApparentPowerDevisionOperatorTest(double apparentPower1, double apparentPower2, double expected)
+        public void ApparentPowerDivisionOperatorTest(double apparentPower1, double apparentPower2, double expected)
         {
             ApparentPower ap1 = new ApparentPower(apparentPower1);
             ApparentPower ap2 = new ApparentPower(apparentPower2);

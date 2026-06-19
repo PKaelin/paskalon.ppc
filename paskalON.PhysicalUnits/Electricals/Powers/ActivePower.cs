@@ -219,7 +219,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="ap1">The first active power value to compare.</param>
         /// <param name="ap2">The second active power value to compare.</param>
         /// <returns>
-        /// True if the value of ap1 is greather than or equal the value of ap2 otherwise false.
+        /// True if the value of ap1 is greater than or equal the value of ap2 otherwise false.
         /// </returns>
         public static bool operator >=(ActivePower ap1, ActivePower ap2)
         {

@@ -129,7 +129,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
         [DataRow(12.34567, 2.5, 4.93827)]
         [DataRow(12.34567, 12, 1.02881)]
         [DataRow(12.34567, 0, double.NaN)]
-        public void TemperatureDevisionOperatorTest(double temperature1, double temperature2, double expected)
+        public void TemperatureDivisionOperatorTest(double temperature1, double temperature2, double expected)
         {
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);

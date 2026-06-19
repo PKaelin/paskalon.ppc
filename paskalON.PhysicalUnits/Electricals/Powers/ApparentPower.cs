@@ -231,7 +231,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="rp1">The first apparent power value to compare.</param>
         /// <param name="rp2">The second apparent power value to compare.</param>
         /// <returns>
-        /// True if the value of rp1 is greather than or equal the value of rp2 otherwise false.
+        /// True if the value of rp1 is greater than or equal the value of rp2 otherwise false.
         /// </returns>
         public static bool operator >=(ApparentPower rp1, ApparentPower rp2)
         {

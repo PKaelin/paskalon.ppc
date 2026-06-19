@@ -130,7 +130,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 2.5, 4.93827)]
         [DataRow(12.34567, 12, 1.02881)]
         [DataRow(12.34567, 0, double.NaN)]
-        public void ReactivePowerDevisionOperatorTest(double reactivePower1, double reactivePower2, double expected)
+        public void ReactivePowerDivisionOperatorTest(double reactivePower1, double reactivePower2, double expected)
         {
             ReactivePower rp1 = new ReactivePower(reactivePower1);
             ReactivePower rp2 = new ReactivePower(reactivePower2);

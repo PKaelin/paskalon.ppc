@@ -243,7 +243,7 @@ namespace paskalON.PhysicalUnits.Thermals
         /// <param name="temp1">The first temperature value to compare.</param>
         /// <param name="temp2">The second temperature value to compare.</param>
         /// <returns>
-        /// True if the value of temp1 is greather than or equal the value of temp2 otherwise false.
+        /// True if the value of temp1 is greater than or equal the value of temp2 otherwise false.
         /// </returns>
         public static bool operator >=(Temperature temp1, Temperature temp2)
         {

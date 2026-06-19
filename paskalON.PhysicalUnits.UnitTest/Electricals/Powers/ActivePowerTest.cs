@@ -130,7 +130,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(12.34567, 2.5, 4.93827)]
         [DataRow(12.34567, 12, 1.02881)]
         [DataRow(12.34567, 0, double.NaN)]
-        public void ActivePowerDevisionOperatorTest(double activePower1, double activePower2, double expected)
+        public void ActivePowerDivisionOperatorTest(double activePower1, double activePower2, double expected)
         {
             ActivePower ap1 = new ActivePower(activePower1);
             ActivePower ap2 = new ActivePower(activePower2);
