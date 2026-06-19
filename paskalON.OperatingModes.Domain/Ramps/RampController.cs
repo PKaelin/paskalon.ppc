@@ -154,13 +154,14 @@ namespace paskalON.OperatingModes.Domain.Ramps
                     List<LinearPoint> linearPoints = new List<LinearPoint>();
                     linearPoints.Add(new LinearPoint(StartDate.UtcTicks, StartValue));
                     double rampStepValue = StartValue;
+                    int steps = 1;
 
-                    if (StartValue >= TargetValue)
+                    if (StartValue <= TargetValue)
                     {
                         while (rampStepValue < TargetValue)
                         {
                             rampStepValue += ((RampRateConfig)_rampBaseConfig).RampUpRatePerSecond;
-                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(1).UtcTicks, rampStepValue));
+                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
                         }
 
                         linearPoints.Last().Y = TargetValue;
@@ -169,8 +170,8 @@ namespace paskalON.OperatingModes.Domain.Ramps
                     {
                         while (rampStepValue > TargetValue)
                         {
-                            rampStepValue -= ((RampRateConfig)_rampBaseConfig).RampUpRatePerSecond;
-                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(1).UtcTicks, rampStepValue));
+                            rampStepValue -= ((RampRateConfig)_rampBaseConfig).RampDownRatePerSecond;
+                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
                         }
 
                         linearPoints.Last().Y = TargetValue;
