@@ -116,8 +116,9 @@ namespace paskalON.OperatingModes.Domain.Ramps
                 if (((_rampBaseConfig is RampRateConfig) || (_rampBaseConfig is RampRatePercentageConfig) ||
                     (_rampBaseConfig is RampTimeConfig) || (_rampBaseConfig is RampTimeConstantConfig)) && (_rampFunction != null))
                 {
-                    // Long to double conversion. Double can hold 5.7 x 10^308. 
-                    CurrentValue = _rampFunction.CalculateOutput(_timeProvider.GetUtcNow().Ticks);
+                    // Long to double conversion. Double can hold 5.7 x 10^308.
+                    // Delay the ramp by the configured RampTimeSeconds
+                    CurrentValue = _rampFunction.CalculateOutput(_timeProvider.GetUtcNow().Ticks - TimeSpan.FromSeconds(_rampBaseConfig.RampTimeSeconds).Ticks);
                 }
                 else
                 {
@@ -181,30 +182,37 @@ namespace paskalON.OperatingModes.Domain.Ramps
                 }
                 else if (_rampBaseConfig is RampRatePercentageConfig)
                 {
+                    /// Current: 0, Target: 60, RampUpRatePercentPerSecond: 50 = Every second a new target 0s=0, 1s=30, 2s=45, 3s=67.5
+
                     List<LinearPoint> linearPoints = new List<LinearPoint>();
                     linearPoints.Add(new LinearPoint(StartDate.UtcTicks, StartValue));
-                    double rampStepValue = StartValue;
+                    int precision = ((RampRatePercentageConfig)_rampBaseConfig).RampRatePrecision;
+                    int steps = 1;
 
-                    if (StartValue >= TargetValue)
+                    if (StartValue <= TargetValue)
                     {
-                        double rampRate = ((RampRatePercentageConfig)_rampBaseConfig).RampUpRatePercentPerSecond == 0 ? 100 : ((RampRatePercentageConfig)_rampBaseConfig).RampUpRatePercentPerSecond;
+                        double rampRate = ((RampRatePercentageConfig)_rampBaseConfig).RampUpRatePercentPerSecond;
+                        double rampStepValue = TargetValue / 100 * rampRate;
+                        linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
 
-                        while (rampStepValue < TargetValue)
+                        while (Math.Round(rampStepValue, precision) < TargetValue)
                         {
-                            rampStepValue = rampStepValue / rampRate * 100;
-                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(1).UtcTicks, rampStepValue));
+                            rampStepValue = rampStepValue + (rampStepValue / 100 * rampRate);
+                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
                         }
 
                         linearPoints.Last().Y = TargetValue;
                     }
                     else
                     {
-                        double rampRate = ((RampRatePercentageConfig)_rampBaseConfig).RampDownRatePercentPerSecond == 0 ? 100 : ((RampRatePercentageConfig)_rampBaseConfig).RampDownRatePercentPerSecond;
+                        double rampRate = ((RampRatePercentageConfig)_rampBaseConfig).RampDownRatePercentPerSecond;
+                        double rampStepValue = StartValue / 100 * rampRate;
+                        linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
 
-                        while (rampStepValue > TargetValue)
+                        while (Math.Round(rampStepValue, precision) > TargetValue)
                         {
-                            rampStepValue = rampStepValue / rampRate * 100;
-                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(1).UtcTicks, rampStepValue));
+                            rampStepValue = rampStepValue - (rampStepValue / 100 * rampRate);
+                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
                         }
 
                         linearPoints.Last().Y = TargetValue;

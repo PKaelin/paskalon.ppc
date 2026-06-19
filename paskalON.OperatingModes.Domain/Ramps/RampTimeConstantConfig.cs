@@ -42,7 +42,7 @@
         public int TuningValue
         {
             get { if (field == 0) return 9; else return field; }
-            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+            set { ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, 0); field = value; }
         }
     }
 }

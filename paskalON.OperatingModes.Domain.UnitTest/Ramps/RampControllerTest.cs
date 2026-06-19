@@ -85,6 +85,41 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
         }
 
 
+        [TestMethod]
+        [DataRow(0, 0)]
+        [DataRow(3, 0)]
+        [DataRow(8, 0)]
+        [DataRow(10, 0)]
+        [DataRow(12, 2)]
+        [DataRow(20, 10)]
+        [DataRow(31, 21)]
+        [DataRow(60, 50)]
+        [DataRow(70, 60)]
+        [DataRow(110, 60)]
+        [DataRow(int.MaxValue, 60)]
+        public void RampControllerRampTimeCalculateRampUpRampDelayTest(int timeSpan, double expectedValue)
+        {
+            RampTimeConfig config = new RampTimeConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 10,
+                RampTimeoutSeconds = 0,
+                RampUpTimeSeconds = 60,
+                RampDownTimeSeconds = 30,
+            };
+
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            Assert.IsNotNull(ramp);
+
+            ramp.Start(0, 60);
+            // Move forward seconds
+            timeProvider.Advance(TimeSpan.FromSeconds(timeSpan));
+            Assert.AreEqual(expectedValue, ramp.CalculatePrecision());
+        }
+
+
 
         [TestMethod]
         [DataRow(0, 60)]
@@ -182,7 +217,6 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
         }
 
 
-
         [TestMethod]
         [DataRow(0, 0)]
         [DataRow(1, 10)]
@@ -238,6 +272,68 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
             Assert.IsNotNull(ramp);
 
             ramp.Start(110, 0);
+            // Move forward seconds
+            timeProvider.Advance(TimeSpan.FromSeconds(timeSpan));
+            Assert.AreEqual(expectedValue, ramp.CalculatePrecision());
+        }
+
+
+        [TestMethod]
+        [DataRow(0, 0)]
+        [DataRow(1, 30)]
+        [DataRow(2, 45)]
+        [DataRow(3, 60)]
+        [DataRow(int.MaxValue, 60)]
+        public void RampControllerRampRatePercentageCalculateRampUpTest(int timeSpan, double expectedValue)
+        {
+            RampRatePercentageConfig config = new RampRatePercentageConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampTimeoutSeconds = 0,
+                RampUpRatePercentPerSecond = 50,
+                RampDownRatePercentPerSecond = 50,
+            };
+
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            Assert.IsNotNull(ramp);
+
+            ramp.Start(0, 60);
+            // Move forward seconds
+            timeProvider.Advance(TimeSpan.FromSeconds(timeSpan));
+            Assert.AreEqual(expectedValue, ramp.CalculatePrecision());
+        }
+
+
+        [TestMethod]
+        [DataRow(0, 60)]
+        [DataRow(1, 30)]
+        [DataRow(2, 15)]
+        [DataRow(3, 7.5)]
+        [DataRow(4, 3.75)]
+        [DataRow(5, 1.875)]
+        [DataRow(6, 0.938)]
+        [DataRow(7, 0)]
+        [DataRow(int.MaxValue, 0)]
+        public void RampControllerRampRatePercentageCalculateRampDownTest(int timeSpan, double expectedValue)
+        {
+            RampRatePercentageConfig config = new RampRatePercentageConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampTimeoutSeconds = 0,
+                RampUpRatePercentPerSecond = 50,
+                RampDownRatePercentPerSecond = 50,
+            };
+
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            Assert.IsNotNull(ramp);
+
+            ramp.Start(60, 0);
             // Move forward seconds
             timeProvider.Advance(TimeSpan.FromSeconds(timeSpan));
             Assert.AreEqual(expectedValue, ramp.CalculatePrecision());
