@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="paskalON.Maths.IntegrationTest/paskalON.Maths.IntegrationTest.csproj" />
+    <Project Path="paskalON.Maths.UnitTest/paskalON.Maths.UnitTest.csproj" />
+    <Project Path="paskalON.PhysicalUnits.UnitTest/paskalON.PhysicalUnits.UnitTest.csproj" />
+  </Folder>
+  <Project Path="paskalON.Domains/paskalON.Domains.csproj" />
+  <Project Path="paskalON.Maths/paskalON.Maths.csproj" />
+  <Project Path="paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
+</Solution>

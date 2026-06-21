@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="paskalON.OperatingModes.Domain.UnitTest/paskalON.OperatingModes.Domain.UnitTest.csproj" />
+  </Folder>
+  <Project Path="paskalON.OperatingModes.Domain/paskalON.OperatingModes.Domain.csproj" />
+</Solution>
