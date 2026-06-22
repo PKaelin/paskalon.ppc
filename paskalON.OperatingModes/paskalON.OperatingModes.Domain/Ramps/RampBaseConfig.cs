@@ -8,13 +8,18 @@ namespace paskalON.OperatingModes.Domain.Ramps
     public class RampBaseConfig : DomainBase
     {
         /// <summary>
-        /// Ramp timeout period (in seconds) between enabling the operating mode and the automatic disablement of the mode.
+        /// Timeout period (in seconds) between enabling the operating mode and the automatic disablement of the mode.
         /// </summary>
         /// <remarks></remarks>
-        public int RampTimeoutSeconds
+        public int TimeoutSeconds
         {
             get { return field; }
-            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, 0);
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, RampTimeSeconds);
+                field = value;
+            }
         }
 
 
@@ -24,7 +29,12 @@ namespace paskalON.OperatingModes.Domain.Ramps
         public int RampTimeSeconds
         {
             get { return field; }
-            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, 0);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, TimeoutSeconds);
+                field = value;
+            }
         }
     }
 }

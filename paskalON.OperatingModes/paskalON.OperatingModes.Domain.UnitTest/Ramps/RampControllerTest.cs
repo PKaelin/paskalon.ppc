@@ -28,7 +28,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                RampTimeoutSeconds = 0,
+                TimeoutSeconds = 0,
                 RampUpTimeSeconds = 60,
                 RampDownTimeSeconds = 30,
             };
@@ -69,7 +69,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                RampTimeoutSeconds = 0,
+                TimeoutSeconds = 0,
                 RampUpTimeSeconds = 60,
                 RampDownTimeSeconds = 30,
             };
@@ -104,7 +104,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 10,
-                RampTimeoutSeconds = 0,
+                TimeoutSeconds = 0,
                 RampUpTimeSeconds = 60,
                 RampDownTimeSeconds = 30,
             };
@@ -136,7 +136,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                RampTimeoutSeconds = 0,
+                TimeoutSeconds = 0,
                 RampUpTimeSeconds = 60,
                 RampDownTimeSeconds = 30,
             };
@@ -167,7 +167,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                RampTimeoutSeconds = 0,
+                TimeoutSeconds = 0,
                 RampUpTimeConstantSeconds = 60,
                 RampDownTimeConstantSeconds = 30,
                 TuningValue = 9
@@ -200,7 +200,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                RampTimeoutSeconds = 0,
+                TimeoutSeconds = 0,
                 RampUpTimeConstantSeconds = 60,
                 RampDownTimeConstantSeconds = 30,
                 TuningValue = 9
@@ -232,7 +232,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                RampTimeoutSeconds = 0,
+                TimeoutSeconds = 0,
                 RampUpRatePerSecond = 10,
                 RampDownRatePerSecond = 20,
             };
@@ -262,7 +262,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                RampTimeoutSeconds = 0,
+                TimeoutSeconds = 0,
                 RampUpRatePerSecond = 10,
                 RampDownRatePerSecond = 20,
             };
@@ -291,7 +291,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                RampTimeoutSeconds = 0,
+                TimeoutSeconds = 0,
                 RampUpRatePercentPerSecond = 50,
                 RampDownRatePercentPerSecond = 50,
             };
@@ -324,7 +324,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                RampTimeoutSeconds = 0,
+                TimeoutSeconds = 0,
                 RampUpRatePercentPerSecond = 50,
                 RampDownRatePercentPerSecond = 50,
             };
