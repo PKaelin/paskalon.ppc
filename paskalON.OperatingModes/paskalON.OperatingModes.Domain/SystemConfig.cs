@@ -1,4 +1,5 @@
 ﻿using paskalON.Domains;
+using System.ComponentModel.DataAnnotations;
 
 namespace paskalON.OperatingModes.Domain
 {
@@ -7,6 +8,25 @@ namespace paskalON.OperatingModes.Domain
     /// </summary>
     public class SystemConfig : DomainBase
     {
+        /// <summary>
+        /// Operating mode type.
+        /// </summary>
+        /// <remarks>
+        /// Though this is a flag this operating mode system should be configured to only serve one type.
+        /// </remarks>
+        [Required]
+        public OperatingModeType Type
+        {
+            get;
+            set
+            {
+                int v = (int)value;
+                if (Enum.IsDefined(typeof(OperatingModeType), value) == false) throw new ArgumentException("Only one type per operating mode system is allowed.");
+                field = value;
+            }
+        }
+
+
         /// <summary>
         /// Gets or sets the system reference frequency in Hertz.
         /// </summary>

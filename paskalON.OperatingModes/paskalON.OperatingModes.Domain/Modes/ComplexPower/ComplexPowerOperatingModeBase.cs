@@ -2,11 +2,12 @@
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
 
-namespace paskalON.OperatingModes.Domain.Modes.PowerFactor
+namespace paskalON.OperatingModes.Domain.Modes.ActivePower
 {
-    public abstract class PowerFactorOperatingModebase : OperatingModeBase
+
+    public abstract class ComplexPowerOperatingModeBase : OperatingModeBase
     {
-        protected PowerFactorOperatingModebase(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, OperatingModeConfig operatingModeConfigBase,
+        protected ComplexPowerOperatingModeBase(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, OperatingModeConfig operatingModeConfigBase,
             IRampController rampController, ICurveController? curveController)
             : base(logger, timeProvider, systemConfig, operatingModeConfigBase, rampController, curveController)
         {

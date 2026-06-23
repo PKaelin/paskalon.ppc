@@ -26,7 +26,7 @@
         Enabled = 3,
 
         /// <summary>
-        /// Operating mode is ramping torwards a disabling state but is not fully disabled.
+        /// Operating mode is ramping towards a disabling state but is not fully disabled.
         /// </summary>
         RampingToDisabled = 4,
 

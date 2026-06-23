@@ -3,7 +3,9 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="paskalON.OperatingModes.Application.IntegrationTest/paskalON.OperatingModes.Application.IntegrationTest.csproj" Id="9d2373e3-4d10-4fda-bf47-d7a16f0853ce" />
     <Project Path="paskalON.OperatingModes.Domain.UnitTest/paskalON.OperatingModes.Domain.UnitTest.csproj" />
   </Folder>
+  <Project Path="paskalON.OperatingModes.Application/paskalON.OperatingModes.Application.csproj" Id="4d9a038d-be7e-42a9-ab47-baae8e975c27" />
   <Project Path="paskalON.OperatingModes.Domain/paskalON.OperatingModes.Domain.csproj" />
 </Solution>

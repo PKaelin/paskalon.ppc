@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
+using paskalON.OperatingModes.Application.Ramps;
 using paskalON.OperatingModes.Domain.Ramps;
 
 namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
@@ -28,13 +29,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                TimeoutSeconds = 0,
                 RampUpTimeSeconds = 60,
                 RampDownTimeSeconds = 30,
             };
 
             FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
             Assert.IsNotNull(ramp);
             Assert.AreEqual(0, ramp.CurrentValue);
             Assert.AreEqual(0, ramp.StartValue);
@@ -69,13 +69,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                TimeoutSeconds = 0,
                 RampUpTimeSeconds = 60,
                 RampDownTimeSeconds = 30,
             };
 
             FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
             Assert.IsNotNull(ramp);
 
             ramp.Start(0, 60);
@@ -104,13 +103,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 10,
-                TimeoutSeconds = 0,
                 RampUpTimeSeconds = 60,
                 RampDownTimeSeconds = 30,
             };
 
             FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
             Assert.IsNotNull(ramp);
 
             ramp.Start(0, 60);
@@ -136,13 +134,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                TimeoutSeconds = 0,
                 RampUpTimeSeconds = 60,
                 RampDownTimeSeconds = 30,
             };
 
             FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
             Assert.IsNotNull(ramp);
 
             ramp.Start(60, 0);
@@ -167,14 +164,13 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                TimeoutSeconds = 0,
                 RampUpTimeConstantSeconds = 60,
                 RampDownTimeConstantSeconds = 30,
                 TuningValue = 9
             };
 
             FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
             Assert.IsNotNull(ramp);
 
             ramp.Start(0, 200);
@@ -200,14 +196,13 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                TimeoutSeconds = 0,
                 RampUpTimeConstantSeconds = 60,
                 RampDownTimeConstantSeconds = 30,
                 TuningValue = 9
             };
 
             FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
             Assert.IsNotNull(ramp);
 
             ramp.Start(200, 0);
@@ -232,13 +227,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                TimeoutSeconds = 0,
                 RampUpRatePerSecond = 10,
                 RampDownRatePerSecond = 20,
             };
 
             FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
             Assert.IsNotNull(ramp);
 
             ramp.Start(0, 110);
@@ -262,13 +256,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                TimeoutSeconds = 0,
                 RampUpRatePerSecond = 10,
                 RampDownRatePerSecond = 20,
             };
 
             FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
             Assert.IsNotNull(ramp);
 
             ramp.Start(110, 0);
@@ -291,13 +284,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                TimeoutSeconds = 0,
                 RampUpRatePercentPerSecond = 50,
                 RampDownRatePercentPerSecond = 50,
             };
 
             FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
             Assert.IsNotNull(ramp);
 
             ramp.Start(0, 60);
@@ -324,13 +316,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
                 Id = 1,
                 ChangedBy = "Test",
                 RampTimeSeconds = 0,
-                TimeoutSeconds = 0,
                 RampUpRatePercentPerSecond = 50,
                 RampDownRatePercentPerSecond = 50,
             };
 
             FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
             Assert.IsNotNull(ramp);
 
             ramp.Start(60, 0);

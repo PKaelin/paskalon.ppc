@@ -2,13 +2,14 @@
 using paskalON.Maths.Calculuses;
 using paskalON.Maths.Calculuses.Coordinates;
 using paskalON.Maths.IntegrationTest.Calculuses.Logarithmics;
+using paskalON.OperatingModes.Domain.Ramps;
 
-namespace paskalON.OperatingModes.Domain.Ramps
+namespace paskalON.OperatingModes.Application.Ramps
 {
     /// <summary>
     /// Ramp controller for controlling ramps according to its configurations.
     /// </summary>
-    public class RampController
+    public class RampController : IRampController
     {
         /// <summary>
         /// ILogger for handling application logging and diagnostics.
@@ -37,25 +38,25 @@ namespace paskalON.OperatingModes.Domain.Ramps
         /// <summary>
         /// Gets the start value of the ramp.
         /// </summary>
-        public double StartValue { get; private set; }
+        public double StartValue { get; protected set; }
 
 
         /// <summary>
         /// Gets the target value of the ramp.
         /// </summary>
-        public double TargetValue { get; private set; }
+        public double TargetValue { get; protected set; }
 
 
         /// <summary>
         /// Gets the current value of the ramp.
         /// </summary>
-        public double CurrentValue { get; private set; }
+        public double CurrentValue { get; protected set; }
 
 
         /// <summary>
         /// Get the start date of the ramp when it was started.
         /// </summary>
-        public DateTimeOffset StartDate { get; private set; } = DateTimeOffset.MinValue;
+        public DateTimeOffset StartDate { get; protected set; } = DateTimeOffset.MinValue;
 
 
         /// <summary>
