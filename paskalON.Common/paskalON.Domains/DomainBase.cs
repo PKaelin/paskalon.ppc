@@ -5,7 +5,7 @@ namespace paskalON.Domains
     /// <summary>
     /// Base class for all domain entities, providing common properties for tracking changes and identifying entities.
     /// </summary>
-    public class DomainBase
+    public abstract class DomainBase
     {
         /// <summary>
         /// Unique identifier of the domain.
