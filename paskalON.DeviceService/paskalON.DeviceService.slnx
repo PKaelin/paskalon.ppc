@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/InitialDevelopment/">
+    <Project Path="../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
+    <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
+    <Project Path="../paskalON.Communication/paskalON.Communication.Protocols.C37118/paskalON.Communication.Protocols.C37118.csproj" />
+    <Project Path="../paskalON.Communication/paskalON.Communication.Protocols.Modbus/paskalON.Communication.Protocols.Modbus.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="paskalON.Devices.Infrastructure.IntegrationTest/paskalON.Devices.Infrastructure.IntegrationTest.csproj" Id="45f71292-154f-4fe7-b9f2-ba3d62122885" />
+  </Folder>
+  <Project Path="paskalON.Devices.Domain.Configs/paskalON.Devices.Domain.Configs.csproj" Id="fa739d75-521d-4cc3-9317-e6c2d1b0beef" />
+  <Project Path="paskalON.Devices.Infrastructure/paskalON.Devices.Infrastructure.csproj" Id="e766ab35-a4e2-42c6-b3fe-f3b99856c08e" />
+</Solution>
