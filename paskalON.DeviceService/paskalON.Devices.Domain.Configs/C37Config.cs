@@ -5,7 +5,7 @@ namespace paskalON.Devices.Domain.Configs
     /// <summary>
     /// TCP addressable device with C37 connection.
     /// </summary>
-    public abstract class C37Base : DeviceIdNameBase
+    public class C37Config : NameBase
     {
         /// <summary>
         /// Indicates the minimum valid polling interval value.

@@ -9,8 +9,11 @@ using Units = paskalON.PhysicalUnits.Electricals.Powers;
 
 namespace paskalON.Devices.Domain.PowerConversionSystems
 {
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
     /// <summary>
-    /// Power Conversion System (PCS) base class for all PCS.
+    /// Power Conversion System (PCS) base class for all PCSs.
     /// </summary>
     public abstract class PowerConversionSystemBase : DerBase, INotifyPropertyChanged
     {
@@ -21,8 +24,8 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// This lock object needs to be used by this class and derived classes
-        /// The classes need to use the same lock for thread safety
+        /// This lock object needs to be used by this class and derived classes.
+        /// The classes need to use the same lock for thread safety.
         /// </summary>
         protected object dataLock = new();
 
@@ -43,6 +46,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// Parent Distributed Energy Resource unit (DER-Unit).
         /// </summary>
         public DerUnit DerUnit { get; set; }
+
+
+        /// <summary>
+        /// Returns true if a communication error has occurred.
+        /// </summary>
+        public bool CommunicationError { get; set; }
 
 
         /// <summary>
@@ -108,7 +117,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// Flag whether this instance is in maintenance mode this is when the DER Unit is in maintenance mode.
         /// </summary>
-        public bool IsInMaintenanceMode => DerUnit.IsInMaintenanceMode;
+        public bool IsInMaintenanceMode { get => DerUnit.IsInMaintenanceMode; }
 
 
 
@@ -292,17 +301,17 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public bool HasVendorEvents { get => WarningStates.Any(a => a.Value == true); }
 
 
-
-
-
+        /// <summary>
+        /// Constructor of <see cref="PowerConversionSystemBase"/>
+        /// </summary>
+        /// <param name="logger">The logging instance.</param>
+        /// <param name="config">The power conversion system configuration.</param>
+        /// <param name="derUnit">The parent DER unit.</param>
         public PowerConversionSystemBase(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit) : base(logger, config)
         {
             _config = config;
             DerUnit = derUnit;
         }
-
-
-
 
 
         /// <summary>

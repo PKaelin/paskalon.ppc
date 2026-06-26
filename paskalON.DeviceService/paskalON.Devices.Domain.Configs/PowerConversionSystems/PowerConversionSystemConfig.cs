@@ -6,7 +6,7 @@ namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
     /// <summary>
     /// Power Conversion System configuration inheriting Modbus device configuration.
     /// </summary>
-    public class PowerConversionSystemConfig : ModbusAddressBase
+    public class PowerConversionSystemConfig : DeviceIdNameBase
     {
         /// <summary>
         /// Parent relationship to DerUnitConfig Id.
@@ -30,6 +30,17 @@ namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
         /// </summary>
         public required PowerConversionSystemDeviceConfig PowerConversionSystemDeviceConfig { get; set; }
 
+
+        /// <summary>
+        /// Relationship to ModbusConfig Id.
+        /// </summary>
+        public int? ModbusConfigId { get; set; }
+
+
+        /// <summary>
+        /// Relationship to ModbusConfig Id.
+        /// </summary>
+        public ModbusConfig? ModbusConfig { get; set; }
 
 
 

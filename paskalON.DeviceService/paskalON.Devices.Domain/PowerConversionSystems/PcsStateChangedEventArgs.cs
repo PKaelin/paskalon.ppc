@@ -10,6 +10,7 @@
         /// </summary>
         public PcsState State { get; private set; }
 
+
         /// <summary>
         /// Constructor of <see cref="PcsStateChangedEventArgs"/>.
         /// </summary>

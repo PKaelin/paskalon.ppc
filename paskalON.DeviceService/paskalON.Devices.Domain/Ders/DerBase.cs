@@ -3,6 +3,9 @@ using paskalON.Devices.Domain.Configs;
 
 namespace paskalON.Devices.Domain.Ders
 {
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
     /// <summary>
     /// Base class for all distributed energy resources (DER).
     /// </summary>

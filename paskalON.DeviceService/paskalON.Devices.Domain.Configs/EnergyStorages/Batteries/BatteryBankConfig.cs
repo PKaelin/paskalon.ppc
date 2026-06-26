@@ -6,7 +6,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
     /// <summary>
     /// Battery bank configuration.
     /// </summary>
-    public class BatteryBankConfig : ModbusAddressBase
+    public class BatteryBankConfig : DeviceIdNameBase
     {
         /// <summary>
         /// Parent relationship to DerUnitConfig Id.
@@ -31,6 +31,17 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// </summary>
         public BatteryBankDeviceConfig? BatteryBankDeviceConfig { get; set; }
 
+
+        /// <summary>
+        /// Relationship to ModbusConfig Id.
+        /// </summary>
+        public int? ModbusConfigId { get; set; }
+
+
+        /// <summary>
+        /// Relationship to ModbusConfig Id.
+        /// </summary>
+        public ModbusConfig? ModbusConfig { get; set; }
 
 
         /// <summary>

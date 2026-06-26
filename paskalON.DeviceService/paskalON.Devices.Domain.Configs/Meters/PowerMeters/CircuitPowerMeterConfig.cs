@@ -1,6 +1,6 @@
 ﻿namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 {
-    public class CircuitPowerMeterConfig : PowerMeter
+    public class CircuitPowerMeterConfig : PowerMeterBaseConfig
     {
     }
 }

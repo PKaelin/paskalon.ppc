@@ -28,7 +28,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 
                 // Core
                 context.Configurations.Add(new Configuration { ChangedBy = "Test", Key = "Key", Value = "Value", Description = "Desc" });
-                context.ModbusConnectionConfig.Add(sample.ModbusConnectionConfig!);
+                context.ModbusConnectionConfigs.Add(sample.ModbusConnectionConfig!);
 
                 // Maps
                 context.PowerMeterMapC37Configs.Add(sample.PowerMeterMapC37Config!);
@@ -52,20 +52,24 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.DerCircuitConfigs.Add(sample.DerCircuitPvConfig!);
                 context.DerBatteryStorageUnitConfigs.Add(sample.DerBatteryStorageUnitConfig!);
                 context.DerSolarUnitConfigs.Add(sample.DerSolarUnitConfig!);
+                context.ModbusConfigs.Add(sample.DerContainerModbusConfig!);
                 context.DerContainerConfigs.Add(sample.DerContainerConfig!);
+                context.ModbusConfigs.Add(sample.BatteryBankModbusConfig!);
                 context.BatteryBankConfigs.Add(sample.BatteryBankConfig!);
+                context.ModbusConfigs.Add(sample.PowerConversionSystemBessModbusConfig!);
                 context.PowerConversionSystemConfigs.Add(sample.PowerConversionSystemBessConfig!);
+                context.ModbusConfigs.Add(sample.PowerConversionSystemPvModbusConfig!);
                 context.PowerConversionSystemConfigs.Add(sample.PowerConversionSystemPvConfig!);
                 context.SolarPanelConfigs.Add(sample.SolarPanelConfig!);
 
-                // Meters                
-                context.PowerMeterC37Configs.Add(sample.SystemPowerMeterC37Config!);
+                // Meters
+                context.C37Configs.Add(sample.SystemPowerMeterC37Config!);
                 context.SystemPowerMeterConfigs.Add(sample.SystemPowerMeterConfig!);
-                context.PowerMeterC37Configs.Add(sample.CircuitPowerMeterC37Config!);
+                context.C37Configs.Add(sample.CircuitPowerMeterC37Config!);
                 context.CircuitPowerMeterConfigs.Add(sample.CircuitPowerMeterConfig!);
-                context.PowerMeterModbusConfigs.Add(sample.AuxiliaryPowerMeterModbusConfig!);
+                context.ModbusConfigs.Add(sample.AuxiliaryPowerMeterModbusConfig!);
                 context.AuxiliaryPowerMeterConfigs.Add(sample.AuxiliaryPowerMeterConfig!);
-                context.PowerMeterModbusConfigs.Add(sample.ExternalPowerMeterModbusConfig!);
+                context.ModbusConfigs.Add(sample.ExternalPowerMeterModbusConfig!);
                 context.ExternalPowerMeterConfigs.Add(sample.ExternalPowerMeterConfig!);
 
                 // GMDs

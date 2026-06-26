@@ -19,7 +19,12 @@ namespace paskalON.Devices.Infrastructure.Storage
         // Core DbSet
         public DbSet<Configuration> Configurations { get; set; }            // General configuration class for the microservice
         public DbSet<History> Histories { get; set; }                       // For DB migration history.
-        public DbSet<ModbusConnectionConfig> ModbusConnectionConfig { get; set; }
+
+
+        // Communications
+        public DbSet<C37Config> C37Configs { get; set; }
+        public DbSet<ModbusConfig> ModbusConfigs { get; set; }
+        public DbSet<ModbusConnectionConfig> ModbusConnectionConfigs { get; set; }
 
 
         // Maps DbSet
@@ -57,8 +62,6 @@ namespace paskalON.Devices.Infrastructure.Storage
 
 
         // Meters DbSet
-        public DbSet<PowerMeterC37Config> PowerMeterC37Configs { get; set; }
-        public DbSet<PowerMeterModbusConfig> PowerMeterModbusConfigs { get; set; }
         public DbSet<SystemPowerMeterConfig> SystemPowerMeterConfigs { get; set; }
         public DbSet<CircuitPowerMeterConfig> CircuitPowerMeterConfigs { get; set; }
         public DbSet<AuxiliaryPowerMeterConfig> AuxiliaryPowerMeterConfigs { get; set; }

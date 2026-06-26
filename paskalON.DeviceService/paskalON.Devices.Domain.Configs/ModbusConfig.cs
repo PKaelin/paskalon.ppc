@@ -9,7 +9,7 @@ namespace paskalON.Devices.Domain.Configs
     /// TCP addressable device with Modbus connection.
     /// All device properties should be on the device definition itself rather on this interpretation.
     /// </summary>
-    public abstract class ModbusAddressBase : DeviceIdNameBase
+    public class ModbusConfig : NameBase
     {
         /// <summary>
         /// Relationship to ModbusConnectionConfig Id.

@@ -4,7 +4,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
     /// <summary>
     /// Generic Modbus configuration.
     /// </summary>
-    public class GenericModbusConfig : ModbusAddressBase
+    public class GenericModbusConfig : GenericModbusBaseConfig
     {
         /// <summary>
         /// Relationship to GenericModbusDeviceConfig Id.

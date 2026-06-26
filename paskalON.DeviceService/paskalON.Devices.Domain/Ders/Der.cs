@@ -1,13 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.GenericModbusDevices;
-using paskalON.Devices.Domain.PowerMeters;
+using paskalON.Devices.Domain.Meters.PowerMeters;
 
 namespace paskalON.Devices.Domain.Ders
 {
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
     /// <summary>
     /// Distributed Energy Resource. Root for all DERs. 
     /// </summary>
+    /// <
     public class Der : DerBase
     {
         /// <summary>
@@ -48,7 +52,11 @@ namespace paskalON.Devices.Domain.Ders
 
 
 
-
+        /// <summary>
+        /// Constructor of <see cref="Der"/>.
+        /// </summary>
+        /// <param name="logger">The logging instance.</param>
+        /// <param name="config">The DER configuration</param>
         public Der(ILogger logger, DerConfig config) : base(logger, config)
         {
             _config = config;

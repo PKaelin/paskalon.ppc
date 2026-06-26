@@ -39,21 +39,36 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
 
 
         /// <summary>
+        /// Solar connection type describes how the panels are connected.
+        /// </summary>
+        public SolarConnectionType ConnectionType { get; set; }
+
+
+        /// <summary>
         /// Simulate list of solar panels by multiplying the solar device configured MinimumVoltageSum.
         /// </summary>
-        public double MinimumVoltageSum { get => SolarPanelDeviceConfig == null ? 0 : SolarPanelDeviceConfig.MinimumVoltage * NumberOfPanels; }
+        public double MinimumVoltageSum
+        {
+            get => SolarPanelDeviceConfig == null ? 0 : ConnectionType == SolarConnectionType.Series ? SolarPanelDeviceConfig.MinimumVoltage * NumberOfPanels : SolarPanelDeviceConfig.MinimumVoltage;
+        }
 
 
         /// <summary>
         /// Simulate list of solar panels by multiplying the solar device configured MaximumVoltageSum.
         /// </summary>
-        public double MaximumVoltageSum { get => SolarPanelDeviceConfig == null ? 0 : SolarPanelDeviceConfig.MaximumVoltage * NumberOfPanels; }
+        public double MaximumVoltageSum
+        {
+            get => SolarPanelDeviceConfig == null ? 0 : ConnectionType == SolarConnectionType.Series ? SolarPanelDeviceConfig.MaximumVoltage * NumberOfPanels : SolarPanelDeviceConfig.MaximumVoltage;
+        }
 
 
         /// <summary>
         /// Simulate list of solar panels by multiplying the solar device configured MaximumOutputSum.
         /// </summary>
-        public double MaximumOutputSum { get => SolarPanelDeviceConfig == null ? 0 : SolarPanelDeviceConfig.MaximumOutput * NumberOfPanels; }
+        public double MaximumOutputSum
+        {
+            get => SolarPanelDeviceConfig == null ? 0 : ConnectionType == SolarConnectionType.Series ? SolarPanelDeviceConfig.MaximumOutput * NumberOfPanels : SolarPanelDeviceConfig.MaximumOutput;
+        }
 
     }
 }

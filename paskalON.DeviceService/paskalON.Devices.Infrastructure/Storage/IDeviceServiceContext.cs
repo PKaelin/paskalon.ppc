@@ -8,13 +8,21 @@ using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
+using paskalON.Domains;
 
 namespace paskalON.Devices.Infrastructure.Storage
 {
     public interface IDeviceServiceContext
     {
         // Core DbSet
-        DbSet<ModbusConnectionConfig> ModbusConnectionConfig { get; set; }
+        DbSet<Configuration> Configurations { get; set; }            // General configuration class for the microservice
+        DbSet<History> Histories { get; set; }                       // For DB migration history.
+
+
+        // Communications
+        DbSet<C37Config> C37Configs { get; set; }
+        DbSet<ModbusConfig> ModbusConfigs { get; set; }
+        DbSet<ModbusConnectionConfig> ModbusConnectionConfigs { get; set; }
 
 
         // Maps DbSet
@@ -52,8 +60,6 @@ namespace paskalON.Devices.Infrastructure.Storage
 
 
         // Meters DbSet
-        DbSet<PowerMeterC37Config> PowerMeterC37Configs { get; set; }
-        DbSet<PowerMeterModbusConfig> PowerMeterModbusConfigs { get; set; }
         DbSet<SystemPowerMeterConfig> SystemPowerMeterConfigs { get; set; }
         DbSet<CircuitPowerMeterConfig> CircuitPowerMeterConfigs { get; set; }
         DbSet<AuxiliaryPowerMeterConfig> AuxiliaryPowerMeterConfigs { get; set; }

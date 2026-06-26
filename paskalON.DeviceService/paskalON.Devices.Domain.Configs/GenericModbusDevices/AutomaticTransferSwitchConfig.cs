@@ -5,7 +5,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
     /// An automatic transfer switch (ATS) is a device that automatically transfers power from 
     /// a primary source to a backup source in the event of a failure.
     /// </summary>
-    public class AutomaticTransferSwitchConfig : ModbusAddressBase
+    public class AutomaticTransferSwitchConfig : GenericModbusBaseConfig
     {
         /// <summary>
         /// Relationship to AutomaticTransferSwitchDeviceConfigId.

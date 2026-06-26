@@ -36,17 +36,26 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 
 
         /// <summary>
-        /// True if a positive value is charging. (Generation-oriented or reversed load-oriented meters.).
-        /// False if a positive value means discharging. (Reversed generation-oriented or load-oriented meters.).
+        /// Gets or set  the reverse power flow.
         /// </summary>
-        public bool IsReversePowerFlow { get; set; } = false;
+        /// <remarks>
+        /// True if a positive value is charging (Generation-oriented or reversed load-oriented meters).
+        /// False if a positive value means discharging (Reversed generation-oriented or load-oriented meters).
+        /// </remarks>
+        public bool IsReversePowerFlow { get; set; }
 
 
         /// <summary>
-        /// Does this meter give both negative and positive current measurements? AC Current is often
-        /// just RMS which is a non-negative magnitude but some meters may use the direction of active
-        /// power flow to give a sign to the current.
+        /// Indicates whether current can handle positive and negative values.
+        /// If it cannot handle negative values the current has to be handled according to the power flow.
         /// </summary>
-        public bool IsCurrentSigned { get; set; } = false;
+        /// <remarks>
+        /// True if current is signed and can do negative values.
+        /// False if current is not signed.
+        /// </remarks>
+        public bool IsCurrentSigned { get; set; }
+
+
+
     }
 }
