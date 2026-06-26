@@ -15,7 +15,7 @@
         /// <summary>
         /// Parent relationship to DerConfig.
         /// </summary>
-        public DerConfig? DerConfig { get; set; }
+        public required DerConfig DerConfig { get; set; }
 
 
         /// <summary>

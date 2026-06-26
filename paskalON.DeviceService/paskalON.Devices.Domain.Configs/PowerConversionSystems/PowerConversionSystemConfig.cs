@@ -17,7 +17,7 @@ namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
         /// <summary>
         /// Parent relationship to DerUnitConfig
         /// </summary>
-        public DerUnitConfig? DerUnitConfig { get; set; }
+        public required DerUnitConfig DerUnitConfig { get; set; }
 
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
         /// <summary>
         /// Relationship tp PowerConversionSystemDeviceConfig.
         /// </summary>
-        public PowerConversionSystemDeviceConfig? PowerConversionSystemDeviceConfig { get; set; }
+        public required PowerConversionSystemDeviceConfig PowerConversionSystemDeviceConfig { get; set; }
 
 
 

@@ -18,19 +18,19 @@ namespace paskalON.Devices.Domain.Configs.Ders
         /// <summary>
         /// Parent relationship to DerGroupConfig.
         /// </summary>
-        public DerGroupConfig? DerGroupConfig { get; set; }
+        public required DerGroupConfig DerGroupConfig { get; set; }
 
 
         /// <summary>
         /// Child relationship to a list of DerSolarUnitConfig.
         /// </summary>
-        public List<DerSolarUnitConfig>? DerSolarUnitConfigs { get; set; }
+        public List<DerSolarUnitConfig> DerSolarUnitConfigs { get; set; } = new List<DerSolarUnitConfig>();
 
 
         /// <summary>
         /// Child relationship to a list of DerBatteryStorageUnitConfig .
         /// </summary>
-        public List<DerBatteryStorageUnitConfig>? DerBatteryStorageUnitConfigs { get; set; }
+        public List<DerBatteryStorageUnitConfig> DerBatteryStorageUnitConfigs { get; set; } = new List<DerBatteryStorageUnitConfig>();
 
 
         /// <summary>

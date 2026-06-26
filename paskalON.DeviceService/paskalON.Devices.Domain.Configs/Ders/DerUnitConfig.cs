@@ -17,7 +17,7 @@ namespace paskalON.Devices.Domain.Configs.Ders
         /// <summary>
         /// Parent relationship to DerCircuitConfig.
         /// </summary>
-        public DerCircuitConfig? DerCircuitConfig { get; set; }
+        public required DerCircuitConfig DerCircuitConfig { get; set; }
 
 
         /// <summary>

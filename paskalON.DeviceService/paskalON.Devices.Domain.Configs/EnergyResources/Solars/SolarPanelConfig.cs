@@ -17,7 +17,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
         /// <summary>
         /// Parent relationship to DerUnitConfig.
         /// </summary>
-        public DerUnitConfig? DerUnitConfig { get; set; }
+        public required DerUnitConfig DerUnitConfig { get; set; }
 
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
         /// <summary>
         /// Relationship to SolarPanelDeviceConfig.
         /// </summary>
-        public SolarPanelDeviceConfig? SolarPanelDeviceConfig { get; set; }
+        public required SolarPanelDeviceConfig SolarPanelDeviceConfig { get; set; }
 
 
         /// <summary>

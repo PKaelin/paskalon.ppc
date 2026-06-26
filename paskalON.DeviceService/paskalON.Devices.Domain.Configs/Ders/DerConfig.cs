@@ -13,31 +13,31 @@ namespace paskalON.Devices.Domain.Configs.Ders
         /// List of DER groups that can be split up onto different device service services 
         /// and therefore run on different machines.
         /// </summary>
-        public List<DerGroupConfig>? DerGroupConfigs { get; set; }
+        public List<DerGroupConfig> DerGroupConfigs { get; set; } = new List<DerGroupConfig>();
 
 
         /// <summary>
         /// List of generic Modbus devices.
         /// </summary>
-        public List<GenericModbusConfig>? GenericModbusConfigs { get; set; }
+        public List<GenericModbusConfig> GenericModbusConfigs { get; set; } = new List<GenericModbusConfig>();
 
 
         /// <summary>
         /// List of system meters. Usually there is one with redundancy within.
         /// </summary>
-        public List<SystemPowerMeterConfig>? SystemPowerMeterConfigs { get; set; }
+        public List<SystemPowerMeterConfig> SystemPowerMeterConfigs { get; set; } = new List<SystemPowerMeterConfig>();
 
 
         /// <summary>
         /// List of auxiliary power meters.
         /// </summary>
-        public List<AuxiliaryPowerMeterConfig>? AuxiliaryPowerMeterConfigs { get; set; }
+        public List<AuxiliaryPowerMeterConfig> AuxiliaryPowerMeterConfigs { get; set; } = new List<AuxiliaryPowerMeterConfig>();
 
 
         /// <summary>
         /// List of external power meters.
         /// </summary>
-        public List<ExternalPowerMeterConfig>? ExternalPowerMeterConfigs { get; set; }
+        public List<ExternalPowerMeterConfig> ExternalPowerMeterConfigs { get; set; } = new List<ExternalPowerMeterConfig>();
 
     }
 }

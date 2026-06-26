@@ -13,5 +13,6 @@
     <Project Path="paskalON.Devices.Infrastructure.IntegrationTest/paskalON.Devices.Infrastructure.IntegrationTest.csproj" Id="45f71292-154f-4fe7-b9f2-ba3d62122885" />
   </Folder>
   <Project Path="paskalON.Devices.Domain.Configs/paskalON.Devices.Domain.Configs.csproj" Id="fa739d75-521d-4cc3-9317-e6c2d1b0beef" />
+  <Project Path="paskalON.Devices.Domain/paskalON.Devices.Domain.csproj" Id="e663604a-5c11-46df-9394-4f9d9a37fe72" />
   <Project Path="paskalON.Devices.Infrastructure/paskalON.Devices.Infrastructure.csproj" Id="e766ab35-a4e2-42c6-b3fe-f3b99856c08e" />
 </Solution>

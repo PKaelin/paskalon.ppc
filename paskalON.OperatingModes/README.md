@@ -1,4 +1,5 @@
 # Operating Modes
+This solution is to self contain all logic regarding the implementation of Operating Modes.
 An Operating Mode defines the specific behavior and control strategy the system uses to interact with the power grid.  
 *Note: paskalON.Common libraries are project references during initial development*  
 

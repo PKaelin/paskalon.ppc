@@ -105,6 +105,19 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
 
 
         /// <summary>
+        /// Calculates the orthogonal sum of the specified <see cref="ActivePower"/> and <see cref="ReactivePower"/> instances.
+        /// </summary>
+        /// <param name="p">The active power value.</param>
+        /// <param name="q">The reactive power value.</param>
+        /// <returns>An object whose value is the orthogonal sum of p and q or null if either p or q are null.</returns>
+        public static ApparentPower? OrthogonalSum(ActivePower? p, ReactivePower? q)
+        {
+            return p.HasValue && q.HasValue ? OrthogonalSum(p.Value, q.Value) : (ApparentPower?)null;
+        }
+
+        public static void Test() { }
+
+        /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>Integer hash code.</returns>

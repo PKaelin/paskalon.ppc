@@ -67,6 +67,9 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
 
 
 
+        /// <summary>
+        /// Constructor that unusually creates all data.
+        /// </summary>
         public SimpleSet()
         {
             CreateCore();
@@ -392,7 +395,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 InitiallyStarted = true,
                 StationId = 1,
                 ModbusConnectionConfig = ModbusConnectionConfig,
-                PowerConversionSystemDeviceConfig = PowerConversionSystemDeviceConfig,
+                PowerConversionSystemDeviceConfig = PowerConversionSystemDeviceConfig!,
                 DerUnitConfig = DerBatteryStorageUnitConfig
             };
 
@@ -408,16 +411,17 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 InitiallyStarted = true,
                 StationId = 1,
                 ModbusConnectionConfig = ModbusConnectionConfig,
-                PowerConversionSystemDeviceConfig = PowerConversionSystemDeviceConfig,
+                PowerConversionSystemDeviceConfig = PowerConversionSystemDeviceConfig!,
                 DerUnitConfig = DerSolarUnitConfig
             };
 
             SolarPanelConfig = new SolarPanelConfig
             {
+                DerUnitConfig = DerSolarUnitConfig,
                 ChangedBy = "Test",
                 Name = "SolarPanel 1",
                 NumberOfPanels = 100,
-                SolarPanelDeviceConfig = SolarPanelDeviceConfig,
+                SolarPanelDeviceConfig = SolarPanelDeviceConfig!,
             };
         }
 
