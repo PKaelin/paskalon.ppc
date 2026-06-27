@@ -1,4 +1,6 @@
 ﻿
+using paskalON.PhysicalUnits.Electricals.Powers;
+
 namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 {
     /// <summary>
@@ -53,6 +55,11 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
         /// </summary>
         public PowerMeterBaseConfig? RedundantPowerMeterConfig { get; set; }
 
+
+        /// <summary>
+        /// Power factor standard used in this power meter.
+        /// </summary>
+        public PowerFactorStandard PowerFactorStandard { get; set; }
 
     }
 }

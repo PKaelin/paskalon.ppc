@@ -18,31 +18,31 @@ namespace paskalON.Communication.Protocols.Modbus.Configurations
 
 
         /// <summary>
-        /// Gets or sets serializable Index property.
+        /// Index property.
         /// </summary>
         public int Index { get; set; }
 
 
         /// <summary>
-        /// Gets or sets Modbus register format. String is parable to ModbusCommon.ModbusRegisterFormat.
+        /// Modbus register format. String is parable to ModbusCommon.ModbusRegisterFormat.
         /// </summary>
         public ModbusRegisterFormat? ModbusRegisterFormat { get; set; }
 
 
         /// <summary>
-        /// Gets or sets serializable Scale property.
+        /// Scale property.
         /// </summary>
         public double Scale { get; set; }
 
 
         /// <summary>
-        /// Gets or sets serializable individual Offset property.
+        /// Individual Offset property.
         /// </summary>
         public int IndividualOffset { get; set; }
 
 
         /// <summary>
-        /// Gets or sets the unit prefix.
+        /// Metric unit prefix.
         /// </summary>
         public MetricPrefix? UnitPrefix { get; set; }
 

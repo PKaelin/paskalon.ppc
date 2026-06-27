@@ -16,7 +16,7 @@ namespace paskalON.Devices.Domain.Configs
 
         private long dataLoggingIntervalMilliseconds = 1000;
         /// <summary>
-        /// Gets or sets the polling interval in milliseconds.
+        /// Polling interval in milliseconds.
         /// </summary>
         public long DataLoggingIntervalMilliseconds
         {
@@ -26,7 +26,7 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// Gets or sets the ip address of the device.
+        /// IP address of the device.
         /// </summary>
         public string? IpAddress
         {
@@ -36,7 +36,7 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// Gets or sets the port of the device.
+        /// Port of the device.
         /// </summary>
         public ushort Port
         {
@@ -46,7 +46,7 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// Gets or sets the transport layer (TCP or UDP) used for C37.118 communications.
+        /// Transport layer (TCP or UDP) used for C37.118 communications.
         /// </summary>
         public C37TransportLayer TransportLayer { get; set; }
 

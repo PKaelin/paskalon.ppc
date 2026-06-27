@@ -24,7 +24,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
 
 
         /// <summary>
-        /// Gets the database context of this repository.
+        /// Database context of this repository.
         /// </summary>
         protected DbContext DatabaseContext
         {
@@ -59,7 +59,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
 
 
         /// <summary>
-        /// Gets paged entities.
+        /// Paged entities.
         /// </summary>
         /// <param name="skip">How many to skip in the page.</param>
         /// <param name="take">How many to take in the page.</param>

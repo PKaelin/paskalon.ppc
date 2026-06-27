@@ -36,7 +36,7 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 
 
         /// <summary>
-        /// Gets or set  the reverse power flow.
+        /// Indicates whether it is a reverse power flow.
         /// </summary>
         /// <remarks>
         /// True if a positive value is charging (Generation-oriented or reversed load-oriented meters).

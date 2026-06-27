@@ -10,25 +10,25 @@ namespace paskalON.Communication.Protocols.Modbus.Configurations
 
 
         /// <summary>
-        /// Gets and sets the index of the starting holding register of this register map.
+        /// Index of the starting holding register of this register map.
         /// </summary>        
         public ushort StartingHoldingRegister { get; set; } = 40001;
 
 
         /// <summary>
-        /// Gets or sets the index of the starting input register of this register map.
+        /// Index of the starting input register of this register map.
         /// </summary>
         public ushort StartingInputRegister { get; set; } = 30001;
 
 
         /// <summary>
-        /// Gets and sets the index of the starting discrete input of this register map.
+        /// Ihe index of the starting discrete input of this register map.
         /// </summary>
         public ushort StartingDiscreteInput { get; set; } = 10001;
 
 
         /// <summary>
-        /// Gets or sets the index of the starting coil of this register map.
+        /// Index of the starting coil of this register map.
         /// </summary>
         public ushort StartingCoil { get; set; } = 1;
 

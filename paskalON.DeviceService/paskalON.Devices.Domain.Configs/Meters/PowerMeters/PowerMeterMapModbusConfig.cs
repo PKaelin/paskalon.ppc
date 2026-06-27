@@ -35,133 +35,133 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ActivePower lookup.
+        /// Map entry for ActivePower lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? ActivePowerMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ReactivePower lookup.
+        /// Map entry for ReactivePower lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? ReactivePowerMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ApparentPower lookup.
+        /// Map entry for ApparentPower lookup.
         /// </summary>        
         public ModbusRegisterMapEntryConfig? ApparentPowerMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for PowerFactor lookup.
+        /// Map entry for PowerFactor lookup.
         /// </summary>        
         public ModbusRegisterMapEntryConfig? PowerFactorMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for Frequency lookup.
+        /// Map entry for Frequency lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? FrequencyMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for VoltageA lookup.
+        /// Map entry for VoltageA lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? VoltageAMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for VoltageB lookup.
+        /// Map entry for VoltageB lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? VoltageBMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for VoltageC lookup.
+        /// Map entry for VoltageC lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? VoltageCMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for VoltageLLAvg lookup.
+        /// Map entry for VoltageLLAvg lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? VoltageLLAvgMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for CurrentA lookup.
+        /// Map entry for CurrentA lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? CurrentAMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for CurrentB lookup.
+        /// Map entry for CurrentB lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? CurrentBMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for CurrentC lookup.
+        /// Map entry for CurrentC lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? CurrentCMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ActivePowerA lookup.
+        /// Map entry for ActivePowerA lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? ActivePowerAMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ActivePowerB lookup.
+        /// Map entry for ActivePowerB lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? ActivePowerBMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ActivePowerC lookup.
+        /// Map entry for ActivePowerC lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? ActivePowerCMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ReactivePowerA lookup.
+        /// Map entry for ReactivePowerA lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? ReactivePowerAMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ReactivePowerB lookup.
+        /// Map entry for ReactivePowerB lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? ReactivePowerBMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ReactivePowerC lookup.
+        /// Map entry for ReactivePowerC lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? ReactivePowerCMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for EnergyDelivered lookup.
+        /// Map entry for EnergyDelivered lookup.
         /// </summary>        
         public ModbusRegisterMapEntryConfig? EnergyDeliveredMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for EnergyReceived lookup.
+        /// Map entry for EnergyReceived lookup.
         /// </summary>        
         public ModbusRegisterMapEntryConfig? EnergyReceivedMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ReactiveEnergyDelivered lookup.
+        /// Map entry for ReactiveEnergyDelivered lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? ReactiveEnergyDeliveredMap { get; set; }
 
 
         /// <summary>
-        /// Gets/Sets the map entry for ReactiveEnergyReceived lookup.
+        /// Map entry for ReactiveEnergyReceived lookup.
         /// </summary>
         public ModbusRegisterMapEntryConfig? ReactiveEnergyReceivedMap { get; set; }
 

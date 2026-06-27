@@ -6,19 +6,19 @@
     public class ModbusConnectionConfig : NameBase
     {
         /// <summary>
-        /// Gets or sets the polling interval in milliseconds.
+        /// Polling interval in milliseconds.
         /// </summary>
         public long PollingIntervalMilliseconds { get; set; }
 
 
         /// <summary>
-        /// Gets or sets the Master HeartBeat interval in milliseconds.
+        /// Master HeartBeat interval in milliseconds.
         /// </summary>
         public long MasterHeartBeatIntervalMilliseconds { get; set; }
 
 
         /// <summary>
-        /// Gets or sets whether this device should utilize connection pipelining.
+        /// Whether this device should utilize connection pipelining.
         /// </summary>
         /// <remarks>
         /// Pipelining is a non-standard connection feature that allows a master/client to issue multiple requests without waiting for a response.

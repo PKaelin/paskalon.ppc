@@ -13,7 +13,7 @@
 
 
         /// <summary>
-        /// Gets or sets the minimum output voltage of the panel in volts.
+        /// Minimum output voltage of the panel in volts.
         /// </summary>
         public double MinimumVoltage
         {
@@ -23,7 +23,7 @@
 
 
         /// <summary>
-        /// Gets or sets the maximum output voltage of the panel in volts.
+        /// Maximum output voltage of the panel in volts.
         /// </summary>
         public double MaximumVoltage
         {
@@ -33,7 +33,7 @@
 
 
         /// <summary>
-        /// Gets or sets the minimum output Current of the panel in ampere.
+        /// Minimum output Current of the panel in ampere.
         /// </summary>
         public double MinimumCurrent
         {
@@ -43,7 +43,7 @@
 
 
         /// <summary>
-        /// Gets or sets the maximum output Current of the panel in ampere.
+        /// Maximum output Current of the panel in ampere.
         /// </summary>
         public double MaximumCurrent
         {
@@ -53,7 +53,7 @@
 
 
         /// <summary>
-        /// Gets or sets the maximum output Output of the panel in watts.
+        /// Maximum output Output of the panel in watts.
         /// </summary>
         public double MaximumOutput
         {

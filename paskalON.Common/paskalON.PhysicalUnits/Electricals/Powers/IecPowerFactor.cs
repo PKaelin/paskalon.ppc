@@ -43,6 +43,23 @@
         /// <param name="activePower">The active power component.</param>
         /// <param name="reactivePower">The reactive power component.</param>
         /// <returns>The calculated IEC power factor</returns>
+        public static IecPowerFactor? Calculate(double? activePower, double? reactivePower)
+        {
+            if (activePower == null || reactivePower == null)
+            {
+                return null;
+            }
+
+            return Calculate(activePower, reactivePower);
+        }
+
+
+        /// <summary>
+        /// Calculates the IEC power factor based on the active and reactive power components, applying the IEC sign convention to determine the correct sign of the power factor.
+        /// </summary>
+        /// <param name="activePower">The active power component.</param>
+        /// <param name="reactivePower">The reactive power component.</param>
+        /// <returns>The calculated IEC power factor</returns>
         public static IecPowerFactor Calculate(double activePower, double reactivePower)
         {
             return new IecPowerFactor(CalculateMagnitude(activePower, reactivePower) * IecSign(activePower, reactivePower));

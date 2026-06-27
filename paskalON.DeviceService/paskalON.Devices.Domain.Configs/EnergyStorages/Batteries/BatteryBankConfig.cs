@@ -45,7 +45,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
 
 
         /// <summary>
-        /// Gets or sets a flag indicating whether the battery bank is initially connected or not.
+        /// Indicates whether the battery bank is initially connected or not.
         /// </summary>
         public bool InitiallyConnected { get; set; } = true;
 

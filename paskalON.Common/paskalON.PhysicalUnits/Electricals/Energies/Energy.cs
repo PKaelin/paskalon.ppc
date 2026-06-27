@@ -24,7 +24,7 @@
 
 
         /// <summary>
-        /// Gets the value of the current <see cref="Energy"/> structure expressed in WattHours.
+        /// Value of the current <see cref="Energy"/> structure expressed in WattHours.
         /// </summary>
         /// <value>
         /// The total number of WattHours represented by this instance.
@@ -33,7 +33,7 @@
 
 
         /// <summary>
-        /// Gets the value of the current <see cref="Energy"/> structure expressed in KiloWattHours.
+        /// Value of the current <see cref="Energy"/> structure expressed in KiloWattHours.
         /// </summary>
         /// <value>
         /// The total number of KiloWattHours represented by this instance.
@@ -42,7 +42,7 @@
 
 
         /// <summary>
-        /// Gets the value of the current <see cref="Energy"/> structure expressed in MegaWattHours.
+        /// Value of the current <see cref="Energy"/> structure expressed in MegaWattHours.
         /// </summary>
         /// <value>
         /// The total number of MegaWattHours represented by this instance.
@@ -51,7 +51,7 @@
 
 
         /// <summary>
-        /// Gets the value of the current <see cref="Energy"/> structure expressed in WattSeconds.
+        /// Value of the current <see cref="Energy"/> structure expressed in WattSeconds.
         /// </summary>
         /// <value>
         /// The total number of WattSeconds represented by this instance.

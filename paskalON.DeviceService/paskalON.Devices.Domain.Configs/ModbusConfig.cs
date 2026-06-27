@@ -26,14 +26,14 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// Gets or sets the host address.
+        /// Host address.
         /// </summary>
         [Required]
         public required string Address { get; set; }
 
 
         /// <summary>
-        /// Gets or sets the port.
+        /// Port.
         /// </summary>
         [Required]
         public required int Port { get; set; }

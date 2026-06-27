@@ -36,8 +36,7 @@ namespace paskalON.Devices.Domain.Configs.Ders
 
 
         /// <summary>
-        /// Gets or sets a value which indicates whether or not the DER Unit
-        /// is in maintenance mode.
+        /// Indicates whether or not the DER Unit is in maintenance mode.
         /// </summary>
         public bool InMaintenanceMode { get; set; } = false;
 

@@ -24,7 +24,7 @@
 
 
         /// <summary>
-        /// Gets the value of the current <see cref="Energy"/> structure expressed in VoltAmperesReactiveHours.
+        /// Value of the current <see cref="Energy"/> structure expressed in VoltAmperesReactiveHours.
         /// </summary>
         /// <value>
         /// The total number of VoltAmperesReactiveHours represented by this instance.
@@ -33,7 +33,7 @@
 
 
         /// <summary>
-        /// Gets the value of the current <see cref="Energy"/> structure expressed in KiloVoltAmperesReactiveHours.
+        /// Value of the current <see cref="Energy"/> structure expressed in KiloVoltAmperesReactiveHours.
         /// </summary>
         /// <value>
         /// The total number of KiloVoltAmperesReactiveHours represented by this instance.
@@ -42,7 +42,7 @@
 
 
         /// <summary>
-        /// Gets the value of the current <see cref="Energy"/> structure expressed in MegaVoltAmperesReactiveHours.
+        /// Value of the current <see cref="Energy"/> structure expressed in MegaVoltAmperesReactiveHours.
         /// </summary>
         /// <value>
         /// The total number of MegaVoltAmperesReactiveHours represented by this instance.
@@ -51,7 +51,7 @@
 
 
         /// <summary>
-        /// Gets the value of the current <see cref="Energy"/> structure expressed in VoltAmperesReactiveSeconds.
+        /// Value of the current <see cref="Energy"/> structure expressed in VoltAmperesReactiveSeconds.
         /// </summary>
         /// <value>
         /// The total number of VoltAmperesReactiveSeconds represented by this instance.

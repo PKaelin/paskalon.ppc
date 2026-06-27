@@ -129,12 +129,12 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         public double PreferredMaximumTemperature { get; set; }
 
         /// <summary>
-        /// Gets or sets the expected maximum current (i.e. the absolute physical limit) the battery could produce.
+        /// Expected maximum current (i.e. the absolute physical limit) the battery could produce.
         /// </summary>
         public double AbsoluteMaxDischargeCurrentAmps { get; set; }
 
         /// <summary>
-        /// Gets or sets the expected minimum current (i.e. the absolute physical limit) the battery could produce.
+        /// Expected minimum current (i.e. the absolute physical limit) the battery could produce.
         /// </summary>
         public double AbsoluteMaxChargeCurrentAmps { get; set; }
 

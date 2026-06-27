@@ -26,7 +26,7 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// Gets or sets whether this device is active meaning whether it should be loaded into configuration.
+        /// Whether this device is active meaning whether it should be loaded into configuration.
         /// </summary>
         [Required]
         public required bool IsActive { get; set; }

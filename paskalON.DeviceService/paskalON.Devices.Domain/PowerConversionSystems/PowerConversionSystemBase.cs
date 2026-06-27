@@ -162,7 +162,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// Gets the apparent power output.
+        /// Apparent power output.
         /// </summary>
         public ApparentPower? ApparentPower
         {

@@ -15,13 +15,13 @@
 
 
         /// <summary>
-        /// Gets a value indicating whether the power factor is leading (capacitive) or not.
+        /// Value indicating whether the power factor is leading (capacitive) or not.
         /// </summary>
         public bool IsLeading { get => PowerFactor > 0; }
 
 
         /// <summary>
-        /// Gets a value indicating whether the power factor is lagging (inductive) or not.
+        /// Value indicating whether the power factor is lagging (inductive) or not.
         /// </summary>
         public bool IsLagging { get => PowerFactor < 0; }
 
@@ -47,6 +47,24 @@
             }
 
             return 1;
+        }
+
+
+        /// <summary>
+        /// Calculates the IEEE power factor based on the active and reactive power components, applying the IEEE sign convention to determine the correct sign of the power factor.
+        /// </summary>
+        /// <param name="activePower">The active power component.</param>
+        /// <param name="reactivePower">The reactive power component.</param>
+        /// <returns>The calculated IEEE power factor</returns>
+        /// <remarks>
+        public static IeeePowerFactor? Calculate(double? activePower, double? reactivePower)
+        {
+            if (activePower == null || reactivePower == null)
+            {
+                return null;
+            }
+
+            return Calculate(activePower, reactivePower);
         }
 
 
