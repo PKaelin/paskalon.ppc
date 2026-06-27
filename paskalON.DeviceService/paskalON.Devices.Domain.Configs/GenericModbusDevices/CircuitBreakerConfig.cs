@@ -2,7 +2,7 @@
 namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
 {
     /// <summary>
-    /// Circuit Breaker generic Modbus device configuration
+    /// Circuit Breaker generic Modbus device configuration.
     /// </summary>
     public class CircuitBreakerConfig : GenericModbusBaseConfig
     {

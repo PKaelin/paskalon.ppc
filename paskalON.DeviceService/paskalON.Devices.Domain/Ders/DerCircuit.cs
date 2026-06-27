@@ -37,7 +37,7 @@ namespace paskalON.Devices.Domain.Ders
         /// </summary>
         /// <remarks>
         /// Circuit breaker is a safety threshold that automatically pauses or stops the circuit when a predefined
-        /// limit is reached. It acts as a fail-safe 
+        /// limit is reached. It acts as a fail-safe.
         /// </remarks>
         public CircuitBreaker? CircuitBreaker { get; set; }
 

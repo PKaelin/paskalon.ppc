@@ -3,6 +3,12 @@ using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 
 namespace paskalON.Devices.Domain.Meters.PowerMeters
 {
+    /// <summary>
+    /// System power meter measures the electrical power output at the point of interconnection (POI).
+    /// </summary>
+    /// <remarks>
+    /// POI is where the plant connects to to the local electrical grid.
+    /// </remarks>
     public class SystemPowerMeter : PowerMeterBase
     {
         /// <summary>

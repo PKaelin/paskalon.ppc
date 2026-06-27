@@ -1,25 +1,26 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
+using paskalON.Devices.Domain.Ders;
 
 namespace paskalON.Devices.Domain.GenericModbusDevices
 {
     /// <summary>
-    /// Generic Modbus Device that communicates using the universal Modbus Protocol.
+    /// Base class for generic Modbus devices.
     /// </summary>
-    public class GenericModbusDevice : GenericModbusDeviceBase
+    public abstract class GenericModbusDeviceBase : DerBase
     {
         /// <summary>
-        /// Generic Modbus configuration.
+        /// Generic Modbus base configuration.
         /// </summary>
-        private readonly GenericModbusConfig _config;
+        private readonly GenericModbusBaseConfig _config;
 
 
         /// <summary>
-        /// Constructor of <see cref="GenericModbusDevice"/>.
+        /// Constructor of <see cref="GenericModbusDeviceBase"/>.
         /// </summary>
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The generic Modbus configuration.</param>
-        public GenericModbusDevice(ILogger logger, GenericModbusConfig config) : base(logger, config)
+        public GenericModbusDeviceBase(ILogger logger, GenericModbusBaseConfig config) : base(logger, config)
         {
             _config = config;
         }
