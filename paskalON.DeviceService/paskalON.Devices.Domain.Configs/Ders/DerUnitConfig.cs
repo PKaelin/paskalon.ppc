@@ -1,5 +1,5 @@
-﻿
-using paskalON.Devices.Domain.Configs.GenericModbusDevices;
+﻿using paskalON.Devices.Domain.Configs.GenericModbusDevices;
+using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 
 namespace paskalON.Devices.Domain.Configs.Ders
 {
@@ -11,7 +11,7 @@ namespace paskalON.Devices.Domain.Configs.Ders
         /// <summary>
         /// Parent relationship to DerCircuitConfig Id.
         /// </summary>
-        public int? DerCircuitConfigId { get; set; }
+        public int DerCircuitConfigId { get; set; }
 
 
         /// <summary>
@@ -21,17 +21,27 @@ namespace paskalON.Devices.Domain.Configs.Ders
 
 
         /// <summary>
+        /// Child relationship to PowerConversionSystemConfig.
+        /// </summary>
+        /// <remarks>
+        /// Ono to one configurations are not possible with data annotations use fluent API in OnModelCreating.
+        /// </remarks>
+        public PowerConversionSystemConfig PowerConversionSystemConfig { get; set; } = null!;
+
+
+        /// <summary>
         /// Relationship to DerContainerConfig.
         /// DER unit could be in a container that has GMDs, HAVAC, UPS, etc.
         /// </summary>
         public DerContainerConfig? DerContainerConfig { get; set; }
 
 
+
         /// <summary>
-        /// Relationship to GenericModbusConfig.
+        /// Relationship to GenericModbusUnitConfig.
         /// DER unit can have a generic Modbus device.
         /// </summary>
-        public GenericModbusConfig? GenericModbusConfig { get; set; }
+        public GenericModbusUnitConfig? GenericModbusUnitConfig { get; set; }
 
 
 

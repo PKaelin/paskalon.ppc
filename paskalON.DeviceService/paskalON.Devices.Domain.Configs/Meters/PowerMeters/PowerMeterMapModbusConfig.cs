@@ -31,7 +31,7 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
         /// <summary>
         /// Modbus polling range.
         /// </summary>
-        public List<ModbusRegisterMapPollingRangeConfig> PollingRange { get; set; } = new List<ModbusRegisterMapPollingRangeConfig>();
+        public ICollection<ModbusRegisterMapPollingRangeConfig> PollingRange { get; set; } = [];
 
 
         /// <summary>

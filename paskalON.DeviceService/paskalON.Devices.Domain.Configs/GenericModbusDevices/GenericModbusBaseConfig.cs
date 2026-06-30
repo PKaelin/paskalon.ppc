@@ -1,13 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
+﻿namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
 {
+    /// <summary>
+    /// Base class for generic Modbus configurations.
+    /// </summary>
     public abstract class GenericModbusBaseConfig : ModbusConfig
     {
         /// <summary>
         /// Id of the generic device.
         /// </summary>
-        [Required]
         public required int DeviceId
         {
             get;
@@ -22,7 +22,6 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
         /// <summary>
         /// Whether this device is active meaning whether it should be loaded into configuration.
         /// </summary>
-        [Required]
         public required bool IsActive { get; set; }
     }
 }

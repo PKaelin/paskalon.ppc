@@ -12,7 +12,7 @@ namespace paskalON.Devices.Domain.Configs.Ders
         /// <summary>
         /// Parent relationship to DerGroupConfig Id.
         /// </summary>
-        public int? DerGroupConfigId { get; set; }
+        public int DerGroupConfigId { get; set; }
 
 
         /// <summary>
@@ -22,22 +22,9 @@ namespace paskalON.Devices.Domain.Configs.Ders
 
 
         /// <summary>
-        /// Child relationship to a list of DerSolarUnitConfig.
+        /// Child relationship to a list of DerUnitConfig.
         /// </summary>
-        public List<DerSolarUnitConfig> DerSolarUnitConfigs { get; set; } = new List<DerSolarUnitConfig>();
-
-
-        /// <summary>
-        /// Child relationship to a list of DerBatteryStorageUnitConfig .
-        /// </summary>
-        public List<DerBatteryStorageUnitConfig> DerBatteryStorageUnitConfigs { get; set; } = new List<DerBatteryStorageUnitConfig>();
-
-
-        /// <summary>
-        /// Relationship to CircuitBreakerConfig Id.
-        /// DER circuit could have a circuit breaker.
-        /// </summary>
-        public int? CircuitBreakerConfigId { get; set; }
+        public ICollection<DerUnitConfig> DerUnitConfigs { get; set; } = [];
 
 
         /// <summary>
@@ -45,13 +32,6 @@ namespace paskalON.Devices.Domain.Configs.Ders
         /// DER circuit could have a circuit breaker.
         /// </summary>
         public CircuitBreakerConfig? CircuitBreakerConfig { get; set; }
-
-
-        /// <summary>
-        /// Relationship to CircuitPowerMeterConfig Id.
-        /// DER circuit could have a power meter config those circuits can be also called feeder power meters.
-        /// </summary>
-        public int? CircuitPowerMeterConfigId { get; set; }
 
 
         /// <summary>

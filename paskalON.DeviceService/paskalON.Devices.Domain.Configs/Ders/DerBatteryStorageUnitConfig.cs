@@ -1,5 +1,4 @@
 ﻿using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
-using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 
 namespace paskalON.Devices.Domain.Configs.Ders
 {
@@ -8,17 +7,11 @@ namespace paskalON.Devices.Domain.Configs.Ders
     /// </summary>
     public class DerBatteryStorageUnitConfig : DerUnitConfig
     {
-        /// <summary>
-        /// Child relationship to PowerConversionSystemConfigId.
-        /// </summary>
-        public PowerConversionSystemConfig? PowerConversionSystemConfig { get; set; }
-
 
         /// <summary>
         /// Child relationship to PowerConversionSystemConfig.
         /// </summary>
-        public List<BatteryBankConfig>? BatteryBankConfigs { get; set; }
-
+        public ICollection<BatteryBankConfig> BatteryBankConfigs { get; set; } = [];
 
 
 

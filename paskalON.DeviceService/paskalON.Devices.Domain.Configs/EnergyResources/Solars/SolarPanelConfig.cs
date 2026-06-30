@@ -6,12 +6,25 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
     /// Minimum configuration for solar panel.
     /// At the moment we assume we dont control solar panels. Hence only one solar panel config is references.
     /// </summary>
-    public class SolarPanelConfig : NameBase
+    public class SolarPanelConfig : DeviceIdNameBase
     {
+        /// <summary>
+        /// Id of the device.
+        /// </summary>
+        public override required int DeviceId
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                field = value;
+            }
+        }
+
         /// <summary>
         /// Parent relationship to DerUnitConfig Id.
         /// </summary>
-        public int? DerUnitConfigId { get; set; }
+        public int DerUnitConfigId { get; set; }
 
 
         /// <summary>
@@ -23,7 +36,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
         /// <summary>
         /// Relationship to SolarPanelDeviceConfig Id.
         /// </summary>
-        public int? SolarPanelDeviceConfigId { get; set; }
+        public int SolarPanelDeviceConfigId { get; set; }
 
 
         /// <summary>

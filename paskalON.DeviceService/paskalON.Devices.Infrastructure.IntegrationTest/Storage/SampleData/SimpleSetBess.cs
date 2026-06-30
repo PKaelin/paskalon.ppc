@@ -10,6 +10,7 @@ using paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.PhysicalUnits;
+using paskalON.PhysicalUnits.Electricals.Powers;
 using System.Net.Sockets;
 
 namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
@@ -17,7 +18,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
     /// <summary>
     /// Used to create at least one entity of db set.
     /// </summary>
-    public class SimpleSet
+    public class SimpleSetBess
     {
         // Core
         public ModbusConnectionConfig? ModbusConnectionConfig { get; set; }
@@ -41,18 +42,13 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
         public DerConfig? DerConfig { get; set; }
         public DerGroupConfig? DerGroupConfig { get; set; }
         public DerCircuitConfig? DerCircuitBessConfig { get; set; }
-        public DerCircuitConfig? DerCircuitPvConfig { get; set; }
         public DerBatteryStorageUnitConfig? DerBatteryStorageUnitConfig { get; set; }
-        public DerSolarUnitConfig? DerSolarUnitConfig { get; set; }
         public ModbusConfig? DerContainerModbusConfig { get; set; }
         public DerContainerConfig? DerContainerConfig { get; set; }
         public ModbusConfig? BatteryBankModbusConfig { get; set; }
         public BatteryBankConfig? BatteryBankConfig { get; set; }
         public ModbusConfig? PowerConversionSystemBessModbusConfig { get; set; }
         public PowerConversionSystemConfig? PowerConversionSystemBessConfig { get; set; }
-        public ModbusConfig? PowerConversionSystemPvModbusConfig { get; set; }
-        public PowerConversionSystemConfig? PowerConversionSystemPvConfig { get; set; }
-        public SolarPanelConfig? SolarPanelConfig { get; set; }
 
         //Meters
         public C37Config? SystemPowerMeterC37Config { get; set; }
@@ -74,14 +70,14 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
         /// <summary>
         /// Constructor that unusually creates all data.
         /// </summary>
-        public SimpleSet()
+        public SimpleSetBess()
         {
             CreateCore();
             CreateMaps();
             CreateDevices();
+            CreateConfiguration();
             CreateMeters();
             CreateGmds();
-            CreateConfiguration();
         }
 
 
@@ -324,10 +320,6 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
             {
                 ChangedBy = "Test",
                 Name = "Der 1",
-                SystemPowerMeterConfigs = new List<SystemPowerMeterConfig> { SystemPowerMeterConfig! },
-                ExternalPowerMeterConfigs = new List<ExternalPowerMeterConfig> { ExternalPowerMeterConfig! },
-                AuxiliaryPowerMeterConfigs = new List<AuxiliaryPowerMeterConfig> { AuxiliaryPowerMeterConfig! },
-
             };
 
             DerGroupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "Group 1", DerConfig = DerConfig };
@@ -337,10 +329,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "Circuit Bess",
                 DerGroupConfig = DerGroupConfig,
-                CircuitPowerMeterConfig = CircuitPowerMeterConfig
             };
-
-            DerCircuitPvConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "Circuit Pv", DerGroupConfig = DerGroupConfig };
 
             DerBatteryStorageUnitConfig = new DerBatteryStorageUnitConfig
             {
@@ -348,13 +337,6 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Name = "BMS-Unit",
                 IncludeBatteryInOperations = true,
                 DerCircuitConfig = DerCircuitBessConfig
-            };
-
-            DerSolarUnitConfig = new DerSolarUnitConfig
-            {
-                ChangedBy = "Test",
-                Name = "PV-Unit 1",
-                DerCircuitConfig = DerCircuitPvConfig
             };
 
 
@@ -366,7 +348,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Port = Constants.PortStartContainer,
                 AddressFamily = AddressFamily.InterNetwork,
                 StationId = 1,
-                ModbusConnectionConfig = ModbusConnectionConfig,
+                ModbusConnectionConfig = ModbusConnectionConfig!
             };
 
 
@@ -388,7 +370,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Port = Constants.PortStartBms,
                 AddressFamily = AddressFamily.InterNetwork,
                 StationId = 1,
-                ModbusConnectionConfig = ModbusConnectionConfig,
+                ModbusConnectionConfig = ModbusConnectionConfig!
             };
 
             BatteryBankConfig = new BatteryBankConfig
@@ -399,9 +381,10 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 DeviceId = 0,
                 InitiallyConnected = true,
                 ModbusConfig = BatteryBankModbusConfig,
-                BatteryBankDeviceConfig = BatteryBankDeviceConfig,
+                BatteryBankDeviceConfig = BatteryBankDeviceConfig!,
                 DerUnitConfig = DerBatteryStorageUnitConfig
             };
+
 
             PowerConversionSystemBessModbusConfig = new ModbusConfig
             {
@@ -411,7 +394,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Port = Constants.PortStartPcs,
                 AddressFamily = AddressFamily.InterNetwork,
                 StationId = 1,
-                ModbusConnectionConfig = ModbusConnectionConfig,
+                ModbusConnectionConfig = ModbusConnectionConfig!
             };
 
             PowerConversionSystemBessConfig = new PowerConversionSystemConfig
@@ -426,37 +409,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 DerUnitConfig = DerBatteryStorageUnitConfig
             };
 
-            PowerConversionSystemPvModbusConfig = new ModbusConfig
-            {
-                ChangedBy = "Test",
-                Name = "PowerConversionSystemPvConfig",
-                Address = Constants.Ip4Localhost,
-                Port = Constants.PortStartPcs + 1,
-                AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
-                ModbusConnectionConfig = ModbusConnectionConfig,
-            };
-
-            PowerConversionSystemPvConfig = new PowerConversionSystemConfig
-            {
-                IsActive = true,
-                ChangedBy = "Test",
-                Name = "PCS PV 1",
-                DeviceId = 1,
-                InitiallyStarted = true,
-                PowerConversionSystemDeviceConfig = PowerConversionSystemDeviceConfig!,
-                DerUnitConfig = DerSolarUnitConfig
-            };
-
-            SolarPanelConfig = new SolarPanelConfig
-            {
-                DerUnitConfig = DerSolarUnitConfig,
-                ChangedBy = "Test",
-                Name = "SolarPanel 1",
-                ConnectionType = SolarConnectionType.Series,
-                NumberOfPanels = 100,
-                SolarPanelDeviceConfig = SolarPanelDeviceConfig!,
-            };
+            DerBatteryStorageUnitConfig.PowerConversionSystemConfig = PowerConversionSystemBessConfig;
         }
 
 
@@ -486,8 +439,10 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "C37 System Power Meter 1",
                 DeviceId = 1,
+                PowerFactorStandard = PowerFactorStandard.IEEE,
                 C37Config = SystemPowerMeterC37Config,
-                PowerMeterDeviceConfig = PowerMeterDeviceC37Config!
+                PowerMeterDeviceConfig = PowerMeterDeviceC37Config!,
+                DerConfig = DerConfig!
             };
 
 
@@ -513,8 +468,10 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "Circuit Power Meter C37 1",
                 DeviceId = 2,
+                PowerFactorStandard = PowerFactorStandard.IEEE,
                 C37Config = CircuitPowerMeterC37Config,
-                PowerMeterDeviceConfig = PowerMeterDeviceC37Config!
+                PowerMeterDeviceConfig = PowerMeterDeviceC37Config!,
+                DerCircuitConfig = DerCircuitBessConfig!
             };
 
 
@@ -526,7 +483,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartMeter + 2,
                 AddressFamily = AddressFamily.InterNetwork,
-                ModbusConnectionConfig = ModbusConnectionConfig
+                ModbusConnectionConfig = ModbusConnectionConfig!
             };
 
 
@@ -537,8 +494,10 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "Auxiliary Power Meter Modbus 1",
                 DeviceId = 3,
+                PowerFactorStandard = PowerFactorStandard.IEEE,
                 ModbusConfig = AuxiliaryPowerMeterModbusConfig,
-                PowerMeterDeviceConfig = PowerMeterDeviceModbusConfig!
+                PowerMeterDeviceConfig = PowerMeterDeviceModbusConfig!,
+                DerConfig = DerConfig!
             };
 
 
@@ -550,7 +509,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartMeter + 3,
                 AddressFamily = AddressFamily.InterNetwork,
-                ModbusConnectionConfig = ModbusConnectionConfig
+                ModbusConnectionConfig = ModbusConnectionConfig!
             };
 
             // External meter communication
@@ -560,7 +519,10 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "External Power Meter Modbus Config 1",
                 DeviceId = 4,
-                PowerMeterDeviceConfig = PowerMeterDeviceModbusConfig!
+                PowerFactorStandard = PowerFactorStandard.IEEE,
+                ModbusConfig = ExternalPowerMeterModbusConfig,
+                PowerMeterDeviceConfig = PowerMeterDeviceModbusConfig!,
+                DerConfig = DerConfig!
             };
         }
 
@@ -578,8 +540,9 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartGmd,
                 AddressFamily = AddressFamily.InterNetwork,
-                ModbusConnectionConfig = ModbusConnectionConfig,
-                GenericModbusDeviceConfig = GenericModbusDeviceConfig,
+                ModbusConnectionConfig = ModbusConnectionConfig!,
+                GenericModbusDeviceConfig = GenericModbusDeviceConfig!,
+                DerConfig = DerConfig!
             };
 
             CircuitBreakerConfig = new CircuitBreakerConfig
@@ -587,13 +550,14 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 IsActive = true,
                 ChangedBy = "Test",
                 Name = "Circuit Breaker 1",
-                DeviceId = 1,
+                DeviceId = 2,
                 StationId = 1,
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartGmd + 1,
                 AddressFamily = AddressFamily.InterNetwork,
-                ModbusConnectionConfig = ModbusConnectionConfig,
-                CircuitBreakerDeviceConfig = CircuitBreakerDeviceConfig,
+                ModbusConnectionConfig = ModbusConnectionConfig!,
+                CircuitBreakerDeviceConfig = CircuitBreakerDeviceConfig!,
+                DerCircuitConfig = DerCircuitBessConfig!
             };
 
             AutomaticTransferSwitchConfig = new AutomaticTransferSwitchConfig
@@ -601,13 +565,14 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 IsActive = true,
                 ChangedBy = "Test",
                 Name = "Automatic Transfer Switch 1",
-                DeviceId = 1,
+                DeviceId = 3,
                 StationId = 1,
                 Address = Constants.Ip4Localhost,
                 AddressFamily = AddressFamily.InterNetwork,
                 Port = Constants.PortStartGmd + 2,
-                ModbusConnectionConfig = ModbusConnectionConfig,
-                AutomaticTransferSwitchDeviceConfig = AutomaticTransferSwitchDeviceConfig,
+                ModbusConnectionConfig = ModbusConnectionConfig!,
+                AutomaticTransferSwitchDeviceConfig = AutomaticTransferSwitchDeviceConfig!,
+                DerConfig = DerConfig!
             };
         }
 

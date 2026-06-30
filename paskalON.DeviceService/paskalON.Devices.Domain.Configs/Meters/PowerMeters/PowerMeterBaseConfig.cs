@@ -1,5 +1,4 @@
-﻿
-using paskalON.PhysicalUnits.Electricals.Powers;
+﻿using paskalON.PhysicalUnits.Electricals.Powers;
 
 namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 {
@@ -9,9 +8,23 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
     public abstract class PowerMeterBaseConfig : DeviceIdNameBase
     {
         /// <summary>
+        /// Id of the device.
+        /// </summary>
+        public override required int DeviceId
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                field = value;
+            }
+        }
+
+
+        /// <summary>
         /// Relationship to PowerMeterDeviceConfigId.
         /// </summary>
-        public int? PowerMeterDeviceConfigId { get; set; }
+        public int PowerMeterDeviceConfigId { get; set; }
 
 
         /// <summary>
@@ -59,7 +72,7 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
         /// <summary>
         /// Power factor standard used in this power meter.
         /// </summary>
-        public PowerFactorStandard PowerFactorStandard { get; set; }
+        public required PowerFactorStandard PowerFactorStandard { get; set; }
 
     }
 }

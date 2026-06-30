@@ -9,7 +9,7 @@
         /// <summary>
         /// Parent relationship to DerConfig Id.
         /// </summary>
-        public int? DerConfigId { get; set; }
+        public int DerConfigId { get; set; }
 
 
         /// <summary>
@@ -21,7 +21,7 @@
         /// <summary>
         /// Child relationships to a list of DerCircuitConfig.
         /// </summary>
-        public List<DerCircuitConfig> DerCircuits { get; set; } = new List<DerCircuitConfig>();
+        public ICollection<DerCircuitConfig> DerCircuits { get; set; } = [];
 
     }
 }

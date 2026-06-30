@@ -1,6 +1,5 @@
 ﻿
 using paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps;
-using System.ComponentModel.DataAnnotations;
 
 namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
 {
@@ -24,8 +23,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
         /// The class name of the.
         /// This uniquely identifies the eventually used type of component. (e.g. a ManufacturerPcs, ManufacturerBattery etc.).
         /// </summary>
-        [Required]
-        public string? ClassName { get; set; }
+        public required string ClassName { get; set; }
 
         public CircuitBreakerOperation CircuitBreakerOperation { get; set; }
 

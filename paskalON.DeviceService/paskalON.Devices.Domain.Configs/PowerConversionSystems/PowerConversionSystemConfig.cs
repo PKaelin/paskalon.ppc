@@ -9,21 +9,37 @@ namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
     public class PowerConversionSystemConfig : DeviceIdNameBase
     {
         /// <summary>
+        /// Id of the device.
+        /// </summary>
+        public override required int DeviceId
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                field = value;
+            }
+        }
+
+
+        /// <summary>
         /// Parent relationship to DerUnitConfig Id.
         /// </summary>
-        public int? DerUnitConfigId { get; set; }
+        public int DerUnitConfigId { get; set; }
 
 
         /// <summary>
         /// Parent relationship to DerUnitConfig
         /// </summary>
-        public required DerUnitConfig DerUnitConfig { get; set; }
+        /// Ono to one configurations not possible with data annotations use fluent API.
+        public DerUnitConfig DerUnitConfig { get; set; } = null!;
 
 
         /// <summary>
         /// Relationship tp PowerConversionSystemDeviceConfig Id.
         /// </summary>
-        public int? PowerConversionSystemDeviceConfigId { get; set; }
+        public int PowerConversionSystemDeviceConfigId { get; set; }
+
 
         /// <summary>
         /// Relationship tp PowerConversionSystemDeviceConfig.
@@ -34,13 +50,13 @@ namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
         /// <summary>
         /// Relationship to ModbusConfig Id.
         /// </summary>
-        public int? ModbusConfigId { get; set; }
+        public int ModbusConfigId { get; set; }
 
 
         /// <summary>
         /// Relationship to ModbusConfig Id.
         /// </summary>
-        public ModbusConfig? ModbusConfig { get; set; }
+        public required ModbusConfig ModbusConfig { get; set; }
 
 
 

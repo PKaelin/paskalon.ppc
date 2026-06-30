@@ -1,7 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
-using System.Net.Sockets;
-
+﻿using System.Net.Sockets;
 
 namespace paskalON.Devices.Domain.Configs
 {
@@ -20,36 +17,30 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// Relationship to ModbusConnectionConfig.
         /// </summary>
-        [Required]
-        public required ModbusConnectionConfig? ModbusConnectionConfig { get; set; }
-
+        public required ModbusConnectionConfig ModbusConnectionConfig { get; set; }
 
 
         /// <summary>
         /// Host address.
         /// </summary>
-        [Required]
         public required string Address { get; set; }
 
 
         /// <summary>
         /// Port.
         /// </summary>
-        [Required]
         public required int Port { get; set; }
 
 
         /// <summary>
         /// Address family to connect with. Default is IP4.
         /// </summary>
-        [Required]
         public required AddressFamily AddressFamily { get; set; } = AddressFamily.InterNetwork;
 
 
         /// <summary>
         /// The station Id.
         /// </summary>
-        [Required]
         public required byte StationId { get; set; } = 1;
 
 

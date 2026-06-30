@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
+﻿namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
 {
     public class PowerConversionSystemDeviceConfig : NameBase
     {
@@ -8,28 +6,24 @@ namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
         /// The class name of the type to instantiate.
         /// This uniquely identifies the eventually used type of component. (e.g. a ManufacturerPcs, ManufacturerBattery etc.)
         /// </summary>
-        [Required]
-        public string? ClassName { get; set; }
+        public required string ClassName { get; set; }
 
 
         /// <summary>
         /// Theoretical maximum active power output.
         /// </summary>
-        [Required]
         public double NameplateMaximumActivePower { get; set; }
 
 
         /// <summary>
         /// Theoretical maximum reactive power output.
         /// </summary>
-        [Required]
         public double NameplateMaximumReactivePower { get; set; }
 
 
         /// <summary>
         /// Theoretical maximum apparent power output.
         /// </summary>
-        [Required]
         public double NameplateMaximumApparentPower { get; set; }
 
 

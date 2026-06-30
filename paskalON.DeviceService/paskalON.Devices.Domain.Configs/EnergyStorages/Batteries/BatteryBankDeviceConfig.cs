@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
+﻿namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
 {
     /// <summary>
     /// Battery bank device configuration.
@@ -11,8 +9,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// The class name of the type to instantiate.
         /// This uniquely identifies the eventually used type of component. (e.g. a ManufacturerPcs, ManufacturerBattery etc.).
         /// </summary>
-        [Required]
-        public string? ClassName { get; set; }
+        public required string ClassName { get; set; }
 
 
         /// <summary>

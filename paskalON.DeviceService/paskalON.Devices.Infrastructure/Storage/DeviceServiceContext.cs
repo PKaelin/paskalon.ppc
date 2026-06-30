@@ -96,6 +96,9 @@ namespace paskalON.Devices.Infrastructure.Storage
         {
             modelBuilder.Entity<History>().ToTable(t => t.ExcludeFromMigrations(true));
             base.OnModelCreating(modelBuilder);
+            // Automatically pulls all individual configuration classes
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(DomainBase).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(DeviceServiceContext).Assembly);
         }
 
 

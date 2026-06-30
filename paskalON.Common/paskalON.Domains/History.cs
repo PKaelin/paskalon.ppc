@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace paskalON.Domains
 {
@@ -12,14 +11,12 @@ namespace paskalON.Domains
         /// <summary>
         /// Migration id of history
         /// </summary>
-        [Key]
         public required string MigrationId { get; set; }
 
 
         /// <summary>
         /// Product version
         /// </summary>
-        [Required]
         public required string ProductVersion { get; set; }
     }
 }

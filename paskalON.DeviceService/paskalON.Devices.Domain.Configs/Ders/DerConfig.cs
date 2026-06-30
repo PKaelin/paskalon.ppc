@@ -13,31 +13,37 @@ namespace paskalON.Devices.Domain.Configs.Ders
         /// List of DER groups that can be split up onto different device service services 
         /// and therefore run on different machines.
         /// </summary>
-        public List<DerGroupConfig> DerGroupConfigs { get; set; } = new List<DerGroupConfig>();
+        public ICollection<DerGroupConfig> DerGroupConfigs { get; set; } = [];
 
 
         /// <summary>
         /// List of generic Modbus devices.
         /// </summary>
-        public List<GenericModbusConfig> GenericModbusConfigs { get; set; } = new List<GenericModbusConfig>();
+        public ICollection<GenericModbusConfig> GenericModbusConfigs { get; set; } = [];
+
+
+        /// <summary>
+        /// List of automatic transfer switches.
+        /// </summary>
+        public ICollection<AutomaticTransferSwitchConfig> AutomaticTransferSwitchConfigs { get; set; } = [];
 
 
         /// <summary>
         /// List of system meters. Usually there is one with redundancy within.
         /// </summary>
-        public List<SystemPowerMeterConfig> SystemPowerMeterConfigs { get; set; } = new List<SystemPowerMeterConfig>();
+        public ICollection<SystemPowerMeterConfig> SystemPowerMeterConfigs { get; set; } = [];
 
 
         /// <summary>
         /// List of auxiliary power meters.
         /// </summary>
-        public List<AuxiliaryPowerMeterConfig> AuxiliaryPowerMeterConfigs { get; set; } = new List<AuxiliaryPowerMeterConfig>();
+        public ICollection<AuxiliaryPowerMeterConfig> AuxiliaryPowerMeterConfigs { get; set; } = [];
 
 
         /// <summary>
         /// List of external power meters.
         /// </summary>
-        public List<ExternalPowerMeterConfig> ExternalPowerMeterConfigs { get; set; } = new List<ExternalPowerMeterConfig>();
+        public ICollection<ExternalPowerMeterConfig> ExternalPowerMeterConfigs { get; set; } = [];
 
     }
 }

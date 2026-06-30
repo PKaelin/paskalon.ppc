@@ -1,5 +1,4 @@
-﻿
-namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
+﻿namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 {
     public class PowerMeterDeviceConfig : NameBase
     {
@@ -32,7 +31,7 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
         /// The class name of the type to instantiate.
         /// This uniquely identifies the eventually used type of component. (e.g. a ManufacturerPcs, ManufacturerBattery etc.).
         /// </summary>
-        public string? ClassName { get; set; }
+        public required string ClassName { get; set; }
 
 
         /// <summary>

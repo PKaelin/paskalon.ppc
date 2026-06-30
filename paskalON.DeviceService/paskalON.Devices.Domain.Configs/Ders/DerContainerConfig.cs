@@ -6,15 +6,29 @@
     public class DerContainerConfig : DeviceIdNameBase
     {
         /// <summary>
+        /// Id of the device.
+        /// </summary>
+        public override required int DeviceId
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                field = value;
+            }
+        }
+
+
+        /// <summary>
         /// Relationship id to DerUnitConfig.
         /// </summary>
-        public int? DerUnitConfigId { get; set; }
+        public int DerUnitConfigId { get; set; }
 
 
         /// <summary>
         /// Relationship to DerUnitConfig.
         /// </summary>
-        public DerUnitConfig? DerUnitConfig { get; set; }
+        public DerUnitConfig DerUnitConfig { get; set; } = null!;
 
 
         /// <summary>

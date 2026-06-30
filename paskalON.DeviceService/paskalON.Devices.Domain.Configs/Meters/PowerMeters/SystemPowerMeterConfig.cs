@@ -1,4 +1,6 @@
-﻿namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
+﻿using paskalON.Devices.Domain.Configs.Ders;
+
+namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 {
     /// <summary>
     /// System power meter could be either a C37 or a Modbus meter but not both.
@@ -7,5 +9,15 @@
     /// </summary>
     public class SystemPowerMeterConfig : PowerMeterBaseConfig
     {
+        /// <summary>
+        /// Parent relationship to DerConfig Id.
+        /// </summary>
+        public int DerConfigId { get; set; }
+
+
+        /// <summary>
+        /// Parent relationship to DerConfig.
+        /// </summary>
+        public required DerConfig DerConfig { get; set; }
     }
 }

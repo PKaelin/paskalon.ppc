@@ -9,39 +9,53 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
     public class BatteryBankConfig : DeviceIdNameBase
     {
         /// <summary>
+        /// Id of the device.
+        /// </summary>
+        public override required int DeviceId
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                field = value;
+            }
+        }
+
+
+        /// <summary>
         /// Parent relationship to DerUnitConfig Id.
         /// </summary>
-        public int? DerUnitConfigId { get; set; }
+        public int DerUnitConfigId { get; set; }
 
 
         /// <summary>
         /// Parent relationship to DerUnitConfig.
         /// </summary>
-        public DerUnitConfig? DerUnitConfig { get; set; }
+        public required DerUnitConfig DerUnitConfig { get; set; }
 
 
         /// <summary>
         /// Relationship to BatteryBankDeviceConfig Id.
         /// </summary>
-        public int? BatteryBankDeviceConfigId { get; set; }
+        public int BatteryBankDeviceConfigId { get; set; }
 
 
         /// <summary>
         /// Relationship to BatteryBankDeviceConfig.
         /// </summary>
-        public BatteryBankDeviceConfig? BatteryBankDeviceConfig { get; set; }
+        public required BatteryBankDeviceConfig BatteryBankDeviceConfig { get; set; }
 
 
         /// <summary>
         /// Relationship to ModbusConfig Id.
         /// </summary>
-        public int? ModbusConfigId { get; set; }
+        public int ModbusConfigId { get; set; }
 
 
         /// <summary>
         /// Relationship to ModbusConfig Id.
         /// </summary>
-        public ModbusConfig? ModbusConfig { get; set; }
+        public required ModbusConfig ModbusConfig { get; set; }
 
 
         /// <summary>

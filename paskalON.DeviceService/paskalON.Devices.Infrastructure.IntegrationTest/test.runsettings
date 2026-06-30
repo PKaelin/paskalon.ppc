@@ -2,7 +2,7 @@
 <RunSettings>
   <RunConfiguration>
     <EnvironmentVariables>
-      <DB_CONNECTION_STRING>Host=localhost;Database=device_infrastructure_test;Username=admin;Password=admin123</DB_CONNECTION_STRING>
+      <DB_CONNECTION_STRING>Host=localhost;Database=device_infrastructure_test;Username=admin;Password=admin123;Include Error Detail=true;</DB_CONNECTION_STRING>
     </EnvironmentVariables>
   </RunConfiguration>
 </RunSettings>

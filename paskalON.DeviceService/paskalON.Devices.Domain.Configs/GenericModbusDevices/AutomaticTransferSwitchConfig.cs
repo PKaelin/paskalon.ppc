@@ -1,4 +1,6 @@
 ﻿
+using paskalON.Devices.Domain.Configs.Ders;
+
 namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
 {
     /// <summary>
@@ -8,15 +10,27 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
     public class AutomaticTransferSwitchConfig : GenericModbusBaseConfig
     {
         /// <summary>
+        /// Parent relationship to DerConfig Id.
+        /// </summary>
+        public int DerConfigId { get; set; }
+
+
+        /// <summary>
+        /// Parent relationship to DerConfig.
+        /// </summary>
+        public required DerConfig DerConfig { get; set; }
+
+
+        /// <summary>
         /// Relationship to AutomaticTransferSwitchDeviceConfigId.
         /// </summary>
-        public int? AutomaticTransferSwitchDeviceConfigId { get; set; }
+        public int AutomaticTransferSwitchDeviceConfigId { get; set; }
 
 
         /// <summary>
         /// Relationship to AutomaticTransferSwitchDeviceConfig.
         /// </summary>
-        public AutomaticTransferSwitchDeviceConfig? AutomaticTransferSwitchDeviceConfig { get; set; }
+        public required AutomaticTransferSwitchDeviceConfig AutomaticTransferSwitchDeviceConfig { get; set; }
 
     }
 }

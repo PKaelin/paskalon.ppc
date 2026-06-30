@@ -16,16 +16,16 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
         public int GenericModbusMapConfigId { get; set; }
 
 
-        public List<GenericModbusCoilMapEntryConfig>? Coils { get; set; }
+        public ICollection<GenericModbusCoilMapEntryConfig>? Coils { get; set; }
 
 
-        public List<GenericModbusDiscreteInputMapEntryConfig>? DiscreteInputs { get; set; }
+        public ICollection<GenericModbusDiscreteInputMapEntryConfig>? DiscreteInputs { get; set; }
 
 
-        public List<GenericModbusInputRegisterMapEntryConfig>? InputRegisters { get; set; }
+        public ICollection<GenericModbusInputRegisterMapEntryConfig>? InputRegisters { get; set; }
 
 
-        public List<GenericModbusHoldingRegisterMapEntryConfig>? HoldingRegisters { get; set; }
+        public ICollection<GenericModbusHoldingRegisterMapEntryConfig>? HoldingRegisters { get; set; }
 
 
         public ushort? SlaveHeartbeatRegister { get; set; }

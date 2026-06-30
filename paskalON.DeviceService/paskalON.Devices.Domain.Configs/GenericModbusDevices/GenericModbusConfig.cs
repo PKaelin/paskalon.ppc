@@ -1,4 +1,6 @@
 ﻿
+using paskalON.Devices.Domain.Configs.Ders;
+
 namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
 {
     /// <summary>
@@ -7,15 +9,27 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
     public class GenericModbusConfig : GenericModbusBaseConfig
     {
         /// <summary>
+        /// Parent relationship to DerConfig Id.
+        /// </summary>
+        public int DerConfigId { get; set; }
+
+
+        /// <summary>
+        /// Parent relationship to DerConfig.
+        /// </summary>
+        public required DerConfig DerConfig { get; set; }
+
+
+        /// <summary>
         /// Relationship to GenericModbusDeviceConfig Id.
         /// </summary>
-        public int? GenericModbusDeviceConfigId { get; set; }
+        public int GenericModbusDeviceConfigId { get; set; }
 
 
         /// <summary>
         /// Relationship to GenericModbusDeviceConfig.
         /// </summary>
-        public GenericModbusDeviceConfig? GenericModbusDeviceConfig { get; set; }
+        public required GenericModbusDeviceConfig GenericModbusDeviceConfig { get; set; }
 
     }
 }
