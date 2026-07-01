@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.EnergyResources.Solars;
 using paskalON.Devices.Domain.Ders;
+using paskalON.Domains.Telemetry;
 
 namespace paskalON.Devices.Domain.EnergyResources.Solars
 {
@@ -14,7 +15,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
     /// At the moment we dont integrate with solar panels.
     /// We still use a list in solar unit as we could have different brands and or types of solar panels.
     /// </remarks>
-    public abstract class SolarPanelBase : DerBase
+    public abstract class SolarPanelBase : DerDeviceBase<SolarPanelBase>
     {
         /// <summary>
         /// Solar panel configuration.
@@ -62,9 +63,16 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
 
 
         /// <summary>
-        /// Simulate list of solar panels by multiplying the solar device configured MaximumOutputSum.
+        /// Simulate list of solar panels by multiplying the solar device configured MinimumCurrentSum.
         /// </summary>
-        public double MaximumOutputSum { get => _config.MaximumOutputSum; }
+        public double MinimumCurrentSum { get => _config.MinimumCurrentSum; }
+
+
+        /// <summary>
+        /// Simulate list of solar panels by multiplying the solar device configured MaximumCurrentSum.
+        /// </summary>
+        public double MaximumCurrentSum { get => _config.MaximumCurrentSum; }
+
 
 
         /// <summary>
@@ -73,10 +81,27 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The solar panel configuration.</param>
         /// <param name="derSolarUnit">The parent solar unit.</param>
-        protected SolarPanelBase(ILogger logger, SolarPanelConfig config, DerSolarUnit derSolarUnit) : base(logger, config)
+        protected SolarPanelBase(ILogger logger, SolarPanelConfig config, DerSolarUnit derSolarUnit, IMetricsPublisher<SolarPanelBase> metricsPublisher)
+            : base(logger, config, metricsPublisher)
         {
             _config = config;
             SolarUnit = derSolarUnit;
+            RegisterMetrics();
+        }
+
+
+        /// <summary>
+        /// Register base metrics with the metrics publisher.
+        /// </summary>
+        private void RegisterMetrics()
+        {
+            _metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass4);
+            _metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), x => x.IsInMaintenanceMode, _config.MetricsFactorClass4);
+            _metricsPublisher.Register<int>(nameof(NumberOfPanels), x => x.NumberOfPanels, _config.MetricsFactorClass4);
+            _metricsPublisher.Register<double>(nameof(MinimumVoltageSum), x => x.MinimumVoltageSum, _config.MetricsFactorClass4);
+            _metricsPublisher.Register<double>(nameof(MaximumVoltageSum), x => x.MaximumVoltageSum, _config.MetricsFactorClass4);
+            _metricsPublisher.Register<double>(nameof(MinimumCurrentSum), x => x.MinimumCurrentSum, _config.MetricsFactorClass4);
+            _metricsPublisher.Register<double>(nameof(MaximumCurrentSum), x => x.MaximumCurrentSum, _config.MetricsFactorClass4);
         }
     }
 }

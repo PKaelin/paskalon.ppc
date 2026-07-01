@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
+using paskalON.Domains.Telemetry;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -15,7 +16,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
     /// <summary>
     /// Power Conversion System (PCS) base class for all PCSs.
     /// </summary>
-    public abstract class PowerConversionSystemBase : DerBase, INotifyPropertyChanged
+    public abstract class PowerConversionSystemBase : DerDeviceBase<PowerConversionSystemBase>, INotifyPropertyChanged
     {
         /// <summary>
         /// Power conversion system configuration of this instance.
@@ -307,10 +308,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The power conversion system configuration.</param>
         /// <param name="derUnit">The parent DER unit.</param>
-        public PowerConversionSystemBase(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit) : base(logger, config)
+        public PowerConversionSystemBase(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher<PowerConversionSystemBase> metricsPublisher)
+            : base(logger, config, metricsPublisher)
         {
             _config = config;
             DerUnit = derUnit;
+            RegisterMetrics();
         }
 
 
@@ -377,11 +380,11 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// Trigger PCS state change events
         /// </summary>
-        /// <param name="pcsState"></param>
-        protected void SetState(PcsState pcsState)
+        /// <param name="state">The PCS state.</param>
+        protected void SetState(PcsState state)
         {
-            _logger.LogInformation("{Name} - PCS state changed to: {PcsState}", Name, State);
-            StateChanged?.Invoke(this, new PcsStateChangedEventArgs(pcsState));
+            _logger.LogInformation("{Name} - PCS state changed to: {State}", Name, State);
+            StateChanged?.Invoke(this, new PcsStateChangedEventArgs(state));
         }
 
 
@@ -437,6 +440,34 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+        /// <summary>
+        /// Register base metrics with the metrics publisher.
+        /// </summary>
+        private void RegisterMetrics()
+        {
+            // MetricsFactorClass1
+            _metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass1);
+            _metricsPublisher.Register<double?>(nameof(ActivePowerTarget), x => x.ActivePowerTarget?.Watts, _config.MetricsFactorClass1);
+            _metricsPublisher.Register<double?>(nameof(ReactivePowerTarget), x => x.ReactivePowerTarget?.VoltAmperesReactive, _config.MetricsFactorClass1);
+            _metricsPublisher.Register<double?>(nameof(ActivePower), x => x.ActivePower?.Watts, _config.MetricsFactorClass1);
+            _metricsPublisher.Register<double?>(nameof(ReactivePower), x => x.ReactivePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
+            // MetricsFactorClass2
+            _metricsPublisher.Register<PcsState>(nameof(State), x => x.State, _config.MetricsFactorClass2);
+            _metricsPublisher.Register<bool>(nameof(HasActiveAlarms), x => x.HasActiveAlarms, _config.MetricsFactorClass2);
+            _metricsPublisher.Register<bool>(nameof(HasActiveWarnings), x => x.HasActiveWarnings, _config.MetricsFactorClass2);
+            _metricsPublisher.Register<double?>(nameof(VoltagePhaseAToB), x => x.VoltagePhaseAToB, _config.MetricsFactorClass2);
+            _metricsPublisher.Register<double?>(nameof(VoltagePhaseBToC), x => x.VoltagePhaseBToC, _config.MetricsFactorClass2);
+            _metricsPublisher.Register<double?>(nameof(VoltagePhaseCToA), x => x.VoltagePhaseCToA, _config.MetricsFactorClass2);
+            _metricsPublisher.Register<double?>(nameof(ACCurrentSum), x => x.ACCurrentSum, _config.MetricsFactorClass2);
+            _metricsPublisher.Register<double?>(nameof(DCCurrent), x => x.DCCurrent, _config.MetricsFactorClass2);
+            _metricsPublisher.Register<double?>(nameof(DCVoltage), x => x.DCVoltage, _config.MetricsFactorClass2);
+            // MetricsFactorClass3
+            _metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
+            // MetricsFactorClass4
+            _metricsPublisher.Register<double?>(nameof(LineFrequency), x => x.LineFrequency, _config.MetricsFactorClass4);
         }
     }
 }

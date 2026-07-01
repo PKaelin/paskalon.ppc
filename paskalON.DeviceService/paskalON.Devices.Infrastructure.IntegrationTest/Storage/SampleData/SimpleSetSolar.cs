@@ -84,7 +84,6 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "Device SolarPanel 1",
                 ClassName = "SolarPanelTest",
-                MaximumOutput = 525,
                 MaximumVoltage = 40.8,
                 MinimumVoltage = 0,
                 MaximumCurrent = 12.87,

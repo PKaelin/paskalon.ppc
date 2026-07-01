@@ -106,8 +106,16 @@
         /// </remarks>
         public double AbsoluteMaximumStateOfCharge { get; set; }
 
+
+        /// <summary>
+        /// The absolute minimum temperature the battery can operate at.
+        /// </summary>
         public double AbsoluteMinimumTemperature { get; set; }
 
+
+        /// <summary>
+        /// The absolute maximum temperature the battery can operate at.
+        /// </summary>
         public double AbsoluteMaximumTemperature { get; set; }
 
 
@@ -116,19 +124,30 @@
         /// </summary>
         public double PreferredMinimumStateOfCharge { get; set; }
 
+
         /// <summary>
         /// The preferred maximum state of charge, as a percentage of usable capacity.
         /// </summary>
         public double PreferredMaximumStateOfCharge { get; set; }
 
+
+        /// <summary>
+        /// The preferred minimum temperature the battery can operate at.
+        /// </summary>
         public double PreferredMinimumTemperature { get; set; }
 
+
+        /// <summary>
+        /// The preferred maximum temperature the battery can operate at.
+        /// </summary>
         public double PreferredMaximumTemperature { get; set; }
+
 
         /// <summary>
         /// Expected maximum current (i.e. the absolute physical limit) the battery could produce.
         /// </summary>
         public double AbsoluteMaxDischargeCurrentAmps { get; set; }
+
 
         /// <summary>
         /// Expected minimum current (i.e. the absolute physical limit) the battery could produce.
@@ -136,8 +155,15 @@
         public double AbsoluteMaxChargeCurrentAmps { get; set; }
 
 
+        /// <summary>
+        /// The minimum DC voltage the battery can operate at.
+        /// </summary>
         public double MinimumDcVoltage { get; set; }
 
+
+        /// <summary>
+        /// The maximum DC voltage the battery can operate at.
+        /// </summary>
         public double MaximumDcVoltage { get; set; }
 
 

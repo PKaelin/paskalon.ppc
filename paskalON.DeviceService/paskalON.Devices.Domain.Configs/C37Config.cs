@@ -8,24 +8,6 @@ namespace paskalON.Devices.Domain.Configs
     public class C37Config : NameBase
     {
         /// <summary>
-        /// Indicates the minimum valid polling interval value.
-        /// If this value is less than 100 milliseconds it will cause an exception.
-        /// </summary>
-        private const long MinimumDataLoggingIntervalMilliseconds = 100;
-
-
-        private long dataLoggingIntervalMilliseconds = 1000;
-        /// <summary>
-        /// Polling interval in milliseconds.
-        /// </summary>
-        public long DataLoggingIntervalMilliseconds
-        {
-            get { return dataLoggingIntervalMilliseconds; }
-            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDataLoggingIntervalMilliseconds); dataLoggingIntervalMilliseconds = value; }
-        }
-
-
-        /// <summary>
         /// IP address of the device.
         /// </summary>
         public string? IpAddress

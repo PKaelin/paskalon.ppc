@@ -58,7 +58,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
 
 
         /// <summary>
-        /// Simulate list of solar panels by multiplying the solar device configured MinimumVoltageSum.
+        /// Simulate list of solar panels by calculating the solar device configured MinimumVoltageSum.
         /// </summary>
         public double MinimumVoltageSum
         {
@@ -67,7 +67,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
 
 
         /// <summary>
-        /// Simulate list of solar panels by multiplying the solar device configured MaximumVoltageSum.
+        /// Simulate list of solar panels by calculating the solar device configured MaximumVoltageSum.
         /// </summary>
         public double MaximumVoltageSum
         {
@@ -76,12 +76,23 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
 
 
         /// <summary>
-        /// Simulate list of solar panels by multiplying the solar device configured MaximumOutputSum.
+        /// Simulate list of solar panels by calculating the solar device configured MinimumCurrentSum.
         /// </summary>
-        public double MaximumOutputSum
+        public double MinimumCurrentSum
         {
-            get => SolarPanelDeviceConfig == null ? 0 : ConnectionType == SolarConnectionType.Series ? SolarPanelDeviceConfig.MaximumOutput * NumberOfPanels : SolarPanelDeviceConfig.MaximumOutput;
+            get => SolarPanelDeviceConfig == null ? 0 : ConnectionType == SolarConnectionType.Series ? SolarPanelDeviceConfig.MinimumCurrent : SolarPanelDeviceConfig.MinimumCurrent * NumberOfPanels;
         }
+
+
+        /// <summary>
+        /// Simulate list of solar panels by calculating the solar device configured MaximumCurrentSum.
+        /// </summary>
+        public double MaximumCurrentSum
+        {
+            get => SolarPanelDeviceConfig == null ? 0 : ConnectionType == SolarConnectionType.Series ? SolarPanelDeviceConfig.MaximumCurrent : SolarPanelDeviceConfig.MaximumCurrent * NumberOfPanels;
+        }
+
+
 
     }
 }

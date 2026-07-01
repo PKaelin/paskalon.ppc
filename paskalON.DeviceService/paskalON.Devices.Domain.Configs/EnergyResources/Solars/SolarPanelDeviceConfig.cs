@@ -33,7 +33,7 @@
 
 
         /// <summary>
-        /// Minimum output Current of the panel in ampere.
+        /// Minimum output current of the panel in ampere.
         /// </summary>
         public double MinimumCurrent
         {
@@ -43,19 +43,9 @@
 
 
         /// <summary>
-        /// Maximum output Current of the panel in ampere.
+        /// Maximum output current of the panel in ampere.
         /// </summary>
         public double MaximumCurrent
-        {
-            get;
-            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
-        }
-
-
-        /// <summary>
-        /// Maximum output Output of the panel in watts.
-        /// </summary>
-        public double MaximumOutput
         {
             get;
             set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
