@@ -10,7 +10,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// Type: 16-bit word (Integer)
     /// Typical Use: Analog inputs measuring physical properties (e.g. real-time temperature, pressure, or flow rate readings from a sensor).
     /// </remarks>
-    public class GenericModbusInputRegisterConfig : GenericModbusRegisterBase
+    public class GenericModbusInputRegisterConfig : GenericModbusRegisterBaseConfig
     {
         /// <inheritdoc/>
         public override bool ModbusWritable { get => false; }

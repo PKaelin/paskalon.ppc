@@ -5,7 +5,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// <summary>
     /// Base class for generic Modbus point base and register base configurations.
     /// </summary>
-    public abstract class GenericModbusEntryBase : NameBase
+    public abstract class GenericModbusEntryBaseConfig : NameBase
     {
         /// <summary>
         /// Parent relationship to GenericModbusMapConfig Id.

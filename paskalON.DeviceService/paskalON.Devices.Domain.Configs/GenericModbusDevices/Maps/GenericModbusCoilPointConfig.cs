@@ -10,10 +10,10 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// Type: 1-bit (Boolean: 1 or 0 / ON or OFF)
     /// Typical Use: Digital outputs used to trigger external actions (e.g. turning a motor on, opening a valve).
     /// </remarks>
-    public class GenericModbusCoilPointConfig : GenericModbusPointBase
+    public class GenericModbusCoilPointConfig : GenericModbusPointBaseConfig
     {
         /// <inheritdoc/>
-        public override bool ModbusWritable { get => false; }
+        public override bool ModbusWritable { get => true; }
 
 
         /// <inheritdoc/>

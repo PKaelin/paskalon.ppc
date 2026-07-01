@@ -10,7 +10,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// Type: 1-bit (Boolean)
     /// Typical Use: Digital inputs originating from the field (e.g. a limit switch, door alarm, or emergency stop status).
     /// </remarks>
-    public class GenericModbusDiscreteInputPointConfig : GenericModbusPointBase
+    public class GenericModbusDiscreteInputPointConfig : GenericModbusPointBaseConfig
     {
         /// <inheritdoc/>
         public override bool ModbusWritable { get => false; }

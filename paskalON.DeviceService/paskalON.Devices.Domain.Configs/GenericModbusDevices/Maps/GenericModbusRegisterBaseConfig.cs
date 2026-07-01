@@ -3,7 +3,7 @@
     /// <summary>
     /// Base class for point map entries that are 16-bits values (sensor data, setpoints, diagnostic, etc.).
     /// </summary>
-    public abstract class GenericModbusRegisterBase : GenericModbusEntryBase
+    public abstract class GenericModbusRegisterBaseConfig : GenericModbusEntryBaseConfig
     {
         /// <summary>
         /// Scaling factor applied to the raw Modbus register value to convert it into a meaningful engineering unit.
@@ -19,7 +19,8 @@
 
         private short? _bitIndex;
         /// <summary>
-        /// The index of the bit within a 16-bit register (0-15) for points that are part of a register. If not applicable, it can be set to -1.
+        /// The index of the bit within a 16-bit register (0-15) for points that are part of a register.
+        /// If not applicable, it can be set to -1.
         /// </summary>
         public short BitIndex
         {

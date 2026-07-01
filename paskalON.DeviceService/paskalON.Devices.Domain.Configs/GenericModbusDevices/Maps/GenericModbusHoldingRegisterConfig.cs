@@ -10,10 +10,10 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// Type: 16-bit word (Integer)
     /// Typical Use: General storage and system configurations. Often stores setpoints, scaling factors, and calibration parameters.
     /// </remarks>
-    public class GenericModbusHoldingRegisterConfig : GenericModbusRegisterBase
+    public class GenericModbusHoldingRegisterConfig : GenericModbusRegisterBaseConfig
     {
         /// <inheritdoc/>
-        public override bool ModbusWritable { get => false; }
+        public override bool ModbusWritable { get => true; }
 
 
         /// <inheritdoc/>
