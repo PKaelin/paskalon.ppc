@@ -81,9 +81,14 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The solar panel configuration.</param>
         /// <param name="derSolarUnit">The parent solar unit.</param>
+        /// <param name="metricsPublisher">Metrics publisher interface.</param>
         protected SolarPanelBase(ILogger logger, SolarPanelConfig config, DerSolarUnit derSolarUnit, IMetricsPublisher<SolarPanelBase> metricsPublisher)
             : base(logger, config, metricsPublisher)
         {
+            ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(derSolarUnit);
+            ArgumentNullException.ThrowIfNull(metricsPublisher);
+
             _config = config;
             SolarUnit = derSolarUnit;
             RegisterMetrics();

@@ -42,6 +42,9 @@ namespace paskalON.Devices.Domain.Ders
         /// <param name="nameBase">Name base configuration.</param>
         public DerBase(ILogger logger, NameBase nameBase)
         {
+            ArgumentNullException.ThrowIfNull(logger);
+            ArgumentNullException.ThrowIfNull(nameBase);
+
             _logger = logger;
             _nameBase = nameBase;
         }

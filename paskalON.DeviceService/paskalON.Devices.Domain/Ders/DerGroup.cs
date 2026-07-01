@@ -41,6 +41,9 @@ namespace paskalON.Devices.Domain.Ders
         /// <param name="der">The parent DER.</param>
         public DerGroup(ILogger logger, DerGroupConfig config, Der der) : base(logger, config)
         {
+            ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(der);
+
             _config = config;
             Der = der;
         }

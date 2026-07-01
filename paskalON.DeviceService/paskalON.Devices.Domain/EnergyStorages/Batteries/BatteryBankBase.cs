@@ -333,9 +333,14 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The battery bank configuration.</param>
         /// <param name="batteryStorageUnit">The paren battery storage unit.</param>
+        /// <param name="metricsPublisher">Metrics publisher interface.</param>
         protected BatteryBankBase(ILogger logger, BatteryBankConfig config, DerBatteryStorageUnit batteryStorageUnit, IMetricsPublisher<BatteryBankBase> metricsPublisher)
             : base(logger, config, metricsPublisher)
         {
+            ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(batteryStorageUnit);
+            ArgumentNullException.ThrowIfNull(metricsPublisher);
+
             _config = config;
             BatteryStorageUnit = batteryStorageUnit;
             RegisterMetrics();

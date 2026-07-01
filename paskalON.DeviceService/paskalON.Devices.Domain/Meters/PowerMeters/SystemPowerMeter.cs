@@ -1,8 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
+using paskalON.Domains.Telemetry;
 
 namespace paskalON.Devices.Domain.Meters.PowerMeters
 {
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
     /// <summary>
     /// System power meter measures the electrical power output at the point of interconnection (POI).
     /// </summary>
@@ -22,8 +26,11 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// </summary>
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The system power meter config.</param>
-        public SystemPowerMeter(ILogger logger, SystemPowerMeterConfig config) : base(logger, config)
+        public SystemPowerMeter(ILogger logger, SystemPowerMeterConfig config, IMetricsPublisher<AuxiliaryPowerMeter> metricsPublisher)
+            : base(logger, config, (IMetricsPublisher<PowerMeterBase>)metricsPublisher)
         {
+            ArgumentNullException.ThrowIfNull(config);
+
             _config = config;
         }
     }

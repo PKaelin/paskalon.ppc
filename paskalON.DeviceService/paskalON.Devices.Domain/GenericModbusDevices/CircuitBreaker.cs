@@ -1,8 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
+using paskalON.Domains.Telemetry;
 
 namespace paskalON.Devices.Domain.GenericModbusDevices
 {
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
     /// <summary>
     /// Circuit breaker is a safety threshold that automatically pauses or stops the circuit when a predefined
     /// limit is reached. It acts as a fail-safe.
@@ -20,8 +24,12 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// </summary>
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The circuit breaker configuration.</param>
-        public CircuitBreaker(ILogger logger, CircuitBreakerConfig config) : base(logger, config)
+        /// <param name="metricsPublisher">Metrics publisher interface.</param>
+        public CircuitBreaker(ILogger logger, CircuitBreakerConfig config, IMetricsPublisher<CircuitBreaker> metricsPublisher)
+            : base(logger, config, (IMetricsPublisher<GenericModbusDeviceBase>)metricsPublisher)
         {
+            ArgumentNullException.ThrowIfNull(config);
+
             _config = config;
         }
     }

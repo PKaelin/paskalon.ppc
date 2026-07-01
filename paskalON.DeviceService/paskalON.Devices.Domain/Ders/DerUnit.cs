@@ -40,6 +40,9 @@ namespace paskalON.Devices.Domain.Ders
         /// <param name="derCircuit">The paren DER circuit.</param>
         public DerUnit(ILogger logger, DerUnitConfig config, DerCircuit derCircuit) : base(logger, config)
         {
+            ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(derCircuit);
+
             _config = config;
             DerCircuit = derCircuit;
             // Use configured maintenance mode when created.

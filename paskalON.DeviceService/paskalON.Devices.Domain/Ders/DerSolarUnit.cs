@@ -46,6 +46,8 @@ namespace paskalON.Devices.Domain.Ders
         /// <param name="derCircuit">The parent DER circuit.</param>
         public DerSolarUnit(ILogger logger, DerSolarUnitConfig config, DerCircuit derCircuit) : base(logger, config, derCircuit)
         {
+            ArgumentNullException.ThrowIfNull(config);
+
             _config = config;
         }
     }

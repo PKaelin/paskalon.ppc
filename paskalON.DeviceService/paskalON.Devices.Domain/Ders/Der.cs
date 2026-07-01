@@ -59,6 +59,8 @@ namespace paskalON.Devices.Domain.Ders
         /// <param name="config">The DER configuration</param>
         public Der(ILogger logger, DerConfig config) : base(logger, config)
         {
+            ArgumentNullException.ThrowIfNull(config);
+
             _config = config;
         }
     }

@@ -1,8 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
+using paskalON.Domains.Telemetry;
 
 namespace paskalON.Devices.Domain.Meters.PowerMeters
 {
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
     /// <summary>
     /// Auxiliary power meter measures the electrical energy consumed by the plant's own supporting infrastructure.
     /// </summary>
@@ -24,8 +28,12 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// </summary>
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The auxiliary power meter configuration.</param>
-        public AuxiliaryPowerMeter(ILogger logger, AuxiliaryPowerMeterConfig config) : base(logger, config)
+        /// <param name="metricsPublisher">Metrics publisher interface.</param>
+        public AuxiliaryPowerMeter(ILogger logger, AuxiliaryPowerMeterConfig config, IMetricsPublisher<AuxiliaryPowerMeter> metricsPublisher)
+            : base(logger, config, (IMetricsPublisher<PowerMeterBase>)metricsPublisher)
         {
+            ArgumentNullException.ThrowIfNull(config);
+
             _config = config;
         }
     }

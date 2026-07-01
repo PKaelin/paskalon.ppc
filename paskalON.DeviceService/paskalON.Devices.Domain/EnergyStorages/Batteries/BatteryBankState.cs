@@ -1,5 +1,8 @@
 ﻿namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 {
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
     /// <summary>
     /// Battery bank states.
     /// </summary>

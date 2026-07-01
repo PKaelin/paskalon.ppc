@@ -1,5 +1,8 @@
 ﻿namespace paskalON.Devices.Domain.PowerConversionSystems
 {
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
     /// <summary>
     /// These are the PCS states logic is based on.
     /// Specialized PCS has to map its states to the states below.
