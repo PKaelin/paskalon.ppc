@@ -24,9 +24,9 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
         public required string ClassName { get; set; }
 
 
-        public GenericModbusCoilMapEntryConfig? GridConnected { get; set; }
+        public GenericModbusCoilPointConfig? GridConnected { get; set; }
 
-        public GenericModbusCoilMapEntryConfig? BackupConnected { get; set; }
+        public GenericModbusCoilPointConfig? BackupConnected { get; set; }
 
     }
 }

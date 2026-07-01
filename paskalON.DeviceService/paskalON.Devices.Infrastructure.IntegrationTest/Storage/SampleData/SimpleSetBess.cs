@@ -27,6 +27,13 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
         public PowerMeterMapC37Config? PowerMeterMapC37Config { get; set; }
         public PowerMeterMapModbusConfig? PowerMeterMapModbusConfig { get; set; }
         public GenericModbusMapConfig? GenericModbusMapConfig { get; set; }
+        public GenericModbusMapConfig? GenericModbusMapCircuitConfig { get; set; }
+        public GenericModbusMapConfig? GenericModbusMapTransferSwitchConfig { get; set; }
+        public GenericModbusCoilPointConfig? GenericModbusCoilPointConfig { get; set; }
+        public GenericModbusDiscreteInputPointConfig? GenericModbusDiscreteInputPointConfig { get; set; }
+        public GenericModbusHoldingRegisterConfig? GenericModbusHoldingRegisterConfig { get; set; }
+        public GenericModbusInputRegisterConfig? GenericModbusInputRegisterConfig { get; set; }
+
 
         // Devices
         public PowerConversionSystemDeviceConfig? PowerConversionSystemDeviceConfig { get; set; }
@@ -171,32 +178,66 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ReactiveEnergyReceivedMap = new ModbusRegisterMapEntryConfig { Index = 30385, ModbusRegisterFormat = ModbusRegisterFormat.MbInt32Be, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
             };
 
+
+            // Generic
             GenericModbusMapConfig = new GenericModbusMapConfig
             {
                 ChangedBy = "Test",
                 Name = "Generic Modbus Map 1",
-                DiscreteInputs = new List<GenericModbusDiscreteInputMapEntryConfig>
-                {
-                    new GenericModbusDiscreteInputMapEntryConfig
-                    {
-                        ChangedBy = "Test",
-                        Name = "DiscretIn 1",
-                        ModbusNumber = 0,
-                        IsAlarm = true,
-                        ModbusRegisterFormat = ModbusRegisterFormat.MbBool
-                    }
-                },
-                HoldingRegisters = new List<GenericModbusHoldingRegisterMapEntryConfig>
-                {
-                    new GenericModbusHoldingRegisterMapEntryConfig
-                    {
-                        ChangedBy = "Test",
-                        Name = "Holding 1",
-                        ModbusNumber = 1,
-                        IsAlarm = true,
-                        ModbusRegisterFormat= ModbusRegisterFormat.MbInt16
-                    }
-                }
+            };
+
+            GenericModbusDiscreteInputPointConfig = new GenericModbusDiscreteInputPointConfig
+            {
+                ChangedBy = "Test",
+                Name = "Discrete Input 1",
+                ModbusNumber = 0,
+                IsAlarm = true,
+                ModbusRegisterFormat = ModbusRegisterFormat.MbBool,
+                GenericModbusMapConfig = GenericModbusMapConfig!
+            };
+
+            GenericModbusHoldingRegisterConfig = new GenericModbusHoldingRegisterConfig
+            {
+                ChangedBy = "Test",
+                Name = "Holding 1",
+                ModbusNumber = 1,
+                ModbusRegisterFormat = ModbusRegisterFormat.MbInt16,
+                GenericModbusMapConfig = GenericModbusMapConfig!
+            };
+
+
+            // Circuit
+            GenericModbusMapCircuitConfig = new GenericModbusMapConfig
+            {
+                ChangedBy = "Test",
+                Name = "Generic Modbus Map Circuit",
+            };
+
+
+            GenericModbusInputRegisterConfig = new GenericModbusInputRegisterConfig
+            {
+                ChangedBy = "Test",
+                Name = "BreakerStatus",
+                ModbusNumber = 42,
+                BitIndex = 2,
+                GenericModbusMapConfig = GenericModbusMapCircuitConfig!
+            };
+
+
+            // Transfer switch
+            GenericModbusMapTransferSwitchConfig = new GenericModbusMapConfig
+            {
+                ChangedBy = "Test",
+                Name = "Generic Modbus Map Transfer Switch",
+            };
+
+
+            GenericModbusCoilPointConfig = new GenericModbusCoilPointConfig
+            {
+                ChangedBy = "Test",
+                Name = "AutoSwitchCoil",
+                ModbusNumber = 1,
+                GenericModbusMapConfig = GenericModbusMapTransferSwitchConfig!
             };
         }
 
@@ -256,37 +297,34 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 MinimumCurrent = 0,
             };
 
+
             GenericModbusDeviceConfig = new GenericModbusDeviceConfig
             {
                 ChangedBy = "Test",
-                Name = "Device GMD 1",
-                ClassName = "GenericModbusTest",
-                GenericModbusMapConfig = GenericModbusMapConfig
+                Name = "Generic Modbus Device 1",
+                ClassName = "GenericClass",
+                GenericModbusMapConfig = GenericModbusMapConfig!
             };
+
 
             CircuitBreakerDeviceConfig = new CircuitBreakerDeviceConfig
             {
                 ChangedBy = "Test",
                 Name = "Device CircuitBreaker 1",
                 ClassName = "CircuitBreakerTest",
-                BreakerStatusRegister = new GenericModbusHoldingRegisterMapEntryConfig
-                {
-                    ChangedBy = "Test",
-                    Name = "BreakerStatus",
-                    ModbusNumber = 42,
-                    BitIndex = 2,
-                    ModbusWritable = true,
-                    ModbusValueType = ModbusValueType.HoldingRegister,
-                },
+                BreakerStatusRegister = GenericModbusHoldingRegisterConfig!,
                 CircuitBreakerOperation = CircuitBreakerOperation.TripAndReset,
+                GenericModbusMapConfig = GenericModbusMapCircuitConfig!
             };
+
 
             AutomaticTransferSwitchDeviceConfig = new AutomaticTransferSwitchDeviceConfig
             {
                 ChangedBy = "Test",
                 Name = "AutoStatus",
                 ClassName = "AutomaticTransferSwitchTest",
-                GridConnected = new GenericModbusCoilMapEntryConfig { ChangedBy = "Test", Name = "AutoSwitchCoil", ModbusNumber = 1, ModbusValueType = ModbusValueType.Coil }
+                GridConnected = GenericModbusCoilPointConfig!,
+                GenericModbusMapConfig = GenericModbusMapTransferSwitchConfig!
             };
 
 

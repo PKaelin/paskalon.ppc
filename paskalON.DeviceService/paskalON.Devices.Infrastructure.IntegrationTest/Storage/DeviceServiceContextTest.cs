@@ -316,6 +316,12 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.ModbusConnectionConfigs.Add(sample.ModbusConnectionConfig!);
                 // Maps
                 context.GenericModbusMapConfigs.Add(sample.GenericModbusMapConfig!);
+                context.GenericModbusMapConfigs.Add(sample.GenericModbusMapCircuitConfig!);
+                context.GenericModbusMapConfigs.Add(sample.GenericModbusMapTransferSwitchConfig!);
+                context.GenericModbusCoilPointConfigs.Add(sample.GenericModbusCoilPointConfig!);
+                context.GenericModbusDiscreteInputPointConfigs.Add(sample.GenericModbusDiscreteInputPointConfig!);
+                context.GenericModbusHoldingRegisterConfigs.Add(sample.GenericModbusHoldingRegisterConfig!);
+                context.GenericModbusInputRegisterConfigs.Add(sample.GenericModbusInputRegisterConfig!);
                 // Devices
                 context.GenericModbusDeviceConfigs.Add(sample.GenericModbusDeviceConfig!);
                 context.CircuitBreakerDeviceConfigs.Add(sample.CircuitBreakerDeviceConfig!);
@@ -343,17 +349,20 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                     // GMDs
                     .Include(gmd => gmd.GenericModbusConfigs)
                     .ThenInclude(dev => dev.GenericModbusDeviceConfig)
+                    .ThenInclude(map => map.GenericModbusMapConfig)
                     .Include(gmd => gmd.GenericModbusConfigs)
                     .ThenInclude(mb => mb.ModbusConnectionConfig)
                     .Include(ats => ats.AutomaticTransferSwitchConfigs)
                     .ThenInclude(dev => dev.AutomaticTransferSwitchDeviceConfig)
+                    .ThenInclude(map => map.GenericModbusMapConfig)
                     .Include(ats => ats.AutomaticTransferSwitchConfigs)
                     .ThenInclude(mb => mb.ModbusConnectionConfig)
-                    .Include(der => der.DerGroupConfigs)
                     // GMD - circuit
+                    .Include(der => der.DerGroupConfigs)
                     .ThenInclude(group => group.DerCircuits)
                     .ThenInclude(cb => cb.CircuitBreakerConfig)
                     .ThenInclude(dev => dev!.CircuitBreakerDeviceConfig)
+                    .ThenInclude(map => map.GenericModbusMapConfig)
                     .Include(der => der.DerGroupConfigs)
                     .ThenInclude(group => group.DerCircuits)
                     .ThenInclude(cb => cb.CircuitBreakerConfig)
@@ -375,17 +384,25 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             Assert.HasCount(1, circuit.DerUnitConfigs.OfType<DerBatteryStorageUnitConfig>());
             // AutomaticTransferSwitchConfig
             Assert.HasCount(1, config.AutomaticTransferSwitchConfigs);
-            Assert.AreEqual(sample.AutomaticTransferSwitchConfig!.Name, config.AutomaticTransferSwitchConfigs.First().Name);
-            Assert.AreEqual(sample.AutomaticTransferSwitchDeviceConfig!.Name, config.AutomaticTransferSwitchConfigs.First().AutomaticTransferSwitchDeviceConfig.Name);
+            AutomaticTransferSwitchConfig automatic = config.AutomaticTransferSwitchConfigs.First();
+            Assert.AreEqual(sample.AutomaticTransferSwitchConfig!.Name, automatic.Name);
+            Assert.AreEqual(sample.AutomaticTransferSwitchDeviceConfig!.Name, automatic.AutomaticTransferSwitchDeviceConfig.Name);
+            Assert.AreEqual(sample.AutomaticTransferSwitchDeviceConfig.GenericModbusMapConfig!.Name, automatic.AutomaticTransferSwitchDeviceConfig.GenericModbusMapConfig!.Name);
+            Assert.AreEqual(sample.AutomaticTransferSwitchConfig.ModbusConnectionConfig!.Name, automatic.ModbusConnectionConfig.Name);
             // GenericModbusConfig
             Assert.HasCount(1, config.GenericModbusConfigs);
             Assert.AreEqual(sample.GenericModbusConfig!.Name, config.GenericModbusConfigs.First().Name);
             Assert.AreEqual(sample.GenericModbusDeviceConfig!.Name, config.GenericModbusConfigs.First().GenericModbusDeviceConfig.Name);
+            GenericModbusConfig generic = config.GenericModbusConfigs.First();
+            Assert.AreEqual(sample.GenericModbusDeviceConfig.GenericModbusMapConfig!.Name, generic.GenericModbusDeviceConfig.GenericModbusMapConfig!.Name);
+            Assert.AreEqual(sample.GenericModbusConfig.ModbusConnectionConfig!.Name, generic.ModbusConnectionConfig!.Name);
             // CircuitBreakerConfig
             CircuitBreakerConfig? breaker = group.DerCircuits.First().CircuitBreakerConfig;
             Assert.IsNotNull(breaker);
             Assert.AreEqual(sample.CircuitBreakerConfig!.Name, breaker.Name);
             Assert.AreEqual(sample.CircuitBreakerDeviceConfig!.Name, breaker.CircuitBreakerDeviceConfig.Name);
+            Assert.AreEqual(sample.CircuitBreakerDeviceConfig.GenericModbusMapConfig!.Name, breaker.CircuitBreakerDeviceConfig.GenericModbusMapConfig!.Name);
+            Assert.AreEqual(sample.CircuitBreakerConfig.ModbusConnectionConfig!.Name, breaker.ModbusConnectionConfig!.Name);
         }
 
     }

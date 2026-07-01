@@ -31,10 +31,10 @@ namespace paskalON.Devices.Infrastructure.Storage
         DbSet<GenericModbusMapConfig> GenericModbusMapConfigs { get; set; }
         DbSet<ModbusRegisterMapEntryConfig> ModbusRegisterMapEntryConfigs { get; set; }
         DbSet<ModbusRegisterMapPollingRangeConfig> ModbusRegisterMapPollingRangeConfigs { get; set; }
-        DbSet<GenericModbusCoilMapEntryConfig> GenericModbusCoilInputMapConfigs { get; set; }
-        DbSet<GenericModbusDiscreteInputMapEntryConfig> GenericModbusDiscreteInputMapEntryConfigs { get; set; }
-        DbSet<GenericModbusHoldingRegisterMapEntryConfig> GenericModbusHoldingRegisterMapConfigs { get; set; }
-        DbSet<GenericModbusInputRegisterMapEntryConfig> GenericModbusInputRegisterMapConfigs { get; set; }
+        DbSet<GenericModbusCoilPointConfig> GenericModbusCoilPointConfigs { get; set; }
+        DbSet<GenericModbusDiscreteInputPointConfig> GenericModbusDiscreteInputPointConfigs { get; set; }
+        DbSet<GenericModbusHoldingRegisterConfig> GenericModbusHoldingRegisterConfigs { get; set; }
+        DbSet<GenericModbusInputRegisterConfig> GenericModbusInputRegisterConfigs { get; set; }
 
 
         // Devices DbSet
