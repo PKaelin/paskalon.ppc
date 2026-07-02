@@ -4,6 +4,8 @@ using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
 using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace paskalON.Devices.Domain.GenericModbusDevices
 {
@@ -31,6 +33,45 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
 
 
         /// <summary>
+        /// Event when the Generic Modbus Device state <see cref="GenericModbusDeviceState"/> changes.
+        /// </summary>
+        public event EventHandler<GenericModbusDeviceStateChangedEventArgs>? StateChanged;
+
+
+        /// <summary>
+        /// Event when the communication error state changed.
+        /// </summary>
+        public event EventHandler<CommunicationErrorChangedEventArgs> CommunicationErrorChanged;
+
+
+        /// <summary>
+        /// Event when a property is changed.
+        /// </summary>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+
+        /// <summary>
+        /// State of the Generic Modbus Device.
+        /// Specialized Generic Modbus Device has to map its states to the these states.
+        /// </summary>
+        public GenericModbusDeviceState State
+        {
+            get;
+            set { if (field != value) { field = value; SetState(value); } else field = value; }
+        }
+
+
+        /// <summary>
+        /// Returns true if a communication error has occurred.
+        /// </summary>
+        public bool CommunicationError
+        {
+            get;
+            set { if (field != value) { field = value; SetCommunicationError(value); } else field = value; }
+        }
+
+
+        /// <summary>
         /// List of generic Modbus entries that represent the data points and registers of the device.
         /// </summary>
         public required List<GenericModbusEntryBase> GenericModbusEntries { get; set; }
@@ -48,6 +89,49 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
             _config = config;
             _device = device;
             RegisterMetrics(device.MetricsPublisher);
+        }
+
+
+        /// <summary>
+        /// Trigger GenericModbusDeviceState change events.
+        /// </summary>
+        /// <param name="state">The GenericModbusDeviceState state.</param>
+        protected void SetState(GenericModbusDeviceState state)
+        {
+            _logger.LogInformation("{Name} - GenericModbusDeviceState state changed to: {State}", Name, State);
+            StateChanged?.Invoke(this, new GenericModbusDeviceStateChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Trigger CommunicationError change events.
+        /// </summary>
+        /// <param name="state">The communication error state.</param>
+        protected void SetCommunicationError(bool state)
+        {
+            if (state == true)
+            {
+                _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+            else
+            {
+                _logger.LogInformation("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+
+            CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Raises the <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyName">
+        /// The name of the property that changed. An empty value or null indicates that all of the
+        /// properties have changed.
+        /// </param>
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
 

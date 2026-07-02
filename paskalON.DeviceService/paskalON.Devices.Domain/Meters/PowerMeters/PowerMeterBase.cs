@@ -5,6 +5,8 @@ using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
 using paskalON.PhysicalUnits.Electricals.Energies;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace paskalON.Devices.Domain.Meters.PowerMeters
 {
@@ -39,6 +41,49 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
 
 
         /// <summary>
+        /// Event when the Power Meter state <see cref="PowerMeterStateChangedEventArgs"/> changes.
+        /// </summary>
+        public event EventHandler<PowerMeterStateChangedEventArgs>? StateChanged;
+
+
+        /// <summary>
+        /// Event when the communication error state changed.
+        /// </summary>
+        public event EventHandler<CommunicationErrorChangedEventArgs> CommunicationErrorChanged;
+
+
+        /// <summary>
+        /// Event when a property is changed.
+        /// </summary>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+
+
+        /// <summary>
+        /// State of the Power Meter.
+        /// Specialized Power Meter has to map its states to the these states.
+        /// </summary>
+        public PowerMeterState State
+        {
+            get;
+            set { if (field != value) { field = value; SetState(value); } else field = value; }
+        }
+
+
+        /// <summary>
+        /// Communication error.
+        /// </summary>
+        /// <remarks>
+        /// Returns true if a communication error has occurred.
+        /// </remarks>
+        public bool CommunicationError
+        {
+            get;
+            set { if (field != value) { field = value; SetCommunicationError(value); } else field = value; }
+        }
+
+
+        /// <summary>
         /// Is reverse power flow from configuration.
         /// </summary>        
         /// </remarks>
@@ -55,15 +100,6 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// Power factor standard used for this meter.
         /// </summary>
         public PowerFactorStandard PowerFactorStandard { get => _config.PowerFactorStandard; }
-
-
-        /// <summary>
-        /// Communication error.
-        /// </summary>
-        /// <remarks>
-        /// Returns true if a communication error has occurred.
-        /// </remarks>
-        public bool CommunicationError { get; set; }
 
 
         /// <summary>
@@ -548,6 +584,49 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         protected override void RegisterDataface(IDataface<PowerMeterBase> dataface)
         {
             // TODO:
+        }
+
+
+        /// <summary>
+        /// Trigger Power Meter state change events.
+        /// </summary>
+        /// <param name="state">The Power Meter state.</param>
+        protected void SetState(PowerMeterState state)
+        {
+            _logger.LogInformation("{Name} - Power Meter state changed to: {State}", Name, State);
+            StateChanged?.Invoke(this, new PowerMeterStateChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Trigger CommunicationError change events.
+        /// </summary>
+        /// <param name="state">The communication error state.</param>
+        protected void SetCommunicationError(bool state)
+        {
+            if (state == true)
+            {
+                _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+            else
+            {
+                _logger.LogInformation("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+
+            CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Raises the <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyName">
+        /// The name of the property that changed. An empty value or null indicates that all of the
+        /// properties have changed.
+        /// </param>
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
     }

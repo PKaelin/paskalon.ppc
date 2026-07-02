@@ -1,0 +1,26 @@
+﻿namespace paskalON.Devices.Domain
+{
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
+    /// <summary>
+    /// Event argument class for Communication Error state changed events.
+    /// </summary>
+    public class CommunicationErrorChangedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Communication error state.
+        /// </summary>
+        public bool State { get; private set; }
+
+
+        /// <summary>
+        /// Constructor of <see cref="CommunicationErrorChangedEventArgs"/>.
+        /// </summary>
+        /// <param name="state">The Communication error state.</param>
+        public CommunicationErrorChangedEventArgs(bool state)
+        {
+            State = state;
+        }
+    }
+}

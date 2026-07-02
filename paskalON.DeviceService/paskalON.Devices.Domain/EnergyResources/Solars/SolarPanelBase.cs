@@ -3,6 +3,8 @@ using paskalON.Devices.Domain.Configs.EnergyResources.Solars;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace paskalON.Devices.Domain.EnergyResources.Solars
 {
@@ -31,12 +33,49 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
 
 
         /// <summary>
+        /// Event when the solar panel state <see cref="SolarPanelStateChangedEventArgs"/> changes.
+        /// </summary>
+        public event EventHandler<SolarPanelStateChangedEventArgs>? StateChanged;
+
+
+        /// <summary>
+        /// Event when the communication error state changed.
+        /// </summary>
+        public event EventHandler<CommunicationErrorChangedEventArgs> CommunicationErrorChanged;
+
+
+        /// <summary>
+        /// Event when a property is changed.
+        /// </summary>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+
+        /// <summary>
+        /// State of the solar panel.
+        /// Specialized solar panel has to map its states to the these states.
+        /// </summary>
+        public SolarPanelState State
+        {
+            // At this point there is no communication with solar panels but we might with smart solar panels in the future.
+            // Default value will always be false.
+            get;
+            set { if (field != value) { field = value; SetState(value); } else field = value; }
+        }
+
+
+        /// <summary>
         /// Returns true if a communication error has occurred.
         /// </summary>
         /// <remarks>
         /// This is currently always false as we dont integrate with solar panels at this point.
         /// </remarks>
-        public bool CommunicationError { get => false; }
+        public bool CommunicationError
+        {
+            // At this point there is no communication with solar panels but we might with smart solar panels in the future.
+            // Default value will always be false.
+            get;
+            set { if (field != value) { field = value; SetCommunicationError(value); } else field = value; }
+        }
 
 
         /// <summary>
@@ -93,6 +132,49 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
             _config = config;
             SolarUnit = derSolarUnit;
             RegisterMetrics(device.MetricsPublisher);
+        }
+
+
+        /// <summary>
+        /// Trigger GenericModbusDeviceState change events
+        /// </summary>
+        /// <param name="state">The GenericModbusDeviceState state.</param>
+        protected void SetState(SolarPanelState state)
+        {
+            _logger.LogInformation("{Name} - SolarPanelState state changed to: {State}", Name, State);
+            StateChanged?.Invoke(this, new SolarPanelStateChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Trigger CommunicationError change events.
+        /// </summary>
+        /// <param name="state">The communication error state.</param>
+        protected void SetCommunicationError(bool state)
+        {
+            if (state == true)
+            {
+                _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+            else
+            {
+                _logger.LogInformation("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+
+            CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Raises the <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyName">
+        /// The name of the property that changed. An empty value or null indicates that all of the
+        /// properties have changed.
+        /// </param>
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
 

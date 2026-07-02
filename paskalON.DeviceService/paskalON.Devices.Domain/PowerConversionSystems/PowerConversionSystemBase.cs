@@ -39,9 +39,15 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// Event when the Power Conversion System state <see cref="PcsStateChanged"/> changes.
+        /// Event when the Power Conversion System state <see cref="PcsState"/> changes.
         /// </summary>
         public event EventHandler<PcsStateChangedEventArgs>? StateChanged;
+
+
+        /// <summary>
+        /// Event when the communication error state changed.
+        /// </summary>
+        public event EventHandler<CommunicationErrorChangedEventArgs> CommunicationErrorChanged;
 
 
         /// <summary>
@@ -57,9 +63,24 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
+        /// State of the Power Conversion System (PCS).
+        /// Specialized PCS has to map its states to the these states.
+        /// </summary>
+        public PcsState State
+        {
+            get;
+            set { if (field != value) { field = value; SetState(value); } else field = value; }
+        }
+
+
+        /// <summary>
         /// Returns true if a communication error has occurred.
         /// </summary>
-        public bool CommunicationError { get; set; }
+        public bool CommunicationError
+        {
+            get;
+            set { if (field != value) { field = value; SetCommunicationError(value); } else field = value; }
+        }
 
 
         /// <summary>
@@ -110,16 +131,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>        
         public bool ZeroOutputOnCommLoss { get => _config.PowerConversionSystemDeviceConfig.ZeroOutputOnCommLoss; }
 
-
-        /// <summary>
-        /// State of the Power Conversion System (PCS).
-        /// Specialized PCS has to map its states to the these states.
-        /// </summary>
-        public PcsState State
-        {
-            get;
-            set { if (field != value) { field = value; SetState(value); } else field = value; }
-        }
 
 
         /// <summary>
@@ -331,6 +342,49 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
+        /// Trigger PCS state change events.
+        /// </summary>
+        /// <param name="state">The PCS state.</param>
+        protected void SetState(PcsState state)
+        {
+            _logger.LogInformation("{Name} - PCS state changed to: {State}", Name, State);
+            StateChanged?.Invoke(this, new PcsStateChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Trigger CommunicationError change events.
+        /// </summary>
+        /// <param name="state">The communication error state.</param>
+        protected void SetCommunicationError(bool state)
+        {
+            if (state == true)
+            {
+                _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+            else
+            {
+                _logger.LogInformation("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+
+            CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Raises the <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyName">
+        /// The name of the property that changed. An empty value or null indicates that all of the
+        /// properties have changed.
+        /// </param>
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+        /// <summary>
         /// Sets the active power.
         /// </summary>
         /// <param name="value">Active power value (Watts).</param>
@@ -391,17 +445,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// Trigger PCS state change events
-        /// </summary>
-        /// <param name="state">The PCS state.</param>
-        protected void SetState(PcsState state)
-        {
-            _logger.LogInformation("{Name} - PCS state changed to: {State}", Name, State);
-            StateChanged?.Invoke(this, new PcsStateChangedEventArgs(state));
-        }
-
-
-        /// <summary>
         /// Set the AC breaker status according to the voltage phases
         /// </summary>
         protected void SetAcBreakerStatuses()
@@ -440,19 +483,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         protected void SetVendorEvent(string name, bool state)
         {
             VendorEvents[name] = state;
-        }
-
-
-        /// <summary>
-        /// Raises the <see cref="PropertyChanged"/> event.
-        /// </summary>
-        /// <param name="propertyName">
-        /// The name of the property that changed. An empty value or null indicates that all of the
-        /// properties have changed.
-        /// </param>
-        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
 

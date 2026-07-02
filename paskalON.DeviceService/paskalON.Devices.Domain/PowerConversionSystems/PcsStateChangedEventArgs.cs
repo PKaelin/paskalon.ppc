@@ -1,5 +1,8 @@
 ﻿namespace paskalON.Devices.Domain.PowerConversionSystems
 {
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
     /// <summary>
     /// Event argument class for power conversion system (PCS) state changed events.
     /// </summary>

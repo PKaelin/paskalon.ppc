@@ -45,22 +45,15 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 
 
         /// <summary>
+        /// Event when the communication error state changed.
+        /// </summary>
+        public event EventHandler<CommunicationErrorChangedEventArgs> CommunicationErrorChanged;
+
+
+        /// <summary>
         /// Event when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
-
-
-
-        /// <summary>
-        /// Parent battery storage unit.
-        /// </summary>
-        public DerBatteryStorageUnit BatteryStorageUnit { get; private set; }
-
-
-        /// <summary>
-        /// Returns true if a communication error has occurred.
-        /// </summary>
-        public bool CommunicationError { get; set; }
 
 
         /// <summary>
@@ -72,6 +65,22 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
             get;
             set { if (field != value) { field = value; SetState(value); } else field = value; }
         }
+
+
+        /// <summary>
+        /// Returns true if a communication error has occurred.
+        /// </summary>
+        public bool CommunicationError
+        {
+            get;
+            set { if (field != value) { field = value; SetCommunicationError(value); } else field = value; }
+        }
+
+
+        /// <summary>
+        /// Parent battery storage unit.
+        /// </summary>
+        public DerBatteryStorageUnit BatteryStorageUnit { get; private set; }
 
 
         /// <summary>
@@ -364,6 +373,25 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         {
             _logger.LogInformation("{Name} - BatteryBank state changed to {State}", Name, State);
             StateChanged?.Invoke(this, new BatteryBankStateChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Trigger CommunicationError change events.
+        /// </summary>
+        /// <param name="state">The communication error state.</param>
+        protected void SetCommunicationError(bool state)
+        {
+            if (state == true)
+            {
+                _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+            else
+            {
+                _logger.LogInformation("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+
+            CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
         }
 
 

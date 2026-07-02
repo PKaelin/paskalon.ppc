@@ -5,48 +5,50 @@
     //---------------------------------------------------------------
     /// <summary>
     /// These are the PCS states logic is based on.
-    /// Specialized PCS has to map its states to the states below.
     /// </summary>
+    /// <remarks>
+    /// Underlying state have to be mapped to these states.
+    /// </remarks>
     public enum PcsState
     {
         /// <summary>
-        /// Unknown when initialized.
+        /// Unknown means that the PCS current state is not determined or is in an undefined state.
         /// </summary>
         Unknown = 0,
         /// <summary>
-        /// PCS has stopped or is off.
+        /// Stopped means PCS has stopped or is off.
         /// </summary>
         Stopped = 1,
         /// <summary>
-        /// PCS is starting initializing.
+        /// Starting means PCS is starting initializing.
         /// </summary>
         Starting = 2,
         /// <summary>
-        /// PCS is started and ready to receive targets.
+        /// Started means PCS is started and ready to receive targets.
         /// </summary>
         Started = 3,
         /// <summary>
-        /// PCS has been commanded to stop and is stopping.
+        /// Stopping means PCS has been commanded to stop and is stopping.
         /// </summary>
         Stopping = 4,
         /// <summary>
-        /// PCS is sleeping, kind of standby but needs more time to get into started state.
+        /// Sleeping means PCS is sleeping, kind of standby but needs more time to get into started state.
         /// </summary>
         Sleeping = 5,
         /// <summary>
-        /// PCS entering standby.
+        /// EnteringStandby means PCS entering standby.
         /// </summary>
         EnteringStandby = 6,
         /// <summary>
-        /// PCS is in standby.
+        /// Standby means PCS is in standby.
         /// </summary>
         Standby = 7,
         /// <summary>
-        /// PCS is exiting standby.
+        /// ExitingStandby means PCS is exiting standby.
         /// </summary>
         ExitingStandby = 8,
         /// <summary>
-        /// PCS is in night mode.
+        /// NightMode means PCS is in night mode.
         /// </summary>
         NightMode = 9,
     }

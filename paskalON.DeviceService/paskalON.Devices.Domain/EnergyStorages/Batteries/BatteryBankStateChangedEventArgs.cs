@@ -1,5 +1,8 @@
 ﻿namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 {
+    //---------------------------------------------------------------
+    // Do not modify this class without consulting the Lead Engineer.
+    //---------------------------------------------------------------
     /// <summary>
     /// Event argument class for battery bank state changed events.
     /// </summary>
