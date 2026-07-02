@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
+using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -22,6 +23,12 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// Battery bank configuration.
         /// </summary>
         private readonly BatteryBankConfig _config;
+
+
+        /// <summary>
+        /// Battery bank device instance that communicates with the device.
+        /// </summary>
+        private readonly IBatteryBank<BatteryBankBase> _device;
 
 
         /// <summary>
@@ -63,7 +70,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         public BatteryBankState State
         {
             get;
-            set { field = value; SetState(value); }
+            set { if (field != value) { field = value; SetState(value); } else field = value; }
         }
 
 
@@ -333,17 +340,18 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The battery bank configuration.</param>
         /// <param name="batteryStorageUnit">The paren battery storage unit.</param>
-        /// <param name="metricsPublisher">Metrics publisher interface.</param>
-        protected BatteryBankBase(ILogger logger, BatteryBankConfig config, DerBatteryStorageUnit batteryStorageUnit, IMetricsPublisher<BatteryBankBase> metricsPublisher)
-            : base(logger, config, metricsPublisher)
+        /// <param name="device">The device interface.</param>
+        protected BatteryBankBase(ILogger logger, BatteryBankConfig config, DerBatteryStorageUnit batteryStorageUnit, IBatteryBank<BatteryBankBase> device)
+            : base(logger, config, device)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(batteryStorageUnit);
-            ArgumentNullException.ThrowIfNull(metricsPublisher);
+            ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
+            _device = device;
             BatteryStorageUnit = batteryStorageUnit;
-            RegisterMetrics();
+            RegisterMetrics(device.MetricsPublisher);
         }
 
 
@@ -373,29 +381,37 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 
 
         /// <summary>
-        /// Register base metrics with the metrics publisher.
+        /// <inheritdoc/>
         /// </summary>
-        private void RegisterMetrics()
+        protected override void RegisterMetrics(IMetricsPublisher<BatteryBankBase> metricsPublisher)
         {
             // MetricsFactorClass1
-            _metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(TotalDCVoltage), x => x.TotalDCVoltage, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(TotalDCCurrent), x => x.TotalDCCurrent, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(StateOfCharge), x => x.StateOfCharge, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(ActualStateOfCharge), x => x.ActualStateOfCharge, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(StateOfHealth), x => x.StateOfHealth, _config.MetricsFactorClass1);
+            metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(TotalDCVoltage), x => x.TotalDCVoltage, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(TotalDCCurrent), x => x.TotalDCCurrent, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(StateOfCharge), x => x.StateOfCharge, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ActualStateOfCharge), x => x.ActualStateOfCharge, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(StateOfHealth), x => x.StateOfHealth, _config.MetricsFactorClass1);
             // MetricsFactorClass2
-            _metricsPublisher.Register<BatteryBankState>(nameof(State), x => x.State, _config.MetricsFactorClass2);
-            _metricsPublisher.Register<double?>(nameof(MinimumCellVoltage), x => x.MinimumCellVoltage, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(MaximumCellVoltage), x => x.MaximumCellVoltage, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(MinimumRackTemperature), x => x.MinimumRackTemperature, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(MaximumRackTemperature), x => x.MaximumRackTemperature, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(MinimumStringTemperature), x => x.MinimumStringTemperature, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(MaximumStringTemperature), x => x.MaximumStringTemperature, _config.MetricsFactorClass1);
+            metricsPublisher.Register<BatteryBankState>(nameof(State), x => x.State, _config.MetricsFactorClass2);
+            metricsPublisher.Register<double?>(nameof(MinimumCellVoltage), x => x.MinimumCellVoltage, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(MaximumCellVoltage), x => x.MaximumCellVoltage, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(MinimumRackTemperature), x => x.MinimumRackTemperature, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(MaximumRackTemperature), x => x.MaximumRackTemperature, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(MinimumStringTemperature), x => x.MinimumStringTemperature, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(MaximumStringTemperature), x => x.MaximumStringTemperature, _config.MetricsFactorClass1);
             // MetricsFactorClass3
-            _metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
+            metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
             // MetricsFactorClass4
         }
 
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        protected override void RegisterDataface(IDataface<BatteryBankBase> dataface)
+        {
+            // TODO: 
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.EnergyResources.Solars;
 using paskalON.Devices.Domain.Ders;
+using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
 
 namespace paskalON.Devices.Domain.EnergyResources.Solars
@@ -81,32 +82,43 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The solar panel configuration.</param>
         /// <param name="derSolarUnit">The parent solar unit.</param>
-        /// <param name="metricsPublisher">Metrics publisher interface.</param>
-        protected SolarPanelBase(ILogger logger, SolarPanelConfig config, DerSolarUnit derSolarUnit, IMetricsPublisher<SolarPanelBase> metricsPublisher)
-            : base(logger, config, metricsPublisher)
+        /// <param name="device">The device interface.</param>
+        protected SolarPanelBase(ILogger logger, SolarPanelConfig config, DerSolarUnit derSolarUnit, ISolarPanel<SolarPanelBase> device)
+            : base(logger, config, device)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(derSolarUnit);
-            ArgumentNullException.ThrowIfNull(metricsPublisher);
+            ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
             SolarUnit = derSolarUnit;
-            RegisterMetrics();
+            RegisterMetrics(device.MetricsPublisher);
         }
 
 
         /// <summary>
-        /// Register base metrics with the metrics publisher.
+        /// <inheritdoc/>
         /// </summary>
-        private void RegisterMetrics()
+        protected override void RegisterMetrics(IMetricsPublisher<SolarPanelBase> metricsPublisher)
         {
-            _metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass4);
-            _metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), x => x.IsInMaintenanceMode, _config.MetricsFactorClass4);
-            _metricsPublisher.Register<int>(nameof(NumberOfPanels), x => x.NumberOfPanels, _config.MetricsFactorClass4);
-            _metricsPublisher.Register<double>(nameof(MinimumVoltageSum), x => x.MinimumVoltageSum, _config.MetricsFactorClass4);
-            _metricsPublisher.Register<double>(nameof(MaximumVoltageSum), x => x.MaximumVoltageSum, _config.MetricsFactorClass4);
-            _metricsPublisher.Register<double>(nameof(MinimumCurrentSum), x => x.MinimumCurrentSum, _config.MetricsFactorClass4);
-            _metricsPublisher.Register<double>(nameof(MaximumCurrentSum), x => x.MaximumCurrentSum, _config.MetricsFactorClass4);
+            metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass4);
+            metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), x => x.IsInMaintenanceMode, _config.MetricsFactorClass4);
+            metricsPublisher.Register<int>(nameof(NumberOfPanels), x => x.NumberOfPanels, _config.MetricsFactorClass4);
+            metricsPublisher.Register<double>(nameof(MinimumVoltageSum), x => x.MinimumVoltageSum, _config.MetricsFactorClass4);
+            metricsPublisher.Register<double>(nameof(MaximumVoltageSum), x => x.MaximumVoltageSum, _config.MetricsFactorClass4);
+            metricsPublisher.Register<double>(nameof(MinimumCurrentSum), x => x.MinimumCurrentSum, _config.MetricsFactorClass4);
+            metricsPublisher.Register<double>(nameof(MaximumCurrentSum), x => x.MaximumCurrentSum, _config.MetricsFactorClass4);
         }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="dataface"></param>
+        protected override void RegisterDataface(IDataface<SolarPanelBase> dataface)
+        {
+            // We dont communicate with solar panels at this point so we dont register any dataface properties.
+        }
+
     }
 }

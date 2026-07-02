@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
-using paskalON.Domains.Telemetry;
 
 namespace paskalON.Devices.Domain.GenericModbusDevices
 {
@@ -25,9 +24,9 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The generic Modbus configuration.</param>
         /// <param name="genericModbusEntries">List of generic Modbus entries.</param>
-        /// <param name="metricsPublisher">Metrics publisher interface.</param>
-        public GenericModbusDevice(ILogger logger, GenericModbusConfig config, List<GenericModbusEntryBase> genericModbusEntries, IMetricsPublisher<GenericModbusDevice> metricsPublisher)
-            : base(logger, config, genericModbusEntries, (IMetricsPublisher<GenericModbusDeviceBase>)metricsPublisher)
+        /// <param name="device">The device interface.</param>
+        public GenericModbusDevice(ILogger logger, GenericModbusConfig config, List<GenericModbusEntryBase> genericModbusEntries, IGenericModbusDevice<GenericModbusDevice> device)
+            : base(logger, config, genericModbusEntries, (IGenericModbusDevice<GenericModbusDeviceBase>)device)
         {
             ArgumentNullException.ThrowIfNull(config);
 

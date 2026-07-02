@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs;
+using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
 
 namespace paskalON.Devices.Domain.Ders
@@ -14,9 +15,15 @@ namespace paskalON.Devices.Domain.Ders
     public abstract class DerDeviceBase<T> : DerBase
     {
         /// <summary>
-        /// Metrics publisher for publishing metrics related to the DER device.
+        /// <inheritdoc/>
         /// </summary>
-        protected readonly IMetricsPublisher<T> _metricsPublisher;
+        public IMetricsPublisher<T> MetricsPublisher { get; private set; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public IDataface<T> Dataface { get; private set; }
 
 
         /// <summary>
@@ -24,12 +31,27 @@ namespace paskalON.Devices.Domain.Ders
         /// </summary>
         /// <param name="logger">The logging instance.</param>
         /// <param name="nameBase">The name base configuration.</param>
-        /// <param name="metricsPublisher">The metrics publisher.</param>
-        protected DerDeviceBase(ILogger logger, NameBase nameBase, IMetricsPublisher<T> metricsPublisher) : base(logger, nameBase)
+        /// <param name="device">The device interface.</param>
+        protected DerDeviceBase(ILogger logger, NameBase nameBase, IDevice<T> device) : base(logger, nameBase)
         {
-            ArgumentNullException.ThrowIfNull(metricsPublisher);
+            ArgumentNullException.ThrowIfNull(device);
 
-            _metricsPublisher = metricsPublisher;
+            MetricsPublisher = device.MetricsPublisher;
+            Dataface = device.Dataface;
         }
+
+
+        /// <summary>
+        /// Register metrics at the publisher.
+        /// </summary>
+        /// <param name="metricsPublisher">The metrics publisher interface.</param>
+        protected abstract void RegisterMetrics(IMetricsPublisher<T> metricsPublisher);
+
+
+        /// <summary>
+        /// Register the data interface at the property setter.
+        /// </summary>
+        /// <param name="dataface">The data face interface with property setter.</param>
+        protected abstract void RegisterDataface(IDataface<T> dataface);
     }
 }

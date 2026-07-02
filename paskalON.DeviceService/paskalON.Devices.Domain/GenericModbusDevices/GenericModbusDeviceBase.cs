@@ -2,6 +2,7 @@
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
+using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
 
 namespace paskalON.Devices.Domain.GenericModbusDevices
@@ -23,6 +24,15 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         private readonly GenericModbusBaseConfig _config;
 
 
+        /// <summary>
+        /// Generic Modbus device instance that communicates with the device.
+        /// </summary>
+        private readonly IGenericModbusDevice<GenericModbusDeviceBase> _device;
+
+
+        /// <summary>
+        /// List of generic Modbus entries that represent the data points and registers of the device.
+        /// </summary>
         public required List<GenericModbusEntryBase> GenericModbusEntries { get; set; }
 
 
@@ -31,29 +41,39 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// </summary>
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The generic Modbus configuration.</param>
-        /// <param name="metricsPublisher">Metrics publisher interface.</param>
-        public GenericModbusDeviceBase(ILogger logger, GenericModbusBaseConfig config, List<GenericModbusEntryBase> genericModbusEntries, IMetricsPublisher<GenericModbusDeviceBase> metricsPublisher)
-            : base(logger, config, metricsPublisher)
+        /// <param name="device">The device interface.</param>
+        public GenericModbusDeviceBase(ILogger logger, GenericModbusBaseConfig config, List<GenericModbusEntryBase> genericModbusEntries, IGenericModbusDevice<GenericModbusDeviceBase> device)
+            : base(logger, config, device)
         {
             _config = config;
-            RegisterMetrics();
+            _device = device;
+            RegisterMetrics(device.MetricsPublisher);
         }
 
 
         /// <summary>
-        /// Register base metrics with the metrics publisher.
+        /// <inheritdoc/>
         /// </summary>
-        private void RegisterMetrics()
+        protected override void RegisterMetrics(IMetricsPublisher<GenericModbusDeviceBase> metricsPublisher)
         {
             foreach (GenericModbusPointEntry entry in GenericModbusEntries.OfType<GenericModbusPointEntry>())
             {
-                _metricsPublisher.Register<byte>(entry.Name, x => entry.Value, _config.MetricsFactorClass1);
+                metricsPublisher.Register<byte>(entry.Name, x => entry.Value, _config.MetricsFactorClass1);
             }
 
             foreach (GenericModbusRegisterEntry entry in GenericModbusEntries.OfType<GenericModbusRegisterEntry>())
             {
-                _metricsPublisher.Register<Int16>(entry.Name, x => entry.Value, _config.MetricsFactorClass1);
+                metricsPublisher.Register<Int16>(entry.Name, x => entry.Value, _config.MetricsFactorClass1);
             }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        protected override void RegisterDataface(IDataface<GenericModbusDeviceBase> dataface)
+        {
+            // TODO:
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Domain.Ders;
+using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
 using paskalON.PhysicalUnits.Electricals.Energies;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -22,6 +23,12 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// Power meter configuration.
         /// </summary>
         private readonly PowerMeterBaseConfig _config;
+
+
+        /// <summary>
+        /// Power meter device instance that communicates with the device.
+        /// </summary>
+        private readonly IPowerMeter<PowerMeterBase> _device;
 
 
         /// <summary>
@@ -476,58 +483,72 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// </summary>
         /// <param name="logger">The logging instance.</param>
         /// <param name="powerMeterConfig">The power meter configuration.</param>
-        /// <param name="metricsPublisher">The metrics publisher instance.</param>
-        public PowerMeterBase(ILogger logger, PowerMeterBaseConfig powerMeterConfig, IMetricsPublisher<PowerMeterBase> metricsPublisher) : base(logger, powerMeterConfig, metricsPublisher)
+        /// <param name="metricsPublisher">The device interface.</param>
+        public PowerMeterBase(ILogger logger, PowerMeterBaseConfig powerMeterConfig, IPowerMeter<PowerMeterBase> device) : base(logger, powerMeterConfig, device)
         {
             _config = powerMeterConfig;
-            RegisterMetrics();
+            _device = device;
+            RegisterMetrics(device.MetricsPublisher);
         }
 
 
-        private void RegisterMetrics()
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        protected override void RegisterMetrics(IMetricsPublisher<PowerMeterBase> metricsPublisher)
         {
             // MetricsFactorClass1
-            _metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(Frequency), x => x.Frequency, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(PowerFactor), x => x.PowerFactor, _config.MetricsFactorClass1);
+            metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(Frequency), x => x.Frequency, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(PowerFactor), x => x.PowerFactor, _config.MetricsFactorClass1);
             // Power A-C
-            _metricsPublisher.Register<double?>(nameof(ActivePower), x => x.ActivePowerValue, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(ReactivePower), x => x.ReactivePowerValue, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(ApparentPower), x => x.ApparentPowerValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ActivePower), x => x.ActivePowerValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ReactivePower), x => x.ReactivePowerValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ApparentPower), x => x.ApparentPowerValue, _config.MetricsFactorClass1);
             // Voltage
-            _metricsPublisher.Register<double?>(nameof(VoltageA), x => x.VoltageA, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltageAngleA), x => x.VoltageAngleA, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltageB), x => x.VoltageB, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltageAngleB), x => x.VoltageAngleB, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltageC), x => x.VoltageC, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltageAngleC), x => x.VoltageAngleC, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltagePositiveSequence), x => x.VoltagePositiveSequence, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltagePositiveSequenceAngle), x => x.VoltagePositiveSequenceAngle, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltageAB), x => x.VoltageAB, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltageBC), x => x.VoltageBC, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltageCA), x => x.VoltageCA, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(VoltageLLAvg), x => x.VoltageLLAvg, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltageA), x => x.VoltageA, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltageAngleA), x => x.VoltageAngleA, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltageB), x => x.VoltageB, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltageAngleB), x => x.VoltageAngleB, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltageC), x => x.VoltageC, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltageAngleC), x => x.VoltageAngleC, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltagePositiveSequence), x => x.VoltagePositiveSequence, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltagePositiveSequenceAngle), x => x.VoltagePositiveSequenceAngle, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltageAB), x => x.VoltageAB, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltageBC), x => x.VoltageBC, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltageCA), x => x.VoltageCA, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(VoltageLLAvg), x => x.VoltageLLAvg, _config.MetricsFactorClass1);
             // Current
-            _metricsPublisher.Register<double?>(nameof(CurrentA), x => x.CurrentA, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(CurrentAngleA), x => x.CurrentAngleA, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(CurrentB), x => x.CurrentB, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(CurrentAngleB), x => x.CurrentAngleB, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(CurrentC), x => x.CurrentC, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(CurrentAngleC), x => x.CurrentAngleC, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(CurrentA), x => x.CurrentA, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(CurrentAngleA), x => x.CurrentAngleA, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(CurrentB), x => x.CurrentB, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(CurrentAngleB), x => x.CurrentAngleB, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(CurrentC), x => x.CurrentC, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(CurrentAngleC), x => x.CurrentAngleC, _config.MetricsFactorClass1);
             // Power A-C
-            _metricsPublisher.Register<double?>(nameof(ActivePowerA), x => x.ActivePowerAValue, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(ActivePowerB), x => x.ActivePowerBValue, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(ActivePowerC), x => x.ActivePowerCValue, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(ReactivePowerA), x => x.ReactivePowerAValue, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(ReactivePowerB), x => x.ReactivePowerBValue, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(ReactivePowerC), x => x.ReactivePowerCValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ActivePowerA), x => x.ActivePowerAValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ActivePowerB), x => x.ActivePowerBValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ActivePowerC), x => x.ActivePowerCValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ReactivePowerA), x => x.ReactivePowerAValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ReactivePowerB), x => x.ReactivePowerBValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ReactivePowerC), x => x.ReactivePowerCValue, _config.MetricsFactorClass1);
             // Energy
-            _metricsPublisher.Register<double?>(nameof(EnergyDelivered), x => x.EnergyDeliveredValue, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(EnergyReceived), x => x.EnergyReceivedValue, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(ReactiveEnergyDelivered), x => x.ReactiveEnergyDeliveredValue, _config.MetricsFactorClass1);
-            _metricsPublisher.Register<double?>(nameof(ReactiveEnergyReceived), x => x.ReactiveEnergyReceivedValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(EnergyDelivered), x => x.EnergyDeliveredValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(EnergyReceived), x => x.EnergyReceivedValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ReactiveEnergyDelivered), x => x.ReactiveEnergyDeliveredValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double?>(nameof(ReactiveEnergyReceived), x => x.ReactiveEnergyReceivedValue, _config.MetricsFactorClass1);
             // MetricsFactorClass2
             // MetricsFactorClass3
         }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        protected override void RegisterDataface(IDataface<PowerMeterBase> dataface)
+        {
+            // TODO:
+        }
+
     }
 }
