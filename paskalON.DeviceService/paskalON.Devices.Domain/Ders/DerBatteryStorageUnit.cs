@@ -2,6 +2,8 @@
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.PowerConversionSystems;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 namespace paskalON.Devices.Domain.Ders
 {
@@ -11,7 +13,7 @@ namespace paskalON.Devices.Domain.Ders
     /// <summary>
     /// DER battery storage unit for one or multiple battery banks and one power conversion system.
     /// </summary>
-    public class DerBatteryStorageUnit : DerUnit
+    public class DerBatteryStorageUnit : DerUnit, IDisposable
     {
         /// <summary>
         /// DER battery storage unit configuration.
@@ -28,7 +30,7 @@ namespace paskalON.Devices.Domain.Ders
         /// <summary>
         /// One or many battery banks for this battery storage unit.
         /// </summary>
-        public List<BatteryBankBase> BatteryBanks { get; set; } = new List<BatteryBankBase>();
+        public ObservableCollection<BatteryBankBase> BatteryBanks { get; set; } = new ObservableCollection<BatteryBankBase>();
 
 
         /// <summary>
@@ -49,6 +51,56 @@ namespace paskalON.Devices.Domain.Ders
             ArgumentNullException.ThrowIfNull(config);
 
             _config = config;
+            BatteryBanks.CollectionChanged += BatteryBanks_CollectionChanged;
+        }
+
+
+        /// <summary>
+        /// Triggered when item(s) are removed or added to the battery bank collection.
+        /// </summary>
+        /// <param name="sender">The object that triggered the change.</param>
+        /// <param name="e">The notify collection changed event args.</param>
+        private void BatteryBanks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (BatteryBankBase batteryBank in e.NewItems!)
+                {
+                    batteryBank.StateChanged += OnBatteryBankStateChange;
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (BatteryBankBase batteryBank in e.OldItems!)
+                {
+                    batteryBank.StateChanged -= OnBatteryBankStateChange;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Triggered when the battery bank state changes.
+        /// </summary>
+        /// <param name="sender">The battery bank instance.</param>
+        /// <param name="e">The battery bank event argument.</param>
+        private void OnBatteryBankStateChange(object? sender, BatteryBankStateChangedEventArgs e)
+        {
+            if (BatteryBanks.All(b => b.State == BatteryBankState.Disconnected || b.State == BatteryBankState.Unknown || b.State == BatteryBankState.Fault))
+            {
+                // Stops the PCS when all battery banks are disconnected, unknown or fault.
+                PowerConversionSystem?.Stop();
+            }
+        }
+
+
+        /// <summary>
+        /// Dispose instance.
+        /// </summary>
+        public void Dispose()
+        {
+            // Deregister event handlers.
+            BatteryBanks.Clear();
         }
     }
 }

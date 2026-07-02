@@ -17,7 +17,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
     /// <summary>
     /// Power Conversion System (PCS) base class for all PCSs.
     /// </summary>
-    public abstract class PowerConversionSystemBase : DerDeviceBase<PowerConversionSystemBase>, INotifyPropertyChanged
+    public abstract class PowerConversionSystemBase : DerDeviceBase<PowerConversionSystemBase>, IPowerConversionSystem<PowerConversionSystemBase>, INotifyPropertyChanged
     {
         /// <summary>
         /// Power conversion system configuration of this instance.
@@ -47,7 +47,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// Event when the communication error state changed.
         /// </summary>
-        public event EventHandler<CommunicationErrorChangedEventArgs> CommunicationErrorChanged;
+        public event EventHandler<CommunicationErrorChangedEventArgs>? CommunicationErrorChanged;
 
 
         /// <summary>
@@ -131,6 +131,11 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>        
         public bool ZeroOutputOnCommLoss { get => _config.PowerConversionSystemDeviceConfig.ZeroOutputOnCommLoss; }
 
+
+        /// <summary>
+        /// Configured minimum active power that the PCS should output when in standby mode.
+        /// </summary>
+        public double StandbyActivePower { get => _config.PowerConversionSystemDeviceConfig.StandbyActivePower; }
 
 
         /// <summary>
@@ -342,6 +347,37 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Start()
+        {
+            _logger.LogInformation("{Name} start requested.", Name);
+            _device.Start();
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Stop()
+        {
+            _logger.LogInformation("{Name} stop requested.", Name);
+            _device.Stop();
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Standby(double? standbyActivePower = null)
+        {
+            _logger.LogInformation("{Name} standby requested with standby active power: {StandbyActivePower}.", Name, standbyActivePower ?? StandbyActivePower);
+            _device.Standby(standbyActivePower ?? StandbyActivePower);
+        }
+
+
+
+        /// <summary>
         /// Trigger PCS state change events.
         /// </summary>
         /// <param name="state">The PCS state.</param>
@@ -360,6 +396,14 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             if (state == true)
             {
+                if (ZeroOutputOnCommLoss == true)
+                {
+                    SetActivePower(0);
+                    SetReactivePower(0);
+                    SetActivePowerTarget(0);
+                    SetReactivePowerTarget(0);
+                }
+
                 _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
             }
             else

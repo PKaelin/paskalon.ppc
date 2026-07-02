@@ -17,7 +17,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
     /// <remarks>
     /// Battery bank is a collection of individual batteries wired together in series or parallel to function as a single large-scale energy storage.
     /// </remarks>
-    public abstract class BatteryBankBase : DerDeviceBase<BatteryBankBase>, INotifyPropertyChanged
+    public abstract class BatteryBankBase : DerDeviceBase<BatteryBankBase>, IBatteryBank<BatteryBankBase>, INotifyPropertyChanged
     {
         /// <summary>
         /// Battery bank configuration.
@@ -47,13 +47,19 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <summary>
         /// Event when the communication error state changed.
         /// </summary>
-        public event EventHandler<CommunicationErrorChangedEventArgs> CommunicationErrorChanged;
+        public event EventHandler<CommunicationErrorChangedEventArgs>? CommunicationErrorChanged;
 
 
         /// <summary>
         /// Event when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
+
+
+        /// <summary>
+        /// Parent battery storage unit.
+        /// </summary>
+        public DerBatteryStorageUnit BatteryStorageUnit { get; private set; }
 
 
         /// <summary>
@@ -75,12 +81,6 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
             get;
             set { if (field != value) { field = value; SetCommunicationError(value); } else field = value; }
         }
-
-
-        /// <summary>
-        /// Parent battery storage unit.
-        /// </summary>
-        public DerBatteryStorageUnit BatteryStorageUnit { get; private set; }
 
 
         /// <summary>
@@ -210,6 +210,19 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// Configured value determining whether the proxy should report 0 capability in the event of communication loss.
         /// </summary>
         public bool ZeroCapacityOnCommLoss { get => _config.BatteryBankDeviceConfig.ZeroCapacityOnCommLoss; }
+
+
+        /// <summary>
+        /// The flow direction of the battery bank, indicating whether it is charging, discharging, or idle.
+        /// </summary>
+        /// <remarks>
+        /// Calculated by the direction of current and a deadband.
+        /// </remarks>
+        public BatteryBankFlowDirection? BatteryBankFlowDirection
+        {
+            get { lock (dataLock) { return field; } }
+            set { lock (dataLock) { field = value; } }
+        }
 
 
         // TODO: Return the usable state of charge if configured else the actual state of charge.
@@ -363,6 +376,25 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
             RegisterMetrics(device.MetricsPublisher);
         }
 
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Connect()
+        {
+            _logger.LogInformation("{Name} connect requested.", Name);
+            _device.Connect();
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Disconnect()
+        {
+            _logger.LogInformation("{Name} disconnect requested.", Name);
+            _device.Disconnect();
+        }
 
 
         /// <summary>

@@ -19,5 +19,16 @@
         /// Stops the power conversion system.
         /// </summary>
         void Stop();
+
+
+        /// <summary>
+        /// Puts the power conversion system in standby mode.
+        /// </summary>
+        /// <remarks>
+        /// The standby mode shall have a minimum active power target configured in the PCS.
+        /// This could be required for PCSs that need a minimum active power to be able to switch on properly.
+        /// If not standby active power is provided, the PCS will use the minimum active power target configured in the PCS.
+        /// </remarks>
+        void Standby(double? standbyActivePower = null);
     }
 }

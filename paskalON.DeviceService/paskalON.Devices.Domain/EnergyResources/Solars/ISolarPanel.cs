@@ -9,5 +9,15 @@
     /// <typeparam name="T">The type of the solar device.</typeparam>
     public interface ISolarPanel<T> : IDevice<T>
     {
+        /// <summary>
+        /// Connects the solar panel and starts communicating once in state connected.
+        /// </summary>
+        void Connect();
+
+
+        /// <summary>
+        /// Disconnects the solar panel after it stops communicating.
+        /// </summary>
+        void Disconnect();
     }
 }

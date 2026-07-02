@@ -9,5 +9,21 @@
     /// <typeparam name="T">The type of the generic Modbus device.</typeparam>
     public interface IGenericModbusDevice<T> : IDevice<T>
     {
+        /// <summary>
+        /// Connects the generic Modbus device and starts communicating once in state connected.
+        /// </summary>
+        void Connect();
+
+
+        /// <summary>
+        /// Disconnects the generic Modbus device after it stops communicating.
+        /// </summary>
+        void Disconnect();
+
+
+        /// <summary>
+        /// Tries to reset all latched alarms.
+        /// </summary>
+        void ResetLatchedAlarms();
     }
 }

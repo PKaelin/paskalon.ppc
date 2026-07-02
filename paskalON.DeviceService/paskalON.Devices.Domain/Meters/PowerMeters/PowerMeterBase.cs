@@ -19,7 +19,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
     /// <remarks>
     /// A power meter measures electrical values (e.g., active/reactive power in watts/vars, voltage, frequency, and power factor).
     /// </remarks>
-    public abstract class PowerMeterBase : DerDeviceBase<PowerMeterBase>
+    public abstract class PowerMeterBase : DerDeviceBase<PowerMeterBase>, IPowerMeter<PowerMeterBase>, INotifyPropertyChanged
     {
         /// <summary>
         /// Power meter configuration.
@@ -49,7 +49,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// Event when the communication error state changed.
         /// </summary>
-        public event EventHandler<CommunicationErrorChangedEventArgs> CommunicationErrorChanged;
+        public event EventHandler<CommunicationErrorChangedEventArgs>? CommunicationErrorChanged;
 
 
         /// <summary>
@@ -526,6 +526,27 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
             _device = device;
             RegisterMetrics(device.MetricsPublisher);
         }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Connect()
+        {
+            _logger.LogInformation("{Name} connect requested.", Name);
+            _device.Connect();
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Disconnect()
+        {
+            _logger.LogInformation("{Name} disconnect requested.", Name);
+            _device.Disconnect();
+        }
+
 
 
         /// <summary>

@@ -9,5 +9,15 @@
     /// <typeparam name="T">The type of the battery bank.</typeparam>
     public interface IBatteryBank<T> : IDevice<T>
     {
+        /// <summary>
+        /// Connects the battery bank and starts communicating once in state connected.
+        /// </summary>
+        void Connect();
+
+
+        /// <summary>
+        /// Disconnects the battery bank after it stops communicating.
+        /// </summary>
+        void Disconnect();
     }
 }

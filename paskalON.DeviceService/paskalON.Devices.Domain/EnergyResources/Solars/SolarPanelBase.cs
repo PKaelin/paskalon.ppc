@@ -18,7 +18,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
     /// At the moment we dont integrate with solar panels.
     /// We still use a list in solar unit as we could have different brands and or types of solar panels.
     /// </remarks>
-    public abstract class SolarPanelBase : DerDeviceBase<SolarPanelBase>
+    public abstract class SolarPanelBase : DerDeviceBase<SolarPanelBase>, ISolarPanel<SolarPanelBase>, INotifyPropertyChanged
     {
         /// <summary>
         /// Solar panel configuration.
@@ -27,9 +27,9 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
 
 
         /// <summary>
-        /// Parent solar unit.
+        /// Solar panel device instance that communicates with the device.
         /// </summary>
-        public DerSolarUnit SolarUnit { get; private set; }
+        private readonly ISolarPanel<SolarPanelBase> _device;
 
 
         /// <summary>
@@ -41,13 +41,19 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <summary>
         /// Event when the communication error state changed.
         /// </summary>
-        public event EventHandler<CommunicationErrorChangedEventArgs> CommunicationErrorChanged;
+        public event EventHandler<CommunicationErrorChangedEventArgs>? CommunicationErrorChanged;
 
 
         /// <summary>
         /// Event when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
+
+
+        /// <summary>
+        /// Parent solar unit.
+        /// </summary>
+        public DerSolarUnit SolarUnit { get; private set; }
 
 
         /// <summary>
@@ -130,8 +136,29 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
             ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
+            _device = device;
             SolarUnit = derSolarUnit;
             RegisterMetrics(device.MetricsPublisher);
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Connect()
+        {
+            _logger.LogInformation("{Name} connect requested.", Name);
+            _device.Connect();
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Disconnect()
+        {
+            _logger.LogInformation("{Name} disconnect requested.", Name);
+            _device.Disconnect();
         }
 
 

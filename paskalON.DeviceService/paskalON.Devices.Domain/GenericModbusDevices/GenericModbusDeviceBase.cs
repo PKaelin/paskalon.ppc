@@ -15,7 +15,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
     /// <summary>
     /// Base class for generic Modbus devices.
     /// </summary>
-    public abstract class GenericModbusDeviceBase : DerDeviceBase<GenericModbusDeviceBase>
+    public abstract class GenericModbusDeviceBase : DerDeviceBase<GenericModbusDeviceBase>, IGenericModbusDevice<GenericModbusDeviceBase>, INotifyPropertyChanged
     {
         /// <summary>
         /// Generic Modbus base configuration.
@@ -41,7 +41,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <summary>
         /// Event when the communication error state changed.
         /// </summary>
-        public event EventHandler<CommunicationErrorChangedEventArgs> CommunicationErrorChanged;
+        public event EventHandler<CommunicationErrorChangedEventArgs>? CommunicationErrorChanged;
 
 
         /// <summary>
@@ -90,6 +90,37 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
             _device = device;
             RegisterMetrics(device.MetricsPublisher);
         }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Connect()
+        {
+            _logger.LogInformation("{Name} connect requested.", Name);
+            _device.Connect();
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void Disconnect()
+        {
+            _logger.LogInformation("{Name} disconnect requested.", Name);
+            _device.Disconnect();
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public virtual void ResetLatchedAlarms()
+        {
+            _logger.LogInformation("{Name} reset latched alarms requested.", Name);
+            _device.ResetLatchedAlarms();
+        }
+
 
 
         /// <summary>
@@ -159,5 +190,6 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         {
             // TODO:
         }
+
     }
 }

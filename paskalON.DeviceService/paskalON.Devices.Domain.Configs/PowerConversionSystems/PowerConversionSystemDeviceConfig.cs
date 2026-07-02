@@ -56,5 +56,10 @@
         /// </remarks>
         public bool ZeroOutputOnCommLoss { get; set; } = true;
 
+
+        /// <summary>
+        /// The configured minimum active power that the PCS should output when in standby mode.
+        /// </summary>
+        public double StandbyActivePower { get; set; } = 0;
     }
 }
