@@ -330,18 +330,20 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The power conversion system configuration.</param>
         /// <param name="derUnit">The parent DER unit.</param>
+        /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        public PowerConversionSystemBase(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IPowerConversionSystem<PowerConversionSystemBase> device)
-            : base(logger, config, device)
+        public PowerConversionSystemBase(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher<PowerConversionSystemBase> publisher,
+            IPowerConversionSystem<PowerConversionSystemBase> device) : base(logger, config, publisher, device)
         {
             ArgumentNullException.ThrowIfNull(config);
-            ArgumentNullException.ThrowIfNull(DerUnit);
+            ArgumentNullException.ThrowIfNull(derUnit);
+            ArgumentNullException.ThrowIfNull(publisher);
             ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
             DerUnit = derUnit;
             _device = device;
-            RegisterMetrics(device.MetricsPublisher);
+            RegisterMetrics(publisher);
         }
 
 

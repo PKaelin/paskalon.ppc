@@ -31,12 +31,15 @@ namespace paskalON.Devices.Domain.Ders
         /// </summary>
         /// <param name="logger">The logging instance.</param>
         /// <param name="nameBase">The name base configuration.</param>
+        /// <param name="publisher">The metrics publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        protected DerDeviceBase(ILogger logger, NameBase nameBase, IDevice<T> device) : base(logger, nameBase)
+        protected DerDeviceBase(ILogger logger, NameBase nameBase, IMetricsPublisher<T> publisher, IDevice<T> device) : base(logger, nameBase)
         {
+            ArgumentNullException.ThrowIfNull(nameBase);
+            ArgumentNullException.ThrowIfNull(publisher);
             ArgumentNullException.ThrowIfNull(device);
 
-            MetricsPublisher = device.MetricsPublisher;
+            MetricsPublisher = publisher;
             Dataface = device.Dataface;
         }
 

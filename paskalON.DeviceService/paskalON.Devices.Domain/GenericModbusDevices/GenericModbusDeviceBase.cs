@@ -74,7 +74,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <summary>
         /// List of generic Modbus entries that represent the data points and registers of the device.
         /// </summary>
-        public required List<GenericModbusEntryBase> GenericModbusEntries { get; set; }
+        public required List<GenericModbusEntryBase> GenericModbusEntries { get; init; }
 
 
         /// <summary>
@@ -82,13 +82,20 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// </summary>
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The generic Modbus configuration.</param>
+        /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        public GenericModbusDeviceBase(ILogger logger, GenericModbusBaseConfig config, List<GenericModbusEntryBase> genericModbusEntries, IGenericModbusDevice<GenericModbusDeviceBase> device)
-            : base(logger, config, device)
+        public GenericModbusDeviceBase(ILogger logger, GenericModbusBaseConfig config, List<GenericModbusEntryBase> genericModbusEntries, IMetricsPublisher<GenericModbusDeviceBase> publisher,
+            IGenericModbusDevice<GenericModbusDeviceBase> device) : base(logger, config, publisher, device)
         {
+            ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(genericModbusEntries);
+            ArgumentNullException.ThrowIfNull(publisher);
+            ArgumentNullException.ThrowIfNull(device);
+
             _config = config;
             _device = device;
-            RegisterMetrics(device.MetricsPublisher);
+            GenericModbusEntries = genericModbusEntries;
+            RegisterMetrics(publisher);
         }
 
 

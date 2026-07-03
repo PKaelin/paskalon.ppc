@@ -519,13 +519,19 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// Constructor of <see cref="PowerMeterBase"/>
         /// </summary>
         /// <param name="logger">The logging instance.</param>
-        /// <param name="powerMeterConfig">The power meter configuration.</param>
-        /// <param name="metricsPublisher">The device interface.</param>
-        public PowerMeterBase(ILogger logger, PowerMeterBaseConfig powerMeterConfig, IPowerMeter<PowerMeterBase> device) : base(logger, powerMeterConfig, device)
+        /// <param name="config">The power meter configuration.</param>
+        /// <param name="publisher">The publisher interface.</param>
+        /// <param name="device">The device interface.</param>
+        public PowerMeterBase(ILogger logger, PowerMeterBaseConfig config, IMetricsPublisher<PowerMeterBase> publisher, IPowerMeter<PowerMeterBase> device)
+            : base(logger, config, publisher, device)
         {
-            _config = powerMeterConfig;
+            ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(publisher);
+            ArgumentNullException.ThrowIfNull(device);
+
+            _config = config;
             _device = device;
-            RegisterMetrics(device.MetricsPublisher);
+            RegisterMetrics(publisher);
         }
 
 

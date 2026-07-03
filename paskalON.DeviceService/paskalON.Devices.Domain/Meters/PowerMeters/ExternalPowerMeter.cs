@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
+using paskalON.Domains.Telemetry;
 
 namespace paskalON.Devices.Domain.Meters.PowerMeters
 {
@@ -22,9 +23,10 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// </summary>
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The external power meter configuration.</param>
+        /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        public ExternalPowerMeter(ILogger logger, ExternalPowerMeterConfig config, IPowerMeter<ExternalPowerMeter> device)
-            : base(logger, config, (IPowerMeter<PowerMeterBase>)device)
+        public ExternalPowerMeter(ILogger logger, ExternalPowerMeterConfig config, IMetricsPublisher<ExternalPowerMeter> publisher, IPowerMeter<ExternalPowerMeter> device)
+            : base(logger, config, (IMetricsPublisher<PowerMeterBase>)publisher, (IPowerMeter<PowerMeterBase>)device)
         {
             ArgumentNullException.ThrowIfNull(config);
 

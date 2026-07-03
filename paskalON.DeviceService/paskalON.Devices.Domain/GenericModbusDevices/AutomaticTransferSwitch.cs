@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
+using paskalON.Domains.Telemetry;
 
 namespace paskalON.Devices.Domain.GenericModbusDevices
 {
@@ -25,9 +26,11 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The automatic transfer switch configuration.</param>
         /// <param name="genericModbusEntries">List of generic Modbus entries.</param>
+        /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        public AutomaticTransferSwitch(ILogger logger, AutomaticTransferSwitchConfig config, List<GenericModbusEntryBase> genericModbusEntries, IGenericModbusDevice<AutomaticTransferSwitch> device)
-            : base(logger, config, genericModbusEntries, (IGenericModbusDevice<GenericModbusDeviceBase>)device)
+        public AutomaticTransferSwitch(ILogger logger, AutomaticTransferSwitchConfig config, List<GenericModbusEntryBase> genericModbusEntries,
+            IMetricsPublisher<AutomaticTransferSwitch> publisher, IGenericModbusDevice<AutomaticTransferSwitch> device)
+            : base(logger, config, genericModbusEntries, (IMetricsPublisher<GenericModbusDeviceBase>)publisher, (IGenericModbusDevice<GenericModbusDeviceBase>)device)
         {
             ArgumentNullException.ThrowIfNull(config);
 
