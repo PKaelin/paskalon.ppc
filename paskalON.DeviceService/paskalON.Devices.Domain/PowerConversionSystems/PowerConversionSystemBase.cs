@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
-using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using System.ComponentModel;
@@ -145,43 +144,43 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
 
-        private double? activePowerTarget;
+        private double? _activePowerTarget;
         /// <summary>
         /// Current active power target in Watts
         /// </summary>
         public ActivePower? ActivePowerTarget
         {
-            get { lock (dataLock) { return (activePowerTarget is null) ? null : new ActivePower((double)activePowerTarget); } }
+            get { lock (dataLock) { return (_activePowerTarget is null) ? null : new ActivePower((double)_activePowerTarget); } }
         }
 
 
-        private double? activePower;
+        private double? _activePower;
         /// <summary>
         /// Current active power output in Watts
         /// </summary>
         public ActivePower? ActivePower
         {
-            get { lock (dataLock) { return (activePower is null) ? null : new ActivePower((double)activePower); } }
+            get { lock (dataLock) { return (_activePower is null) ? null : new ActivePower((double)_activePower); } }
         }
 
 
-        private double? reactivePowerTarget;
+        private double? _reactivePowerTarget;
         /// <summary>
         /// Current reactive power target in Vars
         /// </summary>
         public ReactivePower? ReactivePowerTarget
         {
-            get { lock (dataLock) { return (reactivePowerTarget is null) ? null : new ReactivePower((double)reactivePowerTarget); } }
+            get { lock (dataLock) { return (_reactivePowerTarget is null) ? null : new ReactivePower((double)_reactivePowerTarget); } }
         }
 
 
-        private double? reactivePower;
+        private double? _reactivePower;
         /// <summary>
         /// Current reactive power output in Vars
         /// </summary>
         public ReactivePower? ReactivePower
         {
-            get { lock (dataLock) { return (reactivePower is null) ? null : new ReactivePower((double)reactivePower); } }
+            get { lock (dataLock) { return (_reactivePower is null) ? null : new ReactivePower((double)_reactivePower); } }
         }
 
 
@@ -436,7 +435,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             lock (dataLock)
             {
-                activePower = value;
+                _activePower = value;
             }
         }
 
@@ -449,7 +448,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             lock (dataLock)
             {
-                reactivePower = value;
+                _reactivePower = value;
             }
         }
 
@@ -462,10 +461,10 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             lock (dataLock)
             {
-                if (activePowerTarget != value)
+                if (_activePowerTarget != value)
                 {
-                    activePowerTarget = value;
-                    _logger.LogInformation("{Name} - Set active power target to: {activePowerTarget}", Name, activePowerTarget);
+                    _activePowerTarget = value;
+                    _logger.LogInformation("{Name} - Set active power target to: {activePowerTarget}", Name, _activePowerTarget);
                 }
             }
         }
@@ -479,10 +478,10 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             lock (dataLock)
             {
-                if (reactivePowerTarget != value)
+                if (_reactivePowerTarget != value)
                 {
-                    reactivePowerTarget = value;
-                    _logger.LogInformation("{Name} - Set reactive power target to: {reactivePowerTarget}", Name, reactivePowerTarget);
+                    _reactivePowerTarget = value;
+                    _logger.LogInformation("{Name} - Set reactive power target to: {reactivePowerTarget}", Name, _reactivePowerTarget);
                 }
             }
         }
@@ -555,16 +554,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
             // MetricsFactorClass4
             metricsPublisher.Register<double?>(nameof(LineFrequency), x => x.LineFrequency, _config.MetricsFactorClass4);
-        }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        /// <param name="dataface"></param>
-        protected override void RegisterDataface(IDataface<PowerConversionSystemBase> dataface)
-        {
-            // TODO:
+            metricsPublisher.Register<double?>(nameof(StandbyActivePower), x => x.StandbyActivePower, _config.MetricsFactorClass4);
         }
     }
 }

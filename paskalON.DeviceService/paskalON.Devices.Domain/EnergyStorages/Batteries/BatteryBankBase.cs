@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
-using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -463,15 +462,6 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
             // MetricsFactorClass3
             metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
             // MetricsFactorClass4
-        }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        protected override void RegisterDataface(IDataface<BatteryBankBase> dataface)
-        {
-            // TODO: 
         }
     }
 }

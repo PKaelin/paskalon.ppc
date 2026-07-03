@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.EnergyResources.Solars;
 using paskalON.Devices.Domain.Ders;
-using paskalON.Domains.Contracts;
 using paskalON.Domains.Telemetry;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -218,16 +217,5 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
             metricsPublisher.Register<double>(nameof(MinimumCurrentSum), x => x.MinimumCurrentSum, _config.MetricsFactorClass4);
             metricsPublisher.Register<double>(nameof(MaximumCurrentSum), x => x.MaximumCurrentSum, _config.MetricsFactorClass4);
         }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        /// <param name="dataface"></param>
-        protected override void RegisterDataface(IDataface<SolarPanelBase> dataface)
-        {
-            // We dont communicate with solar panels at this point so we dont register any dataface properties.
-        }
-
     }
 }
