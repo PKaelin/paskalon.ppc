@@ -3,7 +3,7 @@ using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
 using paskalON.Domains.Contracts;
-using paskalON.Domains.Telemetry;
+using paskalON.Telemetry;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -178,14 +178,23 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// </summary>
         protected override void RegisterMetrics(IMetricsPublisher<GenericModbusDeviceBase> metricsPublisher)
         {
+            IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
+            {
+                { "Name", _config.Name },
+                { "DeviceId", _config.DeviceId }
+            };
+
+            // Initialize metrics
+            metricsPublisher.Initialize("GMD", tags);
+
             foreach (GenericModbusPointEntry entry in GenericModbusEntries.OfType<GenericModbusPointEntry>())
             {
-                metricsPublisher.Register<byte>(entry.Name, x => entry.Value, _config.MetricsFactorClass1);
+                metricsPublisher.Register<byte>(entry.Name, MetricType.Gauge, x => entry.Value, _config.MetricsFactorClass1);
             }
 
             foreach (GenericModbusRegisterEntry entry in GenericModbusEntries.OfType<GenericModbusRegisterEntry>())
             {
-                metricsPublisher.Register<Int16>(entry.Name, x => entry.Value, _config.MetricsFactorClass1);
+                metricsPublisher.Register<Int16>(entry.Name, MetricType.Gauge, x => entry.Value, _config.MetricsFactorClass1);
             }
         }
 

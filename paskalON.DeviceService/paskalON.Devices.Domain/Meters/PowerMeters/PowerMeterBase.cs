@@ -3,9 +3,9 @@ using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Domain.Contracts;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Domains.Contracts;
-using paskalON.Domains.Telemetry;
 using paskalON.PhysicalUnits.Electricals.Energies;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.Telemetry;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -561,46 +561,54 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// </summary>
         protected override void RegisterMetrics(IMetricsPublisher<PowerMeterBase> metricsPublisher)
         {
+            IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
+            {
+                { "Name", _config.Name },
+                { "DeviceId", _config.DeviceId }
+            };
+
+            // Initialize metrics
+            metricsPublisher.Initialize("PowerMeter", tags);
             // MetricsFactorClass1
-            metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(Frequency), x => x.Frequency, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(PowerFactor), x => x.PowerFactor, _config.MetricsFactorClass1);
+            metricsPublisher.Register<bool>(nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(Frequency), MetricType.Gauge, x => x.Frequency, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(PowerFactor), MetricType.Gauge, x => x.PowerFactor, _config.MetricsFactorClass1);
             // Power A-C
-            metricsPublisher.Register<double?>(nameof(ActivePower), x => x.ActivePowerValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ReactivePower), x => x.ReactivePowerValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ApparentPower), x => x.ApparentPowerValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ActivePower), MetricType.Gauge, x => x.ActivePowerValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ReactivePower), MetricType.Gauge, x => x.ReactivePowerValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ApparentPower), MetricType.Gauge, x => x.ApparentPowerValue, _config.MetricsFactorClass1);
             // Voltage
-            metricsPublisher.Register<double?>(nameof(VoltageA), x => x.VoltageA, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltageAngleA), x => x.VoltageAngleA, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltageB), x => x.VoltageB, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltageAngleB), x => x.VoltageAngleB, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltageC), x => x.VoltageC, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltageAngleC), x => x.VoltageAngleC, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltagePositiveSequence), x => x.VoltagePositiveSequence, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltagePositiveSequenceAngle), x => x.VoltagePositiveSequenceAngle, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltageAB), x => x.VoltageAB, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltageBC), x => x.VoltageBC, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltageCA), x => x.VoltageCA, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(VoltageLLAvg), x => x.VoltageLLAvg, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltageA), MetricType.Gauge, x => x.VoltageA, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltageAngleA), MetricType.Gauge, x => x.VoltageAngleA, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltageB), MetricType.Gauge, x => x.VoltageB, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltageAngleB), MetricType.Gauge, x => x.VoltageAngleB, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltageC), MetricType.Gauge, x => x.VoltageC, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltageAngleC), MetricType.Gauge, x => x.VoltageAngleC, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltagePositiveSequence), MetricType.Gauge, x => x.VoltagePositiveSequence, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltagePositiveSequenceAngle), MetricType.Gauge, x => x.VoltagePositiveSequenceAngle, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltageAB), MetricType.Gauge, x => x.VoltageAB, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltageBC), MetricType.Gauge, x => x.VoltageBC, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltageCA), MetricType.Gauge, x => x.VoltageCA, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(VoltageLLAvg), MetricType.Gauge, x => x.VoltageLLAvg, _config.MetricsFactorClass1);
             // Current
-            metricsPublisher.Register<double?>(nameof(CurrentA), x => x.CurrentA, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(CurrentAngleA), x => x.CurrentAngleA, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(CurrentB), x => x.CurrentB, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(CurrentAngleB), x => x.CurrentAngleB, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(CurrentC), x => x.CurrentC, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(CurrentAngleC), x => x.CurrentAngleC, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(CurrentA), MetricType.Gauge, x => x.CurrentA, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(CurrentAngleA), MetricType.Gauge, x => x.CurrentAngleA, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(CurrentB), MetricType.Gauge, x => x.CurrentB, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(CurrentAngleB), MetricType.Gauge, x => x.CurrentAngleB, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(CurrentC), MetricType.Gauge, x => x.CurrentC, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(CurrentAngleC), MetricType.Gauge, x => x.CurrentAngleC, _config.MetricsFactorClass1);
             // Power A-C
-            metricsPublisher.Register<double?>(nameof(ActivePowerA), x => x.ActivePowerAValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ActivePowerB), x => x.ActivePowerBValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ActivePowerC), x => x.ActivePowerCValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ReactivePowerA), x => x.ReactivePowerAValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ReactivePowerB), x => x.ReactivePowerBValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ReactivePowerC), x => x.ReactivePowerCValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ActivePowerA), MetricType.Gauge, x => x.ActivePowerAValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ActivePowerB), MetricType.Gauge, x => x.ActivePowerBValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ActivePowerC), MetricType.Gauge, x => x.ActivePowerCValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ReactivePowerA), MetricType.Gauge, x => x.ReactivePowerAValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ReactivePowerB), MetricType.Gauge, x => x.ReactivePowerBValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ReactivePowerC), MetricType.Gauge, x => x.ReactivePowerCValue, _config.MetricsFactorClass1);
             // Energy
-            metricsPublisher.Register<double?>(nameof(EnergyDelivered), x => x.EnergyDeliveredValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(EnergyReceived), x => x.EnergyReceivedValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ReactiveEnergyDelivered), x => x.ReactiveEnergyDeliveredValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ReactiveEnergyReceived), x => x.ReactiveEnergyReceivedValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(EnergyDelivered), MetricType.Gauge, x => x.EnergyDeliveredValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(EnergyReceived), MetricType.Gauge, x => x.EnergyReceivedValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ReactiveEnergyDelivered), MetricType.Gauge, x => x.ReactiveEnergyDeliveredValue, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ReactiveEnergyReceived), MetricType.Gauge, x => x.ReactiveEnergyReceivedValue, _config.MetricsFactorClass1);
             // MetricsFactorClass2
             // MetricsFactorClass3
         }

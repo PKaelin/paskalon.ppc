@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
-using paskalON.Domains.Telemetry;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.Telemetry;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Units = paskalON.PhysicalUnits.Electricals.Powers;
@@ -536,27 +536,35 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>
         protected override void RegisterMetrics(IMetricsPublisher<PowerConversionSystemBase> metricsPublisher)
         {
+            IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
+            {
+                { "Name", _config.Name },
+                { "DeviceId", _config.DeviceId }
+            };
+
+            // Initialize metrics
+            metricsPublisher.Initialize("PCS", tags);
             // MetricsFactorClass1
-            metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ActivePowerTarget), x => x.ActivePowerTarget?.Watts, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ReactivePowerTarget), x => x.ReactivePowerTarget?.VoltAmperesReactive, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ActivePower), x => x.ActivePower?.Watts, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double?>(nameof(ReactivePower), x => x.ReactivePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
+            metricsPublisher.Register<bool>(nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ActivePowerTarget), MetricType.Gauge, x => x.ActivePowerTarget?.Watts, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ReactivePowerTarget), MetricType.Gauge, x => x.ReactivePowerTarget?.VoltAmperesReactive, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ActivePower), MetricType.Gauge, x => x.ActivePower?.Watts, _config.MetricsFactorClass1);
+            metricsPublisher.Register<double>(nameof(ReactivePower), MetricType.Gauge, x => x.ReactivePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
             // MetricsFactorClass2
-            metricsPublisher.Register<PcsState>(nameof(State), x => x.State, _config.MetricsFactorClass2);
-            metricsPublisher.Register<bool>(nameof(HasActiveAlarms), x => x.HasActiveAlarms, _config.MetricsFactorClass2);
-            metricsPublisher.Register<bool>(nameof(HasActiveWarnings), x => x.HasActiveWarnings, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double?>(nameof(VoltagePhaseAToB), x => x.VoltagePhaseAToB, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double?>(nameof(VoltagePhaseBToC), x => x.VoltagePhaseBToC, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double?>(nameof(VoltagePhaseCToA), x => x.VoltagePhaseCToA, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double?>(nameof(ACCurrentSum), x => x.ACCurrentSum, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double?>(nameof(DCCurrent), x => x.DCCurrent, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double?>(nameof(DCVoltage), x => x.DCVoltage, _config.MetricsFactorClass2);
+            metricsPublisher.Register<PcsState>(nameof(State), MetricType.Gauge, x => x.State, _config.MetricsFactorClass2);
+            metricsPublisher.Register<bool>(nameof(HasActiveAlarms), MetricType.Gauge, x => x.HasActiveAlarms, _config.MetricsFactorClass2);
+            metricsPublisher.Register<bool>(nameof(HasActiveWarnings), MetricType.Gauge, x => x.HasActiveWarnings, _config.MetricsFactorClass2);
+            metricsPublisher.Register<double>(nameof(VoltagePhaseAToB), MetricType.Gauge, x => x.VoltagePhaseAToB, _config.MetricsFactorClass2);
+            metricsPublisher.Register<double>(nameof(VoltagePhaseBToC), MetricType.Gauge, x => x.VoltagePhaseBToC, _config.MetricsFactorClass2);
+            metricsPublisher.Register<double>(nameof(VoltagePhaseCToA), MetricType.Gauge, x => x.VoltagePhaseCToA, _config.MetricsFactorClass2);
+            metricsPublisher.Register<double>(nameof(ACCurrentSum), MetricType.Gauge, x => x.ACCurrentSum, _config.MetricsFactorClass2);
+            metricsPublisher.Register<double>(nameof(DCCurrent), MetricType.Gauge, x => x.DCCurrent, _config.MetricsFactorClass2);
+            metricsPublisher.Register<double>(nameof(DCVoltage), MetricType.Gauge, x => x.DCVoltage, _config.MetricsFactorClass2);
             // MetricsFactorClass3
-            metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
+            metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
             // MetricsFactorClass4
-            metricsPublisher.Register<double?>(nameof(LineFrequency), x => x.LineFrequency, _config.MetricsFactorClass4);
-            metricsPublisher.Register<double?>(nameof(StandbyActivePower), x => x.StandbyActivePower, _config.MetricsFactorClass4);
+            metricsPublisher.Register<double>(nameof(LineFrequency), MetricType.Gauge, x => x.LineFrequency, _config.MetricsFactorClass4);
+            metricsPublisher.Register<double>(nameof(StandbyActivePower), MetricType.Gauge, x => x.StandbyActivePower, _config.MetricsFactorClass4);
         }
     }
 }

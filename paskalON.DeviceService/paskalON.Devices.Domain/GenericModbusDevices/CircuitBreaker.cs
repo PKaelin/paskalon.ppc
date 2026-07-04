@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
-using paskalON.Domains.Telemetry;
+using paskalON.Telemetry;
 
 namespace paskalON.Devices.Domain.GenericModbusDevices
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.EnergyResources.Solars;
 using paskalON.Devices.Domain.Ders;
-using paskalON.Domains.Telemetry;
+using paskalON.Telemetry;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -211,13 +211,22 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// </summary>
         protected override void RegisterMetrics(IMetricsPublisher<SolarPanelBase> metricsPublisher)
         {
-            metricsPublisher.Register<bool>(nameof(CommunicationError), x => x.CommunicationError, _config.MetricsFactorClass4);
-            metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), x => x.IsInMaintenanceMode, _config.MetricsFactorClass4);
-            metricsPublisher.Register<int>(nameof(NumberOfPanels), x => x.NumberOfPanels, _config.MetricsFactorClass4);
-            metricsPublisher.Register<double>(nameof(MinimumVoltageSum), x => x.MinimumVoltageSum, _config.MetricsFactorClass4);
-            metricsPublisher.Register<double>(nameof(MaximumVoltageSum), x => x.MaximumVoltageSum, _config.MetricsFactorClass4);
-            metricsPublisher.Register<double>(nameof(MinimumCurrentSum), x => x.MinimumCurrentSum, _config.MetricsFactorClass4);
-            metricsPublisher.Register<double>(nameof(MaximumCurrentSum), x => x.MaximumCurrentSum, _config.MetricsFactorClass4);
+            IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
+            {
+                { "Name", _config.Name },
+                { "DeviceId", _config.DeviceId }
+            };
+
+            // Initialize metrics
+            metricsPublisher.Initialize("Solar", tags);
+            // Solar
+            metricsPublisher.Register<bool>(nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass4);
+            metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass4);
+            metricsPublisher.Register<int>(nameof(NumberOfPanels), MetricType.Gauge, x => x.NumberOfPanels, _config.MetricsFactorClass4);
+            metricsPublisher.Register<double>(nameof(MinimumVoltageSum), MetricType.Gauge, x => x.MinimumVoltageSum, _config.MetricsFactorClass4);
+            metricsPublisher.Register<double>(nameof(MaximumVoltageSum), MetricType.Gauge, x => x.MaximumVoltageSum, _config.MetricsFactorClass4);
+            metricsPublisher.Register<double>(nameof(MinimumCurrentSum), MetricType.Gauge, x => x.MinimumCurrentSum, _config.MetricsFactorClass4);
+            metricsPublisher.Register<double>(nameof(MaximumCurrentSum), MetricType.Gauge, x => x.MaximumCurrentSum, _config.MetricsFactorClass4);
         }
     }
 }

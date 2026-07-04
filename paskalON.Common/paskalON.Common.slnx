@@ -6,8 +6,10 @@
     <Project Path="paskalON.Maths.IntegrationTest/paskalON.Maths.IntegrationTest.csproj" />
     <Project Path="paskalON.Maths.UnitTest/paskalON.Maths.UnitTest.csproj" />
     <Project Path="paskalON.PhysicalUnits.UnitTest/paskalON.PhysicalUnits.UnitTest.csproj" />
+    <Project Path="paskalON.Telemetry.UnitTest/paskalON.Telemetry.UnitTest.csproj" Id="fe1e2884-901e-4517-a527-3feed5d0486d" />
   </Folder>
   <Project Path="paskalON.Domains/paskalON.Domains.csproj" />
   <Project Path="paskalON.Maths/paskalON.Maths.csproj" />
   <Project Path="paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
+  <Project Path="paskalON.Telemetry/paskalON.Telemetry.csproj" Id="46badc79-aadc-414b-9873-d87fce433406" />
 </Solution>

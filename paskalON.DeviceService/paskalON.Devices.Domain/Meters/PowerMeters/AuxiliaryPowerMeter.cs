@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
-using paskalON.Domains.Telemetry;
+using paskalON.Telemetry;
 
 namespace paskalON.Devices.Domain.Meters.PowerMeters
 {

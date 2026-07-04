@@ -33,7 +33,6 @@ namespace paskalON.Communication.Protocols.Modbus.Configurations
         public ushort StartingCoil { get; set; } = 1;
 
 
-        private List<ModbusRegisterMapPollingRangeConfig>? pollingRange;
         /// <summary>
         /// The set of PollingRanges attached to this RegisterMap.  Always return an array so that
         /// callers don't have to check for null, just spins an empty enumerable.

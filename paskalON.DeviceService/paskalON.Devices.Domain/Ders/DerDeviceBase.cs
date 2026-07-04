@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Domains.Contracts;
-using paskalON.Domains.Telemetry;
+using paskalON.Telemetry;
 
 namespace paskalON.Devices.Domain.Ders
 {
@@ -12,7 +12,7 @@ namespace paskalON.Devices.Domain.Ders
     /// Base class for all distributed energy resources (DERs) that symbolizes a device.
     /// </summary>
     /// <typeparam name="T">The type of the DER device.</typeparam>
-    public abstract class DerDeviceBase<T> : DerBase
+    public abstract class DerDeviceBase<T> : DerBase where T : notnull
     {
         /// <summary>
         /// <inheritdoc/>
