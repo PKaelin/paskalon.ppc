@@ -1,4 +1,7 @@
-﻿using paskalON.Devices.Domain.Configs;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.EnergyResources.Solars;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;

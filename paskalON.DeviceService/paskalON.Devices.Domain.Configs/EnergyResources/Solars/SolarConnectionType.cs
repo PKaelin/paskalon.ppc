@@ -1,4 +1,7 @@
-﻿namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
 {
     /// <summary>
     /// Solar connection type describes how the panels are connected.

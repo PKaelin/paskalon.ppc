@@ -1,4 +1,7 @@
-﻿namespace paskalON.OperatingModes.Domain.Ramps
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.OperatingModes.Domain.Ramps
 {
     /// <summary>
     /// Configuration for Rate-Based (Speed) ramp based on percentage.

@@ -1,4 +1,7 @@
-﻿using paskalON.Telemetry.Entries;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Telemetry.Entries;
 using System.Diagnostics.Metrics;
 
 namespace paskalON.Telemetry

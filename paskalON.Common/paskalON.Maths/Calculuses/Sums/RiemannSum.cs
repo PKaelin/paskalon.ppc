@@ -1,4 +1,7 @@
-﻿namespace paskalON.Maths.Calculuses.Sums
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Maths.Calculuses.Sums
 {
     /// <summary>
     /// Class for computing Riemann Sums, which are a method of approximating the integral of a function over an interval 

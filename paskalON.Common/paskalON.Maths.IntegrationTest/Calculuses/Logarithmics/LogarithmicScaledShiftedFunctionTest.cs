@@ -1,4 +1,7 @@
-﻿using paskalON.Maths.Calculuses.Logarithmics;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Maths.Calculuses.Logarithmics;
 
 namespace paskalON.Maths.IntegrationTest.Calculuses.Logarithmics
 {

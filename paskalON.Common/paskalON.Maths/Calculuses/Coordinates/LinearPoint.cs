@@ -1,4 +1,7 @@
-﻿namespace paskalON.Maths.Calculuses.Coordinates
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Maths.Calculuses.Coordinates
 {
     /// <summary>
     /// Class representing a point of definition for a linear function, including the X and Y coordinates.

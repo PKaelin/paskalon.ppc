@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using System.Globalization;
 
 namespace paskalON.PhysicalUnits.Electricals.Powers
 {

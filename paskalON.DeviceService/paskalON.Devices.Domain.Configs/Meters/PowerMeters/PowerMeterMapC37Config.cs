@@ -1,4 +1,7 @@
-﻿namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 {
     /// <summary>
     /// A mapping of named values in the C37 data stream.

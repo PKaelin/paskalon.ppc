@@ -1,4 +1,7 @@
-﻿using paskalON.Maths.Calculuses.Coordinates;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Maths.Calculuses.Coordinates;
 using paskalON.Maths.Calculuses.Exponents;
 
 namespace paskalON.Maths.Calculuses.Curves

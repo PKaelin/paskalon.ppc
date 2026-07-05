@@ -1,4 +1,7 @@
-﻿using paskalON.Communication.Protocols.C37118.Types;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Communication.Protocols.C37118.Types;
 using paskalON.Communication.Protocols.Modbus.Configurations;
 using paskalON.Communication.Protocols.Modbus.Enums;
 using paskalON.Devices.Domain.Configs;

@@ -1,4 +1,7 @@
-﻿using System.Net.Sockets;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using System.Net.Sockets;
 
 namespace paskalON.Devices.Domain.Configs
 {

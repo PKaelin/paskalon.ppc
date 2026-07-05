@@ -1,4 +1,7 @@
-﻿namespace paskalON.OperatingModes.Domain.Curves
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.OperatingModes.Domain.Curves
 {
     /// <summary>
     /// VfrtLowTripCurve commands the plant to completely disconnect from the grid. 

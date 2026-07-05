@@ -1,4 +1,7 @@
-﻿using paskalON.Maths.Calculuses.Sums;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Maths.Calculuses.Sums;
 using System.Collections.Immutable;
 
 namespace paskalON.Maths.UnitTest.Calculuses.Sums

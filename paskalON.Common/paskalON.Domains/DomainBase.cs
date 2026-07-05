@@ -1,4 +1,7 @@
-﻿namespace paskalON.Domains
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Domains
 {
     /// <summary>
     /// Base class for all domain entities, providing common properties for tracking changes and identifying entities.

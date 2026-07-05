@@ -1,4 +1,7 @@
-﻿namespace paskalON.PhysicalUnits.Electricals.Powers
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.PhysicalUnits.Electricals.Powers
 {
     /// <summary>
     /// Power factor standard definition.

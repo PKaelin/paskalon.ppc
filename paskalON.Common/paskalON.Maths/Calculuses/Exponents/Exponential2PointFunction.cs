@@ -1,4 +1,7 @@
-﻿using paskalON.Maths.Randoms;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Maths.Randoms;
 
 namespace paskalON.Maths.Calculuses.Exponents
 {

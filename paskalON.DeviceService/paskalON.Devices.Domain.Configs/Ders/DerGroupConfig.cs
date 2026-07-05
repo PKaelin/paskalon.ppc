@@ -1,4 +1,7 @@
-﻿namespace paskalON.Devices.Domain.Configs.Ders
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Devices.Domain.Configs.Ders
 {
     /// <summary>
     /// DER group that can be split up onto different device service services 

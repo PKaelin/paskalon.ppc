@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Logging;
 using paskalON.Maths.Calculuses;
 using paskalON.Maths.Calculuses.Coordinates;
 using paskalON.Maths.IntegrationTest.Calculuses.Logarithmics;

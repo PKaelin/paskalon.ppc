@@ -1,4 +1,7 @@
-﻿namespace paskalON.PhysicalUnits.Electricals.Energies
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.PhysicalUnits.Electricals.Energies
 {
     /// <summary>
     /// Struct for energy (Wh). The total amount of energy consumed over time (Power x Time)

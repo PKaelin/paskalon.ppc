@@ -1,4 +1,7 @@
-﻿using paskalON.Domains.Contracts;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Domains.Contracts;
 
 namespace paskalON.Devices.Domain
 {

@@ -1,4 +1,7 @@
-﻿namespace paskalON.Devices.Domain.Contracts
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Devices.Domain.Contracts
 {
     /// <summary>
     /// Interface to register data points for a C37 data frame.

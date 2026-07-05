@@ -1,4 +1,7 @@
-﻿namespace paskalON.Maths.Calculuses
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Maths.Calculuses
 {
     /// <summary>
     /// Interface for piecewise functions.

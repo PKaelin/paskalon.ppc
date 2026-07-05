@@ -1,4 +1,7 @@
-﻿namespace paskalON.OperatingModes.Domain.Curves
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.OperatingModes.Domain.Curves
 {
     /// <summary>
     /// A Volt-Watt (active power) curve in a power plant controller automatically curtails (reduces) active power output when grid voltage rises too high. 

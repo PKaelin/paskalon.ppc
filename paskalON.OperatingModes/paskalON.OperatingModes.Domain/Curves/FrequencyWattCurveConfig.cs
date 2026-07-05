@@ -1,4 +1,7 @@
-﻿namespace paskalON.OperatingModes.Domain.Curves
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.OperatingModes.Domain.Curves
 {
     /// <summary>
     /// A Frequency Watt curve in a power plant controller automatically increase/decrease active power output when grid frequency is too low/high. 

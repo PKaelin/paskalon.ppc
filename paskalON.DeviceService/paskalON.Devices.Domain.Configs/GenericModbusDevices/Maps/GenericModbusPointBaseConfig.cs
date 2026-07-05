@@ -1,4 +1,7 @@
-﻿namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
 {
     /// <summary>
     /// Base class for point map entries that are 1-bit boolean values (ON/OFF statuses, alarms, relay commands, etc.).

@@ -1,4 +1,6 @@
-﻿
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
 using paskalON.Devices.Domain.Configs.Ders;
 
 namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries

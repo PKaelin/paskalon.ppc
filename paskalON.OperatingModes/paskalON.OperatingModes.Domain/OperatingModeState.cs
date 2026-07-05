@@ -1,4 +1,7 @@
-﻿namespace paskalON.OperatingModes.Domain
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.OperatingModes.Domain
 {
     /// <summary>
     /// Operating mode states to track the state of the operating mode.

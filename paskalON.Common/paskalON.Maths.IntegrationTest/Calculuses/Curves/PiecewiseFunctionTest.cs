@@ -1,4 +1,7 @@
-﻿using paskalON.Maths.Calculuses.Curves;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Maths.Calculuses.Curves;
 
 namespace paskalON.Maths.IntegrationTest.Calculuses.Curves
 {

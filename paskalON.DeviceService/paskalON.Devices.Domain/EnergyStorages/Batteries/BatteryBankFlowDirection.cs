@@ -1,4 +1,7 @@
-﻿namespace paskalON.Devices.Domain.EnergyStorages.Batteries
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 {
     /// <summary>
     /// Charging and discharging refer to the direction of current flow and the conversion of energy.

@@ -1,4 +1,7 @@
-﻿using paskalON.Communication.Protocols.Modbus.Configurations;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Communication.Protocols.Modbus.Configurations;
 
 namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 {

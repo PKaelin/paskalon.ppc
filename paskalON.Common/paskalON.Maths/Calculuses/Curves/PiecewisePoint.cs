@@ -1,4 +1,7 @@
-﻿namespace paskalON.Maths.Calculuses.Curves
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Maths.Calculuses.Curves
 {
     /// <summary>
     /// Class representing a point of definition for a piecewise function, including the type of function to use, 
