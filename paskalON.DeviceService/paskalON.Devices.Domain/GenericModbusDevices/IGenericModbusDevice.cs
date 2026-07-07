@@ -10,7 +10,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
     /// Generic Modbus device interface for the instances that communicate with the device.
     /// </summary>
     /// <typeparam name="T">The type of the generic Modbus device.</typeparam>
-    public interface IGenericModbusDevice<T> : IDevice<T>
+    public interface IGenericModbusDevice : IDevice
     {
         /// <summary>
         /// Connects the generic Modbus device and starts communicating once in state connected.

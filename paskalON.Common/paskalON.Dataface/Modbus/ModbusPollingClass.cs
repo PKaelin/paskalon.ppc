@@ -1,13 +1,17 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.Domains.Contracts
+namespace paskalON.Dataface.Modbus
 {
     /// <summary>
-    /// Interface to completely loose couple the data source from the data consumer.
+    /// Enumeration of Modbus class polling intervals.
     /// </summary>
-    public interface IDataface<T>
+    public enum ModbusPollingClass
     {
-        void Register<TCom>(Action<TCom> com);
+        Class0 = 1,
+        Default = 2,
+        Class2 = 3,
+        Class3 = 4,
+        Class4 = 5
     }
 }

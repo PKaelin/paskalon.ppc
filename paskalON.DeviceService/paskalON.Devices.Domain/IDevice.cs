@@ -1,7 +1,7 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-using paskalON.Domains.Contracts;
+using paskalON.Dataface;
 
 namespace paskalON.Devices.Domain
 {
@@ -11,12 +11,11 @@ namespace paskalON.Devices.Domain
     /// <summary>
     /// Base interface for all DER devices providing access to metrics publishing and data setting functionalities.
     /// </summary>
-    /// <typeparam name="T">The type of the DER device.</typeparam>
-    public interface IDevice<T>
+    public interface IDevice
     {
         /// <summary>
         /// Data setters for total loose coupled interfaces.
         /// </summary>
-        IDataface<T> Dataface { get; }
+        IDataface Dataface { get; }
     }
 }

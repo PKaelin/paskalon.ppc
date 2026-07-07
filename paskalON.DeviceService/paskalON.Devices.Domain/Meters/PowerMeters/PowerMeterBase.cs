@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface.C37s;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
-using paskalON.Devices.Domain.Contracts;
 using paskalON.Devices.Domain.Ders;
-using paskalON.Domains.Contracts;
 using paskalON.PhysicalUnits.Electricals.Energies;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
@@ -23,7 +22,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
     /// <remarks>
     /// A power meter measures electrical values (e.g., active/reactive power in watts/vars, voltage, frequency, and power factor).
     /// </remarks>
-    public abstract class PowerMeterBase : DerDeviceBase<PowerMeterBase>, IPowerMeter<PowerMeterBase>, INotifyPropertyChanged
+    public abstract class PowerMeterBase : DerDeviceBase, IPowerMeter, INotifyPropertyChanged
     {
         /// <summary>
         /// Power meter configuration.
@@ -34,7 +33,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// Power meter device instance that communicates with the device.
         /// </summary>
-        private readonly IPowerMeter<PowerMeterBase> _device;
+        private readonly IPowerMeter _device;
 
 
         /// <summary>
@@ -525,7 +524,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <param name="config">The power meter configuration.</param>
         /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        public PowerMeterBase(ILogger logger, PowerMeterBaseConfig config, IMetricsPublisher<PowerMeterBase> publisher, IPowerMeter<PowerMeterBase> device)
+        public PowerMeterBase(ILogger logger, PowerMeterBaseConfig config, IMetricsPublisher publisher, IPowerMeter device)
             : base(logger, config, publisher, device)
         {
             ArgumentNullException.ThrowIfNull(config);
@@ -534,7 +533,9 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
 
             _config = config;
             _device = device;
-            RegisterMetrics(publisher);
+
+            RegisterMetrics();
+            RegisterDataface();
         }
 
 
@@ -562,7 +563,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        protected override void RegisterMetrics(IMetricsPublisher<PowerMeterBase> metricsPublisher)
+        protected override void RegisterMetrics()
         {
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
             {
@@ -571,47 +572,47 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
             };
 
             // Initialize metrics
-            metricsPublisher.Initialize("PowerMeter", tags);
+            MetricsPublisher.Initialize("PowerMeter", tags);
             // MetricsFactorClass1
-            metricsPublisher.Register<bool>(nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(Frequency), MetricType.Gauge, x => x.Frequency, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(PowerFactor), MetricType.Gauge, x => x.PowerFactor, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, bool>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(Frequency), MetricType.Gauge, x => x.Frequency, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(PowerFactor), MetricType.Gauge, x => x.PowerFactor, _config.MetricsFactorClass1);
             // Power A-C
-            metricsPublisher.Register<double>(nameof(ActivePower), MetricType.Gauge, x => x.ActivePowerValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ReactivePower), MetricType.Gauge, x => x.ReactivePowerValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ApparentPower), MetricType.Gauge, x => x.ApparentPowerValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ActivePower), MetricType.Gauge, x => x.ActivePowerValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ReactivePower), MetricType.Gauge, x => x.ReactivePowerValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ApparentPower), MetricType.Gauge, x => x.ApparentPowerValue, _config.MetricsFactorClass1);
             // Voltage
-            metricsPublisher.Register<double>(nameof(VoltageA), MetricType.Gauge, x => x.VoltageA, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltageAngleA), MetricType.Gauge, x => x.VoltageAngleA, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltageB), MetricType.Gauge, x => x.VoltageB, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltageAngleB), MetricType.Gauge, x => x.VoltageAngleB, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltageC), MetricType.Gauge, x => x.VoltageC, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltageAngleC), MetricType.Gauge, x => x.VoltageAngleC, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltagePositiveSequence), MetricType.Gauge, x => x.VoltagePositiveSequence, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltagePositiveSequenceAngle), MetricType.Gauge, x => x.VoltagePositiveSequenceAngle, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltageAB), MetricType.Gauge, x => x.VoltageAB, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltageBC), MetricType.Gauge, x => x.VoltageBC, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltageCA), MetricType.Gauge, x => x.VoltageCA, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(VoltageLLAvg), MetricType.Gauge, x => x.VoltageLLAvg, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageA), MetricType.Gauge, x => x.VoltageA, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageAngleA), MetricType.Gauge, x => x.VoltageAngleA, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageB), MetricType.Gauge, x => x.VoltageB, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageAngleB), MetricType.Gauge, x => x.VoltageAngleB, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageC), MetricType.Gauge, x => x.VoltageC, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageAngleC), MetricType.Gauge, x => x.VoltageAngleC, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltagePositiveSequence), MetricType.Gauge, x => x.VoltagePositiveSequence, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltagePositiveSequenceAngle), MetricType.Gauge, x => x.VoltagePositiveSequenceAngle, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageAB), MetricType.Gauge, x => x.VoltageAB, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageBC), MetricType.Gauge, x => x.VoltageBC, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageCA), MetricType.Gauge, x => x.VoltageCA, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageLLAvg), MetricType.Gauge, x => x.VoltageLLAvg, _config.MetricsFactorClass1);
             // Current
-            metricsPublisher.Register<double>(nameof(CurrentA), MetricType.Gauge, x => x.CurrentA, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(CurrentAngleA), MetricType.Gauge, x => x.CurrentAngleA, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(CurrentB), MetricType.Gauge, x => x.CurrentB, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(CurrentAngleB), MetricType.Gauge, x => x.CurrentAngleB, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(CurrentC), MetricType.Gauge, x => x.CurrentC, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(CurrentAngleC), MetricType.Gauge, x => x.CurrentAngleC, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentA), MetricType.Gauge, x => x.CurrentA, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentAngleA), MetricType.Gauge, x => x.CurrentAngleA, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentB), MetricType.Gauge, x => x.CurrentB, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentAngleB), MetricType.Gauge, x => x.CurrentAngleB, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentC), MetricType.Gauge, x => x.CurrentC, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentAngleC), MetricType.Gauge, x => x.CurrentAngleC, _config.MetricsFactorClass1);
             // Power A-C
-            metricsPublisher.Register<double>(nameof(ActivePowerA), MetricType.Gauge, x => x.ActivePowerAValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ActivePowerB), MetricType.Gauge, x => x.ActivePowerBValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ActivePowerC), MetricType.Gauge, x => x.ActivePowerCValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ReactivePowerA), MetricType.Gauge, x => x.ReactivePowerAValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ReactivePowerB), MetricType.Gauge, x => x.ReactivePowerBValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ReactivePowerC), MetricType.Gauge, x => x.ReactivePowerCValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ActivePowerA), MetricType.Gauge, x => x.ActivePowerAValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ActivePowerB), MetricType.Gauge, x => x.ActivePowerBValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ActivePowerC), MetricType.Gauge, x => x.ActivePowerCValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ReactivePowerA), MetricType.Gauge, x => x.ReactivePowerAValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ReactivePowerB), MetricType.Gauge, x => x.ReactivePowerBValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ReactivePowerC), MetricType.Gauge, x => x.ReactivePowerCValue, _config.MetricsFactorClass1);
             // Energy
-            metricsPublisher.Register<double>(nameof(EnergyDelivered), MetricType.Gauge, x => x.EnergyDeliveredValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(EnergyReceived), MetricType.Gauge, x => x.EnergyReceivedValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ReactiveEnergyDelivered), MetricType.Gauge, x => x.ReactiveEnergyDeliveredValue, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ReactiveEnergyReceived), MetricType.Gauge, x => x.ReactiveEnergyReceivedValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(EnergyDelivered), MetricType.Gauge, x => x.EnergyDeliveredValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(EnergyReceived), MetricType.Gauge, x => x.EnergyReceivedValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ReactiveEnergyDelivered), MetricType.Gauge, x => x.ReactiveEnergyDeliveredValue, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ReactiveEnergyReceived), MetricType.Gauge, x => x.ReactiveEnergyReceivedValue, _config.MetricsFactorClass1);
             // MetricsFactorClass2
             // MetricsFactorClass3
         }
@@ -620,46 +621,76 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        protected override void RegisterDataface(IDataface<PowerMeterBase> dataface)
+        protected override void RegisterDataface()
         {
+            PowerMeterMapC37Config? c37Config = _config.PowerMeterDeviceConfig.PowerMeterMapC37Config;
+
             // C37 data interface is only using names which we have in this base class.
             // Modbus data interface uses register numbers, scaling, etc. and therefore should be registered in a manufacturer class.
-            if (_config.PowerMeterDeviceConfig.PowerMeterMapC37Config != null)
+            if (c37Config != null)
             {
                 // Active power
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ActivePower, (x, v) => x.ActivePowerValue = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ActivePowerA, (x, v) => x.ActivePowerAValue = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ActivePowerB, (x, v) => x.ActivePowerBValue = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ActivePowerC, (x, v) => x.ActivePowerCValue = v));
+                if (string.IsNullOrEmpty(c37Config.ActivePower) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePower, (x, v) => x.ActivePowerValue = v));
+                if (string.IsNullOrEmpty(c37Config.ActivePowerA) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePowerA, (x, v) => x.ActivePowerAValue = v));
+                if (string.IsNullOrEmpty(c37Config.ActivePowerB) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePowerB, (x, v) => x.ActivePowerBValue = v));
+                if (string.IsNullOrEmpty(c37Config.ActivePowerC) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePowerC, (x, v) => x.ActivePowerCValue = v));
                 // Reactive power
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ReactivePower, (x, v) => x.ReactivePowerValue = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ReactivePowerA, (x, v) => x.ReactivePowerAValue = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ReactivePowerB, (x, v) => x.ReactivePowerBValue = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ReactivePowerC, (x, v) => x.ReactivePowerCValue = v));
+                if (string.IsNullOrEmpty(c37Config.ReactivePower) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePower, (x, v) => x.ReactivePowerValue = v));
+                if (string.IsNullOrEmpty(c37Config.ReactivePowerA) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePowerA, (x, v) => x.ReactivePowerAValue = v));
+                if (string.IsNullOrEmpty(c37Config.ReactivePowerB) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePowerB, (x, v) => x.ReactivePowerBValue = v));
+                if (string.IsNullOrEmpty(c37Config.ReactivePowerC) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePowerC, (x, v) => x.ReactivePowerCValue = v));
                 // Apparent power
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ApparentPower, (x, v) => x.ApparentPowerValue = v));
+                if (string.IsNullOrEmpty(c37Config.ApparentPower) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ApparentPower, (x, v) => x.ApparentPowerValue = v));
                 // Current and voltage
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.CurrentA, (x, v) => x.CurrentA = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.CurrentAngleA, (x, v) => x.CurrentAngleA = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.VoltageA, (x, v) => x.VoltageA = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.VoltageAngleA, (x, v) => x.VoltageAngleA = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.CurrentB, (x, v) => x.CurrentB = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.CurrentAngleB, (x, v) => x.CurrentAngleB = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.VoltageB, (x, v) => x.VoltageB = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.VoltageAngleB, (x, v) => x.VoltageAngleB = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.CurrentC, (x, v) => x.CurrentC = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.CurrentAngleC, (x, v) => x.CurrentAngleC = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.VoltageC, (x, v) => x.VoltageC = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.VoltageAngleC, (x, v) => x.VoltageAngleC = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.VoltagePositiveSequence, (x, v) => x.VoltagePositiveSequence = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.VoltagePositiveSequenceAngle, (x, v) => x.VoltagePositiveSequenceAngle = v));
+                if (string.IsNullOrEmpty(c37Config.CurrentA) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentA, (x, v) => x.CurrentA = v));
+                if (string.IsNullOrEmpty(c37Config.CurrentAngleA) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleA, (x, v) => x.CurrentAngleA = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageA) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageA, (x, v) => x.VoltageA = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageAngleA) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleA, (x, v) => x.VoltageAngleA = v));
+                if (string.IsNullOrEmpty(c37Config.CurrentB) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentB, (x, v) => x.CurrentB = v));
+                if (string.IsNullOrEmpty(c37Config.CurrentAngleB) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleB, (x, v) => x.CurrentAngleB = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageB) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageB, (x, v) => x.VoltageB = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageAngleB) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleB, (x, v) => x.VoltageAngleB = v));
+                if (string.IsNullOrEmpty(c37Config.CurrentC) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentC, (x, v) => x.CurrentC = v));
+                if (string.IsNullOrEmpty(c37Config.CurrentAngleC) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleC, (x, v) => x.CurrentAngleC = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageC) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageC, (x, v) => x.VoltageC = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageAngleC) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleC, (x, v) => x.VoltageAngleC = v));
+                if (string.IsNullOrEmpty(c37Config.VoltagePositiveSequence) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltagePositiveSequence, (x, v) => x.VoltagePositiveSequence = v));
+                if (string.IsNullOrEmpty(c37Config.VoltagePositiveSequenceAngle) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltagePositiveSequenceAngle, (x, v) => x.VoltagePositiveSequenceAngle = v));
                 // Energy
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.EnergyDelivered, (x, v) => x.EnergyDeliveredValue = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.EnergyReceived, (x, v) => x.EnergyReceivedValue = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ReactiveEnergyDelivered, (x, v) => x.ReactiveEnergyDeliveredValue = v));
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.ReactiveEnergyReceived, (x, v) => x.ReactiveEnergyReceivedValue = v));
+                if (string.IsNullOrEmpty(c37Config.EnergyDelivered) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.EnergyDelivered, (x, v) => x.EnergyDeliveredValue = v));
+                if (string.IsNullOrEmpty(c37Config.EnergyReceived) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.EnergyReceived, (x, v) => x.EnergyReceivedValue = v));
+                if (string.IsNullOrEmpty(c37Config.ReactiveEnergyDelivered) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactiveEnergyDelivered, (x, v) => x.ReactiveEnergyDeliveredValue = v));
+                if (string.IsNullOrEmpty(c37Config.ReactiveEnergyReceived) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactiveEnergyReceived, (x, v) => x.ReactiveEnergyReceivedValue = v));
                 // Misc
-                dataface.Register<IC37DataFrame<PowerMeterBase>>(r => r.Register<double?>(_config.PowerMeterDeviceConfig.PowerMeterMapC37Config.Frequency, (x, v) => x.Frequency = v));
+                if (string.IsNullOrEmpty(c37Config.Frequency) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.Frequency, (x, v) => x.Frequency = v));
             }
         }
 

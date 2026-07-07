@@ -9,8 +9,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
     /// <summary>
     /// Power conversion system interface for the instances that communicate with the device.
     /// </summary>
-    /// <typeparam name="T">The type of the PCS.</typeparam>
-    public interface IPowerConversionSystem<T> : IDevice<T>
+    public interface IPowerConversionSystem : IDevice
     {
         /// <summary>
         /// Starts the power conversion system.
@@ -33,5 +32,19 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// If not standby active power is provided, the PCS will use the minimum active power target configured in the PCS.
         /// </remarks>
         void Standby(double? standbyActivePower = null);
+
+
+        /// <summary>
+        /// Sets the active power target.
+        /// </summary>
+        /// <param name="value">Active power value (Watts).</param>
+        public void SetActivePowerTarget(double? value);
+
+
+        /// <summary>
+        /// Sets the reactive power target.
+        /// </summary>
+        /// <param name="value">Reactive power value (VArs).</param>
+        public void SetReactivePowerTarget(double? value);
     }
 }

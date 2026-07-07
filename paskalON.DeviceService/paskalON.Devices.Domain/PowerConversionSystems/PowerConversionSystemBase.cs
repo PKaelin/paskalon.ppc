@@ -19,18 +19,18 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
     /// <summary>
     /// Power Conversion System (PCS) base class for all PCSs.
     /// </summary>
-    public abstract class PowerConversionSystemBase : DerDeviceBase<PowerConversionSystemBase>, IPowerConversionSystem<PowerConversionSystemBase>, INotifyPropertyChanged
+    public abstract class PowerConversionSystemBase : DerDeviceBase, IPowerConversionSystem, INotifyPropertyChanged
     {
         /// <summary>
         /// Power conversion system configuration of this instance.
         /// </summary>
-        private readonly PowerConversionSystemConfig _config;
+        protected readonly PowerConversionSystemConfig _config;
 
 
         /// <summary>
         /// Power conversion system device instance that communicates with the device.
         /// </summary>
-        private readonly IPowerConversionSystem<PowerConversionSystemBase> _device;
+        protected readonly IPowerConversionSystem _device;
 
 
         /// <summary>
@@ -146,7 +146,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public bool IsInMaintenanceMode { get => DerUnit.IsInMaintenanceMode; }
 
 
-
         private double? _activePowerTarget;
         /// <summary>
         /// Current active power target in Watts
@@ -157,13 +156,22 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
-        private double? _activePower;
+        /// <summary>
+        /// Current active power output value in Watts
+        /// </summary>
+        public double? ActivePowerValue
+        {
+            get { lock (dataLock) { return field; } }
+            set { lock (dataLock) { field = value; } }
+        }
+
+
         /// <summary>
         /// Current active power output in Watts
         /// </summary>
         public ActivePower? ActivePower
         {
-            get { lock (dataLock) { return (_activePower is null) ? null : new ActivePower((double)_activePower); } }
+            get { return (ActivePowerValue is null) ? null : new ActivePower((double)ActivePowerValue); }
         }
 
 
@@ -177,13 +185,23 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
-        private double? _reactivePower;
+
+        /// <summary>
+        /// Current reactive power output value in Vars
+        /// </summary>
+        public double? ReactivePowerValue
+        {
+            get { lock (dataLock) { return field; } }
+            set { lock (dataLock) { field = value; } }
+        }
+
+
         /// <summary>
         /// Current reactive power output in Vars
         /// </summary>
         public ReactivePower? ReactivePower
         {
-            get { lock (dataLock) { return (_reactivePower is null) ? null : new ReactivePower((double)_reactivePower); } }
+            get { lock (dataLock) { return (ReactivePowerValue is null) ? null : new ReactivePower((double)ReactivePowerValue); } }
         }
 
 
@@ -335,18 +353,20 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <param name="derUnit">The parent DER unit.</param>
         /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        public PowerConversionSystemBase(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher<PowerConversionSystemBase> publisher,
-            IPowerConversionSystem<PowerConversionSystemBase> device) : base(logger, config, publisher, device)
+        public PowerConversionSystemBase(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher publisher,
+            IPowerConversionSystem device) : base(logger, config, publisher, device)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(derUnit);
             ArgumentNullException.ThrowIfNull(publisher);
             ArgumentNullException.ThrowIfNull(device);
+            ArgumentNullException.ThrowIfNull(device.Dataface);
 
             _config = config;
             DerUnit = derUnit;
             _device = device;
-            RegisterMetrics(publisher);
+            RegisterMetrics();
+            RegisterDataface();
         }
 
 
@@ -380,6 +400,39 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public void SetActivePowerTarget(double? value)
+        {
+            lock (dataLock)
+            {
+                if (_activePowerTarget != value)
+                {
+                    _activePowerTarget = value;
+                    _logger.LogInformation("{Name} - Set active power target to: {activePowerTarget}", Name, _activePowerTarget);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="value">Reactive power value (VArs).</param>
+        public void SetReactivePowerTarget(double? value)
+        {
+            lock (dataLock)
+            {
+                if (_reactivePowerTarget != value)
+                {
+                    _reactivePowerTarget = value;
+                    _logger.LogInformation("{Name} - Set reactive power target to: {reactivePowerTarget}", Name, _reactivePowerTarget);
+                }
+            }
+        }
+
+
 
         /// <summary>
         /// Trigger PCS state change events.
@@ -402,10 +455,11 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             {
                 if (ZeroOutputOnCommLoss == true)
                 {
-                    SetActivePower(0);
-                    SetReactivePower(0);
+                    ActivePowerValue = 0;
+                    ReactivePowerValue = 0;
                     SetActivePowerTarget(0);
                     SetReactivePowerTarget(0);
+                    _logger.LogInformation("{Name} - Set power targets to 0 due as ZeroOutputOnCommLoss is true on CommunicationError", Name);
                 }
 
                 _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
@@ -431,65 +485,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-
-        /// <summary>
-        /// Sets the active power.
-        /// </summary>
-        /// <param name="value">Active power value (Watts).</param>
-        protected void SetActivePower(double? value)
-        {
-            lock (dataLock)
-            {
-                _activePower = value;
-            }
-        }
-
-
-        /// <summary>
-        /// Sets the reactive power.
-        /// </summary>
-        /// <param name="value">Reactive power value (VArs).</param>
-        protected void SetReactivePower(double? value)
-        {
-            lock (dataLock)
-            {
-                _reactivePower = value;
-            }
-        }
-
-
-        /// <summary>
-        /// Sets the active power target.
-        /// </summary>
-        /// <param name="value">Active power value (Watts).</param>
-        protected void SetActivePowerTarget(double? value)
-        {
-            lock (dataLock)
-            {
-                if (_activePowerTarget != value)
-                {
-                    _activePowerTarget = value;
-                    _logger.LogInformation("{Name} - Set active power target to: {activePowerTarget}", Name, _activePowerTarget);
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Sets the reactive power target.
-        /// </summary>
-        /// <param name="value">Reactive power value (VArs).</param>
-        protected void SetReactivePowerTarget(double? value)
-        {
-            lock (dataLock)
-            {
-                if (_reactivePowerTarget != value)
-                {
-                    _reactivePowerTarget = value;
-                    _logger.LogInformation("{Name} - Set reactive power target to: {reactivePowerTarget}", Name, _reactivePowerTarget);
-                }
-            }
-        }
 
 
         /// <summary>
@@ -537,7 +532,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        protected override void RegisterMetrics(IMetricsPublisher<PowerConversionSystemBase> metricsPublisher)
+        protected override void RegisterMetrics()
         {
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
             {
@@ -546,28 +541,28 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             };
 
             // Initialize metrics
-            metricsPublisher.Initialize("PCS", tags);
+            MetricsPublisher.Initialize("PCS", tags);
             // MetricsFactorClass1
-            metricsPublisher.Register<bool>(nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ActivePowerTarget), MetricType.Gauge, x => x.ActivePowerTarget?.Watts, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ReactivePowerTarget), MetricType.Gauge, x => x.ReactivePowerTarget?.VoltAmperesReactive, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ActivePower), MetricType.Gauge, x => x.ActivePower?.Watts, _config.MetricsFactorClass1);
-            metricsPublisher.Register<double>(nameof(ReactivePower), MetricType.Gauge, x => x.ReactivePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActivePowerTarget), MetricType.Gauge, x => x.ActivePowerTarget?.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactivePowerTarget), MetricType.Gauge, x => x.ReactivePowerTarget?.VoltAmperesReactive, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActivePower), MetricType.Gauge, x => x.ActivePower?.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactivePower), MetricType.Gauge, x => x.ReactivePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
             // MetricsFactorClass2
-            metricsPublisher.Register<PcsState>(nameof(State), MetricType.Gauge, x => x.State, _config.MetricsFactorClass2);
-            metricsPublisher.Register<bool>(nameof(HasActiveAlarms), MetricType.Gauge, x => x.HasActiveAlarms, _config.MetricsFactorClass2);
-            metricsPublisher.Register<bool>(nameof(HasActiveWarnings), MetricType.Gauge, x => x.HasActiveWarnings, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double>(nameof(VoltagePhaseAToB), MetricType.Gauge, x => x.VoltagePhaseAToB, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double>(nameof(VoltagePhaseBToC), MetricType.Gauge, x => x.VoltagePhaseBToC, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double>(nameof(VoltagePhaseCToA), MetricType.Gauge, x => x.VoltagePhaseCToA, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double>(nameof(ACCurrentSum), MetricType.Gauge, x => x.ACCurrentSum, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double>(nameof(DCCurrent), MetricType.Gauge, x => x.DCCurrent, _config.MetricsFactorClass2);
-            metricsPublisher.Register<double>(nameof(DCVoltage), MetricType.Gauge, x => x.DCVoltage, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, PcsState>(this, nameof(State), MetricType.Gauge, x => x.State, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(HasActiveAlarms), MetricType.Gauge, x => x.HasActiveAlarms, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(HasActiveWarnings), MetricType.Gauge, x => x.HasActiveWarnings, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(VoltagePhaseAToB), MetricType.Gauge, x => x.VoltagePhaseAToB, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(VoltagePhaseBToC), MetricType.Gauge, x => x.VoltagePhaseBToC, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(VoltagePhaseCToA), MetricType.Gauge, x => x.VoltagePhaseCToA, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ACCurrentSum), MetricType.Gauge, x => x.ACCurrentSum, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(DCCurrent), MetricType.Gauge, x => x.DCCurrent, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(DCVoltage), MetricType.Gauge, x => x.DCVoltage, _config.MetricsFactorClass2);
             // MetricsFactorClass3
-            metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
+            MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
             // MetricsFactorClass4
-            metricsPublisher.Register<double>(nameof(LineFrequency), MetricType.Gauge, x => x.LineFrequency, _config.MetricsFactorClass4);
-            metricsPublisher.Register<double>(nameof(StandbyActivePower), MetricType.Gauge, x => x.StandbyActivePower, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(LineFrequency), MetricType.Gauge, x => x.LineFrequency, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(StandbyActivePower), MetricType.Gauge, x => x.StandbyActivePower, _config.MetricsFactorClass4);
         }
     }
 }

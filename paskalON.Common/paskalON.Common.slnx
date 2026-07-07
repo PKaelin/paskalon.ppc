@@ -8,6 +8,7 @@
     <Project Path="paskalON.PhysicalUnits.UnitTest/paskalON.PhysicalUnits.UnitTest.csproj" />
     <Project Path="paskalON.Telemetry.UnitTest/paskalON.Telemetry.UnitTest.csproj" Id="fe1e2884-901e-4517-a527-3feed5d0486d" />
   </Folder>
+  <Project Path="paskalON.Dataface/paskalON.Dataface.csproj" Id="0d59507d-03de-441a-af88-59f15348c1d9" />
   <Project Path="paskalON.Domains/paskalON.Domains.csproj" />
   <Project Path="paskalON.Maths/paskalON.Maths.csproj" />
   <Project Path="paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />

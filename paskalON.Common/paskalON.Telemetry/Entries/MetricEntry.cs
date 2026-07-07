@@ -8,30 +8,38 @@ namespace paskalON.Telemetry.Entries
     /// <summary>
     /// Metric entry to store registered metric points.
     /// </summary>
-    /// <typeparam name="T">The metric type.</typeparam>
+    /// <typeparam name="TDevice">The metric type.</typeparam>
     /// <typeparam name="TProperty">The property type.</typeparam>
-    public class MetricEntry<T, TProperty> : IMetricEntry<T> where T : notnull where TProperty : struct
+    public class MetricEntry<TDevice, TProperty> : IMetricEntry where TProperty : struct
     {
         /// <summary>
         /// Function with which we can get the value to then update the metric with.
+        /// Accepts an object (the instance) and returns the nullable property value.
         /// </summary>
-        private readonly Func<T, TProperty?> _getter;
+        private readonly Func<TDevice, TProperty?> _getter;
 
         /// <summary>
         /// Action with which we can update the metric (instrument) value.
         /// </summary>
         private readonly Action<TProperty> _updater;
 
+
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public required string Name { get; init; }
+        public object Instance { get; init; }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public required int Interval { get; init; }
+        public string Name { get; init; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public int Interval { get; init; }
 
 
         /// <summary>
@@ -43,7 +51,7 @@ namespace paskalON.Telemetry.Entries
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public required Instrument Instrument { get; init; }
+        public Instrument Instrument { get; init; }
 
 
         /// <summary>
@@ -52,9 +60,18 @@ namespace paskalON.Telemetry.Entries
         /// <param name="instrument">The metric instrument.</param>
         /// <param name="getter">The getter function to get the value with.</param>
         /// <exception cref="NotImplementedException">Throw an exception when the property type is not implemented.</exception>
-        public MetricEntry(Instrument instrument, Func<T, TProperty?> getter)
+        public MetricEntry(object instance, string name, Instrument instrument, MetricType metricType, Func<TDevice, TProperty?> getter, int interval)
         {
+            ArgumentNullException.ThrowIfNull(instance);
+            ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            ArgumentNullException.ThrowIfNull(getter);
+
+            Instance = instance;
+            Name = name;
+            Instrument = instrument;
+            MetricType = metricType;
             _getter = getter;
+            Interval = interval;
 
             if (instrument is Counter<TProperty> counter)
             {
@@ -82,15 +99,20 @@ namespace paskalON.Telemetry.Entries
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Update(T instance)
+        public void Update()
         {
-            TProperty? property = _getter(instance);
+            if (Instance is not TDevice typedDevice)
+            {
+                throw new ArgumentException($"{nameof(IMetricEntry)} must be of type {typeof(TDevice).Name}", nameof(Instance));
+            }
+
+            TProperty? property = _getter((TDevice)Instance);
+
             // Do not update nullable values.
             if (property != null)
             {
                 _updater((TProperty)property);
             }
         }
-
     }
 }

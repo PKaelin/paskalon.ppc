@@ -31,8 +31,8 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <param name="genericModbusEntries">List of generic Modbus entries.</param>
         /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        public CircuitBreaker(ILogger logger, CircuitBreakerConfig config, List<GenericModbusEntryBase> genericModbusEntries, IMetricsPublisher<CircuitBreaker> publisher, IGenericModbusDevice<CircuitBreaker> device)
-            : base(logger, config, genericModbusEntries, (IMetricsPublisher<GenericModbusDeviceBase>)publisher, (IGenericModbusDevice<GenericModbusDeviceBase>)device)
+        public CircuitBreaker(ILogger logger, CircuitBreakerConfig config, List<GenericModbusEntryBase> genericModbusEntries, IMetricsPublisher publisher,
+            IGenericModbusDevice device) : base(logger, config, genericModbusEntries, publisher, device)
         {
             ArgumentNullException.ThrowIfNull(config);
 

@@ -47,6 +47,7 @@ namespace paskalON.Devices.Domain.Ders
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(nameBase);
+            ArgumentOutOfRangeException.ThrowIfNullOrWhiteSpace(nameBase.Name);
 
             _logger = logger;
             _nameBase = nameBase;

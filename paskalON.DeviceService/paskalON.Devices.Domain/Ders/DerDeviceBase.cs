@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface;
 using paskalON.Devices.Domain.Configs;
-using paskalON.Domains.Contracts;
 using paskalON.Telemetry;
 
 namespace paskalON.Devices.Domain.Ders
@@ -14,19 +14,18 @@ namespace paskalON.Devices.Domain.Ders
     /// <summary>
     /// Base class for all distributed energy resources (DERs) that symbolizes a device.
     /// </summary>
-    /// <typeparam name="T">The type of the DER device.</typeparam>
-    public abstract class DerDeviceBase<T> : DerBase where T : notnull
+    public abstract class DerDeviceBase : DerBase
     {
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public IMetricsPublisher<T> MetricsPublisher { get; private set; }
+        public IMetricsPublisher MetricsPublisher { get; private set; }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public IDataface<T> Dataface { get; private set; }
+        public IDataface Dataface { get; private set; }
 
 
         /// <summary>
@@ -36,11 +35,12 @@ namespace paskalON.Devices.Domain.Ders
         /// <param name="nameBase">The name base configuration.</param>
         /// <param name="publisher">The metrics publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        protected DerDeviceBase(ILogger logger, NameBase nameBase, IMetricsPublisher<T> publisher, IDevice<T> device) : base(logger, nameBase)
+        protected DerDeviceBase(ILogger logger, NameBase nameBase, IMetricsPublisher publisher, IDevice device) : base(logger, nameBase)
         {
             ArgumentNullException.ThrowIfNull(nameBase);
             ArgumentNullException.ThrowIfNull(publisher);
             ArgumentNullException.ThrowIfNull(device);
+            ArgumentNullException.ThrowIfNull(device.Dataface);
 
             MetricsPublisher = publisher;
             Dataface = device.Dataface;
@@ -50,14 +50,12 @@ namespace paskalON.Devices.Domain.Ders
         /// <summary>
         /// Register metrics at the publisher.
         /// </summary>
-        /// <param name="metricsPublisher">The metrics publisher interface.</param>
-        protected abstract void RegisterMetrics(IMetricsPublisher<T> metricsPublisher);
+        protected abstract void RegisterMetrics();
 
 
         /// <summary>
         /// Register the data interface at the property setter.
         /// </summary>
-        /// <param name="dataface">The data face interface with property setter.</param>
-        protected abstract void RegisterDataface(IDataface<T> dataface);
+        protected abstract void RegisterDataface();
     }
 }

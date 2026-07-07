@@ -9,8 +9,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
     /// <summary>
     /// Battery bank interface for the instances that communicate with the device.
     /// </summary>
-    /// <typeparam name="T">The type of the battery bank.</typeparam>
-    public interface IBatteryBank<T> : IDevice<T>
+    public interface IBatteryBank : IDevice
     {
         /// <summary>
         /// Connects the battery bank and starts communicating once in state connected.

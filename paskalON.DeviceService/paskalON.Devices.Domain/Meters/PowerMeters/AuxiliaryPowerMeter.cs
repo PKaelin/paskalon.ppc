@@ -33,10 +33,11 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <param name="config">The auxiliary power meter configuration.</param>
         /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        public AuxiliaryPowerMeter(ILogger logger, AuxiliaryPowerMeterConfig config, IMetricsPublisher<AuxiliaryPowerMeter> publisher, IPowerMeter<AuxiliaryPowerMeter> device)
-            : base(logger, config, (IMetricsPublisher<PowerMeterBase>)publisher, (IPowerMeter<PowerMeterBase>)device)
+        public AuxiliaryPowerMeter(ILogger logger, AuxiliaryPowerMeterConfig config, IMetricsPublisher publisher, IPowerMeter device)
+            : base(logger, config, publisher, device)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
         }

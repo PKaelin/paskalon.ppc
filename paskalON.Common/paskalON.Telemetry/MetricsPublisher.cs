@@ -10,12 +10,12 @@ namespace paskalON.Telemetry
     /// Metrics publisher publishes metrics using the .NET System.Diagnostics.Metrics namespace.
     /// </summary>
     /// <typeparam name="T">Type of the instance.</typeparam>
-    public class MetricsPublisher<T> : IMetricsPublisher<T> where T : notnull
+    public class MetricsPublisher : IMetricsPublisher
     {
         /// <summary>
         /// Caches the metrics structure.
         /// </summary>
-        private readonly Dictionary<string, IMetricEntry<T>> _metrics = new Dictionary<string, IMetricEntry<T>>();
+        private readonly Dictionary<string, IMetricEntry> _metrics = new Dictionary<string, IMetricEntry>();
 
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace paskalON.Telemetry
 
             if (Meter != null)
             {
-                throw new ApplicationException($"Metrics publisher has already been initialized. Type: {typeof(T).Name}");
+                throw new ApplicationException($"Metrics publisher has already been initialized. Measurement: {measurement}");
             }
 
             Meter = new Meter(measurement);
@@ -56,16 +56,20 @@ namespace paskalON.Telemetry
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Register<TProperty>(string name, MetricType metricType, Func<T, TProperty?> getter, int interval = 1) where TProperty : struct
+        public void Register<TDevice, TProperty>(TDevice instance, string name, MetricType metricType, Func<TDevice, TProperty?> getter, int interval = 1) where TProperty : struct
         {
-            if (_metrics.ContainsKey(name) == true)
-            {
-                throw new ArgumentException($"Name has to be unique when registering metrics publisher. Type: {typeof(T).Name}");
-            }
+            ArgumentNullException.ThrowIfNull(instance);
+            ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            ArgumentNullException.ThrowIfNull(getter);
 
             if (Meter == null)
             {
-                throw new ApplicationException($"Metrics publisher must be initialized first. Type: {typeof(T).Name}");
+                throw new ApplicationException($"Metrics publisher must be initialized first. Type: {typeof(TDevice).Name}");
+            }
+
+            if (_metrics.ContainsKey(name) == true)
+            {
+                throw new ArgumentException($"Name has to be unique when registering metrics publisher. Type: {typeof(TDevice).Name} Name: {name}");
             }
 
             Instrument<TProperty> instrument;
@@ -91,27 +95,28 @@ namespace paskalON.Telemetry
                 throw new NotImplementedException($"Instrument type: {metricType} is not implemented.");
             }
 
-            _metrics.Add(name, new MetricEntry<T, TProperty>(instrument, getter) { Name = name, MetricType = metricType, Instrument = instrument, Interval = interval });
+            _metrics.Add(name, new MetricEntry<TDevice, TProperty>(instance, name, instrument, metricType, getter, interval));
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Publish(T instance, int interval)
+        public virtual void Publish(int interval)
         {
             if (Meter == null)
             {
-                throw new ApplicationException($"Metrics publisher must be initialized first. Type: {typeof(T).Name}");
+                throw new ApplicationException($"Metrics publisher must be initialized first.");
             }
 
-            foreach (IMetricEntry<T> entry in _metrics.Values)
+            foreach (IMetricEntry entry in _metrics.Values)
             {
                 if (interval % entry.Interval == 0)
                 {
-                    entry.Update(instance);
+                    entry.Update();
                 }
             }
         }
     }
 }
+

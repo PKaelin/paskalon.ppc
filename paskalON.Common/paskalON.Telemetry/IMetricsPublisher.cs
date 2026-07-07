@@ -6,8 +6,7 @@ namespace paskalON.Telemetry
     /// <summary>
     /// Interface for registering and publishing metrics for a given type T.
     /// </summary>
-    /// <typeparam name="T">The type of metrics to register and publish.</typeparam>
-    public interface IMetricsPublisher<T> where T : notnull
+    public interface IMetricsPublisher
     {
         /// <summary>
         /// Initialized the metrics publisher instance.
@@ -20,7 +19,9 @@ namespace paskalON.Telemetry
         /// <summary>
         /// Registers a property with the specified name, getter function and optional interval.
         /// </summary>
+        /// <typeparam name="TDevice">The metric type.</typeparam>
         /// <typeparam name="TProperty">The type of the property to register.</typeparam>
+        /// <param name="instance">Instance to use for the update.</param>
         /// <param name="name">The name of the property.</param>
         /// <param name="metricType">Metric type <see cref="MetricType"/>.</param>
         /// <param name="getter">A function to get the value of the property from an instance of T.</param>
@@ -28,14 +29,13 @@ namespace paskalON.Telemetry
         /// /// <remarks>
         /// Syntax func: nameof(property/field), x => x.PropertyName/x.FieldName;
         /// </remarks>
-        void Register<TProperty>(string name, MetricType metricType, Func<T, TProperty?> getter, int interval = 1) where TProperty : struct;
+        void Register<TDevice, TProperty>(TDevice instance, string name, MetricType metricType, Func<TDevice, TProperty?> getter, int interval = 1) where TProperty : struct;
 
 
         /// <summary>
         /// Publishes the metrics for the given instance at the specified interval.
         /// </summary>
-        /// <param name="instance">The instance of T for which to publish metrics.</param>
         /// <param name="interval">The interval at which to publish the metrics.</param>
-        void Publish(T instance, int interval);
+        void Publish(int interval);
     }
 }

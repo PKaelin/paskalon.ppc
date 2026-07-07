@@ -10,7 +10,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
     /// Solar panel device interface for the instances that communicate with the device.
     /// </summary>
     /// <typeparam name="T">The type of the solar device.</typeparam>
-    public interface ISolarPanel<T> : IDevice<T>
+    public interface ISolarPanel : IDevice
     {
         /// <summary>
         /// Connects the solar panel and starts communicating once in state connected.

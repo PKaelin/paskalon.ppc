@@ -32,8 +32,8 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
         public AutomaticTransferSwitch(ILogger logger, AutomaticTransferSwitchConfig config, List<GenericModbusEntryBase> genericModbusEntries,
-            IMetricsPublisher<AutomaticTransferSwitch> publisher, IGenericModbusDevice<AutomaticTransferSwitch> device)
-            : base(logger, config, genericModbusEntries, (IMetricsPublisher<GenericModbusDeviceBase>)publisher, (IGenericModbusDevice<GenericModbusDeviceBase>)device)
+            IMetricsPublisher publisher, IGenericModbusDevice device)
+            : base(logger, config, genericModbusEntries, publisher, device)
         {
             ArgumentNullException.ThrowIfNull(config);
 

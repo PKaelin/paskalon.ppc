@@ -20,7 +20,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
     /// At the moment we dont integrate with solar panels.
     /// We still use a list in solar unit as we could have different brands and or types of solar panels.
     /// </remarks>
-    public abstract class SolarPanelBase : DerDeviceBase<SolarPanelBase>, ISolarPanel<SolarPanelBase>, INotifyPropertyChanged
+    public abstract class SolarPanelBase : DerDeviceBase, ISolarPanel, INotifyPropertyChanged
     {
         /// <summary>
         /// Solar panel configuration.
@@ -31,7 +31,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <summary>
         /// Solar panel device instance that communicates with the device.
         /// </summary>
-        private readonly ISolarPanel<SolarPanelBase> _device;
+        private readonly ISolarPanel _device;
 
 
         /// <summary>
@@ -131,8 +131,8 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <param name="derSolarUnit">The parent solar unit.</param>
         /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        protected SolarPanelBase(ILogger logger, SolarPanelConfig config, DerSolarUnit derSolarUnit, IMetricsPublisher<SolarPanelBase> publisher,
-            ISolarPanel<SolarPanelBase> device) : base(logger, config, publisher, device)
+        protected SolarPanelBase(ILogger logger, SolarPanelConfig config, DerSolarUnit derSolarUnit, IMetricsPublisher publisher,
+            ISolarPanel device) : base(logger, config, publisher, device)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(derSolarUnit);
@@ -142,7 +142,9 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
             _config = config;
             _device = device;
             SolarUnit = derSolarUnit;
-            RegisterMetrics(publisher);
+
+            RegisterMetrics();
+            RegisterDataface();
         }
 
 
@@ -212,7 +214,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        protected override void RegisterMetrics(IMetricsPublisher<SolarPanelBase> metricsPublisher)
+        protected override void RegisterMetrics()
         {
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
             {
@@ -221,15 +223,15 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
             };
 
             // Initialize metrics
-            metricsPublisher.Initialize("Solar", tags);
+            MetricsPublisher.Initialize("Solar", tags);
             // Solar
-            metricsPublisher.Register<bool>(nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass4);
-            metricsPublisher.Register<bool>(nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass4);
-            metricsPublisher.Register<int>(nameof(NumberOfPanels), MetricType.Gauge, x => x.NumberOfPanels, _config.MetricsFactorClass4);
-            metricsPublisher.Register<double>(nameof(MinimumVoltageSum), MetricType.Gauge, x => x.MinimumVoltageSum, _config.MetricsFactorClass4);
-            metricsPublisher.Register<double>(nameof(MaximumVoltageSum), MetricType.Gauge, x => x.MaximumVoltageSum, _config.MetricsFactorClass4);
-            metricsPublisher.Register<double>(nameof(MinimumCurrentSum), MetricType.Gauge, x => x.MinimumCurrentSum, _config.MetricsFactorClass4);
-            metricsPublisher.Register<double>(nameof(MaximumCurrentSum), MetricType.Gauge, x => x.MaximumCurrentSum, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, bool>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, int>(this, nameof(NumberOfPanels), MetricType.Gauge, x => x.NumberOfPanels, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MinimumVoltageSum), MetricType.Gauge, x => x.MinimumVoltageSum, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MaximumVoltageSum), MetricType.Gauge, x => x.MaximumVoltageSum, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MinimumCurrentSum), MetricType.Gauge, x => x.MinimumCurrentSum, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MaximumCurrentSum), MetricType.Gauge, x => x.MaximumCurrentSum, _config.MetricsFactorClass4);
         }
     }
 }

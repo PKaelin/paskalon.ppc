@@ -8,9 +8,14 @@ namespace paskalON.Telemetry.Entries
     /// <summary>
     /// Interface for metric entries.
     /// </summary>
-    /// <typeparam name="T">The metric type.</typeparam>
-    public interface IMetricEntry<T> where T : notnull
+    public interface IMetricEntry
     {
+        /// <summary>
+        /// Instance to use for the update.
+        /// </summary>
+        object Instance { get; }
+
+
         /// <summary>
         /// Name of the metric.
         /// </summary>
@@ -38,7 +43,6 @@ namespace paskalON.Telemetry.Entries
         /// <summary>
         /// Gets the value of the instance and updates the metric value.
         /// </summary>
-        /// <param name="instance">Instance from which we get the value from.</param>
-        void Update(T instance);
+        void Update();
     }
 }

@@ -31,10 +31,11 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <param name="config">The </param>
         /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        public CircuitPowerMeter(ILogger logger, CircuitPowerMeterConfig config, IMetricsPublisher<CircuitPowerMeter> publisher, IPowerMeter<CircuitPowerMeter> device)
-            : base(logger, config, (IMetricsPublisher<PowerMeterBase>)publisher, (IPowerMeter<PowerMeterBase>)device)
+        public CircuitPowerMeter(ILogger logger, CircuitPowerMeterConfig config, IMetricsPublisher publisher, IPowerMeter device)
+            : base(logger, config, publisher, device)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
         }

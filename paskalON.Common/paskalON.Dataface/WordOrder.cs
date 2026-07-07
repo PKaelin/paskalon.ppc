@@ -1,7 +1,7 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.Domains.Contracts
+namespace paskalON.Dataface
 {
     /// <summary>
     /// Defines the order in which bytes are arranged within a word for data representation.

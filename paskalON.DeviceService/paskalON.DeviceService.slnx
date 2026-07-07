@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/InitialDevelopment/">
+    <Project Path="../paskalON.Common/paskalON.Dataface/paskalON.Dataface.csproj" />
     <Project Path="../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
     <Project Path="../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
@@ -11,6 +12,7 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="paskalON.Devices.Domain.UnitTest/paskalON.Devices.Domain.UnitTest.csproj" Id="4b64dece-60a2-4aa6-b2de-135df171b224" />
     <Project Path="paskalON.Devices.Infrastructure.IntegrationTest/paskalON.Devices.Infrastructure.IntegrationTest.csproj" Id="45f71292-154f-4fe7-b9f2-ba3d62122885" />
   </Folder>
   <Project Path="paskalON.Devices.Domain.Configs/paskalON.Devices.Domain.Configs.csproj" Id="fa739d75-521d-4cc3-9317-e6c2d1b0beef" />
