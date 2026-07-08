@@ -42,7 +42,9 @@ namespace paskalON.Devices.Infrastructure.Storage
 
         // Devices DbSet
         DbSet<PowerConversionSystemDeviceConfig> PowerConversionSystemDeviceConfigs { get; set; }
+        DbSet<PowerConversionSystemDeviceCustomConfig> PowerConversionSystemDeviceCustomConfigs { get; set; }
         DbSet<BatteryBankDeviceConfig> BatteryBankDeviceConfigs { get; set; }
+        DbSet<BatteryBankDeviceCustomConfig> BatteryBankDeviceCustomConfigs { get; set; }
         DbSet<SolarPanelDeviceConfig> SolarPanelDeviceConfigs { get; set; }
         DbSet<GenericModbusDeviceConfig> GenericModbusDeviceConfigs { get; set; }
         DbSet<CircuitBreakerDeviceConfig> CircuitBreakerDeviceConfigs { get; set; }

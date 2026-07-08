@@ -42,7 +42,9 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.ModbusConnectionConfigs.Add(sample.ModbusConnectionConfig!);
                 // Devices
                 context.PowerConversionSystemDeviceConfigs.Add(sample.PowerConversionSystemDeviceConfig!);
+                context.PowerConversionSystemDeviceCustomConfigs.Add(sample.PowerConversionSystemDeviceCustomConfig!);
                 context.BatteryBankDeviceConfigs.Add(sample.BatteryBankDeviceConfig!);
+                context.BatteryBankDeviceCustomConfigs.Add(sample.BatteryBankDeviceCustomConfig!);
                 // Configurations
                 context.DerConfigs.Add(sample.DerConfig!);
                 context.DerGroupConfigs.Add(sample.DerGroupConfig!);

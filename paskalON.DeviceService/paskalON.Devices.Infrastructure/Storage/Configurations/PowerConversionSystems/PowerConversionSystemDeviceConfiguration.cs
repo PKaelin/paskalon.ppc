@@ -15,6 +15,11 @@ namespace paskalON.Devices.Infrastructure.Storage.Configurations.PowerConversion
             builder.Property(x => x.NameplateMaximumActivePower).IsRequired();
             builder.Property(x => x.NameplateMaximumReactivePower).IsRequired();
             builder.Property(x => x.NameplateMaximumApparentPower).IsRequired();
+
+            builder.HasMany(x => x.Customs)
+                .WithOne(x => x.PowerConversionSystemDeviceConfig)
+                .HasForeignKey(x => x.PowerConversionSystemDeviceConfigId)
+                .IsRequired();
         }
     }
 }

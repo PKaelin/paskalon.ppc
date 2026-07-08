@@ -9,6 +9,12 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
     public class BatteryBankDeviceConfig : NameBase
     {
         /// <summary>
+        /// Child relationship to a list of custom configurations.
+        /// </summary>
+        public ICollection<BatteryBankDeviceCustomConfig> Customs { get; set; } = new List<BatteryBankDeviceCustomConfig>();
+
+
+        /// <summary>
         /// The class name of the type to instantiate.
         /// This uniquely identifies the eventually used type of component. (e.g. a ManufacturerPcs, ManufacturerBattery etc.).
         /// </summary>

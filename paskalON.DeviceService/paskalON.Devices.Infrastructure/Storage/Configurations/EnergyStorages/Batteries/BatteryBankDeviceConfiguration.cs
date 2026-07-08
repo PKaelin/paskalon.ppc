@@ -12,6 +12,11 @@ namespace paskalON.Devices.Infrastructure.Storage.Configurations.EnergyStorages.
         public void Configure(EntityTypeBuilder<BatteryBankDeviceConfig> builder)
         {
             builder.Property(x => x.ClassName).IsRequired();
+
+            builder.HasMany(x => x.Customs)
+                .WithOne(x => x.BatteryBankDeviceConfig)
+                .HasForeignKey(x => x.BatteryBankDeviceConfigId)
+                .IsRequired();
         }
     }
 }

@@ -228,18 +228,9 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// AC Current or AC Current sum in case of current phase A, B, C
+        /// DC Current or calculated DC Current
         /// </summary>
-        public double? ACCurrentSum
-        {
-            get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; } }
-        }
-
-
-        /// <summary>
-        /// DC Current
-        /// </summary>
+        /// </remarks>
         public double? DCCurrent
         {
             get { lock (dataLock) { return field; } }
@@ -248,8 +239,8 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// DC Voltage.
-        /// </summary>
+        /// DC Voltage or calculated DC Voltage.
+        /// </summary>      
         public double? DCVoltage
         {
             get { lock (dataLock) { return field; } }
@@ -258,34 +249,23 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// AC Phase B to A voltage in volts.
+        /// AC Current or calculated AC Current
         /// </summary>
-        public double? VoltagePhaseAToB
+        public double? ACCurrent
         {
             get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; } SetAcBreakerStatuses(); }
+            set { lock (dataLock) { field = value; } }
         }
 
 
         /// <summary>
-        /// AC Phase C to B voltage in volts.
+        /// AC Voltage or calculated AC Voltage
         /// </summary>
-        public double? VoltagePhaseBToC
+        public double? ACVoltage
         {
             get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; SetAcBreakerStatuses(); } }
+            set { lock (dataLock) { field = value; } }
         }
-
-
-        /// <summary>
-        /// AC Phase A to C voltage in volts.
-        /// </summary>
-        public double? VoltagePhaseCToA
-        {
-            get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; SetAcBreakerStatuses(); } }
-        }
-
 
 
         /// <summary>
@@ -486,16 +466,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
-
-        /// <summary>
-        /// Set the AC breaker status according to the voltage phases
-        /// </summary>
-        protected void SetAcBreakerStatuses()
-        {
-            IsACBreakerClosed = (VoltagePhaseAToB != 0.0 || VoltagePhaseBToC != 0.0 || VoltagePhaseCToA != 0.0);
-        }
-
-
         /// <summary>
         /// Sets an alarm.
         /// </summary>
@@ -548,16 +518,14 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactivePowerTarget), MetricType.Gauge, x => x.ReactivePowerTarget?.VoltAmperesReactive, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActivePower), MetricType.Gauge, x => x.ActivePower?.Watts, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactivePower), MetricType.Gauge, x => x.ReactivePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(DCCurrent), MetricType.Gauge, x => x.DCCurrent, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(DCVoltage), MetricType.Gauge, x => x.DCVoltage, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ACCurrent), MetricType.Gauge, x => x.ACCurrent, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ACVoltage), MetricType.Gauge, x => x.ACVoltage, _config.MetricsFactorClass1);
             // MetricsFactorClass2
             MetricsPublisher.Register<PowerConversionSystemBase, PcsState>(this, nameof(State), MetricType.Gauge, x => x.State, _config.MetricsFactorClass2);
             MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(HasActiveAlarms), MetricType.Gauge, x => x.HasActiveAlarms, _config.MetricsFactorClass2);
             MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(HasActiveWarnings), MetricType.Gauge, x => x.HasActiveWarnings, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(VoltagePhaseAToB), MetricType.Gauge, x => x.VoltagePhaseAToB, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(VoltagePhaseBToC), MetricType.Gauge, x => x.VoltagePhaseBToC, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(VoltagePhaseCToA), MetricType.Gauge, x => x.VoltagePhaseCToA, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ACCurrentSum), MetricType.Gauge, x => x.ACCurrentSum, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(DCCurrent), MetricType.Gauge, x => x.DCCurrent, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(DCVoltage), MetricType.Gauge, x => x.DCVoltage, _config.MetricsFactorClass2);
             // MetricsFactorClass3
             MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
             // MetricsFactorClass4

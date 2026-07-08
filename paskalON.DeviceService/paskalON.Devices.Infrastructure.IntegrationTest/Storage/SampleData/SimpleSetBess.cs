@@ -40,7 +40,9 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
 
         // Devices
         public PowerConversionSystemDeviceConfig? PowerConversionSystemDeviceConfig { get; set; }
+        public PowerConversionSystemDeviceCustomConfig? PowerConversionSystemDeviceCustomConfig { get; set; }
         public BatteryBankDeviceConfig? BatteryBankDeviceConfig { get; set; }
+        public BatteryBankDeviceCustomConfig? BatteryBankDeviceCustomConfig { get; set; }
         public SolarPanelDeviceConfig? SolarPanelDeviceConfig { get; set; }
         public GenericModbusDeviceConfig? GenericModbusDeviceConfig { get; set; }
         public CircuitBreakerDeviceConfig? CircuitBreakerDeviceConfig { get; set; }
@@ -262,6 +264,15 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ZeroOutputOnCommLoss = true
             };
 
+            PowerConversionSystemDeviceCustomConfig = new PowerConversionSystemDeviceCustomConfig
+            {
+                ChangedBy = "Test",
+                Key = "SomePcsKey",
+                Value = "SomePcsValue",
+                Description = "Some description",
+                PowerConversionSystemDeviceConfig = PowerConversionSystemDeviceConfig
+            };
+
             BatteryBankDeviceConfig = new BatteryBankDeviceConfig
             {
                 ChangedBy = "Test",
@@ -287,6 +298,15 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 MaximumDcVoltage = 1164.8,
                 MinimumDcVoltage = 1497.6,
                 ZeroCapacityOnCommLoss = true
+            };
+
+            BatteryBankDeviceCustomConfig = new BatteryBankDeviceCustomConfig
+            {
+                ChangedBy = "Test",
+                Key = "SomeBBKey",
+                Value = "SomeBBValue",
+                Description = "Some description",
+                BatteryBankDeviceConfig = BatteryBankDeviceConfig
             };
 
             SolarPanelDeviceConfig = new SolarPanelDeviceConfig

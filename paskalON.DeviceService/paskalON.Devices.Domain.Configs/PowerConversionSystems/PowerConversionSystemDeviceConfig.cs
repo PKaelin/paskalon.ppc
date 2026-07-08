@@ -6,6 +6,12 @@ namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
     public class PowerConversionSystemDeviceConfig : NameBase
     {
         /// <summary>
+        /// Child relationship to a list of custom configurations.
+        /// </summary>
+        public ICollection<PowerConversionSystemDeviceCustomConfig> Customs { get; set; } = new List<PowerConversionSystemDeviceCustomConfig>();
+
+
+        /// <summary>
         /// The class name of the type to instantiate.
         /// This uniquely identifies the eventually used type of component. (e.g. a ManufacturerPcs, ManufacturerBattery etc.)
         /// </summary>
