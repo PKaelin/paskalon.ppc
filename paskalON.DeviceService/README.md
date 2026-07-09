@@ -18,6 +18,11 @@ Persistent Domain Configuration layer of DDD described in [README.md](./paskalON
 Domain layer of DDD described in [README.md](./paskalON.Devices.Domain/README.md)
 
 
+### Project .Equipments
+Equipment and manufacturer specific implementation described in [README.md](./paskalON.Devices.Equipments/README.md)
+
+
+
 TODO: Add general add readmes for projects below.
 
 ### Project .Infrastructure

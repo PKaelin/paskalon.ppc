@@ -54,7 +54,7 @@ namespace paskalON.Devices.Domain.Ders
 
 
         /// <summary>
-        /// Register the data interface at the property setter.
+        /// Register the data interface for interface separations.
         /// </summary>
         protected abstract void RegisterDataface();
     }

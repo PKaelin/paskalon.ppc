@@ -1,8 +1,6 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-using paskalON.Communication.Protocols.Modbus.Enums;
-
 namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
 {
     /// <summary>
@@ -71,9 +69,9 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
 
 
         /// <summary>
-        /// The polling class for the slave heartbeat register, which determines how frequently the slave heartbeat is polled.
+        /// The interval for the slave heartbeat register, which determines how frequently the slave heartbeat is polled.
         /// </summary>
-        public ModbusPollingClass MasterHeartbeatPollingClass { get; set; } = ModbusPollingClass.Default;
+        public int MasterHeartbeatPollingInterval { get; set; } = 1;
 
     }
 }

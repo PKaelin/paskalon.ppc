@@ -3,7 +3,7 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.Dataface.C37s
 {
-    public class C37Register : IC37Register, IDataface
+    public class C37Register : IC37Register, IDataface, IC37Dataface
     {
         public List<IC37RegisterEntry> Registers { get; } = new List<IC37RegisterEntry>();
 

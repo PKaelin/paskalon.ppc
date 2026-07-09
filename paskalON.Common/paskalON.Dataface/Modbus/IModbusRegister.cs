@@ -5,8 +5,9 @@ namespace paskalON.Dataface.Modbus
 {
     public interface IModbusRegister
     {
-        void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty> setter, int register, double scale, WordOrder wordOrder = WordOrder.None, int offset = 0);
+        void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty> setter, int register, double scale,
+            ModbusDataType dataType, int offset = 0);
 
-        void RegisterRange(ushort from, ushort to, ModbusPollingClass pollingClass);
+        void RegisterRange(ushort from, ushort to, ModbusRegistryType registryType, int interval);
     }
 }

@@ -3,7 +3,7 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Communication.Protocols.C37118.Types;
 using paskalON.Communication.Protocols.Modbus.Configurations;
-using paskalON.Communication.Protocols.Modbus.Enums;
+using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.EnergyResources.Solars;
@@ -160,27 +160,27 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 StartingDiscreteInput = 10001,
                 StartingCoil = 1,
                 PollingRange = new List<ModbusRegisterMapPollingRangeConfig> { new ModbusRegisterMapPollingRangeConfig { Start = 30373, End = 30387, IsInputRegisterRange = true } },
-                ActivePowerMap = new ModbusRegisterMapEntryConfig { Index = 30373, ModbusRegisterFormat = ModbusRegisterFormat.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                ReactivePowerMap = new ModbusRegisterMapEntryConfig { Index = 30374, ModbusRegisterFormat = ModbusRegisterFormat.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                ApparentPowerMap = new ModbusRegisterMapEntryConfig { Index = 30375, ModbusRegisterFormat = ModbusRegisterFormat.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                PowerFactorMap = new ModbusRegisterMapEntryConfig { Index = 30376, ModbusRegisterFormat = ModbusRegisterFormat.MbInt16, Scale = 100 },
-                FrequencyMap = new ModbusRegisterMapEntryConfig { Index = 30377, ModbusRegisterFormat = ModbusRegisterFormat.MbUint16, Scale = 100 },
-                VoltageAMap = new ModbusRegisterMapEntryConfig { Index = 30345, ModbusRegisterFormat = ModbusRegisterFormat.MbUint16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                VoltageBMap = new ModbusRegisterMapEntryConfig { Index = 30347, ModbusRegisterFormat = ModbusRegisterFormat.MbUint16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                VoltageCMap = new ModbusRegisterMapEntryConfig { Index = 30349, ModbusRegisterFormat = ModbusRegisterFormat.MbUint16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                CurrentAMap = new ModbusRegisterMapEntryConfig { Index = 30321, ModbusRegisterFormat = ModbusRegisterFormat.MbUint16, Scale = 1 },
-                CurrentBMap = new ModbusRegisterMapEntryConfig { Index = 30323, ModbusRegisterFormat = ModbusRegisterFormat.MbUint16, Scale = 1 },
-                CurrentCMap = new ModbusRegisterMapEntryConfig { Index = 30325, ModbusRegisterFormat = ModbusRegisterFormat.MbUint16, Scale = 1 },
-                ActivePowerAMap = new ModbusRegisterMapEntryConfig { Index = 30361, ModbusRegisterFormat = ModbusRegisterFormat.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                ActivePowerBMap = new ModbusRegisterMapEntryConfig { Index = 30365, ModbusRegisterFormat = ModbusRegisterFormat.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                ActivePowerCMap = new ModbusRegisterMapEntryConfig { Index = 30369, ModbusRegisterFormat = ModbusRegisterFormat.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                ReactivePowerAMap = new ModbusRegisterMapEntryConfig { Index = 30362, ModbusRegisterFormat = ModbusRegisterFormat.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                ReactivePowerBMap = new ModbusRegisterMapEntryConfig { Index = 30366, ModbusRegisterFormat = ModbusRegisterFormat.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                ReactivePowerCMap = new ModbusRegisterMapEntryConfig { Index = 30370, ModbusRegisterFormat = ModbusRegisterFormat.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                EnergyDeliveredMap = new ModbusRegisterMapEntryConfig { Index = 30383, ModbusRegisterFormat = ModbusRegisterFormat.MbInt32Be, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                EnergyReceivedMap = new ModbusRegisterMapEntryConfig { Index = 30381, ModbusRegisterFormat = ModbusRegisterFormat.MbInt32Be, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                ReactiveEnergyDeliveredMap = new ModbusRegisterMapEntryConfig { Index = 30387, ModbusRegisterFormat = ModbusRegisterFormat.MbInt32Be, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
-                ReactiveEnergyReceivedMap = new ModbusRegisterMapEntryConfig { Index = 30385, ModbusRegisterFormat = ModbusRegisterFormat.MbInt32Be, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                ActivePowerMap = new ModbusRegisterMapEntryConfig { Index = 30373, ModbusRegisterFormat = ModbusDataType.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                ReactivePowerMap = new ModbusRegisterMapEntryConfig { Index = 30374, ModbusRegisterFormat = ModbusDataType.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                ApparentPowerMap = new ModbusRegisterMapEntryConfig { Index = 30375, ModbusRegisterFormat = ModbusDataType.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                PowerFactorMap = new ModbusRegisterMapEntryConfig { Index = 30376, ModbusRegisterFormat = ModbusDataType.MbInt16, Scale = 100 },
+                FrequencyMap = new ModbusRegisterMapEntryConfig { Index = 30377, ModbusRegisterFormat = ModbusDataType.MbUint16, Scale = 100 },
+                VoltageAMap = new ModbusRegisterMapEntryConfig { Index = 30345, ModbusRegisterFormat = ModbusDataType.MbUint16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                VoltageBMap = new ModbusRegisterMapEntryConfig { Index = 30347, ModbusRegisterFormat = ModbusDataType.MbUint16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                VoltageCMap = new ModbusRegisterMapEntryConfig { Index = 30349, ModbusRegisterFormat = ModbusDataType.MbUint16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                CurrentAMap = new ModbusRegisterMapEntryConfig { Index = 30321, ModbusRegisterFormat = ModbusDataType.MbUint16, Scale = 1 },
+                CurrentBMap = new ModbusRegisterMapEntryConfig { Index = 30323, ModbusRegisterFormat = ModbusDataType.MbUint16, Scale = 1 },
+                CurrentCMap = new ModbusRegisterMapEntryConfig { Index = 30325, ModbusRegisterFormat = ModbusDataType.MbUint16, Scale = 1 },
+                ActivePowerAMap = new ModbusRegisterMapEntryConfig { Index = 30361, ModbusRegisterFormat = ModbusDataType.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                ActivePowerBMap = new ModbusRegisterMapEntryConfig { Index = 30365, ModbusRegisterFormat = ModbusDataType.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                ActivePowerCMap = new ModbusRegisterMapEntryConfig { Index = 30369, ModbusRegisterFormat = ModbusDataType.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                ReactivePowerAMap = new ModbusRegisterMapEntryConfig { Index = 30362, ModbusRegisterFormat = ModbusDataType.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                ReactivePowerBMap = new ModbusRegisterMapEntryConfig { Index = 30366, ModbusRegisterFormat = ModbusDataType.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                ReactivePowerCMap = new ModbusRegisterMapEntryConfig { Index = 30370, ModbusRegisterFormat = ModbusDataType.MbInt16, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                EnergyDeliveredMap = new ModbusRegisterMapEntryConfig { Index = 30383, ModbusRegisterFormat = ModbusDataType.MbInt32Be, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                EnergyReceivedMap = new ModbusRegisterMapEntryConfig { Index = 30381, ModbusRegisterFormat = ModbusDataType.MbInt32Be, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                ReactiveEnergyDeliveredMap = new ModbusRegisterMapEntryConfig { Index = 30387, ModbusRegisterFormat = ModbusDataType.MbInt32Be, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
+                ReactiveEnergyReceivedMap = new ModbusRegisterMapEntryConfig { Index = 30385, ModbusRegisterFormat = ModbusDataType.MbInt32Be, Scale = 1, UnitPrefix = MetricPrefix.Kilo },
             };
 
 
@@ -197,7 +197,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Name = "Discrete Input 1",
                 ModbusNumber = 0,
                 IsAlarm = true,
-                ModbusRegisterFormat = ModbusRegisterFormat.MbBool,
+                ModbusRegisterFormat = ModbusDataType.MbBool,
                 GenericModbusMapConfig = GenericModbusMapConfig!
             };
 
@@ -206,7 +206,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "Holding 1",
                 ModbusNumber = 1,
-                ModbusRegisterFormat = ModbusRegisterFormat.MbInt16,
+                ModbusRegisterFormat = ModbusDataType.MbInt16,
                 GenericModbusMapConfig = GenericModbusMapConfig!
             };
 

@@ -3,14 +3,15 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.Dataface.Modbus
 {
-    public class ModbusRegister : IModbusRegister, IDataface
+    public class ModbusRegister : IModbusRegister, IDataface, IModbusDataface
     {
         public List<IModbusRegisterEntry> Registers { get; } = new List<IModbusRegisterEntry>();
 
-        public List<Tuple<ushort, ushort, ModbusPollingClass>> PollingRange { get; } = new List<Tuple<ushort, ushort, ModbusPollingClass>>();
+        public List<ModbusPollingRangeEntry> PollingRanges { get; } = new List<ModbusPollingRangeEntry>();
 
 
-        public void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty> setter, int register, double scale, WordOrder wordOrder = WordOrder.None, int offset = 0)
+        public void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty> setter, int register, double scale,
+            ModbusDataType dataType, int offset = 0)
         {
             ArgumentNullException.ThrowIfNull(instance);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -26,7 +27,7 @@ namespace paskalON.Dataface.Modbus
             }
 
 
-            Registers.Add(new ModbusRegisterEntry<TDevice, TProperty>(instance, name, setter, register, scale, wordOrder, offset));
+            Registers.Add(new ModbusRegisterEntry<TDevice, TProperty>(instance, name, setter, register, scale, dataType, offset));
         }
 
         public void Register<TDevice, TCom>(Action<TCom> com)
@@ -39,9 +40,12 @@ namespace paskalON.Dataface.Modbus
             com.Invoke(typedCom);
         }
 
-        public void RegisterRange(ushort from, ushort to, ModbusPollingClass pollingClass)
+        public void RegisterRange(ushort from, ushort to, ModbusRegistryType registryType, int interval)
         {
-            PollingRange.Add(new Tuple<ushort, ushort, ModbusPollingClass>(from, to, pollingClass));
+            ArgumentOutOfRangeException.ThrowIfLessThan(to, from);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(from, to);
+
+            PollingRanges.Add(new ModbusPollingRangeEntry(from, to, registryType, interval));
         }
 
     }

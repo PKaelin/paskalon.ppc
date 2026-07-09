@@ -1,4 +1,7 @@
-﻿using paskalON.Communication.Protocols.Modbus.Enums;
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Dataface.Modbus;
 using paskalON.PhysicalUnits;
 
 namespace paskalON.Communication.Protocols.Modbus.Configurations
@@ -26,7 +29,7 @@ namespace paskalON.Communication.Protocols.Modbus.Configurations
         /// <summary>
         /// Modbus register format. String is parable to ModbusCommon.ModbusRegisterFormat.
         /// </summary>
-        public ModbusRegisterFormat? ModbusRegisterFormat { get; set; }
+        public ModbusDataType? ModbusRegisterFormat { get; set; }
 
 
         /// <summary>

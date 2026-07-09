@@ -1,4 +1,7 @@
-﻿namespace paskalON.Communication.Protocols.C37118.Types
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Communication.Protocols.C37118.Types
 {
     /// <summary>
     /// Transport layer that dictates control logic for C37.118 communications.

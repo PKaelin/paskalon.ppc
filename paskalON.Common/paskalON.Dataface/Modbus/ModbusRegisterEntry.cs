@@ -15,18 +15,19 @@ namespace paskalON.Dataface.Modbus
 
         public double Scale { get; init; }
 
-        public WordOrder WordOrder { get; init; }
+        public ModbusDataType DataType { get; init; }
 
         public int Offset { get; init; }
 
-        public ModbusRegisterEntry(object instance, string name, Action<TDevice, TProperty> setter, int register, double scale, WordOrder wordOrder, int offset)
+
+        public ModbusRegisterEntry(object instance, string name, Action<TDevice, TProperty> setter, int register, double scale, ModbusDataType dataType, int offset)
         {
             Instance = instance;
             Name = name;
             Setter = setter;
             Register = register;
             Scale = scale;
-            WordOrder = wordOrder;
+            DataType = dataType;
             Offset = offset;
         }
 

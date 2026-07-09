@@ -1,7 +1,7 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-using paskalON.Communication.Protocols.Modbus.Enums;
+using paskalON.Dataface.Modbus;
 
 namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
 {
@@ -20,7 +20,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
 
 
         /// <inheritdoc/>
-        public override ModbusValueType ModbusValueType { get => ModbusValueType.DiscreteInput; }
+        public override ModbusRegistryType ModbusValueType { get => ModbusRegistryType.DiscreteInput; }
 
     }
 }

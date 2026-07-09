@@ -11,11 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Dataface\paskalON.Dataface.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Maths\paskalON.Maths.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.PhysicalUnits\paskalON.PhysicalUnits.csproj" />
-    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Communication.Protocols.C37118\paskalON.Communication.Protocols.C37118.csproj" />
-    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Communication.Protocols.Modbus\paskalON.Communication.Protocols.Modbus.csproj" />
   </ItemGroup>
   
 </Project>

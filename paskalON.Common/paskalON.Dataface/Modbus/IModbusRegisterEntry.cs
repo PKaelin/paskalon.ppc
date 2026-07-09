@@ -9,7 +9,7 @@ namespace paskalON.Dataface.Modbus
         string Name { get; }
         int Register { get; }
         double Scale { get; }
-        WordOrder WordOrder { get; }
+        ModbusDataType DataType { get; }
         int Offset { get; }
 
         void Update(object value);

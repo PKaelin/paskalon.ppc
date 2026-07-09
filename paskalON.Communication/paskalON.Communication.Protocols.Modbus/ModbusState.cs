@@ -1,17 +1,16 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.Dataface.Modbus
+namespace paskalON.Communication.Protocols.Modbus
 {
     /// <summary>
-    /// Enumeration of Modbus class polling intervals.
+    /// Modbus state.
     /// </summary>
-    public enum ModbusPollingClass
+    public enum ModbusState
     {
-        Class0 = 1,
-        Default = 2,
-        Class2 = 3,
-        Class3 = 4,
-        Class4 = 5
+        Disconnected,
+        Connecting,
+        Connected,
+        Disconnecting,
     }
 }

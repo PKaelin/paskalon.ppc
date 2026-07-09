@@ -1,10 +1,13 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.Communication.Protocols.Modbus
+namespace paskalON.Dataface.Modbus
 {
-    public interface IModbusServer
+    public enum ModbusRegistryType
     {
-        // TODO: Implement IModbusServer
+        Coil,
+        DiscreteInput,
+        InputRegister,
+        HoldingRegister,
     }
 }

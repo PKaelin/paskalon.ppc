@@ -1,7 +1,7 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-using paskalON.Communication.Protocols.Modbus.Enums;
+using paskalON.Dataface.Modbus;
 
 namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
 {
@@ -30,13 +30,13 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
         /// <summary>
         /// Indicates the Modbus value type of the point (e.g., Coil, Discrete Input, Input Register, Holding Register).
         /// </summary>
-        public abstract ModbusValueType ModbusValueType { get; }
+        public abstract ModbusRegistryType ModbusValueType { get; }
 
 
         /// <summary>
         /// Modbus point register format.
         /// </summary>
-        public ModbusRegisterFormat? ModbusRegisterFormat { get; set; }
+        public ModbusDataType? ModbusRegisterFormat { get; set; }
 
 
         /// <summary>
@@ -46,8 +46,8 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
 
 
         /// <summary>
-        /// Indicates the polling class for the point, which can be used to group points for different polling intervals or priorities.
+        /// Indicates the interval for the point, which can be used to group points for different polling intervals or priorities.
         /// </summary>
-        public ModbusPollingClass PollingClass { get; set; } = ModbusPollingClass.Default;
+        public int PollingInterval { get; set; } = 3;
     }
 }

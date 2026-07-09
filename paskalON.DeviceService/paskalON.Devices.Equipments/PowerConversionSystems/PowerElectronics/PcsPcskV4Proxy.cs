@@ -1,10 +1,10 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.Communication.Protocols.Modbus
+namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
 {
-    public interface IModbusServer
+    internal class PcsPcskV4Proxy
     {
-        // TODO: Implement IModbusServer
+        // TODO: Implement PcsPcskV4Proxy
     }
 }

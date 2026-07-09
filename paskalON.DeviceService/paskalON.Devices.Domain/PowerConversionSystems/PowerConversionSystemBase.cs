@@ -218,9 +218,9 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// Line frequency in hertz.
+        /// Frequency in hertz.
         /// </summary>
-        public double? LineFrequency
+        public double? Frequency
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
@@ -529,7 +529,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             // MetricsFactorClass3
             MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
             // MetricsFactorClass4
-            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(LineFrequency), MetricType.Gauge, x => x.LineFrequency, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(Frequency), MetricType.Gauge, x => x.Frequency, _config.MetricsFactorClass4);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(StandbyActivePower), MetricType.Gauge, x => x.StandbyActivePower, _config.MetricsFactorClass4);
         }
     }

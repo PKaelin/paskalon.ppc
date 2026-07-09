@@ -15,6 +15,66 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
+        /// Polling factor for class 1 Modbus endpoints.
+        /// </summary>
+        /// <remarks>
+        /// The factor is multiplied by the PollingIntervalMilliseconds.
+        /// </remarks>
+        /// <example>
+        /// PollingIntervalMilliseconds = 1000, PollingFactorClass1 = 1 means every 1 second class 1 endpoints get polled.
+        /// </example>
+        public int PollingFactorClass1 { get; set; } = 1;
+
+
+        /// <summary>
+        /// Polling factor for class 2 Modbus endpoints.
+        /// </summary>
+        /// <remarks>
+        /// The factor is multiplied by the PollingIntervalMilliseconds.
+        /// </remarks>
+        /// <example>
+        /// PollingIntervalMilliseconds = 1000, PollingFactorClass2 = 3 means every 3 second class 2 endpoints get polled.
+        /// </example>
+        public int PollingFactorClass2 { get; set; } = 3;
+
+
+        /// <summary>
+        /// Polling factor for class 3 Modbus endpoints.
+        /// </summary>
+        /// <remarks>
+        /// The factor is multiplied by the PollingIntervalMilliseconds.
+        /// </remarks>
+        /// <example>
+        /// PollingIntervalMilliseconds = 1000, PollingFactorClass2 = 10 means every 10 second class 3 endpoints get polled.
+        /// </example>
+        public int PollingFactorClass3 { get; set; } = 10;
+
+
+        /// <summary>
+        /// Polling factor for class 4 Modbus endpoints.
+        /// </summary>
+        /// <remarks>
+        /// The factor is multiplied by the PollingIntervalMilliseconds.
+        /// </remarks>
+        /// <example>
+        /// PollingIntervalMilliseconds = 1000, PollingFactorClass2 = 30 means every 30 second class 4 endpoints get polled.
+        /// </example>
+        public int PollingFactorClass4 { get; set; } = 30;
+
+
+        /// <summary>
+        /// Polling factor for class 5 Modbus endpoints.
+        /// </summary>
+        /// <remarks>
+        /// The factor is multiplied by the PollingIntervalMilliseconds.
+        /// </remarks>
+        /// <example>
+        /// PollingIntervalMilliseconds = 1000, PollingFactorClass2 = 300 means every 300 second class 5 endpoints get polled.
+        /// </example>
+        public int PollingFactorClass5 { get; set; } = 300;
+
+
+        /// <summary>
         /// Master HeartBeat interval in milliseconds.
         /// </summary>
         public long MasterHeartBeatIntervalMilliseconds { get; set; }
