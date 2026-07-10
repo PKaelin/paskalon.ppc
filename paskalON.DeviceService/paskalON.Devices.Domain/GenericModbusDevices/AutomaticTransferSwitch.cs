@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
 using paskalON.Telemetry;
@@ -15,7 +16,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
     /// An Automatic Transfer Switch (ATS) is an intelligent, self-acting device that shifts an electrical
     /// load between two power sources without requiring human intervention.
     /// </summary>
-    public class AutomaticTransferSwitch : GenericModbusDeviceBase
+    public abstract class AutomaticTransferSwitch : GenericModbusDeviceBase
     {
         /// <summary>
         /// Automatic transfer switch configuration.
@@ -30,10 +31,9 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <param name="config">The automatic transfer switch configuration.</param>
         /// <param name="genericModbusEntries">List of generic Modbus entries.</param>
         /// <param name="publisher">The publisher interface.</param>
-        /// <param name="device">The device interface.</param>
+        /// <param name="dataface">The dataface interface.</param>
         public AutomaticTransferSwitch(ILogger logger, AutomaticTransferSwitchConfig config, List<GenericModbusEntryBase> genericModbusEntries,
-            IMetricsPublisher publisher, IGenericModbusDevice device)
-            : base(logger, config, genericModbusEntries, publisher, device)
+            IMetricsPublisher publisher, IDataface dataface) : base(logger, config, genericModbusEntries, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(config);
 

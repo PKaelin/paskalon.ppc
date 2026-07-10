@@ -30,7 +30,6 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// </summary>
         public enum WarningCode
         {
-            Unknown = -1,
             None = 0,
             HighInputVoltage = 1,
             LowInputVoltage = 2,
@@ -43,13 +42,24 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// </summary>
         public enum FaultCode
         {
-            Unknown = -1,
             None = 0,
             HighInputVoltage = 1,
             LowInputVoltage = 2,
             HighFrequency = 3,
             LowFrequency = 4,
         }
+
+
+        /// <summary>
+        /// Enumeration of vendor events.
+        /// </summary>
+        public enum VendorEvents
+        {
+            None = 0,
+            MaintenanceDue = 1,
+            EndOfLifeDue = 2,
+        }
+
 
         /// <summary>
         /// Enumeration of registers.
@@ -59,12 +69,12 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             //Heartbeat
             Heartbeat = 40000,
             //Control
-            PReference = 41000,
-            QReference = 41001,
+            SelectorStatus = 41000,     // Start/Stop
+            PReference = 41001,
+            QReference = 41002,
             // Power
             P = 42000,
-            Q = 42000,
-            S = 42000,
+            Q = 42001,
             // Current, Voltage, Frequency
             Frequency = 43000,
             DCCurrent = 43001,
@@ -75,8 +85,9 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             CurrentStatus = 44000,      // Could be a mask but for simplicity just have one
             CurrentWarning = 44001,     // Could be a mask but for simplicity just have one
             CurrentFault = 44002,
-            ACBreaker = 44003,
-            DcContactor = 44004,        // For simplicity just have one
+            CurrentVendorEvent = 44003,
+            ACBreaker = 44004,
+            DcContactor = 44005,        // For simplicity just have one
         }
     }
 }

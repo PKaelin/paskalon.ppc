@@ -3,10 +3,17 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.Dataface.C37s
 {
-    public class C37Register : IC37Register, IDataface, IC37Dataface
+    public class C37Register : IC37Register, IC37Dataface
     {
+        /// <summary>
+        /// IC37Dataface implementation of Registers <see cref="IC37Dataface"/>.
+        /// </summary>
         public List<IC37RegisterEntry> Registers { get; } = new List<IC37RegisterEntry>();
 
+
+        /// <summary>
+        /// IDataface implementation of Register <see cref="IDataface"/>.
+        /// </summary>
         public void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty> setter)
         {
             ArgumentNullException.ThrowIfNull(instance);
@@ -20,6 +27,10 @@ namespace paskalON.Dataface.C37s
             Registers.Add(new C37RegisterEntry<TDevice, TProperty>(instance, name, setter));
         }
 
+
+        /// <summary>
+        /// IC37Register implementation of Register <see cref="IModbusRegister"/>.
+        /// </summary>
         public void Register<TDevice, TCom>(Action<TCom> com)
         {
             if (com is not TCom typedCom)

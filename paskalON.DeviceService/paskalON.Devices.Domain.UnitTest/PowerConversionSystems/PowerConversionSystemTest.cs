@@ -3,13 +3,13 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
-using paskalON.Devices.Domain.PowerConversionSystems;
-using paskalON.Devices.Domain.UnitTest.Contracts;
 using paskalON.Devices.Domain.UnitTest.Equipments;
+using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
 using System.Net.Sockets;
 
@@ -94,9 +94,9 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         public void CreateWithoutConfigTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            Mock<IPowerConversionSystem> device = new Mock<IPowerConversionSystem>();
+            Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new Pcs(NullLogger.Instance, null, _unit!, publisher.Object, device.Object));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new Pcs(NullLogger.Instance, null, _unit!, publisher.Object, dataface.Object));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -105,9 +105,9 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         public void CreateWithoutParentTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            Mock<IPowerConversionSystem> device = new Mock<IPowerConversionSystem>();
+            Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new Pcs(NullLogger.Instance, _pcsConfig!, null, publisher.Object, device.Object));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new Pcs(NullLogger.Instance, _pcsConfig!, null, publisher.Object, dataface.Object));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -116,14 +116,14 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         public void RegisterDatafaceTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            Mock<IPowerConversionSystem> device = new Mock<IPowerConversionSystem>();
-            DatafaceModbusMock dataface = new DatafaceModbusMock();
-            dataface.Setup<Pcs, object>();
-            device.Setup(x => x.Dataface).Returns(dataface.Mock.Object);
-            Pcs pcs = new Pcs(NullLogger.Instance, _pcsConfig!, _unit!, publisher.Object, device.Object);
+            ModbusRegister dataface = new ModbusRegister();
+            Pcs pcs = new Pcs(NullLogger.Instance, _pcsConfig!, _unit!, publisher.Object, dataface);
 
             Assert.IsNotNull(pcs.Dataface);
-            // TODO: Add more asserts
+            Assert.IsNotNull(dataface.Registers);
+            Assert.HasCount(6, dataface.Registers);
+            Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(ActivePower)));
+            Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(ReactivePower)));
         }
 
     }

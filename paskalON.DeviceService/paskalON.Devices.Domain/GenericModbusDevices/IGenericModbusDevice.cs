@@ -15,18 +15,18 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <summary>
         /// Connects the generic Modbus device and starts communicating once in state connected.
         /// </summary>
-        void Connect();
+        Task ConnectAsync();
 
 
         /// <summary>
         /// Disconnects the generic Modbus device after it stops communicating.
         /// </summary>
-        void Disconnect();
+        Task DisconnectAsync();
 
 
         /// <summary>
         /// Tries to reset all latched alarms.
         /// </summary>
-        void ResetLatchedAlarms();
+        Task ResetLatchedAlarmsAsync();
     }
 }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Telemetry;
 
@@ -16,7 +17,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
     /// <remarks>
     /// It is sometimes called feeder meter.
     /// </remarks>
-    public class CircuitPowerMeter : PowerMeterBase
+    public abstract class CircuitPowerMeter : PowerMeterBase
     {
         /// <summary>
         /// The circuit power meter configuration.
@@ -30,12 +31,11 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The </param>
         /// <param name="publisher">The publisher interface.</param>
-        /// <param name="device">The device interface.</param>
-        public CircuitPowerMeter(ILogger logger, CircuitPowerMeterConfig config, IMetricsPublisher publisher, IPowerMeter device)
-            : base(logger, config, publisher, device)
+        /// <param name="dataface">The dataface interface.</param>
+        public CircuitPowerMeter(ILogger logger, CircuitPowerMeterConfig config, IMetricsPublisher publisher, IDataface dataface)
+            : base(logger, config, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(config);
-            ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
         }

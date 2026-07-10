@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Telemetry;
@@ -25,12 +26,6 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// Battery bank configuration.
         /// </summary>
         private readonly BatteryBankConfig _config;
-
-
-        /// <summary>
-        /// Battery bank device instance that communicates with the device.
-        /// </summary>
-        private readonly IBatteryBank _device;
 
 
         /// <summary>
@@ -365,17 +360,15 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <param name="config">The battery bank configuration.</param>
         /// <param name="batteryStorageUnit">The paren battery storage unit.</param>
         /// <param name="publisher">The publisher interface.</param>
-        /// <param name="device">The device interface.</param>
+        /// <param name="dataface">The dataface interface.</param>
         protected BatteryBankBase(ILogger logger, BatteryBankConfig config, DerBatteryStorageUnit batteryStorageUnit, IMetricsPublisher publisher,
-            IBatteryBank device) : base(logger, config, publisher, device)
+            IDataface dataface) : base(logger, config, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(batteryStorageUnit);
             ArgumentNullException.ThrowIfNull(publisher);
-            ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
-            _device = device;
             BatteryStorageUnit = batteryStorageUnit;
 
             RegisterMetrics();
@@ -386,64 +379,22 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Connect()
+        public virtual async Task ConnectAsync()
         {
             _logger.LogInformation("{Name} connect requested.", Name);
-            _device.Connect();
+            State = BatteryBankState.Connecting;
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Disconnect()
+        public virtual async Task DisconnectAsync()
         {
             _logger.LogInformation("{Name} disconnect requested.", Name);
-            _device.Disconnect();
+            State = BatteryBankState.Disconnecting;
         }
 
-
-        /// <summary>
-        /// Triggers battery banks state changed event.
-        /// </summary>
-        /// <param name="state">The new battery bank state.</param>
-        protected void SetState(BatteryBankState state)
-        {
-            _logger.LogInformation("{Name} - BatteryBank state changed to {State}", Name, State);
-            StateChanged?.Invoke(this, new BatteryBankStateChangedEventArgs(state));
-        }
-
-
-        /// <summary>
-        /// Trigger CommunicationError change events.
-        /// </summary>
-        /// <param name="state">The communication error state.</param>
-        protected void SetCommunicationError(bool state)
-        {
-            if (state == true)
-            {
-                _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
-            }
-            else
-            {
-                _logger.LogInformation("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
-            }
-
-            CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
-        }
-
-
-        /// <summary>
-        /// Raises the <see cref="PropertyChanged"/> event.
-        /// </summary>
-        /// <param name="propertyName">
-        /// The name of the property that changed. An empty value or null indicates that all of the
-        /// properties have changed.
-        /// </param>
-        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
 
 
         /// <summary>
@@ -477,6 +428,49 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
             // MetricsFactorClass3
             MetricsPublisher.Register<BatteryBankBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
             // MetricsFactorClass4
+        }
+
+
+        /// <summary>
+        /// Triggers battery banks state changed event.
+        /// </summary>
+        /// <param name="state">The new battery bank state.</param>
+        private void SetState(BatteryBankState state)
+        {
+            _logger.LogInformation("{Name} - BatteryBank state changed to {State}", Name, State);
+            StateChanged?.Invoke(this, new BatteryBankStateChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Trigger CommunicationError change events.
+        /// </summary>
+        /// <param name="state">The communication error state.</param>
+        private void SetCommunicationError(bool state)
+        {
+            if (state == true)
+            {
+                _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+            else
+            {
+                _logger.LogInformation("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+
+            CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Raises the <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyName">
+        /// The name of the property that changed. An empty value or null indicates that all of the
+        /// properties have changed.
+        /// </param>
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

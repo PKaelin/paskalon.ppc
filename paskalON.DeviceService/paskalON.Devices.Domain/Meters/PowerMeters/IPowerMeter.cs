@@ -14,12 +14,12 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// Connects the power meter and starts communicating once in state connected.
         /// </summary>
-        void Connect();
+        Task ConnectAsync();
 
 
         /// <summary>
         /// Disconnects the power meter after it stops communicating.
         /// </summary>
-        void Disconnect();
+        Task DisconnectAsync();
     }
 }

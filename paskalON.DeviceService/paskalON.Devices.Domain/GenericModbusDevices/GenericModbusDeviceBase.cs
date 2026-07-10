@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
@@ -26,12 +27,6 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// Inherits from ModbusConfig.
         /// </remarks>
         private readonly GenericModbusBaseConfig _config;
-
-
-        /// <summary>
-        /// Generic Modbus device instance that communicates with the device.
-        /// </summary>
-        private readonly IGenericModbusDevice _device;
 
 
         /// <summary>
@@ -85,17 +80,15 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The generic Modbus configuration.</param>
         /// <param name="publisher">The publisher interface.</param>
-        /// <param name="device">The device interface.</param>
-        public GenericModbusDeviceBase(ILogger logger, GenericModbusBaseConfig config, List<GenericModbusEntryBase> genericModbusEntries, IMetricsPublisher publisher,
-            IGenericModbusDevice device) : base(logger, config, publisher, device)
+        /// <param name="dataface">The dataface interface.</param>
+        public GenericModbusDeviceBase(ILogger logger, GenericModbusBaseConfig config, List<GenericModbusEntryBase> genericModbusEntries,
+            IMetricsPublisher publisher, IDataface dataface) : base(logger, config, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(genericModbusEntries);
             ArgumentNullException.ThrowIfNull(publisher);
-            ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
-            _device = device;
             GenericModbusEntries = genericModbusEntries;
 
             RegisterMetrics();
@@ -106,74 +99,29 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Connect()
+        public virtual async Task ConnectAsync()
         {
             _logger.LogInformation("{Name} connect requested.", Name);
-            _device.Connect();
+            State = GenericModbusDeviceState.Connecting;
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Disconnect()
+        public virtual async Task DisconnectAsync()
         {
             _logger.LogInformation("{Name} disconnect requested.", Name);
-            _device.Disconnect();
+            State = GenericModbusDeviceState.Disconnecting;
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void ResetLatchedAlarms()
+        public virtual async Task ResetLatchedAlarmsAsync()
         {
             _logger.LogInformation("{Name} reset latched alarms requested.", Name);
-            _device.ResetLatchedAlarms();
-        }
-
-
-
-        /// <summary>
-        /// Trigger GenericModbusDeviceState change events.
-        /// </summary>
-        /// <param name="state">The GenericModbusDeviceState state.</param>
-        protected void SetState(GenericModbusDeviceState state)
-        {
-            _logger.LogInformation("{Name} - GenericModbusDeviceState state changed to: {State}", Name, State);
-            StateChanged?.Invoke(this, new GenericModbusDeviceStateChangedEventArgs(state));
-        }
-
-
-        /// <summary>
-        /// Trigger CommunicationError change events.
-        /// </summary>
-        /// <param name="state">The communication error state.</param>
-        protected void SetCommunicationError(bool state)
-        {
-            if (state == true)
-            {
-                _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
-            }
-            else
-            {
-                _logger.LogInformation("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
-            }
-
-            CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
-        }
-
-
-        /// <summary>
-        /// Raises the <see cref="PropertyChanged"/> event.
-        /// </summary>
-        /// <param name="propertyName">
-        /// The name of the property that changed. An empty value or null indicates that all of the
-        /// properties have changed.
-        /// </param>
-        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
 
@@ -211,5 +159,47 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
             // TODO: register registers
         }
 
+
+        /// <summary>
+        /// Trigger GenericModbusDeviceState change events.
+        /// </summary>
+        /// <param name="state">The GenericModbusDeviceState state.</param>
+        private void SetState(GenericModbusDeviceState state)
+        {
+            _logger.LogInformation("{Name} - GenericModbusDeviceState state changed to: {State}", Name, State);
+            StateChanged?.Invoke(this, new GenericModbusDeviceStateChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Trigger CommunicationError change events.
+        /// </summary>
+        /// <param name="state">The communication error state.</param>
+        private void SetCommunicationError(bool state)
+        {
+            if (state == true)
+            {
+                _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+            else
+            {
+                _logger.LogInformation("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+            }
+
+            CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
+        }
+
+
+        /// <summary>
+        /// Raises the <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyName">
+        /// The name of the property that changed. An empty value or null indicates that all of the
+        /// properties have changed.
+        /// </param>
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

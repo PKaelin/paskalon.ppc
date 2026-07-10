@@ -19,13 +19,13 @@ namespace paskalON.Devices.Domain.Ders
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public IMetricsPublisher MetricsPublisher { get; private set; }
+        public IMetricsPublisher MetricsPublisher { get; init; }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public IDataface Dataface { get; private set; }
+        public IDataface Dataface { get; init; }
 
 
         /// <summary>
@@ -35,15 +35,14 @@ namespace paskalON.Devices.Domain.Ders
         /// <param name="nameBase">The name base configuration.</param>
         /// <param name="publisher">The metrics publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        protected DerDeviceBase(ILogger logger, NameBase nameBase, IMetricsPublisher publisher, IDevice device) : base(logger, nameBase)
+        protected DerDeviceBase(ILogger logger, NameBase nameBase, IMetricsPublisher publisher, IDataface dataface) : base(logger, nameBase)
         {
             ArgumentNullException.ThrowIfNull(nameBase);
             ArgumentNullException.ThrowIfNull(publisher);
-            ArgumentNullException.ThrowIfNull(device);
-            ArgumentNullException.ThrowIfNull(device.Dataface);
+            ArgumentNullException.ThrowIfNull(dataface);
 
             MetricsPublisher = publisher;
-            Dataface = device.Dataface;
+            Dataface = dataface;
         }
 
 

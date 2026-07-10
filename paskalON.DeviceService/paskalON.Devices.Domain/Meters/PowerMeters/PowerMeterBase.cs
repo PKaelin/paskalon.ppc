@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface;
 using paskalON.Dataface.C37s;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Domain.Ders;
@@ -28,12 +29,6 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// Power meter configuration.
         /// </summary>
         private readonly PowerMeterBaseConfig _config;
-
-
-        /// <summary>
-        /// Power meter device instance that communicates with the device.
-        /// </summary>
-        private readonly IPowerMeter _device;
 
 
         /// <summary>
@@ -524,15 +519,13 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <param name="config">The power meter configuration.</param>
         /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
-        public PowerMeterBase(ILogger logger, PowerMeterBaseConfig config, IMetricsPublisher publisher, IPowerMeter device)
-            : base(logger, config, publisher, device)
+        public PowerMeterBase(ILogger logger, PowerMeterBaseConfig config, IMetricsPublisher publisher, IDataface dataface)
+            : base(logger, config, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(publisher);
-            ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
-            _device = device;
 
             RegisterMetrics();
             RegisterDataface();
@@ -542,20 +535,20 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Connect()
+        public virtual async Task ConnectAsync()
         {
             _logger.LogInformation("{Name} connect requested.", Name);
-            _device.Connect();
+            State = PowerMeterState.Connecting;
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Disconnect()
+        public virtual async Task DisconnectAsync()
         {
             _logger.LogInformation("{Name} disconnect requested.", Name);
-            _device.Disconnect();
+            State = PowerMeterState.Disconnecting;
         }
 
 
@@ -699,7 +692,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// Trigger Power Meter state change events.
         /// </summary>
         /// <param name="state">The Power Meter state.</param>
-        protected void SetState(PowerMeterState state)
+        private void SetState(PowerMeterState state)
         {
             _logger.LogInformation("{Name} - Power Meter state changed to: {State}", Name, State);
             StateChanged?.Invoke(this, new PowerMeterStateChangedEventArgs(state));
@@ -710,7 +703,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// Trigger CommunicationError change events.
         /// </summary>
         /// <param name="state">The communication error state.</param>
-        protected void SetCommunicationError(bool state)
+        private void SetCommunicationError(bool state)
         {
             if (state == true)
             {

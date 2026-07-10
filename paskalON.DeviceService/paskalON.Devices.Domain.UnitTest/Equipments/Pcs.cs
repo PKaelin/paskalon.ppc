@@ -15,8 +15,8 @@ namespace paskalON.Devices.Domain.UnitTest.Equipments
 
         public int PcsDeviceTest { get; set; }
 
-        public Pcs(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher publisher, IPowerConversionSystem device)
-            : base(logger, config, derUnit, publisher, device)
+        public Pcs(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher publisher, IModbusDataface dataface)
+            : base(logger, config, derUnit, publisher, dataface)
         {
         }
 
@@ -34,6 +34,24 @@ namespace paskalON.Devices.Domain.UnitTest.Equipments
             Dataface.Register<Pcs, IModbusRegister>(r => r.Register<Pcs, double?>(this, nameof(ReactivePower), (x, v) => x.ReactivePowerValue = v, 1003, 1, ModbusDataType.MbInt16));
             Dataface.Register<Pcs, IModbusRegister>(r => r.Register<Pcs, double?>(this, nameof(DCCurrent), (x, v) => x.DCCurrent = v, 1004, 1, ModbusDataType.MbInt16));
             Dataface.Register<Pcs, IModbusRegister>(r => r.Register<Pcs, double?>(this, nameof(DCVoltage), (x, v) => x.DCVoltage = v, 1005, 1, ModbusDataType.MbInt16));
+        }
+
+        public override Task StartAsync()
+        {
+            // Test class only
+            throw new NotImplementedException();
+        }
+
+        public override Task StopAsync()
+        {
+            // Test class only
+            throw new NotImplementedException();
+        }
+
+        public override Task StandbyAsync(double? standbyActivePower = null)
+        {
+            // Test class only
+            throw new NotImplementedException();
         }
     }
 }

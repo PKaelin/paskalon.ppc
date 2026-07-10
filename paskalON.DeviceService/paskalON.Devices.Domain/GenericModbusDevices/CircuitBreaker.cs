@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
 using paskalON.Telemetry;
@@ -15,7 +16,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
     /// Circuit breaker is a safety threshold that automatically pauses or stops the circuit when a predefined
     /// limit is reached. It acts as a fail-safe.
     /// </summary>
-    public class CircuitBreaker : GenericModbusDeviceBase
+    public abstract class CircuitBreaker : GenericModbusDeviceBase
     {
         /// <summary>
         /// Circuit breaker configuration.
@@ -30,9 +31,9 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <param name="config">The circuit breaker configuration.</param>
         /// <param name="genericModbusEntries">List of generic Modbus entries.</param>
         /// <param name="publisher">The publisher interface.</param>
-        /// <param name="device">The device interface.</param>
+        /// <param name="dataface">The dataface interface.</param>
         public CircuitBreaker(ILogger logger, CircuitBreakerConfig config, List<GenericModbusEntryBase> genericModbusEntries, IMetricsPublisher publisher,
-            IGenericModbusDevice device) : base(logger, config, genericModbusEntries, publisher, device)
+            IDataface dataface) : base(logger, config, genericModbusEntries, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(config);
 

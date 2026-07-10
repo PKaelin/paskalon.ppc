@@ -3,15 +3,39 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.Dataface.Modbus
 {
-    public class ModbusRegister : IModbusRegister, IDataface, IModbusDataface
+    public class ModbusRegister : IModbusRegister, IModbusDataface
     {
+        /// <summary>
+        /// IModbusDataface implementation of Registers <see cref="IModbusDataface"/>.
+        /// </summary>
         public List<IModbusRegisterEntry> Registers { get; } = new List<IModbusRegisterEntry>();
 
+
+        /// <summary>
+        /// IModbusDataface implementation of PollingRanges <see cref="IModbusDataface"/>.
+        /// </summary>
         public List<ModbusPollingRangeEntry> PollingRanges { get; } = new List<ModbusPollingRangeEntry>();
 
 
-        public void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty> setter, int register, double scale,
-            ModbusDataType dataType, int offset = 0)
+        /// <summary>
+        /// IDataface implementation of Register <see cref="IDataface"/>.
+        /// </summary>
+        public void Register<TDevice, TCom>(Action<TCom> com)
+        {
+            if (this is not TCom typedCom)
+            {
+                throw new ArgumentException($"Register type {typeof(TCom).Name} is not implemented by this class");
+            }
+
+            com.Invoke(typedCom);
+        }
+
+
+        /// <summary>
+        /// IModbusRegister implementation of Register <see cref="IModbusRegister"/>.
+        /// </summary>
+        public void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty> setter, int register,
+            double scale, ModbusDataType dataType, int offset = 0)
         {
             ArgumentNullException.ThrowIfNull(instance);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -30,16 +54,10 @@ namespace paskalON.Dataface.Modbus
             Registers.Add(new ModbusRegisterEntry<TDevice, TProperty>(instance, name, setter, register, scale, dataType, offset));
         }
 
-        public void Register<TDevice, TCom>(Action<TCom> com)
-        {
-            if (this is not TCom typedCom)
-            {
-                throw new ArgumentException($"Register type {typeof(TCom).Name} is not implemented by this class");
-            }
 
-            com.Invoke(typedCom);
-        }
-
+        /// <summary>
+        /// IModbusRegister implementation of RegisterRange <see cref="IModbusRegister"/>.
+        /// </summary>
         public void RegisterRange(ushort from, ushort to, ModbusRegistryType registryType, int interval)
         {
             ArgumentOutOfRangeException.ThrowIfLessThan(to, from);
@@ -47,6 +65,5 @@ namespace paskalON.Dataface.Modbus
 
             PollingRanges.Add(new ModbusPollingRangeEntry(from, to, registryType, interval));
         }
-
     }
 }

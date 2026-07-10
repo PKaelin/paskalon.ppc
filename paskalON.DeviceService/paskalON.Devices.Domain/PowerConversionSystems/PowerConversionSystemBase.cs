@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -9,7 +10,6 @@ using paskalON.Telemetry;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Units = paskalON.PhysicalUnits.Electricals.Powers;
-
 
 namespace paskalON.Devices.Domain.PowerConversionSystems
 {
@@ -25,12 +25,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// Power conversion system configuration of this instance.
         /// </summary>
         protected readonly PowerConversionSystemConfig _config;
-
-
-        /// <summary>
-        /// Power conversion system device instance that communicates with the device.
-        /// </summary>
-        protected readonly IPowerConversionSystem _device;
 
 
         /// <summary>
@@ -95,7 +89,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// Nameplate maximum active power rating.
         /// </summary>
         public ActivePower NameplateMaximumActivePower { get => new ActivePower(_config.PowerConversionSystemDeviceConfig.NameplateMaximumActivePower); }
-
 
 
         /// <summary>
@@ -183,7 +176,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             get { lock (dataLock) { return (_reactivePowerTarget is null) ? null : new ReactivePower((double)_reactivePowerTarget); } }
         }
-
 
 
         /// <summary>
@@ -290,20 +282,28 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// Contains alarm definitions and their states.
+        /// Contains fault definitions and their states.
         /// </summary>
-        public Dictionary<string, bool> AlarmStates { get; } = new Dictionary<string, bool>();
+        /// <remarks>
+        /// Fault states indicate a critical failure that requires the system to shut down immediately to prevent damage.
+        /// Do not set these states directly us <see cref="SetFault(string, bool)"/> method instead.
+        /// </remarks>
+        public Dictionary<string, bool> FaultStates { get; } = new Dictionary<string, bool>();
 
 
         /// <summary>
         /// Indicates whether there are any active alarms.
         /// </summary>
-        public bool HasActiveAlarms { get => AlarmStates.Any(a => a.Value == true); }
+        public bool HasActiveFaults { get => FaultStates.Any(a => a.Value == true); }
 
 
         /// <summary>
         /// Contains warning definitions and their states.
         /// </summary>
+        /// <remarks>
+        /// Warning states indicate that the system is operating outside its optimal range but can continue running.
+        /// Do not set these states directly us <see cref="SetWarning(string, bool)"/> method instead.
+        /// </remarks>
         public Dictionary<string, bool> WarningStates { get; } = new Dictionary<string, bool>();
 
 
@@ -316,6 +316,10 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// Contains vendors event definitions and their states.
         /// </summary>
+        /// <remarks>
+        /// Vendor events can are vendor specific events like maintenance due etc.
+        /// Do not set these states directly us <see cref="SetVendorEvent(string, bool)"/> method instead.
+        /// </remarks>
         public Dictionary<string, bool> VendorEvents { get; } = new Dictionary<string, bool>();
 
 
@@ -334,17 +338,13 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <param name="publisher">The publisher interface.</param>
         /// <param name="device">The device interface.</param>
         public PowerConversionSystemBase(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher publisher,
-            IPowerConversionSystem device) : base(logger, config, publisher, device)
+            IDataface dataface) : base(logger, config, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(derUnit);
-            ArgumentNullException.ThrowIfNull(publisher);
-            ArgumentNullException.ThrowIfNull(device);
-            ArgumentNullException.ThrowIfNull(device.Dataface);
 
             _config = config;
             DerUnit = derUnit;
-            _device = device;
             RegisterMetrics();
             RegisterDataface();
         }
@@ -353,37 +353,37 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Start()
+        public virtual async Task StartAsync()
         {
             _logger.LogInformation("{Name} start requested.", Name);
-            _device.Start();
+            State = PcsState.Starting;
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Stop()
+        public virtual async Task StopAsync()
         {
             _logger.LogInformation("{Name} stop requested.", Name);
-            _device.Stop();
+            State = PcsState.Stopping;
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Standby(double? standbyActivePower = null)
+        public virtual async Task StandbyAsync(double? standbyActivePower = null)
         {
             _logger.LogInformation("{Name} standby requested with standby active power: {StandbyActivePower}.", Name, standbyActivePower ?? StandbyActivePower);
-            _device.Standby(standbyActivePower ?? StandbyActivePower);
+            State = PcsState.EnteringStandby;
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void SetActivePowerTarget(double? value)
+        public virtual void SetActivePowerTarget(double? value)
         {
             lock (dataLock)
             {
@@ -400,7 +400,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <inheritdoc/>
         /// </summary>
         /// <param name="value">Reactive power value (VArs).</param>
-        public void SetReactivePowerTarget(double? value)
+        public virtual void SetReactivePowerTarget(double? value)
         {
             lock (dataLock)
             {
@@ -413,12 +413,11 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
-
         /// <summary>
         /// Trigger PCS state change events.
         /// </summary>
         /// <param name="state">The PCS state.</param>
-        protected void SetState(PcsState state)
+        private void SetState(PcsState state)
         {
             _logger.LogInformation("{Name} - PCS state changed to: {State}", Name, State);
             StateChanged?.Invoke(this, new PcsStateChangedEventArgs(state));
@@ -429,7 +428,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// Trigger CommunicationError change events.
         /// </summary>
         /// <param name="state">The communication error state.</param>
-        protected void SetCommunicationError(bool state)
+        private void SetCommunicationError(bool state)
         {
             if (state == true)
             {
@@ -467,13 +466,26 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// Sets an alarm.
+        /// Sets a fault.
         /// </summary>
         /// <param name="name">Name of the alarm.</param>
         /// <param name="state">State of the alarm.</param>
-        protected void SetAlarm(string name, bool state)
+        protected void SetFault(string name, bool state)
         {
-            AlarmStates[name] = state;
+            // TODO: clean out if state is false and havent been updated for a while.
+            if (FaultStates.ContainsKey(name) == false || FaultStates[name] != state)
+            {
+                if (state == true)
+                {
+                    _logger.LogError("{Name} Fault state occurred. Fault: {Fault}", Name, name);
+                }
+                else
+                {
+                    _logger.LogInformation("{Name} Fault state changed to normal. Fault: {Fault}", Name, name);
+                }
+            }
+
+            FaultStates[name] = state;
         }
 
 
@@ -484,6 +496,19 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <param name="state">State of the warning.</param>
         protected void SetWarning(string name, bool state)
         {
+            // TODO: clean out if state is false and havent been updated for a while.
+            if (WarningStates.ContainsKey(name) == false || WarningStates[name] != state)
+            {
+                if (state == true)
+                {
+                    _logger.LogWarning("{Name} Warning state occurred. Warning: {Warning}", Name, name);
+                }
+                else
+                {
+                    _logger.LogInformation("{Name} Warning state changed to normal. Warning: {Warning}", Name, name);
+                }
+            }
+
             WarningStates[name] = state;
         }
 
@@ -492,14 +517,26 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// Sets a vendor event.
         /// </summary>
         /// <param name="name">Name of the event.</param>
-        /// <param name="state">State of the event.</param>
-        protected void SetVendorEvent(string name, bool state)
+        /// <param name="vendorEvents">Vendor event.</param>
+        protected void SetVendorEvent(string name, bool vendorEvents)
         {
-            VendorEvents[name] = state;
+            // TODO: clean out if state is false and havent been updated for a while.
+            if (VendorEvents.ContainsKey(name) == false || VendorEvents[name] != vendorEvents)
+            {
+                if (vendorEvents == true)
+                {
+                    _logger.LogWarning("{Name} Vendor event occurred. Event: {Event}", Name, name);
+                }
+                else
+                {
+                    _logger.LogInformation("{Name} Vendor event changed to normal. Event: {Event}", Name, name);
+                }
+            }
+
+            VendorEvents[name] = vendorEvents;
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
         /// </summary>
         protected override void RegisterMetrics()
@@ -524,7 +561,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ACVoltage), MetricType.Gauge, x => x.ACVoltage, _config.MetricsFactorClass1);
             // MetricsFactorClass2
             MetricsPublisher.Register<PowerConversionSystemBase, PcsState>(this, nameof(State), MetricType.Gauge, x => x.State, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(HasActiveAlarms), MetricType.Gauge, x => x.HasActiveAlarms, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(HasActiveFaults), MetricType.Gauge, x => x.HasActiveFaults, _config.MetricsFactorClass2);
             MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(HasActiveWarnings), MetricType.Gauge, x => x.HasActiveWarnings, _config.MetricsFactorClass2);
             // MetricsFactorClass3
             MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);

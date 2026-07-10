@@ -14,13 +14,13 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// Starts the power conversion system.
         /// </summary>
-        void Start();
+        Task StartAsync();
 
 
         /// <summary>
         /// Stops the power conversion system.
         /// </summary>
-        void Stop();
+        Task StopAsync();
 
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// This could be required for PCSs that need a minimum active power to be able to switch on properly.
         /// If not standby active power is provided, the PCS will use the minimum active power target configured in the PCS.
         /// </remarks>
-        void Standby(double? standbyActivePower = null);
+        Task StandbyAsync(double? standbyActivePower = null);
 
 
         /// <summary>

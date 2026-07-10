@@ -4,9 +4,9 @@
 namespace paskalON.Dataface.C37s
 {
     /// <summary>
-    /// Interface for C37 data face.
-    /// </summary>
-    public interface IC37Dataface
+    /// IC37Dataface is the specific dataface for C36 registrations and communications.
+    /// </summary>    
+    public interface IC37Dataface : IDataface
     {
         /// <summary>
         /// List of IC37RegisterEntry registrations.

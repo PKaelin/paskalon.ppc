@@ -3,8 +3,21 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.Dataface
 {
+    /// <summary>
+    /// IDataface is to register the data face for a decoupled communication.
+    /// </summary>
     public interface IDataface
     {
+        /// <summary>
+        /// Register a dataface.
+        /// </summary>
+        /// <typeparam name="TDevice">The device type that register its data interface.</typeparam>
+        /// <typeparam name="TCom">The communication interface that gets registered.</typeparam>
+        /// <param name="com"></param>
+        /// <remarks>
+        /// At the moment only <see cref="IModbusRegister"/> and <see cref="IC37Register"/> are implemented.
+        /// In the future we could have more communication methods between the devices.
+        /// </remarks>
         void Register<TDevice, TCom>(Action<TCom> com);
     }
 }

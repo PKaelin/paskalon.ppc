@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface;
 using paskalON.Devices.Domain.Configs.EnergyResources.Solars;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Telemetry;
@@ -26,12 +27,6 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// Solar panel configuration.
         /// </summary>
         private readonly SolarPanelConfig _config;
-
-
-        /// <summary>
-        /// Solar panel device instance that communicates with the device.
-        /// </summary>
-        private readonly ISolarPanel _device;
 
 
         /// <summary>
@@ -130,17 +125,15 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <param name="config">The solar panel configuration.</param>
         /// <param name="derSolarUnit">The parent solar unit.</param>
         /// <param name="publisher">The publisher interface.</param>
-        /// <param name="device">The device interface.</param>
+        /// <param name="dataface">The dataface interface.</param>
         protected SolarPanelBase(ILogger logger, SolarPanelConfig config, DerSolarUnit derSolarUnit, IMetricsPublisher publisher,
-            ISolarPanel device) : base(logger, config, publisher, device)
+            IDataface dataface) : base(logger, config, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(derSolarUnit);
             ArgumentNullException.ThrowIfNull(publisher);
-            ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
-            _device = device;
             SolarUnit = derSolarUnit;
 
             RegisterMetrics();
@@ -151,20 +144,44 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Connect()
+        public virtual async Task ConnectAsync()
         {
             _logger.LogInformation("{Name} connect requested.", Name);
-            _device.Connect();
+            // We dont communicate at this point.
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Disconnect()
+        public virtual async Task DisconnectAsync()
         {
             _logger.LogInformation("{Name} disconnect requested.", Name);
-            _device.Disconnect();
+            // We dont communicate at this point.
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        protected override void RegisterMetrics()
+        {
+            IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
+            {
+                { "Name", _config.Name },
+                { "DeviceId", _config.DeviceId }
+            };
+
+            // Initialize metrics
+            MetricsPublisher.Initialize("Solar", tags);
+            // Solar
+            MetricsPublisher.Register<SolarPanelBase, bool>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, int>(this, nameof(NumberOfPanels), MetricType.Gauge, x => x.NumberOfPanels, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MinimumVoltageSum), MetricType.Gauge, x => x.MinimumVoltageSum, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MaximumVoltageSum), MetricType.Gauge, x => x.MaximumVoltageSum, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MinimumCurrentSum), MetricType.Gauge, x => x.MinimumCurrentSum, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MaximumCurrentSum), MetricType.Gauge, x => x.MaximumCurrentSum, _config.MetricsFactorClass4);
         }
 
 
@@ -172,7 +189,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// Trigger GenericModbusDeviceState change events
         /// </summary>
         /// <param name="state">The GenericModbusDeviceState state.</param>
-        protected void SetState(SolarPanelState state)
+        private void SetState(SolarPanelState state)
         {
             _logger.LogInformation("{Name} - SolarPanelState state changed to: {State}", Name, State);
             StateChanged?.Invoke(this, new SolarPanelStateChangedEventArgs(state));
@@ -183,7 +200,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// Trigger CommunicationError change events.
         /// </summary>
         /// <param name="state">The communication error state.</param>
-        protected void SetCommunicationError(bool state)
+        private void SetCommunicationError(bool state)
         {
             if (state == true)
             {
@@ -210,28 +227,5 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        protected override void RegisterMetrics()
-        {
-            IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
-            {
-                { "Name", _config.Name },
-                { "DeviceId", _config.DeviceId }
-            };
-
-            // Initialize metrics
-            MetricsPublisher.Initialize("Solar", tags);
-            // Solar
-            MetricsPublisher.Register<SolarPanelBase, bool>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass4);
-            MetricsPublisher.Register<SolarPanelBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass4);
-            MetricsPublisher.Register<SolarPanelBase, int>(this, nameof(NumberOfPanels), MetricType.Gauge, x => x.NumberOfPanels, _config.MetricsFactorClass4);
-            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MinimumVoltageSum), MetricType.Gauge, x => x.MinimumVoltageSum, _config.MetricsFactorClass4);
-            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MaximumVoltageSum), MetricType.Gauge, x => x.MaximumVoltageSum, _config.MetricsFactorClass4);
-            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MinimumCurrentSum), MetricType.Gauge, x => x.MinimumCurrentSum, _config.MetricsFactorClass4);
-            MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MaximumCurrentSum), MetricType.Gauge, x => x.MaximumCurrentSum, _config.MetricsFactorClass4);
-        }
     }
 }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Dataface;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Telemetry;
 
@@ -18,7 +19,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
     /// Facility Utilities: Control room HVAC, lighting, and fire protection systems.
     /// Handling Systems: Coal conveyors, ash removal, and scrubbers.
     /// </remarks>
-    public class AuxiliaryPowerMeter : PowerMeterBase
+    public abstract class AuxiliaryPowerMeter : PowerMeterBase
     {
         /// <summary>
         /// Auxiliary power meter configuration.
@@ -32,12 +33,11 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The auxiliary power meter configuration.</param>
         /// <param name="publisher">The publisher interface.</param>
-        /// <param name="device">The device interface.</param>
-        public AuxiliaryPowerMeter(ILogger logger, AuxiliaryPowerMeterConfig config, IMetricsPublisher publisher, IPowerMeter device)
-            : base(logger, config, publisher, device)
+        /// <param name="dataface">The dataface interface.</param>
+        public AuxiliaryPowerMeter(ILogger logger, AuxiliaryPowerMeterConfig config, IMetricsPublisher publisher, IDataface dataface)
+            : base(logger, config, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(config);
-            ArgumentNullException.ThrowIfNull(device);
 
             _config = config;
         }

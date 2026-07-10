@@ -14,12 +14,12 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <summary>
         /// Connects the battery bank and starts communicating once in state connected.
         /// </summary>
-        void Connect();
+        Task ConnectAsync();
 
 
         /// <summary>
         /// Disconnects the battery bank after it stops communicating.
         /// </summary>
-        void Disconnect();
+        Task DisconnectAsync();
     }
 }

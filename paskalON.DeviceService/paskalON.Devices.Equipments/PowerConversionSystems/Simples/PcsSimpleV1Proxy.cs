@@ -12,18 +12,12 @@ using paskalON.Telemetry;
 
 namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
 {
-
-    // TODO: Implement PcsSimpleV1Proxy
-
-
+    /// <summary>
+    /// PCS simple is a basic implementation of the PCS base class.
+    /// It shall be used for tests, simulations, analysis and as a reference for all concrete implementations.
+    /// </summary>
     public class PcsSimpleV1Proxy : PowerConversionSystemBase, IModbusPollingEngine
     {
-        /// <summary>
-        /// Modbus data face for updating the domain data.
-        /// </summary>
-        private readonly IModbusDataface _dataface;
-
-
         /// <summary>
         /// Modbus client communication.
         /// </summary>
@@ -47,16 +41,12 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// <param name="dataface">The data face interface.</param>
         /// <param name="client">The Modbus client interface.</param>
         public PcsSimpleV1Proxy(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher publisher,
-            IPowerConversionSystem device, IModbusDataface dataface, IModbusClient client) : base(logger, config, derUnit, publisher, device)
+            IModbusDataface dataface, IModbusClient client) : base(logger, config, derUnit, publisher, dataface)
         {
-            ArgumentNullException.ThrowIfNull(dataface);
             ArgumentNullException.ThrowIfNull(client);
-
-            _dataface = dataface;
             _client = client;
             _pollingEngine = new ModbusPollingEngine(client, dataface);
         }
-
 
 
         /// <summary>
@@ -68,34 +58,108 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         }
 
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public override async Task StartAsync()
+        {
+            await base.StartAsync();
+            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorStatus, 1);
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public override async Task StopAsync()
+        {
+            await base.StopAsync();
+            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorStatus, 0);
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public override async Task StandbyAsync(double? standbyActivePower = null)
+        {
+            await base.StandbyAsync(standbyActivePower);
+
+            if (standbyActivePower != null)
+            {
+                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, (ushort)standbyActivePower);
+            }
+
+            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorStatus, 3);
+        }
+
+
+
+
 
         /// <summary>
         /// <inheritdoc/>>
         /// </summary>
         protected override void RegisterDataface()
         {
-            // _config.ModbusConfig.ModbusConnectionConfig.PollingIntervalMilliseconds
-
-            // Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, PcsState>(this, nameof(State), (x, v) => x.State = v, (int)PcsSimpleV1Description.Register.CurrentStatus, 1));
-
-            // Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange()
+            // Power
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ActivePower),
+                (x, v) => x.ActivePowerValue = v, (int)PcsSimpleV1Description.Register.P, ModbusScale.NoScale, ModbusDataType.MbUint16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ReactivePower),
+                (x, v) => x.ReactivePowerValue = v, (int)PcsSimpleV1Description.Register.Q, ModbusScale.NoScale, ModbusDataType.MbUint16));
+            // Power range
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.P, (int)PcsSimpleV1Description.Register.Q,
+                ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass1));
+            // Current, Voltage, Frequency
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(Frequency),
+                (x, v) => x.Frequency = v, (int)PcsSimpleV1Description.Register.Frequency, ModbusScale.Factor100, ModbusDataType.MbUint16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(DCCurrent),
+                (x, v) => x.DCCurrent = v, (int)PcsSimpleV1Description.Register.DCCurrent, ModbusScale.NoScale, ModbusDataType.MbUint16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(DCVoltage),
+                (x, v) => x.DCVoltage = v, (int)PcsSimpleV1Description.Register.DCVoltage, ModbusScale.NoScale, ModbusDataType.MbUint16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ACCurrent),
+                (x, v) => x.ACCurrent = v, (int)PcsSimpleV1Description.Register.ACCurrent, ModbusScale.NoScale, ModbusDataType.MbUint16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ACVoltage),
+                (x, v) => x.ACVoltage = v, (int)PcsSimpleV1Description.Register.ACVoltage, ModbusScale.NoScale, ModbusDataType.MbUint16));
+            // Current, Voltage, Frequency range
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.Frequency, (int)PcsSimpleV1Description.Register.ACVoltage,
+                ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass1));
+            // State
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(State),
+                (x, v) => x.SetState(v), (int)PcsSimpleV1Description.Register.CurrentStatus, ModbusScale.NoScale, ModbusDataType.MbInt16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(WarningStates),
+                (x, v) => x.SetWarning(v), (int)PcsSimpleV1Description.Register.CurrentWarning, ModbusScale.NoScale, ModbusDataType.MbInt16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(FaultStates),
+                (x, v) => x.SetFault(v), (int)PcsSimpleV1Description.Register.CurrentFault, ModbusScale.NoScale, ModbusDataType.MbInt16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(VendorEvents),
+                (x, v) => x.SetVendorEvent(v), (int)PcsSimpleV1Description.Register.CurrentVendorEvent, ModbusScale.NoScale, ModbusDataType.MbInt16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(IsACBreakerClosed),
+                (x, v) => x.SetAcBreaker(v), (int)PcsSimpleV1Description.Register.ACBreaker, ModbusScale.NoScale, ModbusDataType.MbInt16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(IsDcContactorClosed),
+                (x, v) => x.SetDcContactors(v), (int)PcsSimpleV1Description.Register.DcContactor, ModbusScale.NoScale, ModbusDataType.MbInt16));
+            // State range
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.CurrentStatus, (int)PcsSimpleV1Description.Register.DcContactor,
+                ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass2));
         }
 
 
-
         /// <summary>
-        /// Convert the device status with the domain status.
+        /// Convert the device state with the domain state.
         /// </summary>
-        /// <param name="status">The device status.</param>
-        private void SetStatus(int status)
+        /// <param name="state">The device state.</param>
+        /// <remarks>
+        /// All possible state should be mapped to the device state.
+        /// Do not add states in base class without consulting the lead.
+        /// </remarks>
+        private void SetState(int state)
         {
-            // Check whether we have defined all status
-            if (Enum.IsDefined(typeof(PcsSimpleV1Description.Status), status) == false)
+            // Check whether we have defined all state
+            if (Enum.IsDefined(typeof(PcsSimpleV1Description.Status), state) == false)
             {
-                _logger.LogError($"Undefined status reported by the {nameof(PcsSimpleV1Proxy)}. Status: {status}");
+                _logger.LogError("{Name} Undefined state reported. Status: {State}", Name, State);
             }
 
-            switch (status)
+            switch (state)
             {
                 case (int)PcsSimpleV1Description.Status.Initialization:
                     State = PcsState.Starting;
@@ -114,6 +178,132 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                 default:
                     // Do not change the state
                     break;
+            }
+        }
+
+
+        /// <summary>
+        /// Sets the warning states.
+        /// </summary>
+        /// <param name="warning">The warning value.</param>
+        /// <remarks>
+        /// Keep it simple in simple proxy
+        /// </remarks>
+        private void SetWarning(int warning)
+        {
+            if (Enum.IsDefined(typeof(PcsSimpleV1Description.WarningCode), warning) == false)
+            {
+                _logger.LogError("{Name} Unknow warning code found: {Warning}", Name, warning);
+                WarningStates.Add("Unknown", true);
+            }
+            else
+            {
+                PcsSimpleV1Description.WarningCode code = (PcsSimpleV1Description.WarningCode)warning;
+
+                if (code != PcsSimpleV1Description.WarningCode.None)
+                {
+                    SetWarning(code.ToString(), true);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Sets the fault states.
+        /// </summary>
+        /// <param name="fault">The fault value.</param>
+        /// <remarks>
+        /// Keep it simple in simple proxy
+        /// </remarks>
+        private void SetFault(int fault)
+        {
+            if (Enum.IsDefined(typeof(PcsSimpleV1Description.FaultCode), fault) == false)
+            {
+                _logger.LogError("{Name} Unknow fault code found: {Fault}", Name, fault);
+                FaultStates.Add("Unknown", true);
+            }
+            else
+            {
+                PcsSimpleV1Description.FaultCode code = (PcsSimpleV1Description.FaultCode)fault;
+
+                if (code != PcsSimpleV1Description.FaultCode.None)
+                {
+                    SetFault(code.ToString(), true);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Sets the vendor events.
+        /// </summary>
+        /// <param name="vendorEvent">The vendor event value.</param>
+        /// <remarks>
+        /// Keep it simple in simple proxy
+        /// </remarks>
+        private void SetVendorEvent(int vendorEvent)
+        {
+            if (Enum.IsDefined(typeof(PcsSimpleV1Description.VendorEvents), vendorEvent) == false)
+            {
+                _logger.LogError("{Name} Unknow vendor event found: {VendorEvent}", Name, vendorEvent);
+                VendorEvents.Add("Unknown", true);
+            }
+            else
+            {
+                PcsSimpleV1Description.VendorEvents code = (PcsSimpleV1Description.VendorEvents)vendorEvent;
+
+                if (code != PcsSimpleV1Description.VendorEvents.None)
+                {
+                    SetVendorEvent(code.ToString(), true);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Sets whether the AC breaker is closed.
+        /// </summary>
+        /// <param name="acBreaker">The AC breaker value.</param>
+        /// <remarks>
+        /// Keep it simple in simple proxy
+        /// </remarks>
+        private void SetAcBreaker(int acBreaker)
+        {
+            if (acBreaker == 0)
+            {
+                IsACBreakerClosed = false;
+            }
+            else
+            {
+                IsACBreakerClosed = true;
+            }
+        }
+
+
+        /// <summary>
+        /// Sets whether one or many DC contactors are closed.
+        /// </summary>
+        /// <param name="dcContactors">The DC contactor value.</param>
+        /// <remarks>
+        /// Keep it simple in simple proxy
+        /// </remarks>
+        private void SetDcContactors(int dcContactors)
+        {
+            if (dcContactors == 0)
+            {
+                IsDcContactorClosed = new[] { false };
+            }
+            else if (dcContactors == 2)
+            {
+                IsDcContactorClosed = new[] { true, true };
+            }
+            else if (dcContactors == 3)
+            {
+                IsDcContactorClosed = new[] { true, true, true };
+            }
+            else
+            {
+                IsDcContactorClosed = new[] { true };
             }
         }
     }

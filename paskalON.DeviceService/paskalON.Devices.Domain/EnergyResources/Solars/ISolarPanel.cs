@@ -15,12 +15,12 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <summary>
         /// Connects the solar panel and starts communicating once in state connected.
         /// </summary>
-        void Connect();
+        Task ConnectAsync();
 
 
         /// <summary>
         /// Disconnects the solar panel after it stops communicating.
         /// </summary>
-        void Disconnect();
+        Task DisconnectAsync();
     }
 }

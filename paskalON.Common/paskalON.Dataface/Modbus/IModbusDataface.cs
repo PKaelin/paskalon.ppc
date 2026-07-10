@@ -4,9 +4,9 @@
 namespace paskalON.Dataface.Modbus
 {
     /// <summary>
-    /// Interface for Modbus data face.
-    /// </summary>
-    public interface IModbusDataface
+    /// IModbusDataface is the specific dataface for Modbus registrations and communications.
+    /// </summary>    
+    public interface IModbusDataface : IDataface
     {
         /// <summary>
         /// List of IModbusRegisterEntry registrations.
