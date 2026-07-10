@@ -4,7 +4,7 @@ This project is not yet an actual power plant controller.
 
 
 ## Core Power Control Overview
-![test](./Core%20Power%20Control%20Controller%20Overview.drawio.svg)
+![test](./Docs/Core%20Power%20Control%20Controller%20Overview.drawio.svg)
 
 
 ## Core Power Control Components
