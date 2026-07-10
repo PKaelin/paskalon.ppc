@@ -26,7 +26,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <summary>
         /// Solar panel configuration.
         /// </summary>
-        private readonly SolarPanelConfig _config;
+        protected readonly SolarPanelConfig _config;
 
 
         /// <summary>

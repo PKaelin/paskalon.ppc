@@ -6,7 +6,7 @@ namespace paskalON.Dataface.UnitTest.Modbus
     [TestClass]
     public class ModbusRegisterTest
     {
-        // Test field used to register action but never set.
+        // Test field used to register action.
         private int _myValue = 0;
 
 
@@ -167,18 +167,13 @@ namespace paskalON.Dataface.UnitTest.Modbus
         }
 
 
-        /// <summary>
-        /// Specific variable for test below for threat safety if tests run parallelized.
-        /// </summary>
-        private int _registerComActionTestVariable = 3;
-
         [TestMethod]
         public void RegisterComActionTest()
         {
             ModbusRegister register = new ModbusRegister();
             string name = "Test";
             register.Register<ModbusRegisterTest, IModbusRegister>(r =>
-                r.Register<ModbusRegisterTest, int>(this, name, (x, v) => x._registerComActionTestVariable = v, 1, 1, ModbusDataType.MbInt16));
+                r.Register<ModbusRegisterTest, int>(this, name, (x, v) => x._myValue = v, 1, 1, ModbusDataType.MbInt16));
 
             Assert.IsNotNull(register);
             Assert.HasCount(1, register.Registers);

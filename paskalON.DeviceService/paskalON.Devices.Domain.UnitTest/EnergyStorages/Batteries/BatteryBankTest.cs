@@ -6,7 +6,7 @@ using Moq;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
-using paskalON.Devices.Domain.Configs.PowerConversionSystems;
+using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.UnitTest.Equipments;
 using paskalON.Telemetry;
@@ -15,7 +15,7 @@ using System.Net.Sockets;
 namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
 {
     [TestClass]
-    public class PowerConversionSystemTest
+    public class BatteryBankTest
     {
         private DerConfig? _derConfig;
         private Der? _der;
@@ -27,8 +27,8 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         private DerBatteryStorageUnit? _unit;
         private ModbusConnectionConfig? _modbusConnectionConfig;
         private ModbusConfig? _modbusConfig;
-        private PowerConversionSystemDeviceConfig? _pcsDeviceConfig;
-        private PowerConversionSystemConfig? _pcsConfig;
+        private BatteryBankDeviceConfig? _bbDeviceConfig;
+        private BatteryBankConfig? _bbConfig;
 
 
         [TestInitialize]
@@ -72,17 +72,17 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
                 ModbusConnectionConfig = _modbusConnectionConfig
             };
 
-            _pcsDeviceConfig = new PowerConversionSystemDeviceConfig { ChangedBy = "Test", Name = "PowerConversionSystemDeviceConfig", ClassName = "ClassName" };
+            _bbDeviceConfig = new BatteryBankDeviceConfig { ChangedBy = "Test", Name = "BatteryBankDeviceConfig", ClassName = "ClassName" };
 
-            _pcsConfig = new PowerConversionSystemConfig
+            _bbConfig = new BatteryBankConfig
             {
                 DeviceId = 1,
                 IsActive = true,
                 ChangedBy = "Test",
-                Name = "PowerConversionSystemConfig",
+                Name = "BatteryBankConfig",
                 DerUnitConfig = _unitConfig,
                 ModbusConfig = _modbusConfig,
-                PowerConversionSystemDeviceConfig = _pcsDeviceConfig
+                BatteryBankDeviceConfig = _bbDeviceConfig
             };
         }
 
@@ -93,7 +93,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new Pcs(NullLogger.Instance, null, _unit!, publisher.Object, dataface.Object));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new BatteryBank(NullLogger.Instance, null, _unit!, publisher.Object, dataface.Object));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -104,7 +104,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new Pcs(NullLogger.Instance, _pcsConfig!, null, publisher.Object, dataface.Object));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new BatteryBank(NullLogger.Instance, _bbConfig!, null, publisher.Object, dataface.Object));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -114,15 +114,15 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             ModbusRegister dataface = new ModbusRegister();
-            Pcs pcs = new Pcs(NullLogger.Instance, _pcsConfig!, _unit!, publisher.Object, dataface);
+            BatteryBank batteryBank = new BatteryBank(NullLogger.Instance, _bbConfig!, _unit!, publisher.Object, dataface);
 
-            Assert.IsNotNull(pcs.Dataface);
+            Assert.IsNotNull(batteryBank.Dataface);
             Assert.IsNotNull(dataface.Registers);
             Assert.HasCount(4, dataface.Registers);
-            Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(pcs.ActivePower)));
-            Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(pcs.ReactivePower)));
-            Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(pcs.DCCurrent)));
-            Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(pcs.DCVoltage)));
+            Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(batteryBank.StateOfCharge)));
+            Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(batteryBank.StateOfHealth)));
+            Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(batteryBank.TotalDCVoltage)));
+            Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(batteryBank.TotalDCCurrent)));
         }
 
     }

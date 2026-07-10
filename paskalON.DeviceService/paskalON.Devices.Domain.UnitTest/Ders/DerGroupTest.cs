@@ -29,5 +29,20 @@ namespace paskalON.Devices.Domain.UnitTest.Ders
             Assert.ThrowsExactly<ArgumentNullException>(() => new DerGroup(NullLogger<DerGroup>.Instance, groupConfig, null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
+
+
+        [TestMethod]
+        public void CreateDerGroupTest()
+        {
+            DerConfig derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
+            Der der = new Der(NullLogger<Der>.Instance, derConfig);
+            DerGroupConfig groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = derConfig };
+
+            DerGroup derGroup = new DerGroup(NullLogger<DerGroup>.Instance, groupConfig, der);
+
+            Assert.IsNotNull(derGroup.DerCircuits);
+            Assert.IsNotNull(derGroup.Der);
+        }
+
     }
 }

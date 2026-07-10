@@ -35,7 +35,7 @@ namespace paskalON.Telemetry
         /// <summary>
         /// Publishes the metrics for the given instance at the specified interval.
         /// </summary>
-        /// <param name="interval">The interval at which to publish the metrics.</param>
-        void Publish(int interval);
+        /// <param name="currentInterval">The current interval iteration.</param>
+        void Publish(int currentInterval);
     }
 }

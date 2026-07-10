@@ -10,18 +10,33 @@ namespace paskalON.Devices.Domain.UnitTest.Ders
     [TestClass]
     public class DerSolarUnitTest
     {
+        private DerConfig? _derConfig;
+        private Der? _der;
+        private DerGroupConfig? _groupConfig;
+        private DerGroup? _group;
+        private DerCircuitConfig? _circuitConfig;
+        private DerCircuit? _circuit;
+        private DerSolarUnitConfig? _unitConfig;
+
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
+            _der = new Der(NullLogger.Instance, _derConfig);
+            _groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = _derConfig };
+            _group = new DerGroup(NullLogger.Instance, _groupConfig, _der);
+            _circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = _groupConfig };
+            _circuit = new DerCircuit(NullLogger.Instance, _circuitConfig, _group);
+            _unitConfig = new DerSolarUnitConfig { ChangedBy = "Test", Name = "DerUnit", DerCircuitConfig = _circuitConfig! };
+        }
+
+
         [TestMethod]
         public void CreateWithoutConfigTest()
         {
-            DerConfig derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
-            Der der = new Der(NullLogger.Instance, derConfig);
-            DerGroupConfig groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = derConfig };
-            DerGroup group = new DerGroup(NullLogger.Instance, groupConfig, der);
-            DerCircuitConfig circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = groupConfig };
-            DerCircuit circuit = new DerCircuit(NullLogger.Instance, circuitConfig, group);
-
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new DerSolarUnit(NullLogger.Instance, null, circuit));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DerSolarUnit(NullLogger.Instance, null, _circuit!));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -29,14 +44,19 @@ namespace paskalON.Devices.Domain.UnitTest.Ders
         [TestMethod]
         public void CreateWithoutParentTest()
         {
-            DerConfig derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
-            DerGroupConfig groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = derConfig };
-            DerCircuitConfig circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = groupConfig };
-            DerSolarUnitConfig unitConfig = new DerSolarUnitConfig { ChangedBy = "Test", Name = "DerUnit", DerCircuitConfig = circuitConfig };
-
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new DerSolarUnit(NullLogger.Instance, unitConfig, null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DerSolarUnit(NullLogger.Instance, _unitConfig!, null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+        }
+
+
+        [TestMethod]
+        public void CreateDerSolaUnitTest()
+        {
+            DerSolarUnit unit = new DerSolarUnit(NullLogger.Instance, _unitConfig!, _circuit!);
+
+            Assert.IsNotNull(unit.DerCircuit);
+            Assert.IsNull(unit.PowerConversionSystem);
         }
     }
 }

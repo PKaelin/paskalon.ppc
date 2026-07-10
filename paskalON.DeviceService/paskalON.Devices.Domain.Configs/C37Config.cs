@@ -13,7 +13,7 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// IP address of the device.
         /// </summary>
-        public string? IpAddress
+        public required string IpAddress
         {
             get;
             set { ArgumentNullException.ThrowIfNullOrEmpty(value); field = value; }
@@ -23,7 +23,7 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// Port of the device.
         /// </summary>
-        public ushort Port
+        public required ushort Port
         {
             get;
             set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
@@ -33,7 +33,7 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// Transport layer (TCP or UDP) used for C37.118 communications.
         /// </summary>
-        public C37TransportLayer TransportLayer { get; set; }
+        public required C37TransportLayer TransportLayer { get; set; }
 
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace paskalON.Devices.Domain.Configs
         /// purposes, and it is sent to the remote device in various command frames so the remote device can
         /// perform that command on it's appropriate data stream.
         /// </remarks>
-        public ushort IdOfDataStream { get; set; } = 1;
+        public required ushort IdOfDataStream { get; set; } = 1;
 
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace paskalON.Devices.Domain.Configs
         /// For devices that are not acting as a PDC, it is "usually" the case that this will match the <see cref="IdOfDataStream"/>, 
         /// however this is not enforced by the C37 protocol.
         /// </remarks>
-        public ushort IdOfDataBlock { get; set; } = 1;
+        public required ushort IdOfDataBlock { get; set; } = 1;
 
 
         /// <summary>

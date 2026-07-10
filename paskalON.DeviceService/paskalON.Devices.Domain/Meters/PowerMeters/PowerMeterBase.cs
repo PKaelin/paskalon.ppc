@@ -674,8 +674,16 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
                     Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleC, (x, v) => x.CurrentAngleC = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageC) == false)
                     Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageC, (x, v) => x.VoltageC = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageAB) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAB, (x, v) => x.VoltageAB = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageBC) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageBC, (x, v) => x.VoltageBC = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageCA) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageCA, (x, v) => x.VoltageCA = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageAngleC) == false)
                     Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleC, (x, v) => x.VoltageAngleC = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageLLAvg) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageLLAvg, (x, v) => x.VoltageLLAvg = v));
                 if (string.IsNullOrEmpty(c37Config.VoltagePositiveSequence) == false)
                     Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltagePositiveSequence, (x, v) => x.VoltagePositiveSequence = v));
                 if (string.IsNullOrEmpty(c37Config.VoltagePositiveSequenceAngle) == false)

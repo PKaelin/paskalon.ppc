@@ -36,8 +36,9 @@ namespace paskalON.Dataface.C37s
         /// </summary>
         public void Register<TDevice, TCom>(Action<TCom> com)
         {
-            if (com is not TCom typedCom)
+            if (this is not TCom typedCom)
             {
+                // At this point it should be IC37Register
                 throw new ArgumentException($"Register type {typeof(TCom).Name} is not implemented by this class");
             }
 

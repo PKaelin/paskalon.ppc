@@ -35,5 +35,19 @@ namespace paskalON.Devices.Domain.UnitTest.Ders
             DerConfig derConfig = new DerConfig { ChangedBy = "Test", Name = string.Empty };
             Assert.ThrowsExactly<ArgumentException>(() => new Der(NullLogger<Der>.Instance, derConfig));
         }
+
+
+        [TestMethod]
+        public void CreateDerTest()
+        {
+            DerConfig derConfig = new DerConfig { ChangedBy = "Test", Name = "Der" };
+            Der der = new Der(NullLogger<Der>.Instance, derConfig);
+
+            Assert.IsNotNull(der.AuxiliaryPowerMeters);
+            Assert.IsNotNull(der.DerGroups);
+            Assert.IsNotNull(der.SystemPowerMeters);
+            Assert.IsNotNull(der.ExternalPowerMeters);
+            Assert.IsNotNull(der.GenericModbusDevices);
+        }
     }
 }

@@ -32,6 +32,7 @@ namespace paskalON.Dataface.Modbus
 
             if (this is not TCom typedCom)
             {
+                // At this point it should be IModbusRegister
                 throw new ArgumentException($"Register type {typeof(TCom).Name} is not implemented by this class");
             }
 

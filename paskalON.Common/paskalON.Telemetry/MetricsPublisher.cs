@@ -102,7 +102,7 @@ namespace paskalON.Telemetry
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void Publish(int interval)
+        public virtual void Publish(int currentInterval)
         {
             if (Meter == null)
             {
@@ -111,7 +111,7 @@ namespace paskalON.Telemetry
 
             foreach (IMetricEntry entry in _metrics.Values)
             {
-                if (interval % entry.Interval == 0)
+                if (currentInterval % entry.Interval == 0)
                 {
                     entry.Update();
                 }

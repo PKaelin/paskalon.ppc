@@ -110,7 +110,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
         /// Updates an entity.
         /// </summary>
         /// <param name="entity">Entity to update.</param>
-        /// <returns>Returns the updated entity.</returns>
+        /// <returns>The updated entity.</returns>
         public TEntity Update(TEntity entity)
         {
             entity.ChangedDate = DateTimeOffset.UtcNow;

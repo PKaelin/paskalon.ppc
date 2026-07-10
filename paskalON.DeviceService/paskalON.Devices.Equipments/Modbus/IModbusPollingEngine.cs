@@ -3,8 +3,17 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.Devices.Equipments.Modbus
 {
+    /// <summary>
+    /// Interface for the Modbus polling engine
+    /// </summary>
     public interface IModbusPollingEngine
     {
-        Task PollAsync(int interval, CancellationToken cancellationToken);
+        /// <summary>
+        /// Executes a asynchronous poll of the Modbus definition. 
+        /// </summary>
+        /// <param name="currentInterval">Current interval of the poll.</param>
+        /// <param name="cancellationToken">Cancelation token.</param>
+        /// <returns></returns>
+        Task PollAsync(int currentInterval, CancellationToken cancellationToken);
     }
 }

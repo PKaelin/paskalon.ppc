@@ -25,7 +25,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <summary>
         /// Battery bank configuration.
         /// </summary>
-        private readonly BatteryBankConfig _config;
+        protected readonly BatteryBankConfig _config;
 
 
         /// <summary>
