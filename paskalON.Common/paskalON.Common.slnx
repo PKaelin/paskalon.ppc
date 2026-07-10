@@ -3,6 +3,7 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="paskalON.Dataface.UnitTest/paskalON.Dataface.UnitTest.csproj" Id="6157fc6e-c19d-47ba-9ab5-83d4ebcd637e" />
     <Project Path="paskalON.Maths.IntegrationTest/paskalON.Maths.IntegrationTest.csproj" />
     <Project Path="paskalON.Maths.UnitTest/paskalON.Maths.UnitTest.csproj" />
     <Project Path="paskalON.PhysicalUnits.UnitTest/paskalON.PhysicalUnits.UnitTest.csproj" />

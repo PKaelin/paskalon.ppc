@@ -3,6 +3,9 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.Dataface.C37s
 {
+    /// <summary>
+    /// C37Register implementation for <see cref="IC37Register"/> and <see cref="IC37Dataface"/> interfaces.
+    /// </summary>
     public class C37Register : IC37Register, IC37Dataface
     {
         /// <summary>
@@ -29,7 +32,7 @@ namespace paskalON.Dataface.C37s
 
 
         /// <summary>
-        /// IC37Register implementation of Register <see cref="IModbusRegister"/>.
+        /// IC37Register implementation of Register <see cref="IC37Register"/>.
         /// </summary>
         public void Register<TDevice, TCom>(Action<TCom> com)
         {
