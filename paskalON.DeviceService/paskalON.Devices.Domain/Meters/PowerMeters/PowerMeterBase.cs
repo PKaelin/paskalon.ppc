@@ -552,6 +552,14 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         }
 
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async virtual Task CheckHealthAsync()
+        {
+            // TODO: Implement state check, data received check and com error update if necessary.
+        }
+
 
         /// <summary>
         /// <inheritdoc/>

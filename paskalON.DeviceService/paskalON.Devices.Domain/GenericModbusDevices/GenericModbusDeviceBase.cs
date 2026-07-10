@@ -128,6 +128,15 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
+        public async virtual Task CheckHealthAsync()
+        {
+            // TODO: Implement state check, data received check and com error update if necessary.
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         protected override void RegisterMetrics()
         {
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>

@@ -17,5 +17,14 @@ namespace paskalON.Devices.Domain
         /// Data setters for total loose coupled interfaces.
         /// </summary>
         IDataface Dataface { get; }
+
+
+        /// <summary>
+        /// Check the health of the device.
+        /// </summary>
+        /// <returns>
+        /// Returns a task as its implemented asynchronously.
+        /// </returns>
+        Task CheckHealthAsync();
     }
 }

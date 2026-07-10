@@ -164,6 +164,15 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
+        public async virtual Task CheckHealthAsync()
+        {
+            // We dont communicate at this point so nothing to check for now.
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         protected override void RegisterMetrics()
         {
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>

@@ -414,6 +414,15 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async virtual Task CheckHealthAsync()
+        {
+            // TODO: Implement state check, data received check and com error update if necessary.
+        }
+
+
+        /// <summary>
         /// Trigger PCS state change events.
         /// </summary>
         /// <param name="state">The PCS state.</param>
