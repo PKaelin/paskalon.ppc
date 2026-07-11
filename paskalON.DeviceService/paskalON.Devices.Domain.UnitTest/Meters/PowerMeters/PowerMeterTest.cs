@@ -9,7 +9,6 @@ using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
-using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.UnitTest.Equipments;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
@@ -20,7 +19,6 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
     public class PowerMeterTest
     {
         private DerConfig? _derConfig;
-        private Der? _der;
         private C37Config? _c37Config;
         private PowerMeterMapC37Config? _powerMeterMapC37Config;
         private PowerMeterDeviceConfig? _powerMeterDeviceConfig;
@@ -30,7 +28,6 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
         public void TestInitialize()
         {
             _derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
-            _der = new Der(NullLogger.Instance, _derConfig);
 
             _powerMeterMapC37Config = new PowerMeterMapC37Config
             {

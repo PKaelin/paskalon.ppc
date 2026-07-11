@@ -15,12 +15,10 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// </remarks>
     public class GenericModbusInputRegisterConfig : GenericModbusRegisterBaseConfig
     {
+        /// <summary>
         /// <inheritdoc/>
-        public override bool ModbusWritable { get => false; }
-
-
-        /// <inheritdoc/>
-        public override ModbusRegistryType ModbusValueType { get => ModbusRegistryType.InputRegister; }
+        /// </summary>
+        public override ModbusRegistryType ModbusRegistryType { get => ModbusRegistryType.InputRegister; }
 
     }
 }

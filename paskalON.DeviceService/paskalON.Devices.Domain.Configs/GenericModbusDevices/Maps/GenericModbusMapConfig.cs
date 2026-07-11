@@ -34,25 +34,25 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
         /// <summary>
         /// The collection of coil map entries for the Modbus device.
         /// </summary>
-        public ICollection<GenericModbusCoilPointConfig>? Coils { get; set; }
+        public ICollection<GenericModbusCoilPointConfig> Coils { get; set; } = null!;
 
 
         /// <summary>
         /// The collection of discrete input map entries for the Modbus device.
         /// </summary>
-        public ICollection<GenericModbusDiscreteInputPointConfig>? DiscreteInputs { get; set; }
+        public ICollection<GenericModbusDiscreteInputPointConfig> DiscreteInputs { get; set; } = null!;
 
 
         /// <summary>
         /// The collection of input register map entries for the Modbus device.
         /// </summary>
-        public ICollection<GenericModbusInputRegisterConfig>? InputRegisters { get; set; }
+        public ICollection<GenericModbusInputRegisterConfig> InputRegisters { get; set; } = null!;
 
 
         /// <summary>
         /// The collection of holding register map entries for the Modbus device.
         /// </summary>
-        public ICollection<GenericModbusHoldingRegisterConfig>? HoldingRegisters { get; set; }
+        public ICollection<GenericModbusHoldingRegisterConfig> HoldingRegisters { get; set; } = null!;
 
 
         /// <summary>

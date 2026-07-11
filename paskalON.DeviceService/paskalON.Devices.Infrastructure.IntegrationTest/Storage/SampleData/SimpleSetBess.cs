@@ -197,7 +197,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Name = "Discrete Input 1",
                 ModbusNumber = 0,
                 IsAlarm = true,
-                ModbusRegisterFormat = ModbusDataType.MbBool,
+                ModbusDataType = ModbusDataType.MbBool,
                 GenericModbusMapConfig = GenericModbusMapConfig!
             };
 
@@ -206,7 +206,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "Holding 1",
                 ModbusNumber = 1,
-                ModbusRegisterFormat = ModbusDataType.MbInt16,
+                ModbusDataType = ModbusDataType.MbInt16,
                 GenericModbusMapConfig = GenericModbusMapConfig!
             };
 

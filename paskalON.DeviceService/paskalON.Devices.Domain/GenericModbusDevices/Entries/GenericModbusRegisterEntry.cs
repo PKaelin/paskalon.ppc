@@ -18,7 +18,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices.Entries
         /// <summary>
         /// Holds the value of the Modbus register.
         /// </summary>
-        public Int16 Value { get; set; }
+        public double Value { get; set; }
 
 
         /// <summary>

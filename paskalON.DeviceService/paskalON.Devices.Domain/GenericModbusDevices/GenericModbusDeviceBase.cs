@@ -3,6 +3,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.Dataface;
+using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
@@ -71,7 +72,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// <summary>
         /// List of generic Modbus entries that represent the data points and registers of the device.
         /// </summary>
-        public required List<GenericModbusEntryBase> GenericModbusEntries { get; init; }
+        public List<GenericModbusEntryBase> GenericModbusEntries { get; init; }
 
 
         /// <summary>
@@ -155,7 +156,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
 
             foreach (GenericModbusRegisterEntry entry in GenericModbusEntries.OfType<GenericModbusRegisterEntry>())
             {
-                MetricsPublisher.Register<GenericModbusDeviceBase, Int16>(this, entry.Name, MetricType.Gauge, x => entry.Value, _config.MetricsFactorClass1);
+                MetricsPublisher.Register<GenericModbusDeviceBase, double>(this, entry.Name, MetricType.Gauge, x => entry.Value, _config.MetricsFactorClass1);
             }
         }
 
@@ -165,8 +166,30 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// </summary>
         protected override void RegisterDataface()
         {
-            // TODO: register registers
+            // Loop through Coils and DiscreteInputs.
+            foreach (GenericModbusPointEntry point in GenericModbusEntries.OfType<GenericModbusPointEntry>())
+            {
+                // Only register none writeable points.
+                if (point.ModbusRegistryType == ModbusRegistryType.DiscreteInput)
+                {
+                    Dataface.Register<GenericModbusPointEntry, IModbusRegister>(r => r.Register<GenericModbusPointEntry, byte>(point, point.Name,
+                        (x, v) => x.Value = v, point.ModbusNumber, ModbusScale.NoScale, ModbusDataType.MbBool));
+                }
+            }
+            // Loop through InputRegisters and HoldingRegisters.
+            foreach (GenericModbusRegisterEntry register in GenericModbusEntries.OfType<GenericModbusRegisterEntry>())
+            {
+                // Only register none writeable points.
+                if (register.ModbusRegistryType == ModbusRegistryType.InputRegister)
+                {
+                    Dataface.Register<GenericModbusRegisterEntry, IModbusRegister>(r => r.Register<GenericModbusRegisterEntry, double>(register, register.Name,
+                        (x, v) => x.Value = v, register.ModbusNumber, register.ModbusScale, register.ModbusDataType));
+                }
+            }
         }
+
+
+        // TODO: Implement writes.
 
 
         /// <summary>

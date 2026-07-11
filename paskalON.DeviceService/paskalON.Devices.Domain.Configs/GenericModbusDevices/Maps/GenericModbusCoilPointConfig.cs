@@ -15,12 +15,10 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// </remarks>
     public class GenericModbusCoilPointConfig : GenericModbusPointBaseConfig
     {
+        /// <summary>
         /// <inheritdoc/>
-        public override bool ModbusWritable { get => true; }
-
-
-        /// <inheritdoc/>
-        public override ModbusRegistryType ModbusValueType { get => ModbusRegistryType.Coil; }
+        /// </summary>
+        public override ModbusRegistryType ModbusRegistryType { get => ModbusRegistryType.Coil; }
 
     }
 }

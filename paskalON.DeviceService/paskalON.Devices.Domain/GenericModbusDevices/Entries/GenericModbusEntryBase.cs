@@ -24,21 +24,15 @@ namespace paskalON.Devices.Domain.GenericModbusDevices.Entries
 
 
         /// <summary>
-        /// Indicates whether the point is writable via Modbus (e.g., for coils and holding registers).
-        /// </summary>
-        public bool ModbusWritable { get => _config.ModbusWritable; }
-
-
-        /// <summary>
         /// Indicates the Modbus value type of the point (e.g., Coil, Discrete Input, Input Register, Holding Register).
         /// </summary>
-        public ModbusRegistryType ModbusValueType { get => _config.ModbusValueType; }
+        public ModbusRegistryType ModbusRegistryType { get => _config.ModbusRegistryType; }
 
 
         /// <summary>
         /// Modbus point register format.
         /// </summary>
-        public ModbusDataType? ModbusRegisterFormat { get => _config.ModbusRegisterFormat; }
+        public ModbusDataType ModbusDataType { get => _config.ModbusDataType; }
 
 
         /// <summary>

@@ -13,13 +13,13 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
         /// <summary>
         /// Relationship to GenericModbusMapConfigId.
         /// </summary>
-        public int? GenericModbusMapConfigId { get; set; }
+        public int GenericModbusMapConfigId { get; set; }
 
 
         /// <summary>
         /// Relationship to GenericModbusMapConfig.
         /// </summary>
-        public GenericModbusMapConfig? GenericModbusMapConfig { get; set; }
+        public required GenericModbusMapConfig GenericModbusMapConfig { get; set; }
 
 
         /// <summary>
