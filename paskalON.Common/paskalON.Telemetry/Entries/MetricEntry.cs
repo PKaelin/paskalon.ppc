@@ -18,9 +18,13 @@ namespace paskalON.Telemetry.Entries
         /// </summary>
         private readonly Func<TDevice, TProperty?> _getter;
 
+
         /// <summary>
         /// Action with which we can update the metric (instrument) value.
         /// </summary>
+        /// <remarks>
+        /// Updater action is assigned in the constructor in combination with the instrument type.
+        /// </remarks>
         private readonly Action<TProperty> _updater;
 
 
