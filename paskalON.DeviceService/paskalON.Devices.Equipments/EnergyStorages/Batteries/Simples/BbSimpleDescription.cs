@@ -1,28 +1,32 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
+namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
 {
     /// <summary>
-    /// Power conversion system simple description.
+    /// Battery bank simple description.
     /// </summary>
     /// <remarks>
     /// For device specific information like Codes, Warnings, Errors, State, Register, etc.
     /// </remarks>
-    public static class PcsSimpleV1Description
+    public static class BbSimpleDescription
     {
+        /// <summary>
+        /// The number of racks in this battery bank.
+        /// </summary>
+        public const ushort RackCount = 10;
+
+
         /// <summary>
         /// Enumeration of states.
         /// </summary>
         public enum State
         {
-            Initialization = 1,
-            Off = 2,
-            On = 3,
-            Stop = 4,
-            Fault = 5,
-            Standby = 6,
-            NightMode = 7,
+            Disconnected = 0,
+            Connected = 1,
+            Idle = 2,
+            Charging = 3,
+            Discharging = 4,
         }
 
 
@@ -32,10 +36,13 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         public enum WarningCode
         {
             None = 0,
-            HighInputVoltage = 1,
-            LowInputVoltage = 2,
-            HighFrequency = 3,
-            LowFrequency = 4,
+            CurrentOverLimit = 1,
+            SystemOverVoltage = 2,
+            SystemUnderVoltage = 3,
+            BigVoltageDifferenceSingleCell = 4,
+            BigTemperatureDifferenceBank = 5,
+            CellExtremeTemperature = 6,
+            CellExtremeVoltage = 7,
         }
 
 
@@ -45,10 +52,13 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         public enum FaultCode
         {
             None = 0,
-            HighInputVoltage = 1,
-            LowInputVoltage = 2,
-            HighFrequency = 3,
-            LowFrequency = 4,
+            CurrentOverLimit = 1,
+            SystemOverVoltage = 2,
+            SystemUnderVoltage = 3,
+            BigVoltageDifferenceSingleCell = 4,
+            BigTemperatureDifferenceBank = 5,
+            CellExtremeTemperature = 6,
+            CellExtremeVoltage = 7,
         }
 
 
@@ -71,25 +81,17 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             //Heartbeat
             Heartbeat = 40000,
             //Control
-            SelectorState = 41000,     // Start/Stop
-            PReference = 41001,
-            QReference = 41002,
-            // Power
-            P = 42000,
-            Q = 42001,
-            // Current, Voltage, Frequency
-            Frequency = 43000,
-            DCCurrent = 43001,
-            DCVoltage = 43002,
-            ACCurrent = 43003,
-            ACVoltage = 43004,
+            SelectorState = 41000,     // Connect/Disconnect
+            // Current, Voltage, Charge, Health
+            TotalStateOfCharge = 43000,
+            TotalStateOfHealth = 43001,
+            TotalDCVoltage = 43002,
+            TotalDCCurrent = 43003,
             // State, Warnings, Faults
-            CurrentState = 44000,      // Could be a mask but for simplicity just have one
-            CurrentWarning = 44001,     // Could be a mask but for simplicity just have one
+            CurrentState = 44000,
+            CurrentWarning = 44001,
             CurrentFault = 44002,
             CurrentVendorEvent = 44003,
-            ACBreaker = 44004,
-            DcContactor = 44005,        // For simplicity just have one
         }
     }
 }

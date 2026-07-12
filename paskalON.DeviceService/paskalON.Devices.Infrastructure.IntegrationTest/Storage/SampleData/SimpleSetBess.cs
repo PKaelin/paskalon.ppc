@@ -222,7 +222,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
             GenericModbusInputRegisterConfig = new GenericModbusInputRegisterConfig
             {
                 ChangedBy = "Test",
-                Name = "BreakerStatus",
+                Name = "BreakerState",
                 ModbusNumber = 42,
                 BitIndex = 2,
                 GenericModbusMapConfig = GenericModbusMapCircuitConfig!
@@ -283,7 +283,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 NameplateMaximumDischargeRate = 186000,
                 BatteryType = BatteryType.LithiumIon,
                 RackCount = 5,
-                StringsPerRackCount = 1,
+                ModulesPerRackCount = 1,
                 InverterBusNumber = 1,
                 AbsoluteMinimumStateOfCharge = 0,
                 AbsoluteMaximumStateOfCharge = 100,
@@ -335,7 +335,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "Device CircuitBreaker 1",
                 ClassName = "CircuitBreakerTest",
-                BreakerStatusRegister = GenericModbusHoldingRegisterConfig!,
+                BreakerStateRegister = GenericModbusHoldingRegisterConfig!,
                 CircuitBreakerOperation = CircuitBreakerOperation.TripAndReset,
                 GenericModbusMapConfig = GenericModbusMapCircuitConfig!
             };
@@ -344,7 +344,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
             AutomaticTransferSwitchDeviceConfig = new AutomaticTransferSwitchDeviceConfig
             {
                 ChangedBy = "Test",
-                Name = "AutoStatus",
+                Name = "AutoState",
                 ClassName = "AutomaticTransferSwitchTest",
                 GridConnected = GenericModbusCoilPointConfig!,
                 GenericModbusMapConfig = GenericModbusMapTransferSwitchConfig!

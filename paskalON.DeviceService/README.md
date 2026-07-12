@@ -36,3 +36,10 @@ Application layer of DDD described in [README.md](./paskalON.Devices.Application
 ### Project .Service
 Service/Interface layer described in [README.md](./paskalON.Devices.Service/README.md)
 
+
+
+## Not implemented at this point
+- Generic Modbus Device writes.
+- Battery Bank Racks, Modules, Cells.
+- PCS and BB heartbeat and watchdog.
+- Check health of the devices.

@@ -52,9 +52,9 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
 
 
         /// <summary>
-        /// Count of strings per rack.
+        /// Count of modules per rack.
         /// </summary>
-        public int StringsPerRackCount { get; set; }
+        public int ModulesPerRackCount { get; set; }
 
 
         /// <summary>

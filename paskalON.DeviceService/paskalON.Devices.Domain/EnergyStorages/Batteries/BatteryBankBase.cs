@@ -117,9 +117,12 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 
 
         /// <summary>
-        /// Count of strings per rack.
+        /// Count of modules per rack.
         /// </summary>
-        public int StringsPerRackCount { get => _config.BatteryBankDeviceConfig.StringsPerRackCount; }
+        /// <remarks>
+        /// Depending on the battery bank modules sometimes are called strings.
+        /// </remarks>
+        public int ModulesPerRackCount { get => _config.BatteryBankDeviceConfig.ModulesPerRackCount; }
 
 
         /// <summary>
@@ -352,6 +355,53 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         }
 
 
+        /// <summary>
+        /// Contains fault definitions and their states.
+        /// </summary>
+        /// <remarks>
+        /// Fault states indicate a critical failure that requires the system to shut down immediately to prevent damage.
+        /// Do not set these states directly us <see cref="SetFault(string, bool)"/> method instead.
+        /// </remarks>
+        public Dictionary<string, bool> FaultStates { get; } = new Dictionary<string, bool>();
+
+
+        /// <summary>
+        /// Indicates whether there are any active alarms.
+        /// </summary>
+        public bool HasActiveFaults { get => FaultStates.Any(a => a.Value == true); }
+
+
+        /// <summary>
+        /// Contains warning definitions and their states.
+        /// </summary>
+        /// <remarks>
+        /// Warning states indicate that the system is operating outside its optimal range but can continue running.
+        /// Do not set these states directly us <see cref="SetWarning(string, bool)"/> method instead.
+        /// </remarks>
+        public Dictionary<string, bool> WarningStates { get; } = new Dictionary<string, bool>();
+
+
+        /// <summary>
+        /// Indicates whether there are any active warnings.
+        /// </summary>
+        public bool HasActiveWarnings { get => WarningStates.Any(a => a.Value == true); }
+
+
+        /// <summary>
+        /// Contains vendors event definitions and their states.
+        /// </summary>
+        /// <remarks>
+        /// Vendor events can are vendor specific events like maintenance due etc.
+        /// Do not set these states directly us <see cref="SetVendorEvent(string, bool)"/> method instead.
+        /// </remarks>
+        public Dictionary<string, bool> VendorEvents { get; } = new Dictionary<string, bool>();
+
+
+        /// <summary>
+        /// Indicates whether there are any vendor events.
+        /// </summary>
+        public bool HasVendorEvents { get => WarningStates.Any(a => a.Value == true); }
+
 
         /// <summary>
         /// Constructor of <see cref="BatteryBankBase"/>.
@@ -466,6 +516,79 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
             }
 
             CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
+        }
+
+
+
+        /// <summary>
+        /// Sets a fault.
+        /// </summary>
+        /// <param name="name">Name of the alarm.</param>
+        /// <param name="state">State of the alarm.</param>
+        protected void SetFault(string name, bool state)
+        {
+            // TODO: clean out if state is false and havent been updated for a while.
+            if (FaultStates.ContainsKey(name) == false || FaultStates[name] != state)
+            {
+                if (state == true)
+                {
+                    _logger.LogError("{Name} Fault state occurred. Fault: {Fault}", Name, name);
+                }
+                else
+                {
+                    _logger.LogInformation("{Name} Fault state changed to normal. Fault: {Fault}", Name, name);
+                }
+            }
+
+            FaultStates[name] = state;
+        }
+
+
+        /// <summary>
+        /// Sets a warning.
+        /// </summary>
+        /// <param name="name">Name of the warning.</param>
+        /// <param name="state">State of the warning.</param>
+        protected void SetWarning(string name, bool state)
+        {
+            // TODO: clean out if state is false and havent been updated for a while.
+            if (WarningStates.ContainsKey(name) == false || WarningStates[name] != state)
+            {
+                if (state == true)
+                {
+                    _logger.LogWarning("{Name} Warning state occurred. Warning: {Warning}", Name, name);
+                }
+                else
+                {
+                    _logger.LogInformation("{Name} Warning state changed to normal. Warning: {Warning}", Name, name);
+                }
+            }
+
+            WarningStates[name] = state;
+        }
+
+
+        /// <summary>
+        /// Sets a vendor event.
+        /// </summary>
+        /// <param name="name">Name of the event.</param>
+        /// <param name="vendorEvents">Vendor event.</param>
+        protected void SetVendorEvent(string name, bool vendorEvents)
+        {
+            // TODO: clean out if state is false and havent been updated for a while.
+            if (VendorEvents.ContainsKey(name) == false || VendorEvents[name] != vendorEvents)
+            {
+                if (vendorEvents == true)
+                {
+                    _logger.LogWarning("{Name} Vendor event occurred. Event: {Event}", Name, name);
+                }
+                else
+                {
+                    _logger.LogInformation("{Name} Vendor event changed to normal. Event: {Event}", Name, name);
+                }
+            }
+
+            VendorEvents[name] = vendorEvents;
         }
 
 

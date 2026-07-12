@@ -4,7 +4,7 @@
 namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
 {
     /// <summary>
-    /// Base class for point map entries that are 1-bit boolean values (ON/OFF statuses, alarms, relay commands, etc.).
+    /// Base class for point map entries that are 1-bit boolean values (ON/OFF states, alarms, relay commands, etc.).
     /// </summary>
     public abstract class GenericModbusPointBaseConfig : GenericModbusEntryBaseConfig
     {

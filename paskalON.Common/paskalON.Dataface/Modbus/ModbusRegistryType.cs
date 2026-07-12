@@ -15,7 +15,7 @@ namespace paskalON.Dataface.Modbus
         Coil,
         /// <summary>
         /// Access: Read Only (1 bit)
-        /// Description: Binary inputs or status flags that provide digital feedback from field devices (e.g., safety switches, emergency stops, or alarm states).
+        /// Description: Binary inputs or sate flags that provide digital feedback from field devices (e.g., safety switches, emergency stops, or alarm states).
         /// </summary>
         DiscreteInput,
         /// <summary>

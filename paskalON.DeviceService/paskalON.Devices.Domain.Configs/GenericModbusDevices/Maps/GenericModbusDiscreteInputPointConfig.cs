@@ -11,7 +11,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// <remarks>
     /// Access: Read-OnlyData
     /// Type: 1-bit (Boolean)
-    /// Typical Use: Digital inputs originating from the field (e.g. a limit switch, door alarm, or emergency stop status).
+    /// Typical Use: Digital inputs originating from the field (e.g. a limit switch, door alarm, or emergency stop state).
     /// </remarks>
     public class GenericModbusDiscreteInputPointConfig : GenericModbusPointBaseConfig
     {

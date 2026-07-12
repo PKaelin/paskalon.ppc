@@ -13,7 +13,7 @@ using paskalON.Telemetry;
 namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
 {
     /// <summary>
-    /// PCS simple is a basic implementation of the PCS base class.
+    /// PCS simple is a basic implementation of the PCS base class <see cref="PowerConversionSystemBase"/>.
     /// It shall be used for tests, simulations, analysis and as a reference for all concrete implementations.
     /// </summary>
     public class PcsSimpleV1Proxy : PowerConversionSystemBase, IModbusPollingEngine
@@ -44,6 +44,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             IModbusDataface dataface, IModbusClient client) : base(logger, config, derUnit, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(client);
+            ArgumentNullException.ThrowIfNull(dataface);
+
             _client = client;
             _pollingEngine = new ModbusPollingEngine(client, dataface);
         }
@@ -64,7 +66,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         public override async Task StartAsync()
         {
             await base.StartAsync();
-            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorStatus, 1);
+            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 1);
         }
 
 
@@ -74,7 +76,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         public override async Task StopAsync()
         {
             await base.StopAsync();
-            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorStatus, 0);
+            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 0);
         }
 
 
@@ -90,11 +92,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                 await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, (ushort)standbyActivePower);
             }
 
-            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorStatus, 3);
+            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 3);
         }
-
-
-
 
 
         /// <summary>
@@ -124,9 +123,9 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             // Current, Voltage, Frequency range
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.Frequency, (int)PcsSimpleV1Description.Register.ACVoltage,
                 ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass1));
-            // State
+            // State, Warnings, Faults, VendorEvents
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(State),
-                (x, v) => x.SetState(v), (int)PcsSimpleV1Description.Register.CurrentStatus, ModbusScale.NoScale, ModbusDataType.MbInt16));
+                (x, v) => x.SetState(v), (int)PcsSimpleV1Description.Register.CurrentState, ModbusScale.NoScale, ModbusDataType.MbInt16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(WarningStates),
                 (x, v) => x.SetWarning(v), (int)PcsSimpleV1Description.Register.CurrentWarning, ModbusScale.NoScale, ModbusDataType.MbInt16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(FaultStates),
@@ -138,7 +137,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(IsDcContactorClosed),
                 (x, v) => x.SetDcContactors(v), (int)PcsSimpleV1Description.Register.DcContactor, ModbusScale.NoScale, ModbusDataType.MbInt16));
             // State range
-            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.CurrentStatus, (int)PcsSimpleV1Description.Register.DcContactor,
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.CurrentState, (int)PcsSimpleV1Description.Register.DcContactor,
                 ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass2));
         }
 
@@ -154,25 +153,25 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         private void SetState(int state)
         {
             // Check whether we have defined all state
-            if (Enum.IsDefined(typeof(PcsSimpleV1Description.Status), state) == false)
+            if (Enum.IsDefined(typeof(PcsSimpleV1Description.State), state) == false)
             {
-                _logger.LogError("{Name} Undefined state reported. Status: {State}", Name, State);
+                _logger.LogError("{Name} Undefined state reported. State: {State}", Name, State);
             }
 
             switch (state)
             {
-                case (int)PcsSimpleV1Description.Status.Initialization:
+                case (int)PcsSimpleV1Description.State.Initialization:
                     State = PcsState.Starting;
                     break;
-                case (int)PcsSimpleV1Description.Status.Off:
-                case (int)PcsSimpleV1Description.Status.Stop:
-                case (int)PcsSimpleV1Description.Status.Fault:
+                case (int)PcsSimpleV1Description.State.Off:
+                case (int)PcsSimpleV1Description.State.Stop:
+                case (int)PcsSimpleV1Description.State.Fault:
                     State = PcsState.Stopped;
                     break;
-                case (int)PcsSimpleV1Description.Status.Standby:
+                case (int)PcsSimpleV1Description.State.Standby:
                     State = PcsState.Standby;
                     break;
-                case (int)PcsSimpleV1Description.Status.NightMode:
+                case (int)PcsSimpleV1Description.State.NightMode:
                     State = PcsState.NightMode;
                     break;
                 default:

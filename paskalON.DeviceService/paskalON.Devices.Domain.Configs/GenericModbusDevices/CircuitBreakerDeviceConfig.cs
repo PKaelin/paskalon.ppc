@@ -36,9 +36,9 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
 
 
         /// <summary>
-        /// The breaker status register configuration.
+        /// The breaker state register configuration.
         /// </summary>
-        public GenericModbusHoldingRegisterConfig? BreakerStatusRegister { get; set; }
+        public GenericModbusHoldingRegisterConfig? BreakerStateRegister { get; set; }
 
 
         /// <summary>
@@ -72,9 +72,9 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
 
 
         /// <summary>
-        /// The settings group status register configuration.
+        /// The settings group state register configuration.
         /// </summary>
-        public GenericModbusHoldingRegisterConfig? SettingsGroupStatus { get; set; }
+        public GenericModbusHoldingRegisterConfig? SettingsGroupState { get; set; }
 
         /// <summary>
         /// The settings group command register configuration.
@@ -83,9 +83,9 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
 
 
         /// <summary>
-        /// The trip status register configuration.
+        /// The trip state register configuration.
         /// </summary>
-        public GenericModbusHoldingRegisterConfig? TripStatus { get; set; }
+        public GenericModbusHoldingRegisterConfig? TripState { get; set; }
 
 
         /// <summary>

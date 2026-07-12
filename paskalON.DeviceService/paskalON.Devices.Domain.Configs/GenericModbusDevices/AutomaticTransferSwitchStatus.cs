@@ -6,7 +6,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
     /// <summary>
     /// Enumeration of the State of the Automatic Transfer Switch (ATS).
     /// </summary>
-    public enum AtsStatus
+    public enum AtsState
     {
         Alarmed = 4,
         Starting = 8,
