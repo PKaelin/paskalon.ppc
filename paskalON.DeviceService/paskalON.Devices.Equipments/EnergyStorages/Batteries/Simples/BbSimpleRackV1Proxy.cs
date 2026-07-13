@@ -8,7 +8,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
     /// <summary>
     /// Battery banks rack proxy.
     /// </summary>
-    public class BbSimpleRackProxy : BatteryBankRackBase
+    public class BbSimpleRackV1Proxy : BatteryBankRackBase
     {
         // Used for equipment specific implementations.
     }

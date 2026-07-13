@@ -38,13 +38,13 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// Sets the active power target.
         /// </summary>
         /// <param name="value">Active power value (Watts).</param>
-        public void SetActivePowerTarget(double? value);
+        Task SetActivePowerTargetAsync(double? value);
 
 
         /// <summary>
         /// Sets the reactive power target.
         /// </summary>
         /// <param name="value">Reactive power value (VArs).</param>
-        public void SetReactivePowerTarget(double? value);
+        Task SetReactivePowerTargetAsync(double? value);
     }
 }

@@ -10,11 +10,6 @@ namespace paskalON.Devices.Domain.UnitTest.Ders
     [TestClass]
     public class DerSolarUnitTest
     {
-        private DerConfig? _derConfig;
-        private Der? _der;
-        private DerGroupConfig? _groupConfig;
-        private DerGroup? _group;
-        private DerCircuitConfig? _circuitConfig;
         private DerCircuit? _circuit;
         private DerSolarUnitConfig? _unitConfig;
 
@@ -22,13 +17,13 @@ namespace paskalON.Devices.Domain.UnitTest.Ders
         [TestInitialize]
         public void TestInitialize()
         {
-            _derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
-            _der = new Der(NullLogger.Instance, _derConfig);
-            _groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = _derConfig };
-            _group = new DerGroup(NullLogger.Instance, _groupConfig, _der);
-            _circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = _groupConfig };
-            _circuit = new DerCircuit(NullLogger.Instance, _circuitConfig, _group);
-            _unitConfig = new DerSolarUnitConfig { ChangedBy = "Test", Name = "DerUnit", DerCircuitConfig = _circuitConfig! };
+            DerConfig derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
+            Der der = new Der(NullLogger.Instance, derConfig);
+            DerGroupConfig groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = derConfig };
+            DerGroup group = new DerGroup(NullLogger.Instance, groupConfig, der);
+            DerCircuitConfig circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = groupConfig };
+            _circuit = new DerCircuit(NullLogger.Instance, circuitConfig, group);
+            _unitConfig = new DerSolarUnitConfig { ChangedBy = "Test", Name = "DerUnit", DerCircuitConfig = circuitConfig! };
         }
 
 

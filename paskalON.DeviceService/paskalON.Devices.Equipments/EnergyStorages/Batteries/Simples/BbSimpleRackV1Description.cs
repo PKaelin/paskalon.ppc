@@ -6,7 +6,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
     /// <summary>
     /// Battery bank simple rack description.
     /// </summary>
-    public static class BbSimpleRackDescription
+    public static class BbSimpleRackV1Description
     {
         /// <summary>
         /// Rack register start.
@@ -27,7 +27,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         /// <summary>
         /// Total number of modules in all racks.
         /// </summary>
-        public static int NumberOfModules = BbSimpleDescription.RackCount * NumberOfModulesPerRack;
+        public static int NumberOfModules = BbSimpleV1Description.RackCount * NumberOfModulesPerRack;
 
 
         /// <summary>

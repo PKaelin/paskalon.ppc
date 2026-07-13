@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Ders;
 
@@ -10,11 +11,6 @@ namespace paskalON.Devices.Domain.UnitTest.Ders
     [TestClass]
     public class DerBatteryStorageUnitTest
     {
-        private DerConfig? _derConfig;
-        private Der? _der;
-        private DerGroupConfig? _groupConfig;
-        private DerGroup? _group;
-        private DerCircuitConfig? _circuitConfig;
         private DerCircuit? _circuit;
         private DerBatteryStorageUnitConfig? _unitConfig;
 
@@ -22,13 +18,20 @@ namespace paskalON.Devices.Domain.UnitTest.Ders
         [TestInitialize]
         public void TestInitialize()
         {
-            _derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
-            _der = new Der(NullLogger.Instance, _derConfig);
-            _groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = _derConfig };
-            _group = new DerGroup(NullLogger.Instance, _groupConfig, _der);
-            _circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = _groupConfig };
-            _circuit = new DerCircuit(NullLogger.Instance, _circuitConfig, _group);
-            _unitConfig = new DerBatteryStorageUnitConfig { ChangedBy = "Test", Name = "DerUnit", DerCircuitConfig = _circuitConfig! };
+            // Der
+            Mock<DerConfig> derConfig = new Mock<DerConfig>();
+            derConfig.SetupGet(x => x.Name).Returns("DerConfig");
+            Mock<Der> der = new Mock<Der>(NullLogger.Instance, derConfig.Object);
+            // Group
+            Mock<DerGroupConfig> groupConfig = new Mock<DerGroupConfig>();
+            groupConfig.SetupGet(x => x.Name).Returns("DerGroupConfig");
+            Mock<DerGroup> group = new Mock<DerGroup>(NullLogger.Instance, groupConfig.Object, der.Object);
+            // Circuit
+            Mock<DerCircuitConfig> circuitConfig = new Mock<DerCircuitConfig>();
+            circuitConfig.SetupGet(x => x.Name).Returns("DerCircuitConfig");
+            _circuit = new DerCircuit(NullLogger.Instance, circuitConfig.Object, group.Object);
+            // Unit
+            _unitConfig = new DerBatteryStorageUnitConfig { ChangedBy = "Test", Name = "DerUnit", DerCircuitConfig = circuitConfig!.Object };
         }
 
 

@@ -66,7 +66,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         public override async Task StartAsync()
         {
             await base.StartAsync();
-            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 1);
+            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 1, ModbusDataType.MbInt16);
         }
 
 
@@ -76,7 +76,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         public override async Task StopAsync()
         {
             await base.StopAsync();
-            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 0);
+            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 0, ModbusDataType.MbInt16);
         }
 
 
@@ -89,10 +89,38 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
 
             if (standbyActivePower != null)
             {
-                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, (ushort)standbyActivePower);
+                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, (double)standbyActivePower, ModbusDataType.MbInt16);
             }
 
-            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 3);
+            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 3, ModbusDataType.MbInt16);
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>>
+        /// </summary>
+        public override async Task SetActivePowerTargetAsync(double? value)
+        {
+            await base.SetActivePowerTargetAsync(value);
+
+            if (ActivePowerTarget.HasValue)
+            {
+                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, ActivePowerTarget.Value.KiloWatts, ModbusDataType.MbInt16);
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>>
+        /// </summary>
+        public override async Task SetReactivePowerTargetAsync(double? value)
+        {
+            await base.SetReactivePowerTargetAsync(value);
+
+            if (ReactivePowerTarget.HasValue)
+            {
+                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, ReactivePowerTarget.Value.KiloVoltAmperesReactive, ModbusDataType.MbInt16);
+            }
         }
 
 

@@ -75,7 +75,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public bool CommunicationError
         {
             get;
-            set { if (field != value) { field = value; SetCommunicationError(value); } else field = value; }
+            set { if (field != value) { field = value; _ = SetCommunicationError(value); } else field = value; }
         }
 
 
@@ -130,7 +130,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// Configured minimum active power that the PCS should output when in standby mode.
         /// </summary>
-        public double StandbyActivePower { get => _config.PowerConversionSystemDeviceConfig.StandbyActivePower; }
+        public double StandbyActivePowerKiloWatts { get => _config.PowerConversionSystemDeviceConfig.StandbyActivePowerKiloWatts; }
 
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>
         public virtual async Task StandbyAsync(double? standbyActivePower = null)
         {
-            _logger.LogInformation("{Name} standby requested with standby active power: {StandbyActivePower}.", Name, standbyActivePower ?? StandbyActivePower);
+            _logger.LogInformation("{Name} standby requested with standby active power: {StandbyActivePower}.", Name, standbyActivePower ?? StandbyActivePowerKiloWatts);
             State = PcsState.EnteringStandby;
         }
 
@@ -383,7 +383,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual void SetActivePowerTarget(double? value)
+        public virtual async Task SetActivePowerTargetAsync(double? value)
         {
             lock (dataLock)
             {
@@ -400,7 +400,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <inheritdoc/>
         /// </summary>
         /// <param name="value">Reactive power value (VArs).</param>
-        public virtual void SetReactivePowerTarget(double? value)
+        public virtual async Task SetReactivePowerTargetAsync(double? value)
         {
             lock (dataLock)
             {
@@ -437,7 +437,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// Trigger CommunicationError change events.
         /// </summary>
         /// <param name="state">The communication error state.</param>
-        private void SetCommunicationError(bool state)
+        private async Task SetCommunicationError(bool state)
         {
             if (state == true)
             {
@@ -445,8 +445,8 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                 {
                     ActivePowerValue = 0;
                     ReactivePowerValue = 0;
-                    SetActivePowerTarget(0);
-                    SetReactivePowerTarget(0);
+                    await SetActivePowerTargetAsync(0);
+                    await SetReactivePowerTargetAsync(0);
                     _logger.LogInformation("{Name} - Set power targets to 0 due as ZeroOutputOnCommLoss is true on CommunicationError", Name);
                 }
 
@@ -576,7 +576,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
             // MetricsFactorClass4
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(Frequency), MetricType.Gauge, x => x.Frequency, _config.MetricsFactorClass4);
-            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(StandbyActivePower), MetricType.Gauge, x => x.StandbyActivePower, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(StandbyActivePowerKiloWatts), MetricType.Gauge, x => x.StandbyActivePowerKiloWatts, _config.MetricsFactorClass4);
         }
     }
 }

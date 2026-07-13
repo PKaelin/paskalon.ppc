@@ -10,7 +10,7 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// Name of the Distributed Energy Resource (DER).
         /// </summary>
-        public required string Name { get; set; }
+        public required virtual string Name { get; set; }
 
     }
 }

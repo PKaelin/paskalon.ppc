@@ -9,7 +9,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
     /// <remarks>
     /// For device specific information like Codes, Warnings, Errors, State, Register, etc.
     /// </remarks>
-    public static class BbSimpleDescription
+    public static class BbSimpleV1Description
     {
         /// <summary>
         /// The number of racks in this battery bank.

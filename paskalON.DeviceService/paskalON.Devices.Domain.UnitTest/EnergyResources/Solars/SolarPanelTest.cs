@@ -15,31 +15,22 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
     [TestClass]
     public class SolarPanelTest
     {
-        private DerConfig? _derConfig;
-        private Der? _der;
-        private DerGroupConfig? _groupConfig;
-        private DerGroup? _group;
-        private DerCircuitConfig? _circuitConfig;
-        private DerCircuit? _circuit;
-        private DerSolarUnitConfig? _unitConfig;
         private DerSolarUnit? _unit;
-        private SolarPanelDeviceConfig? _solarDeviceConfig;
         private SolarPanelConfig? _solarConfig;
 
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
-            _der = new Der(NullLogger.Instance, _derConfig);
-            _groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = _derConfig };
-            _group = new DerGroup(NullLogger.Instance, _groupConfig, _der);
-            _circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = _groupConfig };
-            _circuit = new DerCircuit(NullLogger.Instance, _circuitConfig, _group);
-            _unitConfig = new DerSolarUnitConfig { ChangedBy = "Test", Name = "DerUnitConfig", DerCircuitConfig = _circuitConfig };
-            _unit = new DerSolarUnit(NullLogger.Instance, _unitConfig, _circuit);
-
-            _solarDeviceConfig = new SolarPanelDeviceConfig { ChangedBy = "Test", Name = "SolarPanelDeviceConfig", ClassName = "ClassName" };
+            DerConfig derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
+            Der der = new Der(NullLogger.Instance, derConfig);
+            DerGroupConfig groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = derConfig };
+            DerGroup group = new DerGroup(NullLogger.Instance, groupConfig, der);
+            DerCircuitConfig circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = groupConfig };
+            DerCircuit circuit = new DerCircuit(NullLogger.Instance, circuitConfig, group);
+            DerSolarUnitConfig unitConfig = new DerSolarUnitConfig { ChangedBy = "Test", Name = "DerUnitConfig", DerCircuitConfig = circuitConfig };
+            _unit = new DerSolarUnit(NullLogger.Instance, unitConfig, circuit);
+            SolarPanelDeviceConfig solarDeviceConfig = new SolarPanelDeviceConfig { ChangedBy = "Test", Name = "SolarPanelDeviceConfig", ClassName = "ClassName" };
 
             _solarConfig = new SolarPanelConfig
             {
@@ -47,8 +38,8 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
                 IsActive = true,
                 ChangedBy = "Test",
                 Name = "SolarPanelConfig",
-                DerUnitConfig = _unitConfig,
-                SolarPanelDeviceConfig = _solarDeviceConfig
+                DerUnitConfig = unitConfig,
+                SolarPanelDeviceConfig = solarDeviceConfig
             };
         }
 

@@ -10,69 +10,31 @@ using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.UnitTest.Equipments;
 using paskalON.Telemetry;
-using System.Net.Sockets;
 
 namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
 {
     [TestClass]
     public class BatteryBankTest
     {
-        private DerConfig? _derConfig;
-        private Der? _der;
-        private DerGroupConfig? _groupConfig;
-        private DerGroup? _group;
-        private DerCircuitConfig? _circuitConfig;
-        private DerCircuit? _circuit;
-        private DerBatteryStorageUnitConfig? _unitConfig;
         private DerBatteryStorageUnit? _unit;
-        private ModbusConnectionConfig? _modbusConnectionConfig;
-        private ModbusConfig? _modbusConfig;
-        private BatteryBankDeviceConfig? _bbDeviceConfig;
         private BatteryBankConfig? _bbConfig;
 
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
-            _der = new Der(NullLogger.Instance, _derConfig);
-            _groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = _derConfig };
-            _group = new DerGroup(NullLogger.Instance, _groupConfig, _der);
-            _circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = _groupConfig };
-            _circuit = new DerCircuit(NullLogger.Instance, _circuitConfig, _group);
-            _unitConfig = new DerBatteryStorageUnitConfig { ChangedBy = "Test", Name = "DerUnitConfig", DerCircuitConfig = _circuitConfig };
-            _unit = new DerBatteryStorageUnit(NullLogger.Instance, _unitConfig, _circuit);
-
-            _modbusConnectionConfig = new ModbusConnectionConfig
-            {
-                ChangedBy = "Test",
-                Name = "ModbusConnectionConfig",
-                PollingIntervalMilliseconds = 1001,
-                MasterHeartBeatIntervalMilliseconds = 900,
-                IsPipeliningEnabled = false,
-                ConnectionTimeoutMilliseconds = 1001,
-                DisconnectionTimeoutMilliseconds = 1002,
-                ConnectRetryCount = 2,
-                ConnectRetryIntervalMilliseconds = 4001,
-                SendTimeoutMilliseconds = 1003,
-                SendRetryCount = 1,
-                SendRetryIntervalMilliseconds = 4002,
-                ServerToClientAliveIntervalSeconds = -1,
-                ServerMaximumConnections = 5
-            };
-
-            _modbusConfig = new ModbusConfig
-            {
-                ChangedBy = "Test",
-                Name = "ModbusConfig",
-                Address = Constants.Ip4Localhost,
-                Port = Constants.PortStartPcs,
-                AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
-                ModbusConnectionConfig = _modbusConnectionConfig
-            };
-
-            _bbDeviceConfig = new BatteryBankDeviceConfig { ChangedBy = "Test", Name = "BatteryBankDeviceConfig", ClassName = "ClassName" };
+            DerConfig derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
+            Der der = new Der(NullLogger.Instance, derConfig);
+            DerGroupConfig groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = derConfig };
+            DerGroup group = new DerGroup(NullLogger.Instance, groupConfig, der);
+            DerCircuitConfig circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = groupConfig };
+            DerCircuit circuit = new DerCircuit(NullLogger.Instance, circuitConfig, group);
+            DerBatteryStorageUnitConfig unitConfig = new DerBatteryStorageUnitConfig { ChangedBy = "Test", Name = "DerUnitConfig", DerCircuitConfig = circuitConfig };
+            _unit = new DerBatteryStorageUnit(NullLogger.Instance, unitConfig, circuit);
+            Mock<ModbusConfig> modbusConfig = new Mock<ModbusConfig>();
+            modbusConfig.SetupGet(x => x.Name).Returns("ModbusConfig");
+            Mock<BatteryBankDeviceConfig> bbDeviceConfig = new Mock<BatteryBankDeviceConfig>();
+            bbDeviceConfig.SetupGet(x => x.Name).Returns("BatteryBankDeviceConfig");
 
             _bbConfig = new BatteryBankConfig
             {
@@ -80,9 +42,9 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
                 IsActive = true,
                 ChangedBy = "Test",
                 Name = "BatteryBankConfig",
-                DerUnitConfig = _unitConfig,
-                ModbusConfig = _modbusConfig,
-                BatteryBankDeviceConfig = _bbDeviceConfig
+                DerUnitConfig = unitConfig,
+                ModbusConfig = modbusConfig.Object,
+                BatteryBankDeviceConfig = bbDeviceConfig.Object
             };
         }
 
