@@ -43,3 +43,4 @@ Service/Interface layer described in [README.md](./paskalON.Devices.Service/READ
 - Battery Bank Racks, Modules, Cells.
 - PCS and BB heartbeat and watchdog.
 - Check health of the devices.
+- Communication Errors.

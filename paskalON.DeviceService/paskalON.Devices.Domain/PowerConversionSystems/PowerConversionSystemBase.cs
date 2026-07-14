@@ -445,9 +445,15 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                 {
                     ActivePowerValue = 0;
                     ReactivePowerValue = 0;
+                    lock (dataLock)
+                    {
+                        _activePowerTarget = 0;
+                        _reactivePowerTarget = 0;
+                    }
+                    _logger.LogInformation("{Name} - Set power targets to 0 due as ZeroOutputOnCommLoss is true on CommunicationError", Name);
+                    // Desperate attempt in case there is still a connection.
                     await SetActivePowerTargetAsync(0);
                     await SetReactivePowerTargetAsync(0);
-                    _logger.LogInformation("{Name} - Set power targets to 0 due as ZeroOutputOnCommLoss is true on CommunicationError", Name);
                 }
 
                 _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);

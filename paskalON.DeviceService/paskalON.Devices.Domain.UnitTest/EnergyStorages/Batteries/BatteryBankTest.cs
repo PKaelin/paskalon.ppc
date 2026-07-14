@@ -1,13 +1,15 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using paskalON.Dataface.Modbus;
-using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
+using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.UnitTest.Equipments;
 using paskalON.Telemetry;
 
@@ -16,36 +18,32 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
     [TestClass]
     public class BatteryBankTest
     {
-        private DerBatteryStorageUnit? _unit;
-        private BatteryBankConfig? _bbConfig;
+        private Mock<DerBatteryStorageUnit>? _unit;
+        private Mock<BatteryBankConfig>? _bbConfig;
 
 
         [TestInitialize]
         public void TestInitialize()
         {
-            DerConfig derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
-            Der der = new Der(NullLogger.Instance, derConfig);
-            DerGroupConfig groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "DerGroupConfig", DerConfig = derConfig };
-            DerGroup group = new DerGroup(NullLogger.Instance, groupConfig, der);
-            DerCircuitConfig circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "DerCircuitConfig", DerGroupConfig = groupConfig };
-            DerCircuit circuit = new DerCircuit(NullLogger.Instance, circuitConfig, group);
-            DerBatteryStorageUnitConfig unitConfig = new DerBatteryStorageUnitConfig { ChangedBy = "Test", Name = "DerUnitConfig", DerCircuitConfig = circuitConfig };
-            _unit = new DerBatteryStorageUnit(NullLogger.Instance, unitConfig, circuit);
-            Mock<ModbusConfig> modbusConfig = new Mock<ModbusConfig>();
-            modbusConfig.SetupGet(x => x.Name).Returns("ModbusConfig");
-            Mock<BatteryBankDeviceConfig> bbDeviceConfig = new Mock<BatteryBankDeviceConfig>();
-            bbDeviceConfig.SetupGet(x => x.Name).Returns("BatteryBankDeviceConfig");
-
-            _bbConfig = new BatteryBankConfig
-            {
-                DeviceId = 1,
-                IsActive = true,
-                ChangedBy = "Test",
-                Name = "BatteryBankConfig",
-                DerUnitConfig = unitConfig,
-                ModbusConfig = modbusConfig.Object,
-                BatteryBankDeviceConfig = bbDeviceConfig.Object
-            };
+            // Der
+            Mock<DerConfig> derConfig = new Mock<DerConfig>();
+            derConfig.SetupGet(x => x.Name).Returns("DerConfig");
+            Mock<Der> der = new Mock<Der>(NullLogger.Instance, derConfig.Object);
+            // Group
+            Mock<DerGroupConfig> groupConfig = new Mock<DerGroupConfig>();
+            groupConfig.SetupGet(x => x.Name).Returns("DerGroupConfig");
+            Mock<DerGroup> group = new Mock<DerGroup>(NullLogger.Instance, groupConfig.Object, der.Object);
+            // Circuit
+            Mock<DerCircuitConfig> circuitConfig = new Mock<DerCircuitConfig>();
+            circuitConfig.SetupGet(x => x.Name).Returns("DerCircuitConfig");
+            Mock<DerCircuit> circuit = new Mock<DerCircuit>(NullLogger.Instance, circuitConfig.Object, group.Object);
+            // Unit
+            Mock<DerBatteryStorageUnitConfig> unitConfig = new Mock<DerBatteryStorageUnitConfig>();
+            unitConfig.SetupGet(x => x.Name).Returns("DerBatteryStorageUnitConfig");
+            _unit = new Mock<DerBatteryStorageUnit>(NullLogger.Instance, unitConfig.Object, circuit.Object);
+            // Device
+            _bbConfig = new Mock<BatteryBankConfig>();
+            _bbConfig.SetupGet(x => x.Name).Returns("BatteryBankConfig");
         }
 
 
@@ -55,7 +53,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new BatteryBank(NullLogger.Instance, null, _unit!, publisher.Object, dataface.Object));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new BatteryBank(NullLogger.Instance, null, _unit!.Object, publisher.Object, dataface.Object));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -66,7 +64,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new BatteryBank(NullLogger.Instance, _bbConfig!, null, publisher.Object, dataface.Object));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new BatteryBank(NullLogger.Instance, _bbConfig!.Object, null, publisher.Object, dataface.Object));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -76,7 +74,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             ModbusRegister dataface = new ModbusRegister();
-            BatteryBank batteryBank = new BatteryBank(NullLogger.Instance, _bbConfig!, _unit!, publisher.Object, dataface);
+            BatteryBank batteryBank = new BatteryBank(NullLogger.Instance, _bbConfig!.Object, _unit!.Object, publisher.Object, dataface);
 
             Assert.IsNotNull(batteryBank.Dataface);
             Assert.IsNotNull(dataface.Registers);
@@ -85,6 +83,42 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
             Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(batteryBank.StateOfHealth)));
             Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(batteryBank.TotalDCVoltage)));
             Assert.IsNotNull(dataface.Registers.FirstOrDefault(r => r.Name == nameof(batteryBank.TotalDCCurrent)));
+        }
+
+
+        [TestMethod]
+        public async Task BatteryBankConnectTest()
+        {
+            FakeLogger<BatteryBank> logger = new FakeLogger<BatteryBank>();
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            ModbusRegister dataface = new ModbusRegister();
+            BatteryBank batteryBank = new BatteryBank(logger, _bbConfig!.Object, _unit!.Object, publisher.Object, dataface);
+
+            await batteryBank.ConnectAsync();
+
+            IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Information);
+            Assert.AreEqual(BatteryBankState.Connecting, batteryBank.State);
+            Assert.HasCount(2, logs);
+            Assert.IsTrue(logs.First().Message.Contains("connect requested", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(logs.Last().Message.Contains("state changed", StringComparison.OrdinalIgnoreCase));
+        }
+
+
+        [TestMethod]
+        public async Task BatteryBankDisconnectTest()
+        {
+            FakeLogger<BatteryBank> logger = new FakeLogger<BatteryBank>();
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            ModbusRegister dataface = new ModbusRegister();
+            BatteryBank batteryBank = new BatteryBank(logger, _bbConfig!.Object, _unit!.Object, publisher.Object, dataface);
+
+            await batteryBank.DisconnectAsync();
+
+            IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Information);
+            Assert.AreEqual(BatteryBankState.Disconnecting, batteryBank.State);
+            Assert.HasCount(2, logs);
+            Assert.IsTrue(logs.First().Message.Contains("disconnect requested", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(logs.Last().Message.Contains("state changed", StringComparison.OrdinalIgnoreCase));
         }
 
     }

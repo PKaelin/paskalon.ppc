@@ -1,14 +1,16 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using Moq;
-using paskalON.Communication.Protocols.C37118.Types;
 using paskalON.Dataface.C37s;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
+using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.UnitTest.Equipments;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
@@ -18,16 +20,18 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
     [TestClass]
     public class PowerMeterTest
     {
-        private DerConfig? _derConfig;
-        private C37Config? _c37Config;
         private PowerMeterMapC37Config? _powerMeterMapC37Config;
         private PowerMeterDeviceConfig? _powerMeterDeviceConfig;
         private SystemPowerMeterConfig? _powerMeterConfig;
 
+
         [TestInitialize]
         public void TestInitialize()
         {
-            _derConfig = new DerConfig { ChangedBy = "Test", Name = "DerConfig" };
+            Mock<DerConfig> derConfig = new Mock<DerConfig>();
+            derConfig.SetupGet(x => x.Name).Returns("DerConfig");
+            Mock<C37Config> c37Config = new Mock<C37Config>();
+            c37Config.SetupGet(x => x.Name).Returns("C37Config");
 
             _powerMeterMapC37Config = new PowerMeterMapC37Config
             {
@@ -80,17 +84,6 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
                 PowerMeterMapC37Config = _powerMeterMapC37Config
             };
 
-            _c37Config = new C37Config
-            {
-                ChangedBy = "Test",
-                Name = "C37Config",
-                IpAddress = "localhost",
-                Port = 11,
-                IdOfDataBlock = 2,
-                IdOfDataStream = 1,
-                TransportLayer = C37TransportLayer.UDP,
-            };
-
             _powerMeterConfig = new SystemPowerMeterConfig
             {
                 ChangedBy = "Test",
@@ -98,8 +91,8 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
                 IsActive = true,
                 DeviceId = 1,
                 PowerFactorStandard = PowerFactorStandard.IEEE,
-                DerConfig = _derConfig!,
-                C37Config = _c37Config!,
+                DerConfig = derConfig.Object,
+                C37Config = c37Config.Object,
                 PowerMeterDeviceConfig = _powerMeterDeviceConfig
             };
         }
@@ -215,6 +208,42 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
             Assert.HasCount(2, dataface.Registers);
             Assert.HasCount(expectedNames.Count, registeredNames);
             CollectionAssert.AreEquivalent(expectedNames.ToList(), registeredNames.ToList());
+        }
+
+
+        [TestMethod]
+        public async Task PowerMeterConnectTest()
+        {
+            FakeLogger<PowerMeter> logger = new FakeLogger<PowerMeter>();
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            C37Register dataface = new C37Register();
+            PowerMeter powerMeter = new PowerMeter(logger, _powerMeterConfig!, publisher.Object, dataface);
+
+            await powerMeter.ConnectAsync();
+
+            IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Information);
+            Assert.AreEqual(PowerMeterState.Connecting, powerMeter.State);
+            Assert.HasCount(2, logs);
+            Assert.IsTrue(logs.First().Message.Contains("connect requested", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(logs.Last().Message.Contains("state changed", StringComparison.OrdinalIgnoreCase));
+        }
+
+
+        [TestMethod]
+        public async Task PowerMeterDisconnectTest()
+        {
+            FakeLogger<PowerMeter> logger = new FakeLogger<PowerMeter>();
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            C37Register dataface = new C37Register();
+            PowerMeter powerMeter = new PowerMeter(logger, _powerMeterConfig!, publisher.Object, dataface);
+
+            await powerMeter.DisconnectAsync();
+
+            IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Information);
+            Assert.AreEqual(PowerMeterState.Disconnecting, powerMeter.State);
+            Assert.HasCount(2, logs);
+            Assert.IsTrue(logs.First().Message.Contains("disconnect requested", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(logs.Last().Message.Contains("state changed", StringComparison.OrdinalIgnoreCase));
         }
 
     }

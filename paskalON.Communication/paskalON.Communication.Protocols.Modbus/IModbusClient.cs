@@ -8,7 +8,7 @@ namespace paskalON.Communication.Protocols.Modbus
 {
     public interface IModbusClient : IModbusDataConverter
     {
-        public ModbusState State { get; }
+        public ModbusClientState State { get; }
 
         // Connection Management
         Task ConnectAsync(CancellationToken cancellationToken = default);
