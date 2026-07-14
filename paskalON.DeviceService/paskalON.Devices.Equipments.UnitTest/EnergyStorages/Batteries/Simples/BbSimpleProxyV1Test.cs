@@ -3,13 +3,13 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using paskalON.Communication.Protocols.Modbus;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples;
+using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
 
 namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples

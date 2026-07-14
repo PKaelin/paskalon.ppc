@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
-using paskalON.Communication.Protocols.Modbus;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Equipments.Modbus;
 using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
+using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
 
 namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
@@ -54,9 +54,9 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public async Task PollAsync(int currentInterval, CancellationToken cancellationToken)
+        public async Task PollAsync(int currentInterval)
         {
-            await _pollingEngine.PollAsync(currentInterval, cancellationToken);
+            await _pollingEngine.PollAsync(currentInterval);
         }
 
 
@@ -101,9 +101,9 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                 (x, v) => x.SetVendorEvent(v), (int)PcsSimpleV1Description.Register.CurrentVendorEvent, ModbusScale.NoScale, ModbusDataType.MbInt16));
             // State of charge and health
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, double?>(this, nameof(StateOfCharge),
-                (x, v) => x.StateOfCharge = v, (int)BbSimpleV1Description.Register.TotalStateOfCharge, ModbusScale.Factor100, ModbusDataType.MbUint16));
+                (x, v) => x.StateOfCharge = v, (int)BbSimpleV1Description.Register.TotalStateOfCharge, ModbusScale.Downscale100, ModbusDataType.MbUint16));
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, double?>(this, nameof(StateOfHealth),
-                (x, v) => x.StateOfHealth = v, (int)BbSimpleV1Description.Register.TotalStateOfHealth, ModbusScale.Factor100, ModbusDataType.MbUint16));
+                (x, v) => x.StateOfHealth = v, (int)BbSimpleV1Description.Register.TotalStateOfHealth, ModbusScale.Downscale100, ModbusDataType.MbUint16));
         }
 
 

@@ -10,6 +10,10 @@ namespace paskalON.Dataface.Modbus
     /// Modbus register typically can only hold whole numbers.
     /// Modbus scaling is the method of multiplying these raw values by a specific factor.
     /// </remarks>
+    /// <example>
+    ///  Upscale: To send a temperature of 22.56 Celsius you multiply by 100. The Modbus register stores this as the integer (2256).
+    ///  Downscale: You read the integer 2256 from the register. You multiply this by 0.01 and your domain value becomes 22.56
+    /// </example>
     public class ModbusScale
     {
         /// <summary>
@@ -19,18 +23,34 @@ namespace paskalON.Dataface.Modbus
         /// <summary>
         /// Modbus value / 10
         /// </summary>
-        public const double Factor10 = 0.1;
+        public const double Downscale10 = 0.1;
         /// <summary>
         /// Modbus value / 100
         /// </summary>
-        public const double Factor100 = 0.01;
+        public const double Downscale100 = 0.01;
         /// <summary>
         /// Modbus value / 1000
         /// </summary>
-        public const double Factor1000 = 0.001;
+        public const double Downscale1000 = 0.001;
         /// <summary>
         /// Modbus value / 10000
         /// </summary>
-        public const double Factor10000 = 0.0001;
+        public const double Downscale10000 = 0.0001;
+        /// <summary>
+        /// Modbus value * 10
+        /// </summary>
+        public const double Upscale10 = 10;
+        /// <summary>
+        /// Modbus value * 100
+        /// </summary>
+        public const double Upscale100 = 100;
+        /// <summary>
+        /// Modbus value * 1000
+        /// </summary>
+        public const double Upscale1000 = 1000;
+        /// <summary>
+        /// Modbus value * 10000
+        /// </summary>
+        public const double Upscale10000 = 10000;
     }
 }

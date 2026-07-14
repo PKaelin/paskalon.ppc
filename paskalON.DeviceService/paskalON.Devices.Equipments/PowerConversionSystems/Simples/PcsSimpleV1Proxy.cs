@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
-using paskalON.Communication.Protocols.Modbus;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Equipments.Modbus;
+using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
 
 namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
@@ -54,9 +54,9 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// <summary>
         /// <inheritdoc/>>
         /// </summary>
-        public async Task PollAsync(int interval, CancellationToken cancellationToken)
+        public async Task PollAsync(int interval)
         {
-            await _pollingEngine.PollAsync(interval, cancellationToken);
+            await _pollingEngine.PollAsync(interval);
         }
 
 
@@ -139,7 +139,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                 ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass1));
             // Current, Voltage, Frequency
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(Frequency),
-                (x, v) => x.Frequency = v, (int)PcsSimpleV1Description.Register.Frequency, ModbusScale.Factor100, ModbusDataType.MbUint16));
+                (x, v) => x.Frequency = v, (int)PcsSimpleV1Description.Register.Frequency, ModbusScale.Downscale100, ModbusDataType.MbUint16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(DCCurrent),
                 (x, v) => x.DCCurrent = v, (int)PcsSimpleV1Description.Register.DCCurrent, ModbusScale.NoScale, ModbusDataType.MbUint16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(DCVoltage),
@@ -164,7 +164,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                 (x, v) => x.SetAcBreaker(v), (int)PcsSimpleV1Description.Register.ACBreaker, ModbusScale.NoScale, ModbusDataType.MbInt16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, int>(this, nameof(IsDcContactorClosed),
                 (x, v) => x.SetDcContactors(v), (int)PcsSimpleV1Description.Register.DcContactor, ModbusScale.NoScale, ModbusDataType.MbInt16));
-            // State range
+            // State, Warnings, Faults, VendorEvents range
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.CurrentState, (int)PcsSimpleV1Description.Register.DcContactor,
                 ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass2));
         }

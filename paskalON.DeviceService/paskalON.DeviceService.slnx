@@ -5,8 +5,8 @@
     <Project Path="../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
     <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
-    <Project Path="../paskalON.Communication/paskalON.Communication.Protocols.C37118/paskalON.Communication.Protocols.C37118.csproj" />
-    <Project Path="../paskalON.Communication/paskalON.Communication.Protocols.Modbus/paskalON.Communication.Protocols.Modbus.csproj" />
+    <Project Path="../paskalON.Communication/paskalON.Protocols.C37118/paskalON.Protocols.C37118.csproj" />
+    <Project Path="../paskalON.Communication/paskalON.Protocols.Modbus/paskalON.Protocols.Modbus.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="README.md" />

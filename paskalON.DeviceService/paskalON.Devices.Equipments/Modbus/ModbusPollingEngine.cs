@@ -1,8 +1,8 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-using paskalON.Communication.Protocols.Modbus;
 using paskalON.Dataface.Modbus;
+using paskalON.Protocols.Modbus;
 
 namespace paskalON.Devices.Equipments.Modbus
 {
@@ -37,7 +37,7 @@ namespace paskalON.Devices.Equipments.Modbus
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public async Task PollAsync(int currentInterval, CancellationToken cancellationToken)
+        public async Task PollAsync(int currentInterval)
         {
             foreach (ModbusPollingRangeEntry range in _dataface.PollingRanges)
             {
@@ -52,22 +52,22 @@ namespace paskalON.Devices.Equipments.Modbus
                     {
                         // Fetch raw data via the decoupled client.
                         case ModbusRegistryType.Coil:
-                            rawBoolData = await _client.ReadCoilsAsync(startAddress, endAddress, cancellationToken);
+                            rawBoolData = await _client.ReadCoilsAsync(startAddress, endAddress);
                             break;
                         case ModbusRegistryType.DiscreteInput:
-                            rawBoolData = await _client.ReadDiscreteInputsAsync(startAddress, endAddress, cancellationToken);
+                            rawBoolData = await _client.ReadDiscreteInputsAsync(startAddress, endAddress);
                             break;
                         case ModbusRegistryType.InputRegister:
-                            rawShortData = await _client.ReadInputRegistersAsync(startAddress, endAddress, cancellationToken);
+                            rawShortData = await _client.ReadInputRegistersAsync(startAddress, endAddress);
                             break;
                         case ModbusRegistryType.HoldingRegister:
-                            rawShortData = await _client.ReadHoldingRegistersAsync(startAddress, endAddress, cancellationToken);
+                            rawShortData = await _client.ReadHoldingRegistersAsync(startAddress, endAddress);
                             break;
 
                     }
 
                     // Filter registers that fall within this range
-                    IEnumerable<IModbusRegisterEntry> registers = _dataface.Registers.Where(r => r.Register >= startAddress && r.Register < endAddress).OrderBy(n => n.Register);
+                    IEnumerable<IModbusRegisterEntry> registers = _dataface.Registers.Where(r => r.Register >= startAddress && r.Register <= endAddress).OrderBy(n => n.Register);
 
                     // Map, scale, handle word order and call update
                     foreach (var register in registers)

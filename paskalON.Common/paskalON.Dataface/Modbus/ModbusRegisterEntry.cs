@@ -23,7 +23,7 @@ namespace paskalON.Dataface.Modbus
         /// <summary>
         /// The action method that update the value defined in the registered action.
         /// </summary>
-        public Action<TDevice, TProperty> Setter { get; init; }
+        public Action<TDevice, TProperty?> Setter { get; init; }
 
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace paskalON.Dataface.Modbus
         /// <param name="scale">Scale that is applied to the register value.</param>
         /// <param name="dataType">The register data type.</param>
         /// <param name="offset">The offset applied to the register entry.</param>
-        public ModbusRegisterEntry(object instance, string name, Action<TDevice, TProperty> setter, int register, double scale, ModbusDataType dataType, int offset)
+        public ModbusRegisterEntry(object instance, string name, Action<TDevice, TProperty?> setter, int register, double scale, ModbusDataType dataType, int offset)
         {
             Instance = instance;
             Name = name;
@@ -79,17 +79,38 @@ namespace paskalON.Dataface.Modbus
         /// <exception cref="ArgumentException">Throws an exception when the instance doesn't match the registered type or property.</exception>
         public void Update(object value)
         {
+            ArgumentNullException.ThrowIfNull(value);
+
             if (Instance is not TDevice typedDevice)
             {
                 throw new ArgumentException($"{nameof(IModbusRegisterEntry)} must be of type {typeof(TDevice).Name}", nameof(Instance));
             }
 
-            if (value is not TProperty typedValue)
+            Type targetType = typeof(TProperty);
+            Type? underlyingType = Nullable.GetUnderlyingType(targetType);
+
+            if (value == null)
             {
-                throw new ArgumentException($"Value must be of type {typeof(TProperty).Name}", nameof(value));
+                if (underlyingType != null)
+                {
+                    Setter(typedDevice, default);
+                    return;
+                }
+
+                throw new ArgumentNullException(nameof(value), "Value cannot be null for non-nullable properties.");
             }
 
-            Setter(typedDevice, typedValue);
+            try
+            {
+                // Use the underlying primitive type if nullable, otherwise use targetType
+                Type conversionType = underlyingType ?? targetType;
+                TProperty typedValue = (TProperty)Convert.ChangeType(value, conversionType);
+                Setter(typedDevice, typedValue);
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"Value {value} {value.GetType().Name} cannot be converted to target type {typeof(TProperty).Name} or updated to {Name}", ex);
+            }
         }
     }
 }
