@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Dataface\paskalON.Dataface.csproj" />
+  </ItemGroup>
+
 </Project>

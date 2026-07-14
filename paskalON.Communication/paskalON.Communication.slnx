@@ -1,4 +1,11 @@
 <Solution>
-  <Project Path="paskalON.Communication.Protocols.C37118/paskalON.Communication.Protocols.C37118.csproj" Id="50cdee9f-950e-4ee0-b77e-c3377e0559b6" />
-  <Project Path="paskalON.Communication.Protocols.Modbus/paskalON.Communication.Protocols.Modbus.csproj" Id="b04ba792-66cd-4302-9315-4169bfc08559" />
+  <Folder Name="/InitialDevelopment/">
+    <Project Path="../paskalON.Common/paskalON.Dataface/paskalON.Dataface.csproj" />
+    <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="paskalON.Protocols.Modbus.UnitTest/paskalON.Protocols.Modbus.UnitTest.csproj" Id="bc0efa39-cb37-4ab3-8cbe-c6b983b9e56a" />
+  </Folder>
+  <Project Path="paskalON.Protocols.C37118/paskalON.Protocols.C37118.csproj" Id="fe68b895-0bb2-4ffb-b128-96e3c037b739" />
+  <Project Path="paskalON.Protocols.Modbus/paskalON.Protocols.Modbus.csproj" Id="9d6f3726-4a9b-47bf-8a64-3363f5c8a634" />
 </Solution>

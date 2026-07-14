@@ -1,28 +1,28 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.Communication.Protocols.Modbus
+namespace paskalON.Protocols.Modbus
 {
     /// <summary>
-    /// Modbus client state.
+    /// Modbus server state
     /// </summary>
-    public enum ModbusClientState
+    public enum ModbusServerState
     {
         /// <summary>
-        /// Modbus client is disconnected.
+        /// Idle state
         /// </summary>
-        Disconnected,
+        Idle,
         /// <summary>
-        /// Modbus client is connecting.
+        /// Begin listen
         /// </summary>
-        Connecting,
+        BeginListen,
         /// <summary>
-        /// Modbus client is connected.
+        /// Listening state
         /// </summary>
-        Connected,
+        Listening,
         /// <summary>
-        /// Modbus client is disconnecting.
+        /// Stop listen
         /// </summary>
-        Disconnecting,
+        StopListen,
     }
 }
