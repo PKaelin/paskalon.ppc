@@ -30,10 +30,15 @@ namespace paskalON.Protocols.Modbus.Converters
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public object ConvertRawData(ushort[] rawData, IModbusRegisterEntry register, ushort startAddress)
+        public object? ConvertRawData(ushort[] rawData, IModbusRegisterEntry register, ushort startAddress)
         {
             ArgumentNullException.ThrowIfNull(rawData);
             ArgumentOutOfRangeException.ThrowIfLessThan(startAddress, 0);
+
+            if (rawData.Length == 0)
+            {
+                return null;
+            }
 
             // Extract only the specific registers needed for this entry
             int sliceIndex = register.Register - startAddress;

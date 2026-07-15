@@ -79,8 +79,6 @@ namespace paskalON.Dataface.Modbus
         /// <exception cref="ArgumentException">Throws an exception when the instance doesn't match the registered type or property.</exception>
         public void Update(object value)
         {
-            ArgumentNullException.ThrowIfNull(value);
-
             if (Instance is not TDevice typedDevice)
             {
                 throw new ArgumentException($"{nameof(IModbusRegisterEntry)} must be of type {typeof(TDevice).Name}", nameof(Instance));

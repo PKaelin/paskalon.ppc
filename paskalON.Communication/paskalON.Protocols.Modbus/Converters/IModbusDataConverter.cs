@@ -27,6 +27,6 @@ namespace paskalON.Protocols.Modbus.Converters
         /// <param name="register">The Modbus register entry.</param>
         /// <param name="startAddress">The start address of the first raw data value.</param>
         /// <returns>The data value.</returns>
-        object ConvertRawData(ushort[] rawData, IModbusRegisterEntry register, ushort startAddress);
+        object? ConvertRawData(ushort[] rawData, IModbusRegisterEntry register, ushort startAddress);
     }
 }

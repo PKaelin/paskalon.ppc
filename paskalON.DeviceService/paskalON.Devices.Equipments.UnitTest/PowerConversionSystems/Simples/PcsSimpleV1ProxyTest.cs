@@ -220,7 +220,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
 
 
         [TestMethod]
-        public async Task PcsPollTest()
+        public async Task PcsPoll1Test()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             ModbusRegister dataface = new ModbusRegister();
@@ -281,10 +281,70 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
         }
 
 
-        // TODO: poll 2
-        /*
-         Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.CurrentState, (int)PcsSimpleV1Description.Register.DcContactor,
-         ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass2));
-        */
+
+
+        [TestMethod]
+        public async Task PcsPoll3Test()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            ModbusRegister dataface = new ModbusRegister();
+            ModbusDataConverter converter = new ModbusDataConverter();
+            Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.ConvertRawData(It.IsAny<bool[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
+                .Returns((bool[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
+            client.Setup(x => x.ConvertRawData(It.IsAny<ushort[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
+                .Returns((ushort[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
+
+            double currentState = (int)PcsSimpleV1Description.State.Stop;
+            double currentWarning = (int)PcsSimpleV1Description.WarningCode.LowFrequency;
+            double currentFault = (int)PcsSimpleV1Description.FaultCode.LowInputVoltage;
+            double currentVendorEvent = (int)PcsSimpleV1Description.VendorEvents.MaintenanceDue;
+            double aCBreaker = 1;
+            double dcContactor = 1;
+
+            client
+                .Setup(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.CurrentState, (ushort)PcsSimpleV1Description.Register.DcContactor, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(() =>
+                {
+                    List<ushort> list = new List<ushort>();
+                    list.AddRange(converter.RegisterArrayFromValue(currentState, ModbusDataType.MbInt16, ModbusScale.NoScale));         // CurrentState
+                    list.AddRange(converter.RegisterArrayFromValue(currentWarning, ModbusDataType.MbInt16, ModbusScale.NoScale));       // CurrentWarning
+                    list.AddRange(converter.RegisterArrayFromValue(currentFault, ModbusDataType.MbInt16, ModbusScale.NoScale));         // CurrentFault
+                    list.AddRange(converter.RegisterArrayFromValue(currentVendorEvent, ModbusDataType.MbInt16, ModbusScale.NoScale));   // CurrentVendorEvent
+                    list.AddRange(converter.RegisterArrayFromValue(aCBreaker, ModbusDataType.MbInt16, ModbusScale.NoScale));            // ACBreaker
+                    list.AddRange(converter.RegisterArrayFromValue(dcContactor, ModbusDataType.MbInt16, ModbusScale.NoScale));          // DcContactor
+                    return list.ToArray();
+                });
+
+            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface, client.Object);
+
+            // Poll interval is 3
+            await pcs.PollAsync(3);
+
+            client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.CurrentState, (ushort)PcsSimpleV1Description.Register.DcContactor, It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
+
+            Assert.AreEqual(PcsState.Stopped, pcs.State);
+            // Warnings
+            Assert.IsTrue(pcs.HasActiveWarnings);
+            Assert.HasCount(1, pcs.WarningStates);
+            Assert.AreEqual(PcsSimpleV1Description.WarningCode.LowFrequency.ToString(), pcs.WarningStates.First().Key);
+            Assert.IsTrue(pcs.WarningStates.First().Value);
+            // Faults
+            Assert.IsTrue(pcs.HasActiveFaults);
+            Assert.HasCount(1, pcs.FaultStates);
+            Assert.AreEqual(PcsSimpleV1Description.FaultCode.LowInputVoltage.ToString(), pcs.FaultStates.First().Key);
+            Assert.IsTrue(pcs.FaultStates.First().Value);
+            // Vendor events
+            Assert.IsTrue(pcs.HasVendorEvents);
+            Assert.HasCount(1, pcs.VendorEvents);
+            Assert.AreEqual(PcsSimpleV1Description.VendorEvents.MaintenanceDue.ToString(), pcs.VendorEvents.First().Key);
+            Assert.IsTrue(pcs.VendorEvents.First().Value);
+            // Breakers contactors            
+            Assert.IsTrue(pcs.IsACBreakerClosed);
+            Assert.IsNotNull(pcs.IsDcContactorClosed);
+            Assert.HasCount(1, pcs.IsDcContactorClosed);
+            Assert.IsTrue(pcs.IsDcContactorClosed.First());
+        }
     }
 }

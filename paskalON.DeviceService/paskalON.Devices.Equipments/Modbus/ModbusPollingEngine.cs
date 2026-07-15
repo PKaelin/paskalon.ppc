@@ -74,8 +74,12 @@ namespace paskalON.Devices.Equipments.Modbus
                     {
                         if (rawShortData != null)
                         {
-                            object parsedValue = _client.ConvertRawData(rawShortData, register, startAddress);
-                            register.Update(parsedValue);
+                            object? parsedValue = _client.ConvertRawData(rawShortData, register, startAddress);
+                            // Only update if there is a value.
+                            if (parsedValue != null)
+                            {
+                                register.Update(parsedValue);
+                            }
                         }
                         else if (rawBoolData != null)
                         {

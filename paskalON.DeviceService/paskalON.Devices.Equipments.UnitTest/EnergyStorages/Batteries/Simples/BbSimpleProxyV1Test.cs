@@ -161,7 +161,7 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
 
 
         [TestMethod]
-        public async Task BbPollTest()
+        public async Task BbPoll1Test()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             ModbusRegister dataface = new ModbusRegister();
@@ -202,5 +202,62 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
             Assert.AreEqual(totalDCVoltage, bb.TotalDCVoltage);
             Assert.AreEqual(totalDCCurrent, bb.TotalDCCurrent);
         }
+
+
+        [TestMethod]
+        public async Task BbPoll3Test()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            ModbusRegister dataface = new ModbusRegister();
+            ModbusDataConverter converter = new ModbusDataConverter();
+            Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.ConvertRawData(It.IsAny<bool[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
+                .Returns((bool[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
+            client.Setup(x => x.ConvertRawData(It.IsAny<ushort[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
+                .Returns((ushort[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
+
+            double currentState = (int)BbSimpleV1Description.State.Connected;
+            double currentWarning = (int)BbSimpleV1Description.WarningCode.CellExtremeVoltage;
+            double currentFault = (int)BbSimpleV1Description.FaultCode.CellExtremeTemperature;
+            double currentVendorEvent = (int)BbSimpleV1Description.VendorEvents.MaintenanceDue;
+
+            client
+                .Setup(x => x.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.CurrentState, (ushort)BbSimpleV1Description.Register.CurrentVendorEvent, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(() =>
+                {
+                    List<ushort> list = new List<ushort>();
+                    list.AddRange(converter.RegisterArrayFromValue(currentState, ModbusDataType.MbInt16, ModbusScale.NoScale));         // CurrentState
+                    list.AddRange(converter.RegisterArrayFromValue(currentWarning, ModbusDataType.MbInt16, ModbusScale.NoScale));       // CurrentWarning
+                    list.AddRange(converter.RegisterArrayFromValue(currentFault, ModbusDataType.MbInt16, ModbusScale.NoScale));         // CurrentFault
+                    list.AddRange(converter.RegisterArrayFromValue(currentVendorEvent, ModbusDataType.MbInt16, ModbusScale.NoScale));   // CurrentVendorEvent
+                    return list.ToArray();
+                });
+
+            BbSimpleV1Proxy bb = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, publisher.Object, dataface, client.Object);
+
+            // Poll interval is 3
+            await bb.PollAsync(3);
+
+            client.Verify(x => x.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.CurrentState, (ushort)BbSimpleV1Description.Register.CurrentVendorEvent, It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+
+            Assert.AreEqual(BatteryBankState.Connected, bb.State);
+            // Warnings
+            Assert.IsTrue(bb.HasActiveWarnings);
+            Assert.HasCount(1, bb.WarningStates);
+            Assert.AreEqual(BbSimpleV1Description.WarningCode.CellExtremeVoltage.ToString(), bb.WarningStates.First().Key);
+            Assert.IsTrue(bb.WarningStates.First().Value);
+            // Faults
+            Assert.IsTrue(bb.HasActiveFaults);
+            Assert.HasCount(1, bb.FaultStates);
+            Assert.AreEqual(BbSimpleV1Description.FaultCode.CellExtremeTemperature.ToString(), bb.FaultStates.First().Key);
+            Assert.IsTrue(bb.FaultStates.First().Value);
+            // Vendor events
+            Assert.IsTrue(bb.HasVendorEvents);
+            Assert.HasCount(1, bb.VendorEvents);
+            Assert.AreEqual(BbSimpleV1Description.VendorEvents.MaintenanceDue.ToString(), bb.VendorEvents.First().Key);
+            Assert.IsTrue(bb.VendorEvents.First().Value);
+        }
+
     }
 }
