@@ -70,7 +70,7 @@ namespace paskalON.Devices.Equipments.Modbus
                     IEnumerable<IModbusRegisterEntry> registers = _dataface.Registers.Where(r => r.Register >= startAddress && r.Register <= endAddress).OrderBy(n => n.Register);
 
                     // Map, scale, handle word order and call update
-                    foreach (var register in registers)
+                    foreach (IModbusRegisterEntry register in registers)
                     {
                         if (rawShortData != null)
                         {

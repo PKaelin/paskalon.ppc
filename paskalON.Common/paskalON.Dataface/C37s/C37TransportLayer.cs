@@ -9,7 +9,13 @@ namespace paskalON.Communication.Protocols.C37118.Types
     /// </summary>
     public enum C37TransportLayer
     {
+        /// <summary>
+        /// Transmission Control Protocol (TCP)
+        /// </summary>
         TCP = 0,
+        /// <summary>
+        /// User Datagram Protocol (UDP)
+        /// </summary>
         UDP = 1,
     }
 }

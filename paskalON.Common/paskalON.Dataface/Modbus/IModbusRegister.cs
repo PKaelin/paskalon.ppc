@@ -20,7 +20,7 @@ namespace paskalON.Dataface.Modbus
         /// <param name="scale">Scale that is applied to the register value.</param>
         /// <param name="dataType">The Modbus register data type.</param>
         /// <param name="offset">The offset applied to the Modbus register.</param>
-        void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty> setter, int register, double scale,
+        void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty?> setter, int register, double scale,
             ModbusDataType dataType, int offset = 0);
 
 

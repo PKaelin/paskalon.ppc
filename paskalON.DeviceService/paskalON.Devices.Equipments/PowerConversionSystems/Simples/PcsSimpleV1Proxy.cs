@@ -37,7 +37,6 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// <param name="config">The power conversion system configuration.</param>
         /// <param name="derUnit">The parent DER unit.</param>
         /// <param name="publisher">The publisher interface.</param>
-        /// <param name="device">The device interface.</param>
         /// <param name="dataface">The data face interface.</param>
         /// <param name="client">The Modbus client interface.</param>
         public PcsSimpleV1Proxy(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher publisher,

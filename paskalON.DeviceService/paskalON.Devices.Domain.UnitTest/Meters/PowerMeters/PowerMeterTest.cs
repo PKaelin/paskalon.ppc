@@ -127,7 +127,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
             C37Register dataface = new C37Register();
             PowerMeter powerMeter = new PowerMeter(NullLogger.Instance, _powerMeterConfig!, publisher.Object, dataface);
 
-            var expectedNames = new HashSet<string?>
+            HashSet<string?> expectedNames = new HashSet<string?>
             {
                 // Power
                 _powerMeterMapC37Config!.ActivePower,
@@ -194,7 +194,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
             _powerMeterDeviceConfig!.PowerMeterMapC37Config = _powerMeterMapC37Config;
             PowerMeter powerMeter = new PowerMeter(NullLogger.Instance, _powerMeterConfig!, publisher.Object, dataface);
 
-            var expectedNames = new HashSet<string?>
+            HashSet<string?> expectedNames = new HashSet<string?>
             {
                 // Power
                 _powerMeterMapC37Config!.ActivePower,

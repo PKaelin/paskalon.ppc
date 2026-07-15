@@ -44,7 +44,7 @@ namespace paskalON.Dataface.Modbus
         /// <inheritdoc/>
         /// IModbusRegister implementation of Register <see cref="IModbusRegister"/>.
         /// </summary>
-        public void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty> setter, int register,
+        public void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty?> setter, int register,
             double scale, ModbusDataType dataType, int offset = 0)
         {
             ArgumentNullException.ThrowIfNull(instance);
@@ -63,7 +63,7 @@ namespace paskalON.Dataface.Modbus
             }
 
 
-            Registers.Add(new ModbusRegisterEntry<TDevice, TProperty>(instance, name, setter, register, scale, dataType, offset));
+            Registers.Add(new ModbusRegisterEntry<TDevice, TProperty?>(instance, name, setter, register, scale, dataType, offset));
         }
 
 

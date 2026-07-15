@@ -336,7 +336,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <param name="config">The power conversion system configuration.</param>
         /// <param name="derUnit">The parent DER unit.</param>
         /// <param name="publisher">The publisher interface.</param>
-        /// <param name="device">The device interface.</param>
+        /// <param name="dataface">The dataface interface.</param>
         public PowerConversionSystemBase(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher publisher,
             IDataface dataface) : base(logger, config, publisher, dataface)
         {

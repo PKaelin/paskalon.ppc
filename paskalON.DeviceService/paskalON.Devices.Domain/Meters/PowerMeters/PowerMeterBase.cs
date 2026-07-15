@@ -518,7 +518,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <param name="logger">The logging instance.</param>
         /// <param name="config">The power meter configuration.</param>
         /// <param name="publisher">The publisher interface.</param>
-        /// <param name="device">The device interface.</param>
+        /// <param name="dataface">The dataface interface.</param>
         public PowerMeterBase(ILogger logger, PowerMeterBaseConfig config, IMetricsPublisher publisher, IDataface dataface)
             : base(logger, config, publisher, dataface)
         {
@@ -632,74 +632,74 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
             {
                 // Active power
                 if (string.IsNullOrEmpty(c37Config.ActivePower) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePower, (x, v) => x.ActivePowerValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePower, C37SignalType.Analog, (x, v) => x.ActivePowerValue = v));
                 if (string.IsNullOrEmpty(c37Config.ActivePowerA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePowerA, (x, v) => x.ActivePowerAValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePowerA, C37SignalType.Analog, (x, v) => x.ActivePowerAValue = v));
                 if (string.IsNullOrEmpty(c37Config.ActivePowerB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePowerB, (x, v) => x.ActivePowerBValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePowerB, C37SignalType.Analog, (x, v) => x.ActivePowerBValue = v));
                 if (string.IsNullOrEmpty(c37Config.ActivePowerC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePowerC, (x, v) => x.ActivePowerCValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ActivePowerC, C37SignalType.Analog, (x, v) => x.ActivePowerCValue = v));
                 // Reactive power
                 if (string.IsNullOrEmpty(c37Config.ReactivePower) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePower, (x, v) => x.ReactivePowerValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePower, C37SignalType.Analog, (x, v) => x.ReactivePowerValue = v));
                 if (string.IsNullOrEmpty(c37Config.ReactivePowerA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePowerA, (x, v) => x.ReactivePowerAValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePowerA, C37SignalType.Analog, (x, v) => x.ReactivePowerAValue = v));
                 if (string.IsNullOrEmpty(c37Config.ReactivePowerB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePowerB, (x, v) => x.ReactivePowerBValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePowerB, C37SignalType.Analog, (x, v) => x.ReactivePowerBValue = v));
                 if (string.IsNullOrEmpty(c37Config.ReactivePowerC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePowerC, (x, v) => x.ReactivePowerCValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactivePowerC, C37SignalType.Analog, (x, v) => x.ReactivePowerCValue = v));
                 // Apparent power
                 if (string.IsNullOrEmpty(c37Config.ApparentPower) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ApparentPower, (x, v) => x.ApparentPowerValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ApparentPower, C37SignalType.Analog, (x, v) => x.ApparentPowerValue = v));
                 // Current and voltage
                 if (string.IsNullOrEmpty(c37Config.CurrentA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentA, (x, v) => x.CurrentA = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentA, C37SignalType.Phasor, (x, v) => x.CurrentA = v));
                 if (string.IsNullOrEmpty(c37Config.CurrentAngleA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleA, (x, v) => x.CurrentAngleA = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleA, C37SignalType.Phasor, (x, v) => x.CurrentAngleA = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageA, (x, v) => x.VoltageA = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageA, C37SignalType.Phasor, (x, v) => x.VoltageA = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageAngleA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleA, (x, v) => x.VoltageAngleA = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleA, C37SignalType.Phasor, (x, v) => x.VoltageAngleA = v));
                 if (string.IsNullOrEmpty(c37Config.CurrentB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentB, (x, v) => x.CurrentB = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentB, C37SignalType.Phasor, (x, v) => x.CurrentB = v));
                 if (string.IsNullOrEmpty(c37Config.CurrentAngleB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleB, (x, v) => x.CurrentAngleB = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleB, C37SignalType.Phasor, (x, v) => x.CurrentAngleB = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageB, (x, v) => x.VoltageB = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageB, C37SignalType.Phasor, (x, v) => x.VoltageB = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageAngleB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleB, (x, v) => x.VoltageAngleB = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleB, C37SignalType.Phasor, (x, v) => x.VoltageAngleB = v));
                 if (string.IsNullOrEmpty(c37Config.CurrentC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentC, (x, v) => x.CurrentC = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentC, C37SignalType.Phasor, (x, v) => x.CurrentC = v));
                 if (string.IsNullOrEmpty(c37Config.CurrentAngleC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleC, (x, v) => x.CurrentAngleC = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleC, C37SignalType.Phasor, (x, v) => x.CurrentAngleC = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageC, (x, v) => x.VoltageC = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageC, C37SignalType.Phasor, (x, v) => x.VoltageC = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageAB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAB, (x, v) => x.VoltageAB = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAB, C37SignalType.Phasor, (x, v) => x.VoltageAB = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageBC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageBC, (x, v) => x.VoltageBC = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageBC, C37SignalType.Phasor, (x, v) => x.VoltageBC = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageCA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageCA, (x, v) => x.VoltageCA = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageCA, C37SignalType.Phasor, (x, v) => x.VoltageCA = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageAngleC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleC, (x, v) => x.VoltageAngleC = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleC, C37SignalType.Phasor, (x, v) => x.VoltageAngleC = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageLLAvg) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageLLAvg, (x, v) => x.VoltageLLAvg = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageLLAvg, C37SignalType.Phasor, (x, v) => x.VoltageLLAvg = v));
                 if (string.IsNullOrEmpty(c37Config.VoltagePositiveSequence) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltagePositiveSequence, (x, v) => x.VoltagePositiveSequence = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltagePositiveSequence, C37SignalType.Phasor, (x, v) => x.VoltagePositiveSequence = v));
                 if (string.IsNullOrEmpty(c37Config.VoltagePositiveSequenceAngle) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltagePositiveSequenceAngle, (x, v) => x.VoltagePositiveSequenceAngle = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltagePositiveSequenceAngle, C37SignalType.Phasor, (x, v) => x.VoltagePositiveSequenceAngle = v));
                 // Energy
                 if (string.IsNullOrEmpty(c37Config.EnergyDelivered) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.EnergyDelivered, (x, v) => x.EnergyDeliveredValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.EnergyDelivered, C37SignalType.Analog, (x, v) => x.EnergyDeliveredValue = v));
                 if (string.IsNullOrEmpty(c37Config.EnergyReceived) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.EnergyReceived, (x, v) => x.EnergyReceivedValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.EnergyReceived, C37SignalType.Analog, (x, v) => x.EnergyReceivedValue = v));
                 if (string.IsNullOrEmpty(c37Config.ReactiveEnergyDelivered) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactiveEnergyDelivered, (x, v) => x.ReactiveEnergyDeliveredValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactiveEnergyDelivered, C37SignalType.Analog, (x, v) => x.ReactiveEnergyDeliveredValue = v));
                 if (string.IsNullOrEmpty(c37Config.ReactiveEnergyReceived) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactiveEnergyReceived, (x, v) => x.ReactiveEnergyReceivedValue = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactiveEnergyReceived, C37SignalType.Analog, (x, v) => x.ReactiveEnergyReceivedValue = v));
                 // Misc
                 if (string.IsNullOrEmpty(c37Config.Frequency) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.Frequency, (x, v) => x.Frequency = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.Frequency, C37SignalType.Frequency, (x, v) => x.Frequency = v));
             }
         }
 

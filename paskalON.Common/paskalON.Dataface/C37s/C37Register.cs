@@ -17,7 +17,7 @@ namespace paskalON.Dataface.C37s
         /// <summary>
         /// IDataface implementation of Register <see cref="IDataface"/>.
         /// </summary>
-        public void Register<TDevice, TProperty>(TDevice instance, string name, Action<TDevice, TProperty> setter)
+        public void Register<TDevice, TProperty>(TDevice instance, string name, C37SignalType signalType, Action<TDevice, TProperty> setter)
         {
             ArgumentNullException.ThrowIfNull(instance);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -27,7 +27,7 @@ namespace paskalON.Dataface.C37s
                 throw new ArgumentException($"Register with name {name} is already registered");
             }
 
-            Registers.Add(new C37RegisterEntry<TDevice, TProperty>(instance, name, setter));
+            Registers.Add(new C37RegisterEntry<TDevice, TProperty>(instance, name, signalType, setter));
         }
 
 

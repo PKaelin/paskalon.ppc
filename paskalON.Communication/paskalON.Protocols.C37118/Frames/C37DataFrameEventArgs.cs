@@ -1,0 +1,33 @@
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Protocols.C37118.Frames
+{
+    /// <summary>
+    /// C37 data frame event argument.
+    /// </summary>
+    public class C37DataFrameEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Header frame.
+        /// </summary>
+        public C37FrameHeader Header { get; }
+
+
+        /// <summary>
+        /// Raw payload.
+        /// </summary>
+        public ReadOnlyMemory<byte> RawPayload { get; }
+
+
+        /// <summary>
+        /// Constructor of <see cref="C37DataFrameEventArgs"/>.
+        /// </summary>
+        /// <param name="fullFrameBytes">Full frame payload.</param>
+        public C37DataFrameEventArgs(ReadOnlyMemory<byte> fullFrameBytes)
+        {
+            Header = new C37FrameHeader(fullFrameBytes.Span[0..14]);
+            RawPayload = fullFrameBytes.Slice(14, Header.FrameSize - 16);
+        }
+    }
+}

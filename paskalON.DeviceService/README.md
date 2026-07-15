@@ -40,6 +40,7 @@ Service/Interface layer described in [README.md](./paskalON.Devices.Service/READ
 
 ## Not implemented at this point
 - Generic Modbus Device writes.
+- Power meter Modbus communication.
 - Battery Bank Racks, Modules, Cells.
 - PCS and BB heartbeat and watchdog.
 - Check health of the devices.
