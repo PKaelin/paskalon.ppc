@@ -474,8 +474,8 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
             MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(TotalDCCurrent), MetricType.Gauge, x => x.TotalDCCurrent, _config.MetricsFactorClass1);
             MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(StateOfCharge), MetricType.Gauge, x => x.StateOfCharge, _config.MetricsFactorClass1);
             MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(ActualStateOfCharge), MetricType.Gauge, x => x.ActualStateOfCharge, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(StateOfHealth), MetricType.Gauge, x => x.StateOfHealth, _config.MetricsFactorClass1);
-            // MetricsFactorClass2
+            // MetricsFactorClass2            
+            MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(StateOfHealth), MetricType.Gauge, x => x.StateOfHealth, _config.MetricsFactorClass2);
             MetricsPublisher.Register<BatteryBankBase, BatteryBankState>(this, nameof(State), MetricType.Gauge, x => x.State, _config.MetricsFactorClass2);
             MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(MinimumCellVoltage), MetricType.Gauge, x => x.MinimumCellVoltage, _config.MetricsFactorClass1);
             MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(MaximumCellVoltage), MetricType.Gauge, x => x.MaximumCellVoltage, _config.MetricsFactorClass1);

@@ -54,6 +54,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
                 PowerConversionSystemDeviceConfig =
                 _deviceConfig,
                 ModbusConfig = new Mock<ModbusConfig>().Object,
+                DerUnitConfig = unitConfig.Object,
             };
         }
 

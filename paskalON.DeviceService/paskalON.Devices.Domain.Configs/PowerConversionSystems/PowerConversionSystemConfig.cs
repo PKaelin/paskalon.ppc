@@ -34,7 +34,7 @@ namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
         /// Parent relationship to DerUnitConfig
         /// </summary>
         /// Ono to one configurations not possible with data annotations use fluent API.
-        public DerUnitConfig DerUnitConfig { get; set; } = null!;
+        public required DerUnitConfig DerUnitConfig { get; set; } = null!;
 
 
         /// <summary>

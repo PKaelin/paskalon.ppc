@@ -44,17 +44,18 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             unitConfig.SetupGet(x => x.Name).Returns("DerBatteryStorageUnitConfig");
             _unit = new Mock<DerBatteryStorageUnit>(NullLogger.Instance, unitConfig.Object, circuit.Object);
             Mock<PowerConversionSystemDeviceConfig> deviceConfig = new Mock<PowerConversionSystemDeviceConfig>();
+            deviceConfig.SetupGet(x => x.Name).Returns("PowerConversionSystemDeviceConfig");
 
             ModbusConnectionConfig modbusConnection = new ModbusConnectionConfig
             {
                 ChangedBy = "Test",
-                Name = "ModbusConfig for all",
+                Name = "ModbusConnectionConfig",
             };
 
             ModbusConfig modbusConfig = new ModbusConfig
             {
                 ChangedBy = "Test",
-                Name = "DerContainerModbusConfig",
+                Name = "ModbusConfig",
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartContainer,
                 AddressFamily = AddressFamily.InterNetwork,
@@ -70,7 +71,8 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
                 DeviceId = 1,
                 Name = "PowerConversionSystemConfig",
                 PowerConversionSystemDeviceConfig = deviceConfig.Object,
-                ModbusConfig = modbusConfig
+                ModbusConfig = modbusConfig,
+                DerUnitConfig = unitConfig.Object,
             };
         }
 

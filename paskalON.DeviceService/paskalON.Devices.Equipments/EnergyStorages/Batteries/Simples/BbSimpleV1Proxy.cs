@@ -85,11 +85,19 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         /// </summary>
         protected override void RegisterDataface()
         {
+            // State of charge and health
+            Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, double?>(this, nameof(StateOfCharge),
+                (x, v) => x.StateOfCharge = v, (int)BbSimpleV1Description.Register.TotalStateOfCharge, ModbusScale.Downscale100, ModbusDataType.MbUint16));
+            Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, double?>(this, nameof(StateOfHealth),
+                (x, v) => x.StateOfHealth = v, (int)BbSimpleV1Description.Register.TotalStateOfHealth, ModbusScale.Downscale100, ModbusDataType.MbUint16));
             // Current, Voltage
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, double?>(this, nameof(TotalDCVoltage),
                 (x, v) => x.TotalDCVoltage = v, (int)BbSimpleV1Description.Register.TotalDCVoltage, ModbusScale.NoScale, ModbusDataType.MbUint16));
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, double?>(this, nameof(TotalDCCurrent),
                 (x, v) => x.TotalDCCurrent = v, (int)BbSimpleV1Description.Register.TotalDCCurrent, ModbusScale.NoScale, ModbusDataType.MbUint16));
+            // Current, Voltage, state of charge and health range
+            Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)BbSimpleV1Description.Register.TotalStateOfCharge,
+                (int)BbSimpleV1Description.Register.TotalDCCurrent, ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass1));
             // State, Warnings, Faults, VendorEvents
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, int>(this, nameof(State),
                 (x, v) => x.SetState(v), (int)PcsSimpleV1Description.Register.CurrentState, ModbusScale.NoScale, ModbusDataType.MbInt16));
@@ -99,11 +107,9 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                 (x, v) => x.SetFault(v), (int)PcsSimpleV1Description.Register.CurrentFault, ModbusScale.NoScale, ModbusDataType.MbInt16));
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, int>(this, nameof(VendorEvents),
                 (x, v) => x.SetVendorEvent(v), (int)PcsSimpleV1Description.Register.CurrentVendorEvent, ModbusScale.NoScale, ModbusDataType.MbInt16));
-            // State of charge and health
-            Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, double?>(this, nameof(StateOfCharge),
-                (x, v) => x.StateOfCharge = v, (int)BbSimpleV1Description.Register.TotalStateOfCharge, ModbusScale.Downscale100, ModbusDataType.MbUint16));
-            Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, double?>(this, nameof(StateOfHealth),
-                (x, v) => x.StateOfHealth = v, (int)BbSimpleV1Description.Register.TotalStateOfHealth, ModbusScale.Downscale100, ModbusDataType.MbUint16));
+            // State, Warnings, Faults, VendorEvents range
+            Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)BbSimpleV1Description.Register.CurrentState,
+                (int)BbSimpleV1Description.Register.CurrentVendorEvent, ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass2));
         }
 
 
