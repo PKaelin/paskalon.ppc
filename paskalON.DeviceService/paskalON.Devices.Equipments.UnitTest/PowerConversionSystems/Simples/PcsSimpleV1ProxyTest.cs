@@ -9,6 +9,7 @@ using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.PowerConversionSystems;
+using paskalON.Devices.Equipments.Modbus;
 using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
 using paskalON.Protocols.Modbus;
 using paskalON.Protocols.Modbus.Converters;
@@ -223,7 +224,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
         public async Task PcsPoll1Test()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             ModbusDataConverter converter = new ModbusDataConverter();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
             client.Setup(x => x.ConvertRawData(It.IsAny<bool[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
@@ -262,10 +263,11 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
                     return list.ToArray();
                 });
 
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface, client.Object);
 
             // Poll interval is 1
-            await pcs.PollAsync(1);
+            await engine.PollAsync(1);
 
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.P, (ushort)PcsSimpleV1Description.Register.Q, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.Frequency, (ushort)PcsSimpleV1Description.Register.ACVoltage, It.IsAny<CancellationToken>()), Times.Once);
@@ -287,7 +289,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
         public async Task PcsPoll3Test()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             ModbusDataConverter converter = new ModbusDataConverter();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
             client.Setup(x => x.ConvertRawData(It.IsAny<bool[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
@@ -316,10 +318,11 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
                     return list.ToArray();
                 });
 
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface, client.Object);
 
             // Poll interval is 3
-            await pcs.PollAsync(3);
+            await engine.PollAsync(3);
 
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.CurrentState, (ushort)PcsSimpleV1Description.Register.DcContactor, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(3));

@@ -9,6 +9,16 @@ namespace paskalON.Dataface
     public interface IDataface
     {
         /// <summary>
+        /// Name of the dataface.
+        /// </summary>
+        /// <remarks>
+        /// Communications can have host address and such but it is still easier to have
+        /// a name for the data face such as "Battery Bank 1" or "System Power Meter"
+        /// </remarks>
+        string Name { get; }
+
+
+        /// <summary>
         /// Register a dataface.
         /// </summary>
         /// <typeparam name="TDevice">The device type that register its data interface.</typeparam>

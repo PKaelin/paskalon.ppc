@@ -9,9 +9,24 @@ namespace paskalON.Dataface.C37s
     public class C37Register : IC37Register, IC37Dataface
     {
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public string Name { get; init; }
+
+        /// <summary>
         /// IC37Dataface implementation of Registers <see cref="IC37Dataface"/>.
         /// </summary>
         public List<IC37RegisterEntry> Registers { get; } = new List<IC37RegisterEntry>();
+
+
+        /// <summary>
+        /// Constructor of <see cref="C37Register"/>.
+        /// </summary>
+        /// <param name="name">A name and good identifier of the data face.</param>
+        public C37Register(string name)
+        {
+            Name = name;
+        }
 
 
         /// <summary>

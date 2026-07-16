@@ -7,6 +7,7 @@ using paskalON.Dataface.C37s;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Domain.Meters.PowerMeters;
+using paskalON.Devices.Equipments.C37;
 using paskalON.Devices.Equipments.Meters.PowerMeters.Simples;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Protocols.C37118;
@@ -137,5 +138,14 @@ namespace paskalON.Devices.Equipments.UnitTest.Meters.PowerMeters.Simples
         }
 
 
+        [TestMethod]
+        public async Task PowerMeterTransmisionTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            C37Register dataface = new C37Register("Test");
+            Mock<IC37Client> client = new Mock<IC37Client>();
+
+            C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface);
+        }
     }
 }

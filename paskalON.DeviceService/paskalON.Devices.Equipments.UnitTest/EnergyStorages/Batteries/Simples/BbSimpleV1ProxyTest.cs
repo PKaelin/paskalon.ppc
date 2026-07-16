@@ -10,6 +10,7 @@ using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples;
+using paskalON.Devices.Equipments.Modbus;
 using paskalON.Protocols.Modbus;
 using paskalON.Protocols.Modbus.Converters;
 using paskalON.Telemetry;
@@ -164,7 +165,7 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
         public async Task BbPoll1Test()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             ModbusDataConverter converter = new ModbusDataConverter();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
             client.Setup(x => x.ConvertRawData(It.IsAny<bool[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
@@ -189,10 +190,11 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
                     return list.ToArray();
                 });
 
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
             BbSimpleV1Proxy bb = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, publisher.Object, dataface, client.Object);
 
             // Poll interval is 1
-            await bb.PollAsync(1);
+            await engine.PollAsync(1);
 
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.TotalStateOfCharge, (ushort)BbSimpleV1Description.Register.TotalDCCurrent, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
@@ -208,7 +210,7 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
         public async Task BbPoll3Test()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             ModbusDataConverter converter = new ModbusDataConverter();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
             client.Setup(x => x.ConvertRawData(It.IsAny<bool[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
@@ -233,10 +235,11 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
                     return list.ToArray();
                 });
 
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
             BbSimpleV1Proxy bb = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, publisher.Object, dataface, client.Object);
 
             // Poll interval is 3
-            await bb.PollAsync(3);
+            await engine.PollAsync(3);
 
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.CurrentState, (ushort)BbSimpleV1Description.Register.CurrentVendorEvent, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(2));

@@ -6,7 +6,6 @@ using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.PowerConversionSystems;
-using paskalON.Devices.Equipments.Modbus;
 using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
 
@@ -16,18 +15,12 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
     /// PCS simple is a basic implementation of the PCS base class <see cref="PowerConversionSystemBase"/>.
     /// It shall be used for tests, simulations, analysis and as a reference for all concrete implementations.
     /// </summary>
-    public class PcsSimpleV1Proxy : PowerConversionSystemBase, IModbusPollingEngine
+    public class PcsSimpleV1Proxy : PowerConversionSystemBase
     {
         /// <summary>
         /// Modbus client communication.
         /// </summary>
         private readonly IModbusClient _client;
-
-
-        /// <summary>
-        /// The Modbus polling engine.
-        /// </summary>
-        private readonly ModbusPollingEngine _pollingEngine;
 
 
         /// <summary>
@@ -46,17 +39,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             ArgumentNullException.ThrowIfNull(dataface);
 
             _client = client;
-            _pollingEngine = new ModbusPollingEngine(client, dataface);
         }
 
-
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
-        public async Task PollAsync(int interval)
-        {
-            await _pollingEngine.PollAsync(interval);
-        }
 
 
         /// <summary>

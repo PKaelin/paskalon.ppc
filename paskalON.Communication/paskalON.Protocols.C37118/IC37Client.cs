@@ -9,8 +9,8 @@ namespace paskalON.Protocols.C37118
     public interface IC37Client
     {
         public C37ClientState State { get; }
-        public string Host { get; }
-        public int Port { get; }
+        public string ServerAddress { get; }
+        public int ServerPort { get; }
 
         // Connection Management
         Task StartStreamingAsync();

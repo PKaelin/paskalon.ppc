@@ -107,7 +107,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
         public void RegisterDatafaceWrongRegisterTypeTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             Assert.ThrowsExactly<ArgumentException>(() => new PowerMeter(NullLogger.Instance, _powerMeterConfig!, publisher.Object, dataface));
         }
 
@@ -117,7 +117,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
         public void RegisterDatafaceTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            C37Register dataface = new C37Register();
+            C37Register dataface = new C37Register("Test");
             PowerMeter powerMeter = new PowerMeter(NullLogger.Instance, _powerMeterConfig!, publisher.Object, dataface);
 
             HashSet<string?> expectedNames = new HashSet<string?>
@@ -167,7 +167,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
         public void RegisterDatafaceOnlyConfiguredTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            C37Register dataface = new C37Register();
+            C37Register dataface = new C37Register("Test");
 
             _powerMeterMapC37Config = new PowerMeterMapC37Config
             {
@@ -202,7 +202,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
         {
             FakeLogger<PowerMeter> logger = new FakeLogger<PowerMeter>();
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            C37Register dataface = new C37Register();
+            C37Register dataface = new C37Register("Test");
             PowerMeter powerMeter = new PowerMeter(logger, _powerMeterConfig!, publisher.Object, dataface);
 
             await powerMeter.ConnectAsync();
@@ -220,7 +220,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
         {
             FakeLogger<PowerMeter> logger = new FakeLogger<PowerMeter>();
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            C37Register dataface = new C37Register();
+            C37Register dataface = new C37Register("Test");
             PowerMeter powerMeter = new PowerMeter(logger, _powerMeterConfig!, publisher.Object, dataface);
 
             await powerMeter.DisconnectAsync();

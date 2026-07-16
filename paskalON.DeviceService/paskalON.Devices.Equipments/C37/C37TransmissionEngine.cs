@@ -30,7 +30,6 @@ namespace paskalON.Devices.Equipments.C37
         private readonly IC37Dataface _dataface;
 
 
-
         /// <summary>
         /// Cache C37 to register mappings.
         /// </summary>
@@ -46,6 +45,7 @@ namespace paskalON.Devices.Equipments.C37
         /// <summary>
         /// Constructor of <see cref="C37TransmissionEngine"/>.
         /// </summary>
+        /// <param name="logger">Logger for application logging and diagnostics.</param>
         /// <param name="client">The C37 client interface.</param>
         /// <param name="dataface">The C37 data face.</param>
         public C37TransmissionEngine(ILogger logger, IC37Client client, IC37Dataface dataface)
@@ -59,6 +59,7 @@ namespace paskalON.Devices.Equipments.C37
             _client = client;
             _client.ConfigFrameReceived += OnConfigFrameReceived;
             _client.DataFrameReceived += OnDataFrameReceived;
+            _logger.LogInformation("C37 transmission engine created for: {Name} {Address} {Port}", dataface.Name, client.ServerAddress, client.ServerPort);
         }
 
 
@@ -69,26 +70,33 @@ namespace paskalON.Devices.Equipments.C37
         /// <param name="e">The C37 configuration frame event argument.</param>
         private void OnConfigFrameReceived(object? sender, C37ConfigFrameEventArgs e)
         {
-            C37ConfigBlueprint activeBlueprint = e.Blueprint;
-            _mappings.Clear();
-
-            // Map registers to protocol structural coordinates by matching names            
-            foreach (IC37RegisterEntry register in _dataface.Registers)
+            try
             {
-                if (activeBlueprint.ChannelMap.TryGetValue(register.Name, out C37ChannelEntry? channelEntry))
-                {
-                    // Find matching layout specifications for structural byte offset resolution
-                    PmuLayoutMetadata layout = activeBlueprint.Pmus.First(p => p.StationId == channelEntry.TargetPmuId);
-                    // Create the map entry and set the PMU data offset
-                    _mappings.Add(new C37RegisterMapEntry(register, channelEntry, layout));
-                }
-                else
-                {
-                    _logger.LogInformation("C37 config frame contains unbound register named {RegisterName}", channelEntry);
-                }
-            }
+                C37ConfigBlueprint activeBlueprint = e.Blueprint;
+                _mappings.Clear();
 
-            _runtimeMappings = _mappings.ToArray();
+                // Map registers to protocol structural coordinates by matching names            
+                foreach (IC37RegisterEntry register in _dataface.Registers)
+                {
+                    if (activeBlueprint.ChannelMap.TryGetValue(register.Name, out C37ChannelEntry? channelEntry))
+                    {
+                        // Find matching layout specifications for structural byte offset resolution
+                        PmuLayoutMetadata layout = activeBlueprint.Pmus.First(p => p.StationId == channelEntry.TargetPmuId);
+                        // Create the map entry and set the PMU data offset
+                        _mappings.Add(new C37RegisterMapEntry(register, channelEntry, layout));
+                    }
+                    else
+                    {
+                        _logger.LogInformation("C37 config frame contains unbound register named {RegisterName}", channelEntry);
+                    }
+                }
+
+                _runtimeMappings = _mappings.ToArray();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Unexpected error occurred in C37 transmission on config frame. {C37Error}:", ex.Message);
+            }
         }
 
 
@@ -99,27 +107,34 @@ namespace paskalON.Devices.Equipments.C37
         /// <param name="e">The C37 data frame event argument.</param>
         private void OnDataFrameReceived(object? sender, C37DataFrameEventArgs e)
         {
-            // Capture a local reference snapshot of the current array instance
-            C37RegisterMapEntry[] mappings = _runtimeMappings;
-
-            // No configuration frame has been received yet
-            if (mappings.Length == 0)
+            try
             {
-                return;
+                // Capture a local reference snapshot of the current array instance
+                C37RegisterMapEntry[] mappings = _runtimeMappings;
+
+                // No configuration frame has been received yet
+                if (mappings.Length == 0)
+                {
+                    return;
+                }
+
+                ReadOnlySpan<byte> payloadSpan = e.RawPayload.Span;
+
+                // Iteration using direct pointer manipulation structures
+                for (int i = 0; i < mappings.Length; i++)
+                {
+                    C37RegisterMapEntry entry = mappings[i];
+
+                    // Slice the data frame segment belonging to this specific target PMU device
+                    ReadOnlySpan<byte> pmuSegment = payloadSpan.Slice(entry.Layout.PmuDataStartOffset, entry.Layout.TotalPmuLengthBytes);
+
+                    object parsedValue = ExtractValue(pmuSegment, entry);
+                    entry.Register.Update(parsedValue);
+                }
             }
-
-            ReadOnlySpan<byte> payloadSpan = e.RawPayload.Span;
-
-            // Iteration using direct pointer manipulation structures
-            for (int i = 0; i < mappings.Length; i++)
+            catch (Exception ex)
             {
-                C37RegisterMapEntry entry = mappings[i];
-
-                // Slice the data frame segment belonging to this specific target PMU device
-                ReadOnlySpan<byte> pmuSegment = payloadSpan.Slice(entry.Layout.PmuDataStartOffset, entry.Layout.TotalPmuLengthBytes);
-
-                object parsedValue = ExtractValue(pmuSegment, entry);
-                entry.Register.Update(parsedValue);
+                _logger.LogError("Unexpected error occurred in C37 transmission on data frame. {C37Error}:", ex.Message);
             }
         }
 

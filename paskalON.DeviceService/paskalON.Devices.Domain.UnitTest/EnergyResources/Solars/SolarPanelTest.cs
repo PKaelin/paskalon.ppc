@@ -70,7 +70,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         public void RegisterDatafaceTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             SolarPanel solarPanel = new SolarPanel(NullLogger.Instance, _solarConfig!, _unit!, publisher.Object, dataface);
 
             Assert.IsNotNull(solarPanel.Dataface);

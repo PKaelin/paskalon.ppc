@@ -10,6 +10,12 @@ namespace paskalON.Dataface.Modbus
     {
         /// <summary>
         /// <inheritdoc/>
+        /// </summary>
+        public string Name { get; init; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
         /// IModbusDataface implementation of Registers <see cref="IModbusDataface"/>.
         /// </summary>
         public List<IModbusRegisterEntry> Registers { get; } = new List<IModbusRegisterEntry>();
@@ -20,6 +26,16 @@ namespace paskalON.Dataface.Modbus
         /// IModbusDataface implementation of PollingRanges <see cref="IModbusDataface"/>.
         /// </summary>
         public List<ModbusPollingRangeEntry> PollingRanges { get; } = new List<ModbusPollingRangeEntry>();
+
+
+        /// <summary>
+        /// Constructor of <see cref="ModbusRegister"/>.
+        /// </summary>
+        /// <param name="name">A name and good identifier of the data face.</param>
+        public ModbusRegister(string name)
+        {
+            Name = name;
+        }
 
 
         /// <summary>

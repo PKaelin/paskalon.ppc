@@ -73,7 +73,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         public void RegisterDatafaceTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             BatteryBank batteryBank = new BatteryBank(NullLogger.Instance, _bbConfig!.Object, _unit!.Object, publisher.Object, dataface);
 
             Assert.IsNotNull(batteryBank.Dataface);
@@ -91,7 +91,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         {
             FakeLogger<BatteryBank> logger = new FakeLogger<BatteryBank>();
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             BatteryBank batteryBank = new BatteryBank(logger, _bbConfig!.Object, _unit!.Object, publisher.Object, dataface);
 
             await batteryBank.ConnectAsync();
@@ -109,7 +109,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         {
             FakeLogger<BatteryBank> logger = new FakeLogger<BatteryBank>();
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             BatteryBank batteryBank = new BatteryBank(logger, _bbConfig!.Object, _unit!.Object, publisher.Object, dataface);
 
             await batteryBank.DisconnectAsync();

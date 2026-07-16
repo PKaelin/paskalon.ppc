@@ -6,7 +6,6 @@ using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
-using paskalON.Devices.Equipments.Modbus;
 using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
 using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
@@ -17,18 +16,12 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
     /// BB simple is a basic implementation of the battery bank base class <see cref="BatteryBankBase"/>.
     /// It shall be used for tests, simulations, analysis and as a reference for all concrete implementations.
     /// </summary>
-    public class BbSimpleV1Proxy : BatteryBankBase, IModbusPollingEngine
+    public class BbSimpleV1Proxy : BatteryBankBase
     {
         /// <summary>
         /// Modbus client communication.
         /// </summary>
         private readonly IModbusClient _client;
-
-
-        /// <summary>
-        /// The Modbus polling engine.
-        /// </summary>
-        private readonly ModbusPollingEngine _pollingEngine;
 
 
         /// <summary>
@@ -47,16 +40,6 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
             ArgumentNullException.ThrowIfNull(dataface);
 
             _client = client;
-            _pollingEngine = new ModbusPollingEngine(client, dataface);
-        }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public async Task PollAsync(int currentInterval)
-        {
-            await _pollingEngine.PollAsync(currentInterval);
         }
 
 

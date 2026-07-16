@@ -84,7 +84,7 @@ namespace paskalON.Devices.Domain.UnitTest.GenericModbusDevices
         public void GenericModbusNoMapDefinedTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             List<GenericModbusEntryBase> entries = new List<GenericModbusEntryBase>();
 
             GenericModbusDevice gmd = new GenericModbusDevice(NullLogger.Instance, _genericModbusConfig!, entries, publisher.Object, dataface);
@@ -110,7 +110,7 @@ namespace paskalON.Devices.Domain.UnitTest.GenericModbusDevices
             coils.Add(coil1);
 
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             List<GenericModbusEntryBase> entries = new List<GenericModbusEntryBase>();
 
             foreach (GenericModbusCoilPointConfig config in coils)
@@ -144,7 +144,7 @@ namespace paskalON.Devices.Domain.UnitTest.GenericModbusDevices
             discretes.Add(discrete1);
 
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             List<GenericModbusEntryBase> entries = new List<GenericModbusEntryBase>();
 
             foreach (GenericModbusDiscreteInputPointConfig config in discretes)
@@ -183,7 +183,7 @@ namespace paskalON.Devices.Domain.UnitTest.GenericModbusDevices
             inputs.Add(input1);
 
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             List<GenericModbusEntryBase> entries = new List<GenericModbusEntryBase>();
 
             foreach (GenericModbusInputRegisterConfig config in inputs)
@@ -221,7 +221,7 @@ namespace paskalON.Devices.Domain.UnitTest.GenericModbusDevices
             holdings.Add(holding1);
 
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             List<GenericModbusEntryBase> entries = new List<GenericModbusEntryBase>();
 
             foreach (GenericModbusHoldingRegisterConfig config in holdings)

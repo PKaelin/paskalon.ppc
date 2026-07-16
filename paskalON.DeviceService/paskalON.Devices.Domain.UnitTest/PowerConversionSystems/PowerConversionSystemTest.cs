@@ -85,7 +85,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         public void RegisterDatafaceTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             Pcs pcs = new Pcs(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface);
 
             Assert.IsNotNull(pcs.Dataface);
@@ -104,7 +104,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         {
             FakeLogger<BatteryBank> logger = new FakeLogger<BatteryBank>();
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             Pcs pcs = new Pcs(logger, _pcsConfig!, _unit!.Object, publisher.Object, dataface);
 
             await pcs.StartAsync();
@@ -122,7 +122,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         {
             FakeLogger<BatteryBank> logger = new FakeLogger<BatteryBank>();
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             Pcs pcs = new Pcs(logger, _pcsConfig!, _unit!.Object, publisher.Object, dataface);
 
             await pcs.StopAsync();
@@ -140,7 +140,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         {
             FakeLogger<BatteryBank> logger = new FakeLogger<BatteryBank>();
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            ModbusRegister dataface = new ModbusRegister();
+            ModbusRegister dataface = new ModbusRegister("Test");
             Pcs pcs = new Pcs(logger, _pcsConfig!, _unit!.Object, publisher.Object, dataface);
 
             await pcs.StandbyAsync();
