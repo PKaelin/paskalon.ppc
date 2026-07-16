@@ -48,9 +48,6 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
                 ReactivePowerC = "RAPC",
                 ApparentPower = "APP",
                 // Current
-                CurrentAngleA = "CANA",
-                CurrentAngleB = "CANB",
-                CurrentAngleC = "CANC",
                 CurrentA = "CA",
                 CurrentB = "CB",
                 CurrentC = "CC",
@@ -63,15 +60,11 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
                 VoltageA = "VA",
                 VoltageB = "VB",
                 VoltageC = "VC",
-                VoltageAngleA = "VANA",
-                VoltageAngleB = "VANB",
-                VoltageAngleC = "VANC",
                 VoltageAB = "VAB",
                 VoltageBC = "VBC",
                 VoltageCA = "VCA",
                 VoltageLLAvg = "VLLAvg",
                 VoltagePositiveSequence = "VPS",
-                VoltagePositiveSequenceAngle = "VPSA",
                 // Misc
                 Frequency = "FRQ",
             };
@@ -141,11 +134,8 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
                 _powerMeterMapC37Config!.ReactivePowerC,
                 // Current
                 _powerMeterMapC37Config!.CurrentA,
-                _powerMeterMapC37Config!.CurrentAngleA,
                 _powerMeterMapC37Config!.CurrentB,
-                _powerMeterMapC37Config!.CurrentAngleB,
                 _powerMeterMapC37Config!.CurrentC,
-                _powerMeterMapC37Config!.CurrentAngleC,
                 // Energy
                 _powerMeterMapC37Config!.EnergyDelivered,
                 _powerMeterMapC37Config!.EnergyReceived,
@@ -158,12 +148,8 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
                 _powerMeterMapC37Config!.VoltageAB,
                 _powerMeterMapC37Config!.VoltageBC,
                 _powerMeterMapC37Config!.VoltageCA,
-                _powerMeterMapC37Config!.VoltageAngleA,
-                _powerMeterMapC37Config!.VoltageAngleB,
-                _powerMeterMapC37Config!.VoltageAngleC,
                 _powerMeterMapC37Config!.VoltageLLAvg,
                 _powerMeterMapC37Config!.VoltagePositiveSequence,
-                _powerMeterMapC37Config!.VoltagePositiveSequenceAngle,
                 // Misc
                 _powerMeterMapC37Config!.Frequency,
             };

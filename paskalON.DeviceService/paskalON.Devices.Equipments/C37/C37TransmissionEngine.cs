@@ -143,21 +143,44 @@ namespace paskalON.Devices.Equipments.C37
                         : BinaryPrimitives.ReadInt16BigEndian(pmuSegment.Slice(frequencyPosition, 2));
                 case C37SignalType.Phasor:
                     // Direct access calculation: index * pair size
-                    int phasorPosition = entry.Layout.PhasorOffsetBytes + (entry.ChannelEntry.ElementIndex * (entry.Layout.PhasorDataType == C37DataType.Float ? 8 : 4));
-                    return entry.Layout.PhasorDataType == C37DataType.Float
-                        ? BinaryPrimitives.ReadSingleBigEndian(pmuSegment.Slice(phasorPosition, 4))
-                        : BinaryPrimitives.ReadUInt16BigEndian(pmuSegment.Slice(phasorPosition, 2));
+                    int phasorSize = entry.Layout.PhasorDataType == C37DataType.Float ? 8 : 4;
+                    int phasorPosition = entry.Layout.PhasorOffsetBytes + (entry.ChannelEntry.ElementIndex * phasorSize);
+                    ReadOnlySpan<byte> phasorBytes = pmuSegment.Slice(phasorPosition, phasorSize);
+
+                    if (entry.Layout.PhasorDataType == C37DataType.Float)
+                    {
+                        // Reads 8 bytes natively into a 64-bit layout
+                        // First 4 bytes (0..4) = Magnitude, Second 4 bytes (4..8) = Angle
+                        return BinaryPrimitives.ReadUInt64BigEndian(phasorBytes);
+                    }
+                    else
+                    {
+                        // First 2 bytes (0..2) = Magnitude, Second 2 bytes (2..4) = Angle
+                        ushort magnitude = BinaryPrimitives.ReadUInt16BigEndian(phasorBytes[0..2]);
+                        short angle = BinaryPrimitives.ReadInt16BigEndian(phasorBytes[2..4]);
+                        // Upcast Magnitude to 32 bits (always positive, shifts safely into upper 4 bytes)
+                        uint magnitudeBits = (uint)magnitude;
+                        // Upcast Angle to 32 bits, but mask out any sign extension to protect the upper bits
+                        uint angleBits = (uint)angle & 0xFFFFFFFF;
+                        // First 4 bytes (0..4) = Magnitude, Second 4 bytes (4..8) = Angle
+                        // Later on get the magnitude:  double magBits = (double)(normalizedBits >> 32);
+                        // Later on get the angle: double angBits = (double)(int)(normalizedBits & 0xFFFFFFFF); cast to int first to preserve negative values
+                        return ((ulong)magnitudeBits << 32) | angleBits;
+                    }
+
                 case C37SignalType.Analog:
                     int analogSize = entry.Layout.AnalogDataType == C37DataType.Float ? 4 : 2;
                     int analogPosition = entry.Layout.AnalogOffsetBytes + (entry.ChannelEntry.ElementIndex * analogSize);
                     return entry.Layout.AnalogDataType == C37DataType.Float
                         ? BinaryPrimitives.ReadSingleBigEndian(pmuSegment.Slice(analogPosition, 4))
                         : BinaryPrimitives.ReadInt16BigEndian(pmuSegment.Slice(analogPosition, 2));
+
                 case C37SignalType.Digital:
                     // Find target word index, extract bits using an arithmetic shift mask
                     int digitalPosition = entry.Layout.DigitalOffsetBytes + ((entry.ChannelEntry.ElementIndex) * 2);
                     ushort completeWord = BinaryPrimitives.ReadUInt16BigEndian(pmuSegment.Slice(digitalPosition, 2));
                     return (completeWord & (1 << entry.ChannelEntry.BitPosition)) != 0;
+
                 default:
                     throw new NotImplementedException($"Extraction method not defined for {entry.Register.SignalType}");
             }

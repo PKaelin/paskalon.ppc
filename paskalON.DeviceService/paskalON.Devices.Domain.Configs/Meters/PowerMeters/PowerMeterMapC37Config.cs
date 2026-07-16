@@ -20,37 +20,28 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
         /// <summary>
         /// Name of the C37 value that maps to <see cref="CurrentA"/>.
         /// </summary>
+        /// <remarks>
+        /// This is a phasor signal that has a magnitude and an angle.
+        /// </remarks>
         public string? CurrentA { get; set; }
-
-
-        /// <summary>
-        /// Name of the C37 value that maps to <see cref="CurrentAngleA"/>.
-        /// </summary>
-        public string? CurrentAngleA { get; set; }
 
 
         /// <summary>
         /// Name of the C37 value that maps to <see cref="CurrentB"/>.
         /// </summary>
+        /// <remarks>
+        /// This is a phasor signal that has a magnitude and an angle.
+        /// </remarks>
         public string? CurrentB { get; set; }
-
-
-        /// <summary>
-        /// Name of the C37 value that maps to <see cref="CurrentAngleB"/>.
-        /// </summary>
-        public string? CurrentAngleB { get; set; }
 
 
         /// <summary>
         /// Name of the C37 value that maps to <see cref="CurrentC"/>.
         /// </summary>
+        /// <remarks>
+        /// This is a phasor signal that has a magnitude and an angle.
+        /// </remarks>
         public string? CurrentC { get; set; }
-
-
-        /// <summary>
-        /// Name of the C37 value that maps to <see cref="CurrentAngleC"/>.
-        /// </summary>
-        public string? CurrentAngleC { get; set; }
 
 
         /// <summary>
@@ -140,49 +131,37 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
         /// <summary>
         /// Name of the C37 value that maps to 3-phase positive sequence voltage average.
         /// </summary>
+        /// <remarks>
+        /// This is a phasor signal that has a magnitude and an angle.
+        /// </remarks>
         public string? VoltagePositiveSequence { get; set; }
-
-
-        /// <summary>
-        /// Name of the C37 value that maps to 3-phase positive sequence voltage angle average.
-        /// </summary>
-        public string? VoltagePositiveSequenceAngle { get; set; }
 
 
         /// <summary>
         /// Name of the C37 value that maps to <see cref="VoltageA"/>.
         /// </summary>
+        /// <remarks>
+        /// This is a phasor signal that has a magnitude and an angle.
+        /// </remarks>
         public string? VoltageA { get; set; }
-
-
-        /// <summary>
-        /// Name of the C37 value that maps to <see cref="VoltageAngleA"/>.
-        /// </summary>
-        public string? VoltageAngleA { get; set; }
 
 
         /// <summary>
         /// Name of the C37 value that maps to <see cref="VoltageB"/>.
         /// </summary>
+        /// <remarks>
+        /// This is a phasor signal that has a magnitude and an angle.
+        /// </remarks>
         public string? VoltageB { get; set; }
-
-
-        /// <summary>
-        /// Name of the C37 value that maps to <see cref="VoltageAngleB"/>.
-        /// </summary>
-        public string? VoltageAngleB { get; set; }
 
 
         /// <summary>
         /// Name of the C37 value that maps to <see cref="VoltageC"/>.
         /// </summary>
+        /// <remarks>
+        /// This is a phasor signal that has a magnitude and an angle.
+        /// </remarks>
         public string? VoltageC { get; set; }
-
-
-        /// <summary>
-        /// Name of the C37 value that maps to <see cref="VoltageAngleC"/>.
-        /// </summary>
-        public string? VoltageAngleC { get; set; }
 
 
         /// <summary>
@@ -194,18 +173,27 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
         /// <summary>
         /// Name of the C37 value that maps to 3-phase A-B Line-to-Line voltage magnitude.
         /// </summary>
+        /// <remarks>
+        /// This is a phasor signal that has a magnitude and an angle.
+        /// </remarks>
         public string? VoltageAB { get; set; }
 
 
         /// <summary>
         /// Name of the C37 value that maps to 3-phase B-C Line-to-Line voltage magnitude.
         /// </summary>
+        /// <remarks>
+        /// This is a phasor signal that has a magnitude and an angle.
+        /// </remarks>
         public string? VoltageBC { get; set; }
 
 
         /// <summary>
         /// Name of the C37 value that maps to 3-phase C-A Line-to-Line voltage magnitude.
         /// </summary>
+        /// <remarks>
+        /// This is a phasor signal that has a magnitude and an angle.
+        /// </remarks>
         public string? VoltageCA { get; set; }
 
     }

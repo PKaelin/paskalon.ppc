@@ -172,90 +172,95 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
 
 
         /// <summary>
-        /// Voltage magnitude, phase A.
+        /// Voltage phasor value, phase A.
         /// </summary>
-        public double? VoltageA
+        public ulong? VoltageA
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
         }
+
+
+        /// <summary>
+        /// Voltage magnitude, phase A.
+        /// </summary>
+        public double? VoltageAMagnitude { get => GetMagnitudeFromPhasorValue(VoltageA); }
 
 
         /// <summary>
         /// Voltage angle, phase A.
         /// </summary>
-        public double? VoltageAngleA
+        public double? VoltageAAngle { get => GetAngleFromPhasorValue(VoltageA); }
+
+
+        /// <summary>
+        /// Voltage phasor value, phase B.
+        /// </summary>
+        public ulong? VoltageB
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
         }
+
 
         /// <summary>
         /// Voltage magnitude, phase B.
         /// </summary>
-        public double? VoltageB
-        {
-            get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; } }
-        }
-
+        public double? VoltageBMagnitude { get => GetMagnitudeFromPhasorValue(VoltageB); }
 
 
         /// <summary>
         /// Voltage angle, phase B.
         /// </summary>
-        public double? VoltageAngleB
+        public double? VoltageBAngle { get => GetAngleFromPhasorValue(VoltageB); }
+
+
+        /// <summary>
+        /// Voltage phasor value, phase C.
+        /// </summary>
+        public ulong? VoltageC
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
         }
-
 
         /// <summary>
         /// Voltage magnitude, phase C.
         /// </summary>
-        public double? VoltageC
-        {
-            get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; } }
-        }
+        public double? VoltageCMagnitude { get => GetMagnitudeFromPhasorValue(VoltageC); }
 
 
         /// <summary>
         /// Voltage angle, phase C.
         /// </summary>
-        public double? VoltageAngleC
-        {
-            get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; } }
-        }
-
+        public double? VoltageCAngle { get => GetAngleFromPhasorValue(VoltageC); }
 
 
         /// <summary>
-        /// Voltage positive sequence.
+        /// Voltage phasor value, line-to-line AB.
         /// </summary>
-        public double? VoltagePositiveSequence
+        public ulong? VoltageAB
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
         }
-
-
-        /// <summary>
-        /// Voltage positive sequence angle.
-        /// </summary>
-        public double? VoltagePositiveSequenceAngle
-        {
-            get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; } }
-        }
-
 
         /// <summary>
         /// Voltage magnitude, line-to-line AB.
         /// </summary>
-        public double? VoltageAB
+        public double? VoltageABMagnitude { get => GetMagnitudeFromPhasorValue(VoltageAB); }
+
+
+        /// <summary>
+        /// Voltage angle, line-to-line AB.
+        /// </summary>
+        public double? VoltageABAngle { get => GetAngleFromPhasorValue(VoltageAB); }
+
+
+        /// <summary>
+        /// Voltage phasor value, line-to-line BC.
+        /// </summary>
+        public ulong? VoltageBC
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
@@ -265,7 +270,19 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// Voltage magnitude, line-to-line BC.
         /// </summary>
-        public double? VoltageBC
+        public double? VoltageBCMagnitude { get => GetMagnitudeFromPhasorValue(VoltageBC); }
+
+
+        /// <summary>
+        /// Voltage angle, line-to-line BC.
+        /// </summary>
+        public double? VoltageBCAngle { get => GetAngleFromPhasorValue(VoltageBC); }
+
+
+        /// <summary>
+        /// Voltage phasor value, line-to-line CA.
+        /// </summary>
+        public ulong? VoltageCA
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
@@ -275,7 +292,41 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// Voltage magnitude, line-to-line CA.
         /// </summary>
-        public double? VoltageCA
+        public double? VoltageCAMagnitude { get => GetMagnitudeFromPhasorValue(VoltageCA); }
+
+
+        /// <summary>
+        /// Voltage angle, line-to-line BC.
+        /// </summary>
+        public double? VoltageCAAngle { get => GetAngleFromPhasorValue(VoltageCA); }
+
+
+        /// <summary>
+        /// Voltage positive sequence phasor value.
+        /// </summary>
+        public ulong? VoltagePositiveSequence
+        {
+            get { lock (dataLock) { return field; } }
+            set { lock (dataLock) { field = value; } }
+        }
+
+
+        /// <summary>
+        /// Voltage positive sequence magnitude.
+        /// </summary>
+        public double? VoltagePositiveSequenceMagnitude { get => GetMagnitudeFromPhasorValue(VoltagePositiveSequence); }
+
+
+        /// <summary>
+        /// Voltage positive sequence angle.
+        /// </summary>
+        public double? VoltagePositiveSequenceAngle { get => GetAngleFromPhasorValue(VoltagePositiveSequence); }
+
+
+        /// <summary>
+        /// Current phasor value, phase A.
+        /// </summary>
+        public ulong? CurrentA
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
@@ -285,17 +336,19 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// Current magnitude, phase A.
         /// </summary>
-        public double? CurrentA
-        {
-            get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = (IsReversePowerFlow && IsCurrentSigned) ? -value : value; } }
-        }
+        public double? CurrentAMagnitude { get => GetMagnitudeFromPhasorValue(CurrentA) * ((IsReversePowerFlow && IsCurrentSigned) ? -1 : 1); }
 
 
         /// <summary>
         /// Current angle, phase A.
         /// </summary>
-        public double? CurrentAngleA
+        public double? CurrentAAngle { get => GetAngleFromPhasorValue(CurrentA); }
+
+
+        /// <summary>
+        /// Current phasor value, phase B.
+        /// </summary>
+        public ulong? CurrentB
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
@@ -305,17 +358,19 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// Current magnitude, phase B.
         /// </summary>
-        public double? CurrentB
-        {
-            get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = (IsReversePowerFlow && IsCurrentSigned) ? -value : value; } }
-        }
+        public double? CurrentBMagnitude { get => GetMagnitudeFromPhasorValue(CurrentB) * ((IsReversePowerFlow && IsCurrentSigned) ? -1 : 1); }
 
 
         /// <summary>
         /// Current angle, phase B.
         /// </summary>
-        public double? CurrentAngleB
+        public double? CurrentBAngle { get => GetAngleFromPhasorValue(CurrentB); }
+
+
+        /// <summary>
+        /// Current phasor value, phase C.
+        /// </summary>
+        public ulong? CurrentC
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
@@ -325,25 +380,17 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// Current magnitude, phase C.
         /// </summary>
-        public double? CurrentC
-        {
-            get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = (IsReversePowerFlow && IsCurrentSigned) ? -value : value; } }
-        }
+        public double? CurrentCMagnitude { get => GetMagnitudeFromPhasorValue(CurrentC) * ((IsReversePowerFlow && IsCurrentSigned) ? -1 : 1); }
 
 
         /// <summary>
         /// Current angle, phase C.
         /// </summary>
-        public double? CurrentAngleC
-        {
-            get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; } }
-        }
+        public double? CurrentCAngle { get => GetAngleFromPhasorValue(CurrentC); }
 
 
         /// <summary>
-        /// Voltage ll average.
+        /// Voltage ll average value.
         /// </summary>
         public double? VoltageLLAvg
         {
@@ -583,25 +630,28 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
             MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ReactivePower), MetricType.Gauge, x => x.ReactivePowerValue, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ApparentPower), MetricType.Gauge, x => x.ApparentPowerValue, _config.MetricsFactorClass1);
             // Voltage
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageA), MetricType.Gauge, x => x.VoltageA, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageAngleA), MetricType.Gauge, x => x.VoltageAngleA, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageB), MetricType.Gauge, x => x.VoltageB, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageAngleB), MetricType.Gauge, x => x.VoltageAngleB, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageC), MetricType.Gauge, x => x.VoltageC, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageAngleC), MetricType.Gauge, x => x.VoltageAngleC, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltagePositiveSequence), MetricType.Gauge, x => x.VoltagePositiveSequence, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageAMagnitude), MetricType.Gauge, x => x.VoltageAMagnitude, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageAAngle), MetricType.Gauge, x => x.VoltageAAngle, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageBMagnitude), MetricType.Gauge, x => x.VoltageBMagnitude, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageBAngle), MetricType.Gauge, x => x.VoltageBAngle, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageCMagnitude), MetricType.Gauge, x => x.VoltageCMagnitude, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageCAngle), MetricType.Gauge, x => x.VoltageCAngle, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageABMagnitude), MetricType.Gauge, x => x.VoltageABMagnitude, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageABAngle), MetricType.Gauge, x => x.VoltageABAngle, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageBCMagnitude), MetricType.Gauge, x => x.VoltageBCMagnitude, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageBCAngle), MetricType.Gauge, x => x.VoltageBCAngle, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageCAMagnitude), MetricType.Gauge, x => x.VoltageCAMagnitude, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageCAAngle), MetricType.Gauge, x => x.VoltageCAAngle, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltagePositiveSequenceMagnitude), MetricType.Gauge, x => x.VoltagePositiveSequenceMagnitude, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltagePositiveSequenceAngle), MetricType.Gauge, x => x.VoltagePositiveSequenceAngle, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageAB), MetricType.Gauge, x => x.VoltageAB, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageBC), MetricType.Gauge, x => x.VoltageBC, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageCA), MetricType.Gauge, x => x.VoltageCA, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(VoltageLLAvg), MetricType.Gauge, x => x.VoltageLLAvg, _config.MetricsFactorClass1);
             // Current
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentA), MetricType.Gauge, x => x.CurrentA, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentAngleA), MetricType.Gauge, x => x.CurrentAngleA, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentB), MetricType.Gauge, x => x.CurrentB, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentAngleB), MetricType.Gauge, x => x.CurrentAngleB, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentC), MetricType.Gauge, x => x.CurrentC, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentAngleC), MetricType.Gauge, x => x.CurrentAngleC, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentAMagnitude), MetricType.Gauge, x => x.CurrentAMagnitude, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentAAngle), MetricType.Gauge, x => x.CurrentAAngle, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentBMagnitude), MetricType.Gauge, x => x.CurrentBMagnitude, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentBAngle), MetricType.Gauge, x => x.CurrentBAngle, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentCMagnitude), MetricType.Gauge, x => x.CurrentCMagnitude, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(CurrentCAngle), MetricType.Gauge, x => x.CurrentCAngle, _config.MetricsFactorClass1);
             // Power A-C
             MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ActivePowerA), MetricType.Gauge, x => x.ActivePowerAValue, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(ActivePowerB), MetricType.Gauge, x => x.ActivePowerBValue, _config.MetricsFactorClass1);
@@ -651,43 +701,30 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
                 // Apparent power
                 if (string.IsNullOrEmpty(c37Config.ApparentPower) == false)
                     Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ApparentPower, C37SignalType.Analog, (x, v) => x.ApparentPowerValue = v));
-                // Current and voltage
-                if (string.IsNullOrEmpty(c37Config.CurrentA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentA, C37SignalType.Phasor, (x, v) => x.CurrentA = v));
-                if (string.IsNullOrEmpty(c37Config.CurrentAngleA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleA, C37SignalType.Phasor, (x, v) => x.CurrentAngleA = v));
+                // Voltage
                 if (string.IsNullOrEmpty(c37Config.VoltageA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageA, C37SignalType.Phasor, (x, v) => x.VoltageA = v));
-                if (string.IsNullOrEmpty(c37Config.VoltageAngleA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleA, C37SignalType.Phasor, (x, v) => x.VoltageAngleA = v));
-                if (string.IsNullOrEmpty(c37Config.CurrentB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentB, C37SignalType.Phasor, (x, v) => x.CurrentB = v));
-                if (string.IsNullOrEmpty(c37Config.CurrentAngleB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleB, C37SignalType.Phasor, (x, v) => x.CurrentAngleB = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, ulong?>(this, c37Config.VoltageA, C37SignalType.Phasor, (x, v) => x.VoltageA = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageB, C37SignalType.Phasor, (x, v) => x.VoltageB = v));
-                if (string.IsNullOrEmpty(c37Config.VoltageAngleB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleB, C37SignalType.Phasor, (x, v) => x.VoltageAngleB = v));
-                if (string.IsNullOrEmpty(c37Config.CurrentC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentC, C37SignalType.Phasor, (x, v) => x.CurrentC = v));
-                if (string.IsNullOrEmpty(c37Config.CurrentAngleC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.CurrentAngleC, C37SignalType.Phasor, (x, v) => x.CurrentAngleC = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, ulong?>(this, c37Config.VoltageB, C37SignalType.Phasor, (x, v) => x.VoltageB = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageC, C37SignalType.Phasor, (x, v) => x.VoltageC = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, ulong?>(this, c37Config.VoltageC, C37SignalType.Phasor, (x, v) => x.VoltageC = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageAB) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAB, C37SignalType.Phasor, (x, v) => x.VoltageAB = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, ulong?>(this, c37Config.VoltageAB, C37SignalType.Phasor, (x, v) => x.VoltageAB = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageBC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageBC, C37SignalType.Phasor, (x, v) => x.VoltageBC = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, ulong?>(this, c37Config.VoltageBC, C37SignalType.Phasor, (x, v) => x.VoltageBC = v));
                 if (string.IsNullOrEmpty(c37Config.VoltageCA) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageCA, C37SignalType.Phasor, (x, v) => x.VoltageCA = v));
-                if (string.IsNullOrEmpty(c37Config.VoltageAngleC) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageAngleC, C37SignalType.Phasor, (x, v) => x.VoltageAngleC = v));
-                if (string.IsNullOrEmpty(c37Config.VoltageLLAvg) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageLLAvg, C37SignalType.Phasor, (x, v) => x.VoltageLLAvg = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, ulong?>(this, c37Config.VoltageCA, C37SignalType.Phasor, (x, v) => x.VoltageCA = v));
                 if (string.IsNullOrEmpty(c37Config.VoltagePositiveSequence) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltagePositiveSequence, C37SignalType.Phasor, (x, v) => x.VoltagePositiveSequence = v));
-                if (string.IsNullOrEmpty(c37Config.VoltagePositiveSequenceAngle) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltagePositiveSequenceAngle, C37SignalType.Phasor, (x, v) => x.VoltagePositiveSequenceAngle = v));
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, ulong?>(this, c37Config.VoltagePositiveSequence, C37SignalType.Phasor, (x, v) => x.VoltagePositiveSequence = v));
+                if (string.IsNullOrEmpty(c37Config.VoltageLLAvg) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.VoltageLLAvg, C37SignalType.Analog, (x, v) => x.VoltageLLAvg = v));
+                // Current
+                if (string.IsNullOrEmpty(c37Config.CurrentA) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, ulong?>(this, c37Config.CurrentA, C37SignalType.Phasor, (x, v) => x.CurrentA = v));
+                if (string.IsNullOrEmpty(c37Config.CurrentB) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, ulong?>(this, c37Config.CurrentB, C37SignalType.Phasor, (x, v) => x.CurrentB = v));
+                if (string.IsNullOrEmpty(c37Config.CurrentC) == false)
+                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, ulong?>(this, c37Config.CurrentC, C37SignalType.Phasor, (x, v) => x.CurrentC = v));
                 // Energy
                 if (string.IsNullOrEmpty(c37Config.EnergyDelivered) == false)
                     Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.EnergyDelivered, C37SignalType.Analog, (x, v) => x.EnergyDeliveredValue = v));
@@ -701,6 +738,38 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
                 if (string.IsNullOrEmpty(c37Config.Frequency) == false)
                     Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.Frequency, C37SignalType.Frequency, (x, v) => x.Frequency = v));
             }
+        }
+
+
+        /// <summary>
+        /// Get the magnitude value from phasor endpoint.
+        /// </summary>
+        /// <param name="value">The full phasor value containing magnitude and angle.</param>
+        /// <returns>The magnitude value.</returns>
+        protected double? GetMagnitudeFromPhasorValue(ulong? value)
+        {
+            if (value.HasValue == false)
+            {
+                return null;
+            }
+
+            return (double)(value.Value >> 32);
+        }
+
+
+        /// <summary>
+        /// Get the angle value from phasor endpoint.
+        /// </summary>
+        /// <param name="value">The full phasor value containing magnitude and angle.</param>
+        /// <returns>The angle value in radiant or degrees.</returns>
+        protected double? GetAngleFromPhasorValue(ulong? value)
+        {
+            if (value.HasValue == false)
+            {
+                return null;
+            }
+
+            return (double)(int)(value.Value & 0xFFFFFFFF);
         }
 
 
