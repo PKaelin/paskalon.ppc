@@ -113,7 +113,7 @@ namespace paskalON.Protocols.C37118.Frames
                     cursor += 16;
                 }
 
-                // 4. Skip over the structural Conversion Factors table (4 bytes per Phasor, 4 bytes per Analog, 4 bytes per Digital)
+                // Skip over the structural Conversion Factors table (4 bytes per Phasor, 4 bytes per Analog, 4 bytes per Digital)
                 int factorBlockSize = (pmu.NumberOfPhasors * 4) + (pmu.NumberOfAnalogs * 4) + (pmu.NumberOfDigitals * 4);
                 cursor += factorBlockSize;
 

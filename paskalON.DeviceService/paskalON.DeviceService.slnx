@@ -13,6 +13,7 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="paskalON.Devices.Domain.UnitTest/paskalON.Devices.Domain.UnitTest.csproj" Id="4b64dece-60a2-4aa6-b2de-135df171b224" />
+    <Project Path="paskalON.Devices.Equipments.IntegrationTest/paskalON.Devices.Equipments.IntegrationTest.csproj" Id="4a9ee023-195d-484d-8e5a-a19c68e3a24d" />
     <Project Path="paskalON.Devices.Equipments.UnitTest/paskalON.Devices.Equipments.UnitTest.csproj" Id="99312c0b-f835-4f35-856c-ef2189fce640" />
     <Project Path="paskalON.Devices.Infrastructure.IntegrationTest/paskalON.Devices.Infrastructure.IntegrationTest.csproj" Id="45f71292-154f-4fe7-b9f2-ba3d62122885" />
   </Folder>
