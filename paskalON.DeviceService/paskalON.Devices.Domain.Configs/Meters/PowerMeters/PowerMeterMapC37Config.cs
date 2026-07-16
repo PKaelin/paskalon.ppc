@@ -11,6 +11,10 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
     /// </remarks>
     public class PowerMeterMapC37Config : NameBase
     {
+        // Frequency doesn't have a configurable name and should be fix "FREQUENCY" in the registrations.
+        // public string? Frequency { get; set; }
+
+
         /// <summary>
         /// Name of the C37 value that maps to <see cref="ApparentPower"/>.
         /// </summary>
@@ -54,12 +58,6 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
         /// Name of the C37 value that maps to <see cref="EnergyReceived"/>.
         /// </summary>
         public string? EnergyReceived { get; set; }
-
-
-        /// <summary>
-        /// Name of the C37 value that maps to <see cref="Frequency"/>.
-        /// </summary>
-        public string? Frequency { get; set; }
 
 
         /// <summary>

@@ -4,6 +4,7 @@
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="paskalON.Protocols.C37118.UnitTest/paskalON.Protocols.C37118.UnitTest.csproj" Id="117901a9-26a6-4ecb-90f8-3aacaad8edf5" />
     <Project Path="paskalON.Protocols.Modbus.UnitTest/paskalON.Protocols.Modbus.UnitTest.csproj" Id="bc0efa39-cb37-4ab3-8cbe-c6b983b9e56a" />
   </Folder>
   <Project Path="paskalON.Protocols.C37118/paskalON.Protocols.C37118.csproj" Id="fe68b895-0bb2-4ffb-b128-96e3c037b739" />

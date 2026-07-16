@@ -30,6 +30,12 @@ namespace paskalON.Protocols.C37118.Configs
 
 
         /// <summary>
+        /// Data type of digital data.
+        /// </summary>
+        public C37DataType DigitalDataType { get; set; }
+
+
+        /// <summary>
         /// Data type of frequency data.
         /// </summary>
         public C37DataType FrequencyDataType { get; set; }

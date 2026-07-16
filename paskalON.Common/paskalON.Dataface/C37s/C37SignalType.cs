@@ -22,7 +22,7 @@ namespace paskalON.Dataface.C37s
         /// </summary>
         Frequency,
         /// <summary>
-        /// Derivative of frequency over time (DFREQ) defining how fast the system frequency is shifting.
+        /// Derivative of frequency over time (DFREQ) or ROCOF (Rate of Change of Frequency) defining how fast the system frequency is shifting.
         /// </summary>
         RateOfChangeOfFrequency,
         /// <summary>

@@ -215,7 +215,7 @@ namespace paskalON.Protocols.Modbus.UnitTest.Converters
             ModbusRegisterEntry<ModbusDataConverterTest, bool> entry = new ModbusRegisterEntry<ModbusDataConverterTest, bool>(this, "T", (x, v) => { }, register, scale, type, 0);
             ModbusDataConverter converter = new ModbusDataConverter();
 
-            object result = converter.ConvertRawData(rawData, entry, startAddress);
+            object? result = converter.ConvertRawData(rawData, entry, startAddress);
 
             Assert.AreEqual(expected, result);
         }

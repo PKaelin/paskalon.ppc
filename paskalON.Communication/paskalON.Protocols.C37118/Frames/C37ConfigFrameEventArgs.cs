@@ -47,12 +47,13 @@ namespace paskalON.Protocols.C37118.Frames
         {
             C37ConfigBlueprint blueprint = new C37ConfigBlueprint { StreamIdCode = Header.StreamIdCode };
 
-            // Parse Global Data Stream Fields
-            ushort timeBase = BinaryPrimitives.ReadUInt16BigEndian(payload[0..2]);
-            ushort numberOfDevices = BinaryPrimitives.ReadUInt16BigEndian(payload[2..4]);
+            // Parse global data stream fields
+            uint timeBase = BinaryPrimitives.ReadUInt32BigEndian(payload[0..4]);
+            // In IEEE C37.118 standard a device count of 0 is structurally invalid for a configuration frame
+            ushort numberOfDevices = BinaryPrimitives.ReadUInt16BigEndian(payload[4..6]);
 
             // Track a sliding pointer coordinate across the raw configuration stream payload
-            int cursor = 4;
+            int cursor = 6;
             int dataFrameOffset = 0;
 
             // Iterate through each nested PMU configuration block sequentially
@@ -76,6 +77,7 @@ namespace paskalON.Protocols.C37118.Frames
                 pmu.PhasorDataType = (formatWord & 0x0001) != 0 ? C37DataType.Float : C37DataType.Short;
                 pmu.AnalogDataType = (formatWord & 0x0002) != 0 ? C37DataType.Float : C37DataType.Short;
                 pmu.FrequencyDataType = (formatWord & 0x0004) != 0 ? C37DataType.Float : C37DataType.Short;
+                pmu.DigitalDataType = (formatWord & 0x0008) != 0 ? C37DataType.Float : C37DataType.Short;
 
                 pmu.NumberOfPhasors = BinaryPrimitives.ReadUInt16BigEndian(payload.Slice(cursor, 2));
                 cursor += 2;
@@ -87,16 +89,16 @@ namespace paskalON.Protocols.C37118.Frames
                 // Track total channels to correctly skip string array data tables afterwards
                 int totalChannelCount = pmu.NumberOfPhasors + pmu.NumberOfAnalogs + (pmu.NumberOfDigitals * 16);
 
-                // Populate channel entries sequentially: Phasor -> Analog -> Digital Bits
+                // Read phasor
                 for (int phasor = 0; phasor < pmu.NumberOfPhasors; phasor++)
                 {
                     // A single phasor in C37 is a complex number with magnitude and phase angle of a sinusoidal voltage or current
-                    // TODO: Refactor to magnitude and angle.
                     string rawName = System.Text.Encoding.ASCII.GetString(payload.Slice(cursor, 16)).TrimEnd();
                     blueprint.ChannelMap[rawName] = new C37ChannelEntry(pmu.StationId, C37SignalType.Phasor, phasor);
                     cursor += 16;
                 }
 
+                // Read analogs
                 for (int analog = 0; analog < pmu.NumberOfAnalogs; analog++)
                 {
                     string rawName = System.Text.Encoding.ASCII.GetString(payload.Slice(cursor, 16)).TrimEnd();
@@ -104,6 +106,7 @@ namespace paskalON.Protocols.C37118.Frames
                     cursor += 16;
                 }
 
+                // Read digitals
                 for (int digital = 0; digital < pmu.NumberOfDigitals * 16; digital++)
                 {
                     string rawName = System.Text.Encoding.ASCII.GetString(payload.Slice(cursor, 16)).TrimEnd();
@@ -116,6 +119,10 @@ namespace paskalON.Protocols.C37118.Frames
                 // Skip over the structural Conversion Factors table (4 bytes per Phasor, 4 bytes per Analog, 4 bytes per Digital)
                 int factorBlockSize = (pmu.NumberOfPhasors * 4) + (pmu.NumberOfAnalogs * 4) + (pmu.NumberOfDigitals * 4);
                 cursor += factorBlockSize;
+
+                blueprint.ChannelMap["FREQUENCY"] = new C37ChannelEntry(pmu.StationId, C37SignalType.Frequency, 0);
+                // blueprint.ChannelMap["ROCOF"] = new C37ChannelEntry(pmu.StationId, C37SignalType.RateOfChangeOfFrequency, 0);
+                cursor += 4;
 
                 // Assign the resolved position of this PMU within the data frame packet
                 pmu.PmuDataStartOffset = dataFrameOffset;

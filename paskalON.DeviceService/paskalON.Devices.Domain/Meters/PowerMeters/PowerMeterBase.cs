@@ -735,8 +735,8 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
                 if (string.IsNullOrEmpty(c37Config.ReactiveEnergyReceived) == false)
                     Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.ReactiveEnergyReceived, C37SignalType.Analog, (x, v) => x.ReactiveEnergyReceivedValue = v));
                 // Misc
-                if (string.IsNullOrEmpty(c37Config.Frequency) == false)
-                    Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, c37Config.Frequency, C37SignalType.Frequency, (x, v) => x.Frequency = v));
+                // Frequency doesn't have a configurable name and should be fix "FREQUENCY" in the registrations.
+                Dataface.Register<PowerMeterBase, IC37Register>(r => r.Register<PowerMeterBase, double?>(this, "FREQUENCY", C37SignalType.Frequency, (x, v) => x.Frequency = v));
             }
         }
 
