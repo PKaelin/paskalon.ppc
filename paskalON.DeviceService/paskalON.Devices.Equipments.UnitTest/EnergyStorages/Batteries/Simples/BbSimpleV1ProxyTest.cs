@@ -18,7 +18,7 @@ using System.Net.Sockets;
 namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
 {
     [TestClass]
-    public class BbSimpleProxyV1Test
+    public class BbSimpleV1ProxyTest
     {
         private Mock<DerBatteryStorageUnit>? _unit;
         private BatteryBankConfig? _bbConfig;

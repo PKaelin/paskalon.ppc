@@ -122,26 +122,30 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
             {
                 ChangedBy = "Test",
                 Name = "Power Meter Map C37 1",
+                // Power
                 ApparentPower = "Analog0",
-                CurrentA = "Phasor4",
-                CurrentB = "Phasor5",
-                CurrentC = "Phasor6",
-                PowerFactor = "Analog4",
+                ActivePower = "Analog1",
+                ActivePowerA = "Analog2",
+                ActivePowerB = "Analog3",
+                ActivePowerC = "Analog4",
                 ReactivePower = "Analog5",
                 ReactivePowerA = "Analog6",
                 ReactivePowerB = "Analog7",
                 ReactivePowerC = "Analog8",
-                ActivePower = "Analog9",
-                ActivePowerA = "Analog10",
-                ActivePowerB = "Analog11",
-                ActivePowerC = "Analog12",
-                VoltagePositiveSequence = "Phasor3",
+                PowerFactor = "Analog9",
+                // Voltage
                 VoltageA = "Phasor0",
                 VoltageB = "Phasor1",
                 VoltageC = "Phasor2",
-                VoltageAB = "Analog17",
-                VoltageBC = "Analog18",
-                VoltageCA = "Analog19"
+                VoltageAB = "Phasor3",
+                VoltageBC = "Phasor4",
+                VoltageCA = "Phasor5",
+                VoltagePositiveSequence = "Phasor6",
+                VoltageLLAvg = "Analog10",
+                // Current
+                CurrentA = "Phasor7",
+                CurrentB = "Phasor8",
+                CurrentC = "Phasor9",
             };
 
             PowerMeterMapModbusConfig = new PowerMeterMapModbusConfig
