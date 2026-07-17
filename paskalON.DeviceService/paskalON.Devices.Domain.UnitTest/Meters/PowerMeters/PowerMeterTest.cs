@@ -65,8 +65,6 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
                 VoltageCA = "VCA",
                 VoltageLLAvg = "VLLAvg",
                 VoltagePositiveSequence = "VPS",
-                // Misc
-                Frequency = "FRQ",
             };
 
             _powerMeterDeviceConfig = new PowerMeterDeviceConfig
@@ -122,6 +120,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
 
             HashSet<string?> expectedNames = new HashSet<string?>
             {
+                "FREQUENCY",
                 // Power
                 _powerMeterMapC37Config!.ActivePower,
                 _powerMeterMapC37Config!.ActivePowerA,
@@ -150,8 +149,6 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
                 _powerMeterMapC37Config!.VoltageCA,
                 _powerMeterMapC37Config!.VoltageLLAvg,
                 _powerMeterMapC37Config!.VoltagePositiveSequence,
-                // Misc
-                _powerMeterMapC37Config!.Frequency,
             };
 
             HashSet<string> registeredNames = dataface.Registers.Select(r => r.Name).ToHashSet();
@@ -182,6 +179,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
 
             HashSet<string?> expectedNames = new HashSet<string?>
             {
+                "FREQUENCY",
                 // Power
                 _powerMeterMapC37Config!.ActivePower,
                 _powerMeterMapC37Config!.ReactivePower,
@@ -191,7 +189,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
 
             Assert.IsNotNull(powerMeter.Dataface);
             Assert.IsNotNull(dataface.Registers);
-            Assert.HasCount(2, dataface.Registers);
+            Assert.HasCount(expectedNames.Count, dataface.Registers);
             Assert.HasCount(expectedNames.Count, registeredNames);
             CollectionAssert.AreEquivalent(expectedNames.ToList(), registeredNames.ToList());
         }

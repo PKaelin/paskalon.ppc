@@ -43,6 +43,12 @@ namespace paskalON.Devices.Equipments.C37
 
 
         /// <summary>
+        /// Current registered mappings that were generated via the configuration frame.
+        /// </summary>
+        public List<C37RegisterMapEntry> Mappings { get => _mappings.ToList(); }
+
+
+        /// <summary>
         /// Constructor of <see cref="C37TransmissionEngine"/>.
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>

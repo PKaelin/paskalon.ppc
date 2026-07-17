@@ -4,11 +4,22 @@
 using System.Buffers.Binary;
 using System.Text;
 
-namespace paskalON.Protocols.C37118.UnitTest
+namespace paskalON.Protocols.C37118.Generators
 {
-    public static class C37TestDataGenerator
+    /// <summary>
+    /// Data generator for C37 payloads
+    /// </summary>
+    public static class C37DataGenerator
     {
-        public static byte[] CreateMockConfigFrame(ushort stationId, List<string> phasorNames, List<string> analogNames)
+        /// <summary>
+        /// Creates a configuration frame according to its inputs.
+        /// </summary>
+        /// <param name="streamId">The stream Id.</param>
+        /// <param name="stationId">The station id.</param>
+        /// <param name="phasorNames">List of phasor names.</param>
+        /// <param name="analogNames">List of analog names</param>
+        /// <returns>The payload in a byte array.</returns>
+        public static byte[] CreateConfigFrame(ushort streamId, ushort stationId, List<string> phasorNames, List<string> analogNames)
         {
             using MemoryStream ms = new MemoryStream();
 
@@ -58,7 +69,7 @@ namespace paskalON.Protocols.C37118.UnitTest
                 ms.Write(channelNameBytes);
             }
 
-            // Write analog (16 bytes per channel entry)
+            // Write analogs (16 bytes per channel entry)
             foreach (var analogName in analogNames)
             {
                 byte[] channelNameBytes = new byte[16];
@@ -66,6 +77,19 @@ namespace paskalON.Protocols.C37118.UnitTest
                 Encoding.ASCII.GetBytes(analogName).CopyTo(channelNameBytes, 0);
                 ms.Write(channelNameBytes);
             }
+
+            // Write digitals (16 bytes per channel entry), Implement when required
+
+            // Write Frequency (16 bytes each)
+            byte[] frequencyLabelBytes = new byte[16];
+            Array.Fill(frequencyLabelBytes, (byte)0x20); // Pad with spaces
+            Encoding.ASCII.GetBytes("FREQUENCY").CopyTo(frequencyLabelBytes, 0);
+            ms.Write(frequencyLabelBytes);
+            // Write ROCOF (16 bytes each)
+            byte[] rocofLabelBytes = new byte[16];
+            Array.Fill(rocofLabelBytes, (byte)0x20);
+            Encoding.ASCII.GetBytes("ROCOF").CopyTo(rocofLabelBytes, 0);
+            ms.Write(rocofLabelBytes);
 
             // Conversion Factors (4 bytes per channel item)
             // Phasor conversion factors
@@ -80,8 +104,10 @@ namespace paskalON.Protocols.C37118.UnitTest
                 ms.Write(new byte[4]);
             }
 
-            // Frequency (Mandatory entry each per PMU block) (4 bytes)
-            ms.Write(new byte[4]);
+            // Frequency Conversion Factors  (2 bytes)
+            ms.Write(new byte[2]);
+            // ROCOF Conversion Factors  (2 bytes)
+            ms.Write(new byte[2]);
 
             // Data Reporting Rate (2 bytes) at the very end
             byte[] rateBytes = new byte[2];
@@ -98,20 +124,31 @@ namespace paskalON.Protocols.C37118.UnitTest
             finalFrame[0] = 0xAA;
             finalFrame[1] = 0x21; // Config Frame Type 2
             BinaryPrimitives.WriteUInt16BigEndian(finalFrame.AsSpan(2, 2), frameSize);
-            BinaryPrimitives.WriteUInt16BigEndian(finalFrame.AsSpan(4, 2), stationId);
+            BinaryPrimitives.WriteUInt16BigEndian(finalFrame.AsSpan(4, 2), streamId);
 
             return finalFrame;
         }
 
 
-        public static byte[] CreateMockDataFrame(ushort streamId, List<(float Mag, float Ang)> phasorValues, List<float> analogValues, float frequency)
+        /// <summary>
+        /// Creates a data frame according to its inputs.
+        /// </summary>
+        /// <param name="streamId">The stream Id.</param>
+        /// <param name="phasorValues">List of phasor values.</param>
+        /// <param name="analogValues">List of analog values.</param>
+        /// <param name="frequency">Frequency value.</param>
+        /// <returns></returns>
+        public static byte[] CreateDataFrame(ushort streamId, List<(float Mag, float Ang)> phasorValues, List<float> analogValues, float frequency)
         {
             using MemoryStream ms = new MemoryStream();
 
             // Placeholder for Header (14 bytes)
             ms.Write(new byte[14]);
+            // PMU Status Word (2 bytes)
+            ms.Write(new byte[2]);
+
             // Data Values - Following IEEE C37.118 Structural sequence:
-            // Phasor Data (Each phasor has 4 bytes Mag + 4 bytes Ang = 8 bytes total if float)
+            // Phasor data (Each phasor has 4 bytes Mag + 4 bytes Ang = 8 bytes total if float)
             foreach ((float Mag, float Ang) phasor in phasorValues)
             {
                 byte[] magBytes = new byte[4];
@@ -122,16 +159,16 @@ namespace paskalON.Protocols.C37118.UnitTest
                 ms.Write(angBytes);
             }
 
-            // In theory the IEEE C37.118 should always have at least one signal
-            if (phasorValues.Count > 0 || analogValues.Count > 0)
-            {
-                // Frequency (4 bytes float)
-                byte[] frequencyBytes = new byte[4];
-                BinaryPrimitives.WriteSingleBigEndian(frequencyBytes, frequency);
-                ms.Write(frequencyBytes);
-            }
+            // Frequency data
+            byte[] frequencyBytes = new byte[4];
+            BinaryPrimitives.WriteSingleBigEndian(frequencyBytes, frequency);
+            ms.Write(frequencyBytes);
 
-            // Analog Data (4 bytes float each)
+            // ROCOF data
+            byte[] rocofPlaceholder = new byte[4];
+            ms.Write(rocofPlaceholder);
+
+            // Analog data (4 bytes float each)
             foreach (float analog in analogValues)
             {
                 byte[] analogBytes = new byte[4];
@@ -139,12 +176,12 @@ namespace paskalON.Protocols.C37118.UnitTest
                 ms.Write(analogBytes);
             }
 
-            // Checksum Placeholder (2 bytes)
+            // Checksum placeholder (2 bytes)
             ms.Write(new byte[2]);
 
             byte[] finalFrame = ms.ToArray();
 
-            // Overwrite Valid Header Values
+            // Overwrite valid header values
             ushort frameSize = (ushort)finalFrame.Length;
             finalFrame[0] = 0xAA;
             finalFrame[1] = 0x01; // Data Frame Type 0

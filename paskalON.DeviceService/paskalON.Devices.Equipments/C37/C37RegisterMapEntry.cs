@@ -9,7 +9,7 @@ namespace paskalON.Devices.Equipments.C37
     /// <summary>
     /// C37 channel to dataface registers map entry.
     /// </summary>
-    internal class C37RegisterMapEntry
+    public class C37RegisterMapEntry
     {
         /// <summary>
         /// The C37 dataface register entry.

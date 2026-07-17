@@ -116,13 +116,20 @@ namespace paskalON.Protocols.C37118.Frames
                     cursor += 16;
                 }
 
+                // Read frequency and ROCOF
+                blueprint.ChannelMap["FREQUENCY"] = new C37ChannelEntry(pmu.StationId, C37SignalType.Frequency, 0);
+                cursor += 16;
+                // blueprint.ChannelMap["ROCOF"] = new C37ChannelEntry(pmu.StationId, C37SignalType.RateOfChangeOfFrequency, 0);
+                cursor += 16;
+
                 // Skip over the structural Conversion Factors table (4 bytes per Phasor, 4 bytes per Analog, 4 bytes per Digital)
                 int factorBlockSize = (pmu.NumberOfPhasors * 4) + (pmu.NumberOfAnalogs * 4) + (pmu.NumberOfDigitals * 4);
                 cursor += factorBlockSize;
 
-                blueprint.ChannelMap["FREQUENCY"] = new C37ChannelEntry(pmu.StationId, C37SignalType.Frequency, 0);
-                // blueprint.ChannelMap["ROCOF"] = new C37ChannelEntry(pmu.StationId, C37SignalType.RateOfChangeOfFrequency, 0);
-                cursor += 4;
+                // Frequency Conversion Factors
+                cursor += 2;
+                // ROCOF Conversion Factors
+                cursor += 2;
 
                 // Assign the resolved position of this PMU within the data frame packet
                 pmu.PmuDataStartOffset = dataFrameOffset;

@@ -27,6 +27,7 @@ namespace paskalON.Protocols.C37118.Frames
         public C37DataFrameEventArgs(ReadOnlyMemory<byte> fullFrameBytes)
         {
             Header = new C37FrameHeader(fullFrameBytes.Span[0..14]);
+            // Actual payload minus the checksum at the end
             RawPayload = fullFrameBytes.Slice(14, Header.FrameSize - 16);
         }
     }

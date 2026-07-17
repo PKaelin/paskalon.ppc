@@ -9,6 +9,8 @@ using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Equipments.C37;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Protocols.C37118;
+using paskalON.Protocols.C37118.Frames;
+using paskalON.Protocols.C37118.Generators;
 using paskalON.Telemetry;
 
 namespace paskalON.Devices.Equipments.IntegrationTest.Meters.PowerMeters.Simples
@@ -83,9 +85,20 @@ namespace paskalON.Devices.Equipments.IntegrationTest.Meters.PowerMeters.Simples
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             C37Register dataface = new C37Register("Test");
             Mock<IC37Client> client = new Mock<IC37Client>();
-
             C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface);
-        }
 
+            byte[] configBytes = C37DataGenerator.CreateConfigFrame(1, 1, new List<string>(), new List<string> { _powerMeterMapC37Config!.ActivePower! });
+            C37ConfigFrameEventArgs expectedFrame = new C37ConfigFrameEventArgs(configBytes);
+            C37ConfigFrameEventArgs? raisedFrame = null;
+            client.Object.ConfigFrameReceived += (sender, args) => { raisedFrame = args; };
+
+            client.Raise(c => c.ConfigFrameReceived += null, this, expectedFrame);
+
+            Assert.IsNotNull(raisedFrame);
+            Assert.AreEqual(1, raisedFrame.Header.StreamIdCode);
+            Assert.HasCount(2, raisedFrame.Blueprint.ChannelMap);
+            Assert.IsNotNull(raisedFrame.Blueprint.ChannelMap.FirstOrDefault(n => n.Key == "FREQUENCY"));
+            Assert.IsNotNull(raisedFrame.Blueprint.ChannelMap.FirstOrDefault(n => n.Key == _powerMeterMapC37Config!.ActivePower));
+        }
     }
 }

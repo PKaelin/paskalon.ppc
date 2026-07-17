@@ -753,7 +753,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
                 return null;
             }
 
-            return (double)(value.Value >> 32);
+            return BitConverter.UInt32BitsToSingle((uint)(value >> 32));
         }
 
 
@@ -769,7 +769,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
                 return null;
             }
 
-            return (double)(int)(value.Value & 0xFFFFFFFF);
+            return BitConverter.UInt32BitsToSingle((uint)(value & 0xFFFFFFFF));
         }
 
 

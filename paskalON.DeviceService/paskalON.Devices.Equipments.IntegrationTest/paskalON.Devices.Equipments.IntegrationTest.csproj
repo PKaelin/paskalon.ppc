@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Protocols.C37118\paskalON.Protocols.C37118.csproj" />
     <ProjectReference Include="..\paskalON.Devices.Domain.Configs\paskalON.Devices.Domain.Configs.csproj" />
     <ProjectReference Include="..\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />
     <ProjectReference Include="..\paskalON.Devices.Equipments\paskalON.Devices.Equipments.csproj" />
