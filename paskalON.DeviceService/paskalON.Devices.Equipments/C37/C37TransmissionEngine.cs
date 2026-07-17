@@ -13,6 +13,25 @@ namespace paskalON.Devices.Equipments.C37
     public class C37TransmissionEngine
     {
         /// <summary>
+        /// C37 station Id.
+        /// </summary>
+        /// <remarks>
+        /// Can be either the name of the phasor measurement unit (PMU)
+        /// Or can be the name of the phasor data concentrator (PDC).
+        /// </remarks>
+        private string _stationName;
+
+
+        /// <summary>
+        /// C37 stream id within the C37 data stream.
+        /// </summary>
+        /// <remarks>
+        /// This identifies the PMU.
+        /// </remarks>
+        private ushort _streamId;
+
+
+        /// <summary>
         /// Logger for application logging and diagnostics.
         /// </summary>
         private readonly ILogger _logger;
@@ -54,15 +73,18 @@ namespace paskalON.Devices.Equipments.C37
         /// <param name="logger">Logger for application logging and diagnostics.</param>
         /// <param name="client">The C37 client interface.</param>
         /// <param name="dataface">The C37 data face.</param>
-        public C37TransmissionEngine(ILogger logger, IC37Client client, IC37Dataface dataface)
+        public C37TransmissionEngine(ILogger logger, IC37Client client, IC37Dataface dataface, string stationName, ushort streamId)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(client);
             ArgumentNullException.ThrowIfNull(dataface);
+            ArgumentNullException.ThrowIfNull(stationName);
 
             _logger = logger;
             _dataface = dataface;
             _client = client;
+            _stationName = stationName;
+            _streamId = streamId;
             _client.ConfigFrameReceived += OnConfigFrameReceived;
             _client.DataFrameReceived += OnDataFrameReceived;
             _logger.LogInformation("C37 transmission engine created for: {Name} {Address} {Port}", dataface.Name, client.ServerAddress, client.ServerPort);
@@ -79,25 +101,35 @@ namespace paskalON.Devices.Equipments.C37
             try
             {
                 C37ConfigBlueprint activeBlueprint = e.Blueprint;
-                _mappings.Clear();
+                IEnumerable<PmuLayoutMetadata> pmuLayouts = activeBlueprint.Pmus.Where(p => p.StationName == _stationName);
 
-                // Map registers to protocol structural coordinates by matching names            
-                foreach (IC37RegisterEntry register in _dataface.Registers)
+                // Only configure if the station name and stream id matches the configured name and id
+                if ((pmuLayouts.Count() > 0) && (e.Header.StreamIdCode == _streamId))
                 {
-                    if (activeBlueprint.ChannelMap.TryGetValue(register.Name, out C37ChannelEntry? channelEntry))
-                    {
-                        // Find matching layout specifications for structural byte offset resolution
-                        PmuLayoutMetadata layout = activeBlueprint.Pmus.First(p => p.StationId == channelEntry.TargetPmuId);
-                        // Create the map entry and set the PMU data offset
-                        _mappings.Add(new C37RegisterMapEntry(register, channelEntry, layout));
-                    }
-                    else
-                    {
-                        _logger.LogInformation("C37 config frame contains unbound register named {RegisterName}", channelEntry);
-                    }
-                }
+                    _mappings.Clear();
 
-                _runtimeMappings = _mappings.ToArray();
+                    // Map registers to protocol structural coordinates by matching names            
+                    foreach (IC37RegisterEntry register in _dataface.Registers)
+                    {
+                        if (activeBlueprint.ChannelMap.TryGetValue(register.Name, out C37ChannelEntry? channelEntry))
+                        {
+                            // Find matching layout specifications for structural byte offset resolution
+                            PmuLayoutMetadata? layout = pmuLayouts.FirstOrDefault(p => p.StreamId == channelEntry.TargetStreamId);
+
+                            if (layout != null)
+                            {
+                                // Create the map entry and set the PMU data offset
+                                _mappings.Add(new C37RegisterMapEntry(register, channelEntry, layout));
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogInformation("C37 config frame contains unbound register named {RegisterName}", channelEntry);
+                        }
+                    }
+
+                    _runtimeMappings = _mappings.ToArray();
+                }
             }
             catch (Exception ex)
             {
@@ -130,7 +162,6 @@ namespace paskalON.Devices.Equipments.C37
                 for (int i = 0; i < mappings.Length; i++)
                 {
                     C37RegisterMapEntry entry = mappings[i];
-
                     // Slice the data frame segment belonging to this specific target PMU device
                     ReadOnlySpan<byte> pmuSegment = payloadSpan.Slice(entry.Layout.PmuDataStartOffset, entry.Layout.TotalPmuLengthBytes);
 

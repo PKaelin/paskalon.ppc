@@ -61,12 +61,6 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 
 
         /// <summary>
-        /// Name of the C37 value that maps to <see cref="PowerFactor"/>.
-        /// </summary>
-        public string? PowerFactor { get; set; }
-
-
-        /// <summary>
         /// Name of the C37 value that maps to <see cref="ReactiveEnergyDelivered"/>.
         /// </summary>
         public string? ReactiveEnergyDelivered { get; set; }

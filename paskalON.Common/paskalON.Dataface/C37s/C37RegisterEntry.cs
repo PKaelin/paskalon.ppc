@@ -9,6 +9,12 @@ namespace paskalON.Dataface.C37s
     public class C37RegisterEntry<TDevice, TProperty> : IC37RegisterEntry
     {
         /// <summary>
+        /// Setter action.
+        /// </summary>
+        private Action<TDevice, TProperty?> _setter { get; init; }
+
+
+        /// <summary>
         /// <inheritdoc/>
         /// </summary>
         public object Instance { get; init; }
@@ -26,11 +32,6 @@ namespace paskalON.Dataface.C37s
         public C37SignalType SignalType { get; init; }
 
 
-        /// <summary>
-        /// Setter action.
-        /// </summary>
-        private Action<TDevice, TProperty> _setter { get; init; }
-
 
         /// <summary>
         /// Constructor of <see cref="C37RegisterEntry"/>.
@@ -39,12 +40,12 @@ namespace paskalON.Dataface.C37s
         /// <param name="name">The register entry name.</param>
         /// <param name="signalType">The C37 signal type.</param>
         /// <param name="setter">The setter action.</param>
-        public C37RegisterEntry(object instance, string name, C37SignalType signalType, Action<TDevice, TProperty> setter)
+        public C37RegisterEntry(object instance, string name, C37SignalType signalType, Action<TDevice, TProperty?> setter)
         {
+            _setter = setter;
             Instance = instance;
             Name = name;
             SignalType = signalType;
-            _setter = setter;
         }
 
 
@@ -58,12 +59,31 @@ namespace paskalON.Dataface.C37s
                 throw new ArgumentException($"{nameof(IC37RegisterEntry)} must be of type {typeof(TDevice).Name}", nameof(Instance));
             }
 
-            if (value is not TProperty typedValue)
+            Type targetType = typeof(TProperty);
+            Type? underlyingType = Nullable.GetUnderlyingType(targetType);
+
+            if (value == null)
             {
-                throw new ArgumentException($"Value must be of type {typeof(TProperty).Name}", nameof(value));
+                if (underlyingType != null)
+                {
+                    _setter(typedDevice, default);
+                    return;
+                }
+
+                throw new ArgumentNullException(nameof(value), "Value cannot be null for non-nullable properties.");
             }
 
-            _setter(typedDevice, typedValue);
+            try
+            {
+                // Use the underlying primitive type if nullable, otherwise use targetType
+                Type conversionType = underlyingType ?? targetType;
+                TProperty typedValue = (TProperty)Convert.ChangeType(value, conversionType);
+                _setter(typedDevice, typedValue);
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"Value {value} {value.GetType().Name} cannot be converted to target type {typeof(TProperty).Name} or updated to {Name}", ex);
+            }
         }
     }
 }

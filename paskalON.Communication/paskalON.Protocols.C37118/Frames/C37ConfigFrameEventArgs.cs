@@ -67,7 +67,7 @@ namespace paskalON.Protocols.C37118.Frames
                 cursor += 16;
 
                 // Unpack metadata tracking and count loops
-                pmu.StationId = BinaryPrimitives.ReadUInt16BigEndian(payload.Slice(cursor, 2));
+                pmu.StreamId = BinaryPrimitives.ReadUInt16BigEndian(payload.Slice(cursor, 2));
                 cursor += 2;
 
                 ushort formatWord = BinaryPrimitives.ReadUInt16BigEndian(payload.Slice(cursor, 2));
@@ -94,7 +94,7 @@ namespace paskalON.Protocols.C37118.Frames
                 {
                     // A single phasor in C37 is a complex number with magnitude and phase angle of a sinusoidal voltage or current
                     string rawName = System.Text.Encoding.ASCII.GetString(payload.Slice(cursor, 16)).TrimEnd();
-                    blueprint.ChannelMap[rawName] = new C37ChannelEntry(pmu.StationId, C37SignalType.Phasor, phasor);
+                    blueprint.ChannelMap[rawName] = new C37ChannelEntry(pmu.StreamId, C37SignalType.Phasor, phasor);
                     cursor += 16;
                 }
 
@@ -102,7 +102,7 @@ namespace paskalON.Protocols.C37118.Frames
                 for (int analog = 0; analog < pmu.NumberOfAnalogs; analog++)
                 {
                     string rawName = System.Text.Encoding.ASCII.GetString(payload.Slice(cursor, 16)).TrimEnd();
-                    blueprint.ChannelMap[rawName] = new C37ChannelEntry(pmu.StationId, C37SignalType.Analog, analog);
+                    blueprint.ChannelMap[rawName] = new C37ChannelEntry(pmu.StreamId, C37SignalType.Analog, analog);
                     cursor += 16;
                 }
 
@@ -112,14 +112,14 @@ namespace paskalON.Protocols.C37118.Frames
                     string rawName = System.Text.Encoding.ASCII.GetString(payload.Slice(cursor, 16)).TrimEnd();
                     int wordIndex = digital / 16;
                     int bitPosition = digital % 16;
-                    blueprint.ChannelMap[rawName] = new C37ChannelEntry(pmu.StationId, C37SignalType.Digital, wordIndex, bitPosition);
+                    blueprint.ChannelMap[rawName] = new C37ChannelEntry(pmu.StreamId, C37SignalType.Digital, wordIndex, bitPosition);
                     cursor += 16;
                 }
 
                 // Read frequency and ROCOF
-                blueprint.ChannelMap["FREQUENCY"] = new C37ChannelEntry(pmu.StationId, C37SignalType.Frequency, 0);
+                blueprint.ChannelMap["FREQUENCY"] = new C37ChannelEntry(pmu.StreamId, C37SignalType.Frequency, 0);
                 cursor += 16;
-                // blueprint.ChannelMap["ROCOF"] = new C37ChannelEntry(pmu.StationId, C37SignalType.RateOfChangeOfFrequency, 0);
+                // blueprint.ChannelMap["ROCOF"] = new C37ChannelEntry(pmu.StreamId, C37SignalType.RateOfChangeOfFrequency, 0);
                 cursor += 16;
 
                 // Skip over the structural Conversion Factors table (4 bytes per Phasor, 4 bytes per Analog, 4 bytes per Digital)

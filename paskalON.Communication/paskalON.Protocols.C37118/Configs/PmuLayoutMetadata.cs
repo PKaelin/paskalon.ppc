@@ -6,15 +6,15 @@ namespace paskalON.Protocols.C37118.Configs
     public class PmuLayoutMetadata
     {
         /// <summary>
-        /// The unique station Id.
-        /// </summary>
-        public ushort StationId { get; set; }
-
-
-        /// <summary>
         /// The station name.
         /// </summary>
         public string StationName { get; set; } = string.Empty;
+
+
+        /// <summary>
+        /// The unique stream Id.
+        /// </summary>
+        public ushort StreamId { get; set; }
 
 
         /// <summary>

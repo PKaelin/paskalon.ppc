@@ -17,6 +17,6 @@ namespace paskalON.Dataface.C37s
         /// <param name="name">Name of the property.</param>
         /// <param name="signalType">The C37 signal type.</param>
         /// <param name="setter">Setter action.</param>
-        void Register<TDevice, TProperty>(TDevice instance, string name, C37SignalType signalType, Action<TDevice, TProperty> setter);
+        void Register<TDevice, TProperty>(TDevice instance, string name, C37SignalType signalType, Action<TDevice, TProperty?> setter);
     }
 }

@@ -23,14 +23,18 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
         [TestMethod]
         public async Task TransmissionEngineConfigFrameWithOneAnalogTest()
         {
+            string stationName = "PMU";
+            ushort streamId = 1;
             string signalName = "ActivePower";
+            string signalFrequency = "FREQUENCY";
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             C37Register dataface = new C37Register("Test");
             dataface.Register<C37TransmissionEngineTest, IC37Register>(r => r.Register<C37TransmissionEngineTest, float>(this, signalName, C37SignalType.Analog, (x, v) => x._analogValue = v));
+            dataface.Register<C37TransmissionEngineTest, IC37Register>(r => r.Register<C37TransmissionEngineTest, float>(this, signalFrequency, C37SignalType.Frequency, (x, v) => x._frequencyValue = v));
             Mock<IC37Client> client = new Mock<IC37Client>();
-            C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface);
+            C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface, stationName, streamId);
 
-            byte[] configBytes = C37DataGenerator.CreateConfigFrame(1, 1, new List<string>(), new List<string> { signalName });
+            byte[] configBytes = C37DataGenerator.CreateConfigFrame(stationName, streamId, new List<string>(), new List<string> { signalName });
             C37ConfigFrameEventArgs expectedFrame = new C37ConfigFrameEventArgs(configBytes);
             C37ConfigFrameEventArgs? raisedFrame = null;
             client.Object.ConfigFrameReceived += (sender, args) => { raisedFrame = args; };
@@ -38,11 +42,11 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
             client.Raise(c => c.ConfigFrameReceived += null, this, expectedFrame);
 
             Assert.IsNotNull(raisedFrame);
-            Assert.AreEqual(1, raisedFrame.Header.StreamIdCode);
-            Assert.HasCount(2, raisedFrame.Blueprint.ChannelMap);
+            Assert.AreEqual(streamId, raisedFrame.Header.StreamIdCode);
+            Assert.HasCount(dataface.Registers.Count, raisedFrame.Blueprint.ChannelMap);
             Assert.IsNotNull(raisedFrame.Blueprint.ChannelMap.FirstOrDefault(n => n.Key == "FREQUENCY"));
             Assert.IsNotNull(raisedFrame.Blueprint.ChannelMap.FirstOrDefault(n => n.Key == signalName));
-            Assert.HasCount(1, engine.Mappings);
+            Assert.HasCount(dataface.Registers.Count, engine.Mappings);
             Assert.IsNotNull(engine.Mappings.FirstOrDefault(n => n.Register.Name == signalName));
         }
 
@@ -50,14 +54,16 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
         [TestMethod]
         public async Task TransmissionEngineConfigFrameWithOnePhasorTest()
         {
+            string stationName = "PMU";
+            ushort streamId = 1;
             string signalName = "VoltageA";
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             C37Register dataface = new C37Register("Test");
             dataface.Register<C37TransmissionEngineTest, IC37Register>(r => r.Register<C37TransmissionEngineTest, ulong>(this, signalName, C37SignalType.Phasor, (x, v) => x._phasorValue = v));
             Mock<IC37Client> client = new Mock<IC37Client>();
-            C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface);
+            C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface, stationName, streamId);
 
-            byte[] configBytes = C37DataGenerator.CreateConfigFrame(1, 1, new List<string> { signalName }, new List<string>());
+            byte[] configBytes = C37DataGenerator.CreateConfigFrame(stationName, streamId, new List<string> { signalName }, new List<string>());
             C37ConfigFrameEventArgs expectedFrame = new C37ConfigFrameEventArgs(configBytes);
             C37ConfigFrameEventArgs? raisedFrame = null;
             client.Object.ConfigFrameReceived += (sender, args) => { raisedFrame = args; };
@@ -65,11 +71,11 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
             client.Raise(c => c.ConfigFrameReceived += null, this, expectedFrame);
 
             Assert.IsNotNull(raisedFrame);
-            Assert.AreEqual(1, raisedFrame.Header.StreamIdCode);
-            Assert.HasCount(2, raisedFrame.Blueprint.ChannelMap);
+            Assert.AreEqual(streamId, raisedFrame.Header.StreamIdCode);
+            Assert.HasCount(dataface.Registers.Count + 1, raisedFrame.Blueprint.ChannelMap);
             Assert.IsNotNull(raisedFrame.Blueprint.ChannelMap.FirstOrDefault(n => n.Key == "FREQUENCY"));
             Assert.IsNotNull(raisedFrame.Blueprint.ChannelMap.FirstOrDefault(n => n.Key == signalName));
-            Assert.HasCount(1, engine.Mappings);
+            Assert.HasCount(dataface.Registers.Count, engine.Mappings);
             Assert.IsNotNull(engine.Mappings.FirstOrDefault(n => n.Register.Name == signalName));
         }
 
@@ -77,6 +83,8 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
         [TestMethod]
         public async Task TransmissionEngineDataFrameWithOneAnalogTest()
         {
+            string stationName = "PMU";
+            ushort streamId = 1;
             string signalName = "ActivePower";
             float signalValue = 12;
             string signalFrequency = "FREQUENCY";
@@ -87,9 +95,9 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
             dataface.Register<C37TransmissionEngineTest, IC37Register>(r => r.Register<C37TransmissionEngineTest, float>(this, signalFrequency, C37SignalType.Frequency, (x, v) => x._frequencyValue = v));
 
             Mock<IC37Client> client = new Mock<IC37Client>();
-            C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface);
+            C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface, stationName, streamId);
 
-            byte[] configBytes = C37DataGenerator.CreateConfigFrame(1, 1, new List<string>(), new List<string> { signalName });
+            byte[] configBytes = C37DataGenerator.CreateConfigFrame(stationName, 1, new List<string>(), new List<string> { signalName });
             byte[] dataBytes = C37DataGenerator.CreateDataFrame(1, new List<(float Mag, float Ang)>(), new List<float> { signalValue }, signalFrequencyValue);
             C37ConfigFrameEventArgs expectedConfigFrame = new C37ConfigFrameEventArgs(configBytes);
             C37DataFrameEventArgs expectedDataFrame = new C37DataFrameEventArgs(dataBytes);
@@ -100,7 +108,7 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
             client.Raise(c => c.DataFrameReceived += null, this, expectedDataFrame);
 
             Assert.IsNotNull(raisedDataFrame);
-            Assert.HasCount(2, engine.Mappings);
+            Assert.HasCount(dataface.Registers.Count, engine.Mappings);
             Assert.IsNotNull(engine.Mappings.FirstOrDefault(n => n.Register.Name == signalName));
             Assert.IsNotNull(engine.Mappings.FirstOrDefault(n => n.Register.Name == signalFrequency));
             Assert.AreEqual(signalValue, _analogValue);
@@ -111,6 +119,8 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
         [TestMethod]
         public async Task TransmissionEngineDataFrameWithOnePhasorTest()
         {
+            string stationName = "PMU";
+            ushort streamId = 1;
             string signalName = "VoltageA";
             float signalValueMag = 11;
             float signalValueAng = 22;
@@ -123,9 +133,9 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
             dataface.Register<C37TransmissionEngineTest, IC37Register>(r => r.Register<C37TransmissionEngineTest, float>(this, signalFrequency, C37SignalType.Frequency, (x, v) => x._frequencyValue = v));
 
             Mock<IC37Client> client = new Mock<IC37Client>();
-            C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface);
+            C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface, stationName, streamId);
 
-            byte[] configBytes = C37DataGenerator.CreateConfigFrame(1, 1, new List<string> { signalName }, new List<string>());
+            byte[] configBytes = C37DataGenerator.CreateConfigFrame(stationName, 1, new List<string> { signalName }, new List<string>());
             byte[] dataBytes = C37DataGenerator.CreateDataFrame(1, new List<(float Mag, float Ang)> { (signalValueMag, signalValueAng) }, new List<float>(), signalFrequencyValue);
             C37ConfigFrameEventArgs expectedConfigFrame = new C37ConfigFrameEventArgs(configBytes);
             C37DataFrameEventArgs expectedDataFrame = new C37DataFrameEventArgs(dataBytes);
@@ -136,7 +146,7 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
             client.Raise(c => c.DataFrameReceived += null, this, expectedDataFrame);
 
             Assert.IsNotNull(raisedDataFrame);
-            Assert.HasCount(2, engine.Mappings);
+            Assert.HasCount(dataface.Registers.Count, engine.Mappings);
             Assert.IsNotNull(engine.Mappings.FirstOrDefault(n => n.Register.Name == signalName));
             Assert.IsNotNull(engine.Mappings.FirstOrDefault(n => n.Register.Name == signalFrequency));
             // This calculation is taken from PowerMeterBase -> GetMagnitudeFromPhasorValue

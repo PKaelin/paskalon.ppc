@@ -9,6 +9,12 @@ namespace paskalON.Dataface.Modbus
     public class ModbusRegisterEntry<TDevice, TProperty> : IModbusRegisterEntry
     {
         /// <summary>
+        /// The action method that update the value defined in the registered action.
+        /// </summary>
+        private Action<TDevice, TProperty?> _setter { get; init; }
+
+
+        /// <summary>
         /// <inheritdoc/>
         /// </summary>
         public object Instance { get; init; }
@@ -18,12 +24,6 @@ namespace paskalON.Dataface.Modbus
         /// <inheritdoc/>
         /// </summary>
         public string Name { get; init; }
-
-
-        /// <summary>
-        /// The action method that update the value defined in the registered action.
-        /// </summary>
-        public Action<TDevice, TProperty?> Setter { get; init; }
 
 
         /// <summary>
@@ -62,9 +62,9 @@ namespace paskalON.Dataface.Modbus
         /// <param name="offset">The offset applied to the register entry.</param>
         public ModbusRegisterEntry(object instance, string name, Action<TDevice, TProperty?> setter, int register, double scale, ModbusDataType dataType, int offset)
         {
+            _setter = setter;
             Instance = instance;
             Name = name;
-            Setter = setter;
             Register = register;
             Scale = scale;
             DataType = dataType;
@@ -91,7 +91,7 @@ namespace paskalON.Dataface.Modbus
             {
                 if (underlyingType != null)
                 {
-                    Setter(typedDevice, default);
+                    _setter(typedDevice, default);
                     return;
                 }
 
@@ -103,7 +103,7 @@ namespace paskalON.Dataface.Modbus
                 // Use the underlying primitive type if nullable, otherwise use targetType
                 Type conversionType = underlyingType ?? targetType;
                 TProperty typedValue = (TProperty)Convert.ChangeType(value, conversionType);
-                Setter(typedDevice, typedValue);
+                _setter(typedDevice, typedValue);
             }
             catch (Exception ex)
             {

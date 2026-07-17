@@ -39,6 +39,8 @@ Service/Interface layer described in [README.md](./paskalON.Devices.Service/READ
 
 
 ## Not implemented at this point
+- Harden Modbus communication.
+- Harden C37 communication.
 - Generic Modbus Device writes.
 - Power meter Modbus communication.
 - Battery Bank Racks, Modules, Cells.

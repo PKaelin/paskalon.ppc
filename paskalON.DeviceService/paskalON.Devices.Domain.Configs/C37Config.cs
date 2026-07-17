@@ -37,28 +37,19 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// The ID of the C37 Data Stream.
+        /// The station name of the C37 data stream which identifies the phasor measurement unit (PMU) or phasor data contractor (PDC).
         /// </summary>
-        /// <remarks>
-        /// The remote device may have multiple C37 Data Streams.
-        /// This ID ensures the DG-IC is looking at the correct data stream. This value is used for verification
-        /// purposes, and it is sent to the remote device in various command frames so the remote device can
-        /// perform that command on it's appropriate data stream.
-        /// </remarks>
-        public required ushort IdOfDataStream { get; set; } = 1;
+        public required string StationName { get; set; } = "PMU";
 
 
         /// <summary>
-        /// The ID of the data block within the C37 Data Stream.
+        /// The stream Id of the data block within the C37 data stream.
         /// </summary>
         /// <remarks>
-        /// A remote device may be acting as a "Phasor Data Concentrator," or PDC, which means that the C37 Data Stream will contain
-        /// data off of multiple micro PMUs. In this case, the data within the Data Stream is identified using this value.
-        /// 
-        /// For devices that are not acting as a PDC, it is "usually" the case that this will match the <see cref="IdOfDataStream"/>, 
-        /// however this is not enforced by the C37 protocol.
+        /// A device may be acting as a phasor data concentrator (PDC) which means that the C37 data stream will contain
+        /// data off of multiple micro PMUs. In this case, the data within the data stream is identified using this value.
         /// </remarks>
-        public required ushort IdOfDataBlock { get; set; } = 1;
+        public required ushort StreamId { get; set; } = 1;
 
 
         /// <summary>

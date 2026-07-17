@@ -32,7 +32,7 @@ namespace paskalON.Dataface.C37s
         /// <summary>
         /// IDataface implementation of Register <see cref="IDataface"/>.
         /// </summary>
-        public void Register<TDevice, TProperty>(TDevice instance, string name, C37SignalType signalType, Action<TDevice, TProperty> setter)
+        public void Register<TDevice, TProperty>(TDevice instance, string name, C37SignalType signalType, Action<TDevice, TProperty?> setter)
         {
             ArgumentNullException.ThrowIfNull(instance);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);

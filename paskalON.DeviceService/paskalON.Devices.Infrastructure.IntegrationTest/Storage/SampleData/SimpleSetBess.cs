@@ -132,7 +132,10 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ReactivePowerA = "Analog6",
                 ReactivePowerB = "Analog7",
                 ReactivePowerC = "Analog8",
-                PowerFactor = "Analog9",
+                EnergyDelivered = "Analog9",
+                EnergyReceived = "Analog10",
+                ReactiveEnergyDelivered = "Analog11",
+                ReactiveEnergyReceived = "Analog12",
                 // Voltage
                 VoltageA = "Phasor0",
                 VoltageB = "Phasor1",
@@ -482,8 +485,8 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ConfigFrameTimeoutMilliseconds = 3000,
                 DataFrameRetryCount = 3,
                 DataFrameTimeoutMilliseconds = 500,
-                IdOfDataBlock = 1,
-                IdOfDataStream = 1,
+                StreamId = 1,
+                StationName = "PMU",
                 TransportLayer = C37TransportLayer.UDP,
             };
 
@@ -511,8 +514,8 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ConfigFrameTimeoutMilliseconds = 3000,
                 DataFrameRetryCount = 3,
                 DataFrameTimeoutMilliseconds = 500,
-                IdOfDataBlock = 1,
-                IdOfDataStream = 1,
+                StreamId = 1,
+                StationName = "PMU",
                 TransportLayer = C37TransportLayer.UDP,
             };
 

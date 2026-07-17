@@ -14,12 +14,12 @@ namespace paskalON.Protocols.C37118.Generators
         /// <summary>
         /// Creates a configuration frame according to its inputs.
         /// </summary>
+        /// <param name="stationName">The station id.</param>
         /// <param name="streamId">The stream Id.</param>
-        /// <param name="stationId">The station id.</param>
         /// <param name="phasorNames">List of phasor names.</param>
         /// <param name="analogNames">List of analog names</param>
         /// <returns>The payload in a byte array.</returns>
-        public static byte[] CreateConfigFrame(ushort streamId, ushort stationId, List<string> phasorNames, List<string> analogNames)
+        public static byte[] CreateConfigFrame(string stationName, ushort streamId, List<string> phasorNames, List<string> analogNames)
         {
             using MemoryStream ms = new MemoryStream();
 
@@ -35,15 +35,15 @@ namespace paskalON.Protocols.C37118.Generators
             BinaryPrimitives.WriteUInt16BigEndian(numDevicesBytes, 1);
             ms.Write(numDevicesBytes);
             // PMU Block Start
-            // Station Name (16 bytes fixed width ASCII)
+            // Station name (16 bytes fixed width ASCII)
             byte[] nameBytes = new byte[16];
             Array.Fill(nameBytes, (byte)0x20);
-            Encoding.ASCII.GetBytes("PMU-1").CopyTo(nameBytes, 0);
+            Encoding.ASCII.GetBytes(stationName).CopyTo(nameBytes, 0);
             ms.Write(nameBytes);
-            // Station ID (2 bytes)
-            byte[] stationIdBytes = new byte[2];
-            BinaryPrimitives.WriteUInt16BigEndian(stationIdBytes, stationId);
-            ms.Write(stationIdBytes);
+            // Stream Id (2 bytes)
+            byte[] streamIdBytes = new byte[2];
+            BinaryPrimitives.WriteUInt16BigEndian(streamIdBytes, streamId);
+            ms.Write(streamIdBytes);
             // Format Word (2 bytes) -> 0x0007 (Floats for Phasor, Analog, Freq)
             byte[] formatWordBytes = new byte[2];
             BinaryPrimitives.WriteUInt16BigEndian(formatWordBytes, 0x0007);

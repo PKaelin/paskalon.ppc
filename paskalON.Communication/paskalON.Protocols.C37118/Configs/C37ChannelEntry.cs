@@ -11,19 +11,22 @@ namespace paskalON.Protocols.C37118.Configs
     public class C37ChannelEntry
     {
         /// <summary>
-        /// Target PMU Id.
+        /// Target stream Id.
         /// </summary>
-        public ushort TargetPmuId { get; }
+        public ushort TargetStreamId { get; }
+
 
         /// <summary>
         /// C37 signal type.
         /// </summary>
         public C37SignalType SignalType { get; }
 
+
         /// <summary>
         /// Element index.
         /// </summary>
         public int ElementIndex { get; }
+
 
         /// <summary>
         /// Bit position.
@@ -34,13 +37,13 @@ namespace paskalON.Protocols.C37118.Configs
         /// <summary>
         /// Constructor of <see cref="C37ChannelEntry"/>.
         /// </summary>
-        /// <param name="pmuId">Target PMU Id.</param>
+        /// <param name="streamId">Target stream (PMU) Id.</param>
         /// <param name="signalType">C37 signal type.</param>
         /// <param name="elementIndex">Element index.</param>
         /// <param name="bitPosition">Bit position.</param>
-        public C37ChannelEntry(ushort pmuId, C37SignalType signalType, int elementIndex, int bitPosition = 0)
+        public C37ChannelEntry(ushort streamId, C37SignalType signalType, int elementIndex, int bitPosition = 0)
         {
-            TargetPmuId = pmuId;
+            TargetStreamId = streamId;
             SignalType = signalType;
             ElementIndex = elementIndex;
             BitPosition = bitPosition;
