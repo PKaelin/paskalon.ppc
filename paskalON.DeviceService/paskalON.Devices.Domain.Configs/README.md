@@ -3,7 +3,7 @@ This project contains all persistent configuration related code.
 
 
 ## General concept overview
-We define a specific "Devices" just once (PCS, Battery, etc.) and have multiple "Communications" (C37 or Modbus Addressables), communicate with actual device. "Logicals" are groups of things like DerCircuit, DerUnit, etc.  
+We define a specific "Devices" just once (PCS, Battery, etc.) and have multiple "Communications" (C37 or Modbus Addressable), communicate with actual device. "Logicals" are groups of things like DerCircuit, DerUnit, etc.  
 ![DeviceService Domain Configs Concept](./Docs/DeviceService%20Domain%20Configs%20Concept.drawio.svg)
 
 

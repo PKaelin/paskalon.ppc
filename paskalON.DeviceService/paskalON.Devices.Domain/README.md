@@ -1,5 +1,6 @@
 ﻿# Devices Domain
 This project contains all domain related code.   
-Most of the domains have a related configuration(s) in [Domain.Config](../paskalON.Devices.Domain.Configs/README.md). The structure and devices will only be apparent once the domain configurations are loaded.
+Most of the domains have a related configuration(s) in [Domain.Config](../paskalON.Devices.Domain.Configs/README.md).  
+The structure (Group, Unit, Circuit, etc.) and devices (BB, PCS, Meter, etc.) will only be apparent once the domain configurations are loaded.
 
 ![DeviceService Domain](./Docs/DeviceService%20Domain.drawio.svg)

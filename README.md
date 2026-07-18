@@ -1,7 +1,17 @@
 # Power Plant Controller (PPC)
 This project is not yet an actual power plant controller.  
-# !!!This repo is under initial development!!!
 
+---
+---
+## !!!This repo is under initial development!!!
+## Implemented so far
+- Implemented partial: C37 protocol, Mobus protocol, Physical Units, Maths, Telemetry.
+- Implemented metrics publisher [See](#metrics-publisher)
+- Implemented dataface [See](./paskalON.DeviceService/README.md#dataface)
+- Implemented configs, domains & infrastructure for: [Device Service details](./paskalON.DeviceService/README.md)
+
+---
+---
 
 ## Core Power Control Overview
 ![test](./Docs/Core%20Power%20Control%20Controller%20Overview.drawio.svg)
