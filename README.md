@@ -53,7 +53,7 @@ Manages physical devices and keeps a constant connection to the devices.
 The actual devices (power resource) which can be a simulation, emulation or physical representation.
 
 
-## Notable common design
+## Common design
 
 ### Metrics publisher
 Any class can publish metrics as long as a metrics publisher interface gets injected to the class and an instance (MetricsPublisher) of that injected interface is kept within the class. E.g. 
