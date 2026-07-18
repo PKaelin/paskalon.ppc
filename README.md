@@ -5,10 +5,12 @@ This project is not yet an actual power plant controller.
 ---
 ## !!!This repo is under initial development!!!
 ## Implemented so far
-- Implemented partial: C37 protocol, Mobus protocol, Physical Units, Maths, Telemetry.
+- Implemented partial: C37 protocol, Mobus protocol, Physical Units, Maths, Telemetry, Device infrastructure.
 - Implemented metrics publisher [See](#metrics-publisher)
 - Implemented dataface [See](./paskalON.DeviceService/README.md#dataface)
-- Implemented configs, domains & infrastructure for: [Device Service details](./paskalON.DeviceService/README.md)
+- Readme device service: [See](./paskalON.DeviceService/README.md)
+- Implemented device service domain: [See](./paskalON.DeviceService/paskalON.Devices.Domain/README.md)
+- Implemented device service config: [See](./paskalON.DeviceService/paskalON.Devices.Domain.Configs/README.md)
 
 ---
 ---
