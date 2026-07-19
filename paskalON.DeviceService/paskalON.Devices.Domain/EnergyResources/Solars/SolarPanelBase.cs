@@ -62,7 +62,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
             // At this point there is no communication with solar panels but we might with smart solar panels in the future.
             // Default value will always be false.
             get;
-            set { if (field != value) { field = value; SetState(value); } else field = value; }
+            set { if (field != value) { field = value; SetState(value); } }
         }
 
 
@@ -77,7 +77,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
             // At this point there is no communication with solar panels but we might with smart solar panels in the future.
             // Default value will always be false.
             get;
-            set { if (field != value) { field = value; SetCommunicationError(value); } else field = value; }
+            set { if (field != value) { field = value; SetCommunicationError(value); } }
         }
 
 

@@ -1,9 +1,12 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using paskalON.Dataface.Modbus;
+using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
@@ -18,7 +21,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
     public class PcsSimpleV1ProxyTest
     {
         private Mock<DerBatteryStorageUnit>? _unit;
-        private Mock<PowerConversionSystemConfig>? _pcsConfig;
+        private PowerConversionSystemConfig? _pcsConfig;
 
 
         [TestInitialize]
@@ -40,11 +43,25 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             Mock<DerBatteryStorageUnitConfig> unitConfig = new Mock<DerBatteryStorageUnitConfig>();
             unitConfig.SetupGet(x => x.Name).Returns("DerBatteryStorageUnitConfig");
             _unit = new Mock<DerBatteryStorageUnit>(NullLogger.Instance, unitConfig.Object, circuit.Object);
-            Mock<PowerConversionSystemDeviceConfig> deviceConfig = new Mock<PowerConversionSystemDeviceConfig>();
-            deviceConfig.SetupGet(x => x.Name).Returns("PowerConversionSystemDeviceConfig");
+
+            PowerConversionSystemDeviceConfig deviceConfig = new PowerConversionSystemDeviceConfig
+            {
+                ChangedBy = "Test",
+                Name = "PowerConversionSystemDeviceConfig",
+                ClassName = "ClassName",
+                ZeroOutputOnCommLoss = false
+            };
             // Device
-            _pcsConfig = new Mock<PowerConversionSystemConfig>();
-            _pcsConfig.SetupGet(x => x.Name).Returns("PowerConversionSystemConfig");
+            _pcsConfig = new PowerConversionSystemConfig()
+            {
+                ChangedBy = "Test",
+                Name = "PowerConversionSystemConfig",
+                IsActive = true,
+                DeviceId = 1,
+                DerUnitConfig = unitConfig.Object,
+                PowerConversionSystemDeviceConfig = deviceConfig,
+                ModbusConfig = new Mock<ModbusConfig>().Object,
+            };
         }
 
 
@@ -56,9 +73,22 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!.Object, _unit!.Object, publisher.Object, dataface.Object, null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
+
+
+        [TestMethod]
+        public void CreatePcsWithNullDatafaceTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            Mock<IModbusClient> client = new Mock<IModbusClient>();
+
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, null, client.Object));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+        }
+
 
 
         [TestMethod]
@@ -68,9 +98,29 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
 
-            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!.Object, _unit!.Object, publisher.Object, dataface.Object, client.Object);
+            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
-            Assert.AreEqual(_pcsConfig!.Object.Name, pcs.Name);
+            Assert.AreEqual(_pcsConfig!.Name, pcs.Name);
+        }
+
+
+        [TestMethod]
+        public void PcsWithMockedClientComErrorTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
+            Mock<IModbusClient> client = new Mock<IModbusClient>();
+            FakeLogger<PcsSimpleV1ProxyTest> logger = new FakeLogger<PcsSimpleV1ProxyTest>();
+
+            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(logger, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
+            EventArgs expectedEvent = new EventArgs();
+            client.Raise(x => x.OnCommunicationError += null, this, expectedEvent);
+
+            Assert.AreEqual(_pcsConfig!.Name, pcs.Name);
+            Assert.IsTrue(pcs.CommunicationError);
+            IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsTrue(logs.First().Message.Contains("CommunicationError state", StringComparison.OrdinalIgnoreCase));
         }
 
 
@@ -91,7 +141,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
                 .Callback<ushort, ushort, ModbusDataType, CancellationToken>((adr, val, type, token) => { address = adr; state = val; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
-            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!.Object, _unit!.Object, publisher.Object, dataface.Object, client.Object);
+            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
             await pcs.StartAsync();
 
@@ -120,7 +170,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
                 .Callback<ushort, ushort, ModbusDataType, CancellationToken>((adr, val, type, token) => { address = adr; state = val; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
-            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!.Object, _unit!.Object, publisher.Object, dataface.Object, client.Object);
+            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
             await pcs.StopAsync();
 
@@ -149,7 +199,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
                 .Callback<ushort, double, ModbusDataType, CancellationToken>((adr, val, type, token) => { address = adr; activePower = val; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
-            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!.Object, _unit!.Object, publisher.Object, dataface.Object, client.Object);
+            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
             await pcs.SetActivePowerTargetAsync(activePowerTarget);
 
@@ -178,7 +228,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
                 .Callback<ushort, double, ModbusDataType, CancellationToken>((adr, val, type, token) => { address = adr; reactivePower = val; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
-            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!.Object, _unit!.Object, publisher.Object, dataface.Object, client.Object);
+            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
             await pcs.SetReactivePowerTargetAsync(reactivePowerTarget);
 

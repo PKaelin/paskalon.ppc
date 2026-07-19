@@ -65,7 +65,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public PcsState State
         {
             get;
-            set { if (field != value) { field = value; SetState(value); } else field = value; }
+            set { if (field != value) { field = value; SetState(value); } }
         }
 
 
@@ -75,7 +75,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public bool CommunicationError
         {
             get;
-            set { if (field != value) { field = value; _ = SetCommunicationError(value); } else field = value; }
+            set { if (field != value) { field = value; _ = SetCommunicationError(value); } }
         }
 
 

@@ -15,7 +15,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
     /// PCS simple is a basic implementation of the PCS base class <see cref="PowerConversionSystemBase"/>.
     /// It shall be used for tests, simulations, analysis and as a reference for all concrete implementations.
     /// </summary>
-    public class PcsSimpleV1Proxy : PowerConversionSystemBase
+    public class PcsSimpleV1Proxy : PowerConversionSystemBase, IDisposable
     {
         /// <summary>
         /// Modbus client communication.
@@ -39,6 +39,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             ArgumentNullException.ThrowIfNull(dataface);
 
             _client = client;
+            _client.OnCommunicationError += OnCommunicationError;
         }
 
 
@@ -169,10 +170,15 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                 _logger.LogError("{Name} Undefined state reported. State: {State}", Name, State);
             }
 
+            // Logging and even invocation is done in the setter of the State property
             switch (state)
             {
                 case (int)PcsSimpleV1Description.State.Initialization:
                     State = PcsState.Starting;
+                    break;
+                case (int)PcsSimpleV1Description.State.On:
+                    State = PcsState.Started;
+                    CommunicationError = false;
                     break;
                 case (int)PcsSimpleV1Description.State.Off:
                 case (int)PcsSimpleV1Description.State.Stop:
@@ -315,6 +321,27 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             {
                 IsDcContactorClosed = new[] { true };
             }
+        }
+
+
+        /// <summary>
+        ///  Triggered on client communication error.
+        /// </summary>
+        /// <param name="sender">The communication client.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnCommunicationError(object? sender, EventArgs e)
+        {
+            // Logging and even invocation is done in the setter of the CommunicationError property
+            CommunicationError = true;
+        }
+
+
+        /// <summary>
+        /// Dispose instance.
+        /// </summary>
+        public void Dispose()
+        {
+            _client.OnCommunicationError -= OnCommunicationError;
         }
     }
 }

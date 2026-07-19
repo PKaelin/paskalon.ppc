@@ -16,7 +16,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
     /// BB simple is a basic implementation of the battery bank base class <see cref="BatteryBankBase"/>.
     /// It shall be used for tests, simulations, analysis and as a reference for all concrete implementations.
     /// </summary>
-    public class BbSimpleV1Proxy : BatteryBankBase
+    public class BbSimpleV1Proxy : BatteryBankBase, IDisposable
     {
         /// <summary>
         /// Modbus client communication.
@@ -40,6 +40,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
             ArgumentNullException.ThrowIfNull(dataface);
 
             _client = client;
+            _client.OnCommunicationError += OnCommunicationError;
         }
 
 
@@ -213,6 +214,27 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                     SetVendorEvent(code.ToString(), true);
                 }
             }
+        }
+
+
+        /// <summary>
+        ///  Triggered on client communication error.
+        /// </summary>
+        /// <param name="sender">The communication client.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnCommunicationError(object? sender, EventArgs e)
+        {
+            // Logging and even invocation is done in the setter of the CommunicationError property
+            CommunicationError = true;
+        }
+
+
+        /// <summary>
+        /// Dispose instance.
+        /// </summary>
+        public void Dispose()
+        {
+            _client.OnCommunicationError -= OnCommunicationError;
         }
     }
 }

@@ -8,9 +8,10 @@ namespace paskalON.Protocols.C37118
 {
     public interface IC37Client
     {
-        public C37ClientState State { get; }
-        public string ServerAddress { get; }
-        public int ServerPort { get; }
+        event EventHandler<EventArgs> OnCommunicationError;
+        C37ClientState State { get; }
+        string ServerAddress { get; }
+        int ServerPort { get; }
 
         // Connection Management
         Task StartStreamingAsync();

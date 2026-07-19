@@ -1,7 +1,9 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using paskalON.Dataface.C37s;
 using paskalON.Devices.Domain.Configs.Ders;
@@ -63,6 +65,26 @@ namespace paskalON.Devices.Equipments.UnitTest.Meters.PowerMeters.Simples
             SystemPowerMeterSimpleV1Proxy pm = new SystemPowerMeterSimpleV1Proxy(NullLogger.Instance, _pmConfig!, publisher.Object, dataface.Object, client.Object);
 
             Assert.AreEqual(_pmConfig!.Name, pm.Name);
+        }
+
+
+        [TestMethod]
+        public void PowerMeterWithMockedClientComErrorTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            Mock<IC37Dataface> dataface = new Mock<IC37Dataface>();
+            Mock<IC37Client> client = new Mock<IC37Client>();
+            FakeLogger<SystemPowerMeterSimpleV1Proxy> logger = new FakeLogger<SystemPowerMeterSimpleV1Proxy>();
+
+            SystemPowerMeterSimpleV1Proxy pm = new SystemPowerMeterSimpleV1Proxy(logger, _pmConfig!, publisher.Object, dataface.Object, client.Object);
+            EventArgs expectedEvent = new EventArgs();
+            client.Raise(x => x.OnCommunicationError += null, this, expectedEvent);
+
+            Assert.AreEqual(_pmConfig!.Name, pm.Name);
+            Assert.IsTrue(pm.CommunicationError);
+            IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsTrue(logs.First().Message.Contains("CommunicationError state", StringComparison.OrdinalIgnoreCase));
         }
 
 

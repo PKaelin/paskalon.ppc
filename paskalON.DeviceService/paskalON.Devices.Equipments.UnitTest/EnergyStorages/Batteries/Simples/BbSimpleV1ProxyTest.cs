@@ -1,7 +1,9 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs.Ders;
@@ -59,6 +61,18 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
 
 
         [TestMethod]
+        public void CreateBatteryBankWithNullDatafaceTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            Mock<IModbusClient> client = new Mock<IModbusClient>();
+
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!.Object, _unit!.Object, publisher.Object, null, client.Object));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+        }
+
+
+        [TestMethod]
         public void CreateBatteryBankWithMockedClientTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
@@ -69,6 +83,27 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
 
             Assert.AreEqual(_bbConfig!.Object.Name, bb.Name);
         }
+
+
+        [TestMethod]
+        public void BatteryBankWithMockedClientComErrorTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
+            Mock<IModbusClient> client = new Mock<IModbusClient>();
+            FakeLogger<BbSimpleV1Proxy> logger = new FakeLogger<BbSimpleV1Proxy>();
+
+            BbSimpleV1Proxy bb = new BbSimpleV1Proxy(logger, _bbConfig!.Object, _unit!.Object, publisher.Object, dataface.Object, client.Object);
+            EventArgs expectedEvent = new EventArgs();
+            client.Raise(x => x.OnCommunicationError += null, this, expectedEvent);
+
+            Assert.AreEqual(_bbConfig!.Object.Name, bb.Name);
+            Assert.IsTrue(bb.CommunicationError);
+            IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsTrue(logs.First().Message.Contains("CommunicationError state", StringComparison.OrdinalIgnoreCase));
+        }
+
 
 
         [TestMethod]

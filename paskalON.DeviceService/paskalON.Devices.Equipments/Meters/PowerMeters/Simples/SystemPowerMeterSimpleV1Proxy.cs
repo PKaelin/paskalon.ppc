@@ -7,7 +7,7 @@ using paskalON.Telemetry;
 
 namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
 {
-    public class SystemPowerMeterSimpleV1Proxy : SystemPowerMeter
+    public class SystemPowerMeterSimpleV1Proxy : SystemPowerMeter, IDisposable
     {
         /// <summary>
         /// C37 client communication.
@@ -29,6 +29,7 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
             ArgumentNullException.ThrowIfNull(dataface);
 
             _client = client;
+            _client.OnCommunicationError += OnCommunicationError;
         }
 
 
@@ -49,6 +50,27 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
         {
             await base.DisconnectAsync();
             await _client.SendCommandAsync(C37CommandType.TurnOffTransmission);
+        }
+
+
+        /// <summary>
+        ///  Triggered on client communication error.
+        /// </summary>
+        /// <param name="sender">The communication client.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnCommunicationError(object? sender, EventArgs e)
+        {
+            // Logging and even invocation is done in the setter of the CommunicationError property
+            CommunicationError = true;
+        }
+
+
+        /// <summary>
+        /// Dispose instance.
+        /// </summary>
+        public void Dispose()
+        {
+            _client.OnCommunicationError -= OnCommunicationError;
         }
     }
 }

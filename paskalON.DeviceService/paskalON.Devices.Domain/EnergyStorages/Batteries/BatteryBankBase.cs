@@ -66,7 +66,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         public BatteryBankState State
         {
             get;
-            set { if (field != value) { field = value; SetState(value); } else field = value; }
+            set { if (field != value) { field = value; SetState(value); } }
         }
 
 
@@ -76,7 +76,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         public bool CommunicationError
         {
             get;
-            set { if (field != value) { field = value; SetCommunicationError(value); } else field = value; }
+            set { if (field != value) { field = value; SetCommunicationError(value); } }
         }
 
 

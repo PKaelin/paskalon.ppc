@@ -8,9 +8,10 @@ namespace paskalON.Protocols.Modbus
 {
     public interface IModbusClient : IModbusDataConverter
     {
-        public ModbusClientState State { get; }
-        public string ServerAddress { get; }
-        public int ServerPort { get; }
+        event EventHandler<EventArgs> OnCommunicationError;
+        ModbusClientState State { get; }
+        string ServerAddress { get; }
+        int ServerPort { get; }
 
         // Connection Management
         Task ConnectAsync(CancellationToken cancellationToken = default);
