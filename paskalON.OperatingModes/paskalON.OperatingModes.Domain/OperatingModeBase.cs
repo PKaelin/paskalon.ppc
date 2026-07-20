@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -34,13 +35,13 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Operating mode base configuration.
         /// </summary>
-        private readonly OperatingModeConfig _operatingModeConfig;
+        private readonly OperatingModeBaseConfig _config;
 
 
         /// <summary>
         /// Gets the name of the operating mode.
         /// </summary>
-        public string Name { get => _operatingModeConfig.Name; }
+        public string Name { get => _config.Name; }
 
 
         /// <summary>
@@ -102,13 +103,13 @@ namespace paskalON.OperatingModes.Domain
 
 
 
-        public OperatingModeBase(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, OperatingModeConfig operatingModeConfigBase,
+        public OperatingModeBase(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, OperatingModeBaseConfig config,
             IRampController rampController, ICurveController? curveController)
         {
             _logger = logger;
             _timeProvider = timeProvider;
             _systemConfig = systemConfig;
-            _operatingModeConfig = operatingModeConfigBase;
+            _config = config;
             RampController = rampController;
             CurveController = curveController;
         }

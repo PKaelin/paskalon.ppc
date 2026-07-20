@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using paskalON.Maths.Calculuses;
 using paskalON.Maths.Calculuses.Coordinates;
 using paskalON.Maths.IntegrationTest.Calculuses.Logarithmics;
+using paskalON.OperatingModes.Domain.Configs.Ramps;
 using paskalON.OperatingModes.Domain.Ramps;
 
 namespace paskalON.OperatingModes.Application.Ramps

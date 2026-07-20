@@ -3,10 +3,11 @@ This solution is to self contain all logic regarding the implementation of Opera
 An Operating Mode defines the specific behavior and control strategy the system uses to interact with the power grid.  
 *Note: paskalON.Common libraries are project references during initial development*  
 
+
 ## Types of operating modes
 
 
-### Non-Metered Mode (Open-Loop Control)
+### Open Mode (Open-Loop Control)
 - How it works: The controller sends targets and assumes the action happens perfectly.
 - Feedback: None. It does not measure any actual output or adjust any changes.
 - Power plant use: In predictable scenarios.
@@ -14,7 +15,7 @@ An Operating Mode defines the specific behavior and control strategy the system 
 ![Non-Metered Operating Mode Overview](./Non-Metered%20Operating%20Mode%20Overview.drawio.svg)
 
 
-### Metered Mode (Closed-Loop Control)
+### Closed Mode (Closed-Loop Control)
 - How it works: Consistently checks the output using signals and compares it to the target.
 - Feedback: Continuous. If output drifts the controller calculates an error signal and makes adjustments in real time.
 - Power plant use: Industry standard for safe and stable operation. Used in Automatic Generation Control (AGC) and Automatic Voltage Regulators (AVR) to ensure grid compliance and prevent outages.

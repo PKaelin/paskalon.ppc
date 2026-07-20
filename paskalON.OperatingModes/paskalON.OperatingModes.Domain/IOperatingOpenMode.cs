@@ -1,19 +1,17 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-using paskalON.Domains;
-
-namespace paskalON.Devices.Domain.Configs
+namespace paskalON.OperatingModes.Domain
 {
     /// <summary>
-    /// Base class for all named domain bases.
+    /// Interface definition for all operating mode base.
     /// </summary>
-    public abstract class NameBase : DomainBase
+    public interface IOperatingOpenMode
     {
         /// <summary>
-        /// Name of the domain configuration.
+        /// Calculates the operating modes power target.
         /// </summary>
-        public required virtual string Name { get; set; }
-
+        Task CalculateAsync(CancellationToken cancellationToken);
     }
+
 }

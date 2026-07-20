@@ -14,6 +14,15 @@
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Maths\paskalON.Maths.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.PhysicalUnits\paskalON.PhysicalUnits.csproj" />
+    <ProjectReference Include="..\paskalON.OperatingModes.Domain.Configs\paskalON.OperatingModes.Domain.Configs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ClosedModes\FrequencyActives\" />
+    <Folder Include="ClosedModes\VoltageReactives\" />
+    <Folder Include="OpenModes\EnergyResources\" />
+    <Folder Include="OpenModes\FrequencyActives\" />
+    <Folder Include="OpenModes\VoltageReactives\" />
   </ItemGroup>
 
 </Project>

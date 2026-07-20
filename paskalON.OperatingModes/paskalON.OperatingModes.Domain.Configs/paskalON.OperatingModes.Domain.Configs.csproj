@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="ClosedModes\FrequencyActives\" />
+    <Folder Include="ClosedModes\EnergyStorages\" />
+    <Folder Include="ClosedModes\VoltageReactives\" />
+    <Folder Include="OpenModes\FrequencyActives\" />
+    <Folder Include="OpenModes\EnergyResources\" />
+    <Folder Include="OpenModes\VoltageReactives\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
+  </ItemGroup>
+
+</Project>

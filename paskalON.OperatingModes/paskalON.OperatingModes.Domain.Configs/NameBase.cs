@@ -3,7 +3,7 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Domains;
 
-namespace paskalON.Devices.Domain.Configs
+namespace paskalON.OperatingModes.Domain.Configs
 {
     /// <summary>
     /// Base class for all named domain bases.

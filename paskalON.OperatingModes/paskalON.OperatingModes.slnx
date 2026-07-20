@@ -3,14 +3,17 @@
     <Project Path="../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
     <Project Path="../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="paskalON.OperatingModes.Application.IntegrationTest/paskalON.OperatingModes.Application.IntegrationTest.csproj" Id="9d2373e3-4d10-4fda-bf47-d7a16f0853ce" />
+    <Project Path="paskalON.OperatingModes.Domain.Configs.UnitTest/paskalON.OperatingModes.Domain.Configs.UnitTest.csproj" Id="96f4922f-58dc-43a5-9f98-b28693ee8fae" />
     <Project Path="paskalON.OperatingModes.Domain.UnitTest/paskalON.OperatingModes.Domain.UnitTest.csproj" />
   </Folder>
   <Project Path="paskalON.OperatingModes.Application/paskalON.OperatingModes.Application.csproj" Id="4d9a038d-be7e-42a9-ab47-baae8e975c27" />
+  <Project Path="paskalON.OperatingModes.Domain.Configs/paskalON.OperatingModes.Domain.Configs.csproj" Id="c61f2d23-a0d7-405f-bab7-706d7e6910e3" />
   <Project Path="paskalON.OperatingModes.Domain/paskalON.OperatingModes.Domain.csproj" />
 </Solution>
