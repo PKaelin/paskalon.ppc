@@ -4,7 +4,7 @@
 namespace paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives
 {
     /// <summary>
-    /// Configuration class for reactive power fixed mode.
+    /// Reactive power fixed mode configuration.
     /// </summary>
     public class ReactivePowerFixedModeConfig : OperatingModeBaseConfig
     {
@@ -19,8 +19,9 @@ namespace paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives
         /// </summary>
         /// <remarks>
         /// This value should not exceed the nameplate.
+        /// If this value is not set the systems nameplate for active power is used.
         /// </remarks>
-        public required double MaximumReactivePowerLimitKiloVars { get; set; }
+        public double? MaximumReactivePowerLimitKiloVars { get; set; }
 
 
         /// <summary>
@@ -28,7 +29,8 @@ namespace paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives
         /// </summary>
         /// <remarks>
         /// This value should not exceed the nameplate.
+        /// If this value is not set the systems nameplate for active power is used.
         /// </remarks>
-        public required double MinimumReactivePowerLimitKiloVars { get; set; }
+        public double? MinimumReactivePowerLimitKiloVars { get; set; }
     }
 }

@@ -3,6 +3,9 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower
 {
+    /// <summary>
+    /// Maintenance operating mode configuration.
+    /// </summary>
     public class MaintenanceOperatingModeConfig : OperatingModeBaseConfig
     {
         /// <summary>

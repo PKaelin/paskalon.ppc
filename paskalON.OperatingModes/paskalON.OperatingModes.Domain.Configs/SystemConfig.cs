@@ -29,7 +29,7 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Gets or sets the system reference frequency in Hertz.
+        /// System reference frequency in Hertz.
         /// </summary>
         public required double ReferenceFrequency
         {
@@ -39,7 +39,7 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Gets or sets the system reference voltage in Volts.
+        /// System reference voltage in Volts.
         /// </summary>
         public double ReferenceVoltage
         {
@@ -49,7 +49,7 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Gets or sets the systems maximum voltage nameplate.
+        /// Systems maximum voltage nameplate.
         /// </summary>
         /// <remarks>
         /// Maximum voltage nameplate refers to the highest operating voltage a system can continuously and safely operate.
@@ -63,17 +63,17 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Gets or sets the systems minimum voltage nameplate.
+        /// Systems minimum voltage nameplate.
         /// </summary>
         public double NameplateMinimumVoltage
         {
             get { return field; }
-            set { ArgumentOutOfRangeException.ThrowIfNegative(field); field = value; }
+            set { field = value; }
         }
 
 
         /// <summary>
-        /// Gets or sets the systems maximum current nameplate.
+        /// Systems maximum current nameplate.
         /// </summary>
         /// <remarks>
         public double NameplateMaximumCurrent
@@ -84,14 +84,56 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Gets or sets the systems minimum current nameplate.
+        /// Systems minimum current nameplate.
         /// </summary>
         public double NameplateMinimumCurrent
+        {
+            get { return field; }
+            set { field = value; }
+        }
+
+
+        /// <summary>
+        /// Systems maximum active power nameplate in kilo watt.
+        /// </summary>
+        /// <remarks>
+        public double NameplateMaximumActivePowerKiloWatt
         {
             get { return field; }
             set { ArgumentOutOfRangeException.ThrowIfNegative(field); field = value; }
         }
 
 
+        /// <summary>
+        /// Systems minimum active power nameplate in kilo wat.
+        /// </summary>
+        /// <remarks>
+        public double NameplateMinimumActivePowerKiloWatt
+        {
+            get { return field; }
+            set { field = value; }
+        }
+
+
+        /// <summary>
+        /// Systems maximum reactive power nameplate in kilo vars.
+        /// </summary>
+        /// <remarks>
+        public double NameplateMaximumReactivePowerKiloVars
+        {
+            get { return field; }
+            set { ArgumentOutOfRangeException.ThrowIfNegative(field); field = value; }
+        }
+
+
+        /// <summary>
+        /// Systems minimum reactive power nameplate in kilo vars.
+        /// </summary>
+        /// <remarks>
+        public double NameplateMinimumReactivePowerKiloVars
+        {
+            get { return field; }
+            set { field = value; }
+        }
     }
 }

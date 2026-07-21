@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="ClosedModes\FrequencyActives\" />
+    <Folder Include="ClosedModes\VoltageActives\" />
     <Folder Include="ClosedModes\VoltageReactives\" />
     <Folder Include="OpenModes\EnergyResources\" />
     <Folder Include="OpenModes\FrequencyActives\" />

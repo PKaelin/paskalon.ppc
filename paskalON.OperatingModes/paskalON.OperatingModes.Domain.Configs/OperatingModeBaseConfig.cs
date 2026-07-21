@@ -58,7 +58,15 @@ namespace paskalON.OperatingModes.Domain.Configs
         /// <summary>
         /// Curve configuration of this operating mode.
         /// </summary>
-        public CurveBaseConfig? CurveConfig { get; set; }
+        public virtual CurveBaseConfig? CurveConfig { get; set; }
 
+
+        /// <summary>
+        /// Class name of the specialized operating mode to be initialized.
+        /// </summary>
+        /// <remarks>
+        /// If class name is empty the default operating mode instance is created.
+        /// </remarks>
+        public string? ClassName { get; set; }
     }
 }

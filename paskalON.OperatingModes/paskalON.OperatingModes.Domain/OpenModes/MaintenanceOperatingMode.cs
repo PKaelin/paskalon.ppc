@@ -16,7 +16,6 @@ namespace paskalON.OperatingModes.Domain.OpenModes
         private readonly MaintenanceOperatingModeConfig _config;
         public DerUnit TargetDerUnit { get; init; }
 
-        public DateTimeOffset LastActivated { get; set; } = DateTimeOffset.MinValue;
 
         public MaintenanceOperatingMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, MaintenanceOperatingModeConfig config, DerUnit targetDerUnit,
             IRampController rampController, ICurveController? curveController)

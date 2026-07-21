@@ -26,9 +26,9 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Time stamp when operating mode was enabled otherwise null.
+        /// Time stamp when operating mode was enabled the last time otherwise min value.
         /// </summary>
-        public DateTimeOffset? EnabledTime { get; }
+        public DateTimeOffset LastEnabledTime { get; }
 
 
         /// <summary>

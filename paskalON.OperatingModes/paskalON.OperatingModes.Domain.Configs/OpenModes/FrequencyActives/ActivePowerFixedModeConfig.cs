@@ -4,7 +4,7 @@
 namespace paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives
 {
     /// <summary>
-    /// Configuration class for active power fixed mode.
+    /// Active power fixed mode configuration.
     /// </summary>
     public class ActivePowerFixedModeConfig : OperatingModeBaseConfig
     {
@@ -19,8 +19,9 @@ namespace paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives
         /// </summary>
         /// <remarks>
         /// This value should not exceed the nameplate.
+        /// If this value is not set the systems nameplate for active power is used.
         /// </remarks>
-        public required double MaximumActivePowerLimitKiloWatt { get; set; }
+        public double? MaximumActivePowerLimitKiloWatt { get; set; }
 
 
         /// <summary>
@@ -28,7 +29,8 @@ namespace paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives
         /// </summary>
         /// <remarks>
         /// This value should not exceed the nameplate.
+        /// If this value is not set the systems nameplate for active power is used.
         /// </remarks>
-        public required double MinimumActivePowerLimitKiloWatt { get; set; }
+        public double? MinimumActivePowerLimitKiloWatt { get; set; }
     }
 }

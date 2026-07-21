@@ -27,12 +27,6 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// System configuration for all configured operating modes.
-        /// </summary>
-        protected readonly SystemConfig _systemConfig;
-
-
-        /// <summary>
         /// Operating mode base configuration.
         /// </summary>
         private readonly OperatingModeBaseConfig _config;
@@ -53,16 +47,18 @@ namespace paskalON.OperatingModes.Domain
             set
             {
                 field = value;
-                if (value == true) EnabledTime = DateTimeOffset.UtcNow;
-                else EnabledTime = null;
+                if (value == true)
+                {
+                    LastEnabledTime = DateTimeOffset.UtcNow;
+                }
             }
         }
 
 
         /// <summary>
-        /// Time stamp when operating mode was enabled otherwise null.
+        /// Time stamp when operating mode was enabled the last time otherwise min value.
         /// </summary>
-        public DateTimeOffset? EnabledTime { get; protected set; }
+        public DateTimeOffset LastEnabledTime { get; protected set; } = DateTimeOffset.MinValue;
 
 
         /// <summary>
@@ -98,7 +94,7 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Gets the system configuration.
         /// </summary>
-        public SystemConfig SystemConfig { get => _systemConfig; }
+        public SystemConfig SystemConfig { get; init; }
 
 
 
@@ -108,8 +104,8 @@ namespace paskalON.OperatingModes.Domain
         {
             _logger = logger;
             _timeProvider = timeProvider;
-            _systemConfig = systemConfig;
             _config = config;
+            SystemConfig = systemConfig;
             RampController = rampController;
             CurveController = curveController;
         }

@@ -8,5 +8,7 @@ namespace paskalON.OperatingModes.Domain.Configs.OpenModes.EnergyResources
     /// </summary>
     public class MaximumPowerPointTrackingModeConfig : OperatingModeBaseConfig
     {
+        // Things to consider:
+        // Power smoothing -> e.g. Solar: 500 kW, 800 kW, 700 kW, 420 kW / Smoothing: 500, 600, 700, 420
     }
 }

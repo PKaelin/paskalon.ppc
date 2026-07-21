@@ -39,9 +39,10 @@ OperatingModes
 | Mode | Purpose | Inputs (for calculating output) | Output Controlled | What Output Influences |
 |------|---------|---------------------------------|-------------------|------------------------|
 | Reactive Power Mode | Fixed MVar setpoint | Measured Q at POI, Q setpoint, feedback error | Reactive Power (Q) | Voltage at POI |
-| Voltage Mode | Regulate voltage at POI by adjusting Reactive Power | Measured voltage at POI, voltage setpoint, droop/slope gain, Q capability | Reactive Power Q | Grid voltage at POI |
+| Voltage Mode | Regulate voltage at POI by adjusting Reactive Power | Measured voltage at POI, voltage setpoint, Q capability | Reactive Power Q | Grid voltage at POI |
+| Voltage Droop Mode | Regulate voltage at POI by adjusting Reactive Power | Measured voltage at POI, voltage setpoint, droop/slope gain, Q capability | Reactive Power Q | Grid voltage at POI |
 | Power Factor Mode | Maintain a target power factor at POI regardless of active power output | Measured P & Q at POI, PF setpoint | Reactive Power (Q) | Voltage (indirectly) compliance with PF requirements.
-| Voltage Watt Mode | Curtail active power when voltage rises above a threshold | Measured voltage, volt-watt curve/setpoints |  Active Power (P) | Voltage at POI (limit overvoltage) |
+| Voltage Var Droop Mode | Curtail reactive power when voltage rises above a threshold | Measured voltage, volt-var curve/setpoints | Reactive Power (P) | Voltage at POI (limit overvoltage) |
 
 
 #### Frequency / Active Power (P) Control Modes
@@ -53,6 +54,12 @@ OperatingModes
 | Frequency Watt Mode | Automatically adjust active power in response to frequency deviations | Measured frequency, frequency reference value |  Active Power (P) | Grid frequency |
 | Frequency Droop Mode | Automatically adjust active power in response to frequency deviations | Measured frequency, frequency reference value, droop settings, available reserves |  Active Power (P) | Grid frequency |
 
+
+#### Voltage / Active Power (P) Control Modes
+
+| Mode | Purpose | Inputs (for calculating output) | Output Controlled | What Output Influences |
+|------|---------|---------------------------------|-------------------|------------------------|
+| Voltage Watt Droop Mode | Curtail active power when voltage rises above a threshold | Measured voltage, volt-watt curve/setpoints | Active Power (P) | Voltage at POI (limit overvoltage) |
 
 #### Energy Storage Specific Closed-Loop Modes
 
@@ -66,8 +73,8 @@ OperatingModes
 
 | Mode | Purpose | Inputs (for calculating output) | Output Controlled | What Output Influences |
 |------|---------|---------------------------------|-------------------|------------------------|
-| Active Power Fixed | Set a fixed setpoint without feedback signal |  Active Power setpoint |  Active Power (P) |  Active Power |
-| Reactive Power Fixed | Set a fixed setpoint without feedback signal | Reactive Power setpoint | Reactive Power (Q) | Reactive Power |
+| Active Power Fixed Mode | Set a fixed setpoint without feedback signal |  Active Power setpoint |  Active Power (P) |  Active Power |
+| Reactive Power Fixed Mode | Set a fixed setpoint without feedback signal | Reactive Power setpoint | Reactive Power (Q) | Reactive Power |
 | Maintenance Target Mode | Takes a unit out of available units and commands P and or Q setpoints | None |  Active Power (P) and or Reactive Power (Q) | Active and or Reactive Power |
 
 
