@@ -7,8 +7,8 @@ namespace paskalON.OperatingModes.Domain.Configs
     /// Type of the operating mode.
     /// </summary>
     /// <remarks>
-    /// Same operating mode can be used by multiple types like MaintenanceOperatingMode, MpptOperatingMode (Maximum Power Point Tracking), etc.
-    /// While others are specific to a specific type like ChargeDischargeOperatingMode
+    /// Same operating mode can be used by multiple systems like MaintenanceOperatingMode, MpptOperatingMode (Maximum Power Point Tracking), etc.
+    /// As they are flags they can be used like Bess|Solar to define that they can be used for both BESS and Solar systems.
     /// </remarks>
     public enum OperatingModeType
     {

@@ -17,8 +17,22 @@ namespace paskalON.OperatingModes.Domain.Configs
     public abstract class OperatingModeBaseConfig : NameBase
     {
         /// <summary>
+        /// Is active means it is available for selection.
+        /// </summary>
+        /// <remarks>
+        /// Not active means it is configured but can not be used.
+        /// Consider RBAC for this.
+        /// </remarks>
+        public required bool IsActive { get; set; }
+
+
+        /// <summary>
         /// Operating mode type as a flag representation.
         /// </summary>
+        /// <remarks>
+        /// As they are flags they can be used like Bess|Solar to define that they can be
+        /// used for both BESS and Solar systems.
+        /// </remarks>
         public required OperatingModeType Type { get; set; }
 
 

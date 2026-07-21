@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Maths\paskalON.Maths.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.PhysicalUnits\paskalON.PhysicalUnits.csproj" />
+    <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />
     <ProjectReference Include="..\paskalON.OperatingModes.Domain.Configs\paskalON.OperatingModes.Domain.Configs.csproj" />
   </ItemGroup>
 
