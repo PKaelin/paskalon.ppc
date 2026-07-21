@@ -18,13 +18,4 @@
     <ProjectReference Include="..\paskalON.OperatingModes.Domain.Configs\paskalON.OperatingModes.Domain.Configs.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ClosedModes\FrequencyActives\" />
-    <Folder Include="ClosedModes\VoltageActives\" />
-    <Folder Include="ClosedModes\VoltageReactives\" />
-    <Folder Include="OpenModes\EnergyResources\" />
-    <Folder Include="OpenModes\FrequencyActives\" />
-    <Folder Include="OpenModes\VoltageReactives\" />
-  </ItemGroup>
-
 </Project>

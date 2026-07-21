@@ -13,7 +13,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes
 {
     public class MaintenanceOperatingMode : OperatingOpenModeBase, IOperatingOpenMode, IExclusiveMode
     {
-        private readonly MaintenanceOperatingModeConfig _config;
+        protected readonly MaintenanceOperatingModeConfig _config;
         public DerUnit TargetDerUnit { get; init; }
 
 
