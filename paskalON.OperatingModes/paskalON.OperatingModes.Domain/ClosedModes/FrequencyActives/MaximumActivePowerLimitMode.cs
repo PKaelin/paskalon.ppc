@@ -24,7 +24,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
         }
 
 
-        public override async Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken) where TInput : class
+        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
         {
             if (input is not MaximumActivePowerLimitModeMap map)
             {

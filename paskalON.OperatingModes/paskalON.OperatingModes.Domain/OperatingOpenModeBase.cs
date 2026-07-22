@@ -18,8 +18,8 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Calculates the operating modes power target.
+        /// <inheritdoc/>
         /// </summary>
-        public abstract Task CalculateAsync(CancellationToken cancellationToken);
+        public abstract Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default) where TInput : class;
     }
 }

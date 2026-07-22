@@ -22,8 +22,13 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
             _config = config;
         }
 
-        public override Task CalculateAsync(CancellationToken cancellationToken)
+        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
         {
+            if (input is not ReactivePowerFixedModeMap map)
+            {
+                throw new ArgumentException(nameof(input));
+            }
+
             throw new NotImplementedException();
         }
     }

@@ -19,13 +19,13 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Error adjustment calculated from input and used to make adjustments in real time.
+        /// <inheritdoc/>
         /// </summary>
         public ComplexPower ErrorAdjustment { get; protected set; }
 
 
         /// <summary>
-        /// Gets the adjusted complex power target for the operating mode.
+        /// <inheritdoc/>
         /// </summary>
         public ComplexPower TargetAdjusted
         {
@@ -34,8 +34,8 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Calculates the operating modes power target.
+        /// <inheritdoc/>
         /// </summary>
-        public abstract Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken) where TInput : class;
+        public abstract Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default) where TInput : class;
     }
 }

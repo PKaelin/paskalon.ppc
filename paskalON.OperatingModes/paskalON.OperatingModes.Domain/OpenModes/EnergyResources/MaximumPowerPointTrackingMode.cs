@@ -23,9 +23,13 @@ namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
             _config = config;
         }
 
-
-        public override Task CalculateAsync(CancellationToken cancellationToken)
+        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
         {
+            if (input is not MaximumPowerPointTrackingModeMap map)
+            {
+                throw new ArgumentException(nameof(input));
+            }
+
             throw new NotImplementedException();
         }
     }

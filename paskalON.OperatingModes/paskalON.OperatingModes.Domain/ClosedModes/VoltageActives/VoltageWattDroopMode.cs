@@ -24,7 +24,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageActives
         }
 
 
-        public override async Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken) where TInput : class
+        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
         {
             if (input is not VoltageWattDroopModeMap map)
             {

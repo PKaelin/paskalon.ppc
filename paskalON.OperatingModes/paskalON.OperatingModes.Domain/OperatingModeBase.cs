@@ -110,6 +110,12 @@ namespace paskalON.OperatingModes.Domain
         public OperatingModeBase(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, OperatingModeBaseConfig config,
             IRampController rampController, ICurveController? curveController)
         {
+            ArgumentNullException.ThrowIfNull(logger);
+            ArgumentNullException.ThrowIfNull(timeProvider);
+            ArgumentNullException.ThrowIfNull(systemConfig);
+            ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(rampController);
+
             _logger = logger;
             _timeProvider = timeProvider;
             _config = config;

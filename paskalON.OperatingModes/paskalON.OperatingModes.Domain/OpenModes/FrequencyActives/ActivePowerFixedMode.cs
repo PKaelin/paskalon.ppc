@@ -24,8 +24,13 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
         }
 
 
-        public override Task CalculateAsync(CancellationToken cancellationToken)
+        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
         {
+            if (input is not ActivePowerFixedModeMap map)
+            {
+                throw new ArgumentException(nameof(input));
+            }
+
             throw new NotImplementedException();
         }
     }

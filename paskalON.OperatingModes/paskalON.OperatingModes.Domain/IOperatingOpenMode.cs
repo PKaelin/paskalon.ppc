@@ -11,7 +11,11 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Calculates the operating modes power target.
         /// </summary>
-        Task CalculateAsync(CancellationToken cancellationToken);
+        /// <remarks>
+        /// Though they are closed loops they still need inputs like availability/capability, etc.
+        /// Those inputs are necessary so that it doesn't calculate an impossible target.
+        /// </remarks>
+        Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default) where TInput : class;
     }
 
 }
