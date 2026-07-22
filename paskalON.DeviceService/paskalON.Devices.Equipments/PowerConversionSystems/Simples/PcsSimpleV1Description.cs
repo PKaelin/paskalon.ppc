@@ -77,6 +77,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             // Power
             P = 42000,
             Q = 42001,
+            PAvailable = 42002,
+            QAvailable = 42003,
             // Current, Voltage, Frequency
             Frequency = 43000,
             DCCurrent = 43001,

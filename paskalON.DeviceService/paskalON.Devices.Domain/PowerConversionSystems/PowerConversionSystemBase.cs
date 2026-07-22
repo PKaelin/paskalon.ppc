@@ -168,6 +168,31 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
+        /// <summary>
+        /// Current active available power output value in Watts
+        /// </summary>
+        public double? ActiveAvailablePowerValue
+        {
+            get { lock (dataLock) { return field; } }
+            set { lock (dataLock) { field = value; } }
+        }
+
+
+        /// <summary>
+        /// Current active available power output in Watts
+        /// </summary>
+        /// <remarks>
+        /// Modern PCS units constantly calculate their own available power internally and expose this data.
+        /// E.g. Solar PCS: Reports the maximum AC power it could produce right now based on the connected DC string voltage and current tracking.
+        /// E.g. BESS PCS: Reports the maximum AC power it can charge or discharge right now factoring temperatures and current limits.
+        /// If the endpoint is not available you need to calculate the available power.
+        /// </remarks>
+        public ActivePower? ActiveAvailablePower
+        {
+            get { return (ActiveAvailablePowerValue is null) ? null : new ActivePower((double)ActiveAvailablePowerValue); }
+        }
+
+
         private double? _reactivePowerTarget;
         /// <summary>
         /// Current reactive power target in Vars
@@ -194,6 +219,25 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public ReactivePower? ReactivePower
         {
             get { lock (dataLock) { return (ReactivePowerValue is null) ? null : new ReactivePower((double)ReactivePowerValue); } }
+        }
+
+
+        /// <summary>
+        /// Current reactive available power output value in Watts
+        /// </summary>
+        public double? ReactiveAvailablePowerValue
+        {
+            get { lock (dataLock) { return field; } }
+            set { lock (dataLock) { field = value; } }
+        }
+
+
+        /// <summary>
+        /// Current reactive available power output in Watts
+        /// </summary>
+        public ReactivePower? ReactiveAvailablePower
+        {
+            get { return (ReactiveAvailablePowerValue is null) ? null : new ReactivePower((double)ReactiveAvailablePowerValue); }
         }
 
 
@@ -569,7 +613,9 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActivePowerTarget), MetricType.Gauge, x => x.ActivePowerTarget?.Watts, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactivePowerTarget), MetricType.Gauge, x => x.ReactivePowerTarget?.VoltAmperesReactive, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActivePower), MetricType.Gauge, x => x.ActivePower?.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActiveAvailablePower), MetricType.Gauge, x => x.ActiveAvailablePower?.Watts, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactivePower), MetricType.Gauge, x => x.ReactivePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactiveAvailablePower), MetricType.Gauge, x => x.ReactiveAvailablePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(DCCurrent), MetricType.Gauge, x => x.DCCurrent, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(DCVoltage), MetricType.Gauge, x => x.DCVoltage, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ACCurrent), MetricType.Gauge, x => x.ACCurrent, _config.MetricsFactorClass1);

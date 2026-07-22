@@ -116,10 +116,16 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             // Power
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ActivePower),
                 (x, v) => x.ActivePowerValue = v, (int)PcsSimpleV1Description.Register.P, ModbusScale.NoScale, ModbusDataType.MbUint16));
+
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ActiveAvailablePower),
+                (x, v) => x.ActiveAvailablePowerValue = v, (int)PcsSimpleV1Description.Register.PAvailable, ModbusScale.NoScale, ModbusDataType.MbUint16));
+
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ReactivePower),
                 (x, v) => x.ReactivePowerValue = v, (int)PcsSimpleV1Description.Register.Q, ModbusScale.NoScale, ModbusDataType.MbUint16));
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ReactiveAvailablePower),
+                (x, v) => x.ReactiveAvailablePowerValue = v, (int)PcsSimpleV1Description.Register.QAvailable, ModbusScale.NoScale, ModbusDataType.MbUint16));
             // Power range
-            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.P, (int)PcsSimpleV1Description.Register.Q,
+            Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.P, (int)PcsSimpleV1Description.Register.QAvailable,
                 ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass1));
             // Current, Voltage, Frequency
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(Frequency),

@@ -92,6 +92,8 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
 
             double p = 11;
             double q = 12;
+            double pAvailable = 21;
+            double qAvailable = 22;
             double frequency = 50.45;
             double dcCurrent = 13;
             double dcVoltage = 14;
@@ -99,12 +101,14 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
             double acVoltage = 16;
 
             client
-                .Setup(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.P, (ushort)PcsSimpleV1Description.Register.Q, It.IsAny<CancellationToken>()))
+                .Setup(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.P, (ushort)PcsSimpleV1Description.Register.QAvailable, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() =>
                 {
                     List<ushort> list = new List<ushort>();
-                    list.AddRange(converter.RegisterArrayFromValue(p, ModbusDataType.MbInt16, ModbusScale.NoScale));    // P
-                    list.AddRange(converter.RegisterArrayFromValue(q, ModbusDataType.MbInt16, ModbusScale.NoScale));    // Q
+                    list.AddRange(converter.RegisterArrayFromValue(p, ModbusDataType.MbInt16, ModbusScale.NoScale));            // P
+                    list.AddRange(converter.RegisterArrayFromValue(q, ModbusDataType.MbInt16, ModbusScale.NoScale));            // Q
+                    list.AddRange(converter.RegisterArrayFromValue(pAvailable, ModbusDataType.MbInt16, ModbusScale.NoScale));   // P Available
+                    list.AddRange(converter.RegisterArrayFromValue(qAvailable, ModbusDataType.MbInt16, ModbusScale.NoScale));   // Q Available
                     return list.ToArray();
                 });
 
@@ -127,12 +131,14 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
             // Poll interval is 1
             await engine.PollAsync(1);
 
-            client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.P, (ushort)PcsSimpleV1Description.Register.Q, It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.P, (ushort)PcsSimpleV1Description.Register.QAvailable, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.Frequency, (ushort)PcsSimpleV1Description.Register.ACVoltage, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
 
             Assert.AreEqual(p, pcs.ActivePowerValue);
             Assert.AreEqual(q, pcs.ReactivePowerValue);
+            Assert.AreEqual(pAvailable, pcs.ActiveAvailablePowerValue);
+            Assert.AreEqual(qAvailable, pcs.ReactiveAvailablePowerValue);
             Assert.AreEqual(frequency, pcs.Frequency);
             Assert.AreEqual(dcCurrent, pcs.DCCurrent);
             Assert.AreEqual(dcVoltage, pcs.DCVoltage);
