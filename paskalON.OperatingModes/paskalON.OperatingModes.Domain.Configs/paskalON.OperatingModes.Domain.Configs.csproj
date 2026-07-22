@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ClosedModes\EnergyStorages\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
   </ItemGroup>
 

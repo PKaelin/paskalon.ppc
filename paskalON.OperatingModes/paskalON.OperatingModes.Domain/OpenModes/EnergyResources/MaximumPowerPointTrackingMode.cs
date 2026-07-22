@@ -13,6 +13,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
     {
         protected readonly MaximumPowerPointTrackingModeConfig _config;
 
+
         public MaximumPowerPointTrackingMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, MaximumPowerPointTrackingModeConfig config,
             IRampController rampController, ICurveController? curveController)
             : base(logger, timeProvider, systemConfig, config, rampController, curveController)
@@ -20,6 +21,12 @@ namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
             ArgumentNullException.ThrowIfNull(config);
 
             _config = config;
+        }
+
+
+        public override Task CalculateAsync(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -111,9 +111,8 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
 
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Information);
             Assert.AreEqual(PcsState.Starting, pcs.State);
-            Assert.HasCount(2, logs);
-            Assert.IsTrue(logs.First().Message.Contains("start requested", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(logs.Last().Message.Contains("state changed", StringComparison.OrdinalIgnoreCase));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("start requested", StringComparison.OrdinalIgnoreCase)));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("state changed", StringComparison.OrdinalIgnoreCase)));
         }
 
 
@@ -129,9 +128,8 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
 
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Information);
             Assert.AreEqual(PcsState.Stopping, pcs.State);
-            Assert.HasCount(2, logs);
-            Assert.IsTrue(logs.First().Message.Contains("stop requested", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(logs.Last().Message.Contains("state changed", StringComparison.OrdinalIgnoreCase));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("stop requested", StringComparison.OrdinalIgnoreCase)));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("state changed", StringComparison.OrdinalIgnoreCase)));
         }
 
 
@@ -147,10 +145,9 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
 
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Information);
             Assert.AreEqual(PcsState.EnteringStandby, pcs.State);
-            Assert.HasCount(2, logs);
-            Assert.IsTrue(logs.First().Message.Contains("standby requested", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(logs.First().Message.Contains($"{_deviceConfig!.StandbyActivePowerKiloWatts}", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(logs.Last().Message.Contains("state changed", StringComparison.OrdinalIgnoreCase));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("standby requested", StringComparison.OrdinalIgnoreCase)));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains($"{_deviceConfig!.StandbyActivePowerKiloWatts}", StringComparison.OrdinalIgnoreCase)));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("state changed", StringComparison.OrdinalIgnoreCase)));
         }
     }
 }

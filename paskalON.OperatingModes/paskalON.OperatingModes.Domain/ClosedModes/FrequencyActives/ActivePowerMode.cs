@@ -9,7 +9,7 @@ using paskalON.OperatingModes.Domain.Ramps;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 {
-    public class ActivePowerMode : OperatingOpenModeBase
+    public class ActivePowerMode : OperatingClosedModeBase
     {
         protected readonly ActivePowerModeConfig _config;
 
@@ -20,6 +20,17 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
             ArgumentNullException.ThrowIfNull(config);
 
             _config = config;
+        }
+
+
+        public override async Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken) where TInput : class
+        {
+            if (input is not ActivePowerModeMap map)
+            {
+                throw new ArgumentException(nameof(input));
+            }
+
+            throw new NotImplementedException();
         }
     }
 }

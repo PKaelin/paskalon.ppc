@@ -21,5 +21,10 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
 
             _config = config;
         }
+
+        public override Task CalculateAsync(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

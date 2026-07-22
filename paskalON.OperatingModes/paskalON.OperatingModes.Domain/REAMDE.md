@@ -33,6 +33,10 @@ OperatingModes
 
 ### Closed Modes (Closed-Loop Control)
 
+| Mode | Purpose | Inputs (for calculating output) | Output Controlled | What Output Influences |
+|------|---------|---------------------------------|-------------------|------------------------|
+| Maintenance SOC Mode | Takes a unit out of available units and commands P and or Q setpoints | SOC |  Active Power (P) and or Reactive Power (Q) | Active and or Reactive Power |
+
 
 #### Voltage / Reactive Power (Q) Control Modes
 
@@ -61,6 +65,7 @@ OperatingModes
 |------|---------|---------------------------------|-------------------|------------------------|
 | Voltage Watt Droop Mode | Curtail active power when voltage rises above a threshold | Measured voltage, volt-watt curve/setpoints | Active Power (P) | Voltage at POI (limit overvoltage) |
 
+
 #### Energy Storage Specific Closed-Loop Modes
 
 | Mode | Purpose | Inputs (for calculating output) | Output Controlled | What Output Influences |
@@ -75,7 +80,7 @@ OperatingModes
 |------|---------|---------------------------------|-------------------|------------------------|
 | Active Power Fixed Mode | Set a fixed setpoint without feedback signal |  Active Power setpoint |  Active Power (P) |  Active Power |
 | Reactive Power Fixed Mode | Set a fixed setpoint without feedback signal | Reactive Power setpoint | Reactive Power (Q) | Reactive Power |
-| Maintenance Target Mode | Takes a unit out of available units and commands P and or Q setpoints | None |  Active Power (P) and or Reactive Power (Q) | Active and or Reactive Power |
+| Maintenance Mode | Takes a unit out of available units and commands P and or Q setpoints | None |  Active Power (P) and or Reactive Power (Q) | Active and or Reactive Power |
 
 
 #### Energy Resources Specific Open-Loop Modes

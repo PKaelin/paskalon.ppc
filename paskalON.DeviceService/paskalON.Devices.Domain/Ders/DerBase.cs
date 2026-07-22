@@ -51,6 +51,7 @@ namespace paskalON.Devices.Domain.Ders
 
             _logger = logger;
             _nameBase = nameBase;
+            _logger.LogInformation("DER created. Name: {Name}", Name);
         }
     }
 }

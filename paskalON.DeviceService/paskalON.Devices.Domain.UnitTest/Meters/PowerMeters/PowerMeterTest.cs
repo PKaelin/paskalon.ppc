@@ -207,9 +207,8 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
 
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Information);
             Assert.AreEqual(PowerMeterState.Connecting, powerMeter.State);
-            Assert.HasCount(2, logs);
-            Assert.IsTrue(logs.First().Message.Contains("connect requested", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(logs.Last().Message.Contains("state changed", StringComparison.OrdinalIgnoreCase));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("connect requested", StringComparison.OrdinalIgnoreCase)));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("state changed", StringComparison.OrdinalIgnoreCase)));
         }
 
 
@@ -225,9 +224,8 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
 
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Information);
             Assert.AreEqual(PowerMeterState.Disconnecting, powerMeter.State);
-            Assert.HasCount(2, logs);
-            Assert.IsTrue(logs.First().Message.Contains("disconnect requested", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(logs.Last().Message.Contains("state changed", StringComparison.OrdinalIgnoreCase));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("disconnect requested", StringComparison.OrdinalIgnoreCase)));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("state changed", StringComparison.OrdinalIgnoreCase)));
         }
 
     }

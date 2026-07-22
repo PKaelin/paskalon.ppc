@@ -11,13 +11,14 @@ using paskalON.OperatingModes.Domain.Ramps;
 
 namespace paskalON.OperatingModes.Domain.OpenModes
 {
-    public class MaintenanceOperatingMode : OperatingOpenModeBase, IOperatingOpenMode, IExclusiveMode
+    public class MaintenanceMode : OperatingOpenModeBase, IOperatingOpenMode, IExclusiveMode
     {
-        protected readonly MaintenanceOperatingModeConfig _config;
+        protected readonly MaintenanceModeConfig _config;
+
         public DerUnit TargetDerUnit { get; init; }
 
 
-        public MaintenanceOperatingMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, MaintenanceOperatingModeConfig config, DerUnit targetDerUnit,
+        public MaintenanceMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, MaintenanceModeConfig config, DerUnit targetDerUnit,
             IRampController rampController, ICurveController? curveController)
             : base(logger, timeProvider, systemConfig, config, rampController, curveController)
         {
@@ -29,5 +30,9 @@ namespace paskalON.OperatingModes.Domain.OpenModes
         }
 
 
+        public override Task CalculateAsync(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

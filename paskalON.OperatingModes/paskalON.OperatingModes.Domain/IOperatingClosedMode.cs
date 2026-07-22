@@ -22,7 +22,6 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Calculates the operating modes power target.
         /// </summary>
-        Task CalculateAsync(CancellationToken cancellationToken, string todo_actual_meter);
-        // TODO: implement actual meter
+        Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken) where TInput : class;
     }
 }

@@ -1,12 +1,12 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower
+namespace paskalON.OperatingModes.Domain.Configs.ClosedModes
 {
     /// <summary>
-    /// Maintenance operating mode configuration.
+    /// Maintenance SOC mode configuration.
     /// </summary>
-    public class MaintenanceOperatingModeConfig : OperatingModeBaseConfig
+    public class MaintenanceSocModeConfig : OperatingModeBaseConfig
     {
         /// <summary>
         /// Flag whether to use a target state of charge or not in case the

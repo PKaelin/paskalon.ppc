@@ -9,9 +9,10 @@ using paskalON.OperatingModes.Domain.Ramps;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageActives
 {
-    public class VoltageWattDroopMode : OperatingOpenModeBase
+    public class VoltageWattDroopMode : OperatingClosedModeBase
     {
         protected readonly VoltageWattDroopModeConfig _config;
+
 
         public VoltageWattDroopMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, VoltageWattDroopModeConfig config,
             IRampController rampController, ICurveController? curveController)
@@ -20,6 +21,17 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageActives
             ArgumentNullException.ThrowIfNull(config);
 
             _config = config;
+        }
+
+
+        public override async Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken) where TInput : class
+        {
+            if (input is not VoltageWattDroopModeMap map)
+            {
+                throw new ArgumentException(nameof(input));
+            }
+
+            throw new NotImplementedException();
         }
     }
 }

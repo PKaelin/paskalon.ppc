@@ -13,6 +13,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
     {
         protected readonly ActivePowerFixedModeConfig _config;
 
+
         public ActivePowerFixedMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, ActivePowerFixedModeConfig config,
             IRampController rampController, ICurveController? curveController)
             : base(logger, timeProvider, systemConfig, config, rampController, curveController)
@@ -20,6 +21,12 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
             ArgumentNullException.ThrowIfNull(config);
 
             _config = config;
+        }
+
+
+        public override Task CalculateAsync(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

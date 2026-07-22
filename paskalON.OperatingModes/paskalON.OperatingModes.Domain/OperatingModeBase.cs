@@ -49,7 +49,7 @@ namespace paskalON.OperatingModes.Domain
                 field = value;
                 if (value == true)
                 {
-                    LastEnabledTime = DateTimeOffset.UtcNow;
+                    LastEnabled = DateTimeOffset.UtcNow;
                 }
             }
         }
@@ -58,7 +58,7 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Time stamp when operating mode was enabled the last time otherwise min value.
         /// </summary>
-        public DateTimeOffset LastEnabledTime { get; protected set; } = DateTimeOffset.MinValue;
+        public DateTimeOffset LastEnabled { get; protected set; } = DateTimeOffset.MinValue;
 
 
         /// <summary>
@@ -98,7 +98,15 @@ namespace paskalON.OperatingModes.Domain
 
 
 
-
+        /// <summary>
+        /// Constructor of <see cref="OperatingModeBase"/>.
+        /// </summary>
+        /// <param name="logger">Logger for handling logging and diagnostics.</param>
+        /// <param name="timeProvider">The time provider (TimeProvider.System for prod, FakeTimeProvider for tests.</param>
+        /// <param name="systemConfig">The system configuration.</param>
+        /// <param name="config">The operating mode base configuration.</param>
+        /// <param name="rampController">The ramp controller interface.</param>
+        /// <param name="curveController">The curve controller interface.</param>
         public OperatingModeBase(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, OperatingModeBaseConfig config,
             IRampController rampController, ICurveController? curveController)
         {
@@ -108,6 +116,7 @@ namespace paskalON.OperatingModes.Domain
             SystemConfig = systemConfig;
             RampController = rampController;
             CurveController = curveController;
+            _logger.LogInformation("Operating Mode created. Name: {Name}", Name);
         }
 
 
@@ -116,10 +125,9 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         public virtual void Enable()
         {
-            _logger.LogInformation("Operating mode enabled: {Name}", Name);
-
             if (State != OperatingModeState.Enabled)
             {
+                _logger.LogInformation("Operating mode enabled: {Name}", Name);
                 State = OperatingModeState.Enabling;
                 State = OperatingModeState.RampingToEnabled;
                 RampController.Start(0, 0);
@@ -133,10 +141,9 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         public virtual void Disable()
         {
-            _logger.LogInformation("Operating mode disabled: {Name}", Name);
-
             if (State != OperatingModeState.Disabled)
             {
+                _logger.LogInformation("Operating mode disabled: {Name}", Name);
                 State = OperatingModeState.RampingToDisabled;
                 State = OperatingModeState.Disabling;
                 RampController.Stop();
