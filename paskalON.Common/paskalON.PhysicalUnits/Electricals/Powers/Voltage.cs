@@ -14,6 +14,24 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
     public struct Voltage : IComparable, IComparable<Voltage>, IEquatable<Voltage>
     {
         /// <summary>
+        /// Volt per kilo volt.
+        /// </summary>
+        public const double VoltPerKilovolt = 1000;
+
+
+        /// <summary>
+        /// Volt per mega volt.
+        /// </summary>
+        public const double VoltPerMegavolt = 1000000;
+
+
+        /// <summary>
+        /// Kilo volt per mega volt.
+        /// </summary>
+        public const double KilowattsPerMegavolt = 1000;
+
+
+        /// <summary>
         /// Precision to round to the specific value.
         /// </summary>
         /// <remarks>
@@ -43,7 +61,11 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// Value of the current <see cref="Voltage"/> structure. 
         /// </summary>
         /// <value>Total Kilo-Volts (kV).</value>
-        public readonly double KiloVolts { get => Volts / 1000; }
+        public double KiloVolts
+        {
+            get => Volts / VoltPerKilovolt;
+            set => Volts = value * VoltPerKilovolt;
+        }
 
 
         /// <summary>
@@ -53,14 +75,18 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public readonly double KiloVoltsPrecision { get => Math.Round(KiloVolts, Precision); }
+        public double KiloVoltsPrecision { get => Math.Round(KiloVolts, Precision); }
 
 
         /// <summary>
         /// Value of the current <see cref="Voltage"/> structure. 
         /// </summary>
         /// <value>Total Mega-Volts (mV).</value>
-        public readonly double MegaVolts { get => Volts / 1000000; }
+        public double MegaVolts
+        {
+            get => Volts / VoltPerMegavolt;
+            set => Volts = value * VoltPerMegavolt;
+        }
 
 
         /// <summary>
@@ -70,7 +96,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public readonly double MegaVoltsPrecision { get => Math.Round(MegaVolts, Precision); }
+        public double MegaVoltsPrecision { get => Math.Round(MegaVolts, Precision); }
 
 
         /// <summary>

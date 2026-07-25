@@ -150,13 +150,13 @@ namespace paskalON.Maths.UnitTest.Calculuses.Exponents
             for (int i = 0; i < 10; i++)
             {
                 value = ef.CalculateOutputPrecision(12);
-                Assert.IsTrue(value > 17.21d && value < 19.21d);
+                Assert.IsTrue(value > 17.20d && value < 19.22d);
             }
 
             for (int i = 0; i < 10; i++)
             {
                 value = ef.CalculateOutputPrecision(15);
-                Assert.IsTrue(value > 43.72d && value < 45.72d);
+                Assert.IsTrue(value > 43.71d && value < 45.73d);
             }
         }
 

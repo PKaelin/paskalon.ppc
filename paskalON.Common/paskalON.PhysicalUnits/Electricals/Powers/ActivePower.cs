@@ -14,6 +14,25 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
     /// </remarks>
     public struct ActivePower : IComparable, IComparable<ActivePower>, IEquatable<ActivePower>
     {
+
+        /// <summary>
+        /// Watts per kilo watts.
+        /// </summary>
+        public const double WattsPerKilowatt = 1000;
+
+
+        /// <summary>
+        /// Watts per mega watts
+        /// </summary>
+        public const double WattsPerMegawatt = 1000000;
+
+
+        /// <summary>
+        /// Kilo watts per mega watts.
+        /// </summary>
+        public const double KilowattsPerMegawatt = 1000;
+
+
         /// <summary>
         /// Precision to round to the specific value.
         /// </summary>
@@ -44,7 +63,11 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// Value of the current <see cref="ActivePower"/> structure. 
         /// </summary>
         /// <value>Total Kilo-Watts (kW).</value>
-        public readonly double KiloWatts { get => Watts / 1000; }
+        public double KiloWatts
+        {
+            get => Watts / WattsPerKilowatt;
+            set => Watts = value * WattsPerKilowatt;
+        }
 
 
         /// <summary>
@@ -54,14 +77,18 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public readonly double KiloWattsPrecision { get => Math.Round(KiloWatts, Precision); }
+        public double KiloWattsPrecision { get => Math.Round(KiloWatts, Precision); }
 
 
         /// <summary>
         /// Value of the current <see cref="ActivePower"/> structure. 
         /// </summary>
         /// <value>Total Mega-Watts (mW).</value>
-        public readonly double MegaWatts { get => Watts / 1000000; }
+        public double MegaWatts
+        {
+            get => Watts / WattsPerMegawatt;
+            set => Watts = value * WattsPerMegawatt;
+        }
 
 
         /// <summary>
@@ -71,7 +98,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public readonly double MegaWattsPrecision { get => Math.Round(MegaWatts, Precision); }
+        public double MegaWattsPrecision { get => Math.Round(MegaWatts, Precision); }
 
 
         /// <summary>

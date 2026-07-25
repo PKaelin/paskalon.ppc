@@ -211,5 +211,41 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             Assert.AreEqual(expected, v1.IsNaN());
         }
 
+
+        [TestMethod]
+        [DataRow(1, 1000)]
+        [DataRow(1.5, 1500)]
+        [DataRow(33.33, 33330)]
+        [DataRow(-33.33, -33330)]
+        public void VoltageSetKilowattsTest(double voltage, double expected)
+        {
+            Voltage v = new Voltage(0);
+            v.KiloVolts = voltage;
+            Assert.AreEqual(expected, v.Volts);
+        }
+
+
+        [TestMethod]
+        public void VoltageSetKilowattsNaTest()
+        {
+            Voltage v = new Voltage(0);
+            v.KiloVolts = double.NaN;
+            Assert.AreEqual(double.NaN, v.Volts);
+        }
+
+
+        [TestMethod]
+        [DataRow(1, 1000000)]
+        [DataRow(1.5, 1500000)]
+        [DataRow(33.33, 33330000)]
+        [DataRow(-33.33, -33330000)]
+        [DataRow(4433.33, 4433330000)]
+        public void VoltageSetMegaWattsTest(double activePower, double expected)
+        {
+            Voltage v = new Voltage(0);
+            v.MegaVolts = activePower;
+            Assert.AreEqual(expected, v.Volts);
+        }
+
     }
 }

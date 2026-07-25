@@ -14,6 +14,25 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
     /// </remarks>
     public struct ApparentPower : IComparable, IComparable<ApparentPower>, IEquatable<ApparentPower>
     {
+
+        /// <summary>
+        /// Volt ampere per kilovolt ampere.
+        /// </summary>
+        public const double VoltAmpsPerKilovoltAmps = 1000;
+
+
+        /// <summary>
+        /// Volt ampere per megavolt ampere.
+        /// </summary>
+        public const double VoltAmpsPerMegavoltAmps = 1000000;
+
+
+        /// <summary>
+        /// Kilovolt ampere per megavolt ampere.
+        /// </summary>
+        public const double KilovoltAmpsPerMegavoltAmps = 1000;
+
+
         /// <summary>
         /// Precision to round to the specific value.
         /// </summary>
@@ -44,7 +63,11 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// Value of the current <see cref="ApparentPower"/> structure. 
         /// </summary>
         /// <value>Total Kilo-VoltAmperes (kVA).</value>
-        public readonly double KiloVoltAmperes { get => VoltAmperes / 1000; }
+        public double KiloVoltAmperes
+        {
+            get => VoltAmperes / VoltAmpsPerKilovoltAmps;
+            set => VoltAmperes = value * VoltAmpsPerKilovoltAmps;
+        }
 
 
         /// <summary>
@@ -54,14 +77,18 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public readonly double KiloVoltAmperesPrecision { get => Math.Round(KiloVoltAmperes, Precision); }
+        public double KiloVoltAmperesPrecision { get => Math.Round(KiloVoltAmperes, Precision); }
 
 
         /// <summary>
         /// Value of the current <see cref="ApparentPower"/> structure. 
         /// </summary>
         /// <value>Total Mega-VoltAmperes (MVA).</value>
-        public readonly double MegaVoltAmperes { get => VoltAmperes / 1000000; }
+        public double MegaVoltAmperes
+        {
+            get => VoltAmperes / VoltAmpsPerMegavoltAmps;
+            set => VoltAmperes = value * VoltAmpsPerMegavoltAmps;
+        }
 
 
         /// <summary>
@@ -71,7 +98,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <remarks>
         /// Use wisely as precision is less performant in calculations then full floating number.
         /// </remarks>
-        public readonly double MegaVoltAmperesPrecision { get => Math.Round(MegaVoltAmperes, Precision); }
+        public double MegaVoltAmperesPrecision { get => Math.Round(MegaVoltAmperes, Precision); }
 
 
         /// <summary>
