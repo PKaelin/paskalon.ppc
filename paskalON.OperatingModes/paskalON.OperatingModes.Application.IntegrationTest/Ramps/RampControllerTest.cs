@@ -247,6 +247,67 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
 
 
         [TestMethod]
+        public void RampControllerRampRateCalculateRampUpMultipleTimeTest()
+        {
+            RampRateConfig config = new RampRateConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampUpRatePerSecond = 10,
+                RampDownRatePerSecond = 20,
+            };
+
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            Assert.IsNotNull(ramp);
+
+            ramp.Start(0, 110);
+            // Move forward seconds
+            timeProvider.Advance(TimeSpan.FromSeconds(1));
+            Assert.AreEqual(10, ramp.CalculatePrecision());
+            timeProvider.Advance(TimeSpan.FromSeconds(1));
+            Assert.AreEqual(20, ramp.CalculatePrecision());
+            timeProvider.Advance(TimeSpan.FromSeconds(2));
+            Assert.AreEqual(40, ramp.CalculatePrecision());
+            timeProvider.Advance(TimeSpan.FromSeconds(5));
+            Assert.AreEqual(90, ramp.CalculatePrecision());
+            timeProvider.Advance(TimeSpan.FromSeconds(5));
+            Assert.AreEqual(110, ramp.CalculatePrecision());
+        }
+
+
+        [TestMethod]
+        [DataRow(0, 0)]
+        [DataRow(500, 5)]
+        [DataRow(1000, 10)]
+        [DataRow(1500, 15)]
+        [DataRow(2500, 25)]
+        [DataRow(int.MaxValue, 110)]
+        public void RampControllerRampRateCalculateRampUpHalfSecondsTest(int timeSpan, double expectedValue)
+        {
+            RampRateConfig config = new RampRateConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampUpRatePerSecond = 10,
+                RampDownRatePerSecond = 20,
+            };
+
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            Assert.IsNotNull(ramp);
+
+            ramp.Start(0, 110);
+            // Move forward seconds
+            timeProvider.Advance(TimeSpan.FromMilliseconds(timeSpan));
+            Assert.AreEqual(expectedValue, ramp.CalculatePrecision());
+        }
+
+
+
+        [TestMethod]
         [DataRow(0, 110)]
         [DataRow(1, 90)]
         [DataRow(3, 50)]
@@ -273,6 +334,36 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
             timeProvider.Advance(TimeSpan.FromSeconds(timeSpan));
             Assert.AreEqual(expectedValue, ramp.CalculatePrecision());
         }
+
+
+        [TestMethod]
+        [DataRow(0, 100)]
+        [DataRow(1, 80)]
+        [DataRow(3, 40)]
+        [DataRow(5, 0)]
+        [DataRow(6, -20)]
+        [DataRow(int.MaxValue, -50)]
+        public void RampControllerRampRateCalculateRampDownNegativeTest(int timeSpan, double expectedValue)
+        {
+            RampRateConfig config = new RampRateConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampUpRatePerSecond = 10,
+                RampDownRatePerSecond = 20,
+            };
+
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            Assert.IsNotNull(ramp);
+
+            ramp.Start(100, -50);
+            // Move forward seconds
+            timeProvider.Advance(TimeSpan.FromSeconds(timeSpan));
+            Assert.AreEqual(expectedValue, ramp.CalculatePrecision());
+        }
+
 
 
         [TestMethod]
