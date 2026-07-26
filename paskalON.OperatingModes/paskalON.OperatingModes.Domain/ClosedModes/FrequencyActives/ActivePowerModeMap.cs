@@ -8,10 +8,10 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     /// <summary>
     /// Input mapping class for active power mode.
     /// </summary>
-    public class ActivePowerModeMap
+    public class ActivePowerModeMap : OperatingModeBaseMap
     {
         /// <summary>
-        /// Gets the active power.
+        /// Active power map.
         /// </summary>
         public required Func<ActivePower?> ActivePower { get; set; }
     }

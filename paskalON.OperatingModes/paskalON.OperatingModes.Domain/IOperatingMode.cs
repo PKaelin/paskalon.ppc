@@ -32,37 +32,67 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Gets the complex power setpoints for the operating mode.
-        /// </summary>
-        ComplexPower Setpoint { get; set; }
-
-
-        /// <summary>
-        /// Gets the complex power targets for the operating mode.
-        /// </summary>
-        ComplexPower Target { get; }
-
-
-        /// <summary>
         /// Gets the current operating mode state.
         /// </summary>
         OperatingModeState State { get; }
 
 
         /// <summary>
-        /// Gets the operating mode ramp controller.
+        /// Active power setpoint for the operating mode.
+        /// </summary>
+        /// <remarks>
+        /// Setpoint is set from an external system.
+        /// </remarks>
+        ActivePower SetpointActivePower { get; set; }
+
+
+        /// <summary>
+        /// Register function that get the available active power.
+        /// </summary>
+        Func<ActivePower?> AvailableActivePower { get; }
+
+
+        /// <summary>
+        /// Active power target for the operating mode.
+        /// </summary>
+        ActivePower TargetActivePower { get; }
+
+
+        /// <summary>
+        /// Reactive power setpoint for the operating mode.
+        /// </summary>
+        /// <remarks>
+        /// Setpoint is set from an external system.
+        /// </remarks>
+        ReactivePower SetpointReactivePower { get; set; }
+
+
+        /// <summary>
+        /// Register function that gets the available reactive power.
+        /// </summary>
+        Func<ReactivePower?> AvailableReactivePower { get; }
+
+
+        /// <summary>
+        /// Reactive power target for the operating mode.
+        /// </summary>
+        ReactivePower TargetReactivePower { get; }
+
+
+        /// <summary>
+        /// Operating mode ramp controller.
         /// </summary>
         IRampController RampController { get; }
 
 
         /// <summary>
-        /// Gets the operating mode curve controller.
+        /// Operating mode curve controller.
         /// </summary>
         ICurveController? CurveController { get; }
 
 
         /// <summary>
-        /// Gets the system configuration.
+        /// System configuration.
         /// </summary>
         SystemConfig SystemConfig { get; }
 

@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     /// <summary>
     /// Input mapping class for frequency watt mode.
     /// </summary>
-    public class FrequencyWattModeMap
+    public class FrequencyWattModeMap : OperatingModeBaseMap
     {
     }
 }

@@ -14,29 +14,26 @@ namespace paskalON.OperatingModes.Domain.OpenModes
     public class MaintenanceMode : OperatingOpenModeBase, IOperatingOpenMode, IExclusiveMode
     {
         protected readonly MaintenanceModeConfig _config;
-
+        protected readonly MaintenanceModeMap _map;
         public DerUnit TargetDerUnit { get; init; }
 
 
         public MaintenanceMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, MaintenanceModeConfig config, DerUnit targetDerUnit,
-            IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, rampController, curveController)
+            MaintenanceModeMap map, IRampController rampController, ICurveController? curveController)
+            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(map);
             ArgumentNullException.ThrowIfNull(targetDerUnit);
 
             TargetDerUnit = targetDerUnit;
             _config = config;
+            _map = map;
         }
 
 
-        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
+        public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            if (input is not MaintenanceModeMap map)
-            {
-                throw new ArgumentException(nameof(input));
-            }
-
             throw new NotImplementedException();
         }
     }

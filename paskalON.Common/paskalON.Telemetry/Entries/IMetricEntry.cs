@@ -41,7 +41,7 @@ namespace paskalON.Telemetry.Entries
 
 
         /// <summary>
-        /// Gets the value of the instance and updates the metric value.
+        /// Updates the metric value.
         /// </summary>
         void Update();
     }

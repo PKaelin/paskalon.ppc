@@ -40,19 +40,19 @@ namespace paskalON.OperatingModes.Application.Ramps
 
 
         /// <summary>
-        /// Gets the start value of the ramp.
+        /// Start value of the ramp.
         /// </summary>
         public double StartValue { get; protected set; }
 
 
         /// <summary>
-        /// Gets the target value of the ramp.
+        /// Target value of the ramp.
         /// </summary>
         public double TargetValue { get; protected set; }
 
 
         /// <summary>
-        /// Gets the current value of the ramp.
+        /// Current value of the ramp.
         /// </summary>
         public double CurrentValue { get; protected set; }
 

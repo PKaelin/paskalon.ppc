@@ -12,25 +12,22 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
     public class PowerFactorMode : OperatingClosedModeBase
     {
         protected readonly PowerFactorModeConfig _config;
-
+        protected readonly PowerFactorModeMap _map;
 
         public PowerFactorMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, PowerFactorModeConfig config,
-            IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, rampController, curveController)
+            PowerFactorModeMap map, IRampController rampController, ICurveController? curveController)
+            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(map);
 
             _config = config;
+            _map = map;
         }
 
 
-        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
+        public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            if (input is not PowerFactorModeMap map)
-            {
-                throw new ArgumentException(nameof(input));
-            }
-
             throw new NotImplementedException();
         }
     }

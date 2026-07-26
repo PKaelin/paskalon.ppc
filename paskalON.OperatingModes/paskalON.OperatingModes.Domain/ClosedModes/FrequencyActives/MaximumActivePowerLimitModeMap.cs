@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     /// <summary>
     /// Input mapping class for maximum active power limit mode.
     /// </summary>
-    public class MaximumActivePowerLimitModeMap
+    public class MaximumActivePowerLimitModeMap : OperatingModeBaseMap
     {
     }
 }

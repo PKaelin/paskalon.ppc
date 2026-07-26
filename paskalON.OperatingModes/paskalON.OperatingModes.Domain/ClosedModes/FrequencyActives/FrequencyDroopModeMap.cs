@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     /// <summary>
     /// Input mapping class for frequency droop mode.
     /// </summary>
-    public class FrequencyDroopModeMap
+    public class FrequencyDroopModeMap : OperatingModeBaseMap
     {
     }
 }

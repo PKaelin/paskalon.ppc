@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
     /// <summary>
     /// Input mapping class for voltage droop mode.
     /// </summary>
-    public class VoltageVarDroopModeMap
+    public class VoltageVarDroopModeMap : OperatingModeBaseMap
     {
     }
 }

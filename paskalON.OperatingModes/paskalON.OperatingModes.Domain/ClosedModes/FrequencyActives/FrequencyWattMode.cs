@@ -12,25 +12,22 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     public class FrequencyWattMode : OperatingClosedModeBase
     {
         protected readonly FrequencyWattModeConfig _config;
-
+        protected readonly FrequencyWattModeMap _map;
 
         public FrequencyWattMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, FrequencyWattModeConfig config,
-            IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, rampController, curveController)
+            FrequencyWattModeMap map, IRampController rampController, ICurveController? curveController)
+            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(map);
 
             _config = config;
+            _map = map;
         }
 
 
-        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
+        public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            if (input is not FrequencyWattModeMap map)
-            {
-                throw new ArgumentException(nameof(input));
-            }
-
             throw new NotImplementedException();
         }
     }

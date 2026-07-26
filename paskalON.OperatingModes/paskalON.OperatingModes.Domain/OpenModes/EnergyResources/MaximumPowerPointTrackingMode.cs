@@ -12,24 +12,21 @@ namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
     public class MaximumPowerPointTrackingMode : OperatingOpenModeBase
     {
         protected readonly MaximumPowerPointTrackingModeConfig _config;
-
+        protected readonly MaximumPowerPointTrackingModeMap _map;
 
         public MaximumPowerPointTrackingMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, MaximumPowerPointTrackingModeConfig config,
-            IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, rampController, curveController)
+            MaximumPowerPointTrackingModeMap map, IRampController rampController, ICurveController? curveController)
+            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(map);
 
             _config = config;
+            _map = map;
         }
 
-        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
+        public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            if (input is not MaximumPowerPointTrackingModeMap map)
-            {
-                throw new ArgumentException(nameof(input));
-            }
-
             throw new NotImplementedException();
         }
     }

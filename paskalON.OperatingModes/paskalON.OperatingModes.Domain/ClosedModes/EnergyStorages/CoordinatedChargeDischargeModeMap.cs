@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.EnergyStorages
     /// <summary>
     /// Input mapping class for coordinated charge discharge mode.
     /// </summary>
-    public class CoordinatedChargeDischargeModeMap
+    public class CoordinatedChargeDischargeModeMap : OperatingModeBaseMap
     {
     }
 }

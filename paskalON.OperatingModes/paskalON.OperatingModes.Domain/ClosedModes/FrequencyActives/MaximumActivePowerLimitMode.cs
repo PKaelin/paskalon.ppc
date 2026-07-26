@@ -12,25 +12,22 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     public class MaximumActivePowerLimitMode : OperatingClosedModeBase
     {
         protected readonly MaximumActivePowerLimitModeConfig _config;
-
+        protected readonly MaximumActivePowerLimitModeMap _map;
 
         public MaximumActivePowerLimitMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, MaximumActivePowerLimitModeConfig config,
-            IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, rampController, curveController)
+            MaximumActivePowerLimitModeMap map, IRampController rampController, ICurveController? curveController)
+            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(map);
 
             _config = config;
+            _map = map;
         }
 
 
-        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
+        public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            if (input is not MaximumActivePowerLimitModeMap map)
-            {
-                throw new ArgumentException(nameof(input));
-            }
-
             throw new NotImplementedException();
         }
     }

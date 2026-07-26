@@ -6,10 +6,10 @@ namespace paskalON.OperatingModes.Domain.ClosedModes
     /// <summary>
     /// Input mapping class for maintenance SOC mode.
     /// </summary>
-    public class MaintenanceSocModeMap
+    public class MaintenanceSocModeMap : OperatingModeBaseMap
     {
         /// <summary>
-        /// Gets the state of charge.
+        /// State of charge map.
         /// </summary>
         public required Func<double> StateOfCharge { get; set; }
     }

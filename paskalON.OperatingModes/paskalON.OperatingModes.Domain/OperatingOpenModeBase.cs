@@ -11,8 +11,8 @@ namespace paskalON.OperatingModes.Domain
     public abstract class OperatingOpenModeBase : OperatingModeBase, IOperatingOpenMode
     {
         public OperatingOpenModeBase(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, OperatingModeBaseConfig config,
-            IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, rampController, curveController)
+            OperatingModeBaseMap map, IRampController rampController, ICurveController? curveController)
+            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
         {
         }
 
@@ -20,6 +20,6 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public abstract Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default) where TInput : class;
+        public abstract Task CalculateAsync(CancellationToken cancellationToken = default);
     }
 }

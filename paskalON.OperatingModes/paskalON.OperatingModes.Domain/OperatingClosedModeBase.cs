@@ -12,8 +12,8 @@ namespace paskalON.OperatingModes.Domain
     public abstract class OperatingClosedModeBase : OperatingModeBase, IOperatingClosedMode
     {
         public OperatingClosedModeBase(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, OperatingModeBaseConfig config,
-            IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, rampController, curveController)
+            OperatingModeBaseMap map, IRampController rampController, ICurveController? curveController)
+            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
         {
         }
 
@@ -21,21 +21,36 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ComplexPower ErrorAdjustment { get; protected set; }
+        public ActivePower ErrorAdjustmentActive { get; protected set; } = new ActivePower(0);
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ComplexPower TargetAdjusted
+        public ActivePower TargetAdjustedActive
         {
-            get => new ComplexPower(Target.ActivePower + ErrorAdjustment.ActivePower, Target.ReactivePower + ErrorAdjustment.ReactivePower);
+            get => new ActivePower(TargetActivePower.Watts + ErrorAdjustmentActive.Watts);
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public abstract Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default) where TInput : class;
+        public ReactivePower ErrorAdjustmentReactive { get; protected set; } = new ReactivePower(0);
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public ReactivePower TargetAdjustedReactive
+        {
+            get => new ReactivePower(TargetReactivePower.VoltAmperesReactive + ErrorAdjustmentReactive.VoltAmperesReactive);
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public abstract Task CalculateAsync(CancellationToken cancellationToken = default);
     }
 }

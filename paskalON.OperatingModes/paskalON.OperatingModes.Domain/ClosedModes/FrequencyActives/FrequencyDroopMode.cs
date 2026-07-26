@@ -12,25 +12,22 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     public class FrequencyDroopMode : OperatingClosedModeBase
     {
         protected readonly FrequencyDroopModeConfig _config;
-
+        protected readonly FrequencyDroopModeMap _map;
 
         public FrequencyDroopMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, FrequencyDroopModeConfig config,
-            IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, rampController, curveController)
+            FrequencyDroopModeMap map, IRampController rampController, ICurveController? curveController)
+            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(map);
 
             _config = config;
+            _map = map;
         }
 
 
-        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
+        public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            if (input is not FrequencyDroopModeMap map)
-            {
-                throw new ArgumentException(nameof(input));
-            }
-
             throw new NotImplementedException();
         }
     }

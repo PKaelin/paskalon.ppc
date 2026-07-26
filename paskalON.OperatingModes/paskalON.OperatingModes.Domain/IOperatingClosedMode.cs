@@ -10,18 +10,30 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Error adjustment calculated from input and used to make adjustments in real time.
         /// </summary>
-        ComplexPower ErrorAdjustment { get; }
+        ActivePower ErrorAdjustmentActive { get; }
 
 
         /// <summary>
         /// Gets the adjusted complex power target for the operating mode.
         /// </summary>
-        ComplexPower TargetAdjusted { get; }
+        ActivePower TargetAdjustedActive { get; }
+
+
+        /// <summary>
+        /// Error adjustment calculated from input and used to make adjustments in real time.
+        /// </summary>
+        ReactivePower ErrorAdjustmentReactive { get; }
+
+
+        /// <summary>
+        /// Gets the adjusted complex power target for the operating mode.
+        /// </summary>
+        ReactivePower TargetAdjustedReactive { get; }
 
 
         /// <summary>
         /// Calculates the operating modes power target.
         /// </summary>
-        Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default) where TInput : class;
+        Task CalculateAsync(CancellationToken cancellationToken = default);
     }
 }

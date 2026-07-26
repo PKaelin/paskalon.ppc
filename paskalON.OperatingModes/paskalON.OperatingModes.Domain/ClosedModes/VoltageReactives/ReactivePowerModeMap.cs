@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
     /// <summary>
     /// Input mapping class for reactive power mode.
     /// </summary>
-    public class ReactivePowerModeMap
+    public class ReactivePowerModeMap : OperatingModeBaseMap
     {
     }
 }

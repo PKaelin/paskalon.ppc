@@ -4,10 +4,9 @@
 namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
 {
     /// <summary>
-    /// Input mapping class for maximum power point traching mode.
+    /// Input mapping class for maximum power point tracking mode.
     /// </summary>
-    public class MaximumPowerPointTrackingModeMap
+    public class MaximumPowerPointTrackingModeMap : OperatingModeBaseMap
     {
-
     }
 }

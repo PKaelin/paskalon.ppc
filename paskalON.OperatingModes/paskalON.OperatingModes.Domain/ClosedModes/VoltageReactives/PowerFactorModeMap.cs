@@ -4,9 +4,9 @@
 namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
 {
     /// <summary>
-    /// Input mapping class for pwoer factor mode.
+    /// Input mapping class for power factor mode.
     /// </summary>
-    public class PowerFactorModeMap
+    public class PowerFactorModeMap : OperatingModeBaseMap
     {
     }
 }

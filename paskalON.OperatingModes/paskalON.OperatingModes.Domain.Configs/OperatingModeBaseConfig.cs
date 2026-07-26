@@ -62,6 +62,19 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
+        /// Deadband in kilo threshold used to filter minor setpoint noise signals.
+        /// </summary>
+        public double DeadbandSetpointKilo { get; set; } = 100;
+
+
+        /// <summary>
+        /// Deadband in kilo threshold used to filter minor available noise signals.
+        /// </summary>
+        /// <remarks>
+        public double DeadbandAvailableKilo { get; set; } = 100;
+
+
+        /// <summary>
         /// Class name of the specialized operating mode to be initialized.
         /// </summary>
         /// <remarks>

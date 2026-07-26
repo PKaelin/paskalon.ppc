@@ -12,25 +12,22 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageActives
     public class VoltageWattDroopMode : OperatingClosedModeBase
     {
         protected readonly VoltageWattDroopModeConfig _config;
-
+        protected readonly VoltageWattDroopModeMap _map;
 
         public VoltageWattDroopMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, VoltageWattDroopModeConfig config,
-            IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, rampController, curveController)
+            VoltageWattDroopModeMap map, IRampController rampController, ICurveController? curveController)
+            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(map);
 
             _config = config;
+            _map = map;
         }
 
 
-        public override Task CalculateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
+        public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            if (input is not VoltageWattDroopModeMap map)
-            {
-                throw new ArgumentException(nameof(input));
-            }
-
             throw new NotImplementedException();
         }
     }

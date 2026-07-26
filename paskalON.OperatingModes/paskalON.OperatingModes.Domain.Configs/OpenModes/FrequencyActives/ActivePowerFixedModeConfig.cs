@@ -9,12 +9,6 @@ namespace paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives
     public class ActivePowerFixedModeConfig : OperatingModeBaseConfig
     {
         /// <summary>
-        /// Deadband threshold used to filter minor noise from setpoint signals.
-        /// </summary>
-        public double DeadbandKiloWatt { get; set; } = 100;
-
-
-        /// <summary>
         /// Configurable maximum active power limit in kilo watt.
         /// </summary>
         /// <remarks>
