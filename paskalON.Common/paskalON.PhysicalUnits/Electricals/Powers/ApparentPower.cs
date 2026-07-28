@@ -123,6 +123,17 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
 
 
         /// <summary>
+        /// Create new apparent power from kilo va input.
+        /// </summary>
+        /// <param name="kiloVoltageAmpere">Kilo voltage amperes.</param>
+        /// <returns>ApparentPower instance with va from kilo vas.</returns>
+        public static ApparentPower FromKilo(double kiloVoltageAmpere)
+        {
+            return new ApparentPower(kiloVoltageAmpere * VoltAmpsPerKilovoltAmps);
+        }
+
+
+        /// <summary>
         /// Constructor for <see cref="ApparentPower"/> that calculates apparent power from active and reactive power.
         /// </summary>
         /// <param name="activePower">The active power component.</param>

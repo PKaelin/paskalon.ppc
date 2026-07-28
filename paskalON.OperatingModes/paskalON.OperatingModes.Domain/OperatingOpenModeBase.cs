@@ -8,8 +8,27 @@ using paskalON.OperatingModes.Domain.Ramps;
 
 namespace paskalON.OperatingModes.Domain
 {
+    /// <summary>
+    /// Operating mode open mode base.
+    /// </summary>
+    /// <remarks>
+    /// How they work:
+    /// The controller sends targets and assumes the action happens perfectly.
+    /// Feedback:
+    /// None.It does not measure any actual output or adjust any changes.
+    /// </remarks>
     public abstract class OperatingOpenModeBase : OperatingModeBase, IOperatingOpenMode
     {
+        /// <summary>
+        /// Constructor of <see cref="OperatingOpenModeBase"/>.
+        /// </summary>
+        /// <param name="logger">Logger for handling logging and diagnostics.</param>
+        /// <param name="timeProvider">The time provider (TimeProvider.System for prod, FakeTimeProvider for tests.</param>
+        /// <param name="systemConfig">The system configuration.</param>
+        /// <param name="config">The operating mode base configuration.</param>
+        /// <param name="map">Input mapping class for signals.</param>
+        /// <param name="rampController">The ramp controller interface.</param>
+        /// <param name="curveController">The curve controller interface.</param>
         public OperatingOpenModeBase(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, OperatingModeBaseConfig config,
             OperatingModeBaseMap map, IRampController rampController, ICurveController? curveController)
             : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)

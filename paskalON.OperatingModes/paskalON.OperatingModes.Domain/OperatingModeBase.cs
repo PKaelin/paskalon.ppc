@@ -12,24 +12,56 @@ namespace paskalON.OperatingModes.Domain
     /// <summary>
     /// Base class for all operating modes.
     /// </summary>
+    /// <remarks>
+    /// Operating Mode defines the specific behavior and control strategy the system uses to interact with the power grid.
+    /// </remarks>
     public abstract class OperatingModeBase : IOperatingMode
     {
+        /// <summary>
+        /// Feedback map for the operating mode.
+        /// </summary>
         private readonly OperatingModeBaseMap _map;
+
+
+        /// <summary>
+        /// Last active power available change after the available power is outside deadband.
+        /// </summary>
         protected ActivePower? _lastAvailableActive;
-        protected ActivePower? _lastSetpointActive;
+
+
+        /// <summary>
+        /// Last reactive power available change after the available power is outside deadband.
+        /// </summary>
         protected ReactivePower? _lastAvailableReactive;
+
+
+        /// <summary>
+        /// Last active power setpoint change after the setpoint is outside deadband.
+        /// </summary>
+        protected ActivePower? _lastSetpointActive;
+
+
+        /// <summary>
+        /// Last reactive power setpoint change after the setpoint is outside deadband.
+        /// </summary>
         protected ReactivePower? _lastSetpointReactive;
 
 
         /// <summary>
         /// Active power target for the operating mode.
         /// </summary>
+        /// <remarks>
+        /// For performance this is a class variable.
+        /// </remarks>
         protected ActivePower _targetActivePower = new ActivePower(0);
 
 
         /// <summary>
         /// Reactive power target for the operating mode.
         /// </summary>
+        /// <remarks>
+        /// For performance this is a class variable.
+        /// </remarks>
         protected ReactivePower _targetReactivePower = new ReactivePower(0);
 
 
@@ -69,19 +101,8 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         public bool IsEnabled
         {
-            get { lock (dataLock) { return field; } }
-            set
-            {
-                lock (dataLock)
-                {
-                    field = value;
-
-                    if (value == true)
-                    {
-                        LastEnabled = DateTimeOffset.UtcNow;
-                    }
-                }
-            }
+            get;
+            private set;
         }
 
 
@@ -94,7 +115,18 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public OperatingModeState State { get; protected set; } = OperatingModeState.Disabled;
+        public OperatingModeState State
+        {
+            get;
+            protected set
+            {
+                if (value != field)
+                {
+                    _logger.LogInformation("{Name} OperatingModeState changed to: {State}", Name, value);
+                    field = value;
+                }
+            }
+        } = OperatingModeState.Disabled;
 
 
         /// <summary>
@@ -103,14 +135,24 @@ namespace paskalON.OperatingModes.Domain
         public ActivePower SetpointActivePower
         {
             get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; } }
+            set
+            {
+                lock (dataLock)
+                {
+                    if (value.Watts != field.Watts)
+                    {
+                        field = value;
+                        _logger.LogInformation("{Name} SetpointActivePower changed to: {SetpointActivePower}", Name, value.KiloWatts);
+                    }
+                }
+            }
         } = new ActivePower(0);
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public Func<ActivePower?> AvailableActivePower { get => _map.AvailableActivePower; }
+        public ActivePower? AvailableActivePower { get => _map.AvailableActivePower.Invoke(); }
 
 
         /// <summary>
@@ -125,14 +167,24 @@ namespace paskalON.OperatingModes.Domain
         public ReactivePower SetpointReactivePower
         {
             get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; } }
+            set
+            {
+                lock (dataLock)
+                {
+                    if (value.VoltAmperesReactive != field.VoltAmperesReactive)
+                    {
+                        field = value;
+                        _logger.LogInformation("{Name} SetpointReactivePower changed to: {SetpointReactivePower}", Name, value.KiloVoltAmperesReactive);
+                    }
+                }
+            }
         } = new ReactivePower(0);
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public Func<ReactivePower?> AvailableReactivePower { get => _map.AvailableReactivePower; }
+        public ReactivePower? AvailableReactivePower { get => _map.AvailableReactivePower.Invoke(); }
 
 
         /// <summary>
@@ -144,7 +196,13 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public IRampController RampController { get; protected set; }
+        public IRampController RampControllerActive { get; protected set; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public IRampController RampControllerReactive { get; protected set; }
 
 
         /// <summary>
@@ -185,9 +243,10 @@ namespace paskalON.OperatingModes.Domain
             _config = config;
             _map = map;
             SystemConfig = systemConfig;
-            RampController = rampController;
+            RampControllerActive = rampController;
+            RampControllerReactive = rampController.ShallowCopy();
             CurveController = curveController;
-            _logger.LogInformation("Operating Mode created. Name: {Name}", Name);
+            _logger.LogInformation("{Name} operating mode created.", Name);
         }
 
 
@@ -196,25 +255,27 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         public virtual void Enable()
         {
+            IsEnabled = true;
+
             if (State != OperatingModeState.Enabled)
             {
-                double setpointActive = GetActiveSetpoint();
-                double setpointReactive = GetReactiveSetpoint();
+                double setpointActive = GetActivePowerSetpoint();
+                double setpointReactive = GetReactivePowerSetpoint();
 
-                _logger.LogInformation("Operating mode enabled: {Name}. Active target: {ActiveTarget}. Reactive target: {ReactiveTarget}", Name, setpointActive, setpointReactive);
+                _logger.LogInformation("{Name} operating mode enabled. Active target: {ActiveTarget}. Reactive target: {ReactiveTarget}", Name, setpointActive, setpointReactive);
                 State = OperatingModeState.Enabling;
 
                 if (setpointActive != 0)
                 {
-                    RampController.Start(TargetActivePower.KiloWatts, setpointActive);
+                    RampControllerActive.Start(TargetActivePower.KiloWatts, setpointActive);
+                    State = OperatingModeState.RampingToEnabled;
                 }
 
                 if (setpointReactive != 0)
                 {
-                    RampController.Start(TargetReactivePower.KiloVoltAmperesReactive, setpointReactive);
+                    RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, setpointReactive);
+                    State = OperatingModeState.RampingToEnabled;
                 }
-
-                State = OperatingModeState.RampingToEnabled;
             }
         }
 
@@ -224,24 +285,33 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         public virtual void Disable()
         {
+            IsEnabled = false;
+
             if (State != OperatingModeState.Disabled)
             {
-                _logger.LogInformation("Operating mode disabled: {Name}. Target set to {Target}", Name, 0);
+                _logger.LogInformation("{Name} operating mode disabled. Active target: {ActiveTarget}. Reactive target: {ReactiveTarget}", Name, 0, 0);
+                SetpointActivePower = new ActivePower(0);
+                SetpointReactivePower = new ReactivePower(0);
                 State = OperatingModeState.RampingToDisabled;
-                RampController.Start(TargetActivePower.KiloWatts, 0);
+                RampControllerActive.Start(TargetActivePower.KiloWatts, 0);
+                RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, 0);
             }
         }
 
 
-        protected double GetActiveSetpoint()
+        /// <summary>
+        /// Get the active power setpoint using setpoint and available power.
+        /// </summary>
+        /// <returns>Available power if setpoint is higher otherwise setpoint.</returns>        
+        protected double GetActivePowerSetpoint()
         {
             double setpoint = 0;
-            ActivePower? available = AvailableActivePower.Invoke();
-            // Only change 0 setpoint when there is available power
+            ActivePower? available = AvailableActivePower;
+            // Only change initial 0 setpoint when there is available power
             if (available != null)
             {
                 // Available is less then setpoint use available so that we dont set an unachievable setpoint.
-                if (available.Value.KiloWatts <= SetpointActivePower.KiloWatts)
+                if (Math.Abs(available.Value.KiloWatts) <= Math.Abs(SetpointActivePower.KiloWatts))
                 {
                     setpoint = available.Value.KiloWatts;
                 }
@@ -251,11 +321,13 @@ namespace paskalON.OperatingModes.Domain
                     setpoint = SetpointActivePower.KiloWatts;
                 }
 
+                // Set last to the initial values
                 _lastAvailableActive = available;
-                _lastSetpointActive = new ActivePower(setpoint);
+                _lastSetpointActive = SetpointActivePower;
             }
             else
             {
+                // Clear last values
                 _lastAvailableActive = null;
                 _lastSetpointActive = null;
             }
@@ -263,15 +335,20 @@ namespace paskalON.OperatingModes.Domain
             return setpoint;
         }
 
-        protected double GetReactiveSetpoint()
+
+        /// <summary>
+        /// Get the reactive power setpoint using setpoint and available power.
+        /// </summary>
+        /// <returns>Available power if setpoint is higher otherwise setpoint.</returns>
+        protected double GetReactivePowerSetpoint()
         {
             double setpoint = 0;
-            ReactivePower? available = AvailableReactivePower.Invoke();
-            // Only change 0 setpoint when there is available power
+            ReactivePower? available = AvailableReactivePower;
+            // Only change initial 0 setpoint when there is available power
             if (available != null)
             {
                 // Available is less then setpoint use available so that we dont set an unachievable setpoint.
-                if (available.Value.KiloVoltAmperesReactive <= SetpointReactivePower.KiloVoltAmperesReactive)
+                if (Math.Abs(available.Value.KiloVoltAmperesReactive) <= Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive))
                 {
                     setpoint = available.Value.KiloVoltAmperesReactive;
                 }
@@ -281,11 +358,13 @@ namespace paskalON.OperatingModes.Domain
                     setpoint = SetpointReactivePower.KiloVoltAmperesReactive;
                 }
 
+                // Set last to the initial values
                 _lastAvailableReactive = available;
-                _lastSetpointReactive = new ReactivePower(setpoint);
+                _lastSetpointReactive = SetpointReactivePower;
             }
             else
             {
+                // Clear last values
                 _lastAvailableReactive = null;
                 _lastSetpointReactive = null;
             }

@@ -122,6 +122,17 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
 
 
         /// <summary>
+        /// Create new reactive power from kilo var input.
+        /// </summary>
+        /// <param name="kiloVarReactive">Kilo var.</param>
+        /// <returns>ReactivePower instance with vars from kilo vars.</returns>
+        public static ReactivePower FromKilo(double kiloVarReactive)
+        {
+            return new ReactivePower(kiloVarReactive * VoltAmpsPerKilovoltAmps);
+        }
+
+
+        /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>Integer hash code.</returns>

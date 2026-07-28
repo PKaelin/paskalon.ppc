@@ -22,7 +22,7 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Gets or sets whether operating mode is enabled in the stack or not.
         /// </summary>
-        public bool IsEnabled { get; set; }
+        public bool IsEnabled { get; }
 
 
         /// <summary>
@@ -47,9 +47,9 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Register function that get the available active power.
+        /// Available active power for the operating mode.
         /// </summary>
-        Func<ActivePower?> AvailableActivePower { get; }
+        ActivePower? AvailableActivePower { get; }
 
 
         /// <summary>
@@ -68,9 +68,9 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Register function that gets the available reactive power.
+        /// Available reactive power for the operating mode.
         /// </summary>
-        Func<ReactivePower?> AvailableReactivePower { get; }
+        ReactivePower? AvailableReactivePower { get; }
 
 
         /// <summary>
@@ -80,9 +80,15 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Operating mode ramp controller.
+        /// Operating mode ramp controller for active power.
         /// </summary>
-        IRampController RampController { get; }
+        IRampController RampControllerActive { get; }
+
+
+        /// <summary>
+        /// Operating mode ramp controller for reactive power.
+        /// </summary>
+        IRampController RampControllerReactive { get; }
 
 
         /// <summary>

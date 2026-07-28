@@ -61,5 +61,12 @@ namespace paskalON.OperatingModes.Domain.Ramps
         /// <returns>Current value of the ramp which is also assigned to the CurrentValue property.</returns>
         /// <exception cref="NotImplementedException">Returns exception if the ramp configuration is not implemented.</exception>
         double CalculatePrecision(int precision = 3);
+
+
+        /// <summary>
+        /// Create a shallow copy of <see cref="IRampController"/>.
+        /// </summary>
+        /// <returns>Shallow copy.</returns>
+        IRampController ShallowCopy();
     }
 }

@@ -81,10 +81,8 @@ namespace paskalON.OperatingModes.Application.Ramps
 
 
         /// <summary>
-        /// Starts the ramping.
+        /// <inheritdoc/>
         /// </summary>
-        /// <param name="startValue">Start value of the ramp.</param>
-        /// <param name="targetValue">Target value of the ramp.</param>
         public void Start(double startValue, double targetValue)
         {
             StartDate = _timeProvider.GetUtcNow();
@@ -96,7 +94,7 @@ namespace paskalON.OperatingModes.Application.Ramps
 
 
         /// <summary>
-        /// Stops the ramping regardless of its current position.
+        /// <inheritdoc/>
         /// </summary>
         public void Stop()
         {
@@ -105,10 +103,8 @@ namespace paskalON.OperatingModes.Application.Ramps
 
 
         /// <summary>
-        /// Calculate current ramp.
+        /// <inheritdoc/>
         /// </summary>
-        /// <returns>Current value of the ramp which is also assigned to the CurrentValue property.</returns>
-        /// <exception cref="NotImplementedException">Returns exception if the ramp configuration is not implemented.</exception>
         public double Calculate()
         {
             lock (_rampBaseConfig)
@@ -136,14 +132,20 @@ namespace paskalON.OperatingModes.Application.Ramps
 
 
         /// <summary>
-        /// Calculate current ramp.
+        /// <inheritdoc/>
         /// </summary>
-        /// <param name="precision">Precision of the current value.</param>
-        /// <returns>Current value of the ramp which is also assigned to the CurrentValue property.</returns>
-        /// <exception cref="NotImplementedException">Returns exception if the ramp configuration is not implemented.</exception>
         public double CalculatePrecision(int precision = 3)
         {
             return Math.Round(Calculate(), precision);
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public IRampController ShallowCopy()
+        {
+            return (RampController)MemberwiseClone();
         }
 
 
