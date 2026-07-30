@@ -37,7 +37,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
         /// <param name="logger">Logger for handling logging and diagnostics.</param>
         /// <param name="timeProvider">The time provider (TimeProvider.System for prod, FakeTimeProvider for tests.</param>
         /// <param name="systemConfig">The system configuration.</param>
-        /// <param name="config">The operating mode base configuration.</param>
+        /// <param name="config">The operating mode configuration.</param>
         /// <param name="map">Input mapping class for signals.</param>
         /// <param name="rampController">The ramp controller interface.</param>
         /// <param name="curveController">The curve controller interface.</param>
@@ -103,21 +103,15 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
         /// <returns>Target or limited target.</returns>
         private double ApplyLimits(double target)
         {
-            if (_config.MaximumActivePowerLimitKiloWatt.HasValue == true)
+            if ((_config.MaximumActivePowerLimitKiloWatt.HasValue == true) && (target > _config.MaximumActivePowerLimitKiloWatt.Value))
             {
-                if (target > _config.MaximumActivePowerLimitKiloWatt.Value)
-                {
-                    _logger.LogInformation("{Name} operating mode limited due MaximumActivePowerLimitKiloWatt configuration. Setpoint set to {Setpoint}", Name, target);
-                    target = _config.MaximumActivePowerLimitKiloWatt.Value;
-                }
+                _logger.LogInformation("{Name} operating mode limited due MaximumActivePowerLimitKiloWatt configuration. Setpoint set to {Setpoint}", Name, target);
+                target = _config.MaximumActivePowerLimitKiloWatt.Value;
             }
-            else if (_config.MinimumActivePowerLimitKiloWatt.HasValue == true)
+            else if ((_config.MinimumActivePowerLimitKiloWatt.HasValue == true) && (target < _config.MinimumActivePowerLimitKiloWatt.Value))
             {
-                if (target < _config.MinimumActivePowerLimitKiloWatt.Value)
-                {
-                    _logger.LogInformation("{Name} operating mode limited due MinimumActivePowerLimitKiloWatt configuration. Setpoint set to {Setpoint}", Name, target);
-                    target = _config.MinimumActivePowerLimitKiloWatt.Value;
-                }
+                _logger.LogInformation("{Name} operating mode limited due MinimumActivePowerLimitKiloWatt configuration. Setpoint set to {Setpoint}", Name, target);
+                target = _config.MinimumActivePowerLimitKiloWatt.Value;
             }
 
             return target;

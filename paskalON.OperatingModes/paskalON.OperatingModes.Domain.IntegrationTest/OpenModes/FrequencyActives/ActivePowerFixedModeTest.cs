@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Time.Testing;
 using Moq;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
@@ -55,11 +54,8 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
 
 
         [TestMethod]
-        public void PowerFixedModeTest()
+        public void PowerFixedModePositiveTest()
         {
-            FakeTimeProvider timeProvider = new FakeTimeProvider();
-            ActivePowerFixedMode mode = new ActivePowerFixedMode(NullLogger.Instance, timeProvider, _systemConfig!, _config!, _map!, _rampActive!.Object, null);
-
             _map!.AvailableActivePower = () => ActivePower.FromKilo(1000);
             _mode!.SetpointActivePower = ActivePower.FromKilo(1000);
             _mode!.Enable();
@@ -90,6 +86,42 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
             Assert.AreEqual(OperatingModeState.Enabled, _mode!.State);
             Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(1000, _mode!.TargetActivePower.KiloWatts);
+        }
+
+
+        [TestMethod]
+        public void PowerFixedModeNegativeTest()
+        {
+            _map!.AvailableActivePower = () => ActivePower.FromKilo(-1000);
+            _mode!.SetpointActivePower = ActivePower.FromKilo(-1000);
+            _mode!.Enable();
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
+            Assert.AreEqual(-1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
+
+            _rampActive!.Setup(x => x.Calculate()).Returns(-10);
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
+            Assert.AreEqual(-1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(-10, _mode!.TargetActivePower.KiloWatts);
+
+            _rampActive!.Setup(x => x.Calculate()).Returns(-100);
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
+            Assert.AreEqual(-1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(-100, _mode!.TargetActivePower.KiloWatts);
+
+            _rampActive!.Setup(x => x.Calculate()).Returns(-950);
+            _mode!.CalculateAsync();
+
+            // Target is within the deadband so enabled and target = setpoint
+            Assert.AreEqual(OperatingModeState.Enabled, _mode!.State);
+            Assert.AreEqual(-1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(-1000, _mode!.TargetActivePower.KiloWatts);
         }
     }
 }
