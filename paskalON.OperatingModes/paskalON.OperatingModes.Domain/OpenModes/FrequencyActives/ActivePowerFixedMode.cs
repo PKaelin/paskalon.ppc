@@ -61,27 +61,14 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
             if (State != OperatingModeState.Disabled)
             {
                 ActivePower? available = _map.AvailableActivePower?.Invoke();
-                // Restart ramp controller if available is outside deadband of lastAvailable or if setpoint is outside deadband of lastSetpoint
-                if (State != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableActive != null && _lastSetpointActive != null) &&
-                   ((Math.Abs(available.Value.KiloWatts) > (Math.Abs(_lastAvailableActive.Value.KiloWatts) + _config.DeadbandAvailableKilo)) ||
-                   (Math.Abs(SetpointActivePower.KiloWatts) > (Math.Abs(_lastSetpointActive.Value.KiloWatts) + _config.DeadbandSetpointKilo))))
+                double? target = CheckNewActiveTarget(available);
+
+                if (target != null)
                 {
-                    double target = 0;
-                    // Available is less then setpoint use available so that we dont set an unachievable setpoint.
-                    if (Math.Abs(available.Value.KiloWatts) <= Math.Abs(SetpointActivePower.KiloWatts))
-                    {
-                        target = available.Value.KiloWatts;
-                    }
-                    // Available is more then setpoint use setpoint
-                    else
-                    {
-                        target = SetpointActivePower.KiloWatts;
-                    }
-
-                    // Apply configured limits if configured
-                    target = ApplyLimits(target);
-
-                    if (target != 0 && (_lastSetpointActive.HasValue == false || _lastSetpointActive.Value.Watts == 0))
+                    // Restart/Start when setpoint wasn't set before or setpoint was 0 before and now it is not 0 anymore
+                    // Don't restart when if available gets bigger but still bigger than setpoint and setpoint hasn't changed
+                    if (target.Value != 0 && (_lastSetpointActive.HasValue == false || _lastSetpointActive.Value.Watts == 0) &&
+                       (target != _lastSetpointActive?.KiloWatts))
                     {
                         // In case things have changed after the Enable() command
                         if (State == OperatingModeState.Enabling)
@@ -89,33 +76,20 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
                             State = OperatingModeState.RampingToEnabled;
                         }
 
-                        _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Target set to {Setpoint}", Name, target);
-                        RampControllerActive.Start(TargetActivePower.KiloWatts, target);
+                        // Apply configured limits if configured
+                        target = ApplyLimits(target.Value);
+
+                        _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Target set to {Setpoint}", Name, target.Value);
+                        RampControllerActive.Start(TargetActivePower.KiloWatts, target.Value);
                     }
 
+                    // Only now update the last available and the last setpoint
                     _lastAvailableActive = available;
                     _lastSetpointActive = SetpointActivePower;
                 }
 
                 _targetActivePower.KiloWatts = RampControllerActive.Calculate();
-
-                // Set final target and change state to enabled if we are within a deadband
-                if (Math.Abs(TargetActivePower.KiloWatts) > (Math.Abs(SetpointActivePower.KiloWatts) - _config.DeadbandSetpointKilo))
-                {
-                    if (State == OperatingModeState.RampingToEnabled)
-                    {
-                        // Once within deadband we set the actual the precise target regardless available and set state to enabled 
-                        _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
-                        State = OperatingModeState.Enabled;
-                    }
-                    else if (State == OperatingModeState.RampingToDisabled)
-                    {
-                        // Once within deadband we set the actual the precise target regardless available and set state to disabled
-                        _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
-                        State = OperatingModeState.Disabled;
-                        RampControllerActive.Stop();
-                    }
-                }
+                CheckFinalActiveTarget();
             }
 
             return Task.CompletedTask;

@@ -372,5 +372,116 @@ namespace paskalON.OperatingModes.Domain
             return setpoint;
         }
 
+
+        /// <summary>
+        /// Checks whether there needs to be a new target calculation due to a new setpoint or new available change.
+        /// </summary>
+        /// <param name="available">The current available power.</param>
+        /// <returns>Returns the new target if there has been a change otherwise null.</returns>
+        protected double? CheckNewActiveTarget(ActivePower? available)
+        {
+            double? retval = null;
+            // If available is outside deadband of lastAvailable or if setpoint is outside deadband of lastSetpoint
+            if (State != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableActive != null && _lastSetpointActive != null) &&
+                  ((Math.Abs(available.Value.KiloWatts) > (Math.Abs(_lastAvailableActive.Value.KiloWatts) + _config.DeadbandAvailableKilo)) ||
+                  (Math.Abs(SetpointActivePower.KiloWatts) > (Math.Abs(_lastSetpointActive.Value.KiloWatts) + _config.DeadbandSetpointKilo))))
+            {
+                // Available is less then setpoint use available so that we dont set an unachievable setpoint.
+                if (Math.Abs(available.Value.KiloWatts) <= Math.Abs(SetpointActivePower.KiloWatts))
+                {
+                    retval = available.Value.KiloWatts;
+                }
+                // Available is more then setpoint use setpoint
+                else
+                {
+                    retval = SetpointActivePower.KiloWatts;
+                }
+            }
+
+            return retval;
+        }
+
+
+        /// <summary>
+        /// Checks whether the target is equal or within the deadband of the setpoint.
+        /// Sets the final target and the operating state to enabled/disabled if its within.
+        /// </summary>
+        protected void CheckFinalActiveTarget()
+        {
+            // Set final target and change state to enabled if we are within a deadband
+            if (Math.Abs(TargetActivePower.KiloWatts) > (Math.Abs(SetpointActivePower.KiloWatts) - _config.DeadbandSetpointKilo))
+            {
+                if (State == OperatingModeState.RampingToEnabled)
+                {
+                    // Once within deadband we set the actual the precise target regardless available and set state to enabled 
+                    _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
+                    State = OperatingModeState.Enabled;
+                }
+                else if (State == OperatingModeState.RampingToDisabled)
+                {
+                    // Once within deadband we set the actual the precise target regardless available and set state to disabled
+                    _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
+                    State = OperatingModeState.Disabled;
+                    RampControllerActive.Stop();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Checks whether there needs to be a new target calculation due to a new setpoint or new available change.
+        /// </summary>
+        /// <param name="available">The current available power.</param>
+        /// <returns>Returns the new target if there has been a change otherwise null.</returns>
+        protected double? CheckNewReactiveTarget(ReactivePower? available)
+        {
+            double? retval = null;
+            // If available is outside deadband of lastAvailable or if setpoint is outside deadband of lastSetpoint
+            if (State != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableReactive != null && _lastSetpointReactive != null) &&
+                  ((Math.Abs(available.Value.KiloVoltAmperesReactive) > (Math.Abs(_lastAvailableReactive.Value.KiloVoltAmperesReactive) + _config.DeadbandAvailableKilo)) ||
+                  (Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive) > (Math.Abs(_lastSetpointReactive.Value.KiloVoltAmperesReactive) + _config.DeadbandSetpointKilo))))
+            {
+                // Available is less then setpoint use available so that we dont set an unachievable setpoint.
+                if (Math.Abs(available.Value.KiloVoltAmperesReactive) <= Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive))
+                {
+                    retval = available.Value.KiloVoltAmperesReactive;
+                }
+                // Available is more then setpoint use setpoint
+                else
+                {
+                    retval = SetpointReactivePower.KiloVoltAmperesReactive;
+                }
+            }
+
+            return retval;
+        }
+
+
+
+        /// <summary>
+        /// Checks whether the target is equal or within the deadband of the setpoint.
+        /// Sets the final target and the operating state to enabled/disabled if its within.
+        /// </summary>
+        protected void CheckFinalReactiveTarget()
+        {
+            // Set final target and change state to enabled if we are within a deadband
+            if (Math.Abs(TargetReactivePower.KiloVoltAmperesReactive) > (Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive) - _config.DeadbandSetpointKilo))
+            {
+                if (State == OperatingModeState.RampingToEnabled)
+                {
+                    // Once within deadband we set the actual the precise target regardless available and set state to enabled 
+                    _targetReactivePower.KiloVoltAmperesReactive = SetpointReactivePower.KiloVoltAmperesReactive;
+                    State = OperatingModeState.Enabled;
+                }
+                else if (State == OperatingModeState.RampingToDisabled)
+                {
+                    // Once within deadband we set the actual the precise target regardless available and set state to disabled
+                    _targetReactivePower.KiloVoltAmperesReactive = SetpointReactivePower.KiloVoltAmperesReactive;
+                    State = OperatingModeState.Disabled;
+                    RampControllerReactive.Stop();
+                }
+            }
+        }
+
     }
 }

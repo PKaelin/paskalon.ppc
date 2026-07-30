@@ -280,5 +280,25 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
             _rampActive!.Verify(x => x.Start(0, -400), Times.Once);
         }
 
+
+
+        [TestMethod]
+        public void CalculateModeEnabledAvailableSetpointAvailableGettingBiggerTest()
+        {
+            _map!.AvailableActivePower = () => ActivePower.FromKilo(100);
+            _mode!.SetpointActivePower = ActivePower.FromKilo(100);
+            _mode!.Enable();
+            _mode!.CalculateAsync();
+            _map!.AvailableActivePower = () => ActivePower.FromKilo(500);
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
+            Assert.AreEqual(100, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
+            _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 100), Times.Once);
+        }
+
+
     }
 }
