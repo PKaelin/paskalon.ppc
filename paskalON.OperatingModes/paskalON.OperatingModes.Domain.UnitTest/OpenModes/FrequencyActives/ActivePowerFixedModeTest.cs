@@ -10,7 +10,7 @@ using paskalON.OperatingModes.Domain.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
 
-namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActives
+namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
 {
     /// <summary>
     /// Base constructor parameters are tested in <see cref="OperatingModeBaseTest"/>.
@@ -20,16 +20,25 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
     {
         private ActivePowerFixedMode? _mode;
         private ActivePowerFixedModeMap? _map;
-        private Mock<SystemConfig>? _systemConfig;
         private Mock<IRampController>? _rampActive;
+        private SystemConfig? _systemConfig;
         private ActivePowerFixedModeConfig? _config;
-
 
 
         [TestInitialize]
         public void Initialize()
         {
-            _systemConfig = new Mock<SystemConfig>();
+            _systemConfig = new SystemConfig
+            {
+                ChangedBy = "Test",
+                Type = OperatingModeType.Bess,
+                ReferenceFrequency = 50,
+                NameplateMinimumActivePowerKiloWatt = double.MinValue,
+                NameplateMaximumActivePowerKiloWatt = double.MaxValue,
+                NameplateMinimumReactivePowerKiloVars = double.MinValue,
+                NameplateMaximumReactivePowerKiloVars = double.MaxValue,
+            };
+
             _config = new ActivePowerFixedModeConfig
             {
                 ChangedBy = "Test",
@@ -42,7 +51,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
             _map = new ActivePowerFixedModeMap { AvailableActivePower = () => null, AvailableReactivePower = () => null };
             _rampActive = new Mock<IRampController>();
             _rampActive.Setup(x => x.ShallowCopy()).Returns(new Mock<IRampController>().Object);
-            _mode = new ActivePowerFixedMode(NullLogger.Instance, TimeProvider.System, _systemConfig.Object, _config, _map, _rampActive.Object);
+            _mode = new ActivePowerFixedMode(NullLogger.Instance, TimeProvider.System, _systemConfig, _config, _map, _rampActive.Object);
         }
 
 

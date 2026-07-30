@@ -4,46 +4,92 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
 using Moq;
-using paskalON.OperatingModes.Application.Ramps;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
 using paskalON.OperatingModes.Domain.OpenModes.FrequencyActives;
+using paskalON.OperatingModes.Domain.Ramps;
+using paskalON.PhysicalUnits.Electricals.Powers;
 
 namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActives
 {
     [TestClass]
     public class ActivePowerFixedModeTest
     {
-        [TestMethod]
-        public void PowerFixedModeTest()
-        {
-            Mock<ActivePowerFixedModeMap> map = new Mock<ActivePowerFixedModeMap>();
-            Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
+        private ActivePowerFixedMode? _mode;
+        private ActivePowerFixedModeMap? _map;
+        private Mock<IRampController>? _rampActive;
+        private SystemConfig? _systemConfig;
+        private ActivePowerFixedModeConfig? _config;
 
-            RampRateConfig rampConfig = new RampRateConfig
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            _systemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
-                RampTimeSeconds = 0,
-                RampUpRatePerSecond = 10,
-                RampDownRatePerSecond = 20
+                Type = OperatingModeType.Bess,
+                ReferenceFrequency = 50,
+                NameplateMinimumActivePowerKiloWatt = double.MinValue,
+                NameplateMaximumActivePowerKiloWatt = double.MaxValue,
+                NameplateMinimumReactivePowerKiloVars = double.MinValue,
+                NameplateMaximumReactivePowerKiloVars = double.MaxValue,
             };
 
-
-            ActivePowerFixedModeConfig config = new ActivePowerFixedModeConfig
+            _config = new ActivePowerFixedModeConfig
             {
                 ChangedBy = "Test",
                 Name = "ActivePowerFixedModeConfig",
-                Type = OperatingModeType.Bess,
                 IsActive = true,
-                TimeoutSeconds = 0,
-                RampConfig = rampConfig
+                Type = OperatingModeType.Bess,
+                RampConfig = new Mock<RampBaseConfig>().Object
             };
 
-            FakeTimeProvider timeProvider = new FakeTimeProvider();
-            RampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, rampConfig);
-            ActivePowerFixedMode mode = new ActivePowerFixedMode(NullLogger.Instance, timeProvider, systemConfig.Object, config, map.Object, ramp, null);
+            _map = new ActivePowerFixedModeMap { AvailableActivePower = () => null, AvailableReactivePower = () => null };
+            _rampActive = new Mock<IRampController>();
+            _rampActive.Setup(x => x.ShallowCopy()).Returns(new Mock<IRampController>().Object);
+            _mode = new ActivePowerFixedMode(NullLogger.Instance, TimeProvider.System, _systemConfig, _config, _map, _rampActive.Object);
+        }
 
+
+
+        [TestMethod]
+        public void PowerFixedModeTest()
+        {
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            ActivePowerFixedMode mode = new ActivePowerFixedMode(NullLogger.Instance, timeProvider, _systemConfig!, _config!, _map!, _rampActive!.Object, null);
+
+            _map!.AvailableActivePower = () => ActivePower.FromKilo(1000);
+            _mode!.SetpointActivePower = ActivePower.FromKilo(1000);
+            _mode!.Enable();
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
+            Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
+
+            _rampActive!.Setup(x => x.Calculate()).Returns(10);
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
+            Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(10, _mode!.TargetActivePower.KiloWatts);
+
+            _rampActive!.Setup(x => x.Calculate()).Returns(100);
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
+            Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(100, _mode!.TargetActivePower.KiloWatts);
+
+            _rampActive!.Setup(x => x.Calculate()).Returns(950);
+            _mode!.CalculateAsync();
+
+            // Target is within the deadband so enabled and target = setpoint
+            Assert.AreEqual(OperatingModeState.Enabled, _mode!.State);
+            Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(1000, _mode!.TargetActivePower.KiloWatts);
         }
     }
 }

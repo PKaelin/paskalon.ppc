@@ -40,18 +40,29 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         private OperatingModeBaseMap? _map;
         private Mock<IRampController>? _rampActive;
         private Mock<IRampController>? _rampReactive;
+        private SystemConfig? _systemConfig;
 
 
         [TestInitialize]
         public void Initialize()
         {
-            Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
+            _systemConfig = new SystemConfig
+            {
+                ChangedBy = "Test",
+                Type = OperatingModeType.Bess,
+                ReferenceFrequency = 50,
+                NameplateMinimumActivePowerKiloWatt = double.MinValue,
+                NameplateMaximumActivePowerKiloWatt = double.MaxValue,
+                NameplateMinimumReactivePowerKiloVars = double.MinValue,
+                NameplateMaximumReactivePowerKiloVars = double.MaxValue,
+            };
+
             Mock<OperatingModeBaseConfig> config = new Mock<OperatingModeBaseConfig>();
             _map = new OperatingModeBaseMap { AvailableActivePower = () => null, AvailableReactivePower = () => null };
             _rampActive = new Mock<IRampController>();
             _rampReactive = new Mock<IRampController>();
             _rampActive.Setup(x => x.ShallowCopy()).Returns(_rampReactive.Object);
-            _mode = new OperatingModeTest(NullLogger.Instance, TimeProvider.System, systemConfig.Object, config.Object, _map, _rampActive.Object);
+            _mode = new OperatingModeTest(NullLogger.Instance, TimeProvider.System, _systemConfig, config.Object, _map, _rampActive.Object);
         }
 
 
@@ -120,6 +131,38 @@ namespace paskalON.OperatingModes.Domain.UnitTest
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
+
+
+        [TestMethod]
+        public void SetActivePowerSetpointBiggerThanNameplateTest()
+        {
+            _systemConfig!.NameplateMaximumActivePowerKiloWatt = 100;
+            Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointActivePower = ActivePower.FromKilo(200));
+        }
+
+
+        [TestMethod]
+        public void SetActivePowerSetpointSmallerThanNameplateTest()
+        {
+            _systemConfig!.NameplateMinimumActivePowerKiloWatt = -100;
+            Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointActivePower = ActivePower.FromKilo(-200));
+        }
+
+
+        [TestMethod]
+        public void SetReactivePowerSetpointBiggerThanNameplateTest()
+        {
+            _systemConfig!.NameplateMaximumReactivePowerKiloVars = 100;
+            Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointReactivePower = ReactivePower.FromKilo(200));
+        }
+
+
+        [TestMethod]
+        public void SetReactivePowerSetpointSmallerThanNameplateTest()
+        {
+            _systemConfig!.NameplateMinimumReactivePowerKiloVars = -100;
+            Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointReactivePower = ReactivePower.FromKilo(-200));
+        }
 
 
         [TestMethod]
@@ -369,7 +412,6 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             Assert.AreEqual(20, _mode!.TargetActivePower.KiloWatts);
             Assert.AreEqual(10, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
         }
-
 
     }
 }

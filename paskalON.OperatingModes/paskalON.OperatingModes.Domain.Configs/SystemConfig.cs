@@ -39,9 +39,9 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// System reference voltage in Volts.
+        /// System reference voltage in kilo volts.
         /// </summary>
-        public double ReferenceVoltage
+        public double ReferenceKiloVoltage
         {
             get { return field; }
             set { ArgumentOutOfRangeException.ThrowIfNegative(field); field = value; }
@@ -49,13 +49,13 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Systems maximum voltage nameplate.
+        /// Systems maximum kilo voltage nameplate.
         /// </summary>
         /// <remarks>
         /// Maximum voltage nameplate refers to the highest operating voltage a system can continuously and safely operate.
         /// Most equipment are designed to operate safely with a voltage variation of +/- 10% from the rated nameplate.
         /// </remarks>
-        public double NameplateMaximumVoltage
+        public double NameplateMaximumKiloVoltage
         {
             get { return field; }
             set { ArgumentOutOfRangeException.ThrowIfNegative(field); field = value; }
@@ -63,9 +63,9 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Systems minimum voltage nameplate.
+        /// Systems minimum kilo voltage nameplate.
         /// </summary>
-        public double NameplateMinimumVoltage
+        public double NameplateMinimumKiloVoltage
         {
             get { return field; }
             set { field = value; }

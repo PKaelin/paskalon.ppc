@@ -139,6 +139,13 @@ namespace paskalON.OperatingModes.Domain
             {
                 lock (dataLock)
                 {
+                    if (value.KiloWatts < SystemConfig.NameplateMinimumActivePowerKiloWatt || value.KiloWatts > SystemConfig.NameplateMaximumActivePowerKiloWatt)
+                    {
+                        _logger.LogError("{Name} SetpointActivePower is outside the defined nameplates. Min: {NameplateMinimumActivePowerKiloWatt} Max: {NameplateMaximumActivePowerKiloWatt}", Name,
+                            SystemConfig.NameplateMinimumActivePowerKiloWatt, SystemConfig.NameplateMaximumActivePowerKiloWatt);
+                        throw new InvalidOperationException($"{Name} SetpointActivePower is outside the defined nameplates.");
+                    }
+
                     if (value.Watts != field.Watts)
                     {
                         field = value;
@@ -171,6 +178,13 @@ namespace paskalON.OperatingModes.Domain
             {
                 lock (dataLock)
                 {
+                    if (value.KiloVoltAmperesReactive < SystemConfig.NameplateMinimumReactivePowerKiloVars || value.KiloVoltAmperesReactive > SystemConfig.NameplateMaximumReactivePowerKiloVars)
+                    {
+                        _logger.LogError("{Name} SetpointReactivePower is outside the defined nameplates. Min: {NameplateMinimumReactivePowerKiloVars} Max: {NameplateMaximumReactivePowerKiloVars}", Name,
+                            SystemConfig.NameplateMinimumReactivePowerKiloVars, SystemConfig.NameplateMaximumReactivePowerKiloVars);
+                        throw new InvalidOperationException($"{Name} SetpointReactivePower is outside the defined nameplates.");
+                    }
+
                     if (value.VoltAmperesReactive != field.VoltAmperesReactive)
                     {
                         field = value;
