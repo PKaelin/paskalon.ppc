@@ -81,6 +81,8 @@ namespace paskalON.OperatingModes.Domain.OpenModes
 
                 if (targetActive != null)
                 {
+                    // Apply configured limits if configured
+                    targetActive = ApplyActiveLimits(targetActive.Value);
                     _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetActive.Value);
                     RampControllerActive.Start(TargetActivePower.KiloWatts, targetActive.Value);
                 }
@@ -94,6 +96,8 @@ namespace paskalON.OperatingModes.Domain.OpenModes
 
                 if (targetReactive != null)
                 {
+                    // Apply configured limits if configured
+                    targetReactive = ApplyReactiveLimits(targetReactive.Value);
                     _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetReactive.Value);
                     RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, targetReactive.Value);
                 }
@@ -103,6 +107,51 @@ namespace paskalON.OperatingModes.Domain.OpenModes
             }
 
             return Task.CompletedTask;
+        }
+
+
+        /// <summary>
+        /// Apply configured limits to targets if configured.
+        /// </summary>
+        /// <param name="targetSetpoint">The intended target.</param>
+        /// <returns>Target or limited target.</returns>
+        private double ApplyActiveLimits(double targetSetpoint)
+        {
+            if ((_config.MaximumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint > _config.MaximumActivePowerLimitKiloWatt.Value))
+            {
+                _logger.LogInformation("{Name} operating mode limited due MaximumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MaximumActivePowerLimitKiloWatt.Value;
+            }
+            else if ((_config.MinimumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint < _config.MinimumActivePowerLimitKiloWatt.Value))
+            {
+                _logger.LogInformation("{Name} operating mode limited due MinimumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MinimumActivePowerLimitKiloWatt.Value;
+            }
+
+            return targetSetpoint;
+        }
+
+
+        /// <summary>
+        /// Apply configured limits to targets if configured.
+        /// </summary>
+        /// <param name="targetSetpoint">The intended target.</param>
+        /// <returns>Target or limited target.</returns>
+        private double ApplyReactiveLimits(double targetSetpoint)
+        {
+            if ((_config.MaximumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint > _config.MaximumReactivePowerLimitKiloVars.Value))
+            {
+                _logger.LogInformation("{Name} operating mode limited due MaximumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MaximumReactivePowerLimitKiloVars.Value;
+            }
+            else if ((_config.MinimumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint < _config.MinimumReactivePowerLimitKiloVars.Value))
+            {
+                _logger.LogInformation("{Name} operating mode limited due MinimumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MinimumReactivePowerLimitKiloVars.Value;
+
+            }
+
+            return targetSetpoint;
         }
     }
 }
