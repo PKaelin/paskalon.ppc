@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Configs.Ramps;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -30,6 +31,16 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         public ReactivePower? LastSetpointReactive { get => _lastSetpointReactive; }
         public double TestGetActiveSetpoint() { return GetActivePowerTargetSetpoint(); }
         public double TestGetReactiveSetpoint() { return GetReactivePowerTargetSetpoint(); }
+        public double TestApplyActiveLimits(double targetSetpoint) { return ApplyActiveLimits(targetSetpoint); }
+        public double TestApplyReactiveLimits(double targetSetpoint) { return ApplyReactiveLimits(targetSetpoint); }
+    }
+
+
+    /// <summary>
+    /// Test class to test abstract base class.
+    /// </summary>
+    internal class OperatingModeConfigTest : OperatingModeBaseConfig
+    {
     }
 
 
@@ -41,6 +52,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         private Mock<IRampController>? _rampActive;
         private Mock<IRampController>? _rampReactive;
         private SystemConfig? _systemConfig;
+        private OperatingModeConfigTest? _config;
 
 
         [TestInitialize]
@@ -57,12 +69,20 @@ namespace paskalON.OperatingModes.Domain.UnitTest
                 NameplateMaximumReactivePowerKiloVars = double.MaxValue,
             };
 
-            Mock<OperatingModeBaseConfig> config = new Mock<OperatingModeBaseConfig>();
+            _config = new OperatingModeConfigTest
+            {
+                ChangedBy = "Test",
+                Name = "ActivePowerFixedModeConfig",
+                IsActive = true,
+                Type = OperatingModeType.Bess,
+                RampConfig = new Mock<RampBaseConfig>().Object,
+            };
+
             _map = new OperatingModeBaseMap { AvailableActivePower = () => null, AvailableReactivePower = () => null };
             _rampActive = new Mock<IRampController>();
             _rampReactive = new Mock<IRampController>();
             _rampActive.Setup(x => x.ShallowCopy()).Returns(_rampReactive.Object);
-            _mode = new OperatingModeTest(NullLogger.Instance, TimeProvider.System, _systemConfig, config.Object, _map, _rampActive.Object);
+            _mode = new OperatingModeTest(NullLogger.Instance, TimeProvider.System, _systemConfig, _config, _map, _rampActive.Object);
         }
 
 
@@ -413,5 +433,82 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             Assert.AreEqual(10, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
         }
 
+
+        [TestMethod]
+        public void ApplyActiveLimitsUpperOperatingModeLimitsTest()
+        {
+            _systemConfig!.NameplateMaximumActivePowerKiloWatt = 10;
+            _config!.MaximumActivePowerLimitKiloWatt = 5;
+
+            Assert.AreEqual(5, _mode!.TestApplyActiveLimits(20));
+        }
+
+
+        [TestMethod]
+        public void ApplyActiveLimitsUpperNameplateLimitsTest()
+        {
+            _systemConfig!.NameplateMaximumActivePowerKiloWatt = 10;
+            _config!.MaximumActivePowerLimitKiloWatt = null;
+
+            Assert.AreEqual(10, _mode!.TestApplyActiveLimits(20));
+        }
+
+
+        [TestMethod]
+        public void ApplyActiveLimitsLowerOperatingModeLimitsTest()
+        {
+            _systemConfig!.NameplateMinimumActivePowerKiloWatt = -10;
+            _config!.MinimumActivePowerLimitKiloWatt = -5;
+
+            Assert.AreEqual(-5, _mode!.TestApplyActiveLimits(-20));
+        }
+
+        [TestMethod]
+        public void ApplyActiveLimitsLowerNameplateLimitsTest()
+        {
+            _systemConfig!.NameplateMinimumActivePowerKiloWatt = -10;
+            _config!.MinimumActivePowerLimitKiloWatt = null;
+
+            Assert.AreEqual(-10, _mode!.TestApplyActiveLimits(-20));
+        }
+
+
+        [TestMethod]
+        public void ApplyReactiveLimitsUpperOperatingModeLimitsTest()
+        {
+            _systemConfig!.NameplateMaximumReactivePowerKiloVars = 10;
+            _config!.MaximumReactivePowerLimitKiloVars = 5;
+
+            Assert.AreEqual(5, _mode!.TestApplyReactiveLimits(20));
+        }
+
+
+        [TestMethod]
+        public void ApplyReactiveLimitsUpperNameplateLimitsTest()
+        {
+            _systemConfig!.NameplateMaximumReactivePowerKiloVars = 10;
+            _config!.MaximumReactivePowerLimitKiloVars = null;
+
+            Assert.AreEqual(10, _mode!.TestApplyReactiveLimits(20));
+        }
+
+
+        [TestMethod]
+        public void ApplyReactiveLimitsLowerOperatingModeLimitsTest()
+        {
+            _systemConfig!.NameplateMinimumReactivePowerKiloVars = -10;
+            _config!.MinimumReactivePowerLimitKiloVars = -5;
+
+            Assert.AreEqual(-5, _mode!.TestApplyReactiveLimits(-20));
+        }
+
+        [TestMethod]
+        public void ApplyReactiveLimitsLowerNameplateLimitsTest()
+        {
+            _systemConfig!.NameplateMinimumReactivePowerKiloVars = -10;
+            _config!.MinimumReactivePowerLimitKiloVars = null;
+
+            Assert.AreEqual(-10, _mode!.TestApplyReactiveLimits(-20));
+        }
     }
 }

@@ -110,48 +110,6 @@ namespace paskalON.OperatingModes.Domain.OpenModes
         }
 
 
-        /// <summary>
-        /// Apply configured limits to targets if configured.
-        /// </summary>
-        /// <param name="targetSetpoint">The intended target.</param>
-        /// <returns>Target or limited target.</returns>
-        private double ApplyActiveLimits(double targetSetpoint)
-        {
-            if ((_config.MaximumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint > _config.MaximumActivePowerLimitKiloWatt.Value))
-            {
-                _logger.LogInformation("{Name} operating mode limited due MaximumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MaximumActivePowerLimitKiloWatt.Value;
-            }
-            else if ((_config.MinimumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint < _config.MinimumActivePowerLimitKiloWatt.Value))
-            {
-                _logger.LogInformation("{Name} operating mode limited due MinimumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MinimumActivePowerLimitKiloWatt.Value;
-            }
 
-            return targetSetpoint;
-        }
-
-
-        /// <summary>
-        /// Apply configured limits to targets if configured.
-        /// </summary>
-        /// <param name="targetSetpoint">The intended target.</param>
-        /// <returns>Target or limited target.</returns>
-        private double ApplyReactiveLimits(double targetSetpoint)
-        {
-            if ((_config.MaximumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint > _config.MaximumReactivePowerLimitKiloVars.Value))
-            {
-                _logger.LogInformation("{Name} operating mode limited due MaximumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MaximumReactivePowerLimitKiloVars.Value;
-            }
-            else if ((_config.MinimumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint < _config.MinimumReactivePowerLimitKiloVars.Value))
-            {
-                _logger.LogInformation("{Name} operating mode limited due MinimumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MinimumReactivePowerLimitKiloVars.Value;
-
-            }
-
-            return targetSetpoint;
-        }
     }
 }

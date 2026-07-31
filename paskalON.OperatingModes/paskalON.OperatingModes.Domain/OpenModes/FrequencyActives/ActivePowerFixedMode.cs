@@ -66,7 +66,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
                 if (target != null)
                 {
                     // Apply configured limits if configured
-                    target = ApplyLimits(target.Value);
+                    target = ApplyActiveLimits(target.Value);
                     _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, target.Value);
                     RampControllerActive.Start(TargetActivePower.KiloWatts, target.Value);
                 }
@@ -76,28 +76,6 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
             }
 
             return Task.CompletedTask;
-        }
-
-
-        /// <summary>
-        /// Apply configured limits to targets if configured.
-        /// </summary>
-        /// <param name="targetSetpoint">The intended target.</param>
-        /// <returns>Target or limited target.</returns>
-        private double ApplyLimits(double targetSetpoint)
-        {
-            if ((_config.MaximumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint > _config.MaximumActivePowerLimitKiloWatt.Value))
-            {
-                _logger.LogInformation("{Name} operating mode limited due MaximumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MaximumActivePowerLimitKiloWatt.Value;
-            }
-            else if ((_config.MinimumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint < _config.MinimumActivePowerLimitKiloWatt.Value))
-            {
-                _logger.LogInformation("{Name} operating mode limited due MinimumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MinimumActivePowerLimitKiloWatt.Value;
-            }
-
-            return targetSetpoint;
         }
     }
 }

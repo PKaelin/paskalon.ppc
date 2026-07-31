@@ -558,5 +558,72 @@ namespace paskalON.OperatingModes.Domain
             }
         }
 
+
+        /// <summary>
+        /// Apply configured active power limits to targets if configured.
+        /// </summary>
+        /// <param name="targetSetpoint">The intended target.</param>
+        /// <returns>Target or limited target.</returns>
+        protected double ApplyActiveLimits(double targetSetpoint)
+        {
+            // Careful this is intentional. Local operating mode configuration can overwrite the nameplate
+            if ((_config.MaximumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint > _config.MaximumActivePowerLimitKiloWatt.Value))
+            {
+                _logger.LogWarning("{Name} operating mode limited due MaximumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MaximumActivePowerLimitKiloWatt.Value;
+            }
+            else if ((_config.MaximumActivePowerLimitKiloWatt.HasValue == false) && (targetSetpoint > SystemConfig.NameplateMaximumActivePowerKiloWatt))
+            {
+                _logger.LogWarning("{Name} operating mode limited due NameplateMaximumActivePowerKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = SystemConfig.NameplateMaximumActivePowerKiloWatt;
+            }
+            else if ((_config.MinimumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint < _config.MinimumActivePowerLimitKiloWatt.Value))
+            {
+                _logger.LogWarning("{Name} operating mode limited due MinimumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MinimumActivePowerLimitKiloWatt.Value;
+            }
+            else if ((_config.MinimumActivePowerLimitKiloWatt.HasValue == false) && (targetSetpoint < SystemConfig.NameplateMinimumActivePowerKiloWatt))
+            {
+                _logger.LogWarning("{Name} operating mode limited due NameplateMinimumActivePowerKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = SystemConfig.NameplateMinimumActivePowerKiloWatt;
+            }
+
+            return targetSetpoint;
+        }
+
+
+        /// <summary>
+        /// Apply configured reactive power limits to targets if configured.
+        /// </summary>
+        /// <param name="targetSetpoint">The intended target.</param>
+        /// <returns>Target or limited target.</returns>
+        protected double ApplyReactiveLimits(double targetSetpoint)
+        {
+            // Careful this is intentional. Local operating mode configuration can overwrite the nameplate
+            if ((_config.MaximumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint > _config.MaximumReactivePowerLimitKiloVars.Value))
+            {
+                _logger.LogInformation("{Name} operating mode limited due MaximumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MaximumReactivePowerLimitKiloVars.Value;
+            }
+            else if ((_config.MaximumReactivePowerLimitKiloVars.HasValue == false) && (targetSetpoint > SystemConfig.NameplateMaximumReactivePowerKiloVars))
+            {
+                _logger.LogWarning("{Name} operating mode limited due NameplateMaximumReactivePowerKiloVars configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = SystemConfig.NameplateMaximumReactivePowerKiloVars;
+            }
+            else if ((_config.MinimumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint < _config.MinimumReactivePowerLimitKiloVars.Value))
+            {
+                _logger.LogInformation("{Name} operating mode limited due MinimumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MinimumReactivePowerLimitKiloVars.Value;
+
+            }
+            else if ((_config.MinimumReactivePowerLimitKiloVars.HasValue == false) && (targetSetpoint < SystemConfig.NameplateMinimumReactivePowerKiloVars))
+            {
+                _logger.LogWarning("{Name} operating mode limited due NameplateMinimumReactivePowerKiloVars configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = SystemConfig.NameplateMinimumReactivePowerKiloVars;
+            }
+
+            return targetSetpoint;
+        }
+
     }
 }

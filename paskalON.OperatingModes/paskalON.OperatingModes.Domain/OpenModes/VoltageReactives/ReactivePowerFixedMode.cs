@@ -66,7 +66,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
                 if (targetSetpoint != null)
                 {
                     // Apply configured limits if configured
-                    targetSetpoint = ApplyLimits(targetSetpoint.Value);
+                    targetSetpoint = ApplyReactiveLimits(targetSetpoint.Value);
 
                     _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint.Value);
                     RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, targetSetpoint.Value);
@@ -77,29 +77,6 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
             }
 
             return Task.CompletedTask;
-        }
-
-
-        /// <summary>
-        /// Apply configured limits to targets if configured.
-        /// </summary>
-        /// <param name="targetSetpoint">The intended target.</param>
-        /// <returns>Target or limited target.</returns>
-        private double ApplyLimits(double targetSetpoint)
-        {
-            if ((_config.MaximumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint > _config.MaximumReactivePowerLimitKiloVars.Value))
-            {
-                _logger.LogInformation("{Name} operating mode limited due MaximumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MaximumReactivePowerLimitKiloVars.Value;
-            }
-            else if ((_config.MinimumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint < _config.MinimumReactivePowerLimitKiloVars.Value))
-            {
-                _logger.LogInformation("{Name} operating mode limited due MinimumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MinimumReactivePowerLimitKiloVars.Value;
-
-            }
-
-            return targetSetpoint;
         }
     }
 }
