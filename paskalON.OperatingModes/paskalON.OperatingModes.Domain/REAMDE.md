@@ -78,9 +78,9 @@ OperatingModes
 
 | Mode | Purpose | Inputs (for calculating output) | Output Controlled | What Output Influences |
 |------|---------|---------------------------------|-------------------|------------------------|
-| Active Power Fixed Mode | Set a fixed setpoint without feedback signal |  Active Power setpoint |  Active Power (P) |  Active Power |
-| Reactive Power Fixed Mode | Set a fixed setpoint without feedback signal | Reactive Power setpoint | Reactive Power (Q) | Reactive Power |
-| Maintenance Mode | Takes a unit out of available units and commands P and or Q setpoints | None |  Active Power (P) and or Reactive Power (Q) | Active and or Reactive Power |
+| Active Power Fixed Mode | Set a fixed setpoint without feedback signal |  Active Power setpoint, Available P |  Active Power (P) |  Active Power |
+| Reactive Power Fixed Mode | Set a fixed setpoint without feedback signal | Reactive Power setpoint, Available Q | Reactive Power (Q) | Reactive Power |
+| Maintenance Mode | Takes a unit out of available units and commands P and or Q setpoints | Active Power setpoint, Reactive Power setpoint, Available P&Q |  Active Power (P) and or Reactive Power (Q) | Active and or Reactive Power |
 
 
 #### Energy Resources Specific Open-Loop Modes

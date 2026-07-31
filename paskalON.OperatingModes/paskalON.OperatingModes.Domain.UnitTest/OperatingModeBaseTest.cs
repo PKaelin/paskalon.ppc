@@ -28,8 +28,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         public ActivePower? LastSetpointActive { get => _lastSetpointActive; }
         public ReactivePower? LastAvailableReactive { get => _lastAvailableReactive; }
         public ReactivePower? LastSetpointReactive { get => _lastSetpointReactive; }
-        public double TestGetActiveSetpoint() { return GetActivePowerSetpoint(); }
-        public double TestGetReactiveSetpoint() { return GetReactivePowerSetpoint(); }
+        public double TestGetActiveSetpoint() { return GetActivePowerTargetSetpoint(); }
+        public double TestGetReactiveSetpoint() { return GetReactivePowerTargetSetpoint(); }
     }
 
 

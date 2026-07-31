@@ -13,7 +13,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
     /// <summary>
     /// Mode: Active Power Fixed Mode
     /// Purpose: Set a fixed setpoint without feedback signal
-    /// Inputs: Active Power setpoint, Available active power
+    /// Inputs: Active Power setpoint, Available Active Power
     /// Output Controlled: Active Power (P)
     /// What Output Influences: Active Power
     /// </summary>
@@ -61,31 +61,14 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
             if (State != OperatingModeState.Disabled)
             {
                 ActivePower? available = _map.AvailableActivePower?.Invoke();
-                double? target = CheckNewActiveTarget(available);
+                double? target = CheckNewActiveTargetSetpoint(available);
 
                 if (target != null)
                 {
-                    // Restart/Start when setpoint wasn't set before or setpoint was 0 before and now it is not 0 anymore
-                    // Don't restart when if available gets bigger but still bigger than setpoint and setpoint hasn't changed
-                    if (target.Value != 0 && (_lastSetpointActive.HasValue == false || _lastSetpointActive.Value.Watts == 0) &&
-                       (target != _lastSetpointActive?.KiloWatts))
-                    {
-                        // In case things have changed after the Enable() command
-                        if (State == OperatingModeState.Enabling)
-                        {
-                            State = OperatingModeState.RampingToEnabled;
-                        }
-
-                        // Apply configured limits if configured
-                        target = ApplyLimits(target.Value);
-
-                        _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Target set to {Setpoint}", Name, target.Value);
-                        RampControllerActive.Start(TargetActivePower.KiloWatts, target.Value);
-                    }
-
-                    // Only now update the last available and the last setpoint
-                    _lastAvailableActive = available;
-                    _lastSetpointActive = SetpointActivePower;
+                    // Apply configured limits if configured
+                    target = ApplyLimits(target.Value);
+                    _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, target.Value);
+                    RampControllerActive.Start(TargetActivePower.KiloWatts, target.Value);
                 }
 
                 _targetActivePower.KiloWatts = RampControllerActive.Calculate();
@@ -99,22 +82,22 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
         /// <summary>
         /// Apply configured limits to targets if configured.
         /// </summary>
-        /// <param name="target">The intended target.</param>
+        /// <param name="targetSetpoint">The intended target.</param>
         /// <returns>Target or limited target.</returns>
-        private double ApplyLimits(double target)
+        private double ApplyLimits(double targetSetpoint)
         {
-            if ((_config.MaximumActivePowerLimitKiloWatt.HasValue == true) && (target > _config.MaximumActivePowerLimitKiloWatt.Value))
+            if ((_config.MaximumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint > _config.MaximumActivePowerLimitKiloWatt.Value))
             {
-                _logger.LogInformation("{Name} operating mode limited due MaximumActivePowerLimitKiloWatt configuration. Setpoint set to {Setpoint}", Name, target);
-                target = _config.MaximumActivePowerLimitKiloWatt.Value;
+                _logger.LogInformation("{Name} operating mode limited due MaximumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MaximumActivePowerLimitKiloWatt.Value;
             }
-            else if ((_config.MinimumActivePowerLimitKiloWatt.HasValue == true) && (target < _config.MinimumActivePowerLimitKiloWatt.Value))
+            else if ((_config.MinimumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint < _config.MinimumActivePowerLimitKiloWatt.Value))
             {
-                _logger.LogInformation("{Name} operating mode limited due MinimumActivePowerLimitKiloWatt configuration. Setpoint set to {Setpoint}", Name, target);
-                target = _config.MinimumActivePowerLimitKiloWatt.Value;
+                _logger.LogInformation("{Name} operating mode limited due MinimumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MinimumActivePowerLimitKiloWatt.Value;
             }
 
-            return target;
+            return targetSetpoint;
         }
     }
 }

@@ -13,7 +13,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
     /// <summary>
     /// Mode: Reactive Power Fixed Mode
     /// Purpose: Set a fixed setpoint without feedback signal
-    /// Inputs: Reactive Power setpoint, Available reactive power
+    /// Inputs: Reactive Power setpoint, Available Reactive Power
     /// Output Controlled: Reactive Power (Q)
     /// What Output Influences: Reactive Power
     /// </summary>
@@ -61,31 +61,15 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
             if (State != OperatingModeState.Disabled)
             {
                 ReactivePower? available = _map.AvailableReactivePower?.Invoke();
-                double? target = CheckNewReactiveTarget(available);
+                double? targetSetpoint = CheckNewReactiveTargetSetpoint(available);
 
-                if (target != null)
+                if (targetSetpoint != null)
                 {
-                    // Restart/Start when setpoint wasn't set before or setpoint was 0 before and now it is not 0 anymore
-                    // Don't restart when if available gets bigger but still bigger than setpoint and setpoint hasn't changed
-                    if (target.Value != 0 && (_lastSetpointReactive.HasValue == false || _lastSetpointReactive.Value.VoltAmperesReactive == 0) &&
-                       (target != _lastSetpointReactive?.KiloVoltAmperesReactive))
-                    {
-                        // In case things have changed after the Enable() command
-                        if (State == OperatingModeState.Enabling)
-                        {
-                            State = OperatingModeState.RampingToEnabled;
-                        }
+                    // Apply configured limits if configured
+                    targetSetpoint = ApplyLimits(targetSetpoint.Value);
 
-                        // Apply configured limits if configured
-                        target = ApplyLimits(target.Value);
-
-                        _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Target set to {Setpoint}", Name, target.Value);
-                        RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, target.Value);
-                    }
-
-                    // Only now update the last available and the last setpoint
-                    _lastAvailableReactive = available;
-                    _lastSetpointReactive = SetpointReactivePower;
+                    _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint.Value);
+                    RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, targetSetpoint.Value);
                 }
 
                 _targetReactivePower.KiloVoltAmperesReactive = RampControllerReactive.Calculate();
@@ -99,23 +83,23 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
         /// <summary>
         /// Apply configured limits to targets if configured.
         /// </summary>
-        /// <param name="target">The intended target.</param>
+        /// <param name="targetSetpoint">The intended target.</param>
         /// <returns>Target or limited target.</returns>
-        private double ApplyLimits(double target)
+        private double ApplyLimits(double targetSetpoint)
         {
-            if ((_config.MaximumReactivePowerLimitKiloVars.HasValue == true) && (target > _config.MaximumReactivePowerLimitKiloVars.Value))
+            if ((_config.MaximumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint > _config.MaximumReactivePowerLimitKiloVars.Value))
             {
-                _logger.LogInformation("{Name} operating mode limited due MaximumReactivePowerLimitKiloVars configuration. Setpoint set to {Setpoint}", Name, target);
-                target = _config.MaximumReactivePowerLimitKiloVars.Value;
+                _logger.LogInformation("{Name} operating mode limited due MaximumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MaximumReactivePowerLimitKiloVars.Value;
             }
-            else if ((_config.MinimumReactivePowerLimitKiloVars.HasValue == true) && (target < _config.MinimumReactivePowerLimitKiloVars.Value))
+            else if ((_config.MinimumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint < _config.MinimumReactivePowerLimitKiloVars.Value))
             {
-                _logger.LogInformation("{Name} operating mode limited due MinimumReactivePowerLimitKiloVars configuration. Setpoint set to {Setpoint}", Name, target);
-                target = _config.MinimumReactivePowerLimitKiloVars.Value;
+                _logger.LogInformation("{Name} operating mode limited due MinimumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MinimumReactivePowerLimitKiloVars.Value;
 
             }
 
-            return target;
+            return targetSetpoint;
         }
     }
 }

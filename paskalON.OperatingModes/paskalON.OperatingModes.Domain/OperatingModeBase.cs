@@ -10,10 +10,14 @@ using paskalON.PhysicalUnits.Electricals.Powers;
 namespace paskalON.OperatingModes.Domain
 {
     /// <summary>
-    /// Base class for all operating modes.
+    /// Base class for all operating modes that defines the specific behavior and control strategy
+    /// the system uses to interact with the power grid.
     /// </summary>
-    /// <remarks>
-    /// Operating Mode defines the specific behavior and control strategy the system uses to interact with the power grid.
+    /// <remarks>    
+    /// Definitions:
+    /// Setpoint -> Value set by an external process requesting to hit that setpoint within a definition.
+    /// TargetSetpoint -> Value that is either the setpoint or available power.
+    /// Target -> Value that is the current target considering ramp, curve, feedback calculations.
     /// </remarks>
     public abstract class OperatingModeBase : IOperatingMode
     {
@@ -273,11 +277,12 @@ namespace paskalON.OperatingModes.Domain
 
             if (State != OperatingModeState.Enabled)
             {
-                double setpointActive = GetActivePowerSetpoint();
-                double setpointReactive = GetReactivePowerSetpoint();
+                double setpointActive = GetActivePowerTargetSetpoint();
+                double setpointReactive = GetReactivePowerTargetSetpoint();
 
-                _logger.LogInformation("{Name} operating mode enabled. Active target: {ActiveTarget}. Reactive target: {ReactiveTarget}", Name, setpointActive, setpointReactive);
                 State = OperatingModeState.Enabling;
+                _logger.LogInformation("{Name} operating mode enabled. Active Target-Setpoint: {ActiveTargetSetpoint}. Reactive Target-Setpoint: {ReactiveTargetSetpoint}",
+                    Name, setpointActive, setpointReactive);
 
                 if (setpointActive != 0)
                 {
@@ -303,7 +308,7 @@ namespace paskalON.OperatingModes.Domain
 
             if (State != OperatingModeState.Disabled)
             {
-                _logger.LogInformation("{Name} operating mode disabled. Active target: {ActiveTarget}. Reactive target: {ReactiveTarget}", Name, 0, 0);
+                _logger.LogInformation("{Name} operating mode disabled. Active Target-Setpoint: {ActiveTargetSetpoint}. Reactive Target-Setpoint: {ReactiveTargetSetpoint}", Name, 0, 0);
                 SetpointActivePower = new ActivePower(0);
                 SetpointReactivePower = new ReactivePower(0);
                 State = OperatingModeState.RampingToDisabled;
@@ -314,12 +319,12 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Get the active power setpoint using setpoint and available power.
+        /// Get the active power target setpoint using setpoint and available power.
         /// </summary>
         /// <returns>Available power if setpoint is higher otherwise setpoint.</returns>        
-        protected double GetActivePowerSetpoint()
+        protected double GetActivePowerTargetSetpoint()
         {
-            double setpoint = 0;
+            double targetSetpoint = 0;
             ActivePower? available = AvailableActivePower;
             // Only change initial 0 setpoint when there is available power
             if (available != null)
@@ -327,12 +332,12 @@ namespace paskalON.OperatingModes.Domain
                 // Available is less then setpoint use available so that we dont set an unachievable setpoint.
                 if (Math.Abs(available.Value.KiloWatts) <= Math.Abs(SetpointActivePower.KiloWatts))
                 {
-                    setpoint = available.Value.KiloWatts;
+                    targetSetpoint = available.Value.KiloWatts;
                 }
                 // Available is more then setpoint use setpoint
                 else
                 {
-                    setpoint = SetpointActivePower.KiloWatts;
+                    targetSetpoint = SetpointActivePower.KiloWatts;
                 }
 
                 // Set last to the initial values
@@ -346,17 +351,17 @@ namespace paskalON.OperatingModes.Domain
                 _lastSetpointActive = null;
             }
 
-            return setpoint;
+            return targetSetpoint;
         }
 
 
         /// <summary>
-        /// Get the reactive power setpoint using setpoint and available power.
+        /// Get the reactive power target setpoint using setpoint and available power.
         /// </summary>
         /// <returns>Available power if setpoint is higher otherwise setpoint.</returns>
-        protected double GetReactivePowerSetpoint()
+        protected double GetReactivePowerTargetSetpoint()
         {
-            double setpoint = 0;
+            double targetSetpoint = 0;
             ReactivePower? available = AvailableReactivePower;
             // Only change initial 0 setpoint when there is available power
             if (available != null)
@@ -364,12 +369,12 @@ namespace paskalON.OperatingModes.Domain
                 // Available is less then setpoint use available so that we dont set an unachievable setpoint.
                 if (Math.Abs(available.Value.KiloVoltAmperesReactive) <= Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive))
                 {
-                    setpoint = available.Value.KiloVoltAmperesReactive;
+                    targetSetpoint = available.Value.KiloVoltAmperesReactive;
                 }
                 // Available is more then setpoint use setpoint
                 else
                 {
-                    setpoint = SetpointReactivePower.KiloVoltAmperesReactive;
+                    targetSetpoint = SetpointReactivePower.KiloVoltAmperesReactive;
                 }
 
                 // Set last to the initial values
@@ -383,7 +388,7 @@ namespace paskalON.OperatingModes.Domain
                 _lastSetpointReactive = null;
             }
 
-            return setpoint;
+            return targetSetpoint;
         }
 
 
@@ -392,9 +397,9 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         /// <param name="available">The current available power.</param>
         /// <returns>Returns the new target if there has been a change otherwise null.</returns>
-        protected double? CheckNewActiveTarget(ActivePower? available)
+        protected double? CheckNewActiveTargetSetpoint(ActivePower? available)
         {
-            double? retval = null;
+            double? targetSetpoint = null;
             // If available is outside deadband of lastAvailable or if setpoint is outside deadband of lastSetpoint
             if (State != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableActive != null && _lastSetpointActive != null) &&
                   ((Math.Abs(available.Value.KiloWatts) > (Math.Abs(_lastAvailableActive.Value.KiloWatts) + _config.DeadbandAvailableKilo)) ||
@@ -403,16 +408,42 @@ namespace paskalON.OperatingModes.Domain
                 // Available is less then setpoint use available so that we dont set an unachievable setpoint.
                 if (Math.Abs(available.Value.KiloWatts) <= Math.Abs(SetpointActivePower.KiloWatts))
                 {
-                    retval = available.Value.KiloWatts;
+                    targetSetpoint = available.Value.KiloWatts;
+                    _logger.LogDebug("{Name} new available for active power", Name);
                 }
                 // Available is more then setpoint use setpoint
                 else
                 {
-                    retval = SetpointActivePower.KiloWatts;
+                    targetSetpoint = SetpointActivePower.KiloWatts;
+                    _logger.LogDebug("{Name} new setpoint for active power", Name);
+                }
+
+                if (targetSetpoint != null)
+                {
+                    // Restart/Start when setpoint wasn't set before or setpoint was 0 before and now it is not 0 anymore
+                    // Don't restart when if available gets bigger but still bigger than setpoint and setpoint hasn't changed
+                    if (targetSetpoint.Value != 0 && (_lastSetpointActive.HasValue == false || _lastSetpointActive.Value.Watts == 0) &&
+                       (targetSetpoint != _lastSetpointActive?.KiloWatts))
+                    {
+                        // In case things have changed after the Enable() command
+                        if (State == OperatingModeState.Enabling)
+                        {
+                            State = OperatingModeState.RampingToEnabled;
+                        }
+                    }
+                    else
+                    {
+                        // Target hasn't changed so don't return a value
+                        targetSetpoint = null;
+                    }
+
+                    // Only now update the last available and the last setpoint
+                    _lastAvailableActive = available;
+                    _lastSetpointActive = SetpointActivePower;
                 }
             }
 
-            return retval;
+            return targetSetpoint;
         }
 
 
@@ -438,6 +469,8 @@ namespace paskalON.OperatingModes.Domain
                     State = OperatingModeState.Disabled;
                     RampControllerActive.Stop();
                 }
+
+                _logger.LogDebug("{Name} final target reached setpoint for active power: {ActiveTargetSetpoint}", Name, _targetActivePower.KiloWatts);
             }
         }
 
@@ -447,9 +480,9 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         /// <param name="available">The current available power.</param>
         /// <returns>Returns the new target if there has been a change otherwise null.</returns>
-        protected double? CheckNewReactiveTarget(ReactivePower? available)
+        protected double? CheckNewReactiveTargetSetpoint(ReactivePower? available)
         {
-            double? retval = null;
+            double? targetSetpoint = null;
             // If available is outside deadband of lastAvailable or if setpoint is outside deadband of lastSetpoint
             if (State != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableReactive != null && _lastSetpointReactive != null) &&
                   ((Math.Abs(available.Value.KiloVoltAmperesReactive) > (Math.Abs(_lastAvailableReactive.Value.KiloVoltAmperesReactive) + _config.DeadbandAvailableKilo)) ||
@@ -458,16 +491,42 @@ namespace paskalON.OperatingModes.Domain
                 // Available is less then setpoint use available so that we dont set an unachievable setpoint.
                 if (Math.Abs(available.Value.KiloVoltAmperesReactive) <= Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive))
                 {
-                    retval = available.Value.KiloVoltAmperesReactive;
+                    targetSetpoint = available.Value.KiloVoltAmperesReactive;
+                    _logger.LogDebug("{Name} new available for reactive power.", Name);
                 }
                 // Available is more then setpoint use setpoint
                 else
                 {
-                    retval = SetpointReactivePower.KiloVoltAmperesReactive;
+                    targetSetpoint = SetpointReactivePower.KiloVoltAmperesReactive;
+                    _logger.LogDebug("{Name} new setpoint for reactive power.", Name);
+                }
+
+                if (targetSetpoint != null)
+                {
+                    // Restart/Start when setpoint wasn't set before or setpoint was 0 before and now it is not 0 anymore
+                    // Don't restart when if available gets bigger but still bigger than setpoint and setpoint hasn't changed
+                    if (targetSetpoint.Value != 0 && (_lastSetpointReactive.HasValue == false || _lastSetpointReactive.Value.VoltAmperesReactive == 0) &&
+                       (targetSetpoint != _lastSetpointReactive?.KiloVoltAmperesReactive))
+                    {
+                        // In case things have changed after the Enable() command
+                        if (State == OperatingModeState.Enabling)
+                        {
+                            State = OperatingModeState.RampingToEnabled;
+                        }
+                    }
+                    else
+                    {
+                        // Target hasn't changed so don't return a value as there is no need to start/restart ramp
+                        targetSetpoint = null;
+                    }
+
+                    // Only now update the last available and the last setpoint
+                    _lastAvailableReactive = available;
+                    _lastSetpointReactive = SetpointReactivePower;
                 }
             }
 
-            return retval;
+            return targetSetpoint;
         }
 
 
@@ -494,6 +553,8 @@ namespace paskalON.OperatingModes.Domain
                     State = OperatingModeState.Disabled;
                     RampControllerReactive.Stop();
                 }
+
+                _logger.LogDebug("{Name} final target reached setpoint for reactive power: {ReactiveTargetSetpoint}", Name, _targetReactivePower.KiloVoltAmperesReactive);
             }
         }
 
