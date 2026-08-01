@@ -8,7 +8,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageActives
     /// <summary>
     /// Voltage watt droop mode configuration.
     /// </summary
-    public class VoltageWattDroopModeConfig : OperatingModeBaseConfig
+    public class VoltageWattDroopModeConfig : OperatingClosedModeBaseConfig
     {
         /// <summary>
         /// Curve configuration of this operating mode.

@@ -11,8 +11,8 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     public class ActivePowerModeMap : OperatingModeBaseMap
     {
         /// <summary>
-        /// Active power map.
+        /// Active power at the POI map.
         /// </summary>
-        public required Func<ActivePower?> ActivePower { get; set; }
+        public required Func<ActivePower?> ActivePowerAtPoi { get; set; }
     }
 }

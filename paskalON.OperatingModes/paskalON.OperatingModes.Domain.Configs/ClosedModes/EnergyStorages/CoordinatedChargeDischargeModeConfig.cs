@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.EnergyStorages
     /// <summary>
     /// Coordinated charge discharge mode configuration.
     /// </summary>
-    public class CoordinatedChargeDischargeModeConfig : OperatingModeBaseConfig
+    public class CoordinatedChargeDischargeModeConfig : OperatingClosedModeBaseConfig
     {
         /// <summary>
         /// Maximum storage reserve deadband.

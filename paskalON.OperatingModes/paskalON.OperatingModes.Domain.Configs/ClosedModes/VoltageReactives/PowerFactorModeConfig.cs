@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives
     /// <summary>
     /// Power factor mode configuration.
     /// </summary>
-    public class PowerFactorModeConfig : OperatingModeBaseConfig
+    public class PowerFactorModeConfig : OperatingClosedModeBaseConfig
     {
         /// <summary>
         /// Power factor target.

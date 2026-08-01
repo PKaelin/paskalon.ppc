@@ -8,7 +8,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives
     /// <summary>
     /// Frequency droop mode configuration.
     /// </summary>
-    public class FrequencyDroopModeConfig : OperatingModeBaseConfig
+    public class FrequencyDroopModeConfig : OperatingClosedModeBaseConfig
     {
         /// <summary>
         /// Amount of time (in milliseconds) to wait before responding to a healthy condition.

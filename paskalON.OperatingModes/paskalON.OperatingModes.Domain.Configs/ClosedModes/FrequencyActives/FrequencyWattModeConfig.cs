@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives
     /// <summary>
     /// Frequency watt mode configuration.
     /// </summary>
-    public class FrequencyWattModeConfig : OperatingModeBaseConfig
+    public class FrequencyWattModeConfig : OperatingClosedModeBaseConfig
     {
         /// <summary>
         /// Amount of time (in milliseconds) to wait before responding to a healthy condition.

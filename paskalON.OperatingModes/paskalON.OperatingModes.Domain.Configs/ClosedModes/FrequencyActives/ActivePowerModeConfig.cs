@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives
     /// <summary>
     /// Active power mode configuration.
     /// </summary>
-    public class ActivePowerModeConfig : OperatingModeBaseConfig
+    public class ActivePowerModeConfig : OperatingClosedModeBaseConfig
     {
     }
 }

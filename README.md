@@ -8,10 +8,13 @@ This project is not yet an actual power plant controller.
 - Implemented partial: C37 protocol, Mobus protocol, Physical Units, Maths, Telemetry, Device infrastructure.
 - Implemented metrics publisher [See](#metrics-publisher)
 - Implemented dataface [See](./paskalON.DeviceService/README.md#dataface)
+
 - Readme device service: [See](./paskalON.DeviceService/README.md)
 - Implemented device service domain: [See](./paskalON.DeviceService/paskalON.Devices.Domain/README.md)
 - Implemented device service config: [See](./paskalON.DeviceService/paskalON.Devices.Domain.Configs/README.md)
 
+- Implemented operating mode domain open loop [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/REAMDE.md#open-mode-open-loop-control)
+- Implemented operating mode domain open loop MPPT [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/REAMDE.md#energy-resources-specific-open-loop-modes)
 ---
 ---
 

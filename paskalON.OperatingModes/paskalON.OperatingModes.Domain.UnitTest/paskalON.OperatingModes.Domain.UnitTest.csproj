@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <Folder Include="ClosedModes\EnergyStorages\" />
-    <Folder Include="ClosedModes\FrequencyActives\" />
     <Folder Include="ClosedModes\VoltageActives\" />
     <Folder Include="ClosedModes\VoltageReactives\" />
   </ItemGroup>

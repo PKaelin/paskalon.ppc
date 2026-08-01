@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes
     /// <summary>
     /// Maintenance SOC mode configuration.
     /// </summary>
-    public class MaintenanceSocModeConfig : OperatingModeBaseConfig
+    public class MaintenanceSocModeConfig : OperatingClosedModeBaseConfig
     {
         /// <summary>
         /// Flag whether to use a target state of charge or not in case the

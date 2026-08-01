@@ -453,24 +453,27 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         protected void CheckFinalActiveTarget()
         {
-            // Set final target and change state to enabled if we are within a deadband
-            if (Math.Abs(TargetActivePower.KiloWatts) > (Math.Abs(SetpointActivePower.KiloWatts) - _config.DeadbandSetpointKilo))
+            if (State != OperatingModeState.Enabled && State != OperatingModeState.Disabled)
             {
-                if (State == OperatingModeState.RampingToEnabled)
+                // Set final target and change state to enabled if we are within a deadband
+                if (Math.Abs(TargetActivePower.KiloWatts) > (Math.Abs(SetpointActivePower.KiloWatts) - _config.DeadbandSetpointKilo))
                 {
-                    // Once within deadband we set the actual the precise target regardless available and set state to enabled 
-                    _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
-                    State = OperatingModeState.Enabled;
-                }
-                else if (State == OperatingModeState.RampingToDisabled)
-                {
-                    // Once within deadband we set the actual the precise target regardless available and set state to disabled
-                    _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
-                    State = OperatingModeState.Disabled;
-                    RampControllerActive.Stop();
-                }
+                    if (State == OperatingModeState.RampingToEnabled)
+                    {
+                        // Once within deadband we set the actual the precise target regardless available and set state to enabled 
+                        _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
+                        State = OperatingModeState.Enabled;
+                    }
+                    else if (State == OperatingModeState.RampingToDisabled)
+                    {
+                        // Once within deadband we set the actual the precise target regardless available and set state to disabled
+                        _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
+                        State = OperatingModeState.Disabled;
+                        RampControllerActive.Stop();
+                    }
 
-                _logger.LogDebug("{Name} final target reached setpoint for active power: {ActiveTargetSetpoint}", Name, _targetActivePower.KiloWatts);
+                    _logger.LogDebug("{Name} final target reached setpoint for active power: {ActiveTargetSetpoint}", Name, _targetActivePower.KiloWatts);
+                }
             }
         }
 
@@ -537,24 +540,27 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         protected void CheckFinalReactiveTarget()
         {
-            // Set final target and change state to enabled if we are within a deadband
-            if (Math.Abs(TargetReactivePower.KiloVoltAmperesReactive) > (Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive) - _config.DeadbandSetpointKilo))
+            if (State != OperatingModeState.Enabled && State != OperatingModeState.Disabled)
             {
-                if (State == OperatingModeState.RampingToEnabled)
+                // Set final target and change state to enabled if we are within a deadband
+                if (Math.Abs(TargetReactivePower.KiloVoltAmperesReactive) > (Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive) - _config.DeadbandSetpointKilo))
                 {
-                    // Once within deadband we set the actual the precise target regardless available and set state to enabled 
-                    _targetReactivePower.KiloVoltAmperesReactive = SetpointReactivePower.KiloVoltAmperesReactive;
-                    State = OperatingModeState.Enabled;
-                }
-                else if (State == OperatingModeState.RampingToDisabled)
-                {
-                    // Once within deadband we set the actual the precise target regardless available and set state to disabled
-                    _targetReactivePower.KiloVoltAmperesReactive = SetpointReactivePower.KiloVoltAmperesReactive;
-                    State = OperatingModeState.Disabled;
-                    RampControllerReactive.Stop();
-                }
+                    if (State == OperatingModeState.RampingToEnabled)
+                    {
+                        // Once within deadband we set the actual the precise target regardless available and set state to enabled 
+                        _targetReactivePower.KiloVoltAmperesReactive = SetpointReactivePower.KiloVoltAmperesReactive;
+                        State = OperatingModeState.Enabled;
+                    }
+                    else if (State == OperatingModeState.RampingToDisabled)
+                    {
+                        // Once within deadband we set the actual the precise target regardless available and set state to disabled
+                        _targetReactivePower.KiloVoltAmperesReactive = SetpointReactivePower.KiloVoltAmperesReactive;
+                        State = OperatingModeState.Disabled;
+                        RampControllerReactive.Stop();
+                    }
 
-                _logger.LogDebug("{Name} final target reached setpoint for reactive power: {ReactiveTargetSetpoint}", Name, _targetReactivePower.KiloVoltAmperesReactive);
+                    _logger.LogDebug("{Name} final target reached setpoint for reactive power: {ReactiveTargetSetpoint}", Name, _targetReactivePower.KiloVoltAmperesReactive);
+                }
             }
         }
 

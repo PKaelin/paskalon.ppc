@@ -6,16 +6,43 @@ using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
+using paskalON.PhysicalUnits.Electricals.Powers;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 {
+    /// <summary>
+    /// Mode: Active Power Mode
+    /// Purpose: Fixed Watt setpoint
+    /// Inputs: Active Power setpoint, Available Active Power, Measured Active Power at POI
+    /// Output Controlled: Active Power (P)
+    /// What Output Influences: Active Power, Grid frequency, Power Balance
+    /// </summary>
     public class ActivePowerMode : OperatingClosedModeBase
     {
+        /// <summary>
+        /// Active power mode configuration.
+        /// </summary>
         protected readonly ActivePowerModeConfig _config;
+
+
+        /// <summary>
+        /// Active power mode map.
+        /// </summary>
         protected readonly ActivePowerModeMap _map;
 
+
+        /// <summary>
+        /// Constructor of <see cref="ActivePowerMode"/>.
+        /// </summary>
+        /// <param name="logger">Logger for handling logging and diagnostics.</param>
+        /// <param name="timeProvider">The time provider (TimeProvider.System for prod, FakeTimeProvider for tests.</param>
+        /// <param name="systemConfig">The system configuration.</param>
+        /// <param name="config">The operating mode configuration.</param>
+        /// <param name="map">Input mapping class for signals.</param>
+        /// <param name="rampController">The ramp controller interface.</param>
+        /// <param name="curveController">The curve controller interface.</param>
         public ActivePowerMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, ActivePowerModeConfig config,
-            ActivePowerModeMap map, IRampController rampController, ICurveController? curveController)
+            ActivePowerModeMap map, IRampController rampController, ICurveController? curveController = null)
             : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
@@ -26,9 +53,44 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
         }
 
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            if (State != OperatingModeState.Disabled)
+            {
+                ActivePower? available = _map.AvailableActivePower?.Invoke();
+                double? target = CheckNewActiveTargetSetpoint(available);
+
+                if (target != null)
+                {
+                    // Apply configured limits if configured
+                    target = ApplyActiveLimits(target.Value);
+                    _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, target.Value);
+                    RampControllerActive.Start(TargetActivePower.KiloWatts, target.Value);
+                }
+
+                // TODO: What about the delay in setting the device target and the meters read?
+
+                // Calculate the error between the current target and the measured feedback
+                double powerAtPoi = _map.ActivePowerAtPoi?.Invoke()?.Watts ?? 0;
+                // Don't try to fix minor noise. Set the error adjustment within this statement
+                if (Math.Abs(TargetActivePower.Watts - powerAtPoi) < _config.DeadbandErrorKilo * 1000)
+                {
+                    _errorAdjustmentActive.Watts = 0;
+                }
+                else
+                {
+                    _errorAdjustmentActive.Watts = TargetActivePower.Watts - powerAtPoi;
+                }
+
+                // Include th error into the next iteration
+                _targetActivePower.KiloWatts = RampControllerActive.Calculate() + _errorAdjustmentActive.KiloWatts;
+                CheckFinalActiveTarget();
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

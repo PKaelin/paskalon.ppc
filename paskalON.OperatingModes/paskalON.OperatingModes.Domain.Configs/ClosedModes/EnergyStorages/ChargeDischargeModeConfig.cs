@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.EnergyStorages
     /// <summary>
     /// Charge discharge mode configuration.
     /// </summary>
-    public class ChargeDischargeModeConfig : OperatingModeBaseConfig
+    public class ChargeDischargeModeConfig : OperatingClosedModeBaseConfig
     {
         /// <summary>
         /// Maximum storage reserve deadband.

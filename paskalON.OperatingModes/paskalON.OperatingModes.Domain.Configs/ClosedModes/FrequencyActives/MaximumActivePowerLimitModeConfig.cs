@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives
     /// <summary>
     /// Maximum active power limit mode configuration.
     /// </summary>
-    public class MaximumActivePowerLimitModeConfig : OperatingModeBaseConfig
+    public class MaximumActivePowerLimitModeConfig : OperatingClosedModeBaseConfig
     {
         /// <summary>
         /// Maximum active power limit.

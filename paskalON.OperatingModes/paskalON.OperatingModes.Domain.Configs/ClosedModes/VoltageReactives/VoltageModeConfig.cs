@@ -6,7 +6,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives
     /// <summary>
     /// Voltage mode configuration.
     /// </summary>
-    public class VoltageModeConfig : OperatingModeBaseConfig
+    public class VoltageModeConfig : OperatingClosedModeBaseConfig
     {
     }
 }
