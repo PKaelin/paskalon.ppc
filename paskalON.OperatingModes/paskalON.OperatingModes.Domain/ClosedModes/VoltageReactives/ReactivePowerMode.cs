@@ -20,6 +20,12 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
     public class ReactivePowerMode : OperatingClosedModeBase
     {
         /// <summary>
+        /// Last reactive power at point of interconnection (POI).
+        /// </summary>
+        private double? _lastReactivePowerAtPoi;
+
+
+        /// <summary>
         /// Reactive power mode configuration.
         /// </summary>
         protected readonly ReactivePowerModeConfig _config;
@@ -81,10 +87,16 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
                 }
                 else
                 {
-                    // Apply proportional gain to the error to calculate the adjustment for the next iteration
-                    _errorAdjustmentReactive.KiloVoltAmperesReactive = (TargetReactivePower.VoltAmperesReactive - powerAtPoi) * _config.ProportionalGain / 1000;
+                    // Do not increase if last reactive power at POI is stuck somehow
+                    if (_lastReactivePowerAtPoi.HasValue == false || _lastReactivePowerAtPoi.Value != powerAtPoi)
+                    {
+                        // Apply proportional gain to the error to calculate the adjustment for the next iteration
+                        _errorAdjustmentReactive.KiloVoltAmperesReactive = (TargetReactivePower.VoltAmperesReactive - powerAtPoi) * _config.ProportionalGain / 1000;
+                    }
                 }
 
+                // Set last reactive power
+                _lastReactivePowerAtPoi = powerAtPoi;
                 // Include the error into the next iteration but don't exceed the configured limits
                 _targetReactivePower.KiloVoltAmperesReactive = ApplyReactiveLimits(RampControllerReactive.Calculate() + _errorAdjustmentReactive.KiloVoltAmperesReactive);
                 CheckFinalReactiveTarget();

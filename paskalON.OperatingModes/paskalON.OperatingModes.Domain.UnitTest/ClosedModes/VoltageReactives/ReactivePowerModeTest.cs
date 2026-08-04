@@ -349,6 +349,53 @@ namespace paskalON.OperatingModes.Domain.UnitTest.ClosedModes.VoltageReactives
 
 
         [TestMethod]
+        public void CalculateModeEnabledAvailableSetpointErrorOutsideDeadbandCalculateMultipleTest()
+        {
+            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(1000);
+            _mode!.SetpointReactivePower = ReactivePower.FromKilo(1000);
+            _config!.DeadbandErrorKilo = 20;
+            _mode!.Enable();
+            _rampReactive!.Setup(x => x.Calculate()).Returns(1000);
+            _mode!.CalculateAsync();
+            _map!.ReactivePowerAtPoi = () => ReactivePower.FromKilo(950);
+            _mode!.CalculateAsync();
+            _mode!.CalculateAsync();
+            _mode!.CalculateAsync();
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
+            Assert.AreEqual(1050, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
+            Assert.AreEqual(50, _mode!.ErrorAdjustmentReactive.KiloVoltAmperesReactive);
+            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
+            _rampReactive!.Verify(x => x.Start(0, 1000), Times.Once);
+        }
+
+
+        [TestMethod]
+        public void CalculateModeEnabledAvailableSetpointErrorOutsideDeadbandCalculateMultipleChangePoiTest()
+        {
+            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(1000);
+            _mode!.SetpointReactivePower = ReactivePower.FromKilo(1000);
+            _config!.DeadbandErrorKilo = 20;
+            _mode!.Enable();
+            _rampReactive!.Setup(x => x.Calculate()).Returns(1000);
+            _mode!.CalculateAsync();
+            _map!.ReactivePowerAtPoi = () => ReactivePower.FromKilo(950);
+            _mode!.CalculateAsync();
+            _mode!.CalculateAsync();
+            _map!.ReactivePowerAtPoi = () => ReactivePower.FromKilo(951);
+            _mode!.CalculateAsync();
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
+            Assert.AreEqual(1099, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
+            Assert.AreEqual(99, _mode!.ErrorAdjustmentReactive.KiloVoltAmperesReactive);
+            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
+            _rampReactive!.Verify(x => x.Start(0, 1000), Times.Once);
+        }
+
+
+        [TestMethod]
         public void CalculateModeEnabledAvailableSetpointRampGainTest()
         {
             _config!.ProportionalGain = 0.5;

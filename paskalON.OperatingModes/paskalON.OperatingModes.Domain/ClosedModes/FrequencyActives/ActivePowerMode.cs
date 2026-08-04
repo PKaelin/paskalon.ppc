@@ -20,6 +20,12 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     public class ActivePowerMode : OperatingClosedModeBase
     {
         /// <summary>
+        /// Last active power at point of interconnection (POI).
+        /// </summary>
+        private double? _lastActivePowerAtPoi;
+
+
+        /// <summary>
         /// Active power mode configuration.
         /// </summary>
         protected readonly ActivePowerModeConfig _config;
@@ -73,6 +79,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 
                 // Calculate the error between the current target and the measured feedback
                 double powerAtPoi = _map.ActivePowerAtPoi?.Invoke()?.Watts ?? 0;
+
                 // Don't try to fix minor noise. Set the error adjustment within this statement
                 if (Math.Abs(TargetActivePower.Watts - powerAtPoi) < _config.DeadbandErrorKilo * 1000)
                 {
@@ -80,10 +87,16 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
                 }
                 else
                 {
-                    // Apply proportional gain to the error to calculate the adjustment for the next iteration
-                    _errorAdjustmentActive.KiloWatts = (TargetActivePower.Watts - powerAtPoi) * _config.ProportionalGain / 1000;
+                    // Do not increase if last active power at POI is stuck somehow
+                    if (_lastActivePowerAtPoi.HasValue == false || _lastActivePowerAtPoi.Value != powerAtPoi)
+                    {
+                        // Apply proportional gain to the error to calculate the adjustment for the next iteration
+                        _errorAdjustmentActive.KiloWatts = (TargetActivePower.Watts - powerAtPoi) * _config.ProportionalGain / 1000;
+                    }
                 }
 
+                // Set last active power
+                _lastActivePowerAtPoi = powerAtPoi;
                 // Include the error into the next iteration but don't exceed the configured limits
                 _targetActivePower.KiloWatts = ApplyActiveLimits(RampControllerActive.Calculate() + _errorAdjustmentActive.KiloWatts);
                 CheckFinalActiveTarget();

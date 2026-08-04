@@ -348,6 +348,53 @@ namespace paskalON.OperatingModes.Domain.UnitTest.ClosedModes.FrequencyActives
 
 
         [TestMethod]
+        public void CalculateModeEnabledAvailableSetpointErrorOutsideDeadbandCalculateMultipleTest()
+        {
+            _map!.AvailableActivePower = () => ActivePower.FromKilo(1000);
+            _mode!.SetpointActivePower = ActivePower.FromKilo(1000);
+            _config!.DeadbandErrorKilo = 20;
+            _mode!.Enable();
+            _rampActive!.Setup(x => x.Calculate()).Returns(1000);
+            _mode!.CalculateAsync();
+            _map!.ActivePowerAtPoi = () => ActivePower.FromKilo(950);
+            _mode!.CalculateAsync();
+            _mode!.CalculateAsync();
+            _mode!.CalculateAsync();
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(1050, _mode!.TargetActivePower.KiloWatts);
+            Assert.AreEqual(50, _mode!.ErrorAdjustmentActive.KiloWatts);
+            _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 1000), Times.Once);
+        }
+
+
+        [TestMethod]
+        public void CalculateModeEnabledAvailableSetpointErrorOutsideDeadbandCalculateMultipleChangePoiTest()
+        {
+            _map!.AvailableActivePower = () => ActivePower.FromKilo(1000);
+            _mode!.SetpointActivePower = ActivePower.FromKilo(1000);
+            _config!.DeadbandErrorKilo = 20;
+            _mode!.Enable();
+            _rampActive!.Setup(x => x.Calculate()).Returns(1000);
+            _mode!.CalculateAsync();
+            _map!.ActivePowerAtPoi = () => ActivePower.FromKilo(950);
+            _mode!.CalculateAsync();
+            _mode!.CalculateAsync();
+            _map!.ActivePowerAtPoi = () => ActivePower.FromKilo(951);
+            _mode!.CalculateAsync();
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(1099, _mode!.TargetActivePower.KiloWatts);
+            Assert.AreEqual(99, _mode!.ErrorAdjustmentActive.KiloWatts);
+            _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 1000), Times.Once);
+        }
+
+
+        [TestMethod]
         public void CalculateModeEnabledAvailableSetpointRampGainTest()
         {
             _config!.ProportionalGain = 0.5;
