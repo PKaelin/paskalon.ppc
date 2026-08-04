@@ -9,6 +9,12 @@ namespace paskalON.Telemetry
     public interface IMetricsPublisher
     {
         /// <summary>
+        /// Gets or sets a value indicating whether the metrics publisher is enabled. If set to false, metrics will not be published.
+        /// </summary>
+        bool IsEnabled { get; set; }
+
+
+        /// <summary>
         /// Initialized the metrics publisher instance.
         /// </summary>
         /// <param name="measurement">The name of the measurement for the metrics</param>

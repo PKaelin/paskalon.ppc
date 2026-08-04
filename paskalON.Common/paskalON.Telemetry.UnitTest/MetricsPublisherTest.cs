@@ -99,7 +99,7 @@ namespace paskalON.Telemetry.UnitTest
 
 
         [TestMethod]
-        public void PublishAllIntervalOfOneNulleableTest()
+        public void PublishAllIntervalOfOneNullableTest()
         {
             MetricsPublisher publisher = new MetricsPublisher();
             MetricsPublisherHelperNullable helper = new MetricsPublisherHelperNullable(publisher) { CounterValue = 1, GaugeValue = null, UpDownValue = null };
@@ -159,6 +159,30 @@ namespace paskalON.Telemetry.UnitTest
             Assert.AreEqual(3, colCounter.GetMeasurementSnapshot().Last().Value);
             Assert.AreEqual(3, colGauge.GetMeasurementSnapshot().Last().Value);
             Assert.AreEqual(5, colUpDown.GetMeasurementSnapshot().Last().Value);
+        }
+
+
+        [TestMethod]
+        public void PublishAllIntervalOfOneEnabledFalseTest()
+        {
+            MetricsPublisher publisher = new MetricsPublisher();
+            MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
+
+            publisher.Initialize(nameof(MetricsPublisherHelper), _tags);
+            publisher.Register<MetricsPublisherHelper, int>(helper, "CounterValue", MetricType.Counter, x => x.CounterValue, 1);
+            publisher.Register<MetricsPublisherHelper, double>(helper, "GaugeValue", MetricType.Gauge, x => x.GaugeValue, 1);
+            publisher.Register<MetricsPublisherHelper, int>(helper, "UpDownValue", MetricType.UpDownCounter, x => x.UpDownValue, 1);
+
+            MetricCollector<int> colCounter = new MetricCollector<int>(publisher.Meter!, "CounterValue");
+            MetricCollector<double> colGauge = new MetricCollector<double>(publisher.Meter!, "GaugeValue");
+            MetricCollector<int> colUpDown = new MetricCollector<int>(publisher.Meter!, "UpDownValue");
+
+            publisher.IsEnabled = false;
+            publisher.Publish(1);
+
+            Assert.HasCount(0, colCounter.GetMeasurementSnapshot());
+            Assert.HasCount(0, colGauge.GetMeasurementSnapshot());
+            Assert.HasCount(0, colUpDown.GetMeasurementSnapshot());
         }
 
     }

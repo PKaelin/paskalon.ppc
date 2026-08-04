@@ -13,6 +13,12 @@ namespace paskalON.Telemetry
     public class MetricsPublisher : IMetricsPublisher
     {
         /// <summary>
+        /// <inheritdoc />
+        /// </summary>
+        public bool IsEnabled { get; set; } = true;
+
+
+        /// <summary>
         /// Caches the metrics structure.
         /// </summary>
         private readonly Dictionary<string, IMetricEntry> _metrics = new Dictionary<string, IMetricEntry>();
@@ -104,16 +110,19 @@ namespace paskalON.Telemetry
         /// </summary>
         public virtual void Publish(int currentInterval)
         {
-            if (Meter == null)
+            if (IsEnabled == true)
             {
-                throw new ApplicationException($"Metrics publisher must be initialized first.");
-            }
-
-            foreach (IMetricEntry entry in _metrics.Values)
-            {
-                if (currentInterval % entry.Interval == 0)
+                if (Meter == null)
                 {
-                    entry.Update();
+                    throw new ApplicationException($"Metrics publisher must be initialized first.");
+                }
+
+                foreach (IMetricEntry entry in _metrics.Values)
+                {
+                    if (currentInterval % entry.Interval == 0)
+                    {
+                        entry.Update();
+                    }
                 }
             }
         }
