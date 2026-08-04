@@ -6,6 +6,7 @@ using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.EnergyStorages;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
+using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.EnergyStorages
 {
@@ -15,9 +16,9 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.EnergyStorages
         protected readonly ChargeDischargeModeMap _map;
 
 
-        protected ChargeDischargeMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, ChargeDischargeModeConfig config,
+        protected ChargeDischargeMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, ChargeDischargeModeConfig config,
             ChargeDischargeModeMap map, IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
+            : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(map);

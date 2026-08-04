@@ -6,6 +6,7 @@ using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
+using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes
 {
@@ -15,9 +16,9 @@ namespace paskalON.OperatingModes.Domain.ClosedModes
         protected readonly MaintenanceSocModeMap _map;
 
 
-        public MaintenanceSocMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, MaintenanceSocModeConfig config,
+        public MaintenanceSocMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, MaintenanceSocModeConfig config,
             MaintenanceSocModeMap map, IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
+            : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(map);

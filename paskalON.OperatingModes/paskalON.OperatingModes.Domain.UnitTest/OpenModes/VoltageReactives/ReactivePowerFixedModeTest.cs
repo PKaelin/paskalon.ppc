@@ -9,6 +9,7 @@ using paskalON.OperatingModes.Domain.Configs.Ramps;
 using paskalON.OperatingModes.Domain.OpenModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.VoltageReactives
 {
@@ -28,6 +29,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.VoltageReactives
         [TestInitialize]
         public void Initialize()
         {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+
             _systemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
@@ -52,7 +55,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.VoltageReactives
             Mock<IRampController> rampActive = new Mock<IRampController>();
             _rampReactive = new Mock<IRampController>();
             rampActive.Setup(x => x.ShallowCopy()).Returns(_rampReactive.Object);
-            _mode = new ReactivePowerFixedMode(NullLogger.Instance, TimeProvider.System, _systemConfig, _config, _map, rampActive.Object);
+            _mode = new ReactivePowerFixedMode(NullLogger.Instance, TimeProvider.System, publisher.Object, _systemConfig, _config, _map, rampActive.Object);
         }
 
 

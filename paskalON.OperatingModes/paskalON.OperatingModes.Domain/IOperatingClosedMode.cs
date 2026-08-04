@@ -14,21 +14,9 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Gets the adjusted complex power target for the operating mode.
-        /// </summary>
-        ActivePower TargetAdjustedActive { get; }
-
-
-        /// <summary>
         /// Error adjustment calculated from input and used to make adjustments in real time.
         /// </summary>
         ReactivePower ErrorAdjustmentReactive { get; }
-
-
-        /// <summary>
-        /// Gets the adjusted complex power target for the operating mode.
-        /// </summary>
-        ReactivePower TargetAdjustedReactive { get; }
 
 
         /// <summary>

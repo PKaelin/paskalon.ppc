@@ -9,6 +9,7 @@ using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.UnitTest.ClosedModes.FrequencyActives
 {
@@ -25,6 +26,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest.ClosedModes.FrequencyActives
         [TestInitialize]
         public void Initialize()
         {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+
             _systemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
@@ -49,7 +52,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.ClosedModes.FrequencyActives
             _map = new ActivePowerModeMap { AvailableActivePower = () => null, AvailableReactivePower = () => null, ActivePowerAtPoi = () => null };
             _rampActive = new Mock<IRampController>();
             _rampActive.Setup(x => x.ShallowCopy()).Returns(new Mock<IRampController>().Object);
-            _mode = new ActivePowerMode(NullLogger.Instance, TimeProvider.System, _systemConfig, _config, _map, _rampActive.Object);
+            _mode = new ActivePowerMode(NullLogger.Instance, TimeProvider.System, publisher.Object, _systemConfig, _config, _map, _rampActive.Object);
         }
 
 

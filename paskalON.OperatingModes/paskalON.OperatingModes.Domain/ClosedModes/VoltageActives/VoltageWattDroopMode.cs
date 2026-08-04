@@ -6,6 +6,7 @@ using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageActives;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
+using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageActives
 {
@@ -14,9 +15,9 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageActives
         protected readonly VoltageWattDroopModeConfig _config;
         protected readonly VoltageWattDroopModeMap _map;
 
-        public VoltageWattDroopMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, VoltageWattDroopModeConfig config,
+        public VoltageWattDroopMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, VoltageWattDroopModeConfig config,
             VoltageWattDroopModeMap map, IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
+            : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(map);

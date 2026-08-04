@@ -17,13 +17,13 @@ namespace paskalON.Devices.Domain.Ders
     public abstract class DerDeviceBase : DerBase
     {
         /// <summary>
-        /// <inheritdoc/>
+        /// Interface for registering and publishing metrics for a given type T.
         /// </summary>
         public IMetricsPublisher MetricsPublisher { get; init; }
 
 
         /// <summary>
-        /// <inheritdoc/>
+        ///  IDataface is to register the data face for a decoupled communication.
         /// </summary>
         public IDataface Dataface { get; init; }
 

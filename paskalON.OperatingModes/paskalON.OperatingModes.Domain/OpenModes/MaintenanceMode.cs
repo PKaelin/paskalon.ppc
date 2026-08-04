@@ -9,6 +9,7 @@ using paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.OpenModes
 {
@@ -48,15 +49,16 @@ namespace paskalON.OperatingModes.Domain.OpenModes
         /// </summary>
         /// <param name="logger">Logger for handling logging and diagnostics.</param>
         /// <param name="timeProvider">The time provider (TimeProvider.System for prod, FakeTimeProvider for tests.</param>
+        /// <param name="publisher">The publisher interface.</param>
         /// <param name="systemConfig">The system configuration.</param>
         /// <param name="config">The operating mode configuration.</param>
         /// <param name="targetDerUnit"></param>
         /// <param name="map">Input mapping class for signals.</param>
         /// <param name="rampController">The ramp controller interface.</param>
         /// <param name="curveController">The curve controller interface.</param>
-        public MaintenanceMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, MaintenanceModeConfig config, DerUnit targetDerUnit,
+        public MaintenanceMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, MaintenanceModeConfig config, DerUnit targetDerUnit,
             MaintenanceModeMap map, IRampController rampController, ICurveController? curveController = null)
-            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
+            : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(map);

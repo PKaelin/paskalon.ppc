@@ -7,6 +7,7 @@ using paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
 {
@@ -41,9 +42,9 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
         /// <param name="map">Input mapping class for signals.</param>
         /// <param name="rampController">The ramp controller interface.</param>
         /// <param name="curveController">The curve controller interface.</param>
-        public ReactivePowerFixedMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, ReactivePowerFixedModeConfig config,
+        public ReactivePowerFixedMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, ReactivePowerFixedModeConfig config,
             ReactivePowerFixedModeMap map, IRampController rampController, ICurveController? curveController = null)
-            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
+            : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(map);

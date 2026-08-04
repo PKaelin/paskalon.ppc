@@ -30,15 +30,15 @@ namespace paskalON.Devices.Domain.Configs
         public required bool IsActive { get; set; }
 
 
-        private long metricsIntervalMilliseconds = 1000;
         /// <summary>
         /// Metrics publishing interval in milliseconds.
         /// </summary>
         public long MetricsIntervalMilliseconds
         {
-            get { return metricsIntervalMilliseconds; }
-            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDataLoggingIntervalMilliseconds); metricsIntervalMilliseconds = value; }
-        }
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDataLoggingIntervalMilliseconds); field = value; }
+        } = 1000;
+
 
         /// <summary>
         /// Metrics publishing factor for class 1 metrics.

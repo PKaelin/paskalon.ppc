@@ -6,6 +6,7 @@ using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
+using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 {
@@ -14,9 +15,9 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
         protected readonly MaximumActivePowerLimitModeConfig _config;
         protected readonly MaximumActivePowerLimitModeMap _map;
 
-        public MaximumActivePowerLimitMode(ILogger logger, TimeProvider timeProvider, SystemConfig systemConfig, MaximumActivePowerLimitModeConfig config,
+        public MaximumActivePowerLimitMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, MaximumActivePowerLimitModeConfig config,
             MaximumActivePowerLimitModeMap map, IRampController rampController, ICurveController? curveController)
-            : base(logger, timeProvider, systemConfig, config, map, rampController, curveController)
+            : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(map);

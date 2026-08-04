@@ -12,6 +12,7 @@ using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.OpenModes;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
 {
@@ -32,6 +33,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
         [TestInitialize]
         public void Initialize()
         {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             // Der
             Mock<DerConfig> derConfig = new Mock<DerConfig>();
             derConfig.SetupGet(x => x.Name).Returns("DerConfig");
@@ -77,20 +79,22 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
             _rampActive = new Mock<IRampController>();
             _rampReactive = new Mock<IRampController>();
             _rampActive.Setup(x => x.ShallowCopy()).Returns(_rampReactive.Object);
-            _mode = new MaintenanceMode(NullLogger.Instance, TimeProvider.System, _systemConfig, _config, derUnit.Object, _map, _rampActive.Object);
+            _mode = new MaintenanceMode(NullLogger.Instance, TimeProvider.System, publisher.Object, _systemConfig, _config, derUnit.Object, _map, _rampActive.Object);
         }
 
 
         [TestMethod]
         public void CreateWithNullDerUnitTest()
         {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IRampController> ramp = new Mock<IRampController>();
             Mock<ICurveController> curve = new Mock<ICurveController>();
             Mock<MaintenanceModeConfig> config = new Mock<MaintenanceModeConfig>();
             Mock<MaintenanceModeMap> map = new Mock<MaintenanceModeMap>();
             Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new MaintenanceMode(NullLogger.Instance, TimeProvider.System, systemConfig.Object, config.Object, null, map.Object, ramp.Object, curve.Object));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new MaintenanceMode(NullLogger.Instance, TimeProvider.System, publisher.Object,
+                systemConfig.Object, config.Object, null, map.Object, ramp.Object, curve.Object));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
