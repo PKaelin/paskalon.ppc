@@ -34,6 +34,9 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Gets the current operating mode state.
         /// </summary>
+        /// <remarks>
+        /// The operating mode state represents the current status of the operating mode, considering both active and reactive power states.
+        /// </remarks>
         OperatingModeState State { get; }
 
 

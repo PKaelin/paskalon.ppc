@@ -58,6 +58,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 
             _config = config;
             _map = map;
+            StateActive = OperatingModeState.Disabled;
         }
 
 
@@ -66,7 +67,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
         /// </summary>
         public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            if (State != OperatingModeState.Disabled)
+            if (StateActive != OperatingModeState.Disabled)
             {
                 ActivePower? available = _map.AvailableActivePower?.Invoke();
                 double? target = CheckNewActiveTargetSetpoint(available);

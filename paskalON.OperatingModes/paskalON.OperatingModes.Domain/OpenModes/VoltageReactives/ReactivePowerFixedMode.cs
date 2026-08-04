@@ -51,6 +51,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
 
             _config = config;
             _map = map;
+            StateReactive = OperatingModeState.Disabled;
         }
 
 
@@ -59,7 +60,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
         /// </summary>
         public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            if (State != OperatingModeState.Disabled)
+            if (StateReactive != OperatingModeState.Disabled)
             {
                 ReactivePower? available = _map.AvailableReactivePower?.Invoke();
                 double? targetSetpoint = CheckNewReactiveTargetSetpoint(available);

@@ -25,7 +25,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         }
         public ActivePower ActivePowerTarget { set => _targetActivePower = value; }
         public ReactivePower ReactivePowerTarget { set => _targetReactivePower = value; }
-        public OperatingModeState OmState { set => State = value; }
+        public OperatingModeState OmStateActive { set => StateActive = value; }
+        public OperatingModeState OmStateReactive { set => StateReactive = value; }
         public ActivePower? LastAvailableActive { get => _lastAvailableActive; }
         public ActivePower? LastSetpointActive { get => _lastSetpointActive; }
         public ReactivePower? LastAvailableReactive { get => _lastAvailableReactive; }
@@ -366,10 +367,13 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         {
             _map!.AvailableReactivePower = () => new ReactivePower(100000);
             _mode!.SetpointReactivePower = new ReactivePower(50000);
-            _mode!.OmState = OperatingModeState.Enabled;
+            _mode!.OmStateActive = OperatingModeState.Enabled;
+            _mode!.OmStateReactive = OperatingModeState.Enabled;
             _mode!.Enable();
 
             // As supposed to RampingToEnabled
+            Assert.AreEqual(OperatingModeState.Enabled, _mode!.StateActive);
+            Assert.AreEqual(OperatingModeState.Enabled, _mode!.StateReactive);
             Assert.AreEqual(OperatingModeState.Enabled, _mode!.State);
         }
 
@@ -377,6 +381,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void EnableWhenAvailable0Setpoint0Test()
         {
+            _mode!.OmStateReactive = OperatingModeState.Disabled;
             _map!.AvailableReactivePower = () => new ReactivePower(0);
             _mode!.SetpointReactivePower = new ReactivePower(0);
             _mode!.Enable();
@@ -389,6 +394,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void EnableWhenAvailable10Setpoint10ActiveTest()
         {
+            _mode!.OmStateActive = OperatingModeState.Disabled;
             _map!.AvailableActivePower = () => new ActivePower(20000);
             _mode!.SetpointActivePower = new ActivePower(20000);
             _mode!.Enable();
@@ -403,6 +409,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void EnableWhenAvailable10Setpoint10ReactiveTest()
         {
+            _mode!.OmStateReactive = OperatingModeState.Disabled;
             _map!.AvailableReactivePower = () => new ReactivePower(10000);
             _mode!.SetpointReactivePower = new ReactivePower(10000);
             _mode!.Enable();
@@ -420,10 +427,13 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         {
             _map!.AvailableReactivePower = () => new ReactivePower(100000);
             _mode!.SetpointReactivePower = new ReactivePower(50000);
-            _mode!.OmState = OperatingModeState.Disabled;
+            _mode!.OmStateActive = OperatingModeState.Disabled;
+            _mode!.OmStateReactive = OperatingModeState.Disabled;
             _mode!.Disable();
 
             // As supposed to RampingToDisabled
+            Assert.AreEqual(OperatingModeState.Disabled, _mode!.StateActive);
+            Assert.AreEqual(OperatingModeState.Disabled, _mode!.StateReactive);
             Assert.AreEqual(OperatingModeState.Disabled, _mode!.State);
         }
 
@@ -433,12 +443,18 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         {
             _map!.AvailableReactivePower = () => new ReactivePower(100000);
             _mode!.SetpointReactivePower = new ReactivePower(50000);
-            _mode!.ActivePowerTarget = new ActivePower(20000);
             _mode!.ReactivePowerTarget = new ReactivePower(10000);
 
-            _mode!.OmState = OperatingModeState.Enabled;
+            _map!.AvailableActivePower = () => new ActivePower(100000);
+            _mode!.SetpointActivePower = new ActivePower(50000);
+            _mode!.ActivePowerTarget = new ActivePower(20000);
+
+            _mode!.OmStateActive = OperatingModeState.Enabled;
+            _mode!.OmStateReactive = OperatingModeState.Enabled;
             _mode!.Disable();
 
+            Assert.AreEqual(OperatingModeState.RampingToDisabled, _mode!.StateActive);
+            Assert.AreEqual(OperatingModeState.RampingToDisabled, _mode!.StateReactive);
             Assert.AreEqual(OperatingModeState.RampingToDisabled, _mode!.State);
             Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(0, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);

@@ -67,6 +67,8 @@ namespace paskalON.OperatingModes.Domain.OpenModes
             TargetDerUnit = targetDerUnit;
             _config = config;
             _map = map;
+            StateActive = OperatingModeState.Disabled;
+            StateReactive = OperatingModeState.Disabled;
         }
 
 
@@ -75,7 +77,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes
         /// </summary>
         public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
-            if (State != OperatingModeState.Disabled)
+            if (StateActive != OperatingModeState.Disabled)
             {
                 // Calculate active power
                 ActivePower? availableActive = _map.AvailableActivePower?.Invoke();
@@ -91,7 +93,10 @@ namespace paskalON.OperatingModes.Domain.OpenModes
 
                 _targetActivePower.KiloWatts = RampControllerActive.Calculate();
                 CheckFinalActiveTarget();
+            }
 
+            if (StateReactive != OperatingModeState.Disabled)
+            {
                 // Calculate reactive power
                 ReactivePower? availableReactive = _map.AvailableReactivePower?.Invoke();
                 double? targetReactive = CheckNewReactiveTargetSetpoint(availableReactive);

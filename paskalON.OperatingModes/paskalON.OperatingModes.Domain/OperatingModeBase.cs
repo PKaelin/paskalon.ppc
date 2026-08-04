@@ -25,6 +25,9 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Interface for registering and publishing metrics for a given type T.
         /// </summary>
+        /// <remarks>
+        /// <see cref="IMetricsPublisher"/> should only publish metrics if this operating state is not disabled.
+        /// </remarks>
         public IMetricsPublisher MetricsPublisher { get; init; }
 
 
@@ -125,19 +128,74 @@ namespace paskalON.OperatingModes.Domain
 
         /// <summary>
         /// <inheritdoc/>
-        /// </summary>
+        /// </summary>        
         public OperatingModeState State
+        {
+            get
+            {
+                if (Matches(StateActive, StateReactive, OperatingModeState.Enabled))
+                    return OperatingModeState.Enabled;
+
+                if (Matches(StateActive, StateReactive, OperatingModeState.Enabling))
+                    return OperatingModeState.Enabling;
+
+                if (Matches(StateActive, StateReactive, OperatingModeState.RampingToEnabled))
+                    return OperatingModeState.RampingToEnabled;
+
+                if (Matches(StateActive, StateReactive, OperatingModeState.RampingToDisabled))
+                    return OperatingModeState.RampingToDisabled;
+
+                if (Matches(StateActive, StateReactive, OperatingModeState.Disabling))
+                    return OperatingModeState.Disabling;
+
+                return OperatingModeState.Disabled;
+            }
+        }
+
+
+        /// <summary>
+        /// The active power operating mode state.
+        /// </summary>
+        /// <remarks>
+        /// An operating mode can have active and reactive control and they can operate differently (ramps).
+        /// The base class implements both but the modes have to be activated in the subclasses with the following:
+        /// StateActive = OperatingModeState.Disabled;
+        /// </remarks>
+        public OperatingModeState? StateActive
         {
             get;
             protected set
             {
                 if (value != field)
                 {
-                    _logger.LogInformation("{Name} OperatingModeState changed to: {State}", Name, value);
+                    _logger.LogInformation("{Name} OperatingModeStateActive changed to: {State}", Name, value);
                     field = value;
                 }
             }
-        } = OperatingModeState.Disabled;
+        }
+
+
+        /// <summary>
+        /// The reactive power operating mode state.
+        /// </summary>
+        /// <remarks>
+        /// An operating mode can have active and reactive control and they can operate differently (ramps).
+        /// The base class implements both but the modes have to be activated in the subclasses with the following:
+        /// StateReactive = OperatingModeState.Disabled;
+        /// </remarks>
+        public OperatingModeState? StateReactive
+        {
+            get;
+            protected set
+            {
+                if (value != field)
+                {
+                    _logger.LogInformation("{Name} OperatingModeStateReactive changed to: {State}", Name, value);
+                    field = value;
+                }
+            }
+        }
+
 
 
         /// <summary>
@@ -284,26 +342,31 @@ namespace paskalON.OperatingModes.Domain
         public virtual void Enable()
         {
             IsEnabled = true;
+            _logger.LogInformation("{Name} operating mode enabled.", Name);
 
-            if (State != OperatingModeState.Enabled)
+            if (StateActive.HasValue && StateActive != OperatingModeState.Enabled)
             {
+                StateActive = OperatingModeState.Enabling;
                 double setpointActive = GetActivePowerTargetSetpoint();
-                double setpointReactive = GetReactivePowerTargetSetpoint();
-
-                State = OperatingModeState.Enabling;
-                _logger.LogInformation("{Name} operating mode enabled. Active Target-Setpoint: {ActiveTargetSetpoint}. Reactive Target-Setpoint: {ReactiveTargetSetpoint}",
-                    Name, setpointActive, setpointReactive);
 
                 if (setpointActive != 0)
                 {
+                    _logger.LogInformation("{Name} operating mode enabled. Active Target-Setpoint: {ActiveTargetSetpoint}.", Name, setpointActive);
                     RampControllerActive.Start(TargetActivePower.KiloWatts, setpointActive);
-                    State = OperatingModeState.RampingToEnabled;
+                    StateActive = OperatingModeState.RampingToEnabled;
                 }
+            }
+
+            if (StateReactive.HasValue && StateReactive != OperatingModeState.Enabled)
+            {
+                StateReactive = OperatingModeState.Enabling;
+                double setpointReactive = GetReactivePowerTargetSetpoint();
 
                 if (setpointReactive != 0)
                 {
+                    _logger.LogInformation("{Name} operating mode enabled. Reactive Target-Setpoint: {ReactiveTargetSetpoint}.", Name, setpointReactive);
                     RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, setpointReactive);
-                    State = OperatingModeState.RampingToEnabled;
+                    StateReactive = OperatingModeState.RampingToEnabled;
                 }
             }
         }
@@ -315,14 +378,21 @@ namespace paskalON.OperatingModes.Domain
         public virtual void Disable()
         {
             IsEnabled = false;
+            _logger.LogInformation("{Name} operating mode disabled.", Name);
 
-            if (State != OperatingModeState.Disabled)
+            if (StateActive.HasValue && StateActive != OperatingModeState.Disabled)
             {
-                _logger.LogInformation("{Name} operating mode disabled. Active Target-Setpoint: {ActiveTargetSetpoint}. Reactive Target-Setpoint: {ReactiveTargetSetpoint}", Name, 0, 0);
+                _logger.LogInformation("{Name} operating mode disabled. Active Target-Setpoint: {ActiveTargetSetpoint}.", Name, 0);
                 SetpointActivePower = new ActivePower(0);
-                SetpointReactivePower = new ReactivePower(0);
-                State = OperatingModeState.RampingToDisabled;
+                StateActive = OperatingModeState.RampingToDisabled;
                 RampControllerActive.Start(TargetActivePower.KiloWatts, 0);
+            }
+
+            if (StateReactive.HasValue && StateReactive != OperatingModeState.Disabled)
+            {
+                _logger.LogInformation("{Name} operating mode disabled. Reactive Target-Setpoint: {ReactiveTargetSetpoint}.", Name, 0);
+                SetpointReactivePower = new ReactivePower(0);
+                StateReactive = OperatingModeState.RampingToDisabled;
                 RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, 0);
             }
         }
@@ -411,7 +481,7 @@ namespace paskalON.OperatingModes.Domain
         {
             double? targetSetpoint = null;
             // If available is outside deadband of lastAvailable or if setpoint is outside deadband of lastSetpoint
-            if (State != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableActive != null && _lastSetpointActive != null) &&
+            if (StateActive.HasValue && StateActive != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableActive != null && _lastSetpointActive != null) &&
                   ((Math.Abs(available.Value.KiloWatts) > (Math.Abs(_lastAvailableActive.Value.KiloWatts) + _config.DeadbandAvailableKilo)) ||
                   (Math.Abs(SetpointActivePower.KiloWatts) > (Math.Abs(_lastSetpointActive.Value.KiloWatts) + _config.DeadbandSetpointKilo))))
             {
@@ -435,10 +505,10 @@ namespace paskalON.OperatingModes.Domain
                     if (targetSetpoint.Value != 0 && (_lastSetpointActive.HasValue == false || _lastSetpointActive.Value.Watts == 0) &&
                        (targetSetpoint != _lastSetpointActive?.KiloWatts))
                     {
-                        // In case things have changed after the Enable() command
-                        if (State == OperatingModeState.Enabling)
+                        if (StateActive == OperatingModeState.Enabling)
                         {
-                            State = OperatingModeState.RampingToEnabled;
+                            // In case things have changed after the Enable() command
+                            StateActive = OperatingModeState.RampingToEnabled;
                         }
                     }
                     else
@@ -463,22 +533,22 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         protected void CheckFinalActiveTarget()
         {
-            if (State != OperatingModeState.Enabled && State != OperatingModeState.Disabled)
+            if (StateActive.HasValue && StateActive != OperatingModeState.Enabled && StateActive != OperatingModeState.Disabled)
             {
                 // Set final target and change state to enabled if we are within a deadband
                 if (Math.Abs(TargetActivePower.KiloWatts) > (Math.Abs(SetpointActivePower.KiloWatts) - _config.DeadbandSetpointKilo))
                 {
-                    if (State == OperatingModeState.RampingToEnabled)
+                    if (StateActive == OperatingModeState.RampingToEnabled)
                     {
                         // Once within deadband we set the actual the precise target regardless available and set state to enabled 
                         _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
-                        State = OperatingModeState.Enabled;
+                        StateActive = OperatingModeState.Enabled;
                     }
-                    else if (State == OperatingModeState.RampingToDisabled)
+                    else if (StateActive == OperatingModeState.RampingToDisabled)
                     {
                         // Once within deadband we set the actual the precise target regardless available and set state to disabled
                         _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
-                        State = OperatingModeState.Disabled;
+                        StateActive = OperatingModeState.Disabled;
                         RampControllerActive.Stop();
                     }
 
@@ -497,7 +567,7 @@ namespace paskalON.OperatingModes.Domain
         {
             double? targetSetpoint = null;
             // If available is outside deadband of lastAvailable or if setpoint is outside deadband of lastSetpoint
-            if (State != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableReactive != null && _lastSetpointReactive != null) &&
+            if (StateReactive.HasValue && StateReactive != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableReactive != null && _lastSetpointReactive != null) &&
                   ((Math.Abs(available.Value.KiloVoltAmperesReactive) > (Math.Abs(_lastAvailableReactive.Value.KiloVoltAmperesReactive) + _config.DeadbandAvailableKilo)) ||
                   (Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive) > (Math.Abs(_lastSetpointReactive.Value.KiloVoltAmperesReactive) + _config.DeadbandSetpointKilo))))
             {
@@ -521,10 +591,10 @@ namespace paskalON.OperatingModes.Domain
                     if (targetSetpoint.Value != 0 && (_lastSetpointReactive.HasValue == false || _lastSetpointReactive.Value.VoltAmperesReactive == 0) &&
                        (targetSetpoint != _lastSetpointReactive?.KiloVoltAmperesReactive))
                     {
-                        // In case things have changed after the Enable() command
-                        if (State == OperatingModeState.Enabling)
+                        if (StateReactive == OperatingModeState.Enabling)
                         {
-                            State = OperatingModeState.RampingToEnabled;
+                            // In case things have changed after the Enable() command
+                            StateReactive = OperatingModeState.RampingToEnabled;
                         }
                     }
                     else
@@ -550,22 +620,22 @@ namespace paskalON.OperatingModes.Domain
         /// </summary>
         protected void CheckFinalReactiveTarget()
         {
-            if (State != OperatingModeState.Enabled && State != OperatingModeState.Disabled)
+            if (StateReactive.HasValue && StateReactive != OperatingModeState.Enabled && StateReactive != OperatingModeState.Disabled)
             {
                 // Set final target and change state to enabled if we are within a deadband
                 if (Math.Abs(TargetReactivePower.KiloVoltAmperesReactive) > (Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive) - _config.DeadbandSetpointKilo))
                 {
-                    if (State == OperatingModeState.RampingToEnabled)
+                    if (StateReactive == OperatingModeState.RampingToEnabled)
                     {
                         // Once within deadband we set the actual the precise target regardless available and set state to enabled 
                         _targetReactivePower.KiloVoltAmperesReactive = SetpointReactivePower.KiloVoltAmperesReactive;
-                        State = OperatingModeState.Enabled;
+                        StateReactive = OperatingModeState.Enabled;
                     }
-                    else if (State == OperatingModeState.RampingToDisabled)
+                    else if (StateReactive == OperatingModeState.RampingToDisabled)
                     {
                         // Once within deadband we set the actual the precise target regardless available and set state to disabled
                         _targetReactivePower.KiloVoltAmperesReactive = SetpointReactivePower.KiloVoltAmperesReactive;
-                        State = OperatingModeState.Disabled;
+                        StateReactive = OperatingModeState.Disabled;
                         RampControllerReactive.Stop();
                     }
 
@@ -661,9 +731,26 @@ namespace paskalON.OperatingModes.Domain
             MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(AvailableReactivePower), MetricType.Gauge, x => x.AvailableReactivePower?.KiloVoltAmperesReactive, _config.MetricsFactorClass1);
             // MetricsFactorClass2
             MetricsPublisher.Register<OperatingModeBase, OperatingModeState>(this, nameof(State), MetricType.Gauge, x => x.State, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<OperatingModeBase, OperatingModeState>(this, nameof(StateActive), MetricType.Gauge, x => x.StateActive, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<OperatingModeBase, OperatingModeState>(this, nameof(StateReactive), MetricType.Gauge, x => x.StateReactive, _config.MetricsFactorClass2);
             MetricsPublisher.Register<OperatingModeBase, bool>(this, nameof(IsEnabled), MetricType.Gauge, x => x.IsEnabled, _config.MetricsFactorClass2);
             MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(SetpointActivePower), MetricType.Gauge, x => x.SetpointActivePower.KiloWatts, _config.MetricsFactorClass2);
             MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(SetpointReactivePower), MetricType.Gauge, x => x.SetpointReactivePower.KiloVoltAmperesReactive, _config.MetricsFactorClass2);
+        }
+
+
+        /// <summary>
+        /// Matches the active and reactive operating state to a common state.
+        /// </summary>
+        /// <param name="active">The active operating state.</param>
+        /// <param name="reactive">The reactive operating state.</param>
+        /// <param name="state">The operating state to match.</param>
+        /// <returns></returns>
+        private bool Matches(OperatingModeState? active, OperatingModeState? reactive, OperatingModeState state)
+        {
+            return (active == state && reactive == state) ||
+                   (active == state && (reactive == null || reactive == OperatingModeState.Disabled)) ||
+                   (reactive == state && (active == null || active == OperatingModeState.Disabled));
         }
 
     }
