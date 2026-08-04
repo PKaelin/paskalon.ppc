@@ -24,8 +24,8 @@ namespace paskalON.Devices.Domain.GenericModbusDevices.Entries
             get;
             set
             {
-                ArgumentOutOfRangeException.ThrowIfGreaterThan(1, value);
-                ArgumentOutOfRangeException.ThrowIfLessThan(0, value);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 1);
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, 0);
                 field = value;
             }
         }

@@ -24,7 +24,6 @@
   <ItemGroup>
     <Folder Include="ClosedModes\EnergyStorages\" />
     <Folder Include="ClosedModes\VoltageActives\" />
-    <Folder Include="ClosedModes\VoltageReactives\" />
   </ItemGroup>
 
 </Project>

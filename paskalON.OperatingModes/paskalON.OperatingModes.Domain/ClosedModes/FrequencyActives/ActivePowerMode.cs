@@ -71,8 +71,6 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
                     RampControllerActive.Start(TargetActivePower.KiloWatts, target.Value);
                 }
 
-                // TODO: What about the delay in setting the device target and the meters read?
-
                 // Calculate the error between the current target and the measured feedback
                 double powerAtPoi = _map.ActivePowerAtPoi?.Invoke()?.Watts ?? 0;
                 // Don't try to fix minor noise. Set the error adjustment within this statement
@@ -82,11 +80,12 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
                 }
                 else
                 {
-                    _errorAdjustmentActive.Watts = TargetActivePower.Watts - powerAtPoi;
+                    // Apply proportional gain to the error to calculate the adjustment for the next iteration
+                    _errorAdjustmentActive.KiloWatts = (TargetActivePower.Watts - powerAtPoi) * _config.ProportionalGain / 1000;
                 }
 
-                // Include th error into the next iteration
-                _targetActivePower.KiloWatts = RampControllerActive.Calculate() + _errorAdjustmentActive.KiloWatts;
+                // Include the error into the next iteration but don't exceed the configured limits
+                _targetActivePower.KiloWatts = ApplyActiveLimits(RampControllerActive.Calculate() + _errorAdjustmentActive.KiloWatts);
                 CheckFinalActiveTarget();
             }
 

@@ -42,7 +42,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest.ClosedModes.FrequencyActives
                 Name = "ActivePowerModeConfig",
                 IsActive = true,
                 Type = OperatingModeType.Bess,
-                RampConfig = new Mock<RampBaseConfig>().Object
+                RampConfig = new Mock<RampBaseConfig>().Object,
+                ProportionalGain = 1.0,
             };
 
             _map = new ActivePowerModeMap { AvailableActivePower = () => null, AvailableReactivePower = () => null, ActivePowerAtPoi = () => null };
@@ -341,6 +342,26 @@ namespace paskalON.OperatingModes.Domain.UnitTest.ClosedModes.FrequencyActives
             Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(1050, _mode!.TargetActivePower.KiloWatts);
             Assert.AreEqual(50, _mode!.ErrorAdjustmentActive.KiloWatts);
+            _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 1000), Times.Once);
+        }
+
+
+        [TestMethod]
+        public void CalculateModeEnabledAvailableSetpointRampGainTest()
+        {
+            _config!.ProportionalGain = 0.5;
+            _map!.AvailableActivePower = () => ActivePower.FromKilo(1000);
+            _mode!.SetpointActivePower = ActivePower.FromKilo(1000);
+            _mode!.Enable();
+            _rampActive!.Setup(x => x.Calculate()).Returns(800);
+            _mode!.CalculateAsync();
+            _map!.ActivePowerAtPoi = () => ActivePower.FromKilo(700);
+            _mode!.CalculateAsync();
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
+            Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
+            Assert.AreEqual(850, _mode!.TargetActivePower.KiloWatts);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
             _rampActive!.Verify(x => x.Start(0, 1000), Times.Once);
         }
