@@ -16,12 +16,12 @@ Persistent Domain Configuration layer of DDD described in [README.md](./paskalON
 ### Project .Domain
 Domain layer of DDD described in [README.md](./paskalON.OperatingModes.Domain/README.md)
 
+### Project .Infrastructure
+Infrastructure layer of DDD described in [README.md](./paskalON.OperatingModes.Infrastructure/README.md)
+
 ---
 
 TODO: Add general add readmes for not yet created projects below.
-
-### Project .Infrastructure
-Infrastructure layer of DDD described in [README.md](./paskalON.OperatingModes.Infrastructure/README.md)
 
 ### Project .Application
 Application layer of DDD described in [README.md](./paskalON.OperatingModes.Application/README.md)

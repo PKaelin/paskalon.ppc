@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <DB_CONNECTION_STRING>Host=localhost;Database=operating_infrastructure_test;Username=admin;Password=admin123;Include Error Detail=true;</DB_CONNECTION_STRING>
+    </EnvironmentVariables>
+  </RunConfiguration>
+</RunSettings>
