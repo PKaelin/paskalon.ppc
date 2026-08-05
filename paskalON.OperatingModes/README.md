@@ -4,6 +4,35 @@ An Operating Mode defines the specific behavior and control strategy the system 
 *Note: paskalON.Common libraries are project references during initial development*  
 
 
+## Operating Mode Overview
+![Operating Mode Overview](./Docs/Operating%20Mode%20Overview.drawio.svg)
+
+
+## Structure
+
+### Project .Domain.Configs
+Persistent Domain Configuration layer of DDD described in [README.md](./paskalON.OperatingModes.Domain.Configs/README.md)
+
+### Project .Domain
+Domain layer of DDD described in [README.md](./paskalON.OperatingModes.Domain/README.md)
+
+---
+
+TODO: Add general add readmes for not yet created projects below.
+
+### Project .Infrastructure
+Infrastructure layer of DDD described in [README.md](./paskalON.OperatingModes.Infrastructure/README.md)
+
+### Project .Application
+Application layer of DDD described in [README.md](./paskalON.OperatingModes.Application/README.md)
+
+
+### Project .Service
+Service/Interface layer described in [README.md](./paskalON.OperatingModes.Service/README.md)
+
+---
+
+
 ## Types of operating modes
 
 
@@ -12,33 +41,33 @@ An Operating Mode defines the specific behavior and control strategy the system 
 - Feedback: None. It does not measure any actual output or adjust any changes.
 - Power plant use: In predictable scenarios.
 
-![Non-Metered Operating Mode Overview](./Non-Metered%20Operating%20Mode%20Overview.drawio.svg)
-
+![Non-Metered Operating Mode Overview](./Docs/Non-Metered%20Operating%20Mode%20Overview.drawio.svg)
+ 
 
 ### Closed Mode (Closed-Loop Control)
 - How it works: Consistently checks the output using signals and compares it to the target.
 - Feedback: Continuous. If output drifts the controller calculates an error signal and makes adjustments in real time.
 - Power plant use: Industry standard for safe and stable operation. Used in Automatic Generation Control (AGC) and Automatic Voltage Regulators (AVR) to ensure grid compliance and prevent outages.
 
-![Metered Operating Mode Overview](./Metered%20Operating%20Mode%20Overview.drawio.svg)
+![Metered Operating Mode Overview](./Docs/Metered%20Operating%20Mode%20Overview.drawio.svg)
 
 
 ## High level concept
 Operating modes can be stacked. Operating modes can be defined as "Additive"(each layer calculates output and adds it to its previous output) or "Exclusive" (uses its output only).
 
-![Operating Modes High Level Concept](./Operating%20Modes%20High%20Level%20Concept.drawio.svg)
+![Operating Modes High Level Concept](./Docs/Operating%20Modes%20High%20Level%20Concept.drawio.svg)
 
 
 ## Ramp Model 
 Every operating mode has a ramp model. The ramp model provides the ability to smoothly change power targets between set points.
 
-![Ramp Models Overview](./Ramp%20Models%20Overview.drawio.svg)
+![Ramp Models Overview](./Docs/Ramp%20Models%20Overview.drawio.svg)
 
 
 ## Curve Configuration
 Every operating mode can have a curve configuration.
 
-![Curve Overview](./Curve%20Configuration%20Overview.drawio.svg)
+![Curve Overview](./Docs/Curve%20Configuration%20Overview.drawio.svg)
 
 - If latest signal reading is below or above first/last configured then assume first/last (Input +50/-50 in chart are not configured but are virtually as they are beyond the first/last).
 - If latest signal reading is between two IF values, then calculate the appropriate system output by a linear interpolation between the two corresponding THEN values.
@@ -48,6 +77,5 @@ Every operating mode can have a curve configuration.
 - Directional curve: all points going up or all down. Bi-Directional curve: points going up then down then up or points going down then up then down.
 
 
-
-
-TODO: Add more information.
+## More information
+[See project readmes in structure section](./README.md#structure)

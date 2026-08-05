@@ -1,4 +1,4 @@
-﻿# Operating Modes
+﻿# Operating Modes Domain
 
 
 ## Categories and structure of operating modes

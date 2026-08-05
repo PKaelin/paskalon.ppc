@@ -62,6 +62,8 @@ The C37Equipment could be a system power meter, circuit power meter, etc.
 ![Dataface Data Design Overview](./Docs/Dataface%20Data%20Design%20Overview.drawio.svg)
 
 
+## More information
+[See project readmes in structure section](./README.md#structure)
 
 
 ---
