@@ -73,6 +73,10 @@ The actual devices (power resource) which can be a simulation, emulation or phys
 
 ## Common design
 
+### Configurations
+Configurations are stored in a database to ensure accountability and to track changes.
+
+
 ### Metrics publisher
 Any class can publish metrics as long as a metrics publisher interface gets injected to the class and an instance (MetricsPublisher) of that injected interface is kept within the class. E.g. 
 ```

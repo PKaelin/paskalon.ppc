@@ -30,13 +30,13 @@ namespace paskalON.OperatingModes.Domain.Configs.Curves
         /// <summary>
         /// X-Points represent the seconds the fault has been happening.
         /// </summary>
-        public override required CurveUnit XUnit { get; init; } = CurveUnit.Time;
+        public override CurveUnit XUnit { get; init; } = CurveUnit.Time;
 
 
         /// <summary>
         /// Y-Points represent the measured system or grid voltage at the point of common coupling.
         /// </summary>
-        public override required CurveUnit YUnit { get; init; } = CurveUnit.Voltage;
+        public override CurveUnit YUnit { get; init; } = CurveUnit.Voltage;
 
     }
 }

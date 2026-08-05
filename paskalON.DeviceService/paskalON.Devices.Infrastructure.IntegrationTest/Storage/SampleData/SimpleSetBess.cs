@@ -93,7 +93,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
         }
 
 
-        void CreateCore()
+        private void CreateCore()
         {
             ModbusConnectionConfig = new ModbusConnectionConfig
             {

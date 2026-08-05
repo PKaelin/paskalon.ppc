@@ -7,8 +7,15 @@ using paskalON.Devices.Domain.Configs.Ders;
 
 namespace paskalON.Devices.Infrastructure.Storage.Configurations.Ders
 {
+    /// <summary>
+    /// Allows configuration for an entity type to be factored into a separate class.
+    /// </summary>
     public class DerConfiguration : IEntityTypeConfiguration<DerConfig>
     {
+        /// <summary>
+        /// Configures the entity of type TEntity.
+        /// </summary>
+        /// <param name="builder">The builder to be used to configure the entity type.</param>
         public void Configure(EntityTypeBuilder<DerConfig> builder)
         {
             builder.HasMany(x => x.DerGroupConfigs)

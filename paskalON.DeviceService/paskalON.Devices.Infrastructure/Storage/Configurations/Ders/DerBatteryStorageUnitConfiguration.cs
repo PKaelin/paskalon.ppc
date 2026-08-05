@@ -9,8 +9,15 @@ using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 
 namespace paskalON.Devices.Infrastructure.Storage.Configurations.Ders
 {
+    /// <summary>
+    /// Allows configuration for an entity type to be factored into a separate class.
+    /// </summary>
     public class DerBatteryStorageUnitConfiguration : IEntityTypeConfiguration<DerBatteryStorageUnitConfig>
     {
+        /// <summary>
+        /// Configures the entity of type TEntity.
+        /// </summary>
+        /// <param name="builder">The builder to be used to configure the entity type.</param>
         public void Configure(EntityTypeBuilder<DerBatteryStorageUnitConfig> builder)
         {
             builder.HasOne(x => x.PowerConversionSystemConfig)

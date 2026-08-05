@@ -3,24 +3,23 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using paskalON.Devices.Domain.Configs.Ders;
+using paskalON.OperatingModes.Domain.Configs;
 
-namespace paskalON.Devices.Infrastructure.Storage.Configurations.Ders
+namespace paskalON.OperatingModes.Infrastructure.Storage.Configurations
 {
     /// <summary>
     /// Allows configuration for an entity type to be factored into a separate class.
     /// </summary>
-    public class DerContainerConfiguration : IEntityTypeConfiguration<DerContainerConfig>
+    public class SystemConfiguration : IEntityTypeConfiguration<SystemConfig>
     {
         /// <summary>
         /// Configures the entity of type TEntity.
         /// </summary>
         /// <param name="builder">The builder to be used to configure the entity type.</param>
-        public void Configure(EntityTypeBuilder<DerContainerConfig> builder)
+        public void Configure(EntityTypeBuilder<SystemConfig> builder)
         {
-            builder.Property(x => x.IsActive).IsRequired();
-            builder.Property(x => x.DeviceId).IsRequired();
-            builder.HasIndex(x => x.DeviceId).IsUnique();
+            builder.Property(x => x.Type).IsRequired();
+            builder.Property(x => x.ReferenceFrequency).IsRequired();
         }
     }
 }

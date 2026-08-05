@@ -2,25 +2,25 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using paskalON.Devices.Domain.Configs.Ders;
+using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives;
 
-namespace paskalON.Devices.Infrastructure.Storage.Configurations.Ders
+namespace paskalON.OperatingModes.Infrastructure.Storage.Configurations.ClosedModes
 {
     /// <summary>
     /// Allows configuration for an entity type to be factored into a separate class.
     /// </summary>
-    public class DerContainerConfiguration : IEntityTypeConfiguration<DerContainerConfig>
+    public class VoltageVarDroopModeConfiguration : IEntityTypeConfiguration<VoltageVarDroopModeConfig>
     {
         /// <summary>
         /// Configures the entity of type TEntity.
         /// </summary>
         /// <param name="builder">The builder to be used to configure the entity type.</param>
-        public void Configure(EntityTypeBuilder<DerContainerConfig> builder)
+        public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<VoltageVarDroopModeConfig> builder)
         {
-            builder.Property(x => x.IsActive).IsRequired();
-            builder.Property(x => x.DeviceId).IsRequired();
-            builder.HasIndex(x => x.DeviceId).IsUnique();
+            builder.HasOne(x => x.CurveConfig)
+                .WithMany()
+                .HasForeignKey(x => x.CurveConfigId)
+                .IsRequired();
         }
     }
 }

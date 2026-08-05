@@ -57,9 +57,21 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
+        /// Ramp configuration Id of this operating mode.
+        /// </summary>
+        public int RampConfigId { get; set; }
+
+
+        /// <summary>
         /// Ramp configuration of this operating mode.
         /// </summary>
         public required RampBaseConfig RampConfig { get; set; }
+
+
+        /// <summary>
+        /// Curve configuration Id of this operating mode.
+        /// </summary>
+        public virtual int? CurveConfigId { get; set; }
 
 
         /// <summary>

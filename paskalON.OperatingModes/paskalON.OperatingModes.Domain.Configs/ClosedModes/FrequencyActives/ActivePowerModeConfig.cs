@@ -19,7 +19,7 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives
         /// <example>
         /// Kp 0.05 to 0.3 is common for plant controls.
         /// </example>
-        public required double ProportionalGain
+        public double ProportionalGain
         {
             get;
             set

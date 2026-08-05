@@ -3,24 +3,28 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using paskalON.Devices.Domain.Configs.Ders;
+using paskalON.OperatingModes.Domain.Configs;
 
-namespace paskalON.Devices.Infrastructure.Storage.Configurations.Ders
+namespace paskalON.OperatingModes.Infrastructure.Storage.Configurations
 {
     /// <summary>
     /// Allows configuration for an entity type to be factored into a separate class.
     /// </summary>
-    public class DerContainerConfiguration : IEntityTypeConfiguration<DerContainerConfig>
+    public class NameBaseConfiguration : IEntityTypeConfiguration<NameBase>
     {
         /// <summary>
         /// Configures the entity of type TEntity.
         /// </summary>
         /// <param name="builder">The builder to be used to configure the entity type.</param>
-        public void Configure(EntityTypeBuilder<DerContainerConfig> builder)
+        public void Configure(EntityTypeBuilder<NameBase> builder)
         {
-            builder.Property(x => x.IsActive).IsRequired();
-            builder.Property(x => x.DeviceId).IsRequired();
-            builder.HasIndex(x => x.DeviceId).IsUnique();
+            // Tell EF Core to push all properties down to concrete tables.
+            builder.UseTpcMappingStrategy();
+
+            builder.Property(x => x.Name)
+                .HasMaxLength(250)
+                .IsRequired();
+            builder.HasIndex(x => x.Name).IsUnique();
         }
     }
 }

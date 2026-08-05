@@ -8,19 +8,19 @@ namespace paskalON.OperatingModes.Domain.Configs.Curves
         /// <summary>
         /// List of configured points (X, Y) for this curve.
         /// </summary>
-        public required List<CurvePointConfig> Points { get; set; }
+        public ICollection<CurvePointConfig> Points { get; set; } = [];
 
 
         /// <summary>
         /// Curve unit of the X axis.
         /// </summary>
-        public abstract required CurveUnit XUnit { get; init; }
+        public abstract CurveUnit XUnit { get; init; }
 
 
         /// <summary>
         /// Curve unit of the Y axis.
         /// </summary>
-        public abstract required CurveUnit YUnit { get; init; }
+        public abstract CurveUnit YUnit { get; init; }
 
 
         /// <summary>

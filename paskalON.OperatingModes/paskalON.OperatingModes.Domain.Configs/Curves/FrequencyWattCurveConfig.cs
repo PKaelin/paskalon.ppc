@@ -23,7 +23,7 @@ namespace paskalON.OperatingModes.Domain.Configs.Curves
         /// <summary>
         /// X-Points represent the measured system or grid frequency at the point of common coupling.
         /// </summary>
-        public override required CurveUnit XUnit { get; init; } = CurveUnit.Frequency;
+        public override CurveUnit XUnit { get; init; } = CurveUnit.Frequency;
 
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace paskalON.OperatingModes.Domain.Configs.Curves
         /// <remarks>
         /// Percent of the power plant's maximum rated power (%) or active power (W/kW/MW).
         /// </remarks>
-        public override required CurveUnit YUnit { get; init; } = CurveUnit.Percentage;
+        public override CurveUnit YUnit { get; init; } = CurveUnit.Percentage;
 
 
         /// <summary>

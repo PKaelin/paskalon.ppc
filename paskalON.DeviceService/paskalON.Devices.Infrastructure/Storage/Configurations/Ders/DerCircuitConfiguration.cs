@@ -9,8 +9,15 @@ using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 
 namespace paskalON.Devices.Infrastructure.Storage.Configurations.Ders
 {
+    /// <summary>
+    /// Allows configuration for an entity type to be factored into a separate class.
+    /// </summary>
     public class DerCircuitConfiguration : IEntityTypeConfiguration<DerCircuitConfig>
     {
+        /// <summary>
+        /// Configures the entity of type TEntity.
+        /// </summary>
+        /// <param name="builder">The builder to be used to configure the entity type.</param>
         public void Configure(EntityTypeBuilder<DerCircuitConfig> builder)
         {
             builder.HasMany(x => x.DerUnitConfigs)

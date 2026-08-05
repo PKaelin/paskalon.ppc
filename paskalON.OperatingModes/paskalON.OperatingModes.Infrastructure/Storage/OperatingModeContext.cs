@@ -24,6 +24,7 @@ namespace paskalON.OperatingModes.Infrastructure.Storage
         // Core DbSet
         public DbSet<Configuration> Configurations { get; set; }            // General configuration class for the microservice
         public DbSet<History> Histories { get; set; }                       // For DB migration history.
+        public DbSet<SystemConfig> SystemConfigs { get; set; }
 
         // Ramps
         public DbSet<RampRateConfig> RampRateConfigs { get; set; }
@@ -83,6 +84,8 @@ namespace paskalON.OperatingModes.Infrastructure.Storage
         /// <param name="modelBuilder">Model builder instance <see cref="ModelBuilder"/>.</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Configure inheritance mapping in the model configurations (see: ConfigurationBaseConfiguration)
+            // Table-per-Hierarchy (TPH), Table-per-Type (TPT), Table-per-Concrete-type (TPC)
             modelBuilder.Entity<History>().ToTable(t => t.ExcludeFromMigrations(true));
             base.OnModelCreating(modelBuilder);
             // Automatically pulls all individual configuration classes

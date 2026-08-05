@@ -99,6 +99,8 @@ namespace paskalON.Devices.Infrastructure.Storage
         /// <param name="modelBuilder">Model builder instance <see cref="ModelBuilder"/>.</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Configure inheritance mapping in the model configurations (see: ConfigurationBaseConfiguration)
+            // Table-per-Hierarchy (TPH), Table-per-Type (TPT), Table-per-Concrete-type (TPC)
             modelBuilder.Entity<History>().ToTable(t => t.ExcludeFromMigrations(true));
             base.OnModelCreating(modelBuilder);
             // Automatically pulls all individual configuration classes

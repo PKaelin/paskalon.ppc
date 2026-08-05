@@ -23,6 +23,7 @@ namespace paskalON.OperatingModes.Infrastructure.Storage
         // Core DbSet
         DbSet<Configuration> Configurations { get; set; }            // General configuration class for the microservice
         DbSet<History> Histories { get; set; }                       // For DB migration history.
+        DbSet<SystemConfig> SystemConfigs { get; set; }
 
         // Ramps
         DbSet<RampRateConfig> RampRateConfigs { get; set; }
