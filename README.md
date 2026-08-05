@@ -14,10 +14,10 @@ This project is not yet an actual power plant controller.
   - Implemented device service config: [See](./paskalON.DeviceService/paskalON.Devices.Domain.Configs/README.md)
 
 - Readme operating mode: [See](./paskalON.OperatingModes/README.md)
-  - Implemented operating mode domain open loop [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/REAMDE.md#open-mode-open-loop-control)
-  - Implemented operating mode domain open loop MPPT [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/REAMDE.md#energy-resources-specific-open-loop-modes)
-  - Implemented operating mode closed loop Active Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/REAMDE.md#frequency--active-power-p-control-modes
-  - Implemented operating mode closed loop Reactive Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/REAMDE.md#voltage--active-power-p-control-modes
+  - Implemented operating mode domain open loop [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#open-mode-open-loop-control)
+  - Implemented operating mode domain open loop MPPT [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#energy-resources-specific-open-loop-modes)
+  - Implemented operating mode closed loop Active Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#frequency--active-power-p-control-modes)
+  - Implemented operating mode closed loop Reactive Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#voltage--active-power-p-control-modes)
 ---
 ---
 
