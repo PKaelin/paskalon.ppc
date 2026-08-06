@@ -348,7 +348,7 @@ namespace paskalON.OperatingModes.Domain
             {
                 StateActive = OperatingModeState.Enabling;
                 double setpointActive = GetActivePowerTargetSetpoint();
-
+                // Only start if there is available and if there is a setpoint that is not 0
                 if (setpointActive != 0)
                 {
                     _logger.LogInformation("{Name} operating mode enabled. Active Target-Setpoint: {ActiveTargetSetpoint}.", Name, setpointActive);
@@ -361,7 +361,7 @@ namespace paskalON.OperatingModes.Domain
             {
                 StateReactive = OperatingModeState.Enabling;
                 double setpointReactive = GetReactivePowerTargetSetpoint();
-
+                // Only start if there is available and if there is a setpoint that is not 0
                 if (setpointReactive != 0)
                 {
                     _logger.LogInformation("{Name} operating mode enabled. Reactive Target-Setpoint: {ReactiveTargetSetpoint}.", Name, setpointReactive);
@@ -414,7 +414,7 @@ namespace paskalON.OperatingModes.Domain
                 {
                     targetSetpoint = available.Value.KiloWatts;
                 }
-                // Available is more then setpoint use setpoint
+                // Available is more then setpoint use setpoint that might or might not be 0
                 else
                 {
                     targetSetpoint = SetpointActivePower.KiloWatts;
@@ -451,7 +451,7 @@ namespace paskalON.OperatingModes.Domain
                 {
                     targetSetpoint = available.Value.KiloVoltAmperesReactive;
                 }
-                // Available is more then setpoint use setpoint
+                // Available is more then setpoint use setpoint that might or might not be 0
                 else
                 {
                     targetSetpoint = SetpointReactivePower.KiloVoltAmperesReactive;
