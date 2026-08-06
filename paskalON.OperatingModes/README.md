@@ -53,7 +53,8 @@ Service/Interface layer described in [README.md](./paskalON.OperatingModes.Servi
 
 
 ## High level concept
-Operating modes can be stacked. Operating modes can be defined as "Additive"(each layer calculates output and adds it to its previous output) or "Exclusive" (uses its output only).
+- Operating modes can be stacked. 
+- Operating modes can be defined as "Additive"(each layer calculates output and adds it to its previous output) or "Exclusive" (uses its output only).
 
 ![Operating Modes High Level Concept](./Docs/Operating%20Modes%20High%20Level%20Concept.drawio.svg)
 
