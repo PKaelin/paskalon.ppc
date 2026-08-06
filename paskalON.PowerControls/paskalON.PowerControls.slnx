@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/InitialDevelopment/">
+    <Project Path="../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
+    <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="paskalON.PowerControls.Domain.Configs/paskalON.PowerControls.Domain.Configs.csproj" />
+  <Project Path="paskalON.PowerControls.Domain/paskalON.PowerControls.Domain.csproj" />
+</Solution>
