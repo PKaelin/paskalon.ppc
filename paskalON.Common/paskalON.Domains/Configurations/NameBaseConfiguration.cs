@@ -3,9 +3,8 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using paskalON.Devices.Domain.Configs;
 
-namespace paskalON.Devices.Infrastructure.Storage.Configurations
+namespace paskalON.Domains.Configurations
 {
     /// <summary>
     /// Allows configuration for an entity type to be factored into a separate class.

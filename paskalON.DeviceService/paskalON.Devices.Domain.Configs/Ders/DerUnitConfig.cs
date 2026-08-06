@@ -3,6 +3,7 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
+using paskalON.Domains;
 
 namespace paskalON.Devices.Domain.Configs.Ders
 {

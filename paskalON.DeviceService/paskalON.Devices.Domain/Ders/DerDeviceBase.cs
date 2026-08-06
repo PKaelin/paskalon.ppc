@@ -3,7 +3,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.Dataface;
-using paskalON.Devices.Domain.Configs;
+using paskalON.Domains;
 using paskalON.Telemetry;
 
 namespace paskalON.Devices.Domain.Ders

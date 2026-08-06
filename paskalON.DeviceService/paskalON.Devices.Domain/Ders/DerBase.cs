@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
-using paskalON.Devices.Domain.Configs;
+using paskalON.Domains;
 
 namespace paskalON.Devices.Domain.Ders
 {

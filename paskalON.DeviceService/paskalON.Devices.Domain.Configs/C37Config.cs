@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using paskalON.Communication.Protocols.C37118.Types;
+using paskalON.Domains;
 
 namespace paskalON.Devices.Domain.Configs
 {

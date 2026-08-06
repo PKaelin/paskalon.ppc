@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using paskalON.Communication.Protocols.Modbus.Configurations;
+using paskalON.Domains;
 
 namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
 {

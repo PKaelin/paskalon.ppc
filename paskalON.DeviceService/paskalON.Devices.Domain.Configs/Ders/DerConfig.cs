@@ -3,6 +3,7 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
+using paskalON.Domains;
 
 namespace paskalON.Devices.Domain.Configs.Ders
 {

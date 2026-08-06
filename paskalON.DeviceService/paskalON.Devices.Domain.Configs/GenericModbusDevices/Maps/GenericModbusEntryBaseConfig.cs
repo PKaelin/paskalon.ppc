@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using paskalON.Dataface.Modbus;
+using paskalON.Domains;
 
 namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
 {
