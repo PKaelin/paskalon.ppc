@@ -3,12 +3,12 @@
 //----------------------------------------‐------------------------------------
 using paskalON.PhysicalUnits.Electricals.Powers;
 
-namespace paskalON.PowerControls.Domain.Configs.Constraints
+namespace paskalON.ConstraintEngine.Domain.Configs
 {
     /// <summary>
     /// Configuration for power constraints.
     /// </summary>
-    public class PowerConstraintConfig : ConstraintBaseConfig
+    public abstract class PowerConstraintBaseConfig : ConstraintBaseConfig
     {
         /// <summary>
         /// Maximum active power allowed by the constraint.

@@ -1,0 +1,27 @@
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.Domains;
+
+namespace paskalON.PowerControls.Domain.Configs
+{
+    public class SystemConfig : DomainBase
+    {
+        /// <summary>
+        /// Power control type.
+        /// </summary>
+        /// <remarks>
+        /// Though this is a flag this power control system should be configured to only serve one type.
+        /// </remarks>
+        public required PowerControlType Type
+        {
+            get;
+            set
+            {
+                int v = (int)value;
+                if (Enum.IsDefined(typeof(PowerControlType), value) == false) throw new ArgumentException("Only one type per operating mode system is allowed.");
+                field = value;
+            }
+        }
+    }
+}

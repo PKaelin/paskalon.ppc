@@ -8,7 +8,8 @@
   <Folder Name="/Solution Items/">
     <File Path="README.md" />
   </Folder>
-  <Project Path="paskalON.ConstraintEngine.Domain.Configs.csproj/paskalON.ConstraintEngine.Domain.Configs.csproj" Id="4538a662-b870-48d2-ab62-9293e4f2bdfa" />
+  <Project Path="paskalON.ConstraintEngine.Domain.Configs/paskalON.ConstraintEngine.Domain.Configs.csproj" Id="ae28f480-f435-4a13-ba91-5422ba83880b" />
+  <Project Path="paskalON.ConstraintEngine.Domain/paskalON.ConstraintEngine.Domain.csproj" Id="3fff01ab-e7f9-49cf-9ba6-db0841784cdd" />
   <Project Path="paskalON.PowerControls.Domain.Configs/paskalON.PowerControls.Domain.Configs.csproj" />
   <Project Path="paskalON.PowerControls.Domain/paskalON.PowerControls.Domain.csproj" />
 </Solution>

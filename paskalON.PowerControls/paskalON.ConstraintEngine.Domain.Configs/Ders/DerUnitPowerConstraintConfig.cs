@@ -1,12 +1,12 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.PowerControls.Domain.Configs.Constraints
+namespace paskalON.ConstraintEngine.Domain.Configs.Ders
 {
     /// <summary>
     /// Configuration for DER unit power constraints.
     /// </summary>
-    public class DerUnitPowerConstraintConfig : PowerConstraintConfig
+    public class DerUnitPowerConstraintConfig : PowerConstraintBaseConfig
     {
         /// <summary>
         /// Corresponding DER unit name for which this power constraint is defined.

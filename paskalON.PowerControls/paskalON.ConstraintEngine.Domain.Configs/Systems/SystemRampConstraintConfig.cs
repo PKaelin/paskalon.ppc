@@ -3,7 +3,7 @@
 //----------------------------------------‐------------------------------------
 using paskalON.PhysicalUnits.Electricals.Powers;
 
-namespace paskalON.PowerControls.Domain.Configs.Constraints
+namespace paskalON.ConstraintEngine.Domain.Configs.Systems
 {
     /// <summary>
     /// Configuration for system ramp constraints.

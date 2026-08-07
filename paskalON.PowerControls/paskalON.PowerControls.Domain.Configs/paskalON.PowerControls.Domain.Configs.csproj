@@ -11,4 +11,9 @@
     <ProjectReference Include="..\..\paskalON.Common\paskalON.PhysicalUnits\paskalON.PhysicalUnits.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Ders\" />
+    <Folder Include="Systems\" />
+  </ItemGroup>
+
 </Project>

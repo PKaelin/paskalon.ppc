@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using paskalON.Domains;
-using paskalON.PhysicalUnits.Electricals.Powers;
 
-namespace paskalON.PowerControls.Domain.Configs.Constraints
+namespace paskalON.ConstraintEngine.Domain.Configs
 {
     /// <summary>
     /// Base class for all constraint configurations.
@@ -19,16 +18,6 @@ namespace paskalON.PowerControls.Domain.Configs.Constraints
         /// Consider RBAC for this.
         /// </remarks>
         public required bool IsActive { get; set; }
-
-
-        /// <summary>
-        /// Power control type as a flag representation.
-        /// </summary>
-        /// <remarks>
-        /// As they are flags they can be used like Bess|Solar to define that they can be
-        /// used for both BESS and Solar systems.
-        /// </remarks>
-        public required PowerFactorType Type { get; set; }
 
 
         /// <summary>
