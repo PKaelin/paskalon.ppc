@@ -77,6 +77,13 @@ The actual devices (power resource) which can be a simulation, emulation or phys
 Configurations are stored in a database to ensure accountability and to track changes.
 
 
+### Config - Domain - Application Overview
+PlantControl, OperatingMode, PowerControl, DeviceService are all setup using the same concept. The configuration and structure is stored in a database. During startup the configuration is read and factories create the domains and domain structure passing in the domain mappers that reference the subscribed data.
+
+
+![Config-Domain-Application Overview](./Docs/Config-Domain-Application%20Overview.drawio.svg)
+
+
 ### Metrics publisher
 Any class can publish metrics as long as a metrics publisher interface gets injected to the class and an instance (MetricsPublisher) of that injected interface is kept within the class. E.g. 
 ```
