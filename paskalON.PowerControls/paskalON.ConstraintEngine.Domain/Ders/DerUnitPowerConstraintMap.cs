@@ -1,7 +1,7 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.PowerControls.Domain.Ders
+namespace paskalON.ConstraintEngine.Domain.Ders
 {
     public class DerUnitPowerConstraintMap : PowerConstraintBaseMap
     {

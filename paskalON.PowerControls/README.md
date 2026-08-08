@@ -4,6 +4,10 @@
 ![Power Control Overview](./Docs/Power%20Control%20Overview.drawio.svg)
 
 
+## Important design notice
+**The first version of the power control constraint engine is applying constraints sequentially.  
+A better approach would be to accumulate them first, then intersect, then project the result so that P&Q are considered together and not sperate.**
+
 ## Structure
 
 ### Project ConstraintEngine.Domain.Configs

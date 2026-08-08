@@ -1,9 +1,9 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.PowerControls.Domain
+namespace paskalON.ConstraintEngine.Domain
 {
-    public class ConstraintBaseMap
+    public abstract class ConstraintBaseMap
     {
     }
 }

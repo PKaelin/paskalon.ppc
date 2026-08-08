@@ -1,9 +1,9 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.PowerControls.Domain.Systems
+namespace paskalON.ConstraintEngine.Domain.Systems
 {
-    public class SystemRampConstraintMap : ConstraintBaseMap
+    public class SystemPowerConstraintMap : PowerConstraintBaseMap
     {
     }
 }

@@ -6,7 +6,7 @@ namespace paskalON.ConstraintEngine.Domain.Configs.Systems
     /// <summary>
     /// Configuration for system power constraints.
     /// </summary>
-    public class SystemPowerConstraintConfig : PowerConstraintBaseConfig
+    public abstract class SystemPowerConstraintConfig : PowerConstraintBaseConfig
     {
         /// <summary>
         /// Indicates whether the system should derate per unit stopped.

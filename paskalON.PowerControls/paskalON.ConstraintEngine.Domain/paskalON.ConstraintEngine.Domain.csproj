@@ -10,4 +10,9 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.PhysicalUnits\paskalON.PhysicalUnits.csproj" />
+    <ProjectReference Include="..\paskalON.ConstraintEngine.Domain.Configs\paskalON.ConstraintEngine.Domain.Configs.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -19,7 +19,7 @@ namespace paskalON.PowerControls.Domain.Configs
             set
             {
                 int v = (int)value;
-                if (Enum.IsDefined(typeof(PowerControlType), value) == false) throw new ArgumentException("Only one type per operating mode system is allowed.");
+                if (Enum.IsDefined(typeof(PowerControlType), value) == false) throw new ArgumentException("Only one type per power control system is allowed.");
                 field = value;
             }
         }

@@ -14,4 +14,8 @@
     <ProjectReference Include="..\paskalON.ConstraintEngine.Domain.Configs\paskalON.ConstraintEngine.Domain.Configs.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Systems\" />
+  </ItemGroup>
+
 </Project>

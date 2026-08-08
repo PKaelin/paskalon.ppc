@@ -1,8 +1,6 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-using paskalON.PhysicalUnits.Electricals.Powers;
-
 namespace paskalON.ConstraintEngine.Domain.Configs
 {
     /// <summary>
@@ -13,25 +11,73 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <summary>
         /// Maximum active power allowed by the constraint.
         /// </summary>
-        public ActivePower? MaxActivePower { get; set; }
+        public double? MaximumActivePowerKiloWatt
+        {
+            get;
+            set
+            {
+                if (value != null && MinimumActivePowerKiloWatt.HasValue && MinimumActivePowerKiloWatt.Value > value)
+                {
+                    throw new ArgumentOutOfRangeException($"{nameof(MaximumActivePowerKiloWatt)} has to be bigger than {nameof(MinimumActivePowerKiloWatt)}");
+                }
+
+                field = value;
+            }
+        }
 
 
         /// <summary>
         /// Minimum active power allowed by the constraint.
         /// </summary>
-        public ActivePower? MinActivePower { get; set; }
+        public double? MinimumActivePowerKiloWatt
+        {
+            get;
+            set
+            {
+                if (value != null && MaximumActivePowerKiloWatt.HasValue && MaximumActivePowerKiloWatt.Value < value)
+                {
+                    throw new ArgumentOutOfRangeException($"{nameof(MaximumActivePowerKiloWatt)} has to be smaller than {nameof(MaximumActivePowerKiloWatt)}");
+                }
+
+                field = value;
+            }
+        }
 
 
         /// <summary>
         /// Maximum reactive power allowed by the constraint.
         /// </summary>
-        public ReactivePower? MaxReactivePower { get; set; }
+        public double? MaximumReactivePowerKiloVars
+        {
+            get;
+            set
+            {
+                if (value != null && MinimumReactivePowerKiloVars.HasValue && MinimumReactivePowerKiloVars.Value > value)
+                {
+                    throw new ArgumentOutOfRangeException($"{nameof(MaximumReactivePowerKiloVars)} has to be bigger than {nameof(MinimumReactivePowerKiloVars)}");
+                }
+
+                field = value;
+            }
+        }
 
 
         /// <summary>
         /// Minimum reactive power allowed by the constraint.
         /// </summary>
-        public ReactivePower? MinReactivePower { get; set; }
+        public double? MinimumReactivePowerKiloVars
+        {
+            get;
+            set
+            {
+                if (value != null && MaximumReactivePowerKiloVars.HasValue && MaximumReactivePowerKiloVars.Value < value)
+                {
+                    throw new ArgumentOutOfRangeException($"{nameof(MinimumReactivePowerKiloVars)} has to be smaller than {nameof(MaximumReactivePowerKiloVars)}");
+                }
+
+                field = value;
+            }
+        }
 
     }
 }

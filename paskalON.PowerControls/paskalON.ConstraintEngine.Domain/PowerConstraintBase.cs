@@ -4,7 +4,7 @@
 using Microsoft.Extensions.Logging;
 using paskalON.ConstraintEngine.Domain.Configs;
 
-namespace paskalON.PowerControls.Domain
+namespace paskalON.ConstraintEngine.Domain
 {
     public abstract class PowerConstraintBase : ConstraintBase
     {
