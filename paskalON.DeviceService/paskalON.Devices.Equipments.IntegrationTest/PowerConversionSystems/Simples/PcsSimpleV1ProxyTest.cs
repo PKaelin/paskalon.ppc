@@ -127,6 +127,8 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
 
             ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface, client.Object);
+            // Simulated already started
+            pcs.State = PcsState.Started;
 
             // Poll interval is 1
             await engine.PollAsync(1);

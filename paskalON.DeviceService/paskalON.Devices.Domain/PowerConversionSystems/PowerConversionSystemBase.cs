@@ -64,8 +64,26 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>
         public PcsState State
         {
-            get;
-            set { if (field != value) { field = value; SetState(value); } }
+            get { lock (dataLock) { return field; } }
+            set
+            {
+                bool changed;
+
+                lock (dataLock)
+                {
+                    changed = field != value;
+
+                    if (changed)
+                    {
+                        field = value;
+                    }
+                }
+
+                if (changed)
+                {
+                    SetState(value);
+                }
+            }
         }
 
 
@@ -74,8 +92,26 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>
         public bool CommunicationError
         {
-            get;
-            set { if (field != value) { field = value; _ = SetCommunicationError(value); } }
+            get { lock (dataLock) { return field; } }
+            set
+            {
+                bool changed;
+
+                lock (dataLock)
+                {
+                    changed = field != value;
+
+                    if (changed)
+                    {
+                        field = value;
+                    }
+                }
+
+                if (changed)
+                {
+                    _ = SetCommunicationError(value);
+                }
+            }
         }
 
 
@@ -173,7 +209,18 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>
         public double? ActiveAvailablePowerValue
         {
-            get { lock (dataLock) { return field; } }
+            get
+            {
+                if (State != PcsState.Started)
+                {
+                    return null;
+                }
+
+                lock (dataLock)
+                {
+                    return field;
+                }
+            }
             set { lock (dataLock) { field = value; } }
         }
 
@@ -208,7 +255,18 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>
         public double? ReactivePowerValue
         {
-            get { lock (dataLock) { return field; } }
+            get
+            {
+                if (State != PcsState.Started)
+                {
+                    return null;
+                }
+
+                lock (dataLock)
+                {
+                    return field;
+                }
+            }
             set { lock (dataLock) { field = value; } }
         }
 
@@ -420,7 +478,16 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public virtual async Task StandbyAsync(double? standbyActivePower = null)
         {
             _logger.LogInformation("{Name} standby requested with standby active power: {StandbyActivePower}.", Name, standbyActivePower ?? StandbyActivePowerKiloWatts);
-            State = PcsState.EnteringStandby;
+
+            lock (dataLock)
+            {
+                if (StandbyActivePowerKiloWatts > 0)
+                {
+                    _activePowerTarget = StandbyActivePowerKiloWatts * 1000;
+                }
+
+                State = PcsState.EnteringStandby;
+            }
         }
 
 
@@ -431,6 +498,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             lock (dataLock)
             {
+                if (State == PcsState.EnteringStandby || State == PcsState.Standby)
+                {
+                    _logger.LogWarning("{Name} - Is entering or is in standby. No new active power target can be set: {activePowerTarget}", Name, _activePowerTarget);
+                    return;
+                }
+
                 if (_activePowerTarget != value)
                 {
                     _activePowerTarget = value;
@@ -448,6 +521,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             lock (dataLock)
             {
+                if (State == PcsState.EnteringStandby || State == PcsState.Standby)
+                {
+                    _logger.LogWarning("{Name} - Is entering or is in standby. No new reactive power target can be set: {reactivePowerTarget}", Name, _reactivePowerTarget);
+                    return;
+                }
+
                 if (_reactivePowerTarget != value)
                 {
                     _reactivePowerTarget = value;
