@@ -67,6 +67,7 @@ namespace paskalON.OperatingModes.Application.Ramps
         /// Constructor of <see cref="RampController"/>
         /// </summary>
         /// <param name="logger">ILogger for handling application logging and diagnostics.</param>
+        /// <param name="timeProvider">Time provider for system time abstraction.</param>
         /// <param name="rampBaseConfig">Ramp base configuration containing concrete ramp configuration.</param>
         public RampController(ILogger<RampController> logger, TimeProvider timeProvider, RampBaseConfig rampBaseConfig)
         {
