@@ -175,6 +175,39 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public bool IsInMaintenanceMode { get => DerUnit.IsInMaintenanceMode; }
 
 
+        private ushort deviceHeartbeat = 0;
+        /// <summary>
+        /// Controller heartbeat value that increments on each call and wraps around at 256.
+        /// A value of 0 is skipped to avoid confusion with uninitialized state.
+        /// PPC controller (DeviceService) writes --> to Device
+        /// </summary>
+        /// <remarks>
+        /// Controller heartbeat is sometimes referred to as Modbus master heartbeat.
+        /// </remarks>
+        public ushort ControllerHeartbeat
+        {
+            get
+            {
+                ushort newHeartbeat = (ushort)(++deviceHeartbeat % 256);
+                return newHeartbeat == 0 ? ++newHeartbeat : newHeartbeat;
+            }
+        }
+
+
+        /// <summary>
+        /// Device heartbeat value that gets read from the device.
+        /// PPC controller (DeviceService) reads <-- from Device
+        /// </summary>
+        /// <remarks>
+        /// Device heartbeat is sometimes referred to as Modbus slave heartbeat.
+        /// </remarks>
+        public ushort DeviceHeartbeat
+        {
+            get { lock (dataLock) { return field; } }
+            set { lock (dataLock) { field = value; } }
+        }
+
+
         private double? _activePowerTarget;
         /// <summary>
         /// Current active power target in Watts

@@ -24,9 +24,9 @@ namespace paskalON.Protocols.Modbus
         Task<ushort[]> ReadInputRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default);
 
 
-        Task WriteSingleRegisterAsync(ushort address, double value, ModbusDataType type, CancellationToken cancellationToken = default);
-        Task WriteSingleRegisterAsync(ushort address, ushort value, ModbusDataType type, CancellationToken cancellationToken = default);
-        Task WriteSingleRegisterAsync(ushort address, bool value, ModbusDataType type, CancellationToken cancellationToken = default);
-        Task WriteMultipleRegistersAsync(ushort address, ushort[] values, ModbusDataType type, CancellationToken cancellationToken = default);
+        Task WriteSingleRegisterAsync(ushort address, double value, ModbusDataType type, short priority = 3, CancellationToken cancellationToken = default);
+        Task WriteSingleRegisterAsync(ushort address, ushort value, ModbusDataType type, short priority = 3, CancellationToken cancellationToken = default);
+        Task WriteSingleRegisterAsync(ushort address, bool value, ModbusDataType type, short priority = 3, CancellationToken cancellationToken = default);
+        Task WriteMultipleRegistersAsync(ushort address, ushort[] values, ModbusDataType type, short priority = 3, CancellationToken cancellationToken = default);
     }
 }
