@@ -57,7 +57,7 @@ Manages and maintains the safety of equipment.
 
 
 ### Constraint Engine 
-Constraints the targets to phisycal, operational and regulatory constraints. This component resides within the power control solution.
+Constraints the targets to physical, operational and regulatory constraints. This component resides within the power control solution.
 
 
 ### Device Service 

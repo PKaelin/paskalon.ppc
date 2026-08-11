@@ -3,6 +3,9 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.ConstraintEngine.Domain.Ders
 {
+    /// <summary>
+    /// DER unit power constraint map.
+    /// </summary>
     public class DerUnitPowerConstraintMap : PowerConstraintBaseMap
     {
     }

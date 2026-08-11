@@ -1,0 +1,32 @@
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+using paskalON.PhysicalUnits.Electricals.Powers;
+
+namespace paskalON.PowerControls.Domain
+{
+    /// <summary>
+    /// Interface for power controls.
+    /// </summary>
+    public interface IPowerControl
+    {
+        /// <summary>
+        /// Active power target for the power control.
+        /// </summary>
+        ActivePower TargetActivePower { get; }
+
+
+        /// <summary>
+        /// Reactive power target for the power control.
+        /// </summary>
+        ReactivePower TargetReactivePower { get; }
+
+
+        /// <summary>
+        /// Updates the active and reactive power for the power control.
+        /// </summary>
+        /// <param name="activePower">Active power target for the power control.</param>
+        /// <param name="reactivePower">Reactive power target for the power control.</param>
+        void UpdatePower(ActivePower activePower, ReactivePower reactivePower);
+    }
+}

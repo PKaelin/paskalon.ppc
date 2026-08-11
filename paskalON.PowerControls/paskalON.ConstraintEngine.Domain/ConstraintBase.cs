@@ -10,21 +10,51 @@ namespace paskalON.ConstraintEngine.Domain
     /// <summary>
     /// Base class for all constraints.
     /// </summary>
+    /// <remarks>
+    /// The constraint is implemented once and applied to many power controllers.
+    /// </remarks>
     public abstract class ConstraintBase : IConstraint
     {
         /// <summary>
         /// ILogger for handling application logging and diagnostics.
         /// </summary>
         protected readonly ILogger _logger;
+
+
+        /// <summary>
+        /// Constraint base configuration.
+        /// </summary>
         private readonly ConstraintBaseConfig _config;
+
+
+        /// <summary>
+        /// Constraint base map.
+        /// </summary>
+        /// <remarks>
+        /// Some constraint require inputs like power, voltage, current, etc.
+        /// This is the base mapping class for those inputs.
+        /// </remarks>
         private readonly ConstraintBaseMap _map;
 
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public string Name { get => _config.Name; }
 
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public bool IsEnabled { get => _config.IsEnabled; }
 
 
+        /// <summary>
+        /// Constructor of <see cref="ConstraintBase"/>.
+        /// </summary>
+        /// <param name="logger">ILogger for handling application logging and diagnostics.</param>
+        /// <param name="config">Constraint base configuration.</param>
+        /// <param name="map">Constraint base map.</param>
         public ConstraintBase(ILogger logger, ConstraintBaseConfig config, ConstraintBaseMap map)
         {
             ArgumentNullException.ThrowIfNull(logger);
@@ -36,6 +66,10 @@ namespace paskalON.ConstraintEngine.Domain
             _map = map;
         }
 
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public abstract void ApplyLimits(ref ActivePower activePower, ref ReactivePower reactivePower);
     }
 }

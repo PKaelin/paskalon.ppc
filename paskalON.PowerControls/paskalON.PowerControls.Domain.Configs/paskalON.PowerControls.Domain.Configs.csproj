@@ -9,11 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.PhysicalUnits\paskalON.PhysicalUnits.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Ders\" />
-    <Folder Include="Systems\" />
+    <ProjectReference Include="..\paskalON.ConstraintEngine.Domain.Configs\paskalON.ConstraintEngine.Domain.Configs.csproj" />
   </ItemGroup>
 
 </Project>

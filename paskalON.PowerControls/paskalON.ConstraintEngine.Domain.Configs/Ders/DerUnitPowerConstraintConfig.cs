@@ -8,9 +8,5 @@ namespace paskalON.ConstraintEngine.Domain.Configs.Ders
     /// </summary>
     public class DerUnitPowerConstraintConfig : PowerConstraintBaseConfig
     {
-        /// <summary>
-        /// Corresponding DER unit name for which this power constraint is defined.
-        /// </summary>
-        public required string DerUnitName { get; set; }
     }
 }

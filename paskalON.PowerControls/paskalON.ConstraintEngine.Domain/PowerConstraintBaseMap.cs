@@ -3,6 +3,9 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.ConstraintEngine.Domain
 {
+    /// <summary>
+    /// Power constraint base map.
+    /// </summary>
     public abstract class PowerConstraintBaseMap : ConstraintBaseMap
     {
     }

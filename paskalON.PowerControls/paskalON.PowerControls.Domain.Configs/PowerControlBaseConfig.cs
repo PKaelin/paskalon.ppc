@@ -3,15 +3,9 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Domains;
 
-namespace paskalON.ConstraintEngine.Domain.Configs
+namespace paskalON.PowerControls.Domain.Configs
 {
-    /// <summary>
-    /// Base class for all constraint configurations.
-    /// </summary>
-    /// <remarks>
-    /// The constraint can be configured just once and applied to many power controllers.
-    /// </remarks>
-    public abstract class ConstraintBaseConfig : NameBase
+    public abstract class PowerControlBaseConfig : NameBase
     {
         /// <summary>
         /// Is active means it is available for selection.
@@ -27,6 +21,5 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// Is enabled means the constraint is active and will be applied.
         /// </summary>
         public required bool IsEnabled { get; set; }
-
     }
 }

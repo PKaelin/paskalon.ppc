@@ -26,7 +26,6 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
                 Name = "DerUnitPowerConstraintConfig",
                 IsActive = true,
                 IsEnabled = true,
-                DerUnitName = "Unit1",
                 MaximumActivePowerKiloWatt = double.MaxValue,
                 MinimumActivePowerKiloWatt = double.MinValue,
                 MaximumReactivePowerKiloVars = double.MaxValue,

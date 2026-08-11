@@ -15,13 +15,43 @@ namespace paskalON.ConstraintEngine.Domain.Systems
         private readonly TimeProvider _timeProvider;
 
 
+        /// <summary>
+        /// System ramp constraint configuration.
+        /// </summary>
         private readonly SystemRampConstraintConfig _config;
+
+
+        /// <summary>
+        /// System ramp constraint map.
+        /// </summary>
         private readonly SystemRampConstraintMap _map;
+
+
+        /// <summary>
+        /// Last active watt power in kilo watt.
+        /// </summary>
         private double _lastActiveKiloWattPower = 0;
+
+
+        /// <summary>
+        /// Last reactive voltage ampere reactive in kilo var.
+        /// </summary>
         private double _lastReactiveKiloVarsPower = 0;
+
+
+        /// <summary>
+        /// Time stamp of the last ApplyLimits call.
+        /// </summary>
         private DateTimeOffset _lastApply = DateTimeOffset.MinValue;
 
 
+        /// <summary>
+        /// Constructor of <see cref="SystemRampConstraint"/>.
+        /// </summary>
+        /// <param name="logger">ILogger for handling application logging and diagnostics.</param>
+        /// <param name="config">System ramp constraint configuration.</param>
+        /// <param name="map">System ramp constraint map.</param>
+        /// <param name="timeProvider">Time provider for system time abstraction.</param>
         public SystemRampConstraint(ILogger logger, SystemRampConstraintConfig config, SystemRampConstraintMap map, TimeProvider timeProvider) : base(logger, config, map)
         {
             ArgumentNullException.ThrowIfNull(config);
@@ -33,6 +63,10 @@ namespace paskalON.ConstraintEngine.Domain.Systems
             _timeProvider = timeProvider;
         }
 
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public override void ApplyLimits(ref ActivePower activePower, ref ReactivePower reactivePower)
         {
             // Active power

@@ -9,10 +9,24 @@ namespace paskalON.ConstraintEngine.Domain.Ders
 {
     public class DerUnitPowerConstraint : PowerConstraintBase
     {
+        /// <summary>
+        /// DER unit power constraint configuration.
+        /// </summary>
         private readonly DerUnitPowerConstraintConfig _config;
+
+
+        /// <summary>
+        /// DER unit power constraint map.
+        /// </summary>
         private readonly DerUnitPowerConstraintMap _map;
 
 
+        /// <summary>
+        /// Constructor of <see cref="DerUnitPowerConstraint"/>.
+        /// </summary>
+        /// <param name="logger">ILogger for handling application logging and diagnostics.</param>
+        /// <param name="config">DER unit power constraint configuration.</param>
+        /// <param name="map">DER unit power constraint map.</param>
         public DerUnitPowerConstraint(ILogger logger, DerUnitPowerConstraintConfig config, DerUnitPowerConstraintMap map)
             : base(logger, config, map)
         {
@@ -24,6 +38,9 @@ namespace paskalON.ConstraintEngine.Domain.Ders
         }
 
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public override void ApplyLimits(ref ActivePower activePower, ref ReactivePower reactivePower)
         {
             if (_config.IsEnabled)
