@@ -37,6 +37,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
         /// </summary>
         /// <param name="logger">Logger for handling logging and diagnostics.</param>
         /// <param name="timeProvider">The time provider (TimeProvider.System for prod, FakeTimeProvider for tests.</param>
+        /// <param name="publisher">The metrics publisher interface.</param>
         /// <param name="systemConfig">The system configuration.</param>
         /// <param name="config">The operating mode configuration.</param>
         /// <param name="map">Input mapping class for signals.</param>

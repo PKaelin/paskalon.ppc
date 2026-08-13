@@ -3,44 +3,56 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Configs.SafetyFunctions;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.Telemetry;
 
-namespace paskalON.OperatingModes.Domain
+namespace paskalON.OperatingModes.Domain.SafetyFunctions
 {
     /// <summary>
-    /// Operating mode open mode base.
+    /// Mode: Emergency Shutdown Mode
+    /// Purpose: Shutdown the plant in an emergency situation.
+    /// Inputs: Reactive Power setpoint = 0, Available Reactive Power = 0
+    /// Output Controlled: Active Power (P) and Reactive Power (Q)
+    /// What Output Influences: Active Power and Reactive Power
     /// </summary>
-    /// <remarks>
-    /// How they work:
-    /// The controller sends targets and assumes the action happens perfectly.
-    /// Feedback:
-    /// None.It does not measure any actual output or adjust any changes.
-    /// </remarks>
-    public abstract class OperatingOpenModeBase : OperatingModeBase, IOperatingOpenMode
+    public class EmergencyShutdownMode : OperatingOpenModeBase
     {
         /// <summary>
-        /// Constructor of <see cref="OperatingOpenModeBase"/>.
+        /// Emergency shutdown mode configuration.
+        /// </summary>
+        private readonly EmergencyShutdownModeConfig _config;
+
+
+        /// <summary>
+        /// Constructor of <see cref="EmergencyShutdownMode"/>.
         /// </summary>
         /// <param name="logger">Logger for handling logging and diagnostics.</param>
         /// <param name="timeProvider">The time provider (TimeProvider.System for prod, FakeTimeProvider for tests.</param>
         /// <param name="publisher">The metrics publisher interface.</param>
         /// <param name="systemConfig">The system configuration.</param>
-        /// <param name="config">The operating mode base configuration.</param>
+        /// <param name="config">The operating mode configuration.</param>
         /// <param name="map">Input mapping class for signals.</param>
         /// <param name="rampController">The ramp controller interface.</param>
         /// <param name="curveController">The curve controller interface.</param>
-        public OperatingOpenModeBase(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, OperatingModeBaseConfig config,
+        public EmergencyShutdownMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, EmergencyShutdownModeConfig config,
             OperatingModeBaseMap map, IRampController rampController, ICurveController? curveController)
             : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
         {
+            ArgumentNullException.ThrowIfNull(config);
+
+            _config = config;
         }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public abstract Task CalculateAsync(CancellationToken cancellationToken = default);
+        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        {
+            // TODO: Implement
+            throw new NotImplementedException();
+        }
     }
 }
