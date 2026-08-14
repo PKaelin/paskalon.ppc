@@ -24,8 +24,6 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Systems
             {
                 ChangedBy = "Test",
                 Name = "SystemPowerConstraintConfig",
-                IsActive = true,
-                IsEnabled = true,
                 MaximumActivePowerKiloWatt = double.MaxValue,
                 MinimumActivePowerKiloWatt = double.MinValue,
                 MaximumReactivePowerKiloVars = double.MaxValue,
@@ -64,7 +62,6 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Systems
 
             Assert.IsNotNull(constraint.Name);
             Assert.AreEqual(_config!.Name, constraint.Name);
-            Assert.AreEqual(_config!.IsEnabled, constraint.IsEnabled);
         }
 
 
@@ -142,48 +139,5 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Systems
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Warning);
             Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("below minimum limit", StringComparison.OrdinalIgnoreCase)));
         }
-
-
-        [TestMethod]
-        public void CreateApplyIsNotEnabledMaximumTest()
-        {
-            FakeLogger logger = new FakeLogger();
-            _config!.IsEnabled = false;
-            _config!.MaximumActivePowerKiloWatt = 10;
-            _config!.MaximumReactivePowerKiloVars = 10;
-            SystemPowerConstraint constraint = new SystemPowerConstraint(logger, _config!, _map!);
-            ActivePower activePower = ActivePower.FromKilo(40);
-            ReactivePower reactivePower = ReactivePower.FromKilo(40);
-            logger.Collector.Clear();
-
-            constraint.ApplyConstraints(ref activePower, ref reactivePower);
-
-            Assert.AreEqual(40, activePower.KiloWatts);
-            Assert.AreEqual(40, reactivePower.KiloVoltAmperesReactive);
-            IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Warning);
-            Assert.HasCount(0, logs);
-        }
-
-
-        [TestMethod]
-        public void CreateApplyIsNotEnabledMinimumTest()
-        {
-            FakeLogger logger = new FakeLogger();
-            _config!.IsEnabled = false;
-            _config!.MinimumActivePowerKiloWatt = -20;
-            _config!.MinimumReactivePowerKiloVars = -20;
-            SystemPowerConstraint constraint = new SystemPowerConstraint(logger, _config!, _map!);
-            ActivePower activePower = ActivePower.FromKilo(-40);
-            ReactivePower reactivePower = ReactivePower.FromKilo(-40);
-            logger.Collector.Clear();
-
-            constraint.ApplyConstraints(ref activePower, ref reactivePower);
-
-            Assert.AreEqual(-40, activePower.KiloWatts);
-            Assert.AreEqual(-40, reactivePower.KiloVoltAmperesReactive);
-            IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Warning);
-            Assert.HasCount(0, logs);
-        }
-
     }
 }

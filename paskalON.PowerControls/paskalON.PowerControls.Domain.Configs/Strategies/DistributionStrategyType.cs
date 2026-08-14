@@ -1,8 +1,11 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-namespace paskalON.PowerControls.Domain.Strategies
+namespace paskalON.PowerControls.Domain.Configs.Strategies
 {
+    /// <summary>
+    /// Distribution strategy type.
+    /// </summary>
     public enum DistributionStrategyType
     {
         /// <summary>
@@ -14,7 +17,11 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// </summary>
         Equal = 1,
         /// <summary>
-        /// Distributes using a weight or limits.
+        /// Distributes all to a weight.
+        /// </summary>
+        Weight = 1,
+        /// <summary>
+        /// Distributes using a proportions or limits.
         /// </summary>
         Proportional = 2,
         /// <summary>

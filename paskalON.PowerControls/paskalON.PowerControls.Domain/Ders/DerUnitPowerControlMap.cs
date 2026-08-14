@@ -5,5 +5,6 @@ namespace paskalON.PowerControls.Domain.Ders
 {
     public class DerUnitPowerControlMap : PowerControlBaseMap
     {
+        public required Func<DerState> State { get; init; }
     }
 }

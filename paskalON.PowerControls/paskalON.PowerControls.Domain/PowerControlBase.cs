@@ -67,13 +67,13 @@ namespace paskalON.PowerControls.Domain
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ActivePower TargetActivePower { get => _targetActivePower; }
+        public ref ActivePower TargetActivePower { get => ref _targetActivePower; }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ReactivePower TargetReactivePower { get => _targetReactivePower; }
+        public ref ReactivePower TargetReactivePower { get => ref _targetReactivePower; }
 
 
         /// <summary>
@@ -94,18 +94,5 @@ namespace paskalON.PowerControls.Domain
             _map = map;
             MetricsPublisher = publisher;
         }
-
-
-        public void SetActivePowerTarget(double activePowerValueWatt)
-        {
-            _targetActivePower.Watts = activePowerValueWatt;
-        }
-
-
-        public void SetReactivePowerTarget(double reactivePowerValueVars)
-        {
-            _targetReactivePower.VoltAmperesReactive = reactivePowerValueVars;
-        }
-
     }
 }

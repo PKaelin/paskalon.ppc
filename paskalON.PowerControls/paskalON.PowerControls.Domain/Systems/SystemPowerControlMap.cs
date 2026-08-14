@@ -5,5 +5,6 @@ namespace paskalON.PowerControls.Domain.Systems
 {
     public class SystemPowerControlMap : PowerControlBaseMap
     {
+        public required Func<SystemState> State { get; init; }
     }
 }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.ConstraintEngine.Domain;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.PowerControls.Domain.Ders;
 
@@ -24,40 +25,43 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// <summary>
         /// <inheritdoc/>
         /// </summary>        
-        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> alUnits)
+        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> allUnits)
         {
-            IEnumerable<DerUnitPowerControl> units = alUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
+            IEnumerable<DerUnitPowerControl> units = allUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
             int unitCount = units.Count();
 
             if (unitCount > 0)
             {
-
                 double unitTargetActivePower = systemActivePower.Watts;
                 double unitTargetReactivePower = systemReactivePower.VoltAmperesReactive;
 
                 foreach (DerUnitPowerControl unit in units)
                 {
+                    unit.TargetActivePower.Watts = unitTargetActivePower;
+                    unit.TargetReactivePower.VoltAmperesReactive = unitTargetReactivePower;
+
+                    foreach (IConstraint constraint in unit.Constraints)
+                    {
+                        constraint.ApplyConstraints(ref unit.TargetActivePower, ref unit.TargetReactivePower, false);
+                    }
+
                     if (Math.Round(unitTargetActivePower, 0) != 0)
                     {
-                        unit.SetActivePowerTarget(unitTargetActivePower);
+                        unitTargetActivePower -= unit.TargetActivePower.Watts;
                     }
                     else
                     {
-                        unit.SetActivePowerTarget(0);
+                        unitTargetActivePower = 0;
                     }
 
                     if (Math.Round(unitTargetReactivePower, 0) != 0)
                     {
-                        unit.SetReactivePowerTarget(unitTargetReactivePower);
+                        unitTargetReactivePower -= unit.TargetReactivePower.VoltAmperesReactive;
                     }
                     else
                     {
-                        unit.SetReactivePowerTarget(0);
+                        unitTargetReactivePower = 0;
                     }
-
-                    unit.UpdatePower(unit.TargetActivePower, unit.TargetReactivePower);
-                    unitTargetActivePower -= unit.TargetActivePower.Watts;
-                    unitTargetReactivePower -= unit.TargetReactivePower.VoltAmperesReactive;
                 }
             }
 

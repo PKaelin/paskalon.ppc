@@ -13,7 +13,7 @@ namespace paskalON.PowerControls.Domain.Strategies
         {
         }
 
-        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> alUnits)
+        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> allUnits)
         {
             throw new NotImplementedException();
         }

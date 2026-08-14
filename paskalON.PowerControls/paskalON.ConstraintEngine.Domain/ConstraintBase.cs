@@ -44,12 +44,6 @@ namespace paskalON.ConstraintEngine.Domain
 
 
         /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public bool IsEnabled { get => _config.IsEnabled; }
-
-
-        /// <summary>
         /// Constructor of <see cref="ConstraintBase"/>.
         /// </summary>
         /// <param name="logger">ILogger for handling application logging and diagnostics.</param>
@@ -70,6 +64,6 @@ namespace paskalON.ConstraintEngine.Domain
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public abstract void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower);
+        public abstract void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower, bool shallLogViolations);
     }
 }

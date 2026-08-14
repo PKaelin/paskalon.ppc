@@ -6,7 +6,7 @@ namespace paskalON.ConstraintEngine.Domain.Configs
     /// <summary>
     /// Configuration for power constraints.
     /// </summary>
-    public abstract class PowerConstraintBaseConfig : ConstraintBaseConfig
+    public class PowerConstraintConfig : ConstraintBaseConfig
     {
         /// <summary>
         /// Maximum active power allowed by the constraint.

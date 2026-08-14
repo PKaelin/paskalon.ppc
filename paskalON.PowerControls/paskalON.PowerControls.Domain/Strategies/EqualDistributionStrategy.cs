@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.ConstraintEngine.Domain;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.PowerControls.Domain.Ders;
 
@@ -24,9 +25,9 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// <summary>
         /// <inheritdoc/>
         /// </summary>        
-        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> alUnits)
+        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> allUnits)
         {
-            IEnumerable<DerUnitPowerControl> units = alUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
+            IEnumerable<DerUnitPowerControl> units = allUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
             int unitCount = units.Count();
 
             if (unitCount > 0)
@@ -36,9 +37,14 @@ namespace paskalON.PowerControls.Domain.Strategies
 
                 foreach (DerUnitPowerControl unit in units)
                 {
-                    unit.SetActivePowerTarget(unitTargetActivePower);
-                    unit.SetReactivePowerTarget(unitTargetReactivePower);
+                    unit.TargetActivePower.Watts = unitTargetActivePower;
+                    unit.TargetReactivePower.VoltAmperesReactive = unitTargetReactivePower;
                     unit.UpdatePower(unit.TargetActivePower, unit.TargetReactivePower);
+
+                    foreach (IConstraint constraint in unit.Constraints)
+                    {
+                        constraint.ApplyConstraints(ref unit.TargetActivePower, ref unit.TargetReactivePower, false);
+                    }
                     // If unit.Target != unitTarget then constraints have been applied
                 }
             }

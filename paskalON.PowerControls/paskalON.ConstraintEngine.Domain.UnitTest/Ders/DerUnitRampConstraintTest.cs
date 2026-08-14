@@ -25,8 +25,6 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
             {
                 ChangedBy = "Test",
                 Name = "DerUnitRampConstraintConfig",
-                IsActive = true,
-                IsEnabled = true,
                 MaximumActivePowerKiloWattRampRatePerSecond = double.MaxValue,
                 MaximumReactivePowerKiloVarsRampRatePerSecond = double.MaxValue,
             };
@@ -75,7 +73,6 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
 
             Assert.IsNotNull(constraint.Name);
             Assert.AreEqual(_config!.Name, constraint.Name);
-            Assert.AreEqual(_config!.IsEnabled, constraint.IsEnabled);
         }
 
 

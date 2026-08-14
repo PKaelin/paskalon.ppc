@@ -9,8 +9,6 @@ namespace paskalON.ConstraintEngine.Domain
     {
         string Name { get; }
 
-        bool IsEnabled { get; }
-
-        void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower);
+        void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower, bool shallLogViolations = true);
     }
 }

@@ -3,17 +3,27 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.ConstraintEngine.Domain;
+using paskalON.ConstraintEngine.Domain.Configs.Systems;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.PowerControls.Domain.Configs.Strategies;
 using paskalON.PowerControls.Domain.Configs.Systems;
+using paskalON.PowerControls.Domain.Ders;
+using paskalON.PowerControls.Domain.Strategies;
 using paskalON.Telemetry;
 
 namespace paskalON.PowerControls.Domain.Systems
 {
     public class SystemPowerControl : PowerControlBase
     {
+        private IDistributionStrategy? _priorityDistribution;
+        private IDistributionStrategy? _equalDistribution;
+        private IDistributionStrategy? _weightedDistribution;
+        private IDistributionStrategy? _proportionalDistribution;
+        private IDistributionStrategy? _waterFillingDistribution;
         private readonly SystemPowerControlConfig _config;
         private readonly SystemPowerControlMap _map;
         private readonly IEnumerable<ISystemConstraint> _constraints;
+        private readonly IEnumerable<DerUnitPowerControl> _units;
         private ActivePower _actualSystemActivePowerTarget;
         private ReactivePower _actualSystemReactivePowerTarget;
 
@@ -23,6 +33,7 @@ namespace paskalON.PowerControls.Domain.Systems
         /// </summary>
         protected object dataLock = new();
 
+        public SystemState State { get => _map.State.Invoke(); }
 
         public ActivePower SystemActivePowerTarget
         {
@@ -52,77 +63,98 @@ namespace paskalON.PowerControls.Domain.Systems
         }
 
 
-        /// <summary>
-        /// Maximum Active Power is the potential technical or nameplate limits of the system.
-        /// </summary>
-        public ActivePower MaximumActivePower { get; init; }
-
-
-        /// <summary>
-        /// Minimum Active Power is the potential technical or nameplate limits of the system.
-        /// </summary>
-        public ActivePower MinimumActivePower { get; init; }
-
-
-        /// <summary>
-        /// Maximum Reactive Power is the potential technical or nameplate limits of the system.
-        /// </summary>
-        public ReactivePower MaximumReactivePower { get; init; }
-
-
-        /// <summary>
-        /// Minimum Reactive Power is the potential technical or nameplate limits of the system.
-        /// </summary>
-        public ReactivePower MinimumReactivePower { get; init; }
-
-
-        /// <summary>
-        /// Indicates whether the system should derate per unit stopped.
-        /// </summary>
-        public bool DeratePerUnitStopped { get; init; }
-
-
-        /// <summary>
-        /// Indicates whether the system should derate per unit in maintenance.
-        /// </summary>
-        public bool DeratePerUnitInMaintenance { get; init; }
-
-
-
-
-        public SystemPowerControl(ILogger logger, SystemPowerControlConfig config, SystemPowerControlMap map, IMetricsPublisher publisher, IEnumerable<ISystemConstraint> constraints)
+        public SystemPowerControl(ILogger logger, SystemPowerControlConfig config, SystemPowerControlMap map, IMetricsPublisher publisher,
+            IEnumerable<ISystemConstraint> constraints, IEnumerable<DerUnitPowerControl> units, DistributionStrategyProfile distribution)
             : base(logger, config, map, publisher)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(map);
             ArgumentNullException.ThrowIfNull(constraints);
+            ArgumentNullException.ThrowIfNull(units);
+            ArgumentNullException.ThrowIfNull(distribution);
 
             _config = config;
             _map = map;
             _constraints = constraints;
-            DeratePerUnitInMaintenance = _config.SystemPowerConstraintConfig.DeratePerUnitInMaintenance;
-            DeratePerUnitStopped = _config.SystemPowerConstraintConfig.DeratePerUnitStopped;
-            MaximumActivePower = ActivePower.FromKilo(_config.SystemPowerConstraintConfig.MaximumActivePowerKiloWatt ?? 0);
-            MinimumActivePower = ActivePower.FromKilo(_config.SystemPowerConstraintConfig.MinimumActivePowerKiloWatt ?? 0);
-            MaximumReactivePower = ReactivePower.FromKilo(_config.SystemPowerConstraintConfig.MaximumReactivePowerKiloVars ?? 0);
-            MinimumReactivePower = ReactivePower.FromKilo(_config.SystemPowerConstraintConfig.MinimumReactivePowerKiloVars ?? 0);
+            _units = units;
+            _equalDistribution = distribution.EqualDistribution;
+            _priorityDistribution = distribution.PriorityDistribution;
+            _weightedDistribution = distribution.WeightedDistribution;
+            _proportionalDistribution = distribution.ProportionalDistribution;
+            _waterFillingDistribution = distribution.WaterFillingDistribution;
         }
 
 
 
         public override void UpdatePower(ActivePower activePower, ReactivePower reactivePower)
         {
-            if (activePower.Watts != SystemActivePowerTarget.Watts || reactivePower.VoltAmperesReactivePrecision != SystemReactivePowerTarget.VoltAmperesReactive)
+            if (IsEnabled == true)
             {
-                _logger.LogInformation("Update system power control. Active Power Kilo {ActivePower}, Reactive Power Kilo {ReactivePower}", activePower.KiloWatts, reactivePower.KiloVoltAmperesReactive);
-                _actualSystemActivePowerTarget = new ActivePower(SystemActivePowerTarget.Watts);
-                _actualSystemReactivePowerTarget = new(SystemReactivePowerTarget.VoltAmperesReactive);
+                double systemActivePowerTarget = SystemActivePowerTarget.Watts;
+                double systemReactivePowerTarget = SystemReactivePowerTarget.VoltAmperesReactive;
+                int unitCount = _units.Count();
+                // Get derate stop & maintenance configuration
+                SystemPowerConstraintConfig? derate = _constraints.OfType<SystemPowerConstraintConfig>().FirstOrDefault();
 
-                foreach (ISystemConstraint constraint in _constraints)
+                if (unitCount > 0 && derate != null && (derate.DeratePerUnitStopped || derate.DeratePerUnitInMaintenance))
                 {
-                    constraint.ApplyConstraints(ref _actualSystemActivePowerTarget, ref _actualSystemReactivePowerTarget);
+                    int toDerate = _units.Count(u => derate.DeratePerUnitStopped && u.State == DerState.Stopped || derate.DeratePerUnitInMaintenance && u.State == DerState.Maintenance);
+
+                    systemActivePowerTarget = systemActivePowerTarget / unitCount * toDerate;
+                    systemReactivePowerTarget = systemReactivePowerTarget / unitCount * toDerate;
+                }
+
+                if (activePower.Watts != systemActivePowerTarget || reactivePower.VoltAmperesReactivePrecision != systemReactivePowerTarget)
+                {
+                    _logger.LogInformation("Update system power control. Active Power Kilo {ActivePower}, Reactive Power Kilo {ReactivePower}", activePower.KiloWatts, reactivePower.KiloVoltAmperesReactive);
+                    _actualSystemActivePowerTarget = new ActivePower(SystemActivePowerTarget.Watts);
+                    _actualSystemReactivePowerTarget = new ReactivePower(SystemReactivePowerTarget.VoltAmperesReactive);
+
+                    foreach (ISystemConstraint constraint in _constraints)
+                    {
+                        constraint.ApplyConstraints(ref _actualSystemActivePowerTarget, ref _actualSystemReactivePowerTarget);
+                    }
+
+                    // Distribute to all units that can have different distribution strategies.
+                    DistributePriority();
+                    DistributeEqual();
+                    DistributeWeighted();
+                    DistributeProportional();
+                    DistributeWaterFilling();
                 }
             }
         }
+
+
+        private void DistributePriority()
+        {
+            _priorityDistribution?.Distribute(ActualSystemActivePowerTarget, ActualSystemReactivePowerTarget,
+                _units.Where(u => u.DistributionStrategyType == DistributionStrategyType.Priority));
+        }
+
+        private void DistributeEqual()
+        {
+            _equalDistribution?.Distribute(ActualSystemActivePowerTarget, ActualSystemReactivePowerTarget,
+                _units.Where(u => u.DistributionStrategyType == DistributionStrategyType.Equal));
+        }
+
+        private void DistributeWeighted()
+        {
+            _weightedDistribution?.Distribute(ActualSystemActivePowerTarget, ActualSystemReactivePowerTarget,
+                _units.Where(u => u.DistributionStrategyType == DistributionStrategyType.Weight));
+        }
+
+        private void DistributeProportional()
+        {
+            _proportionalDistribution?.Distribute(ActualSystemActivePowerTarget, ActualSystemReactivePowerTarget,
+                _units.Where(u => u.DistributionStrategyType == DistributionStrategyType.Proportional));
+        }
+
+        private void DistributeWaterFilling()
+        {
+            _waterFillingDistribution?.Distribute(ActualSystemActivePowerTarget, ActualSystemReactivePowerTarget,
+                _units.Where(u => u.DistributionStrategyType == DistributionStrategyType.WaterFilling));
+        }
+
     }
 }

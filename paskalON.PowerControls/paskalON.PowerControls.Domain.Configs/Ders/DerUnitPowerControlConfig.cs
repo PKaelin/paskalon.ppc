@@ -1,7 +1,8 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-using paskalON.ConstraintEngine.Domain.Configs.Ders;
+using paskalON.ConstraintEngine.Domain.Configs;
+using paskalON.PowerControls.Domain.Configs.Strategies;
 
 namespace paskalON.PowerControls.Domain.Configs.Ders
 {
@@ -11,6 +12,12 @@ namespace paskalON.PowerControls.Domain.Configs.Ders
         /// Corresponding DER unit name for which this power constraint is defined.
         /// </summary>
         public required string DerUnitName { get; set; }
+
+
+        /// <summary>
+        /// Distribution strategy type.
+        /// </summary>
+        public required DistributionStrategyType DistributionStrategyType { get; set; }
 
 
         /// <summary>
@@ -50,14 +57,8 @@ namespace paskalON.PowerControls.Domain.Configs.Ders
 
 
         /// <summary>
-        /// Relationship to DerUnitPowerConstraintConfig Id
+        /// Collection of constraints.
         /// </summary>
-        public int DerUnitPowerConstraintConfigId { get; set; }
-
-
-        /// <summary>
-        /// Relationship to DerUnitPowerConstraintConfig Id
-        /// </summary>
-        public required DerUnitPowerConstraintConfig DerUnitPowerConstraintConfig { get; set; }
+        public ICollection<ConstraintBaseConfig> Constraints { get; set; } = [];
     }
 }

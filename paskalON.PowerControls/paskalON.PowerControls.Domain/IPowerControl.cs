@@ -25,13 +25,13 @@ namespace paskalON.PowerControls.Domain
         /// <summary>
         /// Active power target for the power control.
         /// </summary>
-        ActivePower TargetActivePower { get; }
+        ref ActivePower TargetActivePower { get; }
 
 
         /// <summary>
         /// Reactive power target for the power control.
         /// </summary>
-        ReactivePower TargetReactivePower { get; }
+        ref ReactivePower TargetReactivePower { get; }
 
 
         /// <summary>

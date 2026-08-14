@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.ConstraintEngine.Domain;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.PowerControls.Domain.Ders;
 
@@ -24,9 +25,9 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// <summary>
         /// <inheritdoc/>
         /// </summary>        
-        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> alUnits)
+        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> allUnits)
         {
-            IEnumerable<DerUnitPowerControl> units = alUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
+            IEnumerable<DerUnitPowerControl> units = allUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
             double totalWeight = units.Sum(u => u.Weight);
             int unitCount = units.Count();
 
@@ -36,9 +37,13 @@ namespace paskalON.PowerControls.Domain.Strategies
                 {
                     double unitTargetActivePower = systemActivePower.Watts / totalWeight * unit.Weight;
                     double unitTargetReactivePower = systemReactivePower.VoltAmperesReactive / totalWeight * unit.Weight;
-                    unit.SetActivePowerTarget(unitTargetActivePower);
-                    unit.SetReactivePowerTarget(unitTargetReactivePower);
-                    unit.UpdatePower(unit.TargetActivePower, unit.TargetReactivePower);
+                    unit.TargetActivePower.Watts = unitTargetActivePower;
+                    unit.TargetReactivePower.VoltAmperesReactive = unitTargetReactivePower;
+
+                    foreach (IConstraint constraint in unit.Constraints)
+                    {
+                        constraint.ApplyConstraints(ref unit.TargetActivePower, ref unit.TargetReactivePower, false);
+                    }
                 }
             }
 

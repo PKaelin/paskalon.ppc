@@ -31,9 +31,12 @@ namespace paskalON.PowerControls.Domain.Ders
 
         public override void UpdatePower(ActivePower activePower, ReactivePower reactivePower)
         {
-            foreach (IDerUnitConstraint constraint in _constraints)
+            if (IsEnabled == true)
             {
-                constraint.ApplyConstraints(ref activePower, ref reactivePower);
+                foreach (IDerUnitConstraint constraint in _constraints)
+                {
+                    constraint.ApplyConstraints(ref activePower, ref reactivePower);
+                }
             }
         }
     }

@@ -6,7 +6,7 @@ namespace paskalON.ConstraintEngine.Domain.Configs.Ders
     /// <summary>
     /// Configuration for DER unit power constraints.
     /// </summary>
-    public class DerUnitPowerConstraintConfig : PowerConstraintBaseConfig
+    public class DerUnitPowerConstraintConfig : PowerConstraintConfig
     {
     }
 }
