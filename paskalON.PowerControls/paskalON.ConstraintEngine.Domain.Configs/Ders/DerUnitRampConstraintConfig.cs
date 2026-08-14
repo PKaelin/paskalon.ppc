@@ -6,33 +6,7 @@ namespace paskalON.ConstraintEngine.Domain.Configs.Ders
     /// <summary>
     /// Configuration for DER unit ramp constraints.
     /// </summary>
-    public class DerUnitRampConstraintConfig : ConstraintBaseConfig
+    public class DerUnitRampConstraintConfig : PowerRampConstraintConfig
     {
-        /// <summary>
-        /// Maximum ramp rate allowed by the constraint in active power per second.
-        /// </summary>
-        public double MaximumActivePowerKiloWattRampRatePerSecond
-        {
-            get;
-            set
-            {
-                ArgumentOutOfRangeException.ThrowIfNegative(value);
-                field = value;
-            }
-        }
-
-
-        /// <summary>
-        /// Maximum ramp up rate allowed by the constraint in reactive power per second.
-        /// </summary>
-        public double MaximumReactivePowerKiloVarsRampRatePerSecond
-        {
-            get;
-            set
-            {
-                ArgumentOutOfRangeException.ThrowIfNegative(value);
-                field = value;
-            }
-        }
     }
 }

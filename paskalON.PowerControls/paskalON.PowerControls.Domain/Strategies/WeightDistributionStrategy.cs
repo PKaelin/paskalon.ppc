@@ -29,9 +29,8 @@ namespace paskalON.PowerControls.Domain.Strategies
         {
             IEnumerable<DerUnitPowerControl> units = allUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
             double totalWeight = units.Sum(u => u.Weight);
-            int unitCount = units.Count();
 
-            if (unitCount > 0 && totalWeight > 0)
+            if (totalWeight > 0)
             {
                 foreach (DerUnitPowerControl unit in units)
                 {

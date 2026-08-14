@@ -7,15 +7,26 @@ using paskalON.PowerControls.Domain.Ders;
 
 namespace paskalON.PowerControls.Domain.Strategies
 {
+    /// <summary>
+    /// Distributes regarding a the waterfall strategy and applies constraints.
+    /// </summary>
     public class WaterFillingDistributionStrategy : DistributionStrategyBase, IDistributionStrategy
     {
+        /// <summary>
+        /// Constructor of <see cref="WaterFillingDistributionStrategy"/>.
+        /// </summary>
+        /// <param name="logger">Logger for application logging and diagnostics.</param>
         public WaterFillingDistributionStrategy(ILogger logger) : base(logger)
         {
         }
 
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> allUnits)
         {
-            throw new NotImplementedException();
+            // TODO: throw new NotImplementedException();
         }
     }
 }
