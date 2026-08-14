@@ -11,6 +11,9 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <summary>
         /// Maximum active power allowed by the constraint.
         /// </summary>
+        /// <remarks>
+        /// This value can be the systems or units nameplate or less.
+        /// </remarks>
         public double? MaximumActivePowerKiloWatt
         {
             get;
@@ -29,6 +32,9 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <summary>
         /// Minimum active power allowed by the constraint.
         /// </summary>
+        /// <remarks>
+        /// This value can be the systems or units nameplate or less.
+        /// </remarks>
         public double? MinimumActivePowerKiloWatt
         {
             get;
@@ -47,6 +53,9 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <summary>
         /// Maximum reactive power allowed by the constraint.
         /// </summary>
+        /// <remarks>
+        /// This value can be the systems or units nameplate or less.
+        /// </remarks>
         public double? MaximumReactivePowerKiloVars
         {
             get;
@@ -65,6 +74,9 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <summary>
         /// Minimum reactive power allowed by the constraint.
         /// </summary>
+        /// <remarks>
+        /// This value can be the systems or units nameplate or less.
+        /// </remarks>
         public double? MinimumReactivePowerKiloVars
         {
             get;

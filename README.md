@@ -71,6 +71,17 @@ Manages physical devices and keeps a constant connection to the devices.
 The actual devices (power resource) which can be a simulation, emulation or physical representation.
 
 
+## Internal power sign definition
+Within the power plant controller the power sign is defined the following:
+- Positive power means the PPC exports power to the grid.
+- Negative power means the PPC imports power from the grid.
+
+To external systems or devices the power sign can be customized.
+
+![Internal Power Sign Definition.drawio](./Docs/Internal%20Power%20Sign%20Definition.drawio.svg)
+
+
+
 ## Common design
 
 ### Configurations

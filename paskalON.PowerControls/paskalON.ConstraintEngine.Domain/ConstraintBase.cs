@@ -70,6 +70,6 @@ namespace paskalON.ConstraintEngine.Domain
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public abstract void ApplyLimits(ref ActivePower activePower, ref ReactivePower reactivePower);
+        public abstract void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower);
     }
 }

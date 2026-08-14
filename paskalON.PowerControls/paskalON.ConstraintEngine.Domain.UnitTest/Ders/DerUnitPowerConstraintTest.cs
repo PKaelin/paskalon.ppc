@@ -76,7 +76,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
             logger.Collector.Clear();
 
-            constraint.ApplyLimits(ref activePower, ref reactivePower);
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
 
             Assert.AreEqual(10, activePower.KiloWatts);
             Assert.AreEqual(0, reactivePower.KiloVoltAmperesReactive);
@@ -95,7 +95,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
             logger.Collector.Clear();
 
-            constraint.ApplyLimits(ref activePower, ref reactivePower);
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
 
             Assert.AreEqual(-20, activePower.KiloWatts);
             Assert.AreEqual(0, reactivePower.KiloVoltAmperesReactive);
@@ -114,7 +114,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
             ReactivePower reactivePower = ReactivePower.FromKilo(20);
             logger.Collector.Clear();
 
-            constraint.ApplyLimits(ref activePower, ref reactivePower);
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
 
             Assert.AreEqual(0, activePower.KiloWatts);
             Assert.AreEqual(10, reactivePower.KiloVoltAmperesReactive);
@@ -133,7 +133,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
             ReactivePower reactivePower = ReactivePower.FromKilo(-40);
             logger.Collector.Clear();
 
-            constraint.ApplyLimits(ref activePower, ref reactivePower);
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
 
             Assert.AreEqual(0, activePower.KiloWatts);
             Assert.AreEqual(-20, reactivePower.KiloVoltAmperesReactive);
@@ -156,7 +156,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
             ReactivePower reactivePower = ReactivePower.FromKilo(40);
             logger.Collector.Clear();
 
-            constraint.ApplyLimits(ref activePower, ref reactivePower);
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
 
             Assert.AreEqual(40, activePower.KiloWatts);
             Assert.AreEqual(40, reactivePower.KiloVoltAmperesReactive);
@@ -167,7 +167,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
             reactivePower = ReactivePower.FromKilo(-40);
             logger.Collector.Clear();
 
-            constraint.ApplyLimits(ref activePower, ref reactivePower);
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
 
             Assert.AreEqual(-40, activePower.KiloWatts);
             Assert.AreEqual(-40, reactivePower.KiloVoltAmperesReactive);

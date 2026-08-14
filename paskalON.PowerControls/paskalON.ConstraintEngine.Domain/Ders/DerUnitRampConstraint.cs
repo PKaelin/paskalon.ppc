@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
-using paskalON.ConstraintEngine.Domain.Configs.Systems;
+using paskalON.ConstraintEngine.Domain.Configs.Ders;
 using paskalON.PhysicalUnits.Electricals.Powers;
 
-namespace paskalON.ConstraintEngine.Domain.Systems
+namespace paskalON.ConstraintEngine.Domain.Ders
 {
-    public class SystemRampConstraint : ConstraintBase, ISystemConstraint
+    public class DerUnitRampConstraint : ConstraintBase, IDerUnitConstraint
     {
         /// <summary>
         /// Time provider for system time abstraction.
@@ -18,13 +18,13 @@ namespace paskalON.ConstraintEngine.Domain.Systems
         /// <summary>
         /// System ramp constraint configuration.
         /// </summary>
-        private readonly SystemRampConstraintConfig _config;
+        private readonly DerUnitRampConstraintConfig _config;
 
 
         /// <summary>
         /// System ramp constraint map.
         /// </summary>
-        private readonly SystemRampConstraintMap _map;
+        private readonly DerUnitRampConstraintMap _map;
 
 
         /// <summary>
@@ -46,13 +46,13 @@ namespace paskalON.ConstraintEngine.Domain.Systems
 
 
         /// <summary>
-        /// Constructor of <see cref="SystemRampConstraint"/>.
+        /// Constructor of <see cref="DerUnitRampConstraint"/>.
         /// </summary>
         /// <param name="logger">ILogger for handling application logging and diagnostics.</param>
         /// <param name="config">System ramp constraint configuration.</param>
         /// <param name="map">System ramp constraint map.</param>
         /// <param name="timeProvider">Time provider for system time abstraction.</param>
-        public SystemRampConstraint(ILogger logger, SystemRampConstraintConfig config, SystemRampConstraintMap map, TimeProvider timeProvider) : base(logger, config, map)
+        public DerUnitRampConstraint(ILogger logger, DerUnitRampConstraintConfig config, DerUnitRampConstraintMap map, TimeProvider timeProvider) : base(logger, config, map)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(map);
@@ -74,13 +74,13 @@ namespace paskalON.ConstraintEngine.Domain.Systems
 
             if (_lastApply == DateTimeOffset.MinValue && Math.Abs(activePower.KiloWatts) > _config.MaximumActivePowerKiloWattRampRatePerSecond)
             {
-                _logger.LogWarning("{Name} initial active power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, _config.MaximumActivePowerKiloWattRampRatePerSecond);
+                _logger.LogWarning("{Name} units initial active power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, _config.MaximumActivePowerKiloWattRampRatePerSecond);
                 activePower.KiloWatts = activePower.Watts < 0 ?
                     _config.MaximumActivePowerKiloWattRampRatePerSecond * -1 : _config.MaximumActivePowerKiloWattRampRatePerSecond;
             }
             else if ((Math.Abs(activePower.KiloWatts) - Math.Abs(_lastActiveKiloWattPower)) > allowedActiveRamp)
             {
-                _logger.LogWarning("{Name} active power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, allowedActiveRamp);
+                _logger.LogWarning("{Name} units active power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, allowedActiveRamp);
                 activePower.KiloWatts = activePower.Watts < 0 ? allowedActiveRamp * -1 : allowedActiveRamp;
             }
 
@@ -91,13 +91,13 @@ namespace paskalON.ConstraintEngine.Domain.Systems
 
             if (_lastApply == DateTimeOffset.MinValue && Math.Abs(reactivePower.KiloVoltAmperesReactive) > _config.MaximumReactivePowerKiloVarsRampRatePerSecond)
             {
-                _logger.LogWarning("{Name} initial reactive power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, _config.MaximumReactivePowerKiloVarsRampRatePerSecond);
+                _logger.LogWarning("{Name} units initial reactive power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, _config.MaximumReactivePowerKiloVarsRampRatePerSecond);
                 reactivePower.KiloVoltAmperesReactive = reactivePower.VoltAmperesReactive < 0 ?
                     _config.MaximumReactivePowerKiloVarsRampRatePerSecond * -1 : _config.MaximumReactivePowerKiloVarsRampRatePerSecond * 1;
             }
             else if ((Math.Abs(reactivePower.KiloVoltAmperesReactive) - Math.Abs(_lastReactiveKiloVarsPower)) > allowedReactiveRamp)
             {
-                _logger.LogWarning("{Name} reactive power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, allowedReactiveRamp);
+                _logger.LogWarning("{Name} units reactive power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, allowedReactiveRamp);
                 reactivePower.KiloVoltAmperesReactive = reactivePower.VoltAmperesReactive < 0 ? allowedReactiveRamp * -1 : allowedReactiveRamp;
             }
 

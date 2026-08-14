@@ -10,7 +10,7 @@ namespace paskalON.ConstraintEngine.Domain.Systems
     /// <summary>
     /// System power constraint that constraints the active and reactive power to configured limits.
     /// </summary>
-    public class SystemPowerConstraint : PowerConstraintBase
+    public class SystemPowerConstraint : PowerConstraintBase, ISystemConstraint
     {
         /// <summary>
         /// System power constraint configuration.
@@ -44,7 +44,7 @@ namespace paskalON.ConstraintEngine.Domain.Systems
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public override void ApplyLimits(ref ActivePower activePower, ref ReactivePower reactivePower)
+        public override void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower)
         {
             if (_config.IsEnabled)
             {

@@ -11,6 +11,18 @@ namespace paskalON.PowerControls.Domain
     public interface IPowerControl
     {
         /// <summary>
+        /// Is active means it is available for selection.
+        /// </summary>
+        public bool IsActive { get; }
+
+
+        /// <summary>
+        /// Is enabled means the constraint is active and will be applied.
+        /// </summary>
+        public bool IsEnabled { get; }
+
+
+        /// <summary>
         /// Active power target for the power control.
         /// </summary>
         ActivePower TargetActivePower { get; }

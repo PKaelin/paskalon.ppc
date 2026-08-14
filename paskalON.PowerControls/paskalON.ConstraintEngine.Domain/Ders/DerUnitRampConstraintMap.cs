@@ -1,12 +1,12 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-using paskalON.PowerControls.Domain.Ders;
-
-namespace paskalON.PowerControls.Domain
+namespace paskalON.ConstraintEngine.Domain.Ders
 {
-    public abstract class PowerControlBaseMap
+    /// <summary>
+    /// DER unit ramp constraint map.
+    /// </summary>
+    public class DerUnitRampConstraintMap : ConstraintBaseMap
     {
-        public required Func<DerState> State { get; init; }
     }
 }

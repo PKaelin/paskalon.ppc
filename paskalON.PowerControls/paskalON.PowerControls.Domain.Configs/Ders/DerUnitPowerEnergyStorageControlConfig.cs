@@ -1,12 +1,9 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
-using paskalON.PowerControls.Domain.Ders;
-
-namespace paskalON.PowerControls.Domain
+namespace paskalON.PowerControls.Domain.Configs.Ders
 {
-    public abstract class PowerControlBaseMap
+    public class DerUnitPowerEnergyStorageControlConfig : PowerControlBaseConfig
     {
-        public required Func<DerState> State { get; init; }
     }
 }

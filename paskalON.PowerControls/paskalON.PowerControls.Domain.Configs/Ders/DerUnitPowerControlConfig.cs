@@ -14,6 +14,18 @@ namespace paskalON.PowerControls.Domain.Configs.Ders
 
 
         /// <summary>
+        /// If priority distribution strategy is used then this priority is used.
+        /// </summary>
+        public int? Priority { get; set; }
+
+
+        /// <summary>
+        /// If weighted distribution strategy is used then this weight is used.
+        /// </summary>
+        public double? Weight { get; set; }
+
+
+        /// <summary>
         /// Relationship to DerUnitPowerConstraintConfig Id
         /// </summary>
         public int DerUnitPowerConstraintConfigId { get; set; }
