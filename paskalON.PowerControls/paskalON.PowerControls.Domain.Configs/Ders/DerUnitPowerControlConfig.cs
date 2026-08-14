@@ -16,13 +16,37 @@ namespace paskalON.PowerControls.Domain.Configs.Ders
         /// <summary>
         /// If priority distribution strategy is used then this priority is used.
         /// </summary>
-        public int? Priority { get; set; }
+        public ushort? Priority
+        {
+            get;
+            set
+            {
+                if (value != null)
+                {
+                    ArgumentOutOfRangeException.ThrowIfNegative((ushort)value);
+                }
+
+                field = value;
+            }
+        }
 
 
         /// <summary>
         /// If weighted distribution strategy is used then this weight is used.
         /// </summary>
-        public double? Weight { get; set; }
+        public double? Weight
+        {
+            get;
+            set
+            {
+                if (value != null)
+                {
+                    ArgumentOutOfRangeException.ThrowIfNegative((ushort)value);
+                }
+
+                field = value;
+            }
+        }
 
 
         /// <summary>

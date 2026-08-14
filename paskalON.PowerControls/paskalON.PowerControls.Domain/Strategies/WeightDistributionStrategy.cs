@@ -26,7 +26,26 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// </summary>        
         public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> alUnits)
         {
-            throw new NotImplementedException();
+            IEnumerable<DerUnitPowerControl> units = alUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
+            double totalWeight = units.Sum(u => u.Weight);
+            int unitCount = units.Count();
+
+            if (unitCount > 0 && totalWeight > 0)
+            {
+                foreach (DerUnitPowerControl unit in units)
+                {
+                    double unitTargetActivePower = systemActivePower.Watts / totalWeight * unit.Weight;
+                    double unitTargetReactivePower = systemReactivePower.VoltAmperesReactive / totalWeight * unit.Weight;
+                    unit.SetActivePowerTarget(unitTargetActivePower);
+                    unit.SetReactivePowerTarget(unitTargetReactivePower);
+                    unit.UpdatePower(unit.TargetActivePower, unit.TargetReactivePower);
+                }
+            }
+
+            _logger.LogDebug("Active power requested: {SystemActivePower}. Active power achieved: {UnitsActivePower}",
+                systemActivePower.KiloWatts, units.Sum(t => t.TargetActivePower.KiloWatts));
+            _logger.LogDebug("Reactive power requested: {SystemReactivePower}. Reactive power achieved: {UnitsReactivePower}",
+                systemReactivePower.KiloVoltAmperesReactive, units.Sum(t => t.TargetReactivePower.KiloVoltAmperesReactive));
         }
     }
 }
