@@ -27,7 +27,7 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// </summary>        
         public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> allUnits)
         {
-            IEnumerable<DerUnitPowerControl> units = allUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
+            IEnumerable<DerUnitPowerControl> units = allUnits.Where(u => u.IsEnabled && u.State == DerState.Started).OrderBy(o => o.Priority);
             int unitCount = units.Count();
 
             double unitTargetActivePower = systemActivePower.Watts;

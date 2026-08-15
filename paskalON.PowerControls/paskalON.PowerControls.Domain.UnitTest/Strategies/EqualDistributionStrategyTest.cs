@@ -280,6 +280,45 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
         }
 
 
+
+        [TestMethod]
+        public void EqualDistributionTwoUnitStartedConstraintAboveTargetNegativeTest()
+        {
+            ActivePower active = ActivePower.FromKilo(-20);
+            ReactivePower reactive = ReactivePower.FromKilo(-10);
+
+            DerUnitPowerConstraintConfig unitConstraintConfig = new DerUnitPowerConstraintConfig
+            {
+                ChangedBy = "Test",
+                Name = "DerUnitPowerConstraintConfig",
+                MaximumActivePowerKiloWatt = 20,
+                MinimumActivePowerKiloWatt = -20,
+                MaximumReactivePowerKiloVars = 10,
+                MinimumReactivePowerKiloVars = -10
+            };
+
+            DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
+            DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
+            List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2 };
+
+            _distribution!.Distribute(active, reactive, units);
+
+            IReadOnlyList<FakeLogRecord> logs = _logger.Collector.GetSnapshot();
+            Regex regexActive = new Regex(".*active.*requested: -20.*achieved: -20.*", RegexOptions.IgnoreCase);
+            Regex regexReactive = new Regex(".*reactive.*requested: -10.*achieved: -10.*", RegexOptions.IgnoreCase);
+
+            Assert.IsNotNull(logs.Where(m => regexActive.IsMatch(m.Message)).FirstOrDefault());
+            Assert.IsNotNull(logs.Where(m => regexReactive.IsMatch(m.Message)).FirstOrDefault());
+            Assert.AreEqual(-10, unit1.TargetActivePower.KiloWatts);
+            Assert.AreEqual(-5, unit1.TargetReactivePower.KiloVoltAmperesReactive);
+            Assert.AreEqual(-10, unit2.TargetActivePower.KiloWatts);
+            Assert.AreEqual(-5, unit2.TargetReactivePower.KiloVoltAmperesReactive);
+        }
+
+
         [TestMethod]
         public void EqualDistributionTwoUnitStartedConstraintBelowTargetTest()
         {
@@ -315,6 +354,44 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             Assert.AreEqual(4, unit1.TargetReactivePower.KiloVoltAmperesReactive);
             Assert.AreEqual(8, unit2.TargetActivePower.KiloWatts);
             Assert.AreEqual(4, unit2.TargetReactivePower.KiloVoltAmperesReactive);
+        }
+
+
+        [TestMethod]
+        public void EqualDistributionTwoUnitStartedConstraintBelowTargetNegativeTest()
+        {
+            ActivePower active = ActivePower.FromKilo(-20);
+            ReactivePower reactive = ReactivePower.FromKilo(-10);
+
+            DerUnitPowerConstraintConfig unitConstraintConfig = new DerUnitPowerConstraintConfig
+            {
+                ChangedBy = "Test",
+                Name = "DerUnitPowerConstraintConfig",
+                MaximumActivePowerKiloWatt = 8,
+                MinimumActivePowerKiloWatt = -8,
+                MaximumReactivePowerKiloVars = 4,
+                MinimumReactivePowerKiloVars = -4
+            };
+
+            DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
+            DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
+            List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2 };
+
+            _distribution!.Distribute(active, reactive, units);
+
+            IReadOnlyList<FakeLogRecord> logs = _logger.Collector.GetSnapshot();
+            Regex regexActive = new Regex(".*active.*requested: -20.*achieved: -16.*", RegexOptions.IgnoreCase);
+            Regex regexReactive = new Regex(".*reactive.*requested: -10.*achieved: -8.*", RegexOptions.IgnoreCase);
+
+            Assert.IsNotNull(logs.Where(m => regexActive.IsMatch(m.Message)).FirstOrDefault());
+            Assert.IsNotNull(logs.Where(m => regexReactive.IsMatch(m.Message)).FirstOrDefault());
+            Assert.AreEqual(-8, unit1.TargetActivePower.KiloWatts);
+            Assert.AreEqual(-4, unit1.TargetReactivePower.KiloVoltAmperesReactive);
+            Assert.AreEqual(-8, unit2.TargetActivePower.KiloWatts);
+            Assert.AreEqual(-4, unit2.TargetReactivePower.KiloVoltAmperesReactive);
         }
 
     }
