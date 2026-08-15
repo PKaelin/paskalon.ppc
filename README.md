@@ -18,6 +18,13 @@ This project is not yet an actual power plant controller.
   - Implemented operating mode domain open loop MPPT [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#energy-resources-specific-open-loop-modes)
   - Implemented operating mode closed loop Active Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#frequency--active-power-p-control-modes)
   - Implemented operating mode closed loop Reactive Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#voltage--active-power-p-control-modes)
+
+## Not implemented for sure
+- Solid threat safety
+- Solid exception handling
+- Solid tests
+- Protocols
+- Just a simple power control and constraint engine (not even an engine) 
 ---
 ---
 

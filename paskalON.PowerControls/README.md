@@ -5,7 +5,9 @@
 
 
 ## Important design notice
-**The first version of the power control constraint engine is applying constraints sequentially.  
+- **The first version of the power control constraint engine is not an engine more like uses constraints to transform or solve targets.**
+
+- **The first version of the power control constraint engine is applying constraints sequentially.  
 A better approach would be to accumulate them first, then intersect, then project the result so that P&Q are considered together and not sperate.**
 
 ## Structure

@@ -48,7 +48,7 @@ namespace paskalON.PowerControls.Domain.Configs.Ders
             {
                 if (value != null)
                 {
-                    ArgumentOutOfRangeException.ThrowIfNegative((ushort)value);
+                    ArgumentOutOfRangeException.ThrowIfNegative((double)value);
                 }
 
                 field = value;
