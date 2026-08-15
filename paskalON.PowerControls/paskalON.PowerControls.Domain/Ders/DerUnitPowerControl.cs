@@ -65,6 +65,7 @@ namespace paskalON.PowerControls.Domain.Ders
         public DerUnitPowerControl(ILogger logger, DerUnitPowerControlConfig config, DerUnitPowerControlMap map, IMetricsPublisher publisher, IEnumerable<IDerUnitConstraint> constraints)
             : base(logger, config, map, publisher)
         {
+            ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(constraints);
             ArgumentNullException.ThrowIfNull(map);
 
