@@ -19,6 +19,7 @@
   </Folder>
   <Project Path="paskalON.Devices.Domain.Configs/paskalON.Devices.Domain.Configs.csproj" Id="fa739d75-521d-4cc3-9317-e6c2d1b0beef" />
   <Project Path="paskalON.Devices.Domain/paskalON.Devices.Domain.csproj" Id="e663604a-5c11-46df-9394-4f9d9a37fe72" />
+  <Project Path="paskalON.Devices.Dto/paskalON.Devices.Dto.csproj" Id="36045774-867d-4c52-acb0-148b1836a479" />
   <Project Path="paskalON.Devices.Equipments/paskalON.Devices.Equipments.csproj" Id="fcb5c4d3-6569-4671-854a-5689233cf817" />
   <Project Path="paskalON.Devices.Infrastructure/paskalON.Devices.Infrastructure.csproj" Id="e766ab35-a4e2-42c6-b3fe-f3b99856c08e" />
 </Solution>

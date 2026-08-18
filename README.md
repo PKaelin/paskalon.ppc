@@ -23,6 +23,7 @@ This project is not yet an actual power plant controller.
 - Solid threat safety
 - Solid exception handling
 - Solid tests
+- Not all code have XML Documentation Comments at this point
 - Protocols
 - Just a simple power control and constraint engine (not even an engine) 
 ---
