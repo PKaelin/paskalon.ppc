@@ -3,8 +3,15 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.Devices.Dto.EnergyResources.Solars
 {
+    /// <summary>
+    /// Data Transfer Object for a Photovoltaic (Solar) energy resource.
+    /// </summary>
     public class PvDto : DeviceBase<PvDefinitionDto, PvCoreDto, PvDetailDto>
     {
+        /// <summary>
+        /// Constructor of <see cref="PvDto"/>.
+        /// </summary>
+        /// <param name="definition">PV (Solar) definition DTO.</param>
         public PvDto(PvDefinitionDto definition) : base(definition)
         {
         }
