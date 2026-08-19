@@ -9,7 +9,7 @@ namespace paskalON.Devices.Dto.EnergyStorages.Batteries
     /// <remarks>
     /// Used as low frequency DTO update.
     /// </remarks>
-    public class BbDetailDto : IDevice
+    public record BbDetailDto : IDevice
     {
         /// <summary>
         /// <inheritdoc/>

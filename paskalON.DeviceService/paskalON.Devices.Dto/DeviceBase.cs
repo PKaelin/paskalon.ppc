@@ -4,12 +4,12 @@
 namespace paskalON.Devices.Dto
 {
     /// <summary>
-    /// The base class for all device DTOs.
+    /// The base record for all device DTOs.
     /// </summary>
     /// <typeparam name="TDefinition">Type of the definition DTO.</typeparam>
     /// <typeparam name="TCore">Type of the core DTO.</typeparam>
     /// <typeparam name="TDetail">Type of the detail DTO.</typeparam>
-    public abstract class DeviceBase<TDefinition, TCore, TDetail>
+    public abstract record DeviceBase<TDefinition, TCore, TDetail>
             where TDefinition : class, IDeviceDefinition
             where TCore : class, IDevice
             where TDetail : class, IDevice
@@ -33,7 +33,7 @@ namespace paskalON.Devices.Dto
 
 
         /// <summary>
-        /// This lock object needs to be used by this class and derived classes.
+        /// This lock object needs to be used by this record and derived classes.
         /// The classes need to use the same lock for thread safety.
         /// </summary>
         protected object dataLock = new();

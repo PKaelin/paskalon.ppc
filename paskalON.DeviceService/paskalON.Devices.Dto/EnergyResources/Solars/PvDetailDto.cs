@@ -9,7 +9,7 @@ namespace paskalON.Devices.Dto.EnergyResources.Solars
     /// <remarks>
     /// Used as low frequency DTO update.
     /// </remarks>
-    public class PvDetailDto : IDevice
+    public record PvDetailDto : IDevice
     {
         /// <summary>
         /// <inheritdoc/>

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Ders\" />
-    <Folder Include="Meters\PowerMeters\" />
   </ItemGroup>
 
   <ItemGroup>

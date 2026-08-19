@@ -9,7 +9,7 @@ namespace paskalON.Devices.Dto.EnergyResources.Solars
     /// <remarks>
     /// Used to initialize the Photovoltaic (Solar) DTO in device client.
     /// </remarks>
-    public class PvDefinitionDto : IDeviceDefinition
+    public record PvDefinitionDto : IDeviceDefinition
     {
         /// <summary>
         /// <inheritdoc/>

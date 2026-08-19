@@ -6,7 +6,7 @@ namespace paskalON.Devices.Dto.EnergyStorages.Batteries
     /// <summary>
     /// Data Transfer Object for a Battery Bank.
     /// </summary>
-    public class BbDto : DeviceBase<BbDefinitionDto, BbCoreDto, BbDetailDto>
+    public record BbDto : DeviceBase<BbDefinitionDto, BbCoreDto, BbDetailDto>
     {
         /// <summary>
         /// Constructor of <see cref="BbDto"/>.

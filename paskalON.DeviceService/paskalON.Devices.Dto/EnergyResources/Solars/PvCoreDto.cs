@@ -11,7 +11,7 @@ namespace paskalON.Devices.Dto.EnergyResources.Solars
     /// <remarks>
     /// Used as high frequency DTO update.
     /// </remarks>
-    public class PvCoreDto : IDevice
+    public record PvCoreDto : IDevice
     {
         /// <summary>
         /// <inheritdoc/>

@@ -11,7 +11,7 @@ namespace paskalON.Devices.Dto.PowerConversionSystems
     /// <remarks>
     /// Used to initialize the PCS DTO in device client.
     /// </remarks>
-    public class PcsDefinitionDto : IDeviceDefinition
+    public record PcsDefinitionDto : IDeviceDefinition
     {
         /// <summary>
         /// <inheritdoc/>

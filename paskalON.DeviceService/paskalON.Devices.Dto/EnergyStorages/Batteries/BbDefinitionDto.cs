@@ -9,7 +9,7 @@ namespace paskalON.Devices.Dto.EnergyStorages.Batteries
     /// <remarks>
     /// Used to initialize the Battery Bank DTO in device client.
     /// </remarks>
-    public class BbDefinitionDto : IDeviceDefinition
+    public record BbDefinitionDto : IDeviceDefinition
     {
         /// <summary>
         /// <inheritdoc/>

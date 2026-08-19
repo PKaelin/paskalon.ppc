@@ -11,7 +11,7 @@ namespace paskalON.Devices.Dto.PowerConversionSystems
     /// <remarks>
     /// Used as low frequency DTO update.
     /// </remarks>
-    public class PcsDetailDto : IDevice
+    public record PcsDetailDto : IDevice
     {
         /// <summary>
         /// <inheritdoc/>

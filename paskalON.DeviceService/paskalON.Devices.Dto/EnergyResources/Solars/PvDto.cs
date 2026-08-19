@@ -6,7 +6,7 @@ namespace paskalON.Devices.Dto.EnergyResources.Solars
     /// <summary>
     /// Data Transfer Object for a Photovoltaic (Solar) energy resource.
     /// </summary>
-    public class PvDto : DeviceBase<PvDefinitionDto, PvCoreDto, PvDetailDto>
+    public record PvDto : DeviceBase<PvDefinitionDto, PvCoreDto, PvDetailDto>
     {
         /// <summary>
         /// Constructor of <see cref="PvDto"/>.

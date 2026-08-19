@@ -84,7 +84,6 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// Is reverse power flow from configuration.
         /// </summary>        
-        /// </remarks>
         public bool IsReversePowerFlow { get => _config.PowerMeterDeviceConfig.IsReversePowerFlow; }
 
 

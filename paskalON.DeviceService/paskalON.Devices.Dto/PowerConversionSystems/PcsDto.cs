@@ -6,7 +6,7 @@ namespace paskalON.Devices.Dto.PowerConversionSystems
     /// <summary>
     /// Data Transfer Object for a Power Conversion System.
     /// </summary>
-    public class PcsDto : DeviceBase<PcsDefinitionDto, PcsCoreDto, PcsDetailDto>
+    public record PcsDto : DeviceBase<PcsDefinitionDto, PcsCoreDto, PcsDetailDto>
     {
         /// <summary>
         /// Constructor of <see cref="PcsDto"/>.

@@ -11,7 +11,7 @@ namespace paskalON.Devices.Dto.EnergyStorages.Batteries
     /// <remarks>
     /// Used as high frequency DTO update.
     /// </remarks>
-    public class BbCoreDto : IDevice
+    public record BbCoreDto : IDevice
     {
         /// <summary>
         /// <inheritdoc/>
