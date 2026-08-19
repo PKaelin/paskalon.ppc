@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Ders\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />
   </ItemGroup>
 
