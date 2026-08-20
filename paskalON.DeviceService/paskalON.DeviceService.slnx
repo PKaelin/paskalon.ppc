@@ -18,6 +18,7 @@
     <Project Path="paskalON.Devices.Equipments.UnitTest/paskalON.Devices.Equipments.UnitTest.csproj" Id="99312c0b-f835-4f35-856c-ef2189fce640" />
     <Project Path="paskalON.Devices.Infrastructure.IntegrationTest/paskalON.Devices.Infrastructure.IntegrationTest.csproj" Id="45f71292-154f-4fe7-b9f2-ba3d62122885" />
   </Folder>
+  <Project Path="paskalON.Devices.Application/paskalON.Devices.Application.csproj" Id="b806115c-a851-4512-806c-dbe32233a183" />
   <Project Path="paskalON.Devices.Client/paskalON.Devices.Client.csproj" Id="1aad8a90-398d-4a3b-87b4-fd6918331ffd" />
   <Project Path="paskalON.Devices.Domain.Configs/paskalON.Devices.Domain.Configs.csproj" Id="fa739d75-521d-4cc3-9317-e6c2d1b0beef" />
   <Project Path="paskalON.Devices.Domain/paskalON.Devices.Domain.csproj" Id="e663604a-5c11-46df-9394-4f9d9a37fe72" />

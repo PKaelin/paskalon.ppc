@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />
+    <ProjectReference Include="..\paskalON.Devices.Dto\paskalON.Devices.Dto.csproj" />
+    <ProjectReference Include="..\paskalON.Devices.Equipments\paskalON.Devices.Equipments.csproj" />
+  </ItemGroup>
+
+</Project>
