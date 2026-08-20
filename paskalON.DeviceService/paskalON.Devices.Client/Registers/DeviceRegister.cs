@@ -3,18 +3,23 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.Devices.Dto;
-using paskalON.Telemetry.Entries;
 using System.Collections.Concurrent;
 
 namespace paskalON.Devices.Client.Registers
 {
+    /// <summary>
+    /// Device register holds device Ids and their devices to update the definition, core and detail properties of a device.
+    /// </summary>
+    /// <typeparam name="TDevice">The device type.</typeparam>
+    /// <typeparam name="TDefinition">The definition type of the device.</typeparam>
+    /// <typeparam name="TCore">The core type of the device.</typeparam>
+    /// <typeparam name="TDetail">The detail type of the device.</typeparam>
     public sealed class DeviceRegister<TDevice, TDefinition, TCore, TDetail> : IDeviceRegister<TDevice, TDefinition, TCore, TDetail>
         where TDevice : DeviceBase<TDefinition, TCore, TDetail>
         where TDefinition : class, IDeviceDefinition
         where TCore : class, IDevice
         where TDetail : class, IDevice
     {
-
         /// <summary>
         /// Logger for application logging and diagnostics.
         /// </summary>
@@ -31,7 +36,6 @@ namespace paskalON.Devices.Client.Registers
         /// List of registered devices.
         /// </summary>
         public ICollection<TDevice> Devices => _devices.Values;
-
 
 
         /// <summary>
