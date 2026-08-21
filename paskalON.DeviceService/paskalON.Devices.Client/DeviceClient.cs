@@ -16,37 +16,177 @@ using paskalON.Messaging;
 
 namespace paskalON.Devices.Client
 {
+    /// <summary>
+    /// Device client is a reusable client for different microservices that need to subscribe
+    /// to the device services published messages.
+    /// </summary>
     public class DeviceClient : IDeviceClient
     {
+        /// <summary>
+        /// Logger for application logging and diagnostics.
+        /// </summary>
         private readonly ILogger _logger;
+
+
+        /// <summary>
+        /// Device servicer interface for API calls to the device service.
+        /// </summary>
         private readonly IDeviceServer _deviceServer;
+
+
+        /// <summary>
+        /// Message subscriber interface for API calls to the message subscriber.
+        /// </summary>
         private readonly IMessageSubscriber _subscriber;
+
+
+        /// <summary>
+        /// Subscriber topic class containing all the subscriber topics used in device client.
+        /// </summary>
         private readonly SubscriberTopic _subscriberTopic;
+
+
+        #region Registers and Subscribers
+
+        /// <summary>
+        /// Power Conversion System Registers.
+        /// </summary>
         private readonly DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto> _pcsRegisters;
+
+
+        /// <summary>
+        /// Power Conversion System Subscriber.
+        /// </summary>
         private DeviceSubscriber<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>? _pcsSubscriber;
+
+
+        /// <summary>
+        /// Battery Bank Registers.
+        /// </summary>
         private readonly DeviceRegister<BbDto, BbDefinitionDto, BbCoreDto, BbDetailDto> _bbRegisters;
+
+
+        /// <summary>
+        /// Battery Bank Subscriber.
+        /// </summary>
         private DeviceSubscriber<BbDto, BbDefinitionDto, BbCoreDto, BbDetailDto>? _bbSubscriber;
+
+
+        /// <summary>
+        /// Solar Registers.
+        /// </summary>
         private readonly DeviceRegister<PvDto, PvDefinitionDto, PvCoreDto, PvDetailDto> _pvRegisters;
+
+
+        /// <summary>
+        /// Solar Subscriber.
+        /// </summary>
         private DeviceSubscriber<PvDto, PvDefinitionDto, PvCoreDto, PvDetailDto>? _pvSubscriber;
+
+
+        /// <summary>
+        /// External Power Meter Registers.
+        /// </summary>
         private readonly DeviceRegister<PmExternalDto, PmExternalDefinitionDto, PmExternalCoreDto, PmExternalDetailDto> _pmExternalRegisters;
+
+
+        /// <summary>
+        /// External Power Meter Subscriber.
+        /// </summary>
         private DeviceSubscriber<PmExternalDto, PmExternalDefinitionDto, PmExternalCoreDto, PmExternalDetailDto>? _pmExternalSubscriber;
+
+
+        /// <summary>
+        /// Auxiliary Power Meter Registers.
+        /// </summary>
         private readonly DeviceRegister<PmAuxiliaryDto, PmAuxiliaryDefinitionDto, PmAuxiliaryCoreDto, PmAuxiliaryDetailDto> _pmAuxiliaryRegisters;
+
+
+        /// <summary>
+        /// Auxiliary Power Meter Subscriber.
+        /// </summary>
         private DeviceSubscriber<PmAuxiliaryDto, PmAuxiliaryDefinitionDto, PmAuxiliaryCoreDto, PmAuxiliaryDetailDto>? _pmAuxiliarySubscriber;
+
+
+        /// <summary>
+        /// Circuit Power Meter Registers.
+        /// </summary>
         private readonly DeviceRegister<PmCircuitDto, PmCircuitDefinitionDto, PmCircuitCoreDto, PmCircuitDetailDto> _pmCircuitRegisters;
+
+
+        /// <summary>
+        /// Circuit Power Meter Subscriber.
+        /// </summary>
         private DeviceSubscriber<PmCircuitDto, PmCircuitDefinitionDto, PmCircuitCoreDto, PmCircuitDetailDto>? _pmCircuitSubscriber;
+
+
+        /// <summary>
+        /// System Power Meter Registers.
+        /// </summary>
         private readonly DeviceRegister<PmSystemDto, PmSystemDefinitionDto, PmSystemCoreDto, PmSystemDetailDto> _pmSystemRegisters;
+
+
+        /// <summary>
+        /// System Power Meter Subscriber.
+        /// </summary>
         private DeviceSubscriber<PmSystemDto, PmSystemDefinitionDto, PmSystemCoreDto, PmSystemDetailDto>? _pmSystemSubscriber;
 
+        #endregion
+
+
+
         public DerDto Der { get; private set; } = new DerDto();
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public ICollection<PcsDto> PowerConversionSystems { get => _pcsRegisters.Devices; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public ICollection<BbDto> BatteryBanks { get => _bbRegisters.Devices; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public ICollection<PvDto> SolarPanels { get => _pvRegisters.Devices; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public ICollection<PmExternalDto> ExternalPowerMeters { get => _pmExternalRegisters.Devices; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public ICollection<PmAuxiliaryDto> AuxiliaryPowerMeters { get => _pmAuxiliaryRegisters.Devices; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public ICollection<PmSystemDto> SystemPowerMeters { get => _pmSystemRegisters.Devices; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public ICollection<PmCircuitDto> CircuitPowerMeters { get => _pmCircuitRegisters.Devices; }
 
 
+        /// <summary>
+        /// Constructor of <see cref="DeviceClient"/>.
+        /// </summary>
+        /// <param name="logger">Logger for application logging and diagnostics.</param>
+        /// <param name="subscriber">Message subscriber interface for API calls to the message subscriber.</param>
+        /// <param name="deviceServer">Device servicer interface for API calls to the device service.</param>
+        /// <param name="subscriberTopic">Subscriber topic class containing all the subscriber topics used in device client.</param>
         public DeviceClient(ILogger logger, IMessageSubscriber subscriber, IDeviceServer deviceServer, SubscriberTopic subscriberTopic)
         {
             ArgumentNullException.ThrowIfNull(logger);
