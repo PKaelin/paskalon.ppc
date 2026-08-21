@@ -43,6 +43,7 @@ namespace paskalON.Devices.Client
         public ICollection<PvDto> SolarPanels { get => _pvRegisters.Devices; }
         public ICollection<PmExternalDto> ExternalPowerMeters { get => _pmExternalRegisters.Devices; }
         public ICollection<PmAuxiliaryDto> AuxiliaryPowerMeters { get => _pmAuxiliaryRegisters.Devices; }
+        public ICollection<PmSystemDto> SystemPowerMeters { get => _pmSystemRegisters.Devices; }
         public ICollection<PmCircuitDto> CircuitPowerMeters { get => _pmCircuitRegisters.Devices; }
 
 
@@ -74,6 +75,7 @@ namespace paskalON.Devices.Client
         /// </summary>
         public async Task Initialize()
         {
+            // Handle exception where client is created and initialized.
             Der = await _deviceServer.GetDer();
 
             IEnumerable<DerCircuitDto> circuits = Der.DerGroups.SelectMany(g => g.DerCircuits);
