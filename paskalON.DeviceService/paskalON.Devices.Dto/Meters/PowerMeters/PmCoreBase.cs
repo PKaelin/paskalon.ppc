@@ -17,7 +17,7 @@ namespace paskalON.Devices.Dto.Meters.PowerMeters
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public required int DeviceId { get; init; }
+        public int DeviceId { get; init; }
 
 
         /// <summary>

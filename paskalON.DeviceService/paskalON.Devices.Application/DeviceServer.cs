@@ -7,9 +7,24 @@ namespace paskalON.Devices.Application
 {
     public class DeviceServer : IDeviceServer
     {
+        private readonly IDeviceManager _deviceManager;
+
+        private readonly DeviceMapper _mapper;
+
+
+        public DeviceServer(IDeviceManager deviceManager, DeviceMapper mapper)
+        {
+            ArgumentNullException.ThrowIfNull(deviceManager);
+            ArgumentNullException.ThrowIfNull(mapper);
+
+            _deviceManager = deviceManager;
+            _mapper = mapper;
+        }
+
+
         public Task<DerDto> GetDer()
         {
-            throw new NotImplementedException();
+            return Task.FromResult(_mapper.MapDer(_deviceManager.Der));
         }
     }
 }
