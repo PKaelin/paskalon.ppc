@@ -63,33 +63,16 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             using (DeviceServiceContext context = new DeviceServiceContext())
             {
                 configs = context.DerConfigs
-                    // Branch batteries - pcs
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(circuit => circuit.DerUnitConfigs)
-                    .ThenInclude(unit => unit.PowerConversionSystemConfig)
-                    .ThenInclude(pcs => pcs!.PowerConversionSystemDeviceConfig)
-                    // Branch batteries - pcs communication 
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(circuit => circuit.DerUnitConfigs)
-                    .ThenInclude(unit => unit.PowerConversionSystemConfig)
-                    .ThenInclude(pcs => pcs!.ModbusConfig)
-                    .ThenInclude(mc => mc.ModbusConnectionConfig)
-                    // Branch batteries - batteries
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(circuit => circuit.DerUnitConfigs)
-                    .ThenInclude(unit => ((DerBatteryStorageUnitConfig)unit).BatteryBankConfigs)
-                    .ThenInclude(bb => bb!.BatteryBankDeviceConfig)
-                    // Branch batteries - batteries communication
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(circuit => circuit.DerUnitConfigs)
-                    .ThenInclude(unit => ((DerBatteryStorageUnitConfig)unit).BatteryBankConfigs)
-                    .ThenInclude(bb => bb.ModbusConfig)
-                    .ThenInclude(mc => mc.ModbusConnectionConfig)
-                    .ToList();
+                .Include(d => d.DerGroupConfigs)
+                .ThenInclude(c => c.DerCircuits)
+                .ThenInclude(u => u.DerUnitConfigs)
+                .ToList();
+                // Load communications 
+                context.ModbusConfigs.Include(mc => mc.ModbusConnectionConfig).ToList();
+                context.C37Configs.ToList();
+                // Load DER devices
+                context.PowerConversionSystemConfigs.Include(pcs => pcs.PowerConversionSystemDeviceConfig).ToList();
+                context.BatteryBankConfigs.Include(bb => bb.BatteryBankDeviceConfig).ToList();
             }
 
             // Do some checks
@@ -147,26 +130,16 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             using (DeviceServiceContext context = new DeviceServiceContext())
             {
                 configs = context.DerConfigs
-                    // Branch solar - solar panels
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(circuit => circuit.DerUnitConfigs)
-                    .ThenInclude(unit => ((DerSolarUnitConfig)unit).SolarPanelConfig)
-                    .ThenInclude(panel => panel.SolarPanelDeviceConfig)
-                    // Branch solar - pcs
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(circuit => circuit.DerUnitConfigs)
-                    .ThenInclude(pcs => pcs.PowerConversionSystemConfig)
-                    .ThenInclude(dev => dev.PowerConversionSystemDeviceConfig)
-                    // Branch solar - pcs communication 
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(circuit => circuit.DerUnitConfigs)
-                    .ThenInclude(unit => unit.PowerConversionSystemConfig)
-                    .ThenInclude(pcs => pcs!.ModbusConfig)
-                    .ThenInclude(mc => mc.ModbusConnectionConfig)
-                    .ToList();
+                .Include(d => d.DerGroupConfigs)
+                .ThenInclude(c => c.DerCircuits)
+                .ThenInclude(u => u.DerUnitConfigs)
+                .ToList();
+                // Load communications 
+                context.ModbusConfigs.Include(mc => mc.ModbusConnectionConfig).ToList();
+                context.C37Configs.ToList();
+                // Load DER devices
+                context.PowerConversionSystemConfigs.Include(pcs => pcs.PowerConversionSystemDeviceConfig).ToList();
+                context.SolarPanelConfigs.Include(sp => sp.SolarPanelDeviceConfig).ToList();
             }
 
             // Do some checks
@@ -229,48 +202,21 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             using (DeviceServiceContext context = new DeviceServiceContext())
             {
                 configs = context.DerConfigs
-                    // Meters C37
-                    .Include(sm => sm.SystemPowerMeterConfigs)
-                    .ThenInclude(dev => dev.PowerMeterDeviceConfig)
-                    .ThenInclude(map => map.PowerMeterMapC37Config)
-                    .Include(sm => sm.SystemPowerMeterConfigs)
-                    .ThenInclude(com => com.C37Config)
-                    .Include(em => em.ExternalPowerMeterConfigs)
-                    .ThenInclude(dev => dev.PowerMeterDeviceConfig)
-                    .ThenInclude(map => map.PowerMeterMapC37Config)
-                    .Include(em => em.ExternalPowerMeterConfigs)
-                    .ThenInclude(com => com.C37Config)
-                    .Include(am => am.AuxiliaryPowerMeterConfigs)
-                    .ThenInclude(dev => dev.PowerMeterDeviceConfig)
-                    .ThenInclude(map => map.PowerMeterMapC37Config)
-                    .Include(am => am.AuxiliaryPowerMeterConfigs)
-                    .ThenInclude(com => com.C37Config)
-                    // Meters Modbus
-                    .Include(sm => sm.SystemPowerMeterConfigs)
-                    .ThenInclude(dev => dev.PowerMeterDeviceConfig)
-                    .ThenInclude(map => map.PowerMeterMapModbusConfig)
-                    .Include(sm => sm.SystemPowerMeterConfigs)
-                    .ThenInclude(com => com.ModbusConfig)
-                    .Include(em => em.ExternalPowerMeterConfigs)
-                    .ThenInclude(dev => dev.PowerMeterDeviceConfig)
-                    .ThenInclude(map => map.PowerMeterMapModbusConfig)
-                    .Include(em => em.ExternalPowerMeterConfigs)
-                    .ThenInclude(com => com.ModbusConfig)
-                    .Include(am => am.AuxiliaryPowerMeterConfigs)
-                    .ThenInclude(dev => dev.PowerMeterDeviceConfig)
-                    .ThenInclude(map => map.PowerMeterMapModbusConfig)
-                    .Include(am => am.AuxiliaryPowerMeterConfigs)
-                    .ThenInclude(com => com.ModbusConfig)
-                    // Circuit meters
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(circuit => circuit.CircuitPowerMeterConfig)
-                    .ThenInclude(dev => dev!.PowerMeterDeviceConfig)
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(circuit => circuit.CircuitPowerMeterConfig)
-                    .ThenInclude(com => com!.C37Config)
-                    .ToList();
+                .Include(d => d.DerGroupConfigs)
+                .ThenInclude(c => c.DerCircuits)
+                .ThenInclude(u => u.DerUnitConfigs)
+                .ToList();
+                // Load communications 
+                context.ModbusConfigs.Include(mc => mc.ModbusConnectionConfig).ToList();
+                context.C37Configs.ToList();
+                // Load meters and maps
+                context.PowerMeterMapC37Configs.ToListAsync();
+                context.PowerMeterMapModbusConfigs.ToListAsync();
+                context.PowerMeterDeviceConfigs.ToListAsync();
+                context.SystemPowerMeterConfigs.ToList();
+                context.CircuitPowerMeterConfigs.ToList();
+                context.AuxiliaryPowerMeterConfigs.ToList();
+                context.ExternalPowerMeterConfigs.ToList();
             }
 
             // Do some checks
@@ -347,32 +293,16 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             using (DeviceServiceContext context = new DeviceServiceContext())
             {
                 configs = context.DerConfigs
-                    // Units
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(circuit => circuit.DerUnitConfigs)
-                    // GMDs
-                    .Include(gmd => gmd.GenericModbusConfigs)
-                    .ThenInclude(dev => dev.GenericModbusDeviceConfig)
-                    .ThenInclude(map => map.GenericModbusMapConfig)
-                    .Include(gmd => gmd.GenericModbusConfigs)
-                    .ThenInclude(mb => mb.ModbusConnectionConfig)
-                    .Include(ats => ats.AutomaticTransferSwitchConfigs)
-                    .ThenInclude(dev => dev.AutomaticTransferSwitchDeviceConfig)
-                    .ThenInclude(map => map.GenericModbusMapConfig)
-                    .Include(ats => ats.AutomaticTransferSwitchConfigs)
-                    .ThenInclude(mb => mb.ModbusConnectionConfig)
-                    // GMD - circuit
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(cb => cb.CircuitBreakerConfig)
-                    .ThenInclude(dev => dev!.CircuitBreakerDeviceConfig)
-                    .ThenInclude(map => map.GenericModbusMapConfig)
-                    .Include(der => der.DerGroupConfigs)
-                    .ThenInclude(group => group.DerCircuits)
-                    .ThenInclude(cb => cb.CircuitBreakerConfig)
-                    .ThenInclude(mb => mb!.ModbusConnectionConfig)
-                    .ToList();
+                .Include(d => d.DerGroupConfigs)
+                .ThenInclude(c => c.DerCircuits)
+                .ThenInclude(u => u.DerUnitConfigs)
+                .ToList();
+                // Load communications 
+                context.ModbusConfigs.Include(mc => mc.ModbusConnectionConfig).ToList();
+                // Load GDM devices
+                context.GenericModbusConfigs.Include(meter => meter.GenericModbusDeviceConfig).ThenInclude(map => map.GenericModbusMapConfig).ToList();
+                context.CircuitBreakerConfigs.Include(meter => meter.CircuitBreakerDeviceConfig).ThenInclude(map => map.GenericModbusMapConfig).ToList();
+                context.AutomaticTransferSwitchConfigs.Include(meter => meter.AutomaticTransferSwitchDeviceConfig).ThenInclude(map => map.GenericModbusMapConfig).ToList();
             }
 
             // Do some checks

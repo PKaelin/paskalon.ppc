@@ -11,7 +11,7 @@ namespace paskalON.Devices.Infrastructure.Storage
     /// <summary>
     /// Version repository for getting version information.
     /// </summary>
-    public class VersionRepository : RepositoryBase<DeviceServiceContext>
+    public class VersionRepository : RepositoryBase<DeviceServiceContext>, IVersionRepository
     {
         /// <summary>
         /// Constructor of <see cref="VersionRepository"/>.
