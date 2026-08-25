@@ -13,6 +13,7 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="paskalON.Devices.Application.UnitTest/paskalON.Devices.Application.UnitTest.csproj" Id="01464faf-7804-4938-96cc-fa26e5a37527" />
     <Project Path="paskalON.Devices.Client.UnitTest/paskalON.Devices.Client.UnitTest.csproj" Id="cc779dc8-000f-4f93-a6e1-4ac8d778a187" />
     <Project Path="paskalON.Devices.Domain.UnitTest/paskalON.Devices.Domain.UnitTest.csproj" Id="4b64dece-60a2-4aa6-b2de-135df171b224" />
     <Project Path="paskalON.Devices.Equipments.IntegrationTest/paskalON.Devices.Equipments.IntegrationTest.csproj" Id="4a9ee023-195d-484d-8e5a-a19c68e3a24d" />

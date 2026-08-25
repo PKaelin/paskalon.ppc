@@ -37,6 +37,12 @@ namespace paskalON.Devices.Domain.Ders
 
 
         /// <summary>
+        /// List of automatic transfer switches.
+        /// </summary>
+        public List<AutomaticTransferSwitch> AutomaticTransferSwitches { get; set; } = new List<AutomaticTransferSwitch>();
+
+
+        /// <summary>
         /// List of system meters. Usually there is one with redundancy within.
         /// </summary>
         public List<SystemPowerMeter> SystemPowerMeters { get; set; } = new List<SystemPowerMeter>();
