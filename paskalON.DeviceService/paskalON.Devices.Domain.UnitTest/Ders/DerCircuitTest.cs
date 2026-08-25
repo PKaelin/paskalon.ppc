@@ -28,18 +28,14 @@ namespace paskalON.Devices.Domain.UnitTest.Ders
         {
             Der der = new Der(NullLogger<Der>.Instance, _derConfig!);
             DerGroup group = new DerGroup(NullLogger<DerGroup>.Instance, _groupConfig!, der);
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new DerCircuit(NullLogger<DerGroup>.Instance, null, group));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DerCircuit(NullLogger<DerGroup>.Instance, null!, group));
         }
 
 
         [TestMethod]
         public void CreateWithoutParentTest()
         {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new DerGroup(NullLogger<DerGroup>.Instance, _groupConfig!, null));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DerGroup(NullLogger<DerGroup>.Instance, _groupConfig!, null!));
         }
 
 

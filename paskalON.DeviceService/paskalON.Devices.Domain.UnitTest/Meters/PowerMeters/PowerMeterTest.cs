@@ -95,9 +95,7 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IC37Dataface> dataface = new Mock<IC37Dataface>();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new PowerMeter(NullLogger.Instance, null, publisher.Object, dataface.Object));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PowerMeter(NullLogger.Instance, null!, publisher.Object, dataface.Object));
         }
 
 

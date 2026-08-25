@@ -48,9 +48,7 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyResources.Solars.Simples
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
 
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SolarPanelSimpleV1Proxy(NullLogger.Instance, _solarConfig!.Object, _unit!.Object, publisher.Object, null));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SolarPanelSimpleV1Proxy(NullLogger.Instance, _solarConfig!.Object, _unit!.Object, publisher.Object, null!));
         }
 
 

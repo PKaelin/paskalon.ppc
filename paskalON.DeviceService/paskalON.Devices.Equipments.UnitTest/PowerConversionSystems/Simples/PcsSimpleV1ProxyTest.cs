@@ -72,9 +72,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
 
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, null));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, null!));
         }
 
 
@@ -84,9 +82,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
 
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, null, client.Object));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, null!, client.Object));
         }
 
 

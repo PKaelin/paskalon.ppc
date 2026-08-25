@@ -30,18 +30,14 @@ namespace paskalON.Devices.Domain.UnitTest.Ders
         [TestMethod]
         public void CreateWithoutConfigTest()
         {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new DerSolarUnit(NullLogger.Instance, null, _circuit!));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DerSolarUnit(NullLogger.Instance, null!, _circuit!));
         }
 
 
         [TestMethod]
         public void CreateWithoutParentTest()
         {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new DerSolarUnit(NullLogger.Instance, _unitConfig!, null));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DerSolarUnit(NullLogger.Instance, _unitConfig!, null!));
         }
 
 

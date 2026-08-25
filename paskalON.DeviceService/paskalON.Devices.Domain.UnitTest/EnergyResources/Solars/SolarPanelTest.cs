@@ -49,9 +49,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SolarPanel(NullLogger.Instance, null, _unit!, publisher.Object, dataface.Object));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SolarPanel(NullLogger.Instance, null!, _unit!, publisher.Object, dataface.Object));
         }
 
 
@@ -60,9 +58,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SolarPanel(NullLogger.Instance, _solarConfig!, null, publisher.Object, dataface.Object));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SolarPanel(NullLogger.Instance, _solarConfig!, null!, publisher.Object, dataface.Object));
         }
 
 

@@ -49,9 +49,7 @@ namespace paskalON.Devices.Equipments.UnitTest.Meters.PowerMeters.Simples
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IC37Dataface> dataface = new Mock<IC37Dataface>();
 
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemPowerMeterSimpleV1Proxy(NullLogger.Instance, _pmConfig!, publisher.Object, dataface.Object, null));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemPowerMeterSimpleV1Proxy(NullLogger.Instance, _pmConfig!, publisher.Object, dataface.Object, null!));
         }
 
 
