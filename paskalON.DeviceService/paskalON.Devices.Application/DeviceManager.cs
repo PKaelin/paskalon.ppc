@@ -47,49 +47,49 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// Dictionary with device id and PCS. 
         /// </summary>
-        private Dictionary<int, PowerConversionSystemBase> _powerConversionSystems = new Dictionary<int, PowerConversionSystemBase>();
+        protected Dictionary<int, PowerConversionSystemBase> _powerConversionSystems = new Dictionary<int, PowerConversionSystemBase>();
 
 
         /// <summary>
         /// Dictionary with device id and BB.
         /// </summary>
-        private Dictionary<int, BatteryBankBase> _batteryBanks = new Dictionary<int, BatteryBankBase>();
+        protected Dictionary<int, BatteryBankBase> _batteryBanks = new Dictionary<int, BatteryBankBase>();
 
 
         /// <summary>
         /// Dictionary with device id and Solar Panel.
         /// </summary>
-        private Dictionary<int, SolarPanelBase> _solarPanels = new Dictionary<int, SolarPanelBase>();
+        protected Dictionary<int, SolarPanelBase> _solarPanels = new Dictionary<int, SolarPanelBase>();
 
 
         /// <summary>
         /// Dictionary with device id and External Meter.
         /// </summary>
-        private Dictionary<int, ExternalPowerMeter> _externalPowerMeters = new Dictionary<int, ExternalPowerMeter>();
+        protected Dictionary<int, ExternalPowerMeter> _externalPowerMeters = new Dictionary<int, ExternalPowerMeter>();
 
 
         /// <summary>
         /// Dictionary with device id and Auxiliary Meter.
         /// </summary>
-        private Dictionary<int, AuxiliaryPowerMeter> _auxiliaryPowerMeters = new Dictionary<int, AuxiliaryPowerMeter>();
+        protected Dictionary<int, AuxiliaryPowerMeter> _auxiliaryPowerMeters = new Dictionary<int, AuxiliaryPowerMeter>();
 
 
         /// <summary>
         /// Dictionary with device id and System Meter.
         /// </summary>
-        private Dictionary<int, SystemPowerMeter> _systemPowerMeters = new Dictionary<int, SystemPowerMeter>();
+        protected Dictionary<int, SystemPowerMeter> _systemPowerMeters = new Dictionary<int, SystemPowerMeter>();
 
 
         /// <summary>
         /// Dictionary with device id and Circuit Meter.
         /// </summary>
-        private readonly Dictionary<int, CircuitPowerMeter> _circuitPowerMeters = new Dictionary<int, CircuitPowerMeter>();
+        protected readonly Dictionary<int, CircuitPowerMeter> _circuitPowerMeters = new Dictionary<int, CircuitPowerMeter>();
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public Der Der { get; private set; }
+        public Der Der { get; protected set; }
 
 
         /// <summary>
@@ -271,7 +271,7 @@ namespace paskalON.Devices.Application
 
             try
             {
-                await Parallel.ForEachAsync(PowerConversionSystems, options, async (pcs, token) =>
+                await Parallel.ForEachAsync(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false), options, async (pcs, token) =>
                 {
                     if (pcs != null)
                     {
@@ -328,7 +328,7 @@ namespace paskalON.Devices.Application
 
             try
             {
-                await Parallel.ForEachAsync(PowerConversionSystems, options, async (pcs, token) =>
+                await Parallel.ForEachAsync(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false), options, async (pcs, token) =>
                 {
                     if (pcs != null)
                     {
@@ -385,7 +385,7 @@ namespace paskalON.Devices.Application
 
             try
             {
-                await Parallel.ForEachAsync(PowerConversionSystems, options, async (pcs, token) =>
+                await Parallel.ForEachAsync(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false), options, async (pcs, token) =>
                 {
                     if (pcs != null)
                     {
@@ -489,6 +489,30 @@ namespace paskalON.Devices.Application
             }
 
             unit.IsInMaintenanceMode = true;
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async Task SetPcsPowerTarget(int deviceId, double activePowerWatt, double reactivePowerVar)
+        {
+            try
+            {
+                if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
+                {
+                    _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
+                    return;
+                }
+
+                await pcs.SetActivePowerTargetAsync(activePowerWatt);
+                await pcs.SetReactivePowerTargetAsync(reactivePowerVar);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Standby PCS failed error: {Error}", ex.Message);
+                throw;
+            }
         }
 
 

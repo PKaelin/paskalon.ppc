@@ -533,6 +533,9 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
+        /// <remarks>
+        /// Actual write to the endpoint is executed in the equipments.
+        /// </remarks>
         public virtual async Task SetActivePowerTargetAsync(double? value)
         {
             lock (dataLock)
@@ -556,6 +559,9 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <inheritdoc/>
         /// </summary>
         /// <param name="value">Reactive power value (VArs).</param>
+        /// <remarks>
+        /// Actual write to the endpoint is executed in the equipments.
+        /// </remarks>
         public virtual async Task SetReactivePowerTargetAsync(double? value)
         {
             lock (dataLock)

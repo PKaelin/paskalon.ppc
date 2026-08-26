@@ -126,5 +126,14 @@ namespace paskalON.Devices.Application
         /// </summary>
         /// <param name="unitName">DER unit name the action is executed on.</param>
         void PutIntoMaintenance(string unitName);
+
+
+        /// <summary>
+        /// Sets the active and reactive power targets.
+        /// </summary>
+        /// <param name="deviceId">Device id the action is executed on.</param>
+        /// <param name="activePowerWatt">Active power in Watts.</param>
+        /// <param name="reactivePowerVar">Reactive power in Volt Ampere Reactive.</param>
+        Task SetPcsPowerTarget(int deviceId, double activePowerWatt, double reactivePowerVar);
     }
 }

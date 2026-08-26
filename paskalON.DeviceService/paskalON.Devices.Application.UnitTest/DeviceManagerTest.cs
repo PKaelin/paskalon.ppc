@@ -1,17 +1,30 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using Moq;
+using paskalON.Dataface;
 using paskalON.Devices.Domain.Configs.Ders;
+using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
+using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
+using paskalON.Devices.Domain.EnergyStorages.Batteries;
+using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Infrastructure.Storage;
+using paskalON.Telemetry;
 
 namespace paskalON.Devices.Application.UnitTest
 {
     [TestClass]
     public sealed class DeviceManagerTest
     {
+        private FakeLogger<DeviceManagerTestClass> _logger = new FakeLogger<DeviceManagerTestClass>();
+        private Mock<PowerConversionSystemBase>? _pcsMock;
+        private Mock<BatteryBankBase>? _bbMock;
+
+
         [TestMethod]
         public void DeviceManagerConstructorNullLoggerTest()
         {
@@ -218,5 +231,315 @@ namespace paskalON.Devices.Application.UnitTest
         {
         }
 
+
+        [TestMethod]
+        public async Task DeviceManagerStartAllPcsEmptyTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.StartAllPcsAsync();
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            _pcsMock!.Verify(x => x.StartAsync(), Times.Once);
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStopAllPcsEmptyTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.StopAllPcsAsync();
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            _pcsMock!.Verify(x => x.StopAsync(), Times.Once);
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStandbyAllPcsEmptyTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.StandbyAllPcsAsync();
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            _pcsMock!.Verify(x => x.StandbyAsync(), Times.Once);
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStartPcsMissingDeviceTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.StartPcsAsync(99);
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsNotNull(logs.FirstOrDefault(l => l.Message.Contains("cannot find", StringComparison.OrdinalIgnoreCase)));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStartPcsTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.StartPcsAsync(0);
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(0, logs);
+            _pcsMock!.Verify(x => x.StartAsync(), Times.Once);
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStopPcsMissingDeviceTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.StopPcsAsync(99);
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsNotNull(logs.FirstOrDefault(l => l.Message.Contains("cannot find", StringComparison.OrdinalIgnoreCase)));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStopPcsTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.StopPcsAsync(0);
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(0, logs);
+            _pcsMock!.Verify(x => x.StopAsync(), Times.Once);
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStandbyPcsMissingDeviceTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.StandbyPcsAsync(99);
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsNotNull(logs.FirstOrDefault(l => l.Message.Contains("cannot find", StringComparison.OrdinalIgnoreCase)));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStandbyPcsTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.StandbyPcsAsync(0);
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(0, logs);
+            _pcsMock!.Verify(x => x.StandbyAsync(), Times.Once);
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerConnectBatteryBankMissingDeviceTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.ConnectBatteryBankAsync(99);
+
+            Assert.HasCount(1, manager.BatteryBanks);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsNotNull(logs.FirstOrDefault(l => l.Message.Contains("cannot find", StringComparison.OrdinalIgnoreCase)));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerConnectBatteryBankTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.ConnectBatteryBankAsync(0);
+
+            Assert.HasCount(1, manager.BatteryBanks);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(0, logs);
+            _bbMock!.Verify(x => x.ConnectAsync(), Times.Once);
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerDisconnectBatteryBankMissingDeviceTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.DisconnectBatteryBankAsync(99);
+
+            Assert.HasCount(1, manager.BatteryBanks);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsNotNull(logs.FirstOrDefault(l => l.Message.Contains("cannot find", StringComparison.OrdinalIgnoreCase)));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerDisconnectBatteryBankTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.DisconnectBatteryBankAsync(0);
+
+            Assert.HasCount(1, manager.BatteryBanks);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(0, logs);
+            _bbMock!.Verify(x => x.DisconnectAsync(), Times.Once);
+        }
+
+
+        [TestMethod]
+        public void DeviceManagerPutIntoMaintenanceMissingUnitTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            manager.PutIntoMaintenance("Missing unit");
+
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsNotNull(logs.FirstOrDefault(l => l.Message.Contains("cannot find", StringComparison.OrdinalIgnoreCase)));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStartAllPcsCancelledTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+            using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+
+            await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
+                await manager.StartAllPcsAsync(cancellationTokenSource.Token));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStopAllPcsCancelledTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+            using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+
+            await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
+                await manager.StopAllPcsAsync(cancellationTokenSource.Token));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerStandbyAllPcsCancelledTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+            using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+
+            await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
+                await manager.StandbyAllPcsAsync(cancellationTokenSource.Token));
+        }
+
+
+
+        [TestMethod]
+        public async Task DeviceManagerSetPcsPowerTargetMissingDeviceTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.SetPcsPowerTarget(99, 100, 20);
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsNotNull(logs.FirstOrDefault(l => l.Message.Contains("cannot find", StringComparison.OrdinalIgnoreCase)));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerSetPcsPowerTargetTest()
+        {
+            IDeviceManager manager = CreateDeviceManagerWithDomains();
+
+            await manager.SetPcsPowerTarget(0, 100, 20);
+
+            Assert.HasCount(1, manager.PowerConversionSystems);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(0, logs);
+            _pcsMock!.Verify(x => x.SetActivePowerTargetAsync(100), Times.Once);
+            _pcsMock!.Verify(x => x.SetReactivePowerTargetAsync(20), Times.Once);
+        }
+
+
+        private IDeviceManager CreateDeviceManagerWithDomains()
+        {
+
+            Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
+            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
+            DeviceManagerTestClass deviceManager = new DeviceManagerTestClass(_logger, repositoryMock.Object, servicesMock.Object);
+            Mock<IMetricsPublisher> metricsPublisherMock = new Mock<IMetricsPublisher>();
+            Mock<IDataface> datafaceMock = new Mock<IDataface>();
+            // Der
+            Mock<DerConfig> derConfig = new Mock<DerConfig>();
+            derConfig.SetupGet(x => x.Name).Returns("DerConfig");
+            Mock<Der> der = new Mock<Der>(NullLogger.Instance, derConfig.Object);
+            // Group
+            Mock<DerGroupConfig> groupConfig = new Mock<DerGroupConfig>();
+            groupConfig.SetupGet(x => x.Name).Returns("DerGroupConfig");
+            Mock<DerGroup> group = new Mock<DerGroup>(NullLogger.Instance, groupConfig.Object, der.Object);
+            // Circuit
+            Mock<DerCircuitConfig> circuitConfig = new Mock<DerCircuitConfig>();
+            circuitConfig.SetupGet(x => x.Name).Returns("DerCircuitConfig");
+            Mock<DerCircuit> circuit = new Mock<DerCircuit>(NullLogger.Instance, circuitConfig.Object, group.Object);
+            Mock<DerBatteryStorageUnitConfig> unitConfig = new Mock<DerBatteryStorageUnitConfig>();
+            unitConfig.SetupGet(x => x.Name).Returns("DerBatteryStorageUnitConfig");
+            Mock<DerBatteryStorageUnit> unitMock = new Mock<DerBatteryStorageUnit>(NullLogger.Instance, unitConfig.Object, circuit.Object);
+            // Device
+            Mock<PowerConversionSystemConfig> pcsConfig = new Mock<PowerConversionSystemConfig>();
+            pcsConfig.SetupGet(x => x.Name).Returns("PowerConversionSystemConfig");
+            Mock<BatteryBankConfig> bbConfig = new Mock<BatteryBankConfig>();
+            bbConfig.SetupGet(x => x.Name).Returns("BatteryBankConfig");
+            _pcsMock = new Mock<PowerConversionSystemBase>(NullLogger.Instance, pcsConfig.Object, unitMock.Object, metricsPublisherMock.Object, datafaceMock.Object);
+            _bbMock = new Mock<BatteryBankBase>(NullLogger.Instance, bbConfig.Object, unitMock.Object, metricsPublisherMock.Object, datafaceMock.Object);
+            // Add devices
+            deviceManager.AddPcs(0, _pcsMock.Object);
+            deviceManager.AddBb(0, _bbMock.Object);
+
+            return deviceManager;
+        }
+
+
+        class DeviceManagerTestClass : DeviceManager
+        {
+            public DeviceManagerTestClass(ILogger logger, IDerRepository repository, IServiceProvider services) : base(logger, repository, services)
+            {
+            }
+
+            public void AddPcs(int deviceId, PowerConversionSystemBase pcs)
+            {
+                _powerConversionSystems.Add(deviceId, pcs);
+            }
+
+            public void AddBb(int deviceId, BatteryBankBase bb)
+            {
+                _batteryBanks.Add(deviceId, bb);
+            }
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 
             // DBContext excludes this table:
             // modelBuilder.Entity<History>().ToTable(t => t.ExcludeFromMigrations(true));
-            Assert.ThrowsExactly<InvalidOperationException>(async () => await repository.GetDatabaseVersionAsync());
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () => await repository.GetDatabaseVersionAsync());
         }
 
 
