@@ -20,6 +20,10 @@ using System.Reflection;
 
 namespace paskalON.Devices.Application
 {
+    /// <summary>
+    /// The device manager gets the device service configuration and
+    /// creates a domain structure accordingly.
+    /// </summary>
     public class DeviceManager : IDeviceManager
     {
         /// <summary>
@@ -61,7 +65,7 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ICollection<SolarPanelBase> Solars { get; private set; } = new List<SolarPanelBase>();
+        public ICollection<SolarPanelBase> SolarPanels { get; private set; } = new List<SolarPanelBase>();
 
 
         /// <summary>
@@ -184,7 +188,7 @@ namespace paskalON.Devices.Application
                 der.ExternalPowerMeters.Add(Create<ExternalPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, meterConfig));
             }
 
-
+            // Assign the devices to the device specific collections
             IEnumerable<DerUnit> units = der.DerGroups
                 .SelectMany(g => g.DerCircuits)
                 .SelectMany(c => c.DerUnits);
@@ -201,8 +205,7 @@ namespace paskalON.Devices.Application
                 }).Where(p => p is not null).Cast<PowerConversionSystemBase>().ToList();
 
             BatteryBanks = units.OfType<DerBatteryStorageUnit>().SelectMany(u => u.BatteryBanks).ToList();
-            Solars = units.OfType<DerSolarUnit>().SelectMany(u => u.SolarPanels).ToList();
-
+            SolarPanels = units.OfType<DerSolarUnit>().SelectMany(u => u.SolarPanels).ToList();
             SystemPowerMeters = der.SystemPowerMeters;
             AuxiliaryPowerMeters = der.AuxiliaryPowerMeters;
             ExternalPowerMeters = der.ExternalPowerMeters;

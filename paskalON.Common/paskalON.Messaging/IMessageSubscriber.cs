@@ -1,4 +1,7 @@
-﻿namespace paskalON.Messaging
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// SPDX-License-Identifier: Apache-2.0
+//----------------------------------------‐------------------------------------
+namespace paskalON.Messaging
 {
     /// <summary>
     /// Defines an interface for subscribing to message brokers.

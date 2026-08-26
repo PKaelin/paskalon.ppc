@@ -17,7 +17,7 @@ namespace paskalON.Devices.Application
 
         ICollection<BatteryBankBase> BatteryBanks { get; }
 
-        ICollection<SolarPanelBase> Solars { get; }
+        ICollection<SolarPanelBase> SolarPanels { get; }
 
         ICollection<ExternalPowerMeter> ExternalPowerMeters { get; }
 

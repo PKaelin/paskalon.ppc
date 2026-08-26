@@ -52,7 +52,7 @@ namespace paskalON.Devices.Application.UnitTest
             Assert.AreEqual("Uninitialized DER", manager.Der.Name);
             Assert.IsNotNull(manager.PowerConversionSystems);
             Assert.IsNotNull(manager.BatteryBanks);
-            Assert.IsNotNull(manager.Solars);
+            Assert.IsNotNull(manager.SolarPanels);
             Assert.IsNotNull(manager.SystemPowerMeters);
             Assert.IsNotNull(manager.AuxiliaryPowerMeters);
             Assert.IsNotNull(manager.ExternalPowerMeters);
@@ -81,7 +81,7 @@ namespace paskalON.Devices.Application.UnitTest
             Assert.HasCount(0, manager.Der.ExternalPowerMeters);
             Assert.HasCount(0, manager.PowerConversionSystems);
             Assert.HasCount(0, manager.BatteryBanks);
-            Assert.HasCount(0, manager.Solars);
+            Assert.HasCount(0, manager.SolarPanels);
         }
 
 
