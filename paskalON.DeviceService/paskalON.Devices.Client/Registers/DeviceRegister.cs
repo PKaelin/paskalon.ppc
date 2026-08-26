@@ -76,7 +76,7 @@ namespace paskalON.Devices.Client.Registers
         /// </summary>
         public void UpdateDefinition(TDefinition message)
         {
-            if (!_devices.TryGetValue(message.DeviceId, out var device))
+            if (_devices.TryGetValue(message.DeviceId, out var device) == false)
             {
                 _logger.LogError("Update definition messages device id {DeviceID} was not registered in devices.", message.DeviceId);
                 return;
@@ -91,7 +91,7 @@ namespace paskalON.Devices.Client.Registers
         /// </summary>
         public void UpdateCore(TCore message)
         {
-            if (!_devices.TryGetValue(message.DeviceId, out var device))
+            if (_devices.TryGetValue(message.DeviceId, out var device) == false)
             {
                 _logger.LogError("Update core messages device id {DeviceID} was not registered in devices.", message.DeviceId);
                 return;
@@ -106,7 +106,7 @@ namespace paskalON.Devices.Client.Registers
         /// </summary>
         public void UpdateDetail(TDetail message)
         {
-            if (!_devices.TryGetValue(message.DeviceId, out var device))
+            if (_devices.TryGetValue(message.DeviceId, out var device) == false)
             {
                 _logger.LogError("Update detail messages device id {DeviceID} was not registered in devices.", message.DeviceId);
                 return;

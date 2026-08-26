@@ -116,6 +116,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public int DeviceId { get => _config.DeviceId; }
+
+
+        /// <summary>
         /// Flag whether this PCS is initially started or not.
         /// </summary>
         public bool InitiallyStarted { get => _config.InitiallyStarted; }

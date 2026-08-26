@@ -69,7 +69,7 @@ namespace paskalON.Devices.Application.UnitTest
             Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
             DeviceManager manager = new DeviceManager(NullLogger.Instance, repositoryMock.Object, servicesMock.Object);
 
-            await manager.LoadDer();
+            await manager.LoadDerAsync();
 
             repositoryMock.Verify(repository => repository.GetDer(true), Times.Once);
             Assert.AreEqual("Test DER", manager.Der.Name);
@@ -95,7 +95,7 @@ namespace paskalON.Devices.Application.UnitTest
             DeviceManager manager = new DeviceManager(NullLogger.Instance, repositoryMock.Object, servicesMock.Object);
 
             InvalidOperationException result = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-                async () => await manager.LoadDer());
+                async () => await manager.LoadDerAsync());
 
             Assert.AreSame(exception, result);
             repositoryMock.Verify(repository => repository.GetDer(true), Times.Once);
@@ -140,7 +140,7 @@ namespace paskalON.Devices.Application.UnitTest
             Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
             DeviceManager manager = new DeviceManager(NullLogger.Instance, repositoryMock.Object, servicesMock.Object);
 
-            await manager.LoadDer();
+            await manager.LoadDerAsync();
 
             Assert.AreEqual("Configured DER", manager.Der.Name);
             Assert.HasCount(2, manager.Der.DerGroups);
@@ -166,7 +166,7 @@ namespace paskalON.Devices.Application.UnitTest
             DeviceManager manager = new DeviceManager(NullLogger.Instance, repositoryMock.Object, servicesMock.Object);
             Der placeholderDer = manager.Der;
 
-            await manager.LoadDer();
+            await manager.LoadDerAsync();
 
             Assert.AreNotSame(placeholderDer, manager.Der);
             Assert.AreEqual("Loaded DER", manager.Der.Name);
@@ -207,7 +207,7 @@ namespace paskalON.Devices.Application.UnitTest
             circuitConfig.DerUnitConfigs.Add(unsupportedConfig);
 
             InvalidOperationException exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-                async () => await manager.LoadDer());
+                async () => await manager.LoadDerAsync());
 
             StringAssert.Contains(exception.Message, nameof(UnsupportedDerUnitConfig));
             Assert.AreEqual("Uninitialized DER", manager.Der.Name);

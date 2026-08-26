@@ -87,6 +87,12 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 
 
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public int DeviceId { get => _config.DeviceId; }
+
+
+        /// <summary>
         /// Indicates whether the battery bank is initially connected or not.
         /// </summary>
         public bool InitiallyConnected { get => _config.InitiallyConnected; }

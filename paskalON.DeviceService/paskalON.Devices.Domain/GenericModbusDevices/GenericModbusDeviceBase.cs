@@ -76,6 +76,12 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
 
 
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public int DeviceId { get => _config.DeviceId; }
+
+
+        /// <summary>
         /// Constructor of <see cref="GenericModbusDeviceBase"/>.
         /// </summary>
         /// <param name="logger">The logging instance.</param>

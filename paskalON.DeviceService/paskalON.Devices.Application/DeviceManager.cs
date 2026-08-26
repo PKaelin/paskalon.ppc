@@ -45,6 +45,48 @@ namespace paskalON.Devices.Application
 
 
         /// <summary>
+        /// Dictionary with device id and PCS. 
+        /// </summary>
+        private Dictionary<int, PowerConversionSystemBase> _powerConversionSystems = new Dictionary<int, PowerConversionSystemBase>();
+
+
+        /// <summary>
+        /// Dictionary with device id and BB.
+        /// </summary>
+        private Dictionary<int, BatteryBankBase> _batteryBanks = new Dictionary<int, BatteryBankBase>();
+
+
+        /// <summary>
+        /// Dictionary with device id and Solar Panel.
+        /// </summary>
+        private Dictionary<int, SolarPanelBase> _solarPanels = new Dictionary<int, SolarPanelBase>();
+
+
+        /// <summary>
+        /// Dictionary with device id and External Meter.
+        /// </summary>
+        private Dictionary<int, ExternalPowerMeter> _externalPowerMeters = new Dictionary<int, ExternalPowerMeter>();
+
+
+        /// <summary>
+        /// Dictionary with device id and Auxiliary Meter.
+        /// </summary>
+        private Dictionary<int, AuxiliaryPowerMeter> _auxiliaryPowerMeters = new Dictionary<int, AuxiliaryPowerMeter>();
+
+
+        /// <summary>
+        /// Dictionary with device id and System Meter.
+        /// </summary>
+        private Dictionary<int, SystemPowerMeter> _systemPowerMeters = new Dictionary<int, SystemPowerMeter>();
+
+
+        /// <summary>
+        /// Dictionary with device id and Circuit Meter.
+        /// </summary>
+        private readonly Dictionary<int, CircuitPowerMeter> _circuitPowerMeters = new Dictionary<int, CircuitPowerMeter>();
+
+
+        /// <summary>
         /// <inheritdoc/>
         /// </summary>
         public Der Der { get; private set; }
@@ -53,43 +95,43 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ICollection<PowerConversionSystemBase> PowerConversionSystems { get; private set; } = new List<PowerConversionSystemBase>();
+        public ICollection<PowerConversionSystemBase> PowerConversionSystems { get => _powerConversionSystems.Values; }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ICollection<BatteryBankBase> BatteryBanks { get; private set; } = new List<BatteryBankBase>();
+        public ICollection<BatteryBankBase> BatteryBanks { get => _batteryBanks.Values; }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ICollection<SolarPanelBase> SolarPanels { get; private set; } = new List<SolarPanelBase>();
+        public ICollection<SolarPanelBase> SolarPanels { get => _solarPanels.Values; }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ICollection<ExternalPowerMeter> ExternalPowerMeters { get; private set; } = new List<ExternalPowerMeter>();
+        public ICollection<ExternalPowerMeter> ExternalPowerMeters { get => _externalPowerMeters.Values; }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ICollection<AuxiliaryPowerMeter> AuxiliaryPowerMeters { get; private set; } = new List<AuxiliaryPowerMeter>();
+        public ICollection<AuxiliaryPowerMeter> AuxiliaryPowerMeters { get => _auxiliaryPowerMeters.Values; }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ICollection<SystemPowerMeter> SystemPowerMeters { get; private set; } = new List<SystemPowerMeter>();
+        public ICollection<SystemPowerMeter> SystemPowerMeters { get => _systemPowerMeters.Values; }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ICollection<CircuitPowerMeter> CircuitPowerMeters { get; private set; } = new List<CircuitPowerMeter>();
+        public ICollection<CircuitPowerMeter> CircuitPowerMeters { get => _circuitPowerMeters.Values; }
 
 
 
@@ -107,8 +149,10 @@ namespace paskalON.Devices.Application
         }
 
 
-
-        public async Task LoadDer()
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async Task LoadDerAsync()
         {
             DerConfig config = await LoadDerConfig();
             Der der = new Der(_logger, config);
@@ -193,7 +237,7 @@ namespace paskalON.Devices.Application
                 .SelectMany(g => g.DerCircuits)
                 .SelectMany(c => c.DerUnits);
 
-            PowerConversionSystems = units
+            _powerConversionSystems = units
                 .SelectMany(unit => new PowerConversionSystemBase?[]
                 {
                     unit switch
@@ -202,17 +246,256 @@ namespace paskalON.Devices.Application
                         DerSolarUnit solar => solar.PowerConversionSystem,
                         _ => null
                     }
-                }).Where(p => p is not null).Cast<PowerConversionSystemBase>().ToList();
+                }).Where(p => p is not null).Cast<PowerConversionSystemBase>().ToDictionary(d => d.DeviceId);
 
-            BatteryBanks = units.OfType<DerBatteryStorageUnit>().SelectMany(u => u.BatteryBanks).ToList();
-            SolarPanels = units.OfType<DerSolarUnit>().SelectMany(u => u.SolarPanels).ToList();
-            SystemPowerMeters = der.SystemPowerMeters;
-            AuxiliaryPowerMeters = der.AuxiliaryPowerMeters;
-            ExternalPowerMeters = der.ExternalPowerMeters;
+            _batteryBanks = units.OfType<DerBatteryStorageUnit>().SelectMany(u => u.BatteryBanks).ToDictionary(d => d.DeviceId);
+            _solarPanels = units.OfType<DerSolarUnit>().SelectMany(u => u.SolarPanels).ToDictionary(d => d.DeviceId);
+            _systemPowerMeters = der.SystemPowerMeters.ToDictionary(d => d.DeviceId); ;
+            _auxiliaryPowerMeters = der.AuxiliaryPowerMeters.ToDictionary(d => d.DeviceId); ;
+            _externalPowerMeters = der.ExternalPowerMeters.ToDictionary(d => d.DeviceId); ;
 
             Der = der;
         }
 
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async Task StartAllPcsAsync(CancellationToken cancellationToken = default)
+        {
+            ParallelOptions options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = 10,
+                CancellationToken = cancellationToken
+            };
+
+            try
+            {
+                await Parallel.ForEachAsync(PowerConversionSystems, options, async (pcs, token) =>
+                {
+                    if (pcs != null)
+                    {
+                        await pcs.StartAsync();
+                    }
+                });
+            }
+            catch (AggregateException ex)
+            {
+                // Handle exceptions thrown by one or more parallel tasks
+                foreach (Exception innerEx in ex.Flatten().InnerExceptions)
+                {
+                    _logger.LogError("System failed to start {Error}: ", innerEx.Message);
+                }
+
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async Task StartPcsAsync(int deviceId)
+        {
+            try
+            {
+                if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
+                {
+                    _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
+                    return;
+                }
+
+                await pcs.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Start PCS failed error: {Error}", ex.Message);
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async Task StopAllPcsAsync(CancellationToken cancellationToken = default)
+        {
+            ParallelOptions options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = 10,
+                CancellationToken = cancellationToken
+            };
+
+            try
+            {
+                await Parallel.ForEachAsync(PowerConversionSystems, options, async (pcs, token) =>
+                {
+                    if (pcs != null)
+                    {
+                        await pcs.StopAsync();
+                    }
+                });
+            }
+            catch (AggregateException ex)
+            {
+                // Handle exceptions thrown by one or more parallel tasks
+                foreach (Exception innerEx in ex.Flatten().InnerExceptions)
+                {
+                    _logger.LogError("System failed to stop {Error}: ", innerEx.Message);
+                }
+
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async Task StopPcsAsync(int deviceId)
+        {
+            try
+            {
+                if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
+                {
+                    _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
+                    return;
+                }
+
+                await pcs.StopAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Stop PCS failed error: {Error}", ex.Message);
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async Task StandbyAllPcsAsync(CancellationToken cancellationToken = default)
+        {
+            ParallelOptions options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = 10,
+                CancellationToken = cancellationToken
+            };
+
+            try
+            {
+                await Parallel.ForEachAsync(PowerConversionSystems, options, async (pcs, token) =>
+                {
+                    if (pcs != null)
+                    {
+                        await pcs.StandbyAsync();
+                    }
+                });
+            }
+            catch (AggregateException ex)
+            {
+                // Handle exceptions thrown by one or more parallel tasks
+                foreach (Exception innerEx in ex.Flatten().InnerExceptions)
+                {
+                    _logger.LogError("System failed to go into standby {Error}: ", innerEx.Message);
+                }
+
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async Task StandbyPcsAsync(int deviceId)
+        {
+            try
+            {
+                if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
+                {
+                    _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
+                    return;
+                }
+
+                await pcs.StandbyAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Standby PCS failed error: {Error}", ex.Message);
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async Task ConnectBatteryBankAsync(int deviceId)
+        {
+            try
+            {
+                if (_batteryBanks.TryGetValue(deviceId, out var bb) == false)
+                {
+                    _logger.LogError("Device Manager cannot find Battery Bank with device id: {DeviceId}", deviceId);
+                    return;
+                }
+
+                await bb.ConnectAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Connect battery bank failed error: {Error}", ex.Message);
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async Task DisconnectBatteryBankAsync(int deviceId)
+        {
+            try
+            {
+                if (_batteryBanks.TryGetValue(deviceId, out var bb) == false)
+                {
+                    _logger.LogError("Device Manager cannot find Battery Bank with device id: {DeviceId}", deviceId);
+                    return;
+                }
+
+                await bb.DisconnectAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Disconnect battery bank failed error: {Error}", ex.Message);
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public void PutIntoMaintenance(string unitName)
+        {
+            DerUnit? unit = Der.DerGroups.SelectMany(g => g.DerCircuits).SelectMany(c => c.DerUnits).FirstOrDefault(u => u.Name == unitName);
+
+            if (unit == null)
+            {
+                _logger.LogError("Device Manager cannot find Unit with name: {UnitName}", unitName);
+                return;
+            }
+
+            unit.IsInMaintenanceMode = true;
+        }
+
+
+        /// <summary>
+        /// Loads the Distributed Energy Resource (DER) root configuration object with all its content.
+        /// </summary>
+        /// <returns>Distributed Energy Resource (DER) root configuration object with all its content</returns>
         private async Task<DerConfig> LoadDerConfig()
         {
             try

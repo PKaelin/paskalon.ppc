@@ -14,6 +14,12 @@ namespace paskalON.Devices.Domain
     public interface IDevice
     {
         /// <summary>
+        /// Device Id of the device.
+        /// </summary>
+        int DeviceId { get; }
+
+
+        /// <summary>
         /// Data setters for total loose coupled interfaces.
         /// </summary>
         IDataface Dataface { get; }

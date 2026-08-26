@@ -88,6 +88,12 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
 
 
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public int DeviceId { get => _config.DeviceId; }
+
+
+        /// <summary>
         /// Number of solar panels.
         /// </summary>
         public int NumberOfPanels { get => _config.NumberOfPanels; }
