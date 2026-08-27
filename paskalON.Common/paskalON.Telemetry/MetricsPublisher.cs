@@ -110,6 +110,8 @@ namespace paskalON.Telemetry
         /// </summary>
         public virtual void Publish(int currentInterval)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(currentInterval);
+
             if (IsEnabled == true)
             {
                 if (Meter == null)

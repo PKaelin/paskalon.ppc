@@ -18,7 +18,7 @@ namespace paskalON.Devices.Application.Publishers
     /// <summary>
     /// Publishes device data to a message publisher interface.
     /// </summary>
-    public class DevicePublisher
+    public class DevicePublisher : IDevicePublisher
     {
         /// <summary>
         /// Logger for application logging and diagnostics.
@@ -98,6 +98,8 @@ namespace paskalON.Devices.Application.Publishers
         /// <returns>A <see cref="Task"/> that represents the asynchronous publish operation.</returns>
         public async Task Publish(int currentInterval)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(currentInterval);
+
             await PublishHardCoreLoop();
 
             if (currentInterval % _coreInterval == 0)
@@ -235,7 +237,7 @@ namespace paskalON.Devices.Application.Publishers
                 try
                 {
                     string json = JsonSerializer.Serialize(message);
-                    await _publisher.Publish(topic, json);
+                    await _publisher.PublishAsync(topic, json);
                 }
                 catch (Exception ex)
                 {

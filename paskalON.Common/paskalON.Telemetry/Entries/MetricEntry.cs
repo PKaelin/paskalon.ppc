@@ -43,7 +43,11 @@ namespace paskalON.Telemetry.Entries
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public int Interval { get; init; }
+        public int Interval
+        {
+            get;
+            init { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        }
 
 
         /// <summary>

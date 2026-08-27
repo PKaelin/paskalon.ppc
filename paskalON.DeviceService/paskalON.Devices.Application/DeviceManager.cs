@@ -263,21 +263,9 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StartAllPcsAsync(CancellationToken cancellationToken = default)
         {
-            ParallelOptions options = new ParallelOptions
-            {
-                MaxDegreeOfParallelism = 10,
-                CancellationToken = cancellationToken
-            };
-
             try
             {
-                await Parallel.ForEachAsync(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false), options, async (pcs, token) =>
-                {
-                    if (pcs != null)
-                    {
-                        await pcs.StartAsync();
-                    }
-                });
+                await Task.WhenAll(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false).Select(d => d.StartAsync()));
             }
             catch (AggregateException ex)
             {
@@ -320,21 +308,9 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StopAllPcsAsync(CancellationToken cancellationToken = default)
         {
-            ParallelOptions options = new ParallelOptions
-            {
-                MaxDegreeOfParallelism = 10,
-                CancellationToken = cancellationToken
-            };
-
             try
             {
-                await Parallel.ForEachAsync(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false), options, async (pcs, token) =>
-                {
-                    if (pcs != null)
-                    {
-                        await pcs.StopAsync();
-                    }
-                });
+                await Task.WhenAll(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false).Select(d => d.StopAsync()));
             }
             catch (AggregateException ex)
             {
@@ -377,21 +353,9 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StandbyAllPcsAsync(CancellationToken cancellationToken = default)
         {
-            ParallelOptions options = new ParallelOptions
-            {
-                MaxDegreeOfParallelism = 10,
-                CancellationToken = cancellationToken
-            };
-
             try
             {
-                await Parallel.ForEachAsync(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false), options, async (pcs, token) =>
-                {
-                    if (pcs != null)
-                    {
-                        await pcs.StandbyAsync();
-                    }
-                });
+                await Task.WhenAll(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false).Select(d => d.StandbyAsync()));
             }
             catch (AggregateException ex)
             {

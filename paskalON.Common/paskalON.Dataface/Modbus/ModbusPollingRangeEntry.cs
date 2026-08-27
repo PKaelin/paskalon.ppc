@@ -29,7 +29,11 @@ namespace paskalON.Dataface.Modbus
         /// <summary>
         /// The interval based on a polling definition.
         /// </summary>
-        public int Interval { get; init; }
+        public int Interval
+        {
+            get;
+            init { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        }
 
 
         /// <summary>

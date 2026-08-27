@@ -13,6 +13,6 @@ namespace paskalON.Messaging
         /// </summary>
         /// <param name="topic">The topic to publish.</param>
         /// <param name="json">The json message to publish.</param>
-        Task Publish(string topic, string json);
+        Task PublishAsync(string topic, string json);
     }
 }

@@ -99,7 +99,7 @@ namespace paskalON.Devices.Application.UnitTest.Publishers
 
             await publisher.Publish(1);
 
-            publisherMock.Verify(messagePublisher => messagePublisher.Publish(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            publisherMock.Verify(messagePublisher => messagePublisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
 
@@ -113,7 +113,7 @@ namespace paskalON.Devices.Application.UnitTest.Publishers
 
             await publisher.Publish(1);
 
-            publisherMock.Verify(messagePublisher => messagePublisher.Publish(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            publisherMock.Verify(messagePublisher => messagePublisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
 
@@ -127,7 +127,7 @@ namespace paskalON.Devices.Application.UnitTest.Publishers
 
             await publisher.Publish(1);
 
-            publisherMock.Verify(messagePublisher => messagePublisher.Publish(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            publisherMock.Verify(messagePublisher => messagePublisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
 
@@ -141,7 +141,7 @@ namespace paskalON.Devices.Application.UnitTest.Publishers
 
             await publisher.Publish(2);
 
-            publisherMock.Verify(messagePublisher => messagePublisher.Publish(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
+            publisherMock.Verify(messagePublisher => messagePublisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
         }
 
 
@@ -155,7 +155,7 @@ namespace paskalON.Devices.Application.UnitTest.Publishers
 
             await publisher.Publish(1);
 
-            publisherMock.Verify(messagePublisher => messagePublisher.Publish(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            publisherMock.Verify(messagePublisher => messagePublisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
 
@@ -165,14 +165,14 @@ namespace paskalON.Devices.Application.UnitTest.Publishers
             FakeLogger<DevicePublisher> logger = new FakeLogger<DevicePublisher>();
             Mock<IDeviceManager> deviceManagerMock = CreateDeviceManagerMockWithDomains();
             Mock<IMessagePublisher> publisherMock = new Mock<IMessagePublisher>();
-            publisherMock.Setup(messagePublisher => messagePublisher.Publish(It.IsAny<string>(), It.IsAny<string>()))
+            publisherMock.Setup(messagePublisher => messagePublisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new InvalidOperationException("Test exception"));
             DevicePublisher publisher = new DevicePublisher(logger,
                 deviceManagerMock.Object, new DeviceMapper(), publisherMock.Object, CreateTopics(), 1, 1);
 
             await publisher.Publish(1);
 
-            publisherMock.Verify(messagePublisher => messagePublisher.Publish(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
+            publisherMock.Verify(messagePublisher => messagePublisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
             Assert.HasCount(2, logs);
             Assert.IsTrue(logs.All(m => m.Message.Contains("error publishing device", StringComparison.OrdinalIgnoreCase)));

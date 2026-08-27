@@ -1,0 +1,6 @@
+@paskalON.Devices.Service_HostAddress = http://localhost:45000
+
+GET {{paskalON.Devices.Service_HostAddress}}/der/
+Accept: application/json
+
+###
