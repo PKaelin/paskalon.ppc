@@ -1,0 +1,16 @@
+{
+    "Servers": {
+      "1": {
+        "Name": "Devices",
+        "Group": "Servers",
+        "Port": 5432,
+        "Username": "admin",
+        "Host": "paskalon.devices.data",
+        "MaintenanceDB": "postgres",
+        "ConnectionParameters": {
+          "sslmode": "prefer",
+          "connect_timeout": 10
+        }
+      }
+    }
+}

@@ -1,0 +1,48 @@
+# This Docker compose file is only used in DEV & TST.
+# QA and PRD will use docker stack and orchestration.
+# Network is defined as attachable so that we can easely spin up more container and attach them to the same network.
+# Dont use random ports use Microservice Development Port Assignments:
+name: paskalon_ppc_infra
+
+services:
+
+  # PgAdmin database management user interface (for all the databases within network).
+  # Add new database registration to ./pgadmin/servers.json
+  # This service is only for DEV/TST environments and shall not be deployed in PRD!
+  pgadmin:
+    container_name: paskalon.pgadmin
+    image: dpage/pgadmin4:9.17
+    restart: unless-stopped
+    ports:
+      - 41001:80
+    environment:
+      # Email is missing secrets implementation. PGADMIN_DEFAULT_EMAIL needs to be replaced for QAT/PRD.
+      - PGADMIN_DEFAULT_EMAIL=admin@ppc.com
+      - PGADMIN_DEFAULT_PASSWORD_FILE=/run/secrets/pgadmin_password
+      # For development mode disable login
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    volumes:
+      - paskalon.pgadmin:/var/lib/pgadmin
+      - ./pgadmin/preferences.json:/pgadmin4/preferences.json
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+    networks:
+      - ppc.network
+    secrets:
+      - pgadmin_password
+
+
+volumes:
+  paskalon.pgadmin:
+
+# Secrets have to be changed in QAT/PRD according to ./secrets/README.md
+secrets:
+  pgadmin_password:
+    file: ./secrets/pgadmin_password
+
+
+networks:
+  ppc.network:
+    name: ppc.network
+    # Attachable only for development and test
+    attachable: true

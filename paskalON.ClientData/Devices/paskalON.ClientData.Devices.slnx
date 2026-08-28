@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/InitialDevelopment/">
+    <Project Path="../../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
+    <Project Path="../../paskalON.DeviceService/paskalON.Devices.Infrastructure/paskalON.Devices.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="paskalON.DemoSimple.Devices.Data/paskalON.DemoSimple.Devices.Data.csproj" Id="6eb9e0b1-22bd-407c-88bb-6804f6b9595a" />
+</Solution>

@@ -22,7 +22,7 @@ services:
     volumes:
       - paskalon.devices.data:/var/lib/postgresql
     networks:
-      - paskalon.network
+      - ppc.network
 
   # Device Service
   paskalon.devices.service:
@@ -43,7 +43,7 @@ services:
       - database_connection
       - messaging_connection
     networks:
-      - paskalon.network
+      - ppc.network
 
 secrets:
   database_connection:
@@ -60,7 +60,7 @@ volumes:
     name: paskalon.devices.data
 
 networks:
-  paskalon.network:
-    name: paskalon.network
+  ppc.network:
+    name: ppc.network
     # Attachable only for development and test
     attachable: true
