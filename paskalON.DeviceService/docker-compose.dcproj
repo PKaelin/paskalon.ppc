@@ -14,5 +14,7 @@
     <None Include=".dockerignore" />
     <None Include="secrets\database_connection" />
     <None Include="secrets\messaging_connection" />
+    <None Include="secrets\db_user" />
+    <None Include="secrets\db_password" />
   </ItemGroup>
 </Project>

@@ -30,7 +30,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             using DeviceServiceContext context = new DeviceServiceContext(_options!);
             await context.Database.EnsureDeletedAsync();
             await context.Database.EnsureCreatedAsync();
-            DerRepository repository = new DerRepository(NullLogger.Instance, context);
+            DerRepository repository = new DerRepository(NullLogger<DerRepository>.Instance, context);
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () => await repository.GetDer());
         }
@@ -51,7 +51,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 
             using (DeviceServiceContext context = new DeviceServiceContext(_options!))
             {
-                DerRepository repository = new DerRepository(NullLogger.Instance, context);
+                DerRepository repository = new DerRepository(NullLogger<DerRepository>.Instance, context);
                 der = await repository.GetDer();
             }
 
