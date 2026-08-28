@@ -1,11 +1,14 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
+using paskalON.Communication.Protocols.C37118.Types;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
+using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Infrastructure.Storage;
+using paskalON.PhysicalUnits.Electricals.Powers;
 using System.Net.Sockets;
 
 namespace paskalON.DemoSimple.Devices.Data
@@ -27,17 +30,28 @@ namespace paskalON.DemoSimple.Devices.Data
         /// <param name="context">DB context interface.</param>
         public static async Task CreateAsync(IDeviceServiceContext context)
         {
+            DerConfig derConfig = await CreateStructureAndDevicesAsync(context);
+            await CreateMetersAsync(context, derConfig);
+        }
+
+
+        /// <summary>
+        /// Create the DER structure and its devices.
+        /// </summary>
+        /// <param name="context">Database context.</param>
+        private static async Task<DerConfig> CreateStructureAndDevicesAsync(IDeviceServiceContext context)
+        {
             DerConfig derConfig = new DerConfig { ChangedBy = ChangedBy, Name = "Der 1", };
             context.DerConfigs.Add(derConfig);
             DerGroupConfig derGroupConfig = new DerGroupConfig { ChangedBy = ChangedBy, Name = "Der Group 1", DerConfig = derConfig };
             context.DerGroupConfigs.Add(derGroupConfig);
-            DerCircuitConfig derCircuitBessConfig = new DerCircuitConfig { ChangedBy = ChangedBy, Name = "Circuit Bess", DerGroupConfig = derGroupConfig, };
+            DerCircuitConfig derCircuitBessConfig = new DerCircuitConfig { ChangedBy = ChangedBy, Name = "Circuit Bess 1", DerGroupConfig = derGroupConfig, };
             context.DerCircuitConfigs.Add(derCircuitBessConfig);
 
             DerBatteryStorageUnitConfig unit1 = new DerBatteryStorageUnitConfig
             {
                 ChangedBy = ChangedBy,
-                Name = "BMS-Unit1",
+                Name = "BMS-Unit 1",
                 IncludeBatteryInOperations = true,
                 DerCircuitConfig = derCircuitBessConfig
             };
@@ -46,7 +60,7 @@ namespace paskalON.DemoSimple.Devices.Data
             DerBatteryStorageUnitConfig unit2 = new DerBatteryStorageUnitConfig
             {
                 ChangedBy = ChangedBy,
-                Name = "BMS-Unit2",
+                Name = "BMS-Unit 2",
                 IncludeBatteryInOperations = true,
                 DerCircuitConfig = derCircuitBessConfig
             };
@@ -55,7 +69,7 @@ namespace paskalON.DemoSimple.Devices.Data
             DerBatteryStorageUnitConfig unit3 = new DerBatteryStorageUnitConfig
             {
                 ChangedBy = ChangedBy,
-                Name = "BMS-Unit3",
+                Name = "BMS-Unit 3",
                 IncludeBatteryInOperations = true,
                 DerCircuitConfig = derCircuitBessConfig
             };
@@ -348,6 +362,93 @@ namespace paskalON.DemoSimple.Devices.Data
                 DerUnitConfig = unit3
             };
             context.BatteryBankConfigs.Add(bb32);
+
+            await context.SaveChangesAsync();
+
+            return derConfig;
+        }
+
+
+        /// <summary>
+        /// Create the meters.
+        /// </summary>
+        /// <param name="context">Database context.</param>
+        /// <param name="derConfig">DerConfig root object.</param>
+        /// <returns></returns>
+        private static async Task CreateMetersAsync(IDeviceServiceContext context, DerConfig derConfig)
+        {
+            PowerMeterMapC37Config powerMeterMap = new PowerMeterMapC37Config
+            {
+                ChangedBy = ChangedBy,
+                Name = "Power Meter Map C37",
+                // Power
+                ApparentPower = "Analog0",
+                ActivePower = "Analog1",
+                ActivePowerA = "Analog2",
+                ActivePowerB = "Analog3",
+                ActivePowerC = "Analog4",
+                ReactivePower = "Analog5",
+                ReactivePowerA = "Analog6",
+                ReactivePowerB = "Analog7",
+                ReactivePowerC = "Analog8",
+                EnergyDelivered = "Analog9",
+                EnergyReceived = "Analog10",
+                ReactiveEnergyDelivered = "Analog11",
+                ReactiveEnergyReceived = "Analog12",
+                // Voltage
+                VoltageA = "Phasor0",
+                VoltageB = "Phasor1",
+                VoltageC = "Phasor2",
+                VoltageAB = "Phasor3",
+                VoltageBC = "Phasor4",
+                VoltageCA = "Phasor5",
+                VoltagePositiveSequence = "Phasor6",
+                VoltageLLAvg = "Analog13",
+                // Current
+                CurrentA = "Phasor7",
+                CurrentB = "Phasor8",
+                CurrentC = "Phasor9",
+            };
+            context.PowerMeterMapC37Configs.Add(powerMeterMap);
+
+            PowerMeterDeviceConfig systemPowerMeterDevice = new PowerMeterDeviceConfig
+            {
+                ChangedBy = "Test",
+                Name = "System Power Meter Device",
+                ClassName = "paskalON.Devices.Equipments.Meters.PowerMeters.Simples.SystemPowerMeterSimpleV1Proxy",
+                IsReversePowerFlow = false,
+                IsCurrentSigned = true,
+                PowerMeterMapC37Config = powerMeterMap,
+            };
+            context.PowerMeterDeviceConfigs.Add(systemPowerMeterDevice);
+
+            C37Config systemMeterC37 = new C37Config
+            {
+                ChangedBy = ChangedBy,
+                Name = "SystemPowerMeter 1",
+                Address = Constants.Ip4Localhost,
+                Port = Constants.PortStartMeter,
+                ConfigFrameTimeoutMilliseconds = 3000,
+                DataFrameRetryCount = 3,
+                DataFrameTimeoutMilliseconds = 500,
+                StreamId = 1,
+                StationName = "PMU",
+                TransportLayer = C37TransportLayer.UDP,
+            };
+            context.C37Configs.Add(systemMeterC37);
+
+            SystemPowerMeterConfig powerMeterConfig = new SystemPowerMeterConfig
+            {
+                IsActive = true,
+                ChangedBy = "Test",
+                Name = "C37 System Power Meter 1",
+                DeviceId = 1,
+                PowerFactorStandard = PowerFactorStandard.IEEE,
+                C37Config = systemMeterC37,
+                PowerMeterDeviceConfig = systemPowerMeterDevice,
+                DerConfig = derConfig
+            };
+            context.SystemPowerMeterConfigs.Add(powerMeterConfig);
 
             await context.SaveChangesAsync();
         }

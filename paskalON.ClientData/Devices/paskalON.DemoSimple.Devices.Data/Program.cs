@@ -22,48 +22,60 @@ class Program
     /// <remarks>
     /// Don't do any exception handling.
     /// </remarks>
-    public static async Task Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
-        // Setup configuration
-        IConfigurationRoot configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-
-        // Read arguments or configuration
-        // Use specific: "SchemaVersion": "20260530987654_v_0_1"
-        // Use latest:   "SchemaVersion": ""
-        string? schemaVersion = args.Length > 0 ? args[0] : configuration.GetSection("SchemaVersion")?.Value;
-
-        // Read database connection string and create db context options
-        string? connectionString = configuration.GetConnectionString("DatabaseContext");
-        ArgumentException.ThrowIfNullOrEmpty(connectionString);
-        DbContextOptions<DeviceServiceContext> options = new DbContextOptionsBuilder<DeviceServiceContext>().UseNpgsql(connectionString).Options;
-
-        // ----------------------------------------------------------------------------
-        // Important the microservice database must be running.
-        // ----------------------------------------------------------------------------
-        using (DeviceServiceContext context = new DeviceServiceContext(options))
+        try
         {
-            // Always start from scratch
-            await context.Database.EnsureDeletedAsync();
+            // Setup configuration
+            IConfigurationRoot configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
+            // Read arguments or configuration
+            // Use specific: "SchemaVersion": "20260530987654_v_0_1"
+            // Use latest:   "SchemaVersion": ""
+            string? schemaVersion = args.Length > 0 ? args[0] : configuration.GetSection("SchemaVersion")?.Value;
+
+            // Read database connection string and create db context options
+            string? connectionString = configuration.GetConnectionString("DatabaseContext");
+            ArgumentException.ThrowIfNullOrEmpty(connectionString);
+            DbContextOptions<DeviceServiceContext> options = new DbContextOptionsBuilder<DeviceServiceContext>().UseNpgsql(connectionString).Options;
 
             // ----------------------------------------------------------------------------
-            // Important to be able to migrate to a version a migration entry has to exist:
-            // [Microservice].Infrastructure.Storage.Migrations
-            // See README.md in [Microservice].Infrastructure\README.md
+            // Important the microservice database must be running.
             // ----------------------------------------------------------------------------
-            if (string.IsNullOrEmpty(schemaVersion) == false)
+            using (DeviceServiceContext context = new DeviceServiceContext(options))
             {
-                // Migrate the database to a specific version
-                await context.Database.MigrateAsync(schemaVersion);
-            }
-            else
-            {
-                // Migrate the database to the latest version
-                await context.Database.MigrateAsync();
+                // Always start from scratch
+                await context.Database.EnsureDeletedAsync();
+
+                // ----------------------------------------------------------------------------
+                // Important to be able to migrate to a version a migration entry has to exist:
+                // [Microservice].Infrastructure.Storage.Migrations
+                // See README.md in [Microservice].Infrastructure\README.md
+                // ----------------------------------------------------------------------------
+                if (string.IsNullOrEmpty(schemaVersion) == false)
+                {
+                    // Migrate the database to a specific version
+                    await context.Database.MigrateAsync(schemaVersion);
+                }
+                else
+                {
+                    // Migrate the database to the latest version
+                    await context.Database.MigrateAsync();
+                }
+
+                // Create and save the data
+                await CommonData.CreateAsync(context);
+                await ServiceData.CreateAsync(context);
             }
 
-            // Create and save the data
-            await CommonData.CreateAsync(context);
-            await ServiceData.CreateAsync(context);
+            Console.WriteLine("Successfully created the data");
         }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("Unexpected error during data creation. Error: ", ex.Message);
+            return -1;
+        }
+
+        return 0;
     }
 }
