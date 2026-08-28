@@ -737,7 +737,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             // Initialize metrics
             MetricsPublisher.Initialize("PCS", tags);
             // MetricsFactorClass1
-            MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, int>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError ? 1 : 0, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActivePowerTarget), MetricType.Gauge, x => x.ActivePowerTarget?.Watts, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactivePowerTarget), MetricType.Gauge, x => x.ReactivePowerTarget?.VoltAmperesReactive, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActivePower), MetricType.Gauge, x => x.ActivePower?.Watts, _config.MetricsFactorClass1);
@@ -749,11 +749,11 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ACCurrent), MetricType.Gauge, x => x.ACCurrent, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ACVoltage), MetricType.Gauge, x => x.ACVoltage, _config.MetricsFactorClass1);
             // MetricsFactorClass2
-            MetricsPublisher.Register<PowerConversionSystemBase, PcsState>(this, nameof(State), MetricType.Gauge, x => x.State, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(HasActiveFaults), MetricType.Gauge, x => x.HasActiveFaults, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(HasActiveWarnings), MetricType.Gauge, x => x.HasActiveWarnings, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, int>(this, nameof(State), MetricType.Gauge, x => (int)x.State, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, int>(this, nameof(HasActiveFaults), MetricType.Gauge, x => x.HasActiveFaults ? 1 : 0, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<PowerConversionSystemBase, int>(this, nameof(HasActiveWarnings), MetricType.Gauge, x => x.HasActiveWarnings ? 1 : 0, _config.MetricsFactorClass2);
             // MetricsFactorClass3
-            MetricsPublisher.Register<PowerConversionSystemBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass3);
+            MetricsPublisher.Register<PowerConversionSystemBase, int>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode ? 1 : 0, _config.MetricsFactorClass3);
             // MetricsFactorClass4
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(Frequency), MetricType.Gauge, x => x.Frequency, _config.MetricsFactorClass4);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(StandbyActivePowerKiloWatts), MetricType.Gauge, x => x.StandbyActivePowerKiloWatts, _config.MetricsFactorClass4);

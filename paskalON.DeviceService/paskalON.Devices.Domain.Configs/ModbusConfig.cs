@@ -27,13 +27,21 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// Host address.
         /// </summary>
-        public required string Address { get; set; }
+        public required string Address
+        {
+            get;
+            set { ArgumentNullException.ThrowIfNullOrEmpty(value); field = value; }
+        }
 
 
         /// <summary>
         /// Port.
         /// </summary>
-        public required int Port { get; set; }
+        public required int Port
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        }
 
 
         /// <summary>

@@ -3,10 +3,12 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
 using paskalON.Devices.Application;
+using paskalON.Devices.Application.Factories;
 using paskalON.Devices.Infrastructure.Storage;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
+using paskalON.Telemetry;
 using StackExchange.Redis;
 
 try
@@ -28,17 +30,21 @@ try
     Console.WriteLine("Building service.....");
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-    // Build WebApi
+    // Add WebApis
     builder.Services.AddControllers();
     builder.Services.AddOpenApi();
 
-    // Build database
+    // Add databases
     builder.Services.AddDbContext<DeviceServiceContext>(options => options.UseNpgsql(dbConnectionString));
     builder.Services.AddScoped<IDerRepository, DerRepository>();
 
-    // Build messaging
+    // Add communications
     builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(msgConnectionString));
     builder.Services.AddSingleton<IMessagePublisher, RedisMessagePublisher>();
+    builder.Services.AddSingleton<IModbusDeviceFactory, ModbusDeviceFactory>();
+    builder.Services.AddSingleton<IC37DeviceFactory, C37DeviceFactory>();
+    builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
+    builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
 
     // Build application
     var app = builder.Build();
@@ -48,7 +54,10 @@ try
     {
         ILogger<DeviceManager> logger = app.Services.GetRequiredService<ILogger<DeviceManager>>();
         IDerRepository repository = scope.ServiceProvider.GetRequiredService<IDerRepository>();
-        DeviceManager deviceManager = new DeviceManager(logger, repository, app.Services);
+        IModbusDeviceFactory deviceFactoryModbus = app.Services.GetRequiredService<IModbusDeviceFactory>();
+        IC37DeviceFactory deviceFactoryC37 = app.Services.GetRequiredService<IC37DeviceFactory>();
+        IMetricsPublisherFactory publisherFactory = app.Services.GetRequiredService<IMetricsPublisherFactory>();
+        DeviceManager deviceManager = new DeviceManager(logger, repository, app.Services, publisherFactory, deviceFactoryModbus, deviceFactoryC37);
         Console.WriteLine("Loading DERs.....");
         await deviceManager.LoadDerAsync();
     }

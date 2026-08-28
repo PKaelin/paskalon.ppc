@@ -18,7 +18,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Configurations
         /// <param name="builder">The builder to be used to configure the entity type.</param>
         public void Configure(EntityTypeBuilder<C37Config> builder)
         {
-            builder.Property(x => x.IpAddress).IsRequired();
+            builder.Property(x => x.Address).IsRequired();
             builder.Property(x => x.Port).IsRequired();
             builder.Property(x => x.TransportLayer).IsRequired();
             builder.Property(x => x.StreamId).IsRequired();

@@ -14,7 +14,7 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// IP address of the device.
         /// </summary>
-        public required string IpAddress
+        public required string Address
         {
             get;
             set { ArgumentNullException.ThrowIfNullOrEmpty(value); field = value; }
@@ -77,7 +77,7 @@ namespace paskalON.Devices.Domain.Configs
         /// <returns>String representation of this instance.</returns>
         public override string ToString()
         {
-            return $"{Name} {IpAddress}:{Port}";
+            return $"{Name} {Address}:{Port}";
         }
 
     }

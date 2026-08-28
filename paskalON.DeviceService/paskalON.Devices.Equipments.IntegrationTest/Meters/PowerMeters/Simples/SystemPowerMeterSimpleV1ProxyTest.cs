@@ -70,7 +70,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.Meters.PowerMeters.Simples
                 Name = "C37Config",
                 StationName = "PMU",
                 StreamId = 1,
-                IpAddress = "127.0.0.1",
+                Address = "127.0.0.1",
                 Port = 52,
                 TransportLayer = C37TransportLayer.UDP
             };

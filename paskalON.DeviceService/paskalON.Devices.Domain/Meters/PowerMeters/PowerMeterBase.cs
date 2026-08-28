@@ -627,7 +627,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
             // Initialize metrics
             MetricsPublisher.Initialize("PowerMeter", tags);
             // MetricsFactorClass1
-            MetricsPublisher.Register<PowerMeterBase, bool>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, int>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError ? 1 : 0, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(Frequency), MetricType.Gauge, x => x.Frequency, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(PowerFactor), MetricType.Gauge, x => x.PowerFactor, _config.MetricsFactorClass1);
             // Power A-C

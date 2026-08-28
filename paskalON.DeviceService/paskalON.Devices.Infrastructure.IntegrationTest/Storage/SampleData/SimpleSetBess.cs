@@ -144,7 +144,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 VoltageBC = "Phasor4",
                 VoltageCA = "Phasor5",
                 VoltagePositiveSequence = "Phasor6",
-                VoltageLLAvg = "Analog10",
+                VoltageLLAvg = "Analog13",
                 // Current
                 CurrentA = "Phasor7",
                 CurrentB = "Phasor8",
@@ -480,7 +480,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
             {
                 ChangedBy = "Test",
                 Name = "SystemPowerMeterC37Config",
-                IpAddress = Constants.Ip4Localhost,
+                Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartMeter,
                 ConfigFrameTimeoutMilliseconds = 3000,
                 DataFrameRetryCount = 3,
@@ -509,7 +509,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
             {
                 ChangedBy = "Test",
                 Name = "CircuitPowerMeterConfig",
-                IpAddress = Constants.Ip4Localhost,
+                Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartMeter + 1,
                 ConfigFrameTimeoutMilliseconds = 3000,
                 DataFrameRetryCount = 3,

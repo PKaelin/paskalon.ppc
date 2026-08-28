@@ -6,6 +6,7 @@ using paskalON.Devices.Domain.EnergyResources.Solars;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
+using paskalON.Telemetry;
 
 namespace paskalON.Devices.Application
 {
@@ -18,6 +19,12 @@ namespace paskalON.Devices.Application
         /// Distributed Energy Resource (DER) root object.
         /// </summary>
         Der Der { get; }
+
+
+        /// <summary>
+        /// List of metric publisher interfaces.
+        /// </summary>
+        ICollection<IMetricsPublisher> MetricsPublishers { get; }
 
 
         /// <summary>

@@ -190,8 +190,8 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
             // Initialize metrics
             MetricsPublisher.Initialize("Solar", tags);
             // Solar
-            MetricsPublisher.Register<SolarPanelBase, bool>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError, _config.MetricsFactorClass4);
-            MetricsPublisher.Register<SolarPanelBase, bool>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, int>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError ? 1 : 0, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<SolarPanelBase, int>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode ? 1 : 0, _config.MetricsFactorClass4);
             MetricsPublisher.Register<SolarPanelBase, int>(this, nameof(NumberOfPanels), MetricType.Gauge, x => x.NumberOfPanels, _config.MetricsFactorClass4);
             MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MinimumVoltageSum), MetricType.Gauge, x => x.MinimumVoltageSum, _config.MetricsFactorClass4);
             MetricsPublisher.Register<SolarPanelBase, double>(this, nameof(MaximumVoltageSum), MetricType.Gauge, x => x.MaximumVoltageSum, _config.MetricsFactorClass4);
