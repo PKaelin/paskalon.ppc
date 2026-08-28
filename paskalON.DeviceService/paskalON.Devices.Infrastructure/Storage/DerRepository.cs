@@ -18,7 +18,7 @@ namespace paskalON.Devices.Infrastructure.Storage
         /// </summary>
         /// <param name="logger">The logger interface for application logging and diagnostics.</param>
         /// <param name="context">The device service database context.</param>
-        public DerRepository(ILogger logger, DeviceServiceContext context) : base(logger, context)
+        public DerRepository(ILogger<DerRepository> logger, DeviceServiceContext context) : base(logger, context)
         {
         }
 

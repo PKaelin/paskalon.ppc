@@ -1,36 +1,73 @@
 // Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // SPDX-License-Identifier: Apache-2.0
 //----------------------------------------‐------------------------------------
+using Microsoft.EntityFrameworkCore;
+using paskalON.Devices.Application;
+using paskalON.Devices.Infrastructure.Storage;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
 using StackExchange.Redis;
 
-var builder = WebApplication.CreateBuilder(args);
-
-
-
-// Build WebApi
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
-
-// Build publishers
-string redisConnectionString = "TODO:Get";
-builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnectionString));
-builder.Services.AddSingleton<IMessagePublisher, RedisMessagePublisher>();
-
-
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
+    Console.WriteLine("Getting environments.....");
+    // Get database connection string
+    string? dbConnectionStringFile = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_FILE");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dbConnectionStringFile, "Cannot find the database secret file");
+    string dbConnectionString = (await File.ReadAllTextAsync(dbConnectionStringFile)).Trim();
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dbConnectionString, "Cannot find the database connection string definition");
+
+    // Get messaging connection string
+    string? msgConnectionStringFile = Environment.GetEnvironmentVariable("MESSAGING_CONNECTION_FILE");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(msgConnectionStringFile, "Cannot find the messaging secret file");
+    string msgConnectionString = (await File.ReadAllTextAsync(msgConnectionStringFile)).Trim();
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(msgConnectionString, "Cannot find the messaging connection string definition");
+
+    // Create builder
+    Console.WriteLine("Building service.....");
+    WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+    // Build WebApi
+    builder.Services.AddControllers();
+    builder.Services.AddOpenApi();
+
+    // Build database
+    builder.Services.AddDbContext<DeviceServiceContext>(options => options.UseNpgsql(dbConnectionString));
+    builder.Services.AddScoped<IDerRepository, DerRepository>();
+
+    // Build messaging
+    builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(msgConnectionString));
+    builder.Services.AddSingleton<IMessagePublisher, RedisMessagePublisher>();
+
+    // Build application
+    var app = builder.Build();
+
+    // Create and load device manager
+    using (IServiceScope scope = app.Services.CreateScope())
+    {
+        ILogger<DeviceManager> logger = app.Services.GetRequiredService<ILogger<DeviceManager>>();
+        IDerRepository repository = scope.ServiceProvider.GetRequiredService<IDerRepository>();
+        DeviceManager deviceManager = new DeviceManager(logger, repository, app.Services);
+        Console.WriteLine("Loading DERs.....");
+        await deviceManager.LoadDerAsync();
+    }
+
+
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+    app.MapControllers();
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    // Output to Dockers standard output. Use: docker logs [container]
+    Console.Error.WriteLine($"Device service startup failed: {ex.Message}");
+    Console.Error.WriteLine(ex.StackTrace);
+    throw;
+}

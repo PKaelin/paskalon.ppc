@@ -6,3 +6,15 @@ services:
       dockerfile: paskalON.Devices.Service/Dockerfile
     ports:
       - 45000:8080
+    environment:
+      - DATABASE_CONNECTION_FILE=/run/secrets/database_connection
+      - MESSAGING_CONNECTION_FILE=/run/secrets/messaging_connection
+    secrets:
+      - database_connection
+      - messaging_connection
+  
+secrets:
+  database_connection:
+    file: ./secrets/database_connection
+  messaging_connection:
+    file: ./secrets/messaging_connection

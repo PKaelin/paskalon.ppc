@@ -4,7 +4,7 @@
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
     <ProjectGuid>81dded9d-158b-e303-5f62-77a2896d2a5a</ProjectGuid>
-    <DockerComposeProjectName>paskalon_ppc_devices</DockerComposeProjectName>
+    <DockerComposeProjectName>paskalon_ppc</DockerComposeProjectName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">
@@ -12,5 +12,7 @@
     </None>
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
+    <None Include="secrets\database_connection" />
+    <None Include="secrets\messaging_connection" />
   </ItemGroup>
 </Project>

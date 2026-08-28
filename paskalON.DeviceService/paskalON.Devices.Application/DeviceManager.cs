@@ -29,7 +29,7 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// Logger for application logging and diagnostics.
         /// </summary>
-        private readonly ILogger _logger;
+        private readonly ILogger<DeviceManager> _logger;
 
 
         /// <summary>
@@ -134,8 +134,12 @@ namespace paskalON.Devices.Application
         public ICollection<CircuitPowerMeter> CircuitPowerMeters { get => _circuitPowerMeters.Values; }
 
 
-
-        public DeviceManager(ILogger logger, IDerRepository repository, IServiceProvider services)
+        /// <summary>        
+        /// </summary>
+        /// <param name="logger">Logger for application logging and diagnostics.</param>
+        /// <param name="repository">Distributed Energy Resources (DER) repository interface.</param>
+        /// <param name="services">Service provider used to resolve dependencies of configured equipment.</param>
+        public DeviceManager(ILogger<DeviceManager> logger, IDerRepository repository, IServiceProvider services)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(repository);

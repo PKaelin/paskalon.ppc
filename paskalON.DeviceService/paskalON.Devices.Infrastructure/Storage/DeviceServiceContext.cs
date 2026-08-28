@@ -79,6 +79,14 @@ namespace paskalON.Devices.Infrastructure.Storage
         public DbSet<AutomaticTransferSwitchConfig> AutomaticTransferSwitchConfigs { get; set; }
 
 
+        /// <summary>
+        /// Constructor of <see cref="DeviceServiceContext"/>.
+        /// </summary>
+        /// <param name="options">DbContextOptions</param>
+        public DeviceServiceContext(DbContextOptions<DeviceServiceContext> options) : base(options)
+        {
+        }
+
 
         /// <summary>
         /// Set defaults and configure conventions before they run.
@@ -106,20 +114,6 @@ namespace paskalON.Devices.Infrastructure.Storage
             // Automatically pulls all individual configuration classes
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(DomainBase).Assembly);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(DeviceServiceContext).Assembly);
-        }
-
-
-        /// <summary>
-        /// Configure the database (and other options) to be used for this context.
-        /// </summary>
-        /// <param name="optionsBuilder">Options builder instance.</param>
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            string variable = "DB_CONNECTION_STRING";
-            string? connectionString = Environment.GetEnvironmentVariable(variable);
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(connectionString, variable);
-            optionsBuilder.UseNpgsql(connectionString);
-            base.OnConfiguring(optionsBuilder);
         }
     }
 }

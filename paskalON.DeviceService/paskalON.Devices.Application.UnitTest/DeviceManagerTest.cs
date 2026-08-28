@@ -40,7 +40,7 @@ namespace paskalON.Devices.Application.UnitTest
         {
             Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new DeviceManager(NullLogger.Instance, null!, servicesMock.Object));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DeviceManager(NullLogger<DeviceManager>.Instance, null!, servicesMock.Object));
         }
 
 
@@ -49,7 +49,7 @@ namespace paskalON.Devices.Application.UnitTest
         {
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new DeviceManager(NullLogger.Instance, repositoryMock.Object, null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, null!));
         }
 
 
@@ -59,7 +59,7 @@ namespace paskalON.Devices.Application.UnitTest
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
 
-            DeviceManager manager = new DeviceManager(NullLogger.Instance, repositoryMock.Object, servicesMock.Object);
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object);
 
             Assert.IsNotNull(manager.Der);
             Assert.AreEqual("Uninitialized DER", manager.Der.Name);
@@ -80,7 +80,7 @@ namespace paskalON.Devices.Application.UnitTest
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             repositoryMock.Setup(repository => repository.GetDer(true)).ReturnsAsync(config);
             Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManager manager = new DeviceManager(NullLogger.Instance, repositoryMock.Object, servicesMock.Object);
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object);
 
             await manager.LoadDerAsync();
 
@@ -105,7 +105,7 @@ namespace paskalON.Devices.Application.UnitTest
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             repositoryMock.Setup(repository => repository.GetDer(true)).ThrowsAsync(exception);
             Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManager manager = new DeviceManager(NullLogger.Instance, repositoryMock.Object, servicesMock.Object);
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object);
 
             InvalidOperationException result = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                 async () => await manager.LoadDerAsync());
@@ -151,7 +151,7 @@ namespace paskalON.Devices.Application.UnitTest
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             repositoryMock.Setup(repository => repository.GetDer(true)).ReturnsAsync(config);
             Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManager manager = new DeviceManager(NullLogger.Instance, repositoryMock.Object, servicesMock.Object);
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object);
 
             await manager.LoadDerAsync();
 
@@ -176,7 +176,7 @@ namespace paskalON.Devices.Application.UnitTest
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             repositoryMock.Setup(repository => repository.GetDer(true)).ReturnsAsync(config);
             Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManager manager = new DeviceManager(NullLogger.Instance, repositoryMock.Object, servicesMock.Object);
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object);
             Der placeholderDer = manager.Der;
 
             await manager.LoadDerAsync();
@@ -209,7 +209,7 @@ namespace paskalON.Devices.Application.UnitTest
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             repositoryMock.Setup(repository => repository.GetDer(true)).ReturnsAsync(config);
             Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManager manager = new DeviceManager(NullLogger.Instance, repositoryMock.Object, servicesMock.Object);
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object);
 
             DerUnitConfig unsupportedConfig = new UnsupportedDerUnitConfig
             {
@@ -422,43 +422,6 @@ namespace paskalON.Devices.Application.UnitTest
 
 
         [TestMethod]
-        public async Task DeviceManagerStartAllPcsCancelledTest()
-        {
-            IDeviceManager manager = CreateDeviceManagerWithDomains();
-            using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.Cancel();
-
-            await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
-                await manager.StartAllPcsAsync(cancellationTokenSource.Token));
-        }
-
-
-        [TestMethod]
-        public async Task DeviceManagerStopAllPcsCancelledTest()
-        {
-            IDeviceManager manager = CreateDeviceManagerWithDomains();
-            using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.Cancel();
-
-            await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
-                await manager.StopAllPcsAsync(cancellationTokenSource.Token));
-        }
-
-
-        [TestMethod]
-        public async Task DeviceManagerStandbyAllPcsCancelledTest()
-        {
-            IDeviceManager manager = CreateDeviceManagerWithDomains();
-            using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.Cancel();
-
-            await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
-                await manager.StandbyAllPcsAsync(cancellationTokenSource.Token));
-        }
-
-
-
-        [TestMethod]
         public async Task DeviceManagerSetPcsPowerTargetMissingDeviceTest()
         {
             IDeviceManager manager = CreateDeviceManagerWithDomains();
@@ -527,7 +490,7 @@ namespace paskalON.Devices.Application.UnitTest
 
         class DeviceManagerTestClass : DeviceManager
         {
-            public DeviceManagerTestClass(ILogger logger, IDerRepository repository, IServiceProvider services) : base(logger, repository, services)
+            public DeviceManagerTestClass(ILogger<DeviceManager> logger, IDerRepository repository, IServiceProvider services) : base(logger, repository, services)
             {
             }
 

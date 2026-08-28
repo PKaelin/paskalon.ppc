@@ -14,13 +14,24 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
     [TestClass]
     public class DeviceServiceContextTest
     {
-        // TODO: Implement more tests to check required and relationships.
+        private DbContextOptions<DeviceServiceContext>? _options;
+
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            string variable = "DB_CONNECTION_STRING";
+            string? connectionString = Environment.GetEnvironmentVariable(variable);
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(connectionString, variable);
+            _options = new DbContextOptionsBuilder<DeviceServiceContext>().UseNpgsql(connectionString).Options;
+        }
+
 
 
         [TestMethod]
         public void CreateDeviceServiceContext()
         {
-            using DeviceServiceContext context = new DeviceServiceContext();
+            using DeviceServiceContext context = new DeviceServiceContext(_options!);
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
         }
@@ -32,7 +43,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             SimpleSetBess sample = new SimpleSetBess();
             List<DerConfig> configs = new List<DerConfig>();
 
-            using (DeviceServiceContext context = new DeviceServiceContext())
+            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
             {
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
@@ -60,7 +71,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (DeviceServiceContext context = new DeviceServiceContext())
+            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)
@@ -105,7 +116,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             SimpleSetSolar sample = new SimpleSetSolar();
             List<DerConfig> configs = new List<DerConfig>();
 
-            using (DeviceServiceContext context = new DeviceServiceContext())
+            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
             {
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
@@ -127,7 +138,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (DeviceServiceContext context = new DeviceServiceContext())
+            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)
@@ -169,7 +180,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             SimpleSetBess sample = new SimpleSetBess();
             List<DerConfig> configs = new List<DerConfig>();
 
-            using (DeviceServiceContext context = new DeviceServiceContext())
+            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
             {
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
@@ -199,7 +210,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (DeviceServiceContext context = new DeviceServiceContext())
+            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)
@@ -258,7 +269,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             SimpleSetBess sample = new SimpleSetBess();
             List<DerConfig> configs = new List<DerConfig>();
 
-            using (DeviceServiceContext context = new DeviceServiceContext())
+            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
             {
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
@@ -290,7 +301,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (DeviceServiceContext context = new DeviceServiceContext())
+            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)
