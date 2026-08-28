@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Infrastructure.Storage;
+using paskalON.Devices.Infrastructure.Storage.Repositories;
 
 namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 {

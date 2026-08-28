@@ -22,7 +22,7 @@ namespace paskalON.Devices.Infrastructure.Storage
         // Core DbSet
         public DbSet<Configuration> Configurations { get; set; }            // General configuration class for the microservice
         public DbSet<History> Histories { get; set; }                       // For DB migration history.
-
+        public DbSet<SystemConfig> SystemConfigs { get; set; }
 
         // Communications
         public DbSet<C37Config> C37Configs { get; set; }

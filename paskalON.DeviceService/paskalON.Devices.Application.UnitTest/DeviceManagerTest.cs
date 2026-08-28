@@ -12,7 +12,7 @@ using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.PowerConversionSystems;
-using paskalON.Devices.Infrastructure.Storage;
+using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Telemetry;
 
 namespace paskalON.Devices.Application.UnitTest
@@ -183,7 +183,6 @@ namespace paskalON.Devices.Application.UnitTest
 
             Assert.AreNotSame(placeholderDer, manager.Der);
             Assert.AreEqual("Loaded DER", manager.Der.Name);
-            Assert.AreSame(manager.Der, manager.Der);
         }
 
 

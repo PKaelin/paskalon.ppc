@@ -4,6 +4,7 @@
 using Microsoft.EntityFrameworkCore;
 using paskalON.Devices.Application;
 using paskalON.Devices.Infrastructure.Storage;
+using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
 using StackExchange.Redis;

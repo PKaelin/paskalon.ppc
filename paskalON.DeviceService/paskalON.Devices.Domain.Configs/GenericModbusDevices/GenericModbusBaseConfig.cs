@@ -9,13 +9,6 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
     public abstract class GenericModbusBaseConfig : ModbusConfig
     {
         /// <summary>
-        /// Indicates the minimum valid polling interval value.
-        /// If this value is less than 100 milliseconds it will cause an exception.
-        /// </summary>
-        private const long MinimumDataLoggingIntervalMilliseconds = 100;
-
-
-        /// <summary>
         /// Id of the generic device.
         /// </summary>
         public required int DeviceId
@@ -33,17 +26,6 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices
         /// Whether this device is active meaning whether it should be loaded into configuration.
         /// </summary>
         public required bool IsActive { get; set; }
-
-
-        private long metricsIntervalMilliseconds = 1000;
-        /// <summary>
-        /// Metrics publishing interval in milliseconds.
-        /// </summary>
-        public long MetricsIntervalMilliseconds
-        {
-            get { return metricsIntervalMilliseconds; }
-            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDataLoggingIntervalMilliseconds); metricsIntervalMilliseconds = value; }
-        }
 
 
         /// <summary>

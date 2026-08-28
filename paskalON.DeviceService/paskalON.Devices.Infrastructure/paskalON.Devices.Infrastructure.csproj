@@ -17,4 +17,8 @@
     <ProjectReference Include="..\paskalON.Devices.Domain.Configs\paskalON.Devices.Domain.Configs.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Storage\Repositories\" />
+  </ItemGroup>
+
 </Project>

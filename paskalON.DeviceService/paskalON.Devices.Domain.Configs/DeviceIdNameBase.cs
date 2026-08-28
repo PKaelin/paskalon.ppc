@@ -11,13 +11,6 @@ namespace paskalON.Devices.Domain.Configs
     public abstract class DeviceIdNameBase : NameBase
     {
         /// <summary>
-        /// Indicates the minimum valid polling interval value.
-        /// If this value is less than 100 milliseconds it will cause an exception.
-        /// </summary>
-        private const long MinimumDataLoggingIntervalMilliseconds = 100;
-
-
-        /// <summary>
         /// Id of the device.
         /// </summary>
         /// <remarks>
@@ -30,16 +23,6 @@ namespace paskalON.Devices.Domain.Configs
         /// Whether this device is active meaning whether it should be loaded into configuration.
         /// </summary>
         public required bool IsActive { get; set; }
-
-
-        /// <summary>
-        /// Metrics publishing interval in milliseconds.
-        /// </summary>
-        public long MetricsIntervalMilliseconds
-        {
-            get;
-            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDataLoggingIntervalMilliseconds); field = value; }
-        } = 1000;
 
 
         /// <summary>

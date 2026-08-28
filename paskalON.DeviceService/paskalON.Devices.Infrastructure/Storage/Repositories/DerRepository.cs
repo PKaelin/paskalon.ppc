@@ -4,9 +4,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using paskalON.Devices.Domain.Configs.Ders;
-using paskalON.Devices.Infrastructure.Storage.Repositories;
 
-namespace paskalON.Devices.Infrastructure.Storage
+namespace paskalON.Devices.Infrastructure.Storage.Repositories
 {
     /// <summary>
     /// Distributed Energy Resources (DER) repository.

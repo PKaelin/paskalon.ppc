@@ -15,7 +15,7 @@ using paskalON.Devices.Domain.GenericModbusDevices;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
 using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
-using paskalON.Devices.Infrastructure.Storage;
+using paskalON.Devices.Infrastructure.Storage.Repositories;
 using System.Reflection;
 
 namespace paskalON.Devices.Application

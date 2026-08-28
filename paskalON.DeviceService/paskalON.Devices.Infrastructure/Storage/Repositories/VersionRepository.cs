@@ -3,10 +3,9 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Domains;
 
-namespace paskalON.Devices.Infrastructure.Storage
+namespace paskalON.Devices.Infrastructure.Storage.Repositories
 {
     /// <summary>
     /// Version repository for getting version information.

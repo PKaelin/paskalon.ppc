@@ -3,7 +3,7 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Domain.Configs.Ders;
 
-namespace paskalON.Devices.Infrastructure.Storage
+namespace paskalON.Devices.Infrastructure.Storage.Repositories
 {
     /// <summary>
     /// Distributed Energy Resources (DER) repository interface definition.
