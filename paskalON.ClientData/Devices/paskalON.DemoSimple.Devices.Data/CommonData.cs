@@ -21,7 +21,7 @@ namespace paskalON.DemoSimple.Devices.Data
         /// Main method to create the common data.
         /// </summary>
         /// <param name="context">DB context interface.</param>
-        public static void Create(IDeviceServiceContext context)
+        public static async Task CreateAsync(IDeviceServiceContext context)
         {
             context.Configurations.Add(new Configuration
             {
@@ -31,7 +31,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 ChangedBy = _changedBy
             });
 
-            // TODO: Add common data
+            await context.SaveChangesAsync();
         }
     }
 }

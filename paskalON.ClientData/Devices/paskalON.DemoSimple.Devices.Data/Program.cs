@@ -22,7 +22,7 @@ class Program
     /// <remarks>
     /// Don't do any exception handling.
     /// </remarks>
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         // Setup configuration
         IConfigurationRoot configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -37,10 +37,13 @@ class Program
         ArgumentException.ThrowIfNullOrEmpty(connectionString);
         DbContextOptions<DeviceServiceContext> options = new DbContextOptionsBuilder<DeviceServiceContext>().UseNpgsql(connectionString).Options;
 
+        // ----------------------------------------------------------------------------
+        // Important the microservice database must be running.
+        // ----------------------------------------------------------------------------
         using (DeviceServiceContext context = new DeviceServiceContext(options))
         {
             // Always start from scratch
-            context.Database.EnsureDeleted();
+            await context.Database.EnsureDeletedAsync();
 
             // ----------------------------------------------------------------------------
             // Important to be able to migrate to a version a migration entry has to exist:
@@ -50,18 +53,17 @@ class Program
             if (string.IsNullOrEmpty(schemaVersion) == false)
             {
                 // Migrate the database to a specific version
-                context.Database.Migrate(schemaVersion);
+                await context.Database.MigrateAsync(schemaVersion);
             }
             else
             {
                 // Migrate the database to the latest version
-                context.Database.Migrate();
+                await context.Database.MigrateAsync();
             }
 
             // Create and save the data
-            CommonData.Create(context);
-            ServiceData.Create(context);
-            context.SaveChanges();
+            await CommonData.CreateAsync(context);
+            await ServiceData.CreateAsync(context);
         }
     }
 }
