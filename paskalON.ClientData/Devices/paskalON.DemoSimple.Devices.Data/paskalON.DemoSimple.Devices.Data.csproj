@@ -19,6 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\paskalON.Common\paskalON.Dataface\paskalON.Dataface.csproj" />
+    <ProjectReference Include="..\..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
+    <ProjectReference Include="..\..\..\paskalON.Common\paskalON.PhysicalUnits\paskalON.PhysicalUnits.csproj" />
+    <ProjectReference Include="..\..\..\paskalON.Common\paskalON.Telemetry\paskalON.Telemetry.csproj" />
+    <ProjectReference Include="..\..\..\paskalON.DeviceService\paskalON.Devices.Domain.Configs\paskalON.Devices.Domain.Configs.csproj" />
+    <ProjectReference Include="..\..\..\paskalON.DeviceService\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />
     <ProjectReference Include="..\..\..\paskalON.DeviceService\paskalON.Devices.Infrastructure\paskalON.Devices.Infrastructure.csproj" />
   </ItemGroup>
 
