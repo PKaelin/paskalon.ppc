@@ -67,6 +67,15 @@ namespace paskalON.OperatingModes.Infrastructure.Storage
 
 
         /// <summary>
+        /// Constructor of <see cref="OperatingModeContext"/>.
+        /// </summary>
+        /// <param name="options">DbContextOptions</param>
+        public OperatingModeContext(DbContextOptions<OperatingModeContext> options) : base(options)
+        {
+        }
+
+
+        /// <summary>
         /// Set defaults and configure conventions before they run.
         /// </summary>
         /// <param name="configurationBuilder">Configuration builder instance.</param>
@@ -91,20 +100,6 @@ namespace paskalON.OperatingModes.Infrastructure.Storage
             // Automatically pulls all individual configuration classes
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(DomainBase).Assembly);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(OperatingModeContext).Assembly);
-        }
-
-
-        /// <summary>
-        /// Configure the database (and other options) to be used for this context.
-        /// </summary>
-        /// <param name="optionsBuilder">Options builder instance.</param>
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            string variable = "DB_CONNECTION_STRING";
-            string? connectionString = Environment.GetEnvironmentVariable(variable);
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(connectionString, variable);
-            optionsBuilder.UseNpgsql(connectionString);
-            base.OnConfiguring(optionsBuilder);
         }
     }
 }

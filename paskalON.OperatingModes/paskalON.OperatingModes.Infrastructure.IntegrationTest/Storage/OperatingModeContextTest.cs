@@ -15,10 +15,23 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage
         // TODO: Implement more tests to check required and relationships.
 
 
+        private DbContextOptions<OperatingModeContext>? _options;
+
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            string variable = "DB_CONNECTION_STRING";
+            string? connectionString = Environment.GetEnvironmentVariable(variable);
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(connectionString, variable);
+            _options = new DbContextOptionsBuilder<OperatingModeContext>().UseNpgsql(connectionString).Options;
+        }
+
+
         [TestMethod]
         public void CreateDeviceServiceContext()
         {
-            using OperatingModeContext context = new OperatingModeContext();
+            using OperatingModeContext context = new OperatingModeContext(_options!);
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
         }
@@ -30,7 +43,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage
         {
             SimpleOperatingMode sample = new SimpleOperatingMode();
 
-            using (OperatingModeContext context = new OperatingModeContext())
+            using (OperatingModeContext context = new OperatingModeContext(_options!))
             {
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
@@ -64,7 +77,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage
             SystemConfig? systemConfig;
             ActivePowerModeConfig? activePowerModeConfig;
 
-            using (OperatingModeContext context = new OperatingModeContext())
+            using (OperatingModeContext context = new OperatingModeContext(_options!))
             {
                 systemConfig = context.SystemConfigs.FirstOrDefault();
                 activePowerModeConfig = context.ActivePowerModeConfigs.Include(x => x.RampConfig).FirstOrDefault();
