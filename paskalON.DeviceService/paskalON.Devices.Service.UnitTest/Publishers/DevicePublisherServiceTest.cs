@@ -16,38 +16,36 @@ namespace paskalON.Devices.Service.UnitTest.Publishers
         [TestMethod]
         public void DevicePublisherServiceConstructorNullLoggerTest()
         {
-            Mock<IDevicePublisher> devicePublisherMock = new Mock<IDevicePublisher>();
-
-            Assert.ThrowsExactly<ArgumentNullException>(() =>
-                new DevicePublisherService(null!, devicePublisherMock.Object, 10));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DevicePublisherService(null!));
         }
 
 
         [TestMethod]
-        public void DevicePublisherServiceConstructorNullDevicePublisherTest()
+        public void DevicePublisherServiceInitializeNullDevicePublisherTest()
         {
-            Assert.ThrowsExactly<ArgumentNullException>(() =>
-                new DevicePublisherService(NullLogger<DevicePublisherService>.Instance, null!, 10));
+            DevicePublisherService service = new DevicePublisherService(NullLogger<DevicePublisherService>.Instance);
+
+            Assert.ThrowsExactly<ArgumentNullException>(() => service.Initialize(null!, 10));
         }
 
 
         [TestMethod]
-        public void DevicePublisherServiceConstructorInvalidIntervalTest()
+        public void DevicePublisherServiceInitializeInvalidIntervalTest()
         {
             Mock<IDevicePublisher> devicePublisherMock = new Mock<IDevicePublisher>();
+            DevicePublisherService service = new DevicePublisherService(NullLogger<DevicePublisherService>.Instance);
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-                new DevicePublisherService(NullLogger<DevicePublisherService>.Instance, devicePublisherMock.Object, 0));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => service.Initialize(devicePublisherMock.Object, 0));
         }
 
 
         [TestMethod]
-        public void DevicePublisherServiceConstructorTest()
+        public void DevicePublisherServiceInitializeTest()
         {
             Mock<IDevicePublisher> devicePublisherMock = new Mock<IDevicePublisher>();
 
-            DevicePublisherService service = new DevicePublisherService(
-                NullLogger<DevicePublisherService>.Instance, devicePublisherMock.Object, 10);
+            DevicePublisherService service = new DevicePublisherService(NullLogger<DevicePublisherService>.Instance);
+            service.Initialize(devicePublisherMock.Object, 10);
 
             Assert.IsNotNull(service);
         }
@@ -57,8 +55,8 @@ namespace paskalON.Devices.Service.UnitTest.Publishers
         public async Task DevicePublisherServicePublishesEntriesTest()
         {
             Mock<IDevicePublisher> devicePublisherMock = new Mock<IDevicePublisher>();
-            DevicePublisherService service = new DevicePublisherService(
-                NullLogger<DevicePublisherService>.Instance, devicePublisherMock.Object, 1);
+            DevicePublisherService service = new DevicePublisherService(NullLogger<DevicePublisherService>.Instance);
+            service.Initialize(devicePublisherMock.Object, 1);
 
             Task execution = service.StartAsync(CancellationToken.None);
             await WaitForPublication(devicePublisherMock);
@@ -74,8 +72,8 @@ namespace paskalON.Devices.Service.UnitTest.Publishers
         public async Task DevicePublisherServiceStartStopTest()
         {
             Mock<IDevicePublisher> devicePublisherMock = new Mock<IDevicePublisher>();
-            DevicePublisherService service = new DevicePublisherService(
-                NullLogger<DevicePublisherService>.Instance, devicePublisherMock.Object, 1000);
+            DevicePublisherService service = new DevicePublisherService(NullLogger<DevicePublisherService>.Instance);
+            service.Initialize(devicePublisherMock.Object, 1000);
 
             Task execution = service.StartAsync(CancellationToken.None);
             await service.StopAsync(CancellationToken.None);
@@ -92,7 +90,8 @@ namespace paskalON.Devices.Service.UnitTest.Publishers
             Mock<IDevicePublisher> devicePublisherMock = new Mock<IDevicePublisher>();
             devicePublisherMock.Setup(devicePublisher => devicePublisher.Publish(It.IsAny<int>()))
                 .ThrowsAsync(new InvalidOperationException("Test exception"));
-            DevicePublisherService service = new DevicePublisherService(logger, devicePublisherMock.Object, 1);
+            DevicePublisherService service = new DevicePublisherService(logger);
+            service.Initialize(devicePublisherMock.Object, 1);
 
             Task execution = service.StartAsync(CancellationToken.None);
             await WaitForPublication(devicePublisherMock);

@@ -11,18 +11,32 @@ namespace paskalON.Devices.Application.Publishers
         /// <summary>
         /// The definition topic to publish to.
         /// </summary>
-        public required string DefinitionTopic { get; set; }
+        public string DefinitionTopic { get; set; }
 
 
         /// <summary>
         /// The core topic to publish to.
         /// </summary>
-        public required string CoreTopic { get; set; }
+        public string CoreTopic { get; set; }
 
 
         /// <summary>
         /// The detail topic to publish to.
         /// </summary>
-        public required string DetailTopic { get; set; }
+        public string DetailTopic { get; set; }
+
+
+        /// <summary>
+        /// Constructor of <see cref="PublisherTopicEntry"/>.
+        /// </summary>
+        /// <param name="coreTopic">Core topic.</param>
+        /// <param name="detailsTopic">Detail topic.</param>
+        /// <param name="definitionTopic">Definition topic.</param>
+        public PublisherTopicEntry(string coreTopic, string detailsTopic, string definitionTopic = "")
+        {
+            CoreTopic = coreTopic;
+            DetailTopic = detailsTopic;
+            DefinitionTopic = definitionTopic;
+        }
     }
 }

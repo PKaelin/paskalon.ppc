@@ -29,7 +29,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
         /// <summary>
         /// Database context of this repository.
         /// </summary>
-        protected DbContext DatabaseContext
+        public DbContext DatabaseContext
         {
             get { return _context as DbContext; }
         }
@@ -39,7 +39,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
         /// Constructor of <see cref="Repository"/>.
         /// </summary>
         /// <param name="context">The database context.</param>
-        protected Repository(TContext context)
+        public Repository(TContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
 
@@ -49,10 +49,8 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
 
 
         /// <summary>
-        /// Adds a new entity.
+        /// <inheritdoc/>>
         /// </summary>
-        /// <param name="entity">The entity to add.</param>
-        /// <returns>The new entity.</returns>
         public async Task<Action<TEntity>> CreateAsync(TEntity entity)
         {
             EntityEntry<TEntity> entry = await _dbSet.AddAsync(entity);
@@ -62,12 +60,8 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
 
 
         /// <summary>
-        /// Paged entities.
+        /// <inheritdoc/>>
         /// </summary>
-        /// <param name="skip">How many to skip in the page.</param>
-        /// <param name="take">How many to take in the page.</param>
-        /// <param name="trackChanges">Flag whether to track the entities or not.</param>
-        /// <returns>All entities within a page.</returns>
         public async Task<IEnumerable<TEntity>> GetAsync(int skip, int take, bool trackChanges = false)
         {
             IQueryable<TEntity> query = trackChanges ? _dbSet.Skip(skip).Take(take) : _dbSet.Skip(skip).Take(take).AsNoTracking();
@@ -77,11 +71,8 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
 
 
         /// <summary>
-        /// Get entity by id.
+        /// <inheritdoc/>>
         /// </summary>
-        /// <param name="id">Id of entity to get.</param>
-        /// <returns></returns>
-        /// <exception cref="ApplicationException">Throws an exception if entity is not found.</exception>
         public async Task<TEntity> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id) ??
@@ -90,14 +81,8 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
 
 
         /// <summary>
-        /// Get a list of entities that match a predict.
-        /// </summary>
-        /// <example>
-        /// (e) => e.ChangedBy == "User"
-        /// </example>
-        /// <param name="predicate">Predict of the query.</param>
-        /// <param name="trackChanges">Flag whether to track the entities or not.</param>
-        /// <returns></returns>
+        /// <inheritdoc/>>
+        /// </summary>        
         public async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false)
         {
             IQueryable<TEntity> query = trackChanges ? _dbSet.Where(predicate) : _dbSet.AsNoTracking().Where(predicate);
@@ -107,10 +92,8 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
 
 
         /// <summary>
-        /// Updates an entity.
+        /// <inheritdoc/>>
         /// </summary>
-        /// <param name="entity">Entity to update.</param>
-        /// <returns>The updated entity.</returns>
         public TEntity Update(TEntity entity)
         {
             entity.ChangedDate = DateTimeOffset.UtcNow;
@@ -123,9 +106,8 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
 
 
         /// <summary>
-        /// Deletes an entity.
+        /// <inheritdoc/>>
         /// </summary>
-        /// <param name="entity">Entity to delete.</param>
         public void Delete(TEntity entity)
         {
             _dbSet.Remove(entity);
@@ -133,11 +115,11 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
 
 
         /// <summary>
-        /// Saves the changes to the context.
+        /// <inheritdoc/>>
         /// </summary>
-        public async Task SaveAsync()
+        public async Task<int> SaveChangesAsync()
         {
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
 

@@ -214,14 +214,18 @@ namespace paskalON.Devices.Application
 
                     if (circuitConfig.CircuitBreakerConfig is { } breakerConfig)
                     {
+                        // TODO: Add dataface factory and parameter.
+                        IMetricsPublisher gmdMetrics = _publisherFactory.Create();
+                        MetricsPublishers.Add(gmdMetrics);
                         circuit.CircuitBreaker = Create<CircuitBreaker>(
                             breakerConfig.CircuitBreakerDeviceConfig.ClassName, breakerConfig,
-                            CreateGenericModbusEntries(breakerConfig.CircuitBreakerDeviceConfig.GenericModbusMapConfig));
+                            CreateGenericModbusEntries(breakerConfig.CircuitBreakerDeviceConfig.GenericModbusMapConfig), gmdMetrics);
                     }
 
                     if (circuitConfig.CircuitPowerMeterConfig is { } meterConfig)
                     {
                         IMetricsPublisher meterMetrics = _publisherFactory.Create();
+                        MetricsPublishers.Add(meterMetrics);
 
                         if (meterConfig.C37Config != null)
                         {
@@ -260,98 +264,9 @@ namespace paskalON.Devices.Application
                 }
             }
 
-            foreach (GenericModbusConfig genericConfig in config.GenericModbusConfigs)
-            {
-                der.GenericModbusDevices.Add(Create<GenericModbusDevice>(
-                    genericConfig.GenericModbusDeviceConfig.ClassName, genericConfig,
-                    CreateGenericModbusEntries(genericConfig.GenericModbusDeviceConfig.GenericModbusMapConfig)));
-            }
-
-            foreach (AutomaticTransferSwitchConfig atsConfig in config.AutomaticTransferSwitchConfigs)
-            {
-
-                der.AutomaticTransferSwitches.Add(Create<AutomaticTransferSwitch>(
-                    atsConfig.AutomaticTransferSwitchDeviceConfig.ClassName, atsConfig,
-                    CreateGenericModbusEntries(atsConfig.AutomaticTransferSwitchDeviceConfig.GenericModbusMapConfig)));
-            }
-
-            foreach (SystemPowerMeterConfig meterConfig in config.SystemPowerMeterConfigs)
-            {
-                IMetricsPublisher meterMetrics = _publisherFactory.Create();
-
-                if (meterConfig.C37Config != null)
-                {
-                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config!);
-                    der.SystemPowerMeters.Add(Create<SystemPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
-                        meterConfig, meterMetrics, dataface, client));
-                }
-                else if (meterConfig.ModbusConfig != null)
-                {
-                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
-                    der.SystemPowerMeters.Add(Create<SystemPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
-                        meterConfig, meterMetrics, dataface, client));
-                }
-            }
-
-            foreach (AuxiliaryPowerMeterConfig meterConfig in config.AuxiliaryPowerMeterConfigs)
-            {
-                IMetricsPublisher meterMetrics = _publisherFactory.Create();
-
-                if (meterConfig.C37Config != null)
-                {
-                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config!);
-                    der.AuxiliaryPowerMeters.Add(Create<AuxiliaryPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
-                        meterConfig, meterMetrics, dataface, client));
-                }
-                else if (meterConfig.ModbusConfig != null)
-                {
-                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
-                    der.AuxiliaryPowerMeters.Add(Create<AuxiliaryPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
-                        meterConfig, meterMetrics, dataface, client));
-                }
-            }
-
-            foreach (ExternalPowerMeterConfig meterConfig in config.ExternalPowerMeterConfigs)
-            {
-                IMetricsPublisher meterMetrics = _publisherFactory.Create();
-
-                if (meterConfig.C37Config != null)
-                {
-                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config!);
-                    der.ExternalPowerMeters.Add(Create<ExternalPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
-                        meterConfig, meterMetrics, dataface, client));
-                }
-                else if (meterConfig.ModbusConfig != null)
-                {
-                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
-                    der.ExternalPowerMeters.Add(Create<ExternalPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
-                        meterConfig, meterMetrics, dataface, client));
-                }
-
-            }
-
-            // Assign the devices to the device specific collections
-            IEnumerable<DerUnit> units = der.DerGroups
-                .SelectMany(g => g.DerCircuits)
-                .SelectMany(c => c.DerUnits);
-
-            _powerConversionSystems = units
-                .SelectMany(unit => new PowerConversionSystemBase?[]
-                {
-                    unit switch
-                    {
-                        DerBatteryStorageUnit battery => battery.PowerConversionSystem,
-                        DerSolarUnit solar => solar.PowerConversionSystem,
-                        _ => null
-                    }
-                }).Where(p => p is not null).Cast<PowerConversionSystemBase>().ToDictionary(d => d.DeviceId);
-
-            _batteryBanks = units.OfType<DerBatteryStorageUnit>().SelectMany(u => u.BatteryBanks).ToDictionary(d => d.DeviceId);
-            _solarPanels = units.OfType<DerSolarUnit>().SelectMany(u => u.SolarPanels).ToDictionary(d => d.DeviceId);
-            _systemPowerMeters = der.SystemPowerMeters.ToDictionary(d => d.DeviceId); ;
-            _auxiliaryPowerMeters = der.AuxiliaryPowerMeters.ToDictionary(d => d.DeviceId); ;
-            _externalPowerMeters = der.ExternalPowerMeters.ToDictionary(d => d.DeviceId); ;
-
+            LoadDevicesToCollections(der);
+            LoadRootMeters(der, config);
+            LoadRootGenericModbusDevices(der, config);
             Der = der;
         }
 
@@ -595,10 +510,137 @@ namespace paskalON.Devices.Application
             }
         }
 
+
+        /// <summary>
+        /// Assign the devices to the device specific collections.
+        /// </summary>
+        /// <param name="der">Der domain root instance.</param>
+        private void LoadDevicesToCollections(Der der)
+        {
+            // 
+            IEnumerable<DerUnit> units = der.DerGroups
+                .SelectMany(g => g.DerCircuits)
+                .SelectMany(c => c.DerUnits);
+
+            _powerConversionSystems = units
+                .SelectMany(unit => new PowerConversionSystemBase?[]
+                {
+                    unit switch
+                    {
+                        DerBatteryStorageUnit battery => battery.PowerConversionSystem,
+                        DerSolarUnit solar => solar.PowerConversionSystem,
+                        _ => null
+                    }
+                }).Where(p => p is not null).Cast<PowerConversionSystemBase>().ToDictionary(d => d.DeviceId);
+
+            _batteryBanks = units.OfType<DerBatteryStorageUnit>().SelectMany(u => u.BatteryBanks).ToDictionary(d => d.DeviceId);
+            _solarPanels = units.OfType<DerSolarUnit>().SelectMany(u => u.SolarPanels).ToDictionary(d => d.DeviceId);
+            _systemPowerMeters = der.SystemPowerMeters.ToDictionary(d => d.DeviceId); ;
+            _auxiliaryPowerMeters = der.AuxiliaryPowerMeters.ToDictionary(d => d.DeviceId); ;
+            _externalPowerMeters = der.ExternalPowerMeters.ToDictionary(d => d.DeviceId); ;
+        }
+
+
+        /// <summary>
+        /// Load the root meters.
+        /// </summary>
+        /// <param name="der">Der domain root instance.</param>
+        /// <param name="config">DerConfig root configuration instance.</param>
+        private void LoadRootMeters(Der der, DerConfig config)
+        {
+            foreach (SystemPowerMeterConfig meterConfig in config.SystemPowerMeterConfigs)
+            {
+                IMetricsPublisher meterMetrics = _publisherFactory.Create();
+                MetricsPublishers.Add(meterMetrics);
+
+                if (meterConfig.C37Config != null)
+                {
+                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config!);
+                    der.SystemPowerMeters.Add(Create<SystemPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
+                        meterConfig, meterMetrics, dataface, client));
+                }
+                else if (meterConfig.ModbusConfig != null)
+                {
+                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                    der.SystemPowerMeters.Add(Create<SystemPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
+                        meterConfig, meterMetrics, dataface, client));
+                }
+            }
+
+            foreach (AuxiliaryPowerMeterConfig meterConfig in config.AuxiliaryPowerMeterConfigs)
+            {
+                IMetricsPublisher meterMetrics = _publisherFactory.Create();
+                MetricsPublishers.Add(meterMetrics);
+
+                if (meterConfig.C37Config != null)
+                {
+                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config!);
+                    der.AuxiliaryPowerMeters.Add(Create<AuxiliaryPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
+                        meterConfig, meterMetrics, dataface, client));
+                }
+                else if (meterConfig.ModbusConfig != null)
+                {
+                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                    der.AuxiliaryPowerMeters.Add(Create<AuxiliaryPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
+                        meterConfig, meterMetrics, dataface, client));
+                }
+            }
+
+            foreach (ExternalPowerMeterConfig meterConfig in config.ExternalPowerMeterConfigs)
+            {
+                IMetricsPublisher meterMetrics = _publisherFactory.Create();
+                MetricsPublishers.Add(meterMetrics);
+
+                if (meterConfig.C37Config != null)
+                {
+                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config!);
+                    der.ExternalPowerMeters.Add(Create<ExternalPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
+                        meterConfig, meterMetrics, dataface, client));
+                }
+                else if (meterConfig.ModbusConfig != null)
+                {
+                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                    der.ExternalPowerMeters.Add(Create<ExternalPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
+                        meterConfig, meterMetrics, dataface, client));
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Load the root Generic Modbus Devices.
+        /// </summary>
+        /// <param name="der">Der domain root instance.</param>
+        /// <param name="config">DerConfig root configuration instance.</param>
+        private void LoadRootGenericModbusDevices(Der der, DerConfig config)
+        {
+            foreach (GenericModbusConfig genericConfig in config.GenericModbusConfigs)
+            {
+                // TODO: Add dataface factory and parameter.
+                IMetricsPublisher gmdMetrics = _publisherFactory.Create();
+                MetricsPublishers.Add(gmdMetrics);
+                der.GenericModbusDevices.Add(Create<GenericModbusDevice>(
+                    genericConfig.GenericModbusDeviceConfig.ClassName, genericConfig,
+                    CreateGenericModbusEntries(genericConfig.GenericModbusDeviceConfig.GenericModbusMapConfig), gmdMetrics));
+            }
+
+            foreach (AutomaticTransferSwitchConfig atsConfig in config.AutomaticTransferSwitchConfigs)
+            {
+                // TODO: Add dataface factory and parameter.
+                IMetricsPublisher gmdMetrics = _publisherFactory.Create();
+                MetricsPublishers.Add(gmdMetrics);
+                der.AutomaticTransferSwitches.Add(Create<AutomaticTransferSwitch>(
+                    atsConfig.AutomaticTransferSwitchDeviceConfig.ClassName, atsConfig,
+                    CreateGenericModbusEntries(atsConfig.AutomaticTransferSwitchDeviceConfig.GenericModbusMapConfig), gmdMetrics));
+            }
+        }
+
+
         private DerBatteryStorageUnit CreateBatteryUnit(DerBatteryStorageUnitConfig config, DerCircuit circuit)
         {
             DerBatteryStorageUnit unit = new(_logger, config, circuit);
             IMetricsPublisher pcsMetrics = _publisherFactory.Create();
+            MetricsPublishers.Add(pcsMetrics);
             (IModbusDataface pcsDataface, IModbusClient pcsClient) = _deviceFactoryModbus.Create(config.PowerConversionSystemConfig.ModbusConfig);
 
             unit.PowerConversionSystem = Create<PowerConversionSystemBase>(
@@ -608,6 +650,7 @@ namespace paskalON.Devices.Application
             foreach (BatteryBankConfig batteryConfig in config.BatteryBankConfigs)
             {
                 IMetricsPublisher batteryMetrics = _publisherFactory.Create();
+                MetricsPublishers.Add(batteryMetrics);
                 (IModbusDataface batteryDataface, IModbusClient batteryClient) = _deviceFactoryModbus.Create(batteryConfig.ModbusConfig);
                 unit.BatteryBanks.Add(Create<BatteryBankBase>(batteryConfig.BatteryBankDeviceConfig.ClassName, _logger, batteryConfig,
                     unit, batteryMetrics, batteryDataface, batteryClient));
@@ -622,6 +665,7 @@ namespace paskalON.Devices.Application
             DerSolarUnit unit = new(_logger, config, circuit);
 
             IMetricsPublisher pcsMetrics = _publisherFactory.Create();
+            MetricsPublishers.Add(pcsMetrics);
             (IModbusDataface pcsDataface, IModbusClient pcsClient) = _deviceFactoryModbus.Create(config.PowerConversionSystemConfig.ModbusConfig);
 
             unit.PowerConversionSystem = Create<PowerConversionSystemBase>(
@@ -629,6 +673,7 @@ namespace paskalON.Devices.Application
                 config.PowerConversionSystemConfig, unit, pcsMetrics, pcsDataface, pcsClient);
 
             IMetricsPublisher solarMetrics = _publisherFactory.Create();
+            MetricsPublishers.Add(solarMetrics);
             IDataface solarDataface = _services.GetRequiredService<IDataface>();
             unit.SolarPanels.Add(Create<SolarPanelBase>(config.SolarPanelConfig.SolarPanelDeviceConfig.ClassName, _logger,
                 config.SolarPanelConfig, unit, solarMetrics, solarDataface));

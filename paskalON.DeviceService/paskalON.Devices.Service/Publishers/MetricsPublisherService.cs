@@ -19,7 +19,7 @@ namespace paskalON.Devices.Service.Publishers
         /// <summary>
         /// List of metric publishers.
         /// </summary>
-        private readonly IEnumerable<IMetricsPublisher> _metricsPublishers;
+        private IEnumerable<IMetricsPublisher> _metricsPublishers = new List<IMetricsPublisher>();
 
 
         /// <summary>
@@ -28,22 +28,31 @@ namespace paskalON.Devices.Service.Publishers
         /// <remarks>
         /// Time based interval means that the publisher is called periodically with this time interval.
         /// </remarks>
-        private readonly int _intervalMilliseconds;
+        private int _intervalMilliseconds;
 
 
         /// <summary>
         /// Constructor of <see cref="MetricsPublisherService"/>.
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>
-        /// <param name="metricsPublishers">List of metric publishers.</param>
-        /// <param name="intervalMilliseconds">Time based interval for metrics publishers.</param>
-        public MetricsPublisherService(ILogger<MetricsPublisherService> logger, IEnumerable<IMetricsPublisher> metricsPublishers, int intervalMilliseconds)
+        public MetricsPublisherService(ILogger<MetricsPublisherService> logger)
         {
             ArgumentNullException.ThrowIfNull(logger);
+
+            _logger = logger;
+        }
+
+
+        /// <summary>
+        /// Initializes the service.
+        /// </summary>
+        /// <param name="metricsPublishers">List of metric publishers.</param>
+        /// <param name="intervalMilliseconds">Time based interval for metrics publishers.</param>
+        public void Initialize(IEnumerable<IMetricsPublisher> metricsPublishers, int intervalMilliseconds)
+        {
             ArgumentNullException.ThrowIfNull(metricsPublishers);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMilliseconds);
 
-            _logger = logger;
             _metricsPublishers = metricsPublishers;
             _intervalMilliseconds = intervalMilliseconds;
         }
@@ -52,6 +61,9 @@ namespace paskalON.Devices.Service.Publishers
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
+        /// <remarks>
+        /// ExecuteAsync is called only after the application starts running (app.Run).
+        /// </remarks>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             int interval = 0;

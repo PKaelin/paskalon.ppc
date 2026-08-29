@@ -256,12 +256,7 @@ namespace paskalON.Devices.Application.UnitTest.Publishers
 
         private PublisherTopicEntry CreateTopicEntry()
         {
-            return new PublisherTopicEntry
-            {
-                DefinitionTopic = "definition",
-                CoreTopic = "core",
-                DetailTopic = "detail"
-            };
+            return new PublisherTopicEntry("core", "detail", "definition");
         }
 
         class PcsTest : PowerConversionSystemBase
