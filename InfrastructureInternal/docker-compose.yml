@@ -31,9 +31,24 @@ services:
     secrets:
       - pgadmin_password
 
+  # Redis for high-performance, in-memory data structure store
+  redis:
+    container_name: paskalon.redis
+    image: redis:8.10.1
+    restart: unless-stopped
+    ports:
+      - 41002:6379
+    volumes:
+      - paskalon.redis:/data
+      - ./redis/redis.config:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      - ppc.network
+       
 
 volumes:
   paskalon.pgadmin:
+  paskalon.redis:
 
 # Secrets have to be changed in QAT/PRD according to ./secrets/README.md
 secrets:
