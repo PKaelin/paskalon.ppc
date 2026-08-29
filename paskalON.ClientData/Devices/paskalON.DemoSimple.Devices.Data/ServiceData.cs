@@ -30,8 +30,42 @@ namespace paskalON.DemoSimple.Devices.Data
         /// <param name="context">DB context interface.</param>
         public static async Task CreateAsync(IDeviceServiceContext context)
         {
+            await CreateCore(context);
             DerConfig derConfig = await CreateStructureAndDevicesAsync(context);
             await CreateMetersAsync(context, derConfig);
+        }
+
+        /// <summary>
+        /// Create core configuration of the service.
+        /// </summary>
+        /// <param name="context">Database context.</param>
+        private static async Task CreateCore(IDeviceServiceContext context)
+        {
+            SystemConfig systemConfig = new SystemConfig
+            {
+                ChangedBy = ChangedBy,
+                MetricsIntervalMilliseconds = 1000,
+                DeviceIntervalMilliseconds = 1000,
+                DeviceFactorCore = 1,
+                DeviceFactorDetail = 5,
+                PublisherTopicPcsCore = "ppc:device:pcs:core",
+                PublisherTopicPcsDetail = "ppc:device:pcs:detail",
+                PublisherTopicBatteryBankCore = "ppc:device:bb:core",
+                PublisherTopicBatteryBankDetail = "ppc:device:bb:detail",
+                PublisherTopicSolarPanelCore = "ppc:device:pv:core",
+                PublisherTopicSolarPanelDetail = "ppc:device:pv:detail",
+                PublisherTopicExternalPowerMeterCore = "ppc:device:pm:external:core",
+                PublisherTopicExternalPowerMeterDetail = "ppc:device:pm:external:detail",
+                PublisherTopicAuxiliaryPowerMeterCore = "ppc:device:pm:auxiliary:core",
+                PublisherTopicAuxiliaryPowerMeterDetail = "ppc:device:pm:auxiliary:detail",
+                PublisherTopicSystemPowerMeterCore = "ppc:device:pm:system:core",
+                PublisherTopicSystemPowerMeterDetail = "ppc:device:pm:system:detail",
+                PublisherTopicCircuitPowerMeterCore = "ppc:device:pm:circuit:core",
+                PublisherTopicCircuitPowerMeterDetail = "ppc:device:pm:circuit:detail",
+            };
+            context.SystemConfigs.Add(systemConfig);
+
+            await context.SaveChangesAsync();
         }
 
 
