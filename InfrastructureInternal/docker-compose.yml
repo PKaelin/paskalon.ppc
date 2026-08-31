@@ -89,47 +89,112 @@ services:
     ports:
       - 41004:8181
     command:
-      - influxdb3
-      - serve
-      - --node-id=infnod
-      - --object-store=file
-      - --data-dir=/var/lib/influxdb3/data
-      - --plugin-dir=/var/lib/influxdb3/plugins
-      - --without-auth
+      - /bin/sh
+      - -c
+      - |
+        echo "Starting InfluxDB..."
+        influxdb3 serve \
+          --node-id=infnod \
+          --object-store=file \
+          --data-dir=/var/lib/influxdb3/data \
+          --plugin-dir=/var/lib/influxdb3/plugins \
+          --without-auth &
+        INFLUXDB_PID=$$!
+
+        echo "Waiting for InfluxDB to become ready..."
+        until curl -sf http://localhost:8181/health > /dev/null; do
+          sleep 1
+        done
+
+        echo "Creating database ppc if necessary..."
+        if influxdb3 show databases --host http://localhost:8181 | grep -q 'ppc'; then
+          echo 'Database ppc already exists. Skipping initialization.';
+        else
+          echo 'Creating initial database...';
+          influxdb3 create database --retention-period 1d --host http://localhost:8181 ppc;
+          echo 'Database initialization complete!';
+        fi
+        echo "InfluxDB is ready."
+        wait $$INFLUXDB_PID
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8181/health"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
     volumes:
       - paskalon.indluxdb:/var/lib/influxdb3
     networks:
       - ppc.network
-  # Influxdb metrics database container database initialiser.
-  influxdb-init:
-    image: influxdb:3.11.0-core
-    container_name: paskalon.influxdb.initializer
+
+  # Tempo is an open source, easy-to-use, and high-scale distributed tracing backend.
+  # Run with local storage, only one instance, no failover.
+  # Test ready with: [GET] http://localhost:41005/ready
+  tempo:
+    container_name: paskalon.tempo
+    image: grafana/tempo:3.0.3
+    restart: unless-stopped
+    # Expose ports only in DEV/TST environments!
+    ports:
+      # For test purpose expose WebApi
+      - 41005:3200    # http api
+    volumes:
+      - paskalon.tempo:/var/tempo
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    networks:
+      - ppc.network   
+
+
+  # Grafana monitor, visualize data, dashboard and query container container.
+  # This service is only for DEV/TST environments and shall not be deployed in PRD!
+  # Use the Grafana service in the external infrastructure in UAT/PRD.
+  grafana:
+    container_name: paskalon.grafana
+    image: grafana/grafana:13.2.0
+    restart: unless-stopped
     depends_on:
       - influxdb
-    entrypoint: >
-      /bin/sh -c "
-      echo 'Waiting for InfluxDB to start...';
-      until nc -z influxdb3 8181; do sleep 1; done;
-      echo 'Creating initial database...';
-      influxdb3 database create ppc --retention 1d --host http://paskalon.influxdb:8181;
-      echo 'Database initialization complete!';
-      "
+      - loki
+      - tempo
+    ports:
+      - 41006:3000
+    environment:
+      - GF_USERS_DEFAULT_THEME=dark
+      - GRAFANA_PORT=3000
+      - GF_SECURITY_ADMIN_USER__FILE=/run/secrets/grafana_user
+      - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/grafana_password
+      # For development disable login and enable anonymous (Viewer, Editor, Admin)
+      - GF_AUTH_DISABLE_LOGIN_FORM=True
+      - GF_AUTH_ANONYMOUS_ENABLED=True
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - paskalon.grafana:/var/lib/grafana
+      # Mount datasources and dashboards
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
     networks:
       - ppc.network
-
+    secrets:
+      - grafana_user
+      - grafana_password
 
 # Volumes for the services
 volumes:
   paskalon.pgadmin:
   paskalon.redis:
-  paskalon.loki:
+  paskalon.loki:  
   paskalon.indluxdb:
+  paskalon.tempo:
+  paskalon.grafana:
 
 
 # Secrets have to be changed in QAT/PRD according to ./secrets/README.md
 secrets:
   pgadmin_password:
     file: ./secrets/pgadmin_password
+  grafana_user:
+    file: ./secrets/grafana_user
+  grafana_password:
+    file: ./secrets/grafana_password
 
 
 # Networks for the services
