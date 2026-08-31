@@ -1,201 +1,424 @@
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+PASKALON PROPRIETARY SOURCE-AVAILABLE SOFTWARE LICENSE
 
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+VERSION 1.0
 
-   1. Definitions.
+Copyright (c) 2026 Pascal Kaelin, operating as paskalON.
+All rights reserved.
 
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
+IMPORTANT NOTICE
+THIS SOFTWARE IS PROPRIETARY AND SOURCE-AVAILABLE SOFTWARE. IT IS NOT LICENSED UNDER AN OPEN-SOURCE LICENSE.
+THE SOURCE CODE MAY BE PUBLICLY AVAILABLE THROUGH GITHUB OR ANOTHER DEVELOPMENT PLATFORM. PUBLIC AVAILABILITY OF THE SOURCE CODE DOES NOT GRANT THE RIGHT TO USE THE SOFTWARE FOR PRODUCTION OR COMMERCIAL PURPOSES.
+NO PERSON, COMPANY, ORGANIZATION, GOVERNMENT, GOVERNMENTAL AUTHORITY, PUBLIC BODY, OR OTHER ENTITY MAY USE THE SOFTWARE FOR PRODUCTION USE OR COMMERCIAL USE WITHOUT FIRST OBTAINING A SEPARATE COMMERCIAL LICENSE FROM THE LICENSOR.
+BY DOWNLOADING, ACCESSING, COPYING, MODIFYING, COMPILING, OR USING THE SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THIS LICENSE AGREEMENT (THE "AGREEMENT").
+IF YOU DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, YOU MUST NOT DOWNLOAD, ACCESS, COPY, MODIFY, COMPILE, DISTRIBUTE, OR USE THE SOFTWARE.
+IF YOU DOWNLOAD, ACCESS, COPY, MODIFY, COMPILE, OR USE THE SOFTWARE ON BEHALF OF AN ENTITY OR OTHER PERSON, YOU REPRESENT AND WARRANT THAT YOU HAVE AUTHORITY TO BIND THAT ENTITY OR PERSON TO THIS AGREEMENT. IN THAT CASE, THE TERMS "YOU", "YOUR", AND "LICENSEE" SHALL INCLUDE THAT ENTITY OR PERSON.
 
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
 
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
+DEFINITIONS
+1.1 "LICENSOR"
+"Licensor" means Pascal Kaelin, operating under the name "paskalON".
 
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
+1.2 "SOFTWARE"
+"Software" means the software made available by the Licensor under this Agreement, including, as applicable, its source code, object code, binaries, compiled versions, scripts, libraries, configuration files, documentation, examples, associated files, and any other materials expressly identified by the Licensor as being part of the Software.
 
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
+1.3 "SOURCE CODE"
+"Source Code" means the human-readable source code of the Software made available by the Licensor through GitHub or another development platform.
 
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
+1.4 "USER", "YOU", OR "LICENSEE"
+"User", "You", "Your", or "Licensee" means the individual or legal entity exercising rights under this Agreement.
 
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
+1.5 "ENTITY"
+"Entity" means any company, corporation, partnership, association, institution, nonprofit organization, governmental entity, government agency, public authority, municipality, state-owned entity, educational institution, or other legal or organizational body.
 
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
+1.6 "COMMERCIAL USE"
+"Commercial Use" means any use of the Software that is directly or indirectly connected with commercial, business, professional, organizational, revenue-generating, paid, compensated, monetized, or income-producing activity.
 
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
+Commercial Use includes, without limitation:
+(a) using the Software to provide products or services to customers or third parties;
+(b) using the Software in connection with a commercial business or organization;
+(c) using the Software to generate revenue, income, fees, subscriptions, advertising revenue, or other economic benefit;
+(d) using the Software as part of a commercial product, service, platform, application, system, infrastructure, or offering;
+(e) using the Software internally for the operational purposes of a commercial organization;
+(f) using the Software to provide paid or monetized services, including hosted, managed, consulting, or Software-as-a-Service offerings; and
+(g) using the Software by or for a governmental or public-sector entity where such use constitutes operational, professional, commercial, or Production Use.
+Commercial Use does not require that the Software itself be separately sold.
 
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
+1.7 "PRODUCTION USE"
+"Production Use" means any deployment, operation, execution, or use of the Software in an environment or system that is used for actual operational, business, organizational, public, customer-facing, employee-facing, governmental, or other real-world purposes rather than solely for development, testing, evaluation, research, or experimentation.
+Production Use includes use in systems that serve real users, customers, employees, members of the public, organizational processes, or operational workloads.
 
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+1.8 "NON-COMMERCIAL USE"
+"Non-Commercial Use" means use that is not Commercial Use and that otherwise complies with this Agreement.
 
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
+1.9 "NON-PRODUCTION USE"
+"Non-Production Use" means development, evaluation, testing, experimentation, research, education, personal learning, or similar use that does not constitute Production Use or Commercial Use.
 
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
+1.10 "COMMERCIAL LICENSE"
+"Commercial License" means a separate written license agreement issued by the Licensor that expressly authorizes Production Use and/or Commercial Use of the Software.
+A Commercial License may contain fees, usage limits, deployment limits, user limits, support terms, geographic restrictions, duration limits, or other conditions.
 
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
 
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
+OWNERSHIP AND INTELLECTUAL PROPERTY
+The Software is proprietary software owned or controlled by the Licensor.
+All copyrights and other intellectual property rights in and to the Software, including the Source Code, are retained by the Licensor or the respective rights holders.
+Except for the limited rights expressly granted under this Agreement, no ownership interest or intellectual property right in the Software is transferred to You.
 
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
+You acknowledge that:
+(a) the Software is licensed and not sold;
+(b) the Licensor retains all right, title, and interest in and to the Software;
+(c) no ownership interest in the Software is transferred to You; and
+(d) no rights are granted by implication, estoppel, exhaustion, or otherwise except as expressly stated in this Agreement.
 
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
 
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
+PUBLIC SOURCE AVAILABILITY
+The Licensor may make the Source Code publicly available through GitHub or another development platform.
+The public availability of the Source Code does not mean that the Software is open source or that unrestricted rights are granted.
 
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
+Access to, viewing of, downloading of, or interaction with the Source Code through GitHub or another development platform does not constitute:
+(a) a Commercial License;
+(b) authorization for Production Use;
+(c) authorization for Commercial Use;
+(d) authorization to redistribute the Software;
+(e) authorization to sublicense the Software;
+(f) authorization to sell the Software;
+(g) authorization to provide the Software as a service; or
+(h) a transfer of ownership or intellectual property rights.
 
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
+Where the Software is hosted on GitHub, the terms and technical functionality of GitHub do not modify or supersede this Agreement.
 
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
 
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
+LICENSE GRANT
+Subject to Your continuous compliance with this Agreement, the Licensor grants You a limited, revocable, non-exclusive, non-transferable, non-sublicensable license to access and use the Software solely for permitted Non-Commercial and Non-Production purposes as expressly described in this Agreement.
+The license granted under this Agreement does not include any right to use the Software for Production Use or Commercial Use.
+The license granted under this Agreement is personal to You and may not be transferred, assigned, sublicensed, sold, leased, rented, or otherwise provided to another person or Entity.
 
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
+PERMITTED NON-COMMERCIAL AND NON-PRODUCTION USE
+Subject to this Agreement, You may use the Software for purposes including:
+(a) personal evaluation;
+(b) learning and education;
+(c) research;
+(d) experimentation;
+(e) testing;
+(f) security testing conducted lawfully and responsibly;
 
-   END OF TERMS AND CONDITIONS
+All such use remains subject to the restrictions in this Agreement.
+Use that begins as Non-Commercial or Non-Production Use must cease or be brought under a valid Commercial License if it subsequently becomes Commercial Use or Production Use.
 
-   APPENDIX: How to apply the Apache License to your work.
+ABSOLUTE PROHIBITION ON PRODUCTION AND COMMERCIAL USE
+NO PERSON OR ENTITY MAY USE THE SOFTWARE FOR PRODUCTION USE OR COMMERCIAL USE WITHOUT FIRST OBTAINING A VALID COMMERCIAL LICENSE FROM THE LICENSOR.
 
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
+This restriction applies to:
+(a) individuals;
+(b) companies;
+(c) corporations;
+(d) organizations;
+(e) nonprofit organizations;
+(f) educational institutions;
+(g) contractors and consultants;
+(h) governmental entities;
+(i) government agencies;
+(j) public authorities;
+(k) municipalities;
+(l) state-owned or publicly controlled entities; and
+(m) any other person or Entity.
 
-   Copyright 2026 Pascal Kaelin (Operating as paskalON)
+The prohibition applies regardless of whether the Software is used:
+(a) directly or indirectly;
+(b) internally or externally;
+(c) with or without payment;
+(d) as a standalone application or component;
+(e) as part of another product or service;
+(f) on-premises or remotely;
+(g) through a hosted environment;
+(h) through a cloud environment;
+(i) through a Software-as-a-Service offering; or
+(j) for the benefit of customers, employees, users, members of the public, or other third parties.
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+No Commercial or Production rights are granted merely because the Source Code is publicly accessible.
 
-       http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+COMMERCIAL LICENSING
+Production Use and Commercial Use are permitted only pursuant to a separate Commercial License issued by the Licensor.
+A person or Entity wishing to use the Software for Production Use or Commercial Use must contact the Licensor and obtain a Commercial License before commencing such use.
+A Commercial License must be documented in writing and expressly authorize the applicable Production Use and/or Commercial Use.
+Unless expressly stated otherwise in a Commercial License, this Agreement does not grant any Commercial Use or Production Use rights.
+
+A Commercial License may establish, among other things:
+(a) license fees;
+(b) permitted deployments;
+(c) permitted users or instances;
+(d) permitted environments;
+(e) duration;
+(f) geographic scope;
+(g) support and maintenance;
+(h) service-level commitments;
+(i) modification rights;
+(j) redistribution rights;
+(k) sublicensing rights; and
+(l) other commercially agreed terms.
+
+If a Commercial License conflicts with this Agreement, the Commercial License controls only with respect to the rights expressly granted by that Commercial License.
+
+
+MODIFICATION AND DERIVATIVE WORKS
+Subject to this Agreement, You may modify the Software for Non-Commercial and Non-Production purposes.
+
+Any modification, adaptation, translation, extension, enhancement, derivative work, fork, or other work based upon or incorporating the Software remains subject to this Agreement to the extent permitted by applicable law.
+Modification of the Software does not create a right to use the Software or the modified Software for Production Use or Commercial Use.
+You may not use modifications, derivative works, forks, or substantially derived versions of the Software for Production Use or Commercial Use without a separate Commercial License.
+Nothing in this Agreement transfers ownership of the Licensor's intellectual property rights to any modification or derivative work incorporating the Software.
+
+
+REDISTRIBUTION AND SUBLICENSING PROHIBITED
+Except where expressly authorized in writing by the Licensor, You may not:
+(a) redistribute the Software;
+(b) publish or republish the Software;
+(c) mirror the Software;
+(d) distribute copies of the Software;
+(e) distribute modified versions of the Software;
+(f) sublicense the Software;
+(g) sell, lease, rent, loan, or otherwise provide the Software to another person or Entity;
+(h) package or distribute the Software through a package manager or software distribution platform;
+(i) distribute binaries or compiled versions of the Software;
+(j) distribute Docker images, containers, virtual machines, or other deployable packages containing the Software;
+(k) make the Software available as a download or service to third parties;
+(l) incorporate the Software into another product for distribution; or
+(m) otherwise make the Software available to a third party.
+
+The restrictions in this Section apply regardless of whether the redistribution is provided for payment or without charge.
+Any redistribution right must be expressly granted in a separate written agreement by the Licensor.
+
+
+NO CIRCUMVENTION
+You may not circumvent, disable, remove, bypass, or otherwise defeat any technical, contractual, or licensing mechanism used by the Licensor to enforce the terms of this Agreement or a Commercial License.
+You may not modify the Software for the purpose of circumventing license restrictions or enabling unauthorized Production Use or Commercial Use.
+
+NO SUPPORT OR MAINTENANCE OBLIGATION
+Unless expressly agreed in a separate written agreement, the Licensor has no obligation to provide:
+(a) technical support;
+(b) customer support;
+(c) maintenance;
+(d) updates;
+(e) upgrades;
+(f) bug fixes;
+(g) security fixes;
+(h) patches;
+(i) documentation;
+(j) training;
+(k) consulting;
+(l) service-level commitments; or
+(m) other services relating to the Software.
+
+The Licensor may, but is not obligated to, release updates or new versions of the Software.
+
+
+TRADEMARKS AND BRANDING
+This Agreement does not grant You any right to use:
+(a) the name "paskalON";
+(b) the name "Pascal Kaelin";
+(c) any logos;
+(d) trademarks;
+(e) service marks;
+(f) trade names;
+(g) product names; or
+(h) other branding belonging to or associated with the Licensor.
+
+Any use of the Licensor's trademarks or branding requires separate written authorization unless otherwise permitted by applicable law.
+
+
+THIRD-PARTY COMPONENTS
+The Software may contain or depend upon third-party software, libraries, packages, or other components that are subject to separate licenses.
+Such third-party components remain subject to their respective licenses.
+Nothing in this Agreement is intended to restrict rights that You independently receive under a valid third-party license.
+The Licensor makes no representation that third-party components are subject to the terms of this Agreement.
+
+
+COMPLIANCE WITH LAW
+You must use the Software in compliance with all applicable laws and regulations.
+Nothing in this Agreement grants permission to use the Software for unlawful purposes.
+You are solely responsible for determining whether Your intended use of the Software complies with applicable laws, regulations, contractual obligations, professional requirements, and industry standards.
+
+
+TERM
+This Agreement begins when You first download, access, copy, modify, compile, or use the Software and continues until terminated in accordance with this Agreement.
+The rights granted under this Agreement are conditional upon Your continued compliance with all terms of this Agreement.
+
+
+TERMINATION
+The Licensor may terminate this Agreement if You materially breach any provision of this Agreement.
+Your rights under this Agreement shall automatically terminate upon Your material breach where termination is permitted by applicable law.
+Upon termination, You must immediately cease all use of the Software.
+You must also cease any distribution or other activity that is prohibited following termination.
+Termination does not affect rights or obligations that by their nature are intended to survive termination.
+
+
+EFFECT OF TERMINATION
+Upon termination of this Agreement:
+(a) all rights granted to You under this Agreement terminate;
+(b) You must cease using the Software;
+(c) You must cease distributing or making the Software available to third parties;
+(d) You must delete copies of the Software under Your control to the extent reasonably practicable and legally permissible; and
+(e) Sections concerning ownership, intellectual property, restrictions, disclaimers, limitations of liability, governing law, jurisdiction, and any other provisions intended by their nature to survive shall remain effective.
+
+Termination does not grant You any additional rights.
+
+
+WARRANTY DISCLAIMER
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE.
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSOR DISCLAIMS ALL WARRANTIES, INCLUDING ANY IMPLIED WARRANTIES OF:
+(a) MERCHANTABILITY;
+(b) FITNESS FOR A PARTICULAR PURPOSE;
+(c) NON-INFRINGEMENT;
+(d) TITLE;
+(e) QUALITY;
+(f) ACCURACY;
+(g) RELIABILITY;
+(h) AVAILABILITY;
+(i) SECURITY;
+(j) PERFORMANCE; AND
+(k) FREEDOM FROM DEFECTS OR ERRORS.
+
+THE LICENSOR DOES NOT WARRANT THAT THE SOFTWARE:
+(a) WILL MEET YOUR REQUIREMENTS;
+(b) WILL OPERATE WITHOUT INTERRUPTION;
+(c) WILL BE ERROR-FREE;
+(d) WILL BE SECURE;
+(e) WILL BE AVAILABLE AT ANY PARTICULAR TIME;
+(f) WILL BE COMPATIBLE WITH ANY PARTICULAR SYSTEM;
+(g) WILL PRODUCE ANY PARTICULAR RESULT; OR
+(h) WILL BE SUITABLE FOR PRODUCTION OR COMMERCIAL DEPLOYMENT.
+
+YOU ASSUME ALL RISKS ASSOCIATED WITH THE USE OF THE SOFTWARE.
+
+THE SOFTWARE IS NOT PROVIDED WITH ANY WARRANTY THAT IT IS SUITABLE FOR CRITICAL, SAFETY-CRITICAL, MEDICAL, FINANCIAL, GOVERNMENTAL, INDUSTRIAL, OR OTHER HIGH-RISK APPLICATIONS.
+
+
+LIMITATION OF LIABILITY
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSOR SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATING TO THE SOFTWARE OR THIS AGREEMENT.
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSOR SHALL NOT BE LIABLE FOR ANY LOSS OF:
+(a) PROFITS;
+(b) REVENUE;
+(c) BUSINESS;
+(d) BUSINESS OPPORTUNITY;
+(e) DATA;
+(f) GOODWILL;
+(g) REPUTATION;
+(h) ANTICIPATED SAVINGS;
+(i) USE; OR
+(j) OTHER ECONOMIC OR COMMERCIAL BENEFIT.
+
+THE LICENSOR SHALL NOT BE LIABLE FOR DAMAGES ARISING FROM OR RELATING TO:
+(a) INTERRUPTION OF SERVICE;
+(b) SOFTWARE ERRORS;
+(c) SOFTWARE DEFECTS;
+(d) SECURITY VULNERABILITIES;
+(e) DATA LOSS;
+(f) DATA CORRUPTION;
+(g) UNAUTHORIZED ACCESS;
+(h) SYSTEM FAILURE;
+(i) INCOMPATIBILITY;
+(j) LOSS OF BUSINESS;
+(k) LOSS OF CUSTOMERS;
+(l) LOSS OF PROFITS; OR
+(m) USE OR INABILITY TO USE THE SOFTWARE.
+(o) HARDWARE FAILURES;
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE TOTAL AGGREGATE LIABILITY OF THE LICENSOR ARISING OUT OF OR RELATING TO THIS AGREEMENT OR THE SOFTWARE SHALL BE LIMITED TO THE AMOUNT, IF ANY, ACTUALLY PAID BY YOU TO THE LICENSOR FOR THE SOFTWARE UNDER THIS AGREEMENT DURING THE TWELVE (12) MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM.
+WHERE NO AMOUNT HAS BEEN PAID TO THE LICENSOR UNDER THIS AGREEMENT, THE PARTIES INTEND THAT THE LICENSOR'S LIABILITY SHALL BE EXCLUDED TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.
+NOTHING IN THIS AGREEMENT EXCLUDES OR LIMITS LIABILITY TO THE EXTENT SUCH EXCLUSION OR LIMITATION IS PROHIBITED BY MANDATORY APPLICABLE LAW.
+NO INDEMNIFICATION BY LICENSOR
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSOR SHALL HAVE NO OBLIGATION TO INDEMNIFY YOU OR ANY THIRD PARTY AGAINST CLAIMS, LOSSES, DAMAGES, LIABILITIES, COSTS, OR EXPENSES ARISING FROM YOUR USE OF THE SOFTWARE.
+ANY INDEMNIFICATION OBLIGATIONS RELATING TO COMMERCIAL USE MUST BE EXPRESSLY AGREED IN A SEPARATE COMMERCIAL LICENSE OR OTHER WRITTEN AGREEMENT.
+
+
+ASSIGNMENT
+You may not assign, transfer, delegate, sublicense, or otherwise transfer this Agreement or any rights granted under it without the prior written consent of the Licensor.
+Any attempted assignment or transfer in violation of this Section is void to the extent permitted by applicable law.
+The Licensor may assign this Agreement or rights relating to the Software to a successor, purchaser, affiliated entity, or other transferee of the relevant rights.
+
+
+NO WAIVER
+Failure by the Licensor to enforce any provision of this Agreement shall not constitute a waiver of that provision or of the Licensor's right to enforce it in the future.
+A waiver is effective only if made expressly and in writing by the Licensor.
+
+
+SEVERABILITY
+If any provision of this Agreement is determined to be invalid, unlawful, or unenforceable, that provision shall be enforced to the maximum extent permitted by applicable law and the remaining provisions shall remain in full force and effect.
+The parties intend that any invalid provision be replaced, to the extent legally permissible, by a valid provision that most closely reflects the original economic and legal purpose of the invalid provision.
+
+
+ENTIRE AGREEMENT
+This Agreement constitutes the entire agreement between You and the Licensor concerning the subject matter of this Agreement and supersedes prior or contemporaneous understandings concerning the same subject matter, except for any separate written Commercial License or other agreement expressly entered into between You and the Licensor.
+
+
+AMENDMENTS AND NEW VERSIONS
+The Licensor may publish new versions of this Agreement for future releases or versions of the Software.
+Unless expressly stated otherwise, a new version of this Agreement does not retroactively modify the license terms applicable to a copy of the Software that You lawfully obtained under an earlier version.
+The license applicable to a particular version of the Software shall be the license identified by the Licensor as applying to that version.
+
+
+GOVERNING LAW
+This Agreement and any dispute, claim, or controversy arising out of or relating to this Agreement or the Software shall be governed by and construed in accordance with the laws of Switzerland, without regard to its conflict-of-law rules.
+To the maximum extent permitted by applicable law, the application of any foreign law is excluded.
+
+
+JURISDICTION
+To the extent legally permissible, the courts having jurisdiction in the Canton of Zurich, Switzerland, shall have exclusive jurisdiction over any dispute, claim, or controversy arising out of or relating to this Agreement or the Software.
+You consent to such jurisdiction and venue to the extent legally permissible.
+
+Nothing in this Section prevents the Licensor from seeking urgent or interim relief in any court having jurisdiction where such relief is necessary to protect intellectual property rights or prevent unauthorized use, disclosure, distribution, or exploitation of the Software.
+
+NOTICES AND CONTACT
+The Licensor is:
+
+Pascal Kaelin
+Operating as paskalON
+
+For licensing inquiries, including requests for a Commercial License, contact the Licensor through the official paskalON contact channels.
+
+LinkedIn contact:
+
+https://www.linkedin.com/in/pascal-kaelin-951b5981
+
+COMMERCIAL LICENSE REQUIREMENT - SUMMARY
+SOURCE ACCESS:
+Permitted subject to this Agreement.
+
+PERSONAL, EDUCATIONAL, RESEARCH, AND TESTING USE:
+Permitted subject to this Agreement, provided such use is Non-Commercial and Non-Production.
+
+PRODUCTION USE:
+PROHIBITED WITHOUT A COMMERCIAL LICENSE.
+
+COMMERCIAL USE:
+PROHIBITED WITHOUT A COMMERCIAL LICENSE.
+
+GOVERNMENT AND PUBLIC-SECTOR PRODUCTION OR COMMERCIAL USE:
+PROHIBITED WITHOUT A COMMERCIAL LICENSE.
+
+REDISTRIBUTION:
+PROHIBITED WITHOUT EXPRESS WRITTEN AUTHORIZATION.
+
+SUBLICENSING:
+PROHIBITED WITHOUT EXPRESS WRITTEN AUTHORIZATION.
+
+SALE OF THE SOFTWARE:
+PROHIBITED WITHOUT EXPRESS WRITTEN AUTHORIZATION.
+
+PUBLIC SOURCE AVAILABILITY:
+Does not constitute permission for Production Use, Commercial Use, redistribution, sublicensing, or sale.
+
+COMMERCIAL RIGHTS:
+Available only under a separate written Commercial License issued by the Licensor.
+
+ACCEPTANCE
+By downloading, accessing, copying, modifying, compiling, or using the Software, You acknowledge that You have read and understood this Agreement and agree to be legally bound by its terms.
+
+If You do not agree to this Agreement, You must not download, access, copy, modify, compile, distribute, or use the Software.
+
+Copyright (c) 2026 Pascal Kaelin, operating as paskalON.
+All rights reserved.
+
+PASKALON PROPRIETARY SOURCE-AVAILABLE SOFTWARE LICENSE - VERSION 1.0

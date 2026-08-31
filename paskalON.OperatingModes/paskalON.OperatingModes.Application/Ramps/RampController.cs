@@ -1,5 +1,6 @@
 ﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
-// SPDX-License-Identifier: Apache-2.0
+// Licensed under the paskalON Source-Available License (PSAL).
+// See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.Maths.Calculuses;

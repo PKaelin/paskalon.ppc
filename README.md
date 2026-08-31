@@ -1,11 +1,12 @@
 # Power Plant Controller (PPC)
+**This repository is source-available and not open source, with commercial/production use requiring a separate license!**
+
+## !!!This repo is under initial development!!!
 This project is not yet an actual power plant controller.  
 
 ---
 ---
-## !!!This repo is under initial development!!!
-## Implemented so far
-- Implemented partial: C37 protocol, Mobus protocol, Physical Units, Maths, Telemetry, Device infrastructure.
+## You can find a sneak peek of the implementation here
 - Implemented metrics publisher [See](#metrics-publisher)
 - Implemented dataface [See](./paskalON.DeviceService/README.md#dataface)
 
@@ -15,13 +16,11 @@ This project is not yet an actual power plant controller.
 
 - Readme operating mode: [See](./paskalON.OperatingModes/README.md)
   - Implemented operating mode domain open loop [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#open-mode-open-loop-control)
-  - Implemented operating mode domain open loop MPPT [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#energy-resources-specific-open-loop-modes)
   - Implemented operating mode closed loop Active Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#frequency--active-power-p-control-modes)
   - Implemented operating mode closed loop Reactive Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#voltage--active-power-p-control-modes)
 
 ## Not implemented for sure
 - Solid threat safety
-- Solid exception handling
 - Solid tests
 - Not all code have XML Documentation Comments at this point
 - Protocols
