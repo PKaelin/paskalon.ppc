@@ -1,0 +1,67 @@
+receivers:
+  otlp:
+    protocols:
+      # OTLP telemetry endpoints (metrics, logs, traces) to send data to
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  prometheus:
+    config:
+      scrape_configs:
+        # Scrape internal OpenTelemetry metrics endpoint defined in section telemetry
+        - job_name: 'opentelemetry'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['127.0.0.1:8888']
+          metrics_path: /metrics
+          scheme: http
+
+# The order of the processors used in the services section matters.
+processors:
+  memory_limiter:
+    check_interval: 30s
+    limit_mib: 500
+  batch:
+  resourcedetection:
+    detectors: [system]
+
+
+exporters:
+  # This is only used for detailed debugging (change in production)
+  debug:
+    verbosity: detailed
+
+  otlphttp/logs:
+    endpoint: http://paskalon.loki:3100/otlp
+    tls:
+      insecure: true
+
+  influxdb:
+    endpoint: http://paskalon.influxdb:8181
+    bucket: ppc
+
+
+service:
+  # Connector pipelines
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug, otlphttp/logs]
+
+    metrics/influxdb:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, batch]
+      exporters: [debug, influxdb]
+
+  # Expose internal telemetry to local scraped by receivers/prometheus.
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: '127.0.0.1'
+                port: 8888

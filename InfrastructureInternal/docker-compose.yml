@@ -31,11 +31,13 @@ services:
     secrets:
       - pgadmin_password
 
+
   # Redis for high-performance, in-memory data structure store
   redis:
     container_name: paskalon.redis
     image: redis:8.10.1
     restart: unless-stopped
+    # Expose ports only in DEV/TST environments!
     ports:
       - 41002:6379
     volumes:
@@ -44,11 +46,85 @@ services:
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     networks:
       - ppc.network
-       
 
+
+  # OpenTelemetry collector for processeing and forwarding telemetry
+  collector:
+    container_name: paskalon.collector
+    image: otel/opentelemetry-collector-contrib:0.159.0
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./opentelemetry/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    networks:
+      - ppc.network
+
+
+  # Loki horizontally scalable, highly available, multi-tenant log aggregation system.
+  # Test ready with: [Get] http://localhost:41003/ready
+  # API documentaiton: https://grafana.com/docs/loki/latest/reference/loki-http-api
+  loki:
+    container_name: paskalon.loki
+    image: grafana/loki:3.6.16
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    # Expose ports only in DEV/TST environments!
+    ports:
+      - 41003:3100
+    volumes:
+      - paskalon.loki:/data
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+    networks:
+      - ppc.network
+
+
+  # Influxdb metrics database container.
+  # Test health with: [GET] http://localhost:41004/health
+  # API documentation: https://docs.influxdata.com/influxdb3/core/api/v3/
+  influxdb:
+    container_name: paskalon.influxdb
+    image: influxdb:3.11.0-core
+    restart: unless-stopped
+    # Expose ports only in DEV/TST environments!
+    ports:
+      - 41004:8181
+    command:
+      - influxdb3
+      - serve
+      - --node-id=infnod
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3/data
+      - --plugin-dir=/var/lib/influxdb3/plugins
+      - --without-auth
+    volumes:
+      - paskalon.indluxdb:/var/lib/influxdb3
+    networks:
+      - ppc.network
+  # Influxdb metrics database container database initialiser.
+  influxdb-init:
+    image: influxdb:3.11.0-core
+    container_name: paskalon.influxdb.initializer
+    depends_on:
+      - influxdb
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Waiting for InfluxDB to start...';
+      until nc -z influxdb3 8181; do sleep 1; done;
+      echo 'Creating initial database...';
+      influxdb3 database create ppc --retention 1d --host http://paskalon.influxdb:8181;
+      echo 'Database initialization complete!';
+      "
+    networks:
+      - ppc.network
+
+
+# Volumes for the services
 volumes:
   paskalon.pgadmin:
   paskalon.redis:
+  paskalon.loki:
+  paskalon.indluxdb:
+
 
 # Secrets have to be changed in QAT/PRD according to ./secrets/README.md
 secrets:
@@ -56,6 +132,7 @@ secrets:
     file: ./secrets/pgadmin_password
 
 
+# Networks for the services
 networks:
   ppc.network:
     name: ppc.network
