@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
 namespace paskalON.Telemetry.Entries
@@ -64,12 +65,18 @@ namespace paskalON.Telemetry.Entries
 
 
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public TagList TagList { get; init; }
+
+
+        /// <summary>
         /// Constructor of <see cref="IMetricEntry{T}"/>.
         /// </summary>
         /// <param name="instrument">The metric instrument.</param>
         /// <param name="getter">The getter function to get the value with.</param>
         /// <exception cref="NotImplementedException">Throw an exception when the property type is not implemented.</exception>
-        public MetricEntry(object instance, string name, Instrument instrument, MetricType metricType, Func<TDevice, TProperty?> getter, int interval)
+        public MetricEntry(object instance, string name, Instrument instrument, MetricType metricType, Func<TDevice, TProperty?> getter, TagList tagList, int interval)
         {
             ArgumentNullException.ThrowIfNull(instance);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -81,22 +88,23 @@ namespace paskalON.Telemetry.Entries
             MetricType = metricType;
             _getter = getter;
             Interval = interval;
+            TagList = tagList;
 
             if (instrument is Counter<TProperty> counter)
             {
-                _updater = value => counter.Add(value);
+                _updater = value => counter.Add(value, TagList);
             }
             else if (instrument is UpDownCounter<TProperty> up_down)
             {
-                _updater = value => up_down.Add(value);
+                _updater = value => up_down.Add(value, TagList);
             }
             else if (instrument is Gauge<TProperty> gauge)
             {
-                _updater = value => gauge.Record(value);
+                _updater = value => gauge.Record(value, TagList);
             }
             else if (instrument is Histogram<TProperty> histogram)
             {
-                _updater = value => histogram.Record(value);
+                _updater = value => histogram.Record(value, TagList);
             }
             else
             {

@@ -63,9 +63,18 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
         /// <summary>
         /// <inheritdoc/>>
         /// </summary>
-        public async Task<IEnumerable<TEntity>> GetAsync(int skip, int take, bool trackChanges = false)
+        public async Task<IEnumerable<TEntity>> GetAsync<TKey>(int skip, int take, Expression<Func<TEntity, TKey>> orderBy,
+            bool descending = false, bool trackChanges = false)
         {
-            IQueryable<TEntity> query = trackChanges ? _dbSet.Skip(skip).Take(take) : _dbSet.Skip(skip).Take(take).AsNoTracking();
+            IQueryable<TEntity> query = _dbSet;
+
+            query = descending ? query.OrderByDescending(orderBy) : query.OrderBy(orderBy);
+            query = query.Skip(skip).Take(take);
+
+            if (trackChanges == false)
+            {
+                query = query.AsNoTracking();
+            }
 
             return await query.ToListAsync();
         }

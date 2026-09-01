@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
 namespace paskalON.Telemetry.Entries
@@ -20,25 +21,31 @@ namespace paskalON.Telemetry.Entries
         /// <summary>
         /// Name of the metric.
         /// </summary>
-        string Name { get; init; }
+        string Name { get; }
 
 
         /// <summary>
         /// Interval of the metric.
         /// </summary>
-        int Interval { get; init; }
+        int Interval { get; }
 
 
         /// <summary>
         /// Metric type.
         /// </summary>
-        MetricType MetricType { get; init; }
+        MetricType MetricType { get; }
 
 
         /// <summary>
         /// Metric instrument.
         /// </summary>
-        Instrument Instrument { get; init; }
+        Instrument Instrument { get; }
+
+
+        /// <summary>
+        /// Tags for the metric.
+        /// </summary>
+        TagList TagList { get; }
 
 
         /// <summary>

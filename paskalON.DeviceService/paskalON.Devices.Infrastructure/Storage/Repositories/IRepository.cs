@@ -25,9 +25,12 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
         /// </summary>
         /// <param name="skip">How many to skip in the page.</param>
         /// <param name="take">How many to take in the page.</param>
+        /// <param name="orderBy">Predict of the order.</param>
+        /// <param name="descending">Returns descending get if true else ascending.</param>
         /// <param name="trackChanges">Flag whether to track the entities or not.</param>
         /// <returns>All entities within a page.</returns>
-        Task<IEnumerable<TEntity>> GetAsync(int skip, int take, bool trackChanges = false);
+        Task<IEnumerable<TEntity>> GetAsync<TKey>(int skip, int take, Expression<Func<TEntity, TKey>> orderBy,
+            bool descending = false, bool trackChanges = false);
 
 
         /// <summary>

@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Telemetry.Entries;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
 namespace paskalON.Telemetry
@@ -29,6 +30,7 @@ namespace paskalON.Telemetry
         /// Tags for the measurements.
         /// </summary>
         private IEnumerable<KeyValuePair<string, object?>> _tags = [];
+
 
         /// <summary>
         /// The logical factory or container that groups related instruments.
@@ -83,26 +85,27 @@ namespace paskalON.Telemetry
 
             if (metricType == MetricType.Counter)
             {
-                instrument = Meter.CreateCounter<TProperty>(name, null, null, _tags);
+                instrument = Meter.CreateCounter<TProperty>($"{Meter.Name.ToLower()}_{name.ToLower()}");
             }
             else if (metricType == MetricType.UpDownCounter)
             {
-                instrument = Meter.CreateUpDownCounter<TProperty>(name, null, null, _tags);
+                instrument = Meter.CreateUpDownCounter<TProperty>($"{Meter.Name.ToLower()}_{name.ToLower()}");
             }
             else if (metricType == MetricType.Gauge)
             {
-                instrument = Meter.CreateGauge<TProperty>(name, null, null, _tags);
+                instrument = Meter.CreateGauge<TProperty>($"{Meter.Name.ToLower()}_{name.ToLower()}");
             }
             else if (metricType == MetricType.Histogram)
             {
-                instrument = Meter.CreateHistogram<TProperty>(name, null, null, _tags);
+                instrument = Meter.CreateHistogram<TProperty>($"{Meter.Name.ToLower()}_{name.ToLower()}");
             }
             else
             {
                 throw new NotImplementedException($"Instrument type: {metricType} is not implemented.");
             }
 
-            _metrics.Add(name, new MetricEntry<TDevice, TProperty>(instance, name, instrument, metricType, getter, interval));
+            TagList tagList = new TagList(_tags.ToArray());
+            _metrics.Add(name, new MetricEntry<TDevice, TProperty>(instance, name, instrument, metricType, getter, tagList, interval));
         }
 
 

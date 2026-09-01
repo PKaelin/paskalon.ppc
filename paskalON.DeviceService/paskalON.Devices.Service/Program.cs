@@ -3,6 +3,10 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using paskalON.Devices.Application;
 using paskalON.Devices.Application.Factories;
 using paskalON.Devices.Application.Publishers;
@@ -15,20 +19,30 @@ using paskalON.Messaging.Redis;
 using paskalON.Telemetry;
 using StackExchange.Redis;
 
+WebApplication? app = null;
+
 try
 {
     Console.WriteLine("Getting environments.....");
     // Get database connection string
     string? dbConnectionStringFile = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_FILE");
-    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dbConnectionStringFile, "Cannot find the database secret file");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dbConnectionStringFile, "Cannot find the database secret file. DATABASE_CONNECTION_FILE");
     string dbConnectionString = (await File.ReadAllTextAsync(dbConnectionStringFile)).Trim();
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dbConnectionString, "Cannot find the database connection string definition");
 
     // Get messaging connection string
     string? msgConnectionStringFile = Environment.GetEnvironmentVariable("MESSAGING_CONNECTION_FILE");
-    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(msgConnectionStringFile, "Cannot find the messaging secret file");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(msgConnectionStringFile, "Cannot find the messaging secret file. MESSAGING_CONNECTION_FILE");
     string msgConnectionString = (await File.ReadAllTextAsync(msgConnectionStringFile)).Trim();
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(msgConnectionString, "Cannot find the messaging connection string definition");
+
+    // Get Logging, Metrics, Tracing endpoint strings
+    string? logEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_LOGGING_ENDPOINT");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(logEndpointString, "Cannot find the logging endpoint. TELEMETRY_LOGGING_ENDPOINT");
+    string? metricsEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_METRICS_ENDPOINT");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(metricsEndpointString, "Cannot find the metrics endpoint. TELEMETRY_METRICS_ENDPOINT");
+    string? tracingEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_TRACING_ENDPOINT");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(tracingEndpointString, "Cannot find the tracing endpoint. TELEMETRY_TRACING_ENDPOINT");
 
     // Create builder
     Console.WriteLine("Building service.....");
@@ -55,9 +69,53 @@ try
     builder.Services.AddSingleton<MetricsPublisherService>();
     builder.Services.AddHostedService<MetricsPublisherService>(provider => provider.GetRequiredService<MetricsPublisherService>());
 
-    // Build application
-    var app = builder.Build();
+    // Configure OpenTelemetry logging, metrics, & tracing with auto-start using the
+    // AddOpenTelemetry extension from OpenTelemetry.Extensions.Hosting.
+    builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r
+        .AddService(
+            serviceName: builder.Environment.ApplicationName,
+            serviceVersion: typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",
+            serviceInstanceId: Environment.MachineName))
+        .WithLogging(builder =>
+        {
+            builder.AddOtlpExporter((otlpOptions, logRecordExportProcessorOptions) =>
+            {
+                otlpOptions.Endpoint = new Uri(logEndpointString);
+                otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+            });
+        })
+        .WithMetrics(builder =>
+        {
+            builder.AddAspNetCoreInstrumentation();
+            builder.AddMeter("Solar");
+            builder.AddMeter("BMS");
+            builder.AddMeter("GMD");
+            builder.AddMeter("PowerMeter");
+            builder.AddMeter("PCS");
 
+            builder.AddOtlpExporter((otlpOptions, metricReaderOptions) =>
+            {
+                otlpOptions.Endpoint = new Uri(metricsEndpointString);
+                otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 5000;
+            });
+        })
+        .WithTracing(builder =>
+        {
+            builder.AddAspNetCoreInstrumentation();
+            builder.AddSource("PPC.Devices");
+            builder.AddOtlpExporter((otlpOptions) =>
+            {
+                otlpOptions.Endpoint = new Uri(tracingEndpointString);
+                otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+            });
+        });
+
+    // Build application
+    app = builder.Build();
+    app.Logger.LogInformation("Application has been build");
+    app.Logger.LogInformation("Application start initializing services");
     // Create and load device manager
     DeviceManager deviceManager;
     using (IServiceScope scope = app.Services.CreateScope())
@@ -76,7 +134,7 @@ try
     {
         // Load system configuration
         IRepository<DeviceServiceContext, SystemConfig> repository = scope.ServiceProvider.GetRequiredService<IRepository<DeviceServiceContext, SystemConfig>>();
-        SystemConfig? config = repository.GetAsync(0, 1).Result.FirstOrDefault();
+        SystemConfig? config = repository.GetAsync(0, 1, (o) => o.Id).Result.FirstOrDefault();
         ArgumentNullException.ThrowIfNull(config, "System configuration contains no record");
 
         // Give the devices and device manager some time to connect and get ready.
@@ -95,6 +153,7 @@ try
         MetricsPublisherService metricsPublisherService = app.Services.GetRequiredService<MetricsPublisherService>();
         metricsPublisherService.Initialize(deviceManager.MetricsPublishers, config.MetricsIntervalMilliseconds);
     }
+    app.Logger.LogInformation("Application finished initializing services");
 
     if (app.Environment.IsDevelopment())
     {
@@ -108,8 +167,16 @@ try
 }
 catch (Exception ex)
 {
+    string error = $"Device service startup failed: {ex.Message}";
     // Output to Dockers standard output. Use: docker logs [container]
-    Console.Error.WriteLine($"Device service startup failed: {ex.Message}");
+    Console.Error.WriteLine(error);
     Console.Error.WriteLine(ex.StackTrace);
+
+    if (app != null)
+    {
+        app.Logger.LogError(error);
+        app.Logger.LogError(ex.StackTrace);
+    }
+
     throw;
 }

@@ -39,6 +39,9 @@ services:
     environment:
       - DATABASE_CONNECTION_FILE=/run/secrets/database_connection
       - MESSAGING_CONNECTION_FILE=/run/secrets/messaging_connection
+      - TELEMETRY_LOGGING_ENDPOINT=http://collector:4317
+      - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
+      - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
     secrets:
       - database_connection
       - messaging_connection

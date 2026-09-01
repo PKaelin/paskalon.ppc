@@ -2,6 +2,8 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using System.Diagnostics.Metrics;
+
 namespace paskalON.Telemetry
 {
     /// <summary>
@@ -13,6 +15,12 @@ namespace paskalON.Telemetry
         /// Gets or sets a value indicating whether the metrics publisher is enabled. If set to false, metrics will not be published.
         /// </summary>
         bool IsEnabled { get; set; }
+
+
+        /// <summary>
+        /// The logical factory or container that groups related instruments.
+        /// </summary>
+        public Meter? Meter { get; }
 
 
         /// <summary>
