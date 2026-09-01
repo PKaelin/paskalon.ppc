@@ -123,6 +123,70 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                         });
                 });
 
+            modelBuilder.Entity("paskalON.Devices.Domain.Configs.SystemConfig", b =>
+                {
+                    b.HasBaseType("paskalON.Domains.DomainBase");
+
+                    b.Property<int>("DeviceFactorCore")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DeviceFactorDetail")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DeviceIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MetricsIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PublisherTopicAuxiliaryPowerMeterCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicAuxiliaryPowerMeterDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicBatteryBankCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicBatteryBankDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicCircuitPowerMeterCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicCircuitPowerMeterDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicExternalPowerMeterCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicExternalPowerMeterDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicPcsCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicPcsDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicSolarPanelCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicSolarPanelDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicSystemPowerMeterCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicSystemPowerMeterDetail")
+                        .HasColumnType("text");
+
+                    b.Property<int>("StartupDelayForDevices")
+                        .HasColumnType("integer");
+
+                    b.ToTable("SystemConfig");
+                });
+
             modelBuilder.Entity("paskalON.Domains.ConfigurationBase", b =>
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
@@ -195,6 +259,10 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.NameBase");
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("ConfigFrameTimeoutMilliseconds")
                         .HasColumnType("integer");
 
@@ -203,10 +271,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
                     b.Property<int>("DataFrameTimeoutMilliseconds")
                         .HasColumnType("integer");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int>("Port")
                         .HasColumnType("integer");
@@ -268,9 +332,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
                     b.Property<int>("MetricsFactorClass4")
                         .HasColumnType("integer");
-
-                    b.Property<long>("MetricsIntervalMilliseconds")
-                        .HasColumnType("bigint");
 
                     b.Property<int?>("ModbusConfigId")
                         .HasColumnType("integer");
@@ -340,9 +401,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
                     b.Property<int>("MetricsFactorClass4")
                         .HasColumnType("integer");
-
-                    b.Property<long>("MetricsIntervalMilliseconds")
-                        .HasColumnType("bigint");
 
                     b.Property<int>("NumberOfPanels")
                         .HasColumnType("integer");
@@ -414,9 +472,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
                     b.Property<int>("MetricsFactorClass4")
                         .HasColumnType("integer");
-
-                    b.Property<long>("MetricsIntervalMilliseconds")
-                        .HasColumnType("bigint");
 
                     b.Property<int>("ModbusConfigId")
                         .HasColumnType("integer");
@@ -778,9 +833,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
                     b.Property<int>("MetricsFactorClass4")
                         .HasColumnType("integer");
-
-                    b.Property<long>("MetricsIntervalMilliseconds")
-                        .HasColumnType("bigint");
 
                     b.Property<int?>("ModbusConfigId")
                         .HasColumnType("integer");
@@ -1154,9 +1206,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<int>("MetricsFactorClass4")
                         .HasColumnType("integer");
 
-                    b.Property<long>("MetricsIntervalMilliseconds")
-                        .HasColumnType("bigint");
-
                     b.Property<int>("ModbusConfigId")
                         .HasColumnType("integer");
 
@@ -1302,9 +1351,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<int>("MetricsFactorClass2")
                         .HasColumnType("integer");
 
-                    b.Property<long>("MetricsIntervalMilliseconds")
-                        .HasColumnType("bigint");
-
                     b.HasIndex("AutomaticTransferSwitchDeviceConfigId");
 
                     b.HasIndex("DerConfigId");
@@ -1336,9 +1382,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
                     b.Property<int>("MetricsFactorClass2")
                         .HasColumnType("integer");
-
-                    b.Property<long>("MetricsIntervalMilliseconds")
-                        .HasColumnType("bigint");
 
                     b.HasIndex("CircuitBreakerDeviceConfigId");
 
@@ -1373,9 +1416,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<int>("MetricsFactorClass2")
                         .HasColumnType("integer");
 
-                    b.Property<long>("MetricsIntervalMilliseconds")
-                        .HasColumnType("bigint");
-
                     b.HasIndex("DerConfigId");
 
                     b.HasIndex("DeviceId")
@@ -1407,9 +1447,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
                     b.Property<int>("MetricsFactorClass2")
                         .HasColumnType("integer");
-
-                    b.Property<long>("MetricsIntervalMilliseconds")
-                        .HasColumnType("bigint");
 
                     b.HasIndex("DerUnitConfigId")
                         .IsUnique();

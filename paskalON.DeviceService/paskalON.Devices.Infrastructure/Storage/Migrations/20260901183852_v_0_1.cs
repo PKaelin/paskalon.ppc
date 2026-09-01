@@ -58,7 +58,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    IpAddress = table.Column<string>(type: "text", nullable: false),
+                    Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
                     TransportLayer = table.Column<int>(type: "integer", nullable: false),
                     StationName = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
@@ -114,7 +114,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     DerUnitConfigId = table.Column<int>(type: "integer", nullable: false),
                     ModbusConfigId = table.Column<int>(type: "integer", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
@@ -268,6 +267,38 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SolarPanelDeviceConfig", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SystemConfig",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
+                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    MetricsIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    DeviceIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    DeviceFactorCore = table.Column<int>(type: "integer", nullable: false),
+                    DeviceFactorDetail = table.Column<int>(type: "integer", nullable: false),
+                    PublisherTopicPcsCore = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicPcsDetail = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicBatteryBankCore = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicBatteryBankDetail = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicSolarPanelCore = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicSolarPanelDetail = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicExternalPowerMeterCore = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicExternalPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicAuxiliaryPowerMeterCore = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicAuxiliaryPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicCircuitPowerMeterCore = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicCircuitPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicSystemPowerMeterCore = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicSystemPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
+                    StartupDelayForDevices = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SystemConfig", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -633,7 +664,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     ModbusConfigId = table.Column<int>(type: "integer", nullable: false),
                     InitiallyStarted = table.Column<bool>(type: "boolean", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
@@ -744,7 +774,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     GenericModbusDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -788,7 +817,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     GenericModbusDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -1006,7 +1034,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     AutomaticTransferSwitchDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -1050,7 +1077,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     CircuitBreakerDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -1093,7 +1119,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     PowerFactorStandard = table.Column<int>(type: "integer", nullable: false),
                     DerConfigId = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
@@ -1137,7 +1162,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     PowerFactorStandard = table.Column<int>(type: "integer", nullable: false),
                     DerCircuitConfigId = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
@@ -1181,7 +1205,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     PowerFactorStandard = table.Column<int>(type: "integer", nullable: false),
                     DerConfigId = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
@@ -1225,7 +1248,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     PowerFactorStandard = table.Column<int>(type: "integer", nullable: false),
                     DerConfigId = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
@@ -1267,7 +1289,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     ModbusConfigId = table.Column<int>(type: "integer", nullable: false),
                     InitiallyConnected = table.Column<bool>(type: "boolean", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
@@ -1304,7 +1325,6 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     NumberOfPanels = table.Column<int>(type: "integer", nullable: false),
                     ConnectionType = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
                     MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
@@ -2131,6 +2151,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
             migrationBuilder.DropTable(
                 name: "SolarPanelConfig");
+
+            migrationBuilder.DropTable(
+                name: "SystemConfig");
 
             migrationBuilder.DropTable(
                 name: "SystemPowerMeterConfig");
