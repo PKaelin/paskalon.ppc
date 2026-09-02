@@ -10,20 +10,24 @@ namespace paskalON.Protocols.Modbus
     public enum ModbusServerState
     {
         /// <summary>
-        /// Idle state
+        /// Stopped state.
         /// </summary>
-        Idle,
+        Stopped,
         /// <summary>
-        /// Begin listen
+        /// Begin listen.
         /// </summary>
         BeginListen,
         /// <summary>
-        /// Listening state
+        /// Listening state.
         /// </summary>
         Listening,
         /// <summary>
-        /// Stop listen
+        /// Stop listen.
         /// </summary>
         StopListen,
+        /// <summary>
+        /// Modbus server is faulted.
+        /// </summary>
+        Faulted
     }
 }

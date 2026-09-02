@@ -25,5 +25,9 @@ namespace paskalON.Protocols.Modbus
         /// Modbus client is disconnecting.
         /// </summary>
         Disconnecting,
+        /// <summary>
+        /// Modbus client is faulted.
+        /// </summary>
+        Faulted
     }
 }

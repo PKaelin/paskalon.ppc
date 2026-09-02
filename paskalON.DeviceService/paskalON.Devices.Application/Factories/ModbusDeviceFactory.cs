@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Protocols.Modbus;
+using paskalON.Protocols.Modbus.Configs;
+using paskalON.Protocols.Modbus.NModbus;
 
 namespace paskalON.Devices.Application.Factories
 {
@@ -41,8 +43,22 @@ namespace paskalON.Devices.Application.Factories
             ArgumentNullException.ThrowIfNull(config);
 
             IModbusDataface dataface = new ModbusRegister(config.Name);
-            ILogger<ModbusClient> logger = _services.GetRequiredService<ILogger<ModbusClient>>();
-            IModbusClient client = new ModbusClient(logger, config.Address, config.Port);
+            ILogger<NModbusClient> logger = _services.GetRequiredService<ILogger<NModbusClient>>();
+            ClientConnectionConfig connectionConfig = new ClientConnectionConfig
+            {
+                ServerAddress = config.Address,
+                ServerPort = config.Port,
+                AddressFamily = config.AddressFamily,
+                ConnectionTimeoutMilliseconds = config.ModbusConnectionConfig.ConnectionTimeoutMilliseconds,
+                DisconnectionTimeoutMilliseconds = config.ModbusConnectionConfig.DisconnectionTimeoutMilliseconds,
+                ConnectRetryCount = config.ModbusConnectionConfig.ConnectRetryCount,
+                ConnectRetryIntervalMilliseconds = config.ModbusConnectionConfig.ConnectRetryIntervalMilliseconds,
+                OperationTimeoutMilliseconds = config.ModbusConnectionConfig.OperationTimeoutMilliseconds,
+                SendRetryCount = config.ModbusConnectionConfig.SendRetryCount,
+                SendRetryIntervalMilliseconds = config.ModbusConnectionConfig.SendRetryIntervalMilliseconds,
+            };
+
+            IModbusClient client = new NModbusClient(logger, connectionConfig, config.UnitId);
 
             return (dataface, client);
         }

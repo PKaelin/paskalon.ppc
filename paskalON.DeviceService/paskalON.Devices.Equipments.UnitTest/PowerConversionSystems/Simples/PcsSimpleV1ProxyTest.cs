@@ -134,15 +134,15 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             double? state = null;
 
             client
-                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
-                .Callback<ushort, ushort, ModbusDataType, short, CancellationToken>((adr, val, type, priority, token) => { address = adr; state = val; modbusDataType = type; })
+                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
+                .Callback<ushort, ushort, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; state = val; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
             await pcs.StartAsync();
 
-            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Once);
             Assert.AreEqual((ushort)PcsSimpleV1Description.Register.SelectorState, address);
             Assert.AreEqual(ModbusDataType.MbInt16, modbusDataType);
             Assert.AreEqual(stateTarget, state);
@@ -163,15 +163,15 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             double? state = null;
 
             client
-                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
-                .Callback<ushort, ushort, ModbusDataType, short, CancellationToken>((adr, val, type, priority, token) => { address = adr; state = val; modbusDataType = type; })
+                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
+                .Callback<ushort, ushort, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; state = val; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
             await pcs.StopAsync();
 
-            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Once);
             Assert.AreEqual((ushort)PcsSimpleV1Description.Register.SelectorState, address);
             Assert.AreEqual(ModbusDataType.MbInt16, modbusDataType);
             Assert.AreEqual(stateTarget, state);
@@ -192,15 +192,15 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             double? activePower = null;
 
             client
-                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<double>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
-                .Callback<ushort, double, ModbusDataType, short, CancellationToken>((adr, val, type, priority, token) => { address = adr; activePower = val; modbusDataType = type; })
+                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<double>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
+                .Callback<ushort, double, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; activePower = val; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
             await pcs.SetActivePowerTargetAsync(activePowerTarget);
 
-            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<double>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<double>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Once);
             Assert.AreEqual((ushort)PcsSimpleV1Description.Register.PReference, address);
             Assert.AreEqual(ModbusDataType.MbInt16, modbusDataType);
             // Active power is written in kilo watts
@@ -221,15 +221,15 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             double? reactivePower = null;
 
             client
-                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<double>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
-                .Callback<ushort, double, ModbusDataType, short, CancellationToken>((adr, val, type, priority, token) => { address = adr; reactivePower = val; modbusDataType = type; })
+                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<double>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
+                .Callback<ushort, double, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; reactivePower = val; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
             await pcs.SetReactivePowerTargetAsync(reactivePowerTarget);
 
-            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<double>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<double>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Once);
             Assert.AreEqual((ushort)PcsSimpleV1Description.Register.QReference, address);
             Assert.AreEqual(ModbusDataType.MbInt16, modbusDataType);
             // Reactive power is written in kilo vars

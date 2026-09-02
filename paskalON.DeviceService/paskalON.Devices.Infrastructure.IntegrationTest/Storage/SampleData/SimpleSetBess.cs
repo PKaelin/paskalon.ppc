@@ -107,7 +107,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 DisconnectionTimeoutMilliseconds = 1002,
                 ConnectRetryCount = 2,
                 ConnectRetryIntervalMilliseconds = 4001,
-                SendTimeoutMilliseconds = 1003,
+                OperationTimeoutMilliseconds = 1003,
                 SendRetryCount = 1,
                 SendRetryIntervalMilliseconds = 4002,
                 ServerToClientAliveIntervalSeconds = -1,
@@ -408,7 +408,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartContainer,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = ModbusConnectionConfig!
             };
 
@@ -430,7 +430,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartBms,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = ModbusConnectionConfig!
             };
 
@@ -454,7 +454,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartPcs,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = ModbusConnectionConfig!
             };
 
@@ -538,7 +538,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
             {
                 ChangedBy = "Test",
                 Name = "AuxiliaryPowerMeterModbusConfig",
-                StationId = 1,
+                UnitId = 1,
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartMeter + 2,
                 AddressFamily = AddressFamily.InterNetwork,
@@ -564,7 +564,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
             {
                 ChangedBy = "Test",
                 Name = "ExternalPowerMeterModbusConfig",
-                StationId = 1,
+                UnitId = 1,
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartMeter + 3,
                 AddressFamily = AddressFamily.InterNetwork,
@@ -595,7 +595,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "Generic Modbus 1",
                 DeviceId = 1,
-                StationId = 1,
+                UnitId = 1,
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartGmd,
                 AddressFamily = AddressFamily.InterNetwork,
@@ -610,7 +610,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "Circuit Breaker 1",
                 DeviceId = 2,
-                StationId = 1,
+                UnitId = 1,
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartGmd + 1,
                 AddressFamily = AddressFamily.InterNetwork,
@@ -625,7 +625,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 ChangedBy = "Test",
                 Name = "Automatic Transfer Switch 1",
                 DeviceId = 3,
-                StationId = 1,
+                UnitId = 1,
                 Address = Constants.Ip4Localhost,
                 AddressFamily = AddressFamily.InterNetwork,
                 Port = Constants.PortStartGmd + 2,

@@ -103,13 +103,13 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// Wait time for to client to be successfully connected before raising an error.
         /// </summary>
-        public int ConnectionTimeoutMilliseconds { get; set; } = 30000;
+        public int ConnectionTimeoutMilliseconds { get; set; } = 5000;
 
 
         /// <summary>
         /// Wait time for to client to be successfully disconnected before raising an error.
         /// </summary>
-        public int DisconnectionTimeoutMilliseconds { get; set; } = 30000;
+        public int DisconnectionTimeoutMilliseconds { get; set; } = 10000;
 
 
         /// <summary>
@@ -126,21 +126,21 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// Timeout for sending a response in milliseconds or -1 when no timeout
+        /// Timeout for sending/reading a response in milliseconds or -1 when no timeout
         /// </summary>
-        public int SendTimeoutMilliseconds { get; set; } = 30000;
+        public int OperationTimeoutMilliseconds { get; set; } = 30000;
 
 
         /// <summary>
         /// How many times the client tries to send a failed send
         /// </summary>
-        public int SendRetryCount { get; set; } = 2;
+        public int SendRetryCount { get; set; } = 1;
 
 
         /// <summary>
         /// How long to wait before retrying to send in milliseconds.
         /// </summary>
-        public int SendRetryIntervalMilliseconds { get; set; } = 5000;
+        public int SendRetryIntervalMilliseconds { get; set; } = 200;
 
 
         /// <summary>

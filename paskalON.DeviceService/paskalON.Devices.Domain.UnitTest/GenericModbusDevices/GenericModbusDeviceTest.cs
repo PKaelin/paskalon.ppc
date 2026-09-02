@@ -43,7 +43,7 @@ namespace paskalON.Devices.Domain.UnitTest.GenericModbusDevices
                 DisconnectionTimeoutMilliseconds = 1002,
                 ConnectRetryCount = 2,
                 ConnectRetryIntervalMilliseconds = 4001,
-                SendTimeoutMilliseconds = 1003,
+                OperationTimeoutMilliseconds = 1003,
                 SendRetryCount = 1,
                 SendRetryIntervalMilliseconds = 4002,
                 ServerToClientAliveIntervalSeconds = -1,
@@ -74,7 +74,7 @@ namespace paskalON.Devices.Domain.UnitTest.GenericModbusDevices
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartPcs,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = _connectionConfig,
                 GenericModbusDeviceConfig = _deviceConfig
             };

@@ -61,7 +61,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartContainer,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
 

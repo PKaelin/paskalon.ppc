@@ -58,7 +58,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 DisconnectionTimeoutMilliseconds = 1002,
                 ConnectRetryCount = 2,
                 ConnectRetryIntervalMilliseconds = 4001,
-                SendTimeoutMilliseconds = 1003,
+                OperationTimeoutMilliseconds = 1003,
                 SendRetryCount = 1,
                 SendRetryIntervalMilliseconds = 4002,
                 ServerToClientAliveIntervalSeconds = -1,
@@ -123,7 +123,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartPcs + 1,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = ModbusConnectionConfig!
             };
 

@@ -27,7 +27,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Configurations
             builder.Property(x => x.Address).IsRequired();
             builder.Property(x => x.Port).IsRequired();
             builder.Property(x => x.AddressFamily).IsRequired();
-            builder.Property(x => x.StationId).IsRequired();
+            builder.Property(x => x.UnitId).IsRequired();
         }
     }
 }

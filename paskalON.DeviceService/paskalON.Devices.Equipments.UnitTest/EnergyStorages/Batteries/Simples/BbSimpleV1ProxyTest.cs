@@ -116,15 +116,15 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
             double? state = null;
 
             client
-                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
-                .Callback<ushort, ushort, ModbusDataType, short, CancellationToken>((adr, val, type, priority, token) => { address = adr; state = val; modbusDataType = type; })
+                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
+                .Callback<ushort, ushort, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; state = val; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
             BbSimpleV1Proxy bb = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!.Object, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
             await bb.ConnectAsync();
 
-            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Once);
             Assert.AreEqual((ushort)BbSimpleV1Description.Register.SelectorState, address);
             Assert.AreEqual(ModbusDataType.MbInt16, modbusDataType);
             Assert.AreEqual(stateTarget, state);
@@ -145,15 +145,15 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
             double? state = null;
 
             client
-                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
-                .Callback<ushort, ushort, ModbusDataType, short, CancellationToken>((adr, val, type, priority, token) => { address = adr; state = val; modbusDataType = type; })
+                .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
+                .Callback<ushort, ushort, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; state = val; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
             BbSimpleV1Proxy bb = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!.Object, _unit!.Object, publisher.Object, dataface.Object, client.Object);
 
             await bb.DisconnectAsync();
 
-            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Once);
             Assert.AreEqual((ushort)BbSimpleV1Description.Register.SelectorState, address);
             Assert.AreEqual(ModbusDataType.MbInt16, modbusDataType);
             Assert.AreEqual(stateTarget, state);

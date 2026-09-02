@@ -52,9 +52,9 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// The station Id.
+        /// The Modbus unit Id.
         /// </summary>
-        public required byte StationId { get; set; } = 1;
+        public required byte UnitId { get; set; } = 1;
 
 
 
