@@ -121,9 +121,9 @@ namespace paskalON.DemoSimple.Devices.Data
                 DisconnectionTimeoutMilliseconds = 5000,
                 ConnectRetryCount = 3,
                 ConnectRetryIntervalMilliseconds = 5000,
-                SendTimeoutMilliseconds = 1000,
+                OperationTimeoutMilliseconds = 500,
                 SendRetryCount = 1,
-                SendRetryIntervalMilliseconds = 5000,
+                SendRetryIntervalMilliseconds = 100,
                 ServerToClientAliveIntervalSeconds = -1,
                 ServerMaximumConnections = 5
             };
@@ -151,7 +151,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartPcs,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
             context.ModbusConfigs.Add(pcs1Modbus);
@@ -176,7 +176,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartPcs + 1,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
             context.ModbusConfigs.Add(pcs1Modbus);
@@ -201,7 +201,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartPcs + 2,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
             context.ModbusConfigs.Add(pcs1Modbus);
@@ -255,7 +255,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartBms,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
             context.ModbusConfigs.Add(bb11Modbus);
@@ -280,7 +280,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartBms + 1,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
             context.ModbusConfigs.Add(bb11Modbus);
@@ -305,7 +305,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartBms + 2,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
             context.ModbusConfigs.Add(bb21Modbus);
@@ -330,7 +330,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartBms + 3,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
             context.ModbusConfigs.Add(bb22Modbus);
@@ -355,7 +355,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartBms + 4,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
             context.ModbusConfigs.Add(bb31Modbus);
@@ -380,7 +380,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartBms + 5,
                 AddressFamily = AddressFamily.InterNetwork,
-                StationId = 1,
+                UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
             context.ModbusConfigs.Add(bb32Modbus);
