@@ -313,7 +313,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <inheritdoc/>
         /// </summary>
         public Task WriteSingleRegisterAsync(ushort address, double value, ModbusDataType type, short priority = 3,
-            double scale = 0, CancellationToken cancellationToken = default)
+            double scale = 1, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Write, address, priority,
                 () => ExecuteWriteAsync(UnitId, address, _converter.RegisterArrayFromValue(value, type, scale)), cancellationToken);
@@ -324,7 +324,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <inheritdoc/>
         /// </summary>
         public Task WriteSingleRegisterAsync(ushort address, ushort value, ModbusDataType type, short priority = 3,
-            double scale = 0, CancellationToken cancellationToken = default)
+            double scale = 1, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Write, address, priority,
                 () => ExecuteWriteAsync(UnitId, address, _converter.RegisterArrayFromValue(value, type, scale)), cancellationToken);
@@ -335,7 +335,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <inheritdoc/>
         /// </summary>
         public Task WriteSingleRegisterAsync(ushort address, bool value, ModbusDataType type, short priority = 3,
-            double scale = 0, CancellationToken cancellationToken = default)
+            double scale = 1, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Write, address, priority,
                 () => ExecuteWriteAsync(UnitId, address, _converter.RegisterArrayFromValue(Convert.ToDouble(value), type, scale)), cancellationToken);

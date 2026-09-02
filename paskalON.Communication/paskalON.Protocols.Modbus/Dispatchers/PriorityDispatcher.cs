@@ -22,31 +22,31 @@ namespace paskalON.Protocols.Modbus.Dispatchers
         /// <summary>
         /// Data lock object
         /// </summary>
-        private readonly object _dataLock = new();
+        protected readonly object _dataLock = new();
 
 
         /// <summary>
         /// Work key structure to eliminate duplicates in the queue.
         /// </summary>
-        private readonly record struct WorkKey(ModbusOperation Operation, ushort Address);
+        protected readonly record struct WorkKey(ModbusOperation Operation, ushort Address);
 
 
         /// <summary>
         /// Work item structure for the queue.
         /// </summary>
-        private readonly record struct WorkItem(WorkKey Key, Func<Task<object?>> Action, TaskCompletionSource<object?> Completion, CancellationToken CancellationToken);
+        protected readonly record struct WorkItem(WorkKey Key, Func<Task<object?>> Action, TaskCompletionSource<object?> Completion, CancellationToken CancellationToken);
 
 
         /// <summary>
         /// Priority queue of work items.
         /// </summary>
-        private readonly PriorityQueue<WorkItem, short> _queue = new PriorityQueue<WorkItem, short>();
+        protected readonly PriorityQueue<WorkItem, short> _queue = new PriorityQueue<WorkItem, short>();
 
 
         /// <summary>
         /// List if queue keys that are in the priority queue for performance access.
         /// </summary>
-        private readonly HashSet<WorkKey> _queueKeys = new HashSet<WorkKey>();
+        protected readonly HashSet<WorkKey> _queueKeys = new HashSet<WorkKey>();
 
 
         /// <summary>
@@ -55,19 +55,19 @@ namespace paskalON.Protocols.Modbus.Dispatchers
         /// <remarks>
         /// This is in combination with MaxQueueSize.
         /// </remarks>
-        private readonly SemaphoreSlim _signal = new(0, int.MaxValue);
+        protected readonly SemaphoreSlim _signal = new(0, int.MaxValue);
 
 
         /// <summary>
         /// Cancellation token source for the loop.
         /// </summary>
-        private CancellationTokenSource? _loopCts;
+        protected CancellationTokenSource? _loopCts;
 
 
         /// <summary>
         /// Loop task.
         /// </summary>
-        private Task? _loopTask;
+        protected Task? _loopTask;
 
 
         /// <summary>

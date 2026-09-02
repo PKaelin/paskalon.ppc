@@ -98,7 +98,7 @@ namespace paskalON.Protocols.Modbus
         /// <param name="priority">The priority of the write operation.</param>
         /// <param name="cancellationToken">Cancelation token.</param>
         Task WriteSingleRegisterAsync(ushort address, double value, ModbusDataType type, short priority = 3,
-            double scale = 0, CancellationToken cancellationToken = default);
+            double scale = 1, CancellationToken cancellationToken = default);
 
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace paskalON.Protocols.Modbus
         /// <param name="priority">The priority of the write operation.</param>
         /// <param name="cancellationToken">Cancelation token.</param>
         Task WriteSingleRegisterAsync(ushort address, ushort value, ModbusDataType type, short priority = 3,
-            double scale = 0, CancellationToken cancellationToken = default);
+            double scale = 1, CancellationToken cancellationToken = default);
 
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace paskalON.Protocols.Modbus
         /// <param name="priority">The priority of the write operation.</param>
         /// <param name="cancellationToken">Cancelation token.</param>
         Task WriteSingleRegisterAsync(ushort address, bool value, ModbusDataType type, short priority = 3,
-            double scale = 0, CancellationToken cancellationToken = default);
+            double scale = 1, CancellationToken cancellationToken = default);
 
 
         /// <summary>
