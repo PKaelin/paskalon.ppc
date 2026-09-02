@@ -72,14 +72,31 @@ namespace paskalON.Protocols.Modbus.UnitTest.Dispatchers
 
 
         [TestMethod]
-        public async Task PriorityDispatcherEnqueueAsyncRejectsDuplicateAndCancelledItemsTest()
+        public async Task PriorityDispatcherEnqueueAsyncDuplicateTest()
         {
             PriorityDispatcherTestClass dispatcher = new PriorityDispatcherTestClass();
             dispatcher.SetLoopTask(Task.CompletedTask);
             Task first = dispatcher.EnqueueAsync(ModbusOperation.Write, 20, 1, () => Task.CompletedTask, CancellationToken.None);
             Task duplicate1 = dispatcher.EnqueueAsync(ModbusOperation.Write, 20, 1, () => Task.CompletedTask, CancellationToken.None);
             Task duplicate2 = dispatcher.EnqueueAsync(ModbusOperation.Write, 20, 1, () => Task.CompletedTask, CancellationToken.None);
+
             Assert.AreEqual(1, dispatcher.QueueCount);
+        }
+
+
+        [TestMethod]
+        public async Task PriorityDispatcherEnqueueAsyncPriorityTest()
+        {
+            PriorityDispatcherTestClass dispatcher = new PriorityDispatcherTestClass();
+            dispatcher.SetLoopTask(Task.CompletedTask);
+            List<int> prioOrder = [];
+            Task prio2 = dispatcher.EnqueueAsync(ModbusOperation.Write, 30, 2, () => { prioOrder.Add(2); return Task.CompletedTask; }, CancellationToken.None);
+            Task prio3 = dispatcher.EnqueueAsync(ModbusOperation.Write, 10, 3, () => { prioOrder.Add(3); return Task.CompletedTask; }, CancellationToken.None);
+            Task prio1 = dispatcher.EnqueueAsync(ModbusOperation.Write, 40, 1, () => { prioOrder.Add(1); return Task.CompletedTask; }, CancellationToken.None);
+
+            Assert.AreEqual(3, dispatcher.QueueCount);
+            await dispatcher.CallActions();
+            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, prioOrder);
         }
 
 
@@ -102,6 +119,17 @@ namespace paskalON.Protocols.Modbus.UnitTest.Dispatchers
             }
 
             public int QueueCount { get => _queue.Count; }
+
+            public async Task CallActions()
+            {
+                while (_queue.Count > 0)
+                {
+                    WorkItem item = _queue.Dequeue();
+                    _queueKeys.Remove(item.Key);
+                    object? result = await item.Action().ConfigureAwait(false);
+                    item.Completion.TrySetResult(result);
+                }
+            }
         }
     }
 }
