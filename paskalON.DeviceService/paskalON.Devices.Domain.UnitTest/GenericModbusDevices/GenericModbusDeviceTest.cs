@@ -36,7 +36,6 @@ namespace paskalON.Devices.Domain.UnitTest.GenericModbusDevices
             {
                 ChangedBy = "Test",
                 Name = "ModbusConnectionConfig",
-                PollingIntervalMilliseconds = 1001,
                 MasterHeartBeatIntervalMilliseconds = 900,
                 IsPipeliningEnabled = false,
                 ConnectionTimeoutMilliseconds = 1001,

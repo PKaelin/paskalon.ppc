@@ -132,7 +132,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
             pcs.State = PcsState.Started;
 
             // Poll interval is 1
-            await engine.PollAsync(1);
+            await engine.PollAsync(1, CancellationToken.None);
 
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.P, (ushort)PcsSimpleV1Description.Register.QAvailable, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.Frequency, (ushort)PcsSimpleV1Description.Register.ACVoltage, It.IsAny<CancellationToken>()), Times.Once);
@@ -187,7 +187,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface, client.Object);
 
             // Poll interval is 3
-            await engine.PollAsync(3);
+            await engine.PollAsync(3, CancellationToken.None);
 
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.CurrentState, (ushort)PcsSimpleV1Description.Register.DcContactor, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(3));

@@ -14,6 +14,7 @@ using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Infrastructure.Storage;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Devices.Service.Publishers;
+using paskalON.Devices.Service.Workers;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
 using paskalON.Telemetry;
@@ -64,6 +65,8 @@ try
     builder.Services.AddSingleton<IC37DeviceFactory, C37DeviceFactory>();
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
     builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
+    builder.Services.AddSingleton<ModbusPollService>();
+    builder.Services.AddHostedService<ModbusPollService>(provider => provider.GetRequiredService<ModbusPollService>());
     builder.Services.AddSingleton<DevicePublisherService>();
     builder.Services.AddHostedService<DevicePublisherService>(provider => provider.GetRequiredService<DevicePublisherService>());
     builder.Services.AddSingleton<MetricsPublisherService>();
@@ -139,6 +142,10 @@ try
 
         // Give the devices and device manager some time to connect and get ready.
         await Task.Delay(config.StartupDelayForDevices);
+
+        // Create and load Modbus polling service
+        ModbusPollService modbusPollService = app.Services.GetRequiredService<ModbusPollService>();
+        modbusPollService.Initialize(deviceManager.ModbusPollingEngines, config.PollingIntervalMilliseconds);
 
         // Create and load device publisher
         DevicePublisherService devicePublisherService = app.Services.GetRequiredService<DevicePublisherService>();

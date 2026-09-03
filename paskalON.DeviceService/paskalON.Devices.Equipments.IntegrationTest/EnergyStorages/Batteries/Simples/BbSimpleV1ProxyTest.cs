@@ -112,7 +112,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.EnergyStorages.Batteries.S
             BbSimpleV1Proxy bb = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, publisher.Object, dataface, client.Object);
 
             // Poll interval is 1
-            await engine.PollAsync(1);
+            await engine.PollAsync(1, CancellationToken.None);
 
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.TotalStateOfCharge, (ushort)BbSimpleV1Description.Register.TotalDCCurrent, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
@@ -157,7 +157,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.EnergyStorages.Batteries.S
             BbSimpleV1Proxy bb = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, publisher.Object, dataface, client.Object);
 
             // Poll interval is 3
-            await engine.PollAsync(3);
+            await engine.PollAsync(3, CancellationToken.None);
 
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.CurrentState, (ushort)BbSimpleV1Description.Register.CurrentVendorEvent, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(2));

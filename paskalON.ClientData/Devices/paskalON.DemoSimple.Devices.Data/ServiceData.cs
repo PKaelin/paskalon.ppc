@@ -45,7 +45,8 @@ namespace paskalON.DemoSimple.Devices.Data
             SystemConfig systemConfig = new SystemConfig
             {
                 ChangedBy = ChangedBy,
-                MetricsIntervalMilliseconds = 1000,
+                PollingIntervalMilliseconds = 1000,
+                MetricsIntervalMilliseconds = 5000,
                 DeviceIntervalMilliseconds = 1000,
                 DeviceFactorCore = 1,
                 DeviceFactorDetail = 5,
@@ -114,7 +115,6 @@ namespace paskalON.DemoSimple.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConnection for all",
-                PollingIntervalMilliseconds = 1000,
                 MasterHeartBeatIntervalMilliseconds = 1000,
                 IsPipeliningEnabled = false,
                 ConnectionTimeoutMilliseconds = 5000,

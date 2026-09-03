@@ -24,10 +24,17 @@ namespace paskalON.Devices.Equipments.Modbus
         /// </summary>
         private readonly IModbusClient _client;
 
+
         /// <summary>
         /// The Modbus dataface for loos coupling.
         /// </summary>
         private readonly IModbusDataface _dataface;
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public string ModbusPollingDestination { get => $"{_client.ServerAddress}:{_client.ServerPort}"; }
 
 
         /// <summary>
@@ -58,7 +65,7 @@ namespace paskalON.Devices.Equipments.Modbus
             {
                 foreach (ModbusPollingRangeEntry range in _dataface.PollingRanges)
                 {
-                    if (currentInterval % range.Interval == 0)
+                    if (currentInterval % range.Interval == 0 && _client.State == ModbusClientState.Connected)
                     {
                         ushort startAddress = range.From;
                         ushort endAddress = range.To;

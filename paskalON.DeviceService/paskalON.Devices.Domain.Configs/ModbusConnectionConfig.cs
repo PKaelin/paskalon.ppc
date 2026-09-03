@@ -12,12 +12,6 @@ namespace paskalON.Devices.Domain.Configs
     public class ModbusConnectionConfig : NameBase
     {
         /// <summary>
-        /// Polling interval in milliseconds.
-        /// </summary>
-        public long PollingIntervalMilliseconds { get; set; }
-
-
-        /// <summary>
         /// Polling factor for class 1 Modbus endpoints.
         /// </summary>
         /// <remarks>

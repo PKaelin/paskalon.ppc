@@ -12,25 +12,60 @@ namespace paskalON.Devices.Domain.Configs
     public class SystemConfig : DomainBase
     {
         /// <summary>
-        /// Indicates the minimum valid polling interval value.
+        /// Indicates the minimum valid metrics publishing interval value.
+        /// If this value is less than 100 milliseconds it will cause an exception.
+        /// </summary>
+        private const long MinimumMetricsIntervalMilliseconds = 200;
+
+        /// <summary>
+        /// Indicates the minimum valid data logging interval value.
         /// If this value is less than 100 milliseconds it will cause an exception.
         /// </summary>
         private const long MinimumDataLoggingIntervalMilliseconds = 100;
 
 
         /// <summary>
+        /// Indicates the minimum valid polling interval value.
+        /// If this value is less than 100 milliseconds it will cause an exception.
+        /// </summary>
+        private const long MinimumPollingIntervalMilliseconds = 100;
+
+
+        /// <summary>
         /// Metrics publishing interval in milliseconds.
         /// </summary>
+        /// <remarks>
+        /// Used in combination with the MetricsFactorClassX to determine the publishing interval for each class.
+        /// Defined in: <see cref="DeviceIdNameBase"/>.
+        /// </remarks>
         public int MetricsIntervalMilliseconds
         {
             get;
-            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDataLoggingIntervalMilliseconds); field = value; }
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumMetricsIntervalMilliseconds); field = value; }
+        } = 1000;
+
+
+        /// <summary>
+        /// Polling interval in milliseconds.
+        /// </summary>
+        /// <remarks>
+        /// Used in combination with the PollingFactorClassX to determine the polling interval for each class.
+        /// Defined in: <see cref="ModbusConnectionConfig"/>.
+        /// </remarks>
+        public int PollingIntervalMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumPollingIntervalMilliseconds); field = value; }
         } = 1000;
 
 
         /// <summary>
         /// Device publishing interval in milliseconds.
         /// </summary>
+        /// <remarks>
+        /// Used in combination with the DeviceFactorCore, DeviceFactorDetail to determine the publishing interval for each class.
+        /// Defined in: <see cref="SystemConfig"/>.
+        /// </remarks>
         public int DeviceIntervalMilliseconds
         {
             get;

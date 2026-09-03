@@ -107,7 +107,9 @@ namespace paskalON.Devices.Service.Workers
                         await Task.Delay(TimeSpan.FromMilliseconds(delay), stoppingToken);
                     }
 
-                    // This execution is scheduled. If the task is slow it will never catch up but that's ok
+                    // This execution is scheduled.
+                    // If the task is always slow it will never catch up but that's ok
+                    // If the task is sometimes slower and sometimes faster it the loop is trying to maintain the interval
                     nextRun += _intervalMilliseconds;
 
                     if (++interval == int.MaxValue)
@@ -125,7 +127,7 @@ namespace paskalON.Devices.Service.Workers
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError("Error polling Modbus engine {Engine}. Error: {Error}", engine, ex);
+                        _logger.LogError("Error polling Modbus engine {Engine}. Error: {Error}", engine.ModbusPollingDestination, ex);
                     }
                 }
             }

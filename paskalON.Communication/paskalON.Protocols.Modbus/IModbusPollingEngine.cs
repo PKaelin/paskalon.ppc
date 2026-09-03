@@ -10,6 +10,12 @@ namespace paskalON.Protocols.Modbus
     public interface IModbusPollingEngine
     {
         /// <summary>
+        /// Gets the Modbus destination address (IP or hostname + Port).
+        /// </summary>
+        string ModbusPollingDestination { get; }
+
+
+        /// <summary>
         /// Executes a asynchronous poll of the Modbus definition. 
         /// </summary>
         /// <param name="currentInterval">Current interval of the poll.</param>
