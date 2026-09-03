@@ -13,7 +13,8 @@ namespace paskalON.Protocols.Modbus
         /// Executes a asynchronous poll of the Modbus definition. 
         /// </summary>
         /// <param name="currentInterval">Current interval of the poll.</param>
+        /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
         /// <returns></returns>
-        Task PollAsync(int currentInterval);
+        Task PollAsync(int currentInterval, CancellationToken cancellationToken);
     }
 }

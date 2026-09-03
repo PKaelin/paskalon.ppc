@@ -76,23 +76,30 @@ namespace paskalON.Devices.Service.Publishers
                 CancellationToken = stoppingToken
             };
 
-            // awaits make sure that no overload should occur
-            while (await timer.WaitForNextTickAsync(stoppingToken))
+            try
             {
-                if (++interval == int.MaxValue)
+                // awaits make sure that no overload should occur
+                while (await timer.WaitForNextTickAsync(stoppingToken))
                 {
-                    interval = 1;
-                }
+                    if (++interval == int.MaxValue)
+                    {
+                        interval = 1;
+                    }
 
-                try
-                {
-                    await Parallel.ForEachAsync(_metricsPublishers,
-                        options, (pub, token) => { pub.Publish(interval); return ValueTask.CompletedTask; });
+                    try
+                    {
+                        await Parallel.ForEachAsync(_metricsPublishers,
+                            options, (pub, token) => { pub.Publish(interval); return ValueTask.CompletedTask; });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError("Unexpected error while publishing metrics data. {Error}", ex);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError("Unexpected error while publishing metrics data. {Error}", ex);
-                }
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                // Expected when normal shutdown.
             }
         }
     }

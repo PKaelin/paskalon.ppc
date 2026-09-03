@@ -52,7 +52,7 @@ namespace paskalON.Devices.Equipments.Modbus
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public async Task PollAsync(int currentInterval)
+        public async Task PollAsync(int currentInterval, CancellationToken cancellationToken)
         {
             try
             {
@@ -69,16 +69,16 @@ namespace paskalON.Devices.Equipments.Modbus
                         {
                             // Fetch raw data via the decoupled client.
                             case ModbusRegistryType.Coil:
-                                rawBoolData = await _client.ReadCoilsAsync(startAddress, endAddress);
+                                rawBoolData = await _client.ReadCoilsAsync(startAddress, endAddress, cancellationToken);
                                 break;
                             case ModbusRegistryType.DiscreteInput:
-                                rawBoolData = await _client.ReadDiscreteInputsAsync(startAddress, endAddress);
+                                rawBoolData = await _client.ReadDiscreteInputsAsync(startAddress, endAddress, cancellationToken);
                                 break;
                             case ModbusRegistryType.InputRegister:
-                                rawShortData = await _client.ReadInputRegistersAsync(startAddress, endAddress);
+                                rawShortData = await _client.ReadInputRegistersAsync(startAddress, endAddress, cancellationToken);
                                 break;
                             case ModbusRegistryType.HoldingRegister:
-                                rawShortData = await _client.ReadHoldingRegistersAsync(startAddress, endAddress);
+                                rawShortData = await _client.ReadHoldingRegistersAsync(startAddress, endAddress, cancellationToken);
                                 break;
 
                         }

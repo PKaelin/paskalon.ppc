@@ -20,6 +20,7 @@ using paskalON.Devices.Domain.GenericModbusDevices;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
 using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
+using paskalON.Devices.Equipments.Modbus;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Protocols.C37118;
 using paskalON.Protocols.Modbus;
@@ -122,6 +123,12 @@ namespace paskalON.Devices.Application
         /// <inheritdoc/>
         /// </summary>
         public ICollection<IMetricsPublisher> MetricsPublishers { get; protected set; } = new List<IMetricsPublisher>();
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public ICollection<IModbusPollingEngine> ModbusPollingEngines { get; protected set; } = new List<IModbusPollingEngine>();
 
 
         /// <summary>
@@ -237,6 +244,7 @@ namespace paskalON.Devices.Application
                         else if (meterConfig.ModbusConfig != null)
                         {
                             (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                            ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, client, dataface));
                             circuit.CircuitPowerMeter = Create<CircuitPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                                 meterConfig, meterMetrics, dataface, client);
                         }
@@ -563,6 +571,7 @@ namespace paskalON.Devices.Application
                 else if (meterConfig.ModbusConfig != null)
                 {
                     (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                    ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, client, dataface));
                     der.SystemPowerMeters.Add(Create<SystemPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                         meterConfig, meterMetrics, dataface, client));
                 }
@@ -582,6 +591,7 @@ namespace paskalON.Devices.Application
                 else if (meterConfig.ModbusConfig != null)
                 {
                     (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                    ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, client, dataface));
                     der.AuxiliaryPowerMeters.Add(Create<AuxiliaryPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                         meterConfig, meterMetrics, dataface, client));
                 }
@@ -601,6 +611,7 @@ namespace paskalON.Devices.Application
                 else if (meterConfig.ModbusConfig != null)
                 {
                     (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                    ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, client, dataface));
                     der.ExternalPowerMeters.Add(Create<ExternalPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                         meterConfig, meterMetrics, dataface, client));
                 }
@@ -643,6 +654,7 @@ namespace paskalON.Devices.Application
             IMetricsPublisher pcsMetrics = _publisherFactory.Create();
             MetricsPublishers.Add(pcsMetrics);
             (IModbusDataface pcsDataface, IModbusClient pcsClient) = _deviceFactoryModbus.Create(config.PowerConversionSystemConfig.ModbusConfig);
+            ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, pcsClient, pcsDataface));
 
             unit.PowerConversionSystem = Create<PowerConversionSystemBase>(
                 config.PowerConversionSystemConfig.PowerConversionSystemDeviceConfig.ClassName, _logger,
@@ -653,6 +665,7 @@ namespace paskalON.Devices.Application
                 IMetricsPublisher batteryMetrics = _publisherFactory.Create();
                 MetricsPublishers.Add(batteryMetrics);
                 (IModbusDataface batteryDataface, IModbusClient batteryClient) = _deviceFactoryModbus.Create(batteryConfig.ModbusConfig);
+                ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, batteryClient, batteryDataface));
                 unit.BatteryBanks.Add(Create<BatteryBankBase>(batteryConfig.BatteryBankDeviceConfig.ClassName, _logger, batteryConfig,
                     unit, batteryMetrics, batteryDataface, batteryClient));
             }
@@ -668,6 +681,7 @@ namespace paskalON.Devices.Application
             IMetricsPublisher pcsMetrics = _publisherFactory.Create();
             MetricsPublishers.Add(pcsMetrics);
             (IModbusDataface pcsDataface, IModbusClient pcsClient) = _deviceFactoryModbus.Create(config.PowerConversionSystemConfig.ModbusConfig);
+            ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, pcsClient, pcsDataface));
 
             unit.PowerConversionSystem = Create<PowerConversionSystemBase>(
                 config.PowerConversionSystemConfig.PowerConversionSystemDeviceConfig.ClassName, _logger,

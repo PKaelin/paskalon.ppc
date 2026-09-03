@@ -67,22 +67,29 @@ namespace paskalON.Devices.Service.Publishers
             int interval = 0;
             using PeriodicTimer timer = new(TimeSpan.FromMilliseconds(_intervalMilliseconds));
 
-            // awaits make sure that no overload should occur
-            while (await timer.WaitForNextTickAsync(stoppingToken))
+            try
             {
-                if (++interval == int.MaxValue)
+                // awaits make sure that no overload should occur
+                while (await timer.WaitForNextTickAsync(stoppingToken))
                 {
-                    interval = 1;
-                }
+                    if (++interval == int.MaxValue)
+                    {
+                        interval = 1;
+                    }
 
-                try
-                {
-                    await (_devicePublisher?.Publish(interval) ?? Task.CompletedTask);
+                    try
+                    {
+                        await (_devicePublisher?.Publish(interval) ?? Task.CompletedTask);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError("Unexpected error while publishing device data. {Error}", ex);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError("Unexpected error while publishing device data. {Error}", ex);
-                }
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                // Expected when normal shutdown.
             }
         }
     }

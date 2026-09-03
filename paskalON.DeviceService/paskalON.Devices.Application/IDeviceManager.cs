@@ -7,6 +7,7 @@ using paskalON.Devices.Domain.EnergyResources.Solars;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
+using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
 
 namespace paskalON.Devices.Application
@@ -26,6 +27,12 @@ namespace paskalON.Devices.Application
         /// List of metric publisher interfaces.
         /// </summary>
         ICollection<IMetricsPublisher> MetricsPublishers { get; }
+
+
+        /// <summary>
+        /// List of Modbus polling engine interfaces.
+        /// </summary>
+        ICollection<IModbusPollingEngine> ModbusPollingEngines { get; }
 
 
         /// <summary>
