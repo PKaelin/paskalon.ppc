@@ -2,7 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Protocols.Modbus;
+using paskalON.Devices.Equipments.Modbus;
 using System.Diagnostics;
 
 namespace paskalON.Devices.Service.Workers

@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using paskalON.Dataface;
 using paskalON.Dataface.C37s;
@@ -20,6 +21,7 @@ using paskalON.Devices.Domain.GenericModbusDevices;
 using paskalON.Devices.Domain.GenericModbusDevices.Entries;
 using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
+using paskalON.Devices.Equipments.C37;
 using paskalON.Devices.Equipments.Modbus;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Protocols.C37118;
@@ -39,6 +41,12 @@ namespace paskalON.Devices.Application
         /// Logger for application logging and diagnostics.
         /// </summary>
         private readonly ILogger<DeviceManager> _logger;
+
+
+        /// <summary>
+        /// Application wide shutdown token.
+        /// </summary>
+        private CancellationToken _shutdownToken;
 
 
         /// <summary>
@@ -134,6 +142,12 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
+        public ICollection<IC37TransmissionEngine> C37TransmissionEngines { get; protected set; } = new List<IC37TransmissionEngine>();
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public ICollection<PowerConversionSystemBase> PowerConversionSystems { get => _powerConversionSystems.Values; }
 
 
@@ -197,6 +211,8 @@ namespace paskalON.Devices.Application
             _publisherFactory = publisherFactory;
             _deviceFactoryModbus = deviceFactoryModbus;
             _deviceFactoryC37 = deviceFactoryC37;
+            IHostApplicationLifetime lifetime = services.GetRequiredService<IHostApplicationLifetime>();
+            _shutdownToken = lifetime.ApplicationStopping;
             // Initialized DER with a place holder
             Der = new Der(logger, new DerConfig { ChangedBy = "System", Name = "Uninitialized DER" });
         }
@@ -207,6 +223,7 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task LoadDerAsync()
         {
+            _logger.LogInformation("Load DER during startup");
             DerConfig config = await LoadDerConfig();
             Der der = new Der(_logger, config);
 
@@ -237,13 +254,14 @@ namespace paskalON.Devices.Application
 
                         if (meterConfig.C37Config != null)
                         {
-                            (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config!);
+                            (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config);
+                            C37TransmissionEngines.Add(new C37TransmissionEngine(_logger, client, dataface, meterConfig.C37Config.StationName, meterConfig.C37Config.StreamId));
                             circuit.CircuitPowerMeter = Create<CircuitPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                                 meterConfig, meterMetrics, dataface, client);
                         }
                         else if (meterConfig.ModbusConfig != null)
                         {
-                            (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                            (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig);
                             ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, client, dataface));
                             circuit.CircuitPowerMeter = Create<CircuitPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                                 meterConfig, meterMetrics, dataface, client);
@@ -277,6 +295,7 @@ namespace paskalON.Devices.Application
             LoadRootMeters(der, config);
             LoadRootGenericModbusDevices(der, config);
             Der = der;
+            ConnectDevices();
         }
 
 
@@ -285,6 +304,8 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StartAllPcsAsync(CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Start all Power Conversion Systems");
+
             try
             {
                 await Task.WhenAll(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false).Select(d => d.StartAsync()));
@@ -307,6 +328,8 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StartPcsAsync(int deviceId)
         {
+            _logger.LogInformation("Start Power Conversion System with {DeviceId}", deviceId);
+
             try
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
@@ -330,6 +353,8 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StopAllPcsAsync(CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Stop all Power Conversion Systems");
+
             try
             {
                 await Task.WhenAll(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false).Select(d => d.StopAsync()));
@@ -352,6 +377,8 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StopPcsAsync(int deviceId)
         {
+            _logger.LogInformation("Stop Power Conversion System with {DeviceId}", deviceId);
+
             try
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
@@ -375,6 +402,8 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StandbyAllPcsAsync(CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Standby all Power Conversion Systems");
+
             try
             {
                 await Task.WhenAll(PowerConversionSystems.Where(p => p.IsInMaintenanceMode == false).Select(d => d.StandbyAsync()));
@@ -397,6 +426,8 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StandbyPcsAsync(int deviceId)
         {
+            _logger.LogInformation("Standby Power Conversion System with {DeviceId}", deviceId);
+
             try
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
@@ -420,6 +451,8 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task ConnectBatteryBankAsync(int deviceId)
         {
+            _logger.LogInformation("Connect Battery Bank with {DeviceId}", deviceId);
+
             try
             {
                 if (_batteryBanks.TryGetValue(deviceId, out var bb) == false)
@@ -443,6 +476,8 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task DisconnectBatteryBankAsync(int deviceId)
         {
+            _logger.LogInformation("Disconnect Battery Bank with {DeviceId}", deviceId);
+
             try
             {
                 if (_batteryBanks.TryGetValue(deviceId, out var bb) == false)
@@ -466,6 +501,7 @@ namespace paskalON.Devices.Application
         /// </summary>
         public void PutIntoMaintenance(string unitName)
         {
+            _logger.LogInformation("Put unit into maintenance. Unit name: {UnitName}", unitName);
             DerUnit? unit = Der.DerGroups.SelectMany(g => g.DerCircuits).SelectMany(c => c.DerUnits).FirstOrDefault(u => u.Name == unitName);
 
             if (unit == null)
@@ -510,6 +546,7 @@ namespace paskalON.Devices.Application
         {
             try
             {
+                // Get DER with all active configurations.
                 return await _repository.GetDer(true);
             }
             catch (Exception ex)
@@ -564,13 +601,14 @@ namespace paskalON.Devices.Application
 
                 if (meterConfig.C37Config != null)
                 {
-                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config!);
+                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config);
+                    C37TransmissionEngines.Add(new C37TransmissionEngine(_logger, client, dataface, meterConfig.C37Config.StationName, meterConfig.C37Config.StreamId));
                     der.SystemPowerMeters.Add(Create<SystemPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                         meterConfig, meterMetrics, dataface, client));
                 }
                 else if (meterConfig.ModbusConfig != null)
                 {
-                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig);
                     ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, client, dataface));
                     der.SystemPowerMeters.Add(Create<SystemPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                         meterConfig, meterMetrics, dataface, client));
@@ -584,13 +622,14 @@ namespace paskalON.Devices.Application
 
                 if (meterConfig.C37Config != null)
                 {
-                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config!);
+                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config);
+                    C37TransmissionEngines.Add(new C37TransmissionEngine(_logger, client, dataface, meterConfig.C37Config.StationName, meterConfig.C37Config.StreamId));
                     der.AuxiliaryPowerMeters.Add(Create<AuxiliaryPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                         meterConfig, meterMetrics, dataface, client));
                 }
                 else if (meterConfig.ModbusConfig != null)
                 {
-                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig);
                     ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, client, dataface));
                     der.AuxiliaryPowerMeters.Add(Create<AuxiliaryPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                         meterConfig, meterMetrics, dataface, client));
@@ -604,13 +643,14 @@ namespace paskalON.Devices.Application
 
                 if (meterConfig.C37Config != null)
                 {
-                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config!);
+                    (IC37Dataface dataface, IC37Client client) = _deviceFactoryC37.Create(meterConfig.C37Config);
+                    C37TransmissionEngines.Add(new C37TransmissionEngine(_logger, client, dataface, meterConfig.C37Config.StationName, meterConfig.C37Config.StreamId));
                     der.ExternalPowerMeters.Add(Create<ExternalPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                         meterConfig, meterMetrics, dataface, client));
                 }
                 else if (meterConfig.ModbusConfig != null)
                 {
-                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig!);
+                    (IModbusDataface dataface, IModbusClient client) = _deviceFactoryModbus.Create(meterConfig.ModbusConfig);
                     ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, client, dataface));
                     der.ExternalPowerMeters.Add(Create<ExternalPowerMeter>(meterConfig.PowerMeterDeviceConfig.ClassName, _logger,
                         meterConfig, meterMetrics, dataface, client));
@@ -648,6 +688,12 @@ namespace paskalON.Devices.Application
         }
 
 
+        /// <summary>
+        /// Creates a Battery Unit and its dependencies from a configuration.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        /// <param name="circuit">The parent instance.</param>
+        /// <returns>Return a battery unit and its dependencies.</returns>
         private DerBatteryStorageUnit CreateBatteryUnit(DerBatteryStorageUnitConfig config, DerCircuit circuit)
         {
             DerBatteryStorageUnit unit = new(_logger, config, circuit);
@@ -674,6 +720,12 @@ namespace paskalON.Devices.Application
         }
 
 
+        /// <summary>
+        /// Creates a Solar Unit and its dependencies from a configuration.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        /// <param name="circuit">The parent instance.</param>
+        /// <returns>Return a solar unit and its dependencies.</returns>
         private DerSolarUnit CreateSolarUnit(DerSolarUnitConfig config, DerCircuit circuit)
         {
             DerSolarUnit unit = new(_logger, config, circuit);
@@ -697,6 +749,11 @@ namespace paskalON.Devices.Application
         }
 
 
+        /// <summary>
+        /// Create a list of generic Modbus entries from a Modbus map configuration
+        /// </summary>
+        /// <param name="mapConfig">Generic Modbus map configuration.</param>
+        /// <returns>Returns a list of generic Modbus entries.</returns>
         private List<GenericModbusEntryBase> CreateGenericModbusEntries(GenericModbusMapConfig? mapConfig)
         {
             List<GenericModbusEntryBase> entries = [];
@@ -720,6 +777,14 @@ namespace paskalON.Devices.Application
         }
 
 
+        /// <summary>
+        /// Create a class instance.
+        /// </summary>
+        /// <typeparam name="T">Type of the instance.</typeparam>
+        /// <param name="className">Full class name of the instance to create.</param>
+        /// <param name="arguments">Arguments for the constructor.</param>
+        /// <returns>A new instance of type T</returns>
+        /// <exception cref="InvalidOperationException">Throw invalid operation exception if class name could not be found.</exception>
         private T Create<T>(string className, params object[] arguments) where T : class
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(className);
@@ -745,6 +810,25 @@ namespace paskalON.Devices.Application
             }
 
             return (T)ActivatorUtilities.CreateInstance(_services, type, arguments);
+        }
+
+
+        /// <summary>
+        /// Connect all devices.
+        /// </summary>
+        private void ConnectDevices()
+        {
+            _logger.LogInformation("Connect all device during startup");
+
+            foreach (IC37TransmissionEngine engine in C37TransmissionEngines)
+            {
+                _ = Task.Run(() => engine.StartStreaming(_shutdownToken));
+            }
+
+            foreach (IModbusPollingEngine engine in ModbusPollingEngines)
+            {
+                _ = Task.Run(() => engine.ConnectAsync(_shutdownToken));
+            }
         }
     }
 }

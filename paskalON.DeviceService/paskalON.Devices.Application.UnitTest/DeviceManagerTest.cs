@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
@@ -28,15 +29,24 @@ namespace paskalON.Devices.Application.UnitTest
         private Mock<IC37DeviceFactory> _deviceFactoryC37 = new Mock<IC37DeviceFactory>();
         private Mock<PowerConversionSystemBase>? _pcsMock;
         private Mock<BatteryBankBase>? _bbMock;
+        private Mock<IServiceProvider> _servicesMock = new Mock<IServiceProvider>();
+
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            Mock<IHostApplicationLifetime> lifetime = new Mock<IHostApplicationLifetime>();
+            lifetime.Setup(x => x.ApplicationStopping).Returns(CancellationToken.None);
+            _servicesMock.Setup(x => x.GetService(typeof(IHostApplicationLifetime))).Returns(lifetime.Object);
+        }
 
 
         [TestMethod]
         public void DeviceManagerConstructorNullLoggerTest()
         {
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new DeviceManager(null!, repositoryMock.Object, servicesMock.Object,
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DeviceManager(null!, repositoryMock.Object, _servicesMock.Object,
                 _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object));
         }
 
@@ -44,10 +54,8 @@ namespace paskalON.Devices.Application.UnitTest
         [TestMethod]
         public void DeviceManagerConstructorNullRepositoryTest()
         {
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-
             Assert.ThrowsExactly<ArgumentNullException>(() => new DeviceManager(NullLogger<DeviceManager>.Instance, null!,
-                servicesMock.Object, _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object));
+                _servicesMock.Object, _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object));
         }
 
 
@@ -64,33 +72,30 @@ namespace paskalON.Devices.Application.UnitTest
         [TestMethod]
         public void DeviceManagerConstructorNullPublisherFactoryTest()
         {
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
 
             Assert.ThrowsExactly<ArgumentNullException>(() => new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object,
-                servicesMock.Object, null!, _deviceFactoryModbus.Object, _deviceFactoryC37.Object));
+                _servicesMock.Object, null!, _deviceFactoryModbus.Object, _deviceFactoryC37.Object));
         }
 
 
         [TestMethod]
         public void DeviceManagerConstructorNullDeviceFactoryModbusTest()
         {
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
 
             Assert.ThrowsExactly<ArgumentNullException>(() => new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object,
-                servicesMock.Object, _publisherFactory.Object, null!, _deviceFactoryC37.Object));
+                _servicesMock.Object, _publisherFactory.Object, null!, _deviceFactoryC37.Object));
         }
 
 
         [TestMethod]
         public void DeviceManagerConstructorNullDeviceFactoryC37Test()
         {
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
 
             Assert.ThrowsExactly<ArgumentNullException>(() => new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object,
-                servicesMock.Object, _publisherFactory.Object, _deviceFactoryModbus.Object, null!));
+                _servicesMock.Object, _publisherFactory.Object, _deviceFactoryModbus.Object, null!));
         }
 
 
@@ -98,9 +103,8 @@ namespace paskalON.Devices.Application.UnitTest
         public void DeviceManagerConstructorTest()
         {
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
 
-            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object,
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, _servicesMock.Object,
                 _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object);
 
             Assert.IsNotNull(manager.Der);
@@ -121,8 +125,7 @@ namespace paskalON.Devices.Application.UnitTest
             DerConfig config = new DerConfig { ChangedBy = "Test", Name = "Test DER" };
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             repositoryMock.Setup(repository => repository.GetDer(true)).ReturnsAsync(config);
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object,
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, _servicesMock.Object,
                 _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object);
 
             await manager.LoadDerAsync();
@@ -147,8 +150,7 @@ namespace paskalON.Devices.Application.UnitTest
             InvalidOperationException exception = new InvalidOperationException("Test exception");
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             repositoryMock.Setup(repository => repository.GetDer(true)).ThrowsAsync(exception);
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object,
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, _servicesMock.Object,
                 _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object);
 
             InvalidOperationException result = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
@@ -194,8 +196,7 @@ namespace paskalON.Devices.Application.UnitTest
 
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             repositoryMock.Setup(repository => repository.GetDer(true)).ReturnsAsync(config);
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object,
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, _servicesMock.Object,
                 _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object);
 
             await manager.LoadDerAsync();
@@ -220,8 +221,7 @@ namespace paskalON.Devices.Application.UnitTest
             DerConfig config = new DerConfig { ChangedBy = "Test", Name = "Loaded DER" };
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             repositoryMock.Setup(repository => repository.GetDer(true)).ReturnsAsync(config);
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object,
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, _servicesMock.Object,
                 _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object);
             Der placeholderDer = manager.Der;
 
@@ -253,8 +253,7 @@ namespace paskalON.Devices.Application.UnitTest
 
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
             repositoryMock.Setup(repository => repository.GetDer(true)).ReturnsAsync(config);
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, servicesMock.Object,
+            DeviceManager manager = new DeviceManager(NullLogger<DeviceManager>.Instance, repositoryMock.Object, _servicesMock.Object,
                 _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object);
 
             DerUnitConfig unsupportedConfig = new UnsupportedDerUnitConfig
@@ -500,8 +499,7 @@ namespace paskalON.Devices.Application.UnitTest
         {
 
             Mock<IDerRepository> repositoryMock = new Mock<IDerRepository>();
-            Mock<IServiceProvider> servicesMock = new Mock<IServiceProvider>();
-            DeviceManagerTestClass deviceManager = new DeviceManagerTestClass(_logger, repositoryMock.Object, servicesMock.Object,
+            DeviceManagerTestClass deviceManager = new DeviceManagerTestClass(_logger, repositoryMock.Object, _servicesMock.Object,
                 _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object);
             Mock<IMetricsPublisher> metricsPublisherMock = new Mock<IMetricsPublisher>();
             Mock<IDataface> datafaceMock = new Mock<IDataface>();

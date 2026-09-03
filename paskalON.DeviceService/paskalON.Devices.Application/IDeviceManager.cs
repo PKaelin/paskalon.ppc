@@ -7,7 +7,8 @@ using paskalON.Devices.Domain.EnergyResources.Solars;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
-using paskalON.Protocols.Modbus;
+using paskalON.Devices.Equipments.C37;
+using paskalON.Devices.Equipments.Modbus;
 using paskalON.Telemetry;
 
 namespace paskalON.Devices.Application
@@ -33,6 +34,12 @@ namespace paskalON.Devices.Application
         /// List of Modbus polling engine interfaces.
         /// </summary>
         ICollection<IModbusPollingEngine> ModbusPollingEngines { get; }
+
+
+        /// <summary>
+        /// List of C37 transmission engine interfaces.
+        /// </summary>
+        ICollection<IC37TransmissionEngine> C37TransmissionEngines { get; }
 
 
         /// <summary>

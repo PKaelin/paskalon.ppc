@@ -38,6 +38,11 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
         /// </summary>
         public override async Task ConnectAsync()
         {
+            if (_client.State != C37ClientState.Connected || _client.State != C37ClientState.Connecting)
+            {
+                await _client.StartStreamingAsync();
+            }
+
             await base.ConnectAsync();
             await _client.SendCommandAsync(C37CommandType.TurnOnTransmission);
         }

@@ -171,7 +171,6 @@ namespace paskalON.Protocols.Modbus.NModbus
                     try
                     {
                         tcpClient = new TcpClient(_clientConnection.AddressFamily);
-
                         using CancellationTokenSource timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                         timeoutCts.CancelAfter(_clientConnection.ConnectionTimeoutMilliseconds);
                         await tcpClient.ConnectAsync(ServerAddress, ServerPort, timeoutCts.Token).ConfigureAwait(false);
@@ -183,14 +182,15 @@ namespace paskalON.Protocols.Modbus.NModbus
                         _master.Transport.Retries = _clientConnection.SendRetryCount;
                         _master.Transport.WaitToRetryMilliseconds = _clientConnection.SendRetryIntervalMilliseconds;
                         _dispatcher.Start();
-
                         _state = ModbusClientState.Connected;
 
                         return;
                     }
-                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested == false)
+                    catch (Exception ex) when (ex is SocketException || (ex is OperationCanceledException && cancellationToken.IsCancellationRequested == false))
                     {
-                        lastException = new TimeoutException($"Connection attempt {attempt} timed out after {_clientConnection.ConnectionTimeoutMilliseconds} ms.");
+                        string msgAttempt = $"{DateTime.Now.ToString("HH:mm:ss")} Device connect to {ServerAddress}:{ServerPort} failed. Attempt {attempt} timed out after {_clientConnection.ConnectionTimeoutMilliseconds} ms";
+                        _logger.LogError(msgAttempt);
+                        lastException = new TimeoutException(msgAttempt);
                     }
                     catch (Exception ex)
                     {
@@ -205,7 +205,9 @@ namespace paskalON.Protocols.Modbus.NModbus
                     }
                 }
 
-                throw new InvalidOperationException($"Unable to connect to {ServerAddress}:{ServerPort} after {maxAttempts} attempt(s).", lastException);
+                string msgConnect = $"Device connect to {ServerAddress}:{ServerPort} failed. Unable to connect {maxAttempts} attempt(s)";
+                _logger.LogError(msgConnect);
+                throw new InvalidOperationException(msgConnect, lastException);
             }
             catch
             {

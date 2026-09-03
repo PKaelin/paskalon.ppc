@@ -140,12 +140,15 @@ try
         SystemConfig? config = repository.GetAsync(0, 1, (o) => o.Id).Result.FirstOrDefault();
         ArgumentNullException.ThrowIfNull(config, "System configuration contains no record");
 
-        // Give the devices and device manager some time to connect and get ready.
-        await Task.Delay(config.StartupDelayForDevices);
+        // Give the devices and device manager some time to connect.
+        await Task.Delay(config.StartupDelayForDevices / 2);
 
         // Create and load Modbus polling service
         ModbusPollService modbusPollService = app.Services.GetRequiredService<ModbusPollService>();
         modbusPollService.Initialize(deviceManager.ModbusPollingEngines, config.PollingIntervalMilliseconds);
+
+        // Give the devices and device manager some time to get some data before publishing
+        await Task.Delay(config.StartupDelayForDevices / 2);
 
         // Create and load device publisher
         DevicePublisherService devicePublisherService = app.Services.GetRequiredService<DevicePublisherService>();

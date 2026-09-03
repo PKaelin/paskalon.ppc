@@ -59,6 +59,15 @@ namespace paskalON.Devices.Equipments.Modbus
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
+        public async Task ConnectAsync(CancellationToken cancellationToken)
+        {
+            await _client.ConnectAsync(cancellationToken);
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public async Task PollAsync(int currentInterval, CancellationToken cancellationToken)
         {
             try

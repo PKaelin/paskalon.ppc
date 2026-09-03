@@ -11,7 +11,7 @@ using System.Buffers.Binary;
 
 namespace paskalON.Devices.Equipments.C37
 {
-    public class C37TransmissionEngine
+    public class C37TransmissionEngine : IC37TransmissionEngine
     {
         /// <summary>
         /// C37 station Id.
@@ -63,7 +63,7 @@ namespace paskalON.Devices.Equipments.C37
 
 
         /// <summary>
-        /// Current registered mappings that were generated via the configuration frame.
+        /// <inheritdoc/>
         /// </summary>
         public List<C37RegisterMapEntry> Mappings { get => _mappings.ToList(); }
 
@@ -89,6 +89,15 @@ namespace paskalON.Devices.Equipments.C37
             _client.ConfigFrameReceived += OnConfigFrameReceived;
             _client.DataFrameReceived += OnDataFrameReceived;
             _logger.LogInformation("C37 transmission engine created for: {Name} {Address} {Port}", dataface.Name, client.ServerAddress, client.ServerPort);
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>>
+        /// </summary>        
+        public async Task StartStreaming(CancellationToken stoppingToken)
+        {
+            _ = Task.Run(() => _client.StartStreamingAsync());
         }
 
 

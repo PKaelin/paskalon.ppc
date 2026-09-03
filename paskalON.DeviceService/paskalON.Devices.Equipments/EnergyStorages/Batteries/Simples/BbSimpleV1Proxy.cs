@@ -50,6 +50,11 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         /// </summary>
         public override async Task ConnectAsync()
         {
+            if (_client.State != ModbusClientState.Connected || _client.State != ModbusClientState.Connecting)
+            {
+                await _client.ConnectAsync();
+            }
+
             await base.ConnectAsync();
             await _client.WriteSingleRegisterAsync((ushort)BbSimpleV1Description.Register.SelectorState, 1, ModbusDataType.MbInt16);
         }
