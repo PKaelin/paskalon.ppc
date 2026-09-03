@@ -2,6 +2,8 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using NModbus;
+
 namespace paskalON.Protocols.Modbus.Stores
 {
     /// <summary>
@@ -40,6 +42,36 @@ namespace paskalON.Protocols.Modbus.Stores
 
 
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <remarks>
+        /// These are called Coils in the Modbus standard.
+        /// </remarks>
+        public IPointSource<bool> CoilDiscretes { get; init; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <remarks>
+        /// These are called DiscreteInputs in the Modbus standard.
+        /// </remarks>
+        public IPointSource<bool> CoilInputs { get; init; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public IPointSource<ushort> HoldingRegisters { get; init; }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public IPointSource<ushort> InputRegisters { get; init; }
+
+
+        /// <summary>
         /// Constructor of <see cref="ModbusDataMemoryStore"/>.
         /// </summary>
         /// <param name="coilCount">The coil register buffer size.</param>
@@ -61,109 +93,61 @@ namespace paskalON.Protocols.Modbus.Stores
             _discreteInputs = new bool[discreteInputCount];
             _holdingRegisters = new ushort[holdingRegisterCount];
             _inputRegisters = new ushort[inputRegisterCount];
+
+            CoilDiscretes = new MemoryPointSource<bool>(
+                (startAddress, numberOfPoints) => ReadPoints(_coils, startAddress, numberOfPoints),
+                (startAddress, values) => WritePoints(_coils, startAddress, values));
+            CoilInputs = new MemoryPointSource<bool>(
+                (startAddress, numberOfPoints) => ReadPoints(_discreteInputs, startAddress, numberOfPoints),
+                (startAddress, values) => WritePoints(_discreteInputs, startAddress, values));
+            HoldingRegisters = new MemoryPointSource<ushort>(
+                (startAddress, numberOfPoints) => ReadPoints(_holdingRegisters, startAddress, numberOfPoints),
+                (startAddress, values) => WritePoints(_holdingRegisters, startAddress, values));
+            InputRegisters = new MemoryPointSource<ushort>(
+                (startAddress, numberOfPoints) => ReadPoints(_inputRegisters, startAddress, numberOfPoints),
+                (startAddress, values) => WritePoints(_inputRegisters, startAddress, values));
+
         }
 
 
         /// <summary>
-        /// <inheritdoc/>
+        /// Read points from a source.
         /// </summary>
-        public bool[] ReadCoils(ushort startAddress, ushort endAddress)
+        /// <typeparam name="T">Type of return values.</typeparam>
+        /// <param name="source">The data source to read from.</param>
+        /// <param name="startAddress">The start address to read from.</param>
+        /// <param name="numberOfPoints">The number of points to read.</param>
+        /// <returns>Array of point of type T.</returns>
+        private T[] ReadPoints<T>(T[] source, ushort startAddress, ushort numberOfPoints)
         {
+            long endAddress = (long)startAddress + numberOfPoints - 1;
+            ValidateRange(startAddress, (ushort)endAddress, source.Length);
+
             lock (_dataLock)
             {
-                ValidateRange(startAddress, endAddress, _coils.Length);
-                return GetRange(_coils, startAddress, endAddress);
+                T[] result = new T[numberOfPoints];
+                Array.Copy(source, startAddress, result, 0, numberOfPoints);
+
+                return result;
             }
         }
 
 
         /// <summary>
-        /// <inheritdoc/>
+        /// Writes points to a source.
         /// </summary>
-        public bool[] ReadDiscreteInputs(ushort startAddress, ushort endAddress)
+        /// <typeparam name="T">Type of points to write.</typeparam>
+        /// <param name="destination">The destination to write to.</param>
+        /// <param name="startAddress">The start address to write to.</param>
+        /// <param name="values">The values to write.</param>
+        private void WritePoints<T>(T[] destination, ushort startAddress, T[] values)
         {
+            ArgumentNullException.ThrowIfNull(values, "Write points doesn't contain any values.");
+
             lock (_dataLock)
             {
-                ValidateRange(startAddress, endAddress, _discreteInputs.Length);
-                return GetRange(_discreteInputs, startAddress, endAddress);
-            }
-        }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public ushort[] ReadHoldingRegisters(ushort startAddress, ushort endAddress)
-        {
-            lock (_dataLock)
-            {
-                ValidateRange(startAddress, endAddress, _holdingRegisters.Length);
-                return GetRange(_holdingRegisters, startAddress, endAddress);
-            }
-        }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public ushort[] ReadInputRegisters(ushort startAddress, ushort endAddress)
-        {
-            lock (_dataLock)
-            {
-                ValidateRange(startAddress, endAddress, _inputRegisters.Length);
-                return GetRange(_inputRegisters, startAddress, endAddress);
-            }
-        }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public void WriteCoils(ushort startAddress, bool[] values)
-        {
-            lock (_dataLock)
-            {
-                ValidateWriteRange(startAddress, values.Length, _coils.Length);
-                Array.Copy(values, 0, _coils, startAddress, values.Length);
-            }
-        }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public void WriteDiscreteInputs(ushort startAddress, bool[] values)
-        {
-            lock (_dataLock)
-            {
-                ValidateWriteRange(startAddress, values.Length, _discreteInputs.Length);
-                Array.Copy(values, 0, _discreteInputs, startAddress, values.Length);
-            }
-        }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public void WriteHoldingRegisters(ushort startAddress, ushort[] values)
-        {
-            lock (_dataLock)
-            {
-                ValidateWriteRange(startAddress, values.Length, _holdingRegisters.Length);
-                Array.Copy(values, 0, _holdingRegisters, startAddress, values.Length);
-            }
-        }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public void WriteInputRegisters(ushort startAddress, ushort[] values)
-        {
-            lock (_dataLock)
-            {
-                ValidateWriteRange(startAddress, values.Length, _inputRegisters.Length);
-                Array.Copy(values, 0, _inputRegisters, startAddress, values.Length);
+                ValidateWriteRange(startAddress, values.Length, destination.Length);
+                Array.Copy(values, 0, destination, startAddress, values.Length);
             }
         }
 
@@ -192,38 +176,6 @@ namespace paskalON.Protocols.Modbus.Stores
         {
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(count, 0, "At least one value is required.");
             ArgumentOutOfRangeException.ThrowIfGreaterThan((long)startAddress + count, capacity);
-        }
-
-
-        /// <summary>
-        /// Gets an array of boolean values from a start to end address
-        /// </summary>
-        /// <param name="source">The source to get the values from.</param>
-        /// <param name="startAddress">The start address.</param>
-        /// <param name="endAddress">The end address.</param>
-        /// <returns>Array of boolean values.</returns>
-        private bool[] GetRange(bool[] source, ushort startAddress, ushort endAddress)
-        {
-            bool[] result = new bool[endAddress - startAddress + 1];
-            Array.Copy(source, startAddress, result, 0, result.Length);
-
-            return result;
-        }
-
-
-        /// <summary>
-        /// Gets an array of ushort values from a start to end address
-        /// </summary>
-        /// <param name="source">The source to get the values from.</param>
-        /// <param name="startAddress">The start address.</param>
-        /// <param name="endAddress">The end address.</param>
-        /// <returns>Array of ushort values.</returns>
-        private ushort[] GetRange(ushort[] source, ushort startAddress, ushort endAddress)
-        {
-            ushort[] result = new ushort[endAddress - startAddress + 1];
-            Array.Copy(source, startAddress, result, 0, result.Length);
-
-            return result;
         }
     }
 }

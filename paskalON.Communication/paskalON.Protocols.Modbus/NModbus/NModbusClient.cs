@@ -13,7 +13,7 @@ using System.Net.Sockets;
 namespace paskalON.Protocols.Modbus.NModbus
 {
     /// <summary>
-    /// Modbus client implementation for over Modbus TCP communications.
+    /// Modbus client (Modbus Master) implementation for over Modbus TCP communications.
     /// </summary>
     /// <remarks>
     /// - "priority" has no meaning in the Modbus protocol itself. Because only one request can be
@@ -170,7 +170,7 @@ namespace paskalON.Protocols.Modbus.NModbus
 
                     try
                     {
-                        tcpClient = new TcpClient();
+                        tcpClient = new TcpClient(_clientConnection.AddressFamily);
 
                         using CancellationTokenSource timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                         timeoutCts.CancelAfter(_clientConnection.ConnectionTimeoutMilliseconds);

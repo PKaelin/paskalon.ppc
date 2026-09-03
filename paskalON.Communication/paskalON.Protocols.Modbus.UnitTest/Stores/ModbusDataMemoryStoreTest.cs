@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using NModbus;
 using paskalON.Protocols.Modbus.Stores;
 
 namespace paskalON.Protocols.Modbus.UnitTest.Stores
@@ -10,14 +11,14 @@ namespace paskalON.Protocols.Modbus.UnitTest.Stores
     public sealed class ModbusDataMemoryStoreTest
     {
         [TestMethod]
-        [DataRow(-1, 2, 2, 2, DisplayName = "NegativeCoilCount")]
-        [DataRow(65536, 2, 2, 2, DisplayName = "CoilCountTooLarge")]
-        [DataRow(2, -1, 2, 2, DisplayName = "NegativeDiscreteInputCount")]
-        [DataRow(2, 65536, 2, 2, DisplayName = "DiscreteInputCountTooLarge")]
-        [DataRow(2, 2, -1, 2, DisplayName = "NegativeHoldingRegisterCount")]
-        [DataRow(2, 2, 65536, 2, DisplayName = "HoldingRegisterCountTooLarge")]
-        [DataRow(2, 2, 2, -1, DisplayName = "NegativeInputRegisterCount")]
-        [DataRow(2, 2, 2, 65536, DisplayName = "InputRegisterCountTooLarge")]
+        [DataRow(-1, 2, 2, 2)]
+        [DataRow(65536, 2, 2, 2)]
+        [DataRow(2, -1, 2, 2)]
+        [DataRow(2, 65536, 2, 2)]
+        [DataRow(2, 2, -1, 2)]
+        [DataRow(2, 2, 65536, 2)]
+        [DataRow(2, 2, 2, -1)]
+        [DataRow(2, 2, 2, 65536)]
         public void ModbusDataMemoryStoreConstructorRejectsInvalidCountsTest(int coilCount, int discreteInputCount, int holdingRegisterCount, int inputRegisterCount)
         {
             Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new ModbusDataMemoryStore(coilCount, discreteInputCount, holdingRegisterCount, inputRegisterCount));
@@ -25,191 +26,168 @@ namespace paskalON.Protocols.Modbus.UnitTest.Stores
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreConstructorCreatesEmptyAreasTest()
+        public void ModbusDataMemoryStoreConstructorInitializesPointSourcesTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(3, 4, 5, 6);
 
-            CollectionAssert.AreEqual(new bool[] { false, false, false }, store.ReadCoils(0, 2));
-            CollectionAssert.AreEqual(new bool[] { false, false, false, false }, store.ReadDiscreteInputs(0, 3));
-            CollectionAssert.AreEqual(new ushort[] { 0, 0, 0, 0, 0 }, store.ReadHoldingRegisters(0, 4));
-            CollectionAssert.AreEqual(new ushort[] { 0, 0, 0, 0, 0, 0 }, store.ReadInputRegisters(0, 5));
+            Assert.IsInstanceOfType<ISlaveDataStore>(store);
+            Assert.IsNotNull(store.CoilDiscretes);
+            Assert.IsNotNull(store.CoilInputs);
+            Assert.IsNotNull(store.HoldingRegisters);
+            Assert.IsNotNull(store.InputRegisters);
+            CollectionAssert.AreEqual(new bool[] { false, false, false }, store.CoilDiscretes.ReadPoints(0, 3));
+            CollectionAssert.AreEqual(new bool[] { false, false, false, false }, store.CoilInputs.ReadPoints(0, 4));
+            CollectionAssert.AreEqual(new ushort[] { 0, 0, 0, 0, 0 }, store.HoldingRegisters.ReadPoints(0, 5));
+            CollectionAssert.AreEqual(new ushort[] { 0, 0, 0, 0, 0, 0 }, store.InputRegisters.ReadPoints(0, 6));
         }
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreWritesAndReadsCoilsTest()
+        public void ModbusDataMemoryStorePointSourcesReadAndWriteActualValuesTest()
         {
-            ModbusDataMemoryStore store = new ModbusDataMemoryStore(coilCount: 8);
-            bool[] values = new[] { true, false, true, true };
+            ModbusDataMemoryStore store = new ModbusDataMemoryStore(8, 8, 8, 8);
 
-            store.WriteCoils(2, values);
+            store.CoilDiscretes.WritePoints(1, new[] { true, false, true });
+            store.CoilInputs.WritePoints(1, new[] { false, true, false });
+            store.HoldingRegisters.WritePoints(1, new ushort[] { 1234, 32768, 65535 });
+            store.InputRegisters.WritePoints(1, new ushort[] { 42, 54321, 0 });
 
-            CollectionAssert.AreEqual(new[] { false, false, true, false, true, true, false, false }, store.ReadCoils(0, 7));
-            CollectionAssert.AreEqual(values, store.ReadCoils(2, 5));
+            CollectionAssert.AreEqual(new[] { true, false, true }, store.CoilDiscretes.ReadPoints(1, 3));
+            CollectionAssert.AreEqual(new[] { false, true, false }, store.CoilInputs.ReadPoints(1, 3));
+            CollectionAssert.AreEqual(new ushort[] { 1234, 32768, 65535 }, store.HoldingRegisters.ReadPoints(1, 3));
+            CollectionAssert.AreEqual(new ushort[] { 42, 54321, 0 }, store.InputRegisters.ReadPoints(1, 3));
         }
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreWritesAndReadsDiscreteInputsTest()
+        public void ModbusDataMemoryStorePointSourcesRemainIndependentTest()
         {
-            ModbusDataMemoryStore store = new ModbusDataMemoryStore(discreteInputCount: 8);
-            bool[] values = new[] { false, true, true, false };
+            ModbusDataMemoryStore store = new ModbusDataMemoryStore(4, 4, 4, 4);
 
-            store.WriteDiscreteInputs(2, values);
+            store.CoilDiscretes.WritePoints(0, new[] { true });
+            store.CoilInputs.WritePoints(0, new[] { false });
+            store.HoldingRegisters.WritePoints(0, new ushort[] { 100 });
+            store.InputRegisters.WritePoints(0, new ushort[] { 200 });
 
-            CollectionAssert.AreEqual(new[] { false, false, false, true, true, false, false, false }, store.ReadDiscreteInputs(0, 7));
-            CollectionAssert.AreEqual(values, store.ReadDiscreteInputs(2, 5));
+            Assert.IsTrue(store.CoilDiscretes.ReadPoints(0, 1)[0]);
+            Assert.IsFalse(store.CoilInputs.ReadPoints(0, 1)[0]);
+            Assert.AreEqual((ushort)100, store.HoldingRegisters.ReadPoints(0, 1)[0]);
+            Assert.AreEqual((ushort)200, store.InputRegisters.ReadPoints(0, 1)[0]);
         }
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreWritesAndReadsHoldingRegistersTest()
+        public void ModbusDataMemoryStorePointSourcesReturnCopiesTest()
         {
-            ModbusDataMemoryStore store = new ModbusDataMemoryStore(holdingRegisterCount: 8);
-            ushort[] values = new ushort[] { 1, 32768, 65535, 42 };
+            ModbusDataMemoryStore store = new ModbusDataMemoryStore(2, 2, 2, 2);
+            store.CoilDiscretes.WritePoints(0, new[] { true, false });
+            store.HoldingRegisters.WritePoints(0, new ushort[] { 123, 456 });
 
-            store.WriteHoldingRegisters(2, values);
-
-            CollectionAssert.AreEqual(new ushort[] { 0, 0, 1, 32768, 65535, 42, 0, 0 }, store.ReadHoldingRegisters(0, 7));
-            CollectionAssert.AreEqual(values, store.ReadHoldingRegisters(2, 5));
-        }
-
-
-        [TestMethod]
-        public void ModbusDataMemoryStoreWritesAndReadsInputRegistersTest()
-        {
-            ModbusDataMemoryStore store = new ModbusDataMemoryStore(inputRegisterCount: 8);
-            ushort[] values = new ushort[] { 65535, 0, 12345, 54321 };
-
-            store.WriteInputRegisters(2, values);
-
-            CollectionAssert.AreEqual(new ushort[] { 0, 0, 65535, 0, 12345, 54321, 0, 0 }, store.ReadInputRegisters(0, 7));
-            CollectionAssert.AreEqual(values, store.ReadInputRegisters(2, 5));
-        }
-
-
-        [TestMethod]
-        public void ModbusDataMemoryStoreReadReturnsCopyTest()
-        {
-            ModbusDataMemoryStore store = new ModbusDataMemoryStore(coilCount: 3, holdingRegisterCount: 3);
-            store.WriteCoils(0, new[] { true, false, true });
-            store.WriteHoldingRegisters(0, new ushort[] { 10, 20, 30 });
-
-            bool[] coils = store.ReadCoils(0, 2);
-            ushort[] registers = store.ReadHoldingRegisters(0, 2);
+            bool[] coils = store.CoilDiscretes.ReadPoints(0, 2);
+            ushort[] registers = store.HoldingRegisters.ReadPoints(0, 2);
             coils[0] = false;
             registers[0] = 999;
 
-            CollectionAssert.AreEqual(new[] { true, false, true }, store.ReadCoils(0, 2));
-            CollectionAssert.AreEqual(new ushort[] { 10, 20, 30 }, store.ReadHoldingRegisters(0, 2));
+            CollectionAssert.AreEqual(new[] { true, false }, store.CoilDiscretes.ReadPoints(0, 2));
+            CollectionAssert.AreEqual(new ushort[] { 123, 456 }, store.HoldingRegisters.ReadPoints(0, 2));
         }
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreWritesCopyInputValuesTest()
+        public void ModbusDataMemoryStorePointSourcesCopyInputValuesTest()
         {
-            ModbusDataMemoryStore store = new ModbusDataMemoryStore(coilCount: 2, holdingRegisterCount: 2);
+            ModbusDataMemoryStore store = new ModbusDataMemoryStore(2, 2, 2, 2);
             bool[] coils = new[] { true, false };
             ushort[] registers = new ushort[] { 100, 200 };
 
-            store.WriteCoils(0, coils);
-            store.WriteHoldingRegisters(0, registers);
+            store.CoilDiscretes.WritePoints(0, coils);
+            store.HoldingRegisters.WritePoints(0, registers);
             coils[0] = false;
             registers[0] = 999;
 
-            CollectionAssert.AreEqual(new[] { true, false }, store.ReadCoils(0, 1));
-            CollectionAssert.AreEqual(new ushort[] { 100, 200 }, store.ReadHoldingRegisters(0, 1));
+            CollectionAssert.AreEqual(new[] { true, false }, store.CoilDiscretes.ReadPoints(0, 2));
+            CollectionAssert.AreEqual(new ushort[] { 100, 200 }, store.HoldingRegisters.ReadPoints(0, 2));
         }
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreOverwritesOnlyRequestedRangeTest()
+        public void ModbusDataMemoryStorePointSourcesOverwriteRequestedRangeTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(holdingRegisterCount: 6);
-            store.WriteHoldingRegisters(0, new ushort[] { 10, 20, 30, 40, 50, 60 });
-            store.WriteHoldingRegisters(2, new ushort[] { 300, 400 });
+            store.HoldingRegisters.WritePoints(0, new ushort[] { 10, 20, 30, 40, 50, 60 });
 
-            CollectionAssert.AreEqual(new ushort[] { 10, 20, 300, 400, 50, 60 }, store.ReadHoldingRegisters(0, 5));
+            store.HoldingRegisters.WritePoints(2, new ushort[] { 300, 400 });
+
+            CollectionAssert.AreEqual(new ushort[] { 10, 20, 300, 400, 50, 60 }, store.HoldingRegisters.ReadPoints(0, 6));
         }
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreSupportsLastAddressTest()
+        public void ModbusDataMemoryStorePointSourcesSupportLastAddressTest()
         {
-            ModbusDataMemoryStore store = new ModbusDataMemoryStore(coilCount: 65535, discreteInputCount: 65535, holdingRegisterCount: 65535, inputRegisterCount: 65535);
-            store.WriteCoils(65534, new[] { true });
-            store.WriteDiscreteInputs(65534, new[] { true });
-            store.WriteHoldingRegisters(65534, new ushort[] { 1234 });
-            store.WriteInputRegisters(65534, new ushort[] { 5678 });
+            ModbusDataMemoryStore store = new ModbusDataMemoryStore(65535, 65535, 65535, 65535);
 
-            CollectionAssert.AreEqual(new[] { true }, store.ReadCoils(65534, 65534));
-            CollectionAssert.AreEqual(new[] { true }, store.ReadDiscreteInputs(65534, 65534));
-            CollectionAssert.AreEqual(new ushort[] { 1234 }, store.ReadHoldingRegisters(65534, 65534));
-            CollectionAssert.AreEqual(new ushort[] { 5678 }, store.ReadInputRegisters(65534, 65534));
+            store.CoilDiscretes.WritePoints(65534, new[] { true });
+            store.CoilInputs.WritePoints(65534, new[] { true });
+            store.HoldingRegisters.WritePoints(65534, new ushort[] { 1234 });
+            store.InputRegisters.WritePoints(65534, new ushort[] { 5678 });
+
+            CollectionAssert.AreEqual(new[] { true }, store.CoilDiscretes.ReadPoints(65534, 1));
+            CollectionAssert.AreEqual(new[] { true }, store.CoilInputs.ReadPoints(65534, 1));
+            CollectionAssert.AreEqual(new ushort[] { 1234 }, store.HoldingRegisters.ReadPoints(65534, 1));
+            CollectionAssert.AreEqual(new ushort[] { 5678 }, store.InputRegisters.ReadPoints(65534, 1));
         }
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreReadRejectsDescendingRangesTest()
-        {
-            ModbusDataMemoryStore store = new ModbusDataMemoryStore(2, 2, 2, 2);
-
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadCoils(1, 0));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadDiscreteInputs(1, 0));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadHoldingRegisters(1, 0));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadInputRegisters(1, 0));
-        }
-
-
-        [TestMethod]
-        public void ModbusDataMemoryStoreReadRejectsRangesOutsideCapacityTest()
+        public void ModbusDataMemoryStorePointSourcesRejectInvalidRangesTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(2, 2, 2, 2);
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadCoils(1, 2));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadDiscreteInputs(1, 2));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadHoldingRegisters(1, 2));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadInputRegisters(1, 2));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.CoilDiscretes.ReadPoints(0, 0));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.CoilInputs.ReadPoints(1, 2));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.HoldingRegisters.ReadPoints(2, 1));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.InputRegisters.WritePoints(1, new ushort[] { 1, 2 }));
         }
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreWriteRejectsEmptyValuesTest()
+        public void ModbusDataMemoryStorePointSourcesRejectNullWritesTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(2, 2, 2, 2);
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteCoils(0, Array.Empty<bool>()));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteDiscreteInputs(0, Array.Empty<bool>()));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteHoldingRegisters(0, Array.Empty<ushort>()));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteInputRegisters(0, Array.Empty<ushort>()));
+            Assert.ThrowsExactly<ArgumentNullException>(() => store.CoilDiscretes.WritePoints(0, null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => store.CoilInputs.WritePoints(0, null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => store.HoldingRegisters.WritePoints(0, null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => store.InputRegisters.WritePoints(0, null!));
         }
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreWriteRejectsValuesOutsideCapacityTest()
+        public void ModbusDataMemoryStorePointSourcesRejectWritesOutsideCapacityTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(2, 2, 2, 2);
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteCoils(1, new[] { true, false }));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteDiscreteInputs(1, new[] { true, false }));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteHoldingRegisters(1, new ushort[] { 1, 2 }));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteInputRegisters(1, new ushort[] { 1, 2 }));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.CoilDiscretes.WritePoints(1, new[] { true, false }));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.CoilInputs.WritePoints(1, new[] { true, false }));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.HoldingRegisters.WritePoints(1, new ushort[] { 1, 2 }));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.InputRegisters.WritePoints(1, new ushort[] { 1, 2 }));
         }
 
 
         [TestMethod]
-        public void ModbusDataMemoryStoreZeroCapacityRejectsReadsAndWritesTest()
+        public void ModbusDataMemoryStoreZeroCapacityRejectsPointOperationsTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(0, 0, 0, 0);
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadCoils(0, 0));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadDiscreteInputs(0, 0));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadHoldingRegisters(0, 0));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.ReadInputRegisters(0, 0));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteCoils(0, new[] { true }));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteDiscreteInputs(0, new[] { true }));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteHoldingRegisters(0, new ushort[] { 1 }));
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.WriteInputRegisters(0, new ushort[] { 1 }));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.CoilDiscretes.ReadPoints(0, 1));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.CoilInputs.ReadPoints(0, 1));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.HoldingRegisters.ReadPoints(0, 1));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.InputRegisters.ReadPoints(0, 1));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.CoilDiscretes.WritePoints(0, new[] { true }));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.CoilInputs.WritePoints(0, new[] { true }));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.HoldingRegisters.WritePoints(0, new ushort[] { 1 }));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => store.InputRegisters.WritePoints(0, new ushort[] { 1 }));
         }
     }
 }
