@@ -1,6 +1,88 @@
+#------------------------------------------------------------------------------
+# Variables
+#------------------------------------------------------------------------------
 @paskalON.Devices.Service_HostAddress = http://localhost:45000
 
-GET {{paskalON.Devices.Service_HostAddress}}/der/
-Accept: application/json
+#------------------------------------------------------------------------------
+# DER Controller
+#------------------------------------------------------------------------------
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/der/putintomaintenance
+Content-Type: application/json
+
+{
+  "UnitName": "BMS-Unit 1"
+}
 
 ###
+
+#------------------------------------------------------------------------------
+# PCS Controller
+#------------------------------------------------------------------------------
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/pcs/startall
+
+###
+
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/pcs/stopall
+
+###
+
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/pcs/standbyall
+
+###
+
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/pcs/start
+Content-Type: application/json
+
+{
+  "DeviceId": 1
+}
+
+###
+
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/pcs/stop
+Content-Type: application/json
+
+{
+  "DeviceId": 1
+}
+
+###
+
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/pcs/standby
+Content-Type: application/json
+
+{
+  "DeviceId": 1
+}
+
+###
+
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/pcs/setpowertarget
+Content-Type: application/json
+
+{
+  "DeviceId": 1,
+  "ActivePowerWatt": 10,
+  "ReactivePowerVar": 5
+}
+
+###
+
+#------------------------------------------------------------------------------
+# BB Controller
+#------------------------------------------------------------------------------
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/bb/connect
+Content-Type: application/json
+
+{
+  "DeviceId": 11
+}
+
+###
+
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/bb/disconnect
+Content-Type: application/json
+
+{
+  "DeviceId": 11
+}

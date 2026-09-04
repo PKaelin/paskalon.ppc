@@ -50,12 +50,6 @@ namespace paskalON.Devices.Application
 
 
         /// <summary>
-        /// Distributed Energy Resources (DER) repository interface.
-        /// </summary>
-        private readonly IDerRepository _repository;
-
-
-        /// <summary>
         /// Service provider used to resolve dependencies of configured equipment.
         /// </summary>
         private readonly IServiceProvider _services;
@@ -190,23 +184,20 @@ namespace paskalON.Devices.Application
         /// <summary>        
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>
-        /// <param name="repository">Distributed Energy Resources (DER) repository interface.</param>
         /// <param name="services">Service provider used to resolve dependencies of configured equipment.</param>
         /// <param name="publisherFactory">Metrics publisher factory interface.</param>
         /// <param name="deviceFactoryModbus">Modbus device factory interface.</param>
         /// <param name="deviceFactoryC37">C37 device factory interface.</param>
-        public DeviceManager(ILogger<DeviceManager> logger, IDerRepository repository, IServiceProvider services,
+        public DeviceManager(ILogger<DeviceManager> logger, IServiceProvider services,
             IMetricsPublisherFactory publisherFactory, IModbusDeviceFactory deviceFactoryModbus, IC37DeviceFactory deviceFactoryC37)
         {
             ArgumentNullException.ThrowIfNull(logger);
-            ArgumentNullException.ThrowIfNull(repository);
             ArgumentNullException.ThrowIfNull(services);
             ArgumentNullException.ThrowIfNull(publisherFactory);
             ArgumentNullException.ThrowIfNull(deviceFactoryModbus);
             ArgumentNullException.ThrowIfNull(deviceFactoryC37);
 
             _logger = logger;
-            _repository = repository;
             _services = services;
             _publisherFactory = publisherFactory;
             _deviceFactoryModbus = deviceFactoryModbus;
@@ -221,10 +212,12 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public async Task LoadDerAsync()
+        public async Task LoadDerAsync(IDerRepository repository)
         {
+            ArgumentNullException.ThrowIfNull(repository);
+
             _logger.LogInformation("Load DER during startup");
-            DerConfig config = await LoadDerConfig();
+            DerConfig config = await LoadDerConfig(repository);
             Der der = new Der(_logger, config);
 
             foreach (DerGroupConfig groupConfig in config.DerGroupConfigs)
@@ -335,7 +328,7 @@ namespace paskalON.Devices.Application
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
                     _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
-                    return;
+                    throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
                 }
 
                 await pcs.StartAsync();
@@ -384,7 +377,7 @@ namespace paskalON.Devices.Application
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
                     _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
-                    return;
+                    throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
                 }
 
                 await pcs.StopAsync();
@@ -433,7 +426,7 @@ namespace paskalON.Devices.Application
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
                     _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
-                    return;
+                    throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
                 }
 
                 await pcs.StandbyAsync();
@@ -458,7 +451,7 @@ namespace paskalON.Devices.Application
                 if (_batteryBanks.TryGetValue(deviceId, out var bb) == false)
                 {
                     _logger.LogError("Device Manager cannot find Battery Bank with device id: {DeviceId}", deviceId);
-                    return;
+                    throw new InvalidOperationException($"Device Manager cannot find Battery Bank with device id: {deviceId}");
                 }
 
                 await bb.ConnectAsync();
@@ -483,7 +476,7 @@ namespace paskalON.Devices.Application
                 if (_batteryBanks.TryGetValue(deviceId, out var bb) == false)
                 {
                     _logger.LogError("Device Manager cannot find Battery Bank with device id: {DeviceId}", deviceId);
-                    return;
+                    throw new InvalidOperationException($"Device Manager cannot find Battery Bank with device id: {deviceId}");
                 }
 
                 await bb.DisconnectAsync();
@@ -507,7 +500,7 @@ namespace paskalON.Devices.Application
             if (unit == null)
             {
                 _logger.LogError("Device Manager cannot find Unit with name: {UnitName}", unitName);
-                return;
+                throw new InvalidOperationException($"Device Manager cannot find Unit with name: {unitName}");
             }
 
             unit.IsInMaintenanceMode = true;
@@ -524,7 +517,7 @@ namespace paskalON.Devices.Application
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
                     _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
-                    return;
+                    throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
                 }
 
                 await pcs.SetActivePowerTargetAsync(activePowerWatt);
@@ -542,12 +535,12 @@ namespace paskalON.Devices.Application
         /// Loads the Distributed Energy Resource (DER) root configuration object with all its content.
         /// </summary>
         /// <returns>Distributed Energy Resource (DER) root configuration object with all its content</returns>
-        private async Task<DerConfig> LoadDerConfig()
+        private async Task<DerConfig> LoadDerConfig(IDerRepository repository)
         {
             try
             {
                 // Get DER with all active configurations.
-                return await _repository.GetDer(true);
+                return await repository.GetDer(true);
             }
             catch (Exception ex)
             {

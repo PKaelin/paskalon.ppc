@@ -51,6 +51,7 @@ namespace paskalON.Devices.Service.Publishers
         /// <param name="intervalMilliseconds">Time based interval for metrics publishers.</param>
         public void Initialize(IEnumerable<IMetricsPublisher> metricsPublishers, int intervalMilliseconds)
         {
+            _logger.LogInformation("Initializing MetricsPublisherService with {Interval}ms interval", intervalMilliseconds);
             ArgumentNullException.ThrowIfNull(metricsPublishers);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMilliseconds);
 

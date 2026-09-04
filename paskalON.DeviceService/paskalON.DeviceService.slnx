@@ -21,6 +21,7 @@
     <Project Path="paskalON.Devices.Infrastructure.IntegrationTest/paskalON.Devices.Infrastructure.IntegrationTest.csproj" Id="45f71292-154f-4fe7-b9f2-ba3d62122885" />
     <Project Path="paskalON.Devices.Service.UnitTest/paskalON.Devices.Service.UnitTest.csproj" />
   </Folder>
+  <Project Path="../paskalON.Devices.Service.Dto/paskalON.Devices.Service.Dto.csproj" Id="1a1da737-55fc-40ec-8ed3-276e28debd3f" />
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>

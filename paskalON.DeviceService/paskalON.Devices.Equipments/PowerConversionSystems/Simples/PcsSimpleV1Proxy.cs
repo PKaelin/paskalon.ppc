@@ -65,8 +65,11 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// </summary>
         public override async Task StopAsync()
         {
-            await base.StopAsync();
-            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 0, ModbusDataType.MbInt16);
+            if (_client.State == ModbusClientState.Connected)
+            {
+                await base.StopAsync();
+                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 0, ModbusDataType.MbInt16);
+            }
         }
 
 
@@ -75,14 +78,17 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// </summary>
         public override async Task StandbyAsync(double? standbyActivePower = null)
         {
-            await base.StandbyAsync(standbyActivePower);
-
-            if (standbyActivePower != null)
+            if (_client.State == ModbusClientState.Connected)
             {
-                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, (double)standbyActivePower, ModbusDataType.MbInt16);
-            }
+                await base.StandbyAsync(standbyActivePower);
 
-            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 3, ModbusDataType.MbInt16);
+                if (standbyActivePower != null)
+                {
+                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, (double)standbyActivePower, ModbusDataType.MbInt16);
+                }
+
+                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 3, ModbusDataType.MbInt16);
+            }
         }
 
 
@@ -91,11 +97,14 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// </summary>
         public override async Task SetActivePowerTargetAsync(double? value)
         {
-            await base.SetActivePowerTargetAsync(value);
-
-            if (ActivePowerTarget.HasValue)
+            if (_client.State == ModbusClientState.Connected)
             {
-                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, ActivePowerTarget.Value.KiloWatts, ModbusDataType.MbInt16);
+                await base.SetActivePowerTargetAsync(value);
+
+                if (ActivePowerTarget.HasValue)
+                {
+                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, ActivePowerTarget.Value.KiloWatts, ModbusDataType.MbInt16);
+                }
             }
         }
 
@@ -105,11 +114,14 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// </summary>
         public override async Task SetReactivePowerTargetAsync(double? value)
         {
-            await base.SetReactivePowerTargetAsync(value);
-
-            if (ReactivePowerTarget.HasValue)
+            if (_client.State == ModbusClientState.Connected)
             {
-                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, ReactivePowerTarget.Value.KiloVoltAmperesReactive, ModbusDataType.MbInt16);
+                await base.SetReactivePowerTargetAsync(value);
+
+                if (ReactivePowerTarget.HasValue)
+                {
+                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, ReactivePowerTarget.Value.KiloVoltAmperesReactive, ModbusDataType.MbInt16);
+                }
             }
         }
 

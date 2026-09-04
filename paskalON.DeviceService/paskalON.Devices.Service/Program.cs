@@ -71,6 +71,7 @@ try
     builder.Services.AddHostedService<DevicePublisherService>(provider => provider.GetRequiredService<DevicePublisherService>());
     builder.Services.AddSingleton<MetricsPublisherService>();
     builder.Services.AddHostedService<MetricsPublisherService>(provider => provider.GetRequiredService<MetricsPublisherService>());
+    builder.Services.AddSingleton<IDeviceManager, DeviceManager>();
 
     // Configure OpenTelemetry logging, metrics, & tracing with auto-start using the
     // AddOpenTelemetry extension from OpenTelemetry.Extensions.Hosting.
@@ -118,19 +119,18 @@ try
     // Build application
     app = builder.Build();
     app.Logger.LogInformation("Application has been build");
-    app.Logger.LogInformation("Application start initializing services");
+    // Register start/stop of the service
+    IHostApplicationLifetime lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+    lifetime.ApplicationStarted.Register(() => { app.Logger.LogInformation("Microservice Device Service has started"); });
+    lifetime.ApplicationStopping.Register(() => { app.Logger.LogInformation("Microservice Device Service is stopping"); });
+    app.Logger.LogInformation("Application starts initializing services");
     // Create and load device manager
-    DeviceManager deviceManager;
+    IDeviceManager deviceManager = app.Services.GetRequiredService<IDeviceManager>();
+
     using (IServiceScope scope = app.Services.CreateScope())
     {
-        ILogger<DeviceManager> logger = app.Services.GetRequiredService<ILogger<DeviceManager>>();
         IDerRepository repository = scope.ServiceProvider.GetRequiredService<IDerRepository>();
-        IModbusDeviceFactory deviceFactoryModbus = app.Services.GetRequiredService<IModbusDeviceFactory>();
-        IC37DeviceFactory deviceFactoryC37 = app.Services.GetRequiredService<IC37DeviceFactory>();
-        IMetricsPublisherFactory publisherFactory = app.Services.GetRequiredService<IMetricsPublisherFactory>();
-        deviceManager = new DeviceManager(logger, repository, app.Services, publisherFactory, deviceFactoryModbus, deviceFactoryC37);
-        Console.WriteLine("Loading DERs.....");
-        await deviceManager.LoadDerAsync();
+        await deviceManager.LoadDerAsync(repository);
     }
 
     using (IServiceScope scope = app.Services.CreateScope())

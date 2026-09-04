@@ -9,6 +9,7 @@ using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Equipments.C37;
 using paskalON.Devices.Equipments.Modbus;
+using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Telemetry;
 
 namespace paskalON.Devices.Application
@@ -87,7 +88,8 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// Loads the Distributed Energy Resource (DER) and all its content.
         /// </summary>
-        Task LoadDerAsync();
+        /// <param name="repository">Distributed Energy Resources (DER) repository interface.</param>
+        Task LoadDerAsync(IDerRepository repository);
 
 
         /// <summary>

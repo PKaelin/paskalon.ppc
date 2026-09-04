@@ -32,6 +32,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Telemetry\paskalON.Telemetry.csproj" />
+    <ProjectReference Include="..\..\paskalON.Devices.Service.Dto\paskalON.Devices.Service.Dto.csproj" />
     <ProjectReference Include="..\paskalON.Devices.Application\paskalON.Devices.Application.csproj" />
     <ProjectReference Include="..\paskalON.Devices.Dto\paskalON.Devices.Dto.csproj" />
   </ItemGroup>

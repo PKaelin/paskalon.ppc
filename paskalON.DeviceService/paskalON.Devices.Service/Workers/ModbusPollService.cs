@@ -49,6 +49,7 @@ namespace paskalON.Devices.Service.Workers
         /// <param name="intervalMilliseconds">Time based interval for Modbus polls.</param>
         public void Initialize(IEnumerable<IModbusPollingEngine> modbusEngines, int intervalMilliseconds)
         {
+            _logger.LogInformation("Initializing ModbusPollService with {Interval}ms interval", intervalMilliseconds);
             ArgumentNullException.ThrowIfNull(modbusEngines);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMilliseconds);
 
