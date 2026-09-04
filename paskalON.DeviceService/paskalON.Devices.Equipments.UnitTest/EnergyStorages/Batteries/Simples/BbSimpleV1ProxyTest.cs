@@ -138,6 +138,7 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyStorages.Batteries.Simples
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.State).Returns(ModbusClientState.Connected);
 
             ushort? stateTarget = 0;
             ushort? address = null;

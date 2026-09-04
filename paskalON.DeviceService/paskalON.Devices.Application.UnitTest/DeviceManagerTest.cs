@@ -298,7 +298,7 @@ namespace paskalON.Devices.Application.UnitTest
         {
             IDeviceManager manager = CreateDeviceManagerWithDomains();
 
-            await manager.StartPcsAsync(99);
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await manager.StartPcsAsync(99));
 
             Assert.HasCount(1, manager.PowerConversionSystems);
             IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
@@ -326,7 +326,7 @@ namespace paskalON.Devices.Application.UnitTest
         {
             IDeviceManager manager = CreateDeviceManagerWithDomains();
 
-            await manager.StopPcsAsync(99);
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await manager.StopPcsAsync(99));
 
             Assert.HasCount(1, manager.PowerConversionSystems);
             IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
@@ -354,7 +354,7 @@ namespace paskalON.Devices.Application.UnitTest
         {
             IDeviceManager manager = CreateDeviceManagerWithDomains();
 
-            await manager.StandbyPcsAsync(99);
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await manager.StandbyPcsAsync(99));
 
             Assert.HasCount(1, manager.PowerConversionSystems);
             IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
@@ -382,7 +382,7 @@ namespace paskalON.Devices.Application.UnitTest
         {
             IDeviceManager manager = CreateDeviceManagerWithDomains();
 
-            await manager.ConnectBatteryBankAsync(99);
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await manager.ConnectBatteryBankAsync(99));
 
             Assert.HasCount(1, manager.BatteryBanks);
             IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
@@ -410,7 +410,7 @@ namespace paskalON.Devices.Application.UnitTest
         {
             IDeviceManager manager = CreateDeviceManagerWithDomains();
 
-            await manager.DisconnectBatteryBankAsync(99);
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await manager.DisconnectBatteryBankAsync(99));
 
             Assert.HasCount(1, manager.BatteryBanks);
             IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
@@ -434,11 +434,11 @@ namespace paskalON.Devices.Application.UnitTest
 
 
         [TestMethod]
-        public void DeviceManagerPutIntoMaintenanceMissingUnitTest()
+        public async Task DeviceManagerPutIntoMaintenanceMissingUnitTest()
         {
             IDeviceManager manager = CreateDeviceManagerWithDomains();
 
-            manager.PutIntoMaintenance("Missing unit");
+            Assert.ThrowsExactly<InvalidOperationException>(() => manager.PutIntoMaintenance("Missing unit"));
 
             IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
             Assert.HasCount(1, logs);
@@ -451,7 +451,7 @@ namespace paskalON.Devices.Application.UnitTest
         {
             IDeviceManager manager = CreateDeviceManagerWithDomains();
 
-            await manager.SetPcsPowerTarget(99, 100, 20);
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await manager.SetPcsPowerTarget(99, 100, 20));
 
             Assert.HasCount(1, manager.PowerConversionSystems);
             IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);

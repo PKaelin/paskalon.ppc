@@ -156,6 +156,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.State).Returns(ModbusClientState.Connected);
 
             ushort? stateTarget = 0;
             ushort? address = null;
@@ -185,6 +186,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.State).Returns(ModbusClientState.Connected);
 
             double? activePowerTarget = 11000;
             ushort? address = null;
@@ -214,6 +216,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.State).Returns(ModbusClientState.Connected);
 
             double? reactivePowerTarget = 12000;
             ushort? address = null;

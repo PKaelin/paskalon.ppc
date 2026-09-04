@@ -86,6 +86,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
             ModbusRegister dataface = new ModbusRegister("Test");
             ModbusDataConverter converter = new ModbusDataConverter();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.State).Returns(ModbusClientState.Connected);
             client.Setup(x => x.ConvertRawData(It.IsAny<bool[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
                 .Returns((bool[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
             client.Setup(x => x.ConvertRawData(It.IsAny<ushort[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
@@ -157,6 +158,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
             ModbusRegister dataface = new ModbusRegister("Test");
             ModbusDataConverter converter = new ModbusDataConverter();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.State).Returns(ModbusClientState.Connected);
             client.Setup(x => x.ConvertRawData(It.IsAny<bool[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
                 .Returns((bool[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
             client.Setup(x => x.ConvertRawData(It.IsAny<ushort[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))

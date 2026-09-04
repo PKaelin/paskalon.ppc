@@ -327,7 +327,6 @@ namespace paskalON.Devices.Application
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
-                    _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
                     throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
                 }
 
@@ -376,7 +375,6 @@ namespace paskalON.Devices.Application
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
-                    _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
                     throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
                 }
 
@@ -425,7 +423,6 @@ namespace paskalON.Devices.Application
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
-                    _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
                     throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
                 }
 
@@ -450,7 +447,6 @@ namespace paskalON.Devices.Application
             {
                 if (_batteryBanks.TryGetValue(deviceId, out var bb) == false)
                 {
-                    _logger.LogError("Device Manager cannot find Battery Bank with device id: {DeviceId}", deviceId);
                     throw new InvalidOperationException($"Device Manager cannot find Battery Bank with device id: {deviceId}");
                 }
 
@@ -475,7 +471,6 @@ namespace paskalON.Devices.Application
             {
                 if (_batteryBanks.TryGetValue(deviceId, out var bb) == false)
                 {
-                    _logger.LogError("Device Manager cannot find Battery Bank with device id: {DeviceId}", deviceId);
                     throw new InvalidOperationException($"Device Manager cannot find Battery Bank with device id: {deviceId}");
                 }
 
@@ -516,7 +511,6 @@ namespace paskalON.Devices.Application
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
-                    _logger.LogError("Device Manager cannot find PCS with device id: {DeviceId}", deviceId);
                     throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
                 }
 
