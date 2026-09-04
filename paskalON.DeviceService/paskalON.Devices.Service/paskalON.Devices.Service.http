@@ -6,6 +6,10 @@
 #------------------------------------------------------------------------------
 # DER Controller
 #------------------------------------------------------------------------------
+GET {{paskalON.Devices.Service_HostAddress}}/api/v1/der/getder
+
+###
+
 POST {{paskalON.Devices.Service_HostAddress}}/api/v1/der/putintomaintenance
 Content-Type: application/json
 

@@ -12,10 +12,23 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
     [Route("api/v1/[controller]/[action]")]
     public class PcsController : ControllerBase
     {
+        /// <summary>
+        /// Logger for handling application logging and diagnostics.
+        /// </summary>
         private readonly ILogger<PcsController> _logger;
+
+
+        /// <summary>
+        /// Device manager for managing DER (Distributed Energy Resources) devices and their operations.
+        /// </summary>
         private readonly IDeviceManager _deviceManager;
 
 
+        /// <summary>
+        /// Constructor of <see cref="PcsController"/>
+        /// </summary>
+        /// <param name="logger">Logger for handling application logging and diagnostics.</param>
+        /// <param name="deviceManager">Device manager for managing DER (Distributed Energy Resources).</param>
         public PcsController(ILogger<PcsController> logger, IDeviceManager deviceManager)
         {
             ArgumentNullException.ThrowIfNull(logger);
@@ -26,6 +39,10 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
         }
 
 
+        /// <summary>
+        /// Starts all PCS that are not in maintenance mode.
+        /// </summary>
+        /// <returns>Task</returns>
         [HttpPost]
         public async Task<IActionResult> StartAll()
         {
@@ -36,6 +53,11 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
         }
 
 
+        /// <summary>
+        /// Starts a specific PCS.
+        /// </summary>
+        /// <param name="request">Request containing the device ID of the PCS to action on.</param>
+        /// <returns>Task</returns>
         [HttpPost]
         public async Task<IActionResult> Start(StartPcsRequestDto request)
         {
@@ -45,6 +67,10 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
         }
 
 
+        /// <summary>
+        /// Stops all PCS that are not in maintenance mode.
+        /// </summary>
+        /// <returns>Task</returns>
         [HttpPost]
         public async Task<IActionResult> StopAll()
         {
@@ -55,6 +81,11 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
         }
 
 
+        /// <summary>
+        /// Stops a specific PCS.
+        /// </summary>
+        /// <param name="request">Request containing the device ID of the PCS to action on.</param>
+        /// <returns>Task</returns>
         [HttpPost]
         public async Task<IActionResult> Stop(StopPcsRequestDto request)
         {
@@ -64,6 +95,10 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
         }
 
 
+        /// <summary>
+        /// Standbys all PCS that are not in maintenance mode.
+        /// </summary>
+        /// <returns>Task</returns>
         [HttpPost]
         public async Task<IActionResult> StandbyAll()
         {
@@ -73,6 +108,11 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
         }
 
 
+        /// <summary>
+        /// Standbys a specific PCS.
+        /// </summary>
+        /// <param name="request">Request containing the device ID of the PCS to action on.</param>
+        /// <returns>Task</returns>
         [HttpPost]
         public async Task<IActionResult> Standby(StandbyPcsRequestDto request)
         {
@@ -82,6 +122,11 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
         }
 
 
+        /// <summary>
+        /// Sets a power targets to a specific PCS.
+        /// </summary>
+        /// <param name="request">Request containing the device ID of the PCS to action on.</param>
+        /// <returns>Task</returns>
         [HttpPost]
         public async Task<IActionResult> SetPowerTarget(SetPowerTargetRequest request)
         {

@@ -12,10 +12,23 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
     [Route("api/v1/[controller]/[action]")]
     public class BbController : ControllerBase
     {
+        /// <summary>
+        /// Logger for handling application logging and diagnostics.
+        /// </summary>
         private readonly ILogger<BbController> _logger;
+
+
+        /// <summary>
+        /// Device manager for managing DER (Distributed Energy Resources) devices and their operations.
+        /// </summary>
         private readonly IDeviceManager _deviceManager;
 
 
+        /// <summary>
+        /// Constructor of <see cref="BbController"/>
+        /// </summary>
+        /// <param name="logger">Logger for handling application logging and diagnostics.</param>
+        /// <param name="deviceManager">Device manager for managing DER (Distributed Energy Resources).</param>
         public BbController(ILogger<BbController> logger, IDeviceManager deviceManager)
         {
             ArgumentNullException.ThrowIfNull(logger);
@@ -26,6 +39,11 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
         }
 
 
+        /// <summary>
+        /// Connects a battery bank.
+        /// </summary>
+        /// <param name="request">Connect BB request.</param>
+        /// <returns>Task</returns>
         [HttpPost]
         public async Task<IActionResult> Connect(ConnectBbRequest request)
         {
@@ -35,6 +53,11 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
         }
 
 
+        /// <summary>
+        /// Disconnects a battery bank.
+        /// </summary>
+        /// <param name="request">Disconnect BB request.</param>
+        /// <returns>Task</returns>
         [HttpPost]
         public async Task<IActionResult> Disconnect(DisconnectBbRequest request)
         {

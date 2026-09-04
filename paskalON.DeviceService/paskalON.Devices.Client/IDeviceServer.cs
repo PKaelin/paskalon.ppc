@@ -4,7 +4,7 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Dto.Ders;
 
-namespace paskalON.Devices.Application
+namespace paskalON.Devices.Client
 {
     public interface IDeviceServer
     {

@@ -135,7 +135,9 @@ namespace paskalON.Devices.Client
         #endregion
 
 
-
+        /// <summary>
+        /// The DER (Distributed Energy Resource) root DTO object.
+        /// </summary>
         public DerDto Der { get; private set; } = new DerDto();
 
 
