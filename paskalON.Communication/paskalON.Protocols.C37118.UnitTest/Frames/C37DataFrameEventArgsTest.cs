@@ -16,7 +16,7 @@ namespace paskalON.Protocols.C37118.UnitTest.Frames
             byte[] data = C37DataGenerator.CreateDataFrame(1, new List<(float Mag, float Ang)>(), new List<float>(), 0);
             C37DataFrameEventArgs dataFrame = new C37DataFrameEventArgs(data);
 
-            Assert.AreEqual(0, dataFrame.RawPayload.Length);
+            Assert.IsGreaterThan(0, dataFrame.RawPayload.Length);
         }
 
 

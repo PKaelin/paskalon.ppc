@@ -12,7 +12,7 @@ namespace paskalON.Protocols.C37118.Frames
         /// <summary>
         /// Header frame.
         /// </summary>
-        public C37FrameHeader Header { get; }
+        public C37HeaderFrame Header { get; }
 
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace paskalON.Protocols.C37118.Frames
         /// <param name="fullFrameBytes">Full frame payload.</param>
         public C37DataFrameEventArgs(ReadOnlyMemory<byte> fullFrameBytes)
         {
-            Header = new C37FrameHeader(fullFrameBytes.Span[0..14]);
+            Header = new C37HeaderFrame(fullFrameBytes);
             // Actual payload minus the checksum at the end
             RawPayload = fullFrameBytes.Slice(14, Header.FrameSize - 16);
         }

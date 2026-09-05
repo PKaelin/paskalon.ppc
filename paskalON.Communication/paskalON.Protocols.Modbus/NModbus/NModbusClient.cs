@@ -87,7 +87,11 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ModbusClientState State { get; init; } = ModbusClientState.Disconnected;
+        public ModbusClientState State
+        {
+            get { return _state; }
+            private set { _state = value; }
+        }
 
 
         /// <summary>
@@ -119,6 +123,9 @@ namespace paskalON.Protocols.Modbus.NModbus
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(clientConnection);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(clientConnection.ServerPort);
+            ArgumentOutOfRangeException.ThrowIfNegative(clientConnection.ConnectionTimeoutMilliseconds);
+            ArgumentOutOfRangeException.ThrowIfNegative(clientConnection.ConnectRetryIntervalMilliseconds);
 
             _logger = logger;
             _clientConnection = clientConnection;
@@ -156,9 +163,7 @@ namespace paskalON.Protocols.Modbus.NModbus
             }
 
             _state = ModbusClientState.Connecting;
-
             Exception? lastException = null;
-
             // Number of attempts = initial attempt + retries.
             int maxAttempts = _clientConnection.ConnectRetryCount + 1;
 
@@ -188,7 +193,7 @@ namespace paskalON.Protocols.Modbus.NModbus
                     }
                     catch (Exception ex) when (ex is SocketException || (ex is OperationCanceledException && cancellationToken.IsCancellationRequested == false))
                     {
-                        string msgAttempt = $"{DateTime.Now.ToString("HH:mm:ss")} Device connect to {ServerAddress}:{ServerPort} failed. Attempt {attempt} timed out after {_clientConnection.ConnectionTimeoutMilliseconds} ms";
+                        string msgAttempt = $"Device connect to {ServerAddress}:{ServerPort} failed. Attempt {attempt} timed out after {_clientConnection.ConnectionTimeoutMilliseconds} ms";
                         _logger.LogError(msgAttempt);
                         lastException = new TimeoutException(msgAttempt);
                     }
@@ -209,7 +214,7 @@ namespace paskalON.Protocols.Modbus.NModbus
                 _logger.LogError(msgConnect);
                 throw new InvalidOperationException(msgConnect, lastException);
             }
-            catch
+            catch (Exception)
             {
                 _state = ModbusClientState.Faulted;
                 RaiseCommunicationError();
@@ -234,7 +239,6 @@ namespace paskalON.Protocols.Modbus.NModbus
 
             _master?.Dispose();
             _master = null;
-
             _tcpClient?.Close();
             _tcpClient?.Dispose();
             _tcpClient = null;

@@ -4,6 +4,9 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.Protocols.C37118.Configs
 {
+    /// <summary>
+    /// PMU layout metadata.
+    /// </summary>
     public class PmuLayoutMetadata
     {
         /// <summary>
