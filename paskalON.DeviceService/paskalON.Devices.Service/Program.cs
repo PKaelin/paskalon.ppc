@@ -21,6 +21,7 @@ using paskalON.Telemetry;
 using StackExchange.Redis;
 
 WebApplication? app = null;
+Console.WriteLine("Starting service.....");
 
 try
 {
@@ -170,7 +171,6 @@ try
         app.MapOpenApi();
     }
 
-    app.UseHttpsRedirection();
     app.UseAuthorization();
     app.MapControllers();
     app.Run();

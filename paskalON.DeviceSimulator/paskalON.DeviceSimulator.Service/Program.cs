@@ -3,13 +3,24 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 
+using paskalON.Devices.Client;
+using paskalON.Devices.Dto.Ders;
+
 WebApplication? app = null;
+Console.WriteLine("Starting service.....");
 
 try
 {
+    // Get device service endpoint
+    Console.WriteLine("Getting environments.....");
+    string? getDerEndpointString = Environment.GetEnvironmentVariable("DEVICE_SERVICE_GETDER_ENDPOINT");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(getDerEndpointString);
+
+    // Create builder
+    Console.WriteLine("Building service.....");
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-
+    // Add WebApi's
     builder.Services.AddControllers();
     builder.Services.AddOpenApi();
 
@@ -20,6 +31,9 @@ try
     lifetime.ApplicationStopping.Register(() => app.Logger.LogInformation("Microservice Device Simulator is stopping"));
     app.Logger.LogInformation("Application starts initializing services");
 
+    // Get DER DTO
+    IDeviceServer deviceServer = new DeviceServer(getDerEndpointString);
+    DerDto derDto = await deviceServer.GetDer();
 
     app.Logger.LogInformation("Application finished initializing services");
 
@@ -28,7 +42,6 @@ try
         app.MapOpenApi();
     }
 
-    app.UseHttpsRedirection();
     app.UseAuthorization();
     app.MapControllers();
     app.Run();

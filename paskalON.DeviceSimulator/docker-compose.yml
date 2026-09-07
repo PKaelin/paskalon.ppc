@@ -1,0 +1,20 @@
+services:
+  paskalon.devicesimulator.service:
+    container_name: paskalon.devicesimulator.service
+    image: ${DOCKER_REGISTRY-}paskalondevicesimulatorservice
+    build:
+      context: .
+      dockerfile: paskalON.DeviceSimulator.Service/Dockerfile
+    ports:
+      - 45500:8080
+    environment:
+      - DEVICE_SERVICE_GETDER_ENDPOINT=http://paskalon.devices.service:8080/api/v1/der/getder
+    networks:
+      - ppc.network
+
+networks:
+  ppc.network:
+    name: ppc.network
+    # Attachable only for development and test
+    attachable: true
+
