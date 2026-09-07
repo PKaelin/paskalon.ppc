@@ -1,0 +1,21 @@
+#------------------------------------------------------------------------------
+# Variables
+#------------------------------------------------------------------------------
+@paskalON.DeviceSimulator.Service_HostAddress = http://localhost:32768
+
+
+
+#------------------------------------------------------------------------------
+# Simulations
+#------------------------------------------------------------------------------
+POST {{paskalON.DeviceSimulator.Service_HostAddress}}/api/v1/simulation/slowdownpower
+Content-Type: application/json
+
+{
+  "DeviceId": 1,
+  "SlowActivePowerByPercent": 5,
+  "SlowReactivePowerByPercent": 5
+}
+
+
+###
