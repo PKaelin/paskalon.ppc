@@ -55,7 +55,7 @@ namespace paskalON.Protocols.Modbus.Dispatchers
         /// <remarks>
         /// This is in combination with MaxQueueSize.
         /// </remarks>
-        protected readonly SemaphoreSlim _signal = new(0, int.MaxValue);
+        protected readonly SemaphoreSlim _signal = new SemaphoreSlim(0, int.MaxValue);
 
 
         /// <summary>

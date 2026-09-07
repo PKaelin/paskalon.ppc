@@ -2,11 +2,15 @@
 
 ## Project Guidelines
 - **Spacing:** Always use two carriage returns/line feeds (CR/LF) after class member definitions, such as methods and properties.
+- **Newlines:** Always insert a single blank line (`\n`) immediately before `try`, `switch`, and `if` statements, unless they are the very first line inside a code block.
 - **Variable Declaration:** Never use the implicit `var` keyword for variables; always use explicit types (e.g., `int x = 5;`, `string name = "";`).
 - **Exception Handling:** Do not use `if/else` blocks to manually validate arguments. Instead, always use the modern .NET static `ThrowIf` or `Throw` helper methods
   - Use `ArgumentException.ThrowIfNullOrEmpty(...)` or `ArgumentException.ThrowIfNullOrWhiteSpace(...)`
   - Use `ArgumentNullException.ThrowIfNull(...)`
   - Use `ArgumentOutOfRangeException.ThrowIfLessThan(...)` or `ArgumentOutOfRangeException.ThrowIfGreaterThan(...)`
+- **Conditions:**
+    - Do not write conditional statements and their return values on a single line.
+    - Always wrap multi-line conditional blocks or returned values in parentheses or proper block syntax where applicable, ensuring clean line breaks.
 - **Boolean Comparisons:** Avoid using the prefix `!` operator for negative boolean checks as it can be easily missed. Instead, use C# pattern matching or descriptive naming:
   - Use `is false` or `is not true` for explicit negative checks (e.g., `if (isValid is false)`). 
   - Prefer naming variables using positive phrasing so negative checks are rarely needed.
@@ -14,8 +18,29 @@
     - Use <inheritdoc/> when documentation can be inherited from a base class or interface.    
     - XML documentation tags must use multi-line formatting. Opening and closing tags must be on separate lines, with the documentation text on its own line(s).
     - Exception: <inheritdoc/> is always a self-closing single-line tag and must not be wrapped in <summary> or formatted across multiple lines.
+- **General test structure**:
+    - Tests must be deterministic.
+    - Test class and method names shall not contain any underscores.    
+    - Follow arrange, act, assert order.
+    - Tests must not depend on execution order.
+    - Ensure resources are disposed after use.
+    - Use async tests with `Task` rather than blocking on async code.
+    - Never use `.Result`, `.Wait()`, `Thread.Sleep()` for synchronization.
+    - Use data-driven testing (Data Rows) where applicable instead of writing separate test methods.
+    - Use realistic, fully instantiated test data in the Arrange phase and do not just use simple primitives or empty mock objects if the system behavior depends on real data structures.
+    - Use the short form of types (e.g., `IPEndPoint`) and ensure the necessary using directive (e.g., `using System.Net;`) is added at the top of the file namespace.**
 - **Unit Tests:** Use MSTest, use Moq without fluent-style APIs and following conventions:
-    - Test class names must begin with the name of the class that is tested and end with Test (e.g. class Device results in unit test class DeviceTest).
-    - Test method names shall start with the class name, followed by description what it tests and end with Test (e.g. class Device method Run results in unit test Run[Description]Test).
-    - Test class and method names shall not contain any underscores.
+    - Test class names must begin with the name of the class that is tested and end with Test (e.g. class Device results in unit test class DeviceTest).    
+    - Test method names shall start with the class name, followed by description what it tests and end with Test (e.g. class Device method Run results in unit test Run[Description]Test).    
     - Use `Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance` for simple ILoggers and `Microsoft.Extensions.Logging.Testing.FakeLogger<T>` when testing of logging makes sense.
+    - Ensure unit tests are entirely isolated, pure, and run completely in-memory.
+    - Strictly prohibit all hardware-bound or external dependencies.
+    - Use mocked interfaces or in-memory doubles to simulate external layer boundaries.
+    - Target the smallest piece of code that can be usefully and independently tested.
+- **Integration Tests:** Use MSTest, write real integration tests that verify multiple components work together.
+    - Do not mock the system under test.
+    - Do not mock the database when the purpose of the test is database integration.
+    - Do not mock HTTP services when the purpose of the test is HTTP integration unless the external dependency is intentionally replaced by a test server/fake.
+    - Mock only external boundaries that cannot or should not be exercised in the integration environment.
+    - Reuse the application's real dependency injection configuration whenever practical.
+     

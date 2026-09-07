@@ -113,7 +113,16 @@ namespace paskalON.Protocols.C37118
             }
 
             Task[] sessions = _clientSessions.ToArray();
-            await Task.WhenAll(sessions).WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                await Task.WhenAll(sessions).WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (_shutdownClientConnects.IsCancellationRequested)
+            {
+                // Expected when active streaming sessions are canceled during shutdown.
+            }
+
             State = C37ServerState.Disconnected;
         }
 

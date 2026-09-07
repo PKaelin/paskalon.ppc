@@ -24,7 +24,7 @@ namespace paskalON.Protocols.C37118.Configs
         /// <summary>
         /// List of PMU layout meta data.
         /// </summary>
-        public List<PmuLayoutMetadata> Pmus { get; } = new();
+        public List<PmuLayoutMetadata> Pmus { get; } = new List<PmuLayoutMetadata>();
 
 
         /// <summary>
@@ -33,6 +33,6 @@ namespace paskalON.Protocols.C37118.Configs
         /// <remarks>
         /// Create these when parsing the configuration frame bytes.
         /// </remarks>
-        public Dictionary<string, C37ChannelEntry> ChannelMap { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, C37ChannelEntry> ChannelMap { get; } = new Dictionary<string, C37ChannelEntry>(StringComparer.OrdinalIgnoreCase);
     }
 }

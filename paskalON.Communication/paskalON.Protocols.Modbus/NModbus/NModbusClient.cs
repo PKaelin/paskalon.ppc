@@ -51,7 +51,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <summary>
         /// IO lock that limits the number of threads that can access a resource.
         /// </summary>
-        private readonly SemaphoreSlim _ioLock = new(1, 1);
+        private readonly SemaphoreSlim _ioLock = new SemaphoreSlim(1, 1);
 
 
         /// <summary>

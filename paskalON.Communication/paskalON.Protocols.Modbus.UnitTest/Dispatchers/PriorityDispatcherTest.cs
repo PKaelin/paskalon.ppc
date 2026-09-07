@@ -36,8 +36,8 @@ namespace paskalON.Protocols.Modbus.UnitTest.Dispatchers
 
             try
             {
-                TaskCompletionSource<bool> firstStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
-                TaskCompletionSource<bool> releaseFirst = new(TaskCreationOptions.RunContinuationsAsynchronously);
+                TaskCompletionSource<bool> firstStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                TaskCompletionSource<bool> releaseFirst = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                 List<int> executionOrder = [];
 
                 Task first = dispatcher.EnqueueAsync(ModbusOperation.Write, 1, 5, async () =>
