@@ -27,6 +27,7 @@ namespace paskalON.Devices.Infrastructure.Storage
         DbSet<C37Config> C37Configs { get; set; }
         DbSet<ModbusConfig> ModbusConfigs { get; set; }
         DbSet<ModbusConnectionConfig> ModbusConnectionConfigs { get; set; }
+        DbSet<C37ConnectionConfig> C37ConnectionConfigs { get; set; }
 
 
         // Maps DbSet

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using paskalON.Dataface.C37s;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Protocols.C37118;
+using paskalON.Protocols.C37118.Configs;
 
 namespace paskalON.Devices.Application.Factories
 {
@@ -42,7 +43,18 @@ namespace paskalON.Devices.Application.Factories
 
             IC37Dataface dataface = new C37Register(config.Name);
             ILogger<C37Client> logger = _services.GetRequiredService<ILogger<C37Client>>();
-            IC37Client client = new C37Client(logger, config.Address, config.Port);
+            ClientConnectionConfig connectionConfig = new ClientConnectionConfig
+            {
+                ServerAddress = config.Address,
+                ServerPort = config.Port,
+                AddressFamily = config.AddressFamily,
+                ConnectionTimeoutMilliseconds = config.C37ConnectionConfig.ConnectionTimeoutMilliseconds,
+                DisconnectionTimeoutMilliseconds = config.C37ConnectionConfig.DisconnectionTimeoutMilliseconds,
+                ConnectRetryCount = config.C37ConnectionConfig.ConnectRetryCount,
+                ConnectRetryIntervalMilliseconds = config.C37ConnectionConfig.ConnectRetryIntervalMilliseconds,
+            };
+
+            IC37Client client = new C37Client(logger, connectionConfig);
 
             return (dataface, client);
         }

@@ -448,7 +448,7 @@ namespace paskalON.DemoSimple.Devices.Data
 
             PowerMeterDeviceConfig systemPowerMeterDevice = new PowerMeterDeviceConfig
             {
-                ChangedBy = "Test",
+                ChangedBy = ChangedBy,
                 Name = "System Power Meter Device",
                 ClassName = "paskalON.Devices.Equipments.Meters.PowerMeters.Simples.SystemPowerMeterSimpleV1Proxy",
                 IsReversePowerFlow = false,
@@ -457,10 +457,24 @@ namespace paskalON.DemoSimple.Devices.Data
             };
             context.PowerMeterDeviceConfigs.Add(systemPowerMeterDevice);
 
+            C37ConnectionConfig c37ConnectionConfig = new C37ConnectionConfig
+            {
+                ChangedBy = ChangedBy,
+                Name = "C37 connection for all C37",
+                ConnectionTimeoutMilliseconds = 5000,
+                DisconnectionTimeoutMilliseconds = 5000,
+                ConnectRetryCount = 3,
+                ConnectRetryIntervalMilliseconds = 5000,
+            };
+            context.C37ConnectionConfigs.Add(c37ConnectionConfig);
+
+
             C37Config systemMeterC37 = new C37Config
             {
                 ChangedBy = ChangedBy,
                 Name = "SystemPowerMeter 1",
+                C37ConnectionConfig = c37ConnectionConfig,
+                AddressFamily = AddressFamily.InterNetwork,
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartMeter,
                 ConfigFrameTimeoutMilliseconds = 3000,
@@ -475,7 +489,7 @@ namespace paskalON.DemoSimple.Devices.Data
             SystemPowerMeterConfig powerMeterConfig = new SystemPowerMeterConfig
             {
                 IsActive = true,
-                ChangedBy = "Test",
+                ChangedBy = ChangedBy,
                 Name = "C37 System Power Meter 1",
                 DeviceId = 1,
                 PowerFactorStandard = PowerFactorStandard.IEEE,

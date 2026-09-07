@@ -16,6 +16,7 @@ using paskalON.Protocols.C37118;
 using paskalON.Protocols.C37118.Frames;
 using paskalON.Protocols.C37118.Generators;
 using paskalON.Telemetry;
+using System.Net.Sockets;
 
 namespace paskalON.Devices.Equipments.IntegrationTest.Meters.PowerMeters.Simples
 {
@@ -31,6 +32,16 @@ namespace paskalON.Devices.Equipments.IntegrationTest.Meters.PowerMeters.Simples
         {
             Mock<DerConfig> derConfig = new Mock<DerConfig>();
             derConfig.SetupGet(x => x.Name).Returns("DerConfig");
+
+            C37ConnectionConfig connectionConfig = new C37ConnectionConfig
+            {
+                ChangedBy = "Test",
+                Name = "C37Config for all",
+                ConnectionTimeoutMilliseconds = 1001,
+                DisconnectionTimeoutMilliseconds = 1002,
+                ConnectRetryCount = 0,
+                ConnectRetryIntervalMilliseconds = 4001,
+            };
 
             _powerMeterMapC37Config = new PowerMeterMapC37Config
             {
@@ -69,6 +80,8 @@ namespace paskalON.Devices.Equipments.IntegrationTest.Meters.PowerMeters.Simples
             {
                 ChangedBy = "Test",
                 Name = "C37Config",
+                C37ConnectionConfig = connectionConfig,
+                AddressFamily = AddressFamily.InterNetwork,
                 StationName = "PMU",
                 StreamId = 1,
                 Address = "127.0.0.1",

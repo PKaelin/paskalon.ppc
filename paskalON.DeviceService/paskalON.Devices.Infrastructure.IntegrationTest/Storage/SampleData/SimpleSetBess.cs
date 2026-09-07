@@ -26,6 +26,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
     {
         // Core
         public ModbusConnectionConfig? ModbusConnectionConfig { get; set; }
+        public C37ConnectionConfig? C37ConnectionConfig { get; set; }
 
         // Maps
         public PowerMeterMapC37Config? PowerMeterMapC37Config { get; set; }
@@ -111,6 +112,16 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
                 SendRetryIntervalMilliseconds = 4002,
                 ServerToClientAliveIntervalSeconds = -1,
                 ServerMaximumConnections = 5
+            };
+
+            C37ConnectionConfig = new C37ConnectionConfig
+            {
+                ChangedBy = "Test",
+                Name = "C37Config for all",
+                ConnectionTimeoutMilliseconds = 1001,
+                DisconnectionTimeoutMilliseconds = 1002,
+                ConnectRetryCount = 2,
+                ConnectRetryIntervalMilliseconds = 4001,
             };
         }
 
@@ -476,12 +487,16 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
         // CreateMeters
         private void CreateMeters()
         {
+
+
             SystemPowerMeterC37Config = new C37Config
             {
                 ChangedBy = "Test",
                 Name = "SystemPowerMeterC37Config",
+                C37ConnectionConfig = C37ConnectionConfig!,
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartMeter,
+                AddressFamily = AddressFamily.InterNetwork,
                 ConfigFrameTimeoutMilliseconds = 3000,
                 DataFrameRetryCount = 3,
                 DataFrameTimeoutMilliseconds = 500,
@@ -509,6 +524,8 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
             {
                 ChangedBy = "Test",
                 Name = "CircuitPowerMeterConfig",
+                C37ConnectionConfig = C37ConnectionConfig!,
+                AddressFamily = AddressFamily.InterNetwork,
                 Address = Constants.Ip4Localhost,
                 Port = Constants.PortStartMeter + 1,
                 ConfigFrameTimeoutMilliseconds = 3000,

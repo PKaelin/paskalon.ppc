@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
+    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Protocols.C37118\paskalON.Protocols.C37118.csproj" />
+    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Protocols.Modbus\paskalON.Protocols.Modbus.csproj" />
     <ProjectReference Include="..\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />
     <ProjectReference Include="..\paskalON.Devices.Dto\paskalON.Devices.Dto.csproj" />
     <ProjectReference Include="..\paskalON.Devices.Equipments\paskalON.Devices.Equipments.csproj" />

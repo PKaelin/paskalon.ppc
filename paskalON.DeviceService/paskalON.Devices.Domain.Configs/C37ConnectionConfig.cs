@@ -2,37 +2,19 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using System.Net.Sockets;
+using paskalON.Domains;
 
-namespace paskalON.Protocols.C37118.Configs
+namespace paskalON.Devices.Domain.Configs
 {
     /// <summary>
-    /// Client connection configuration.
+    /// Configuration class for a host connections.
     /// </summary>
-    public record ClientConnectionConfig
+    public class C37ConnectionConfig : NameBase
     {
-        /// <summary>
-        /// Server address the client connects to.
-        /// </summary>
-        public required string ServerAddress { get; init; }
-
-
-        /// <summary>
-        /// Server port the client connects to.
-        /// </summary>
-        public required int ServerPort { get; init; }
-
-
-        /// <summary>
-        /// Address family to connect with. Default is IP4.
-        /// </summary>
-        public AddressFamily AddressFamily { get; init; }
-
-
         /// <summary>
         /// Wait time for to client to be successfully connected before raising an error.
         /// </summary>
-        public required int ConnectionTimeoutMilliseconds { get; init; }
+        public int ConnectionTimeoutMilliseconds { get; set; } = 5000;
 
 
         /// <summary>
@@ -45,12 +27,12 @@ namespace paskalON.Protocols.C37118.Configs
         /// How many times the client tries to reconnect or when negative (-1) then endless retry or 0 connects once.
         /// When this is negative this is equivalent with maintain connection.
         /// </summary>
-        public required int ConnectRetryCount { get; init; }
+        public int ConnectRetryCount { get; set; } = 3;
 
 
         /// <summary>
         /// How long to wait before retrying to connect in milliseconds.
         /// </summary>
-        public required int ConnectRetryIntervalMilliseconds { get; init; }
+        public int ConnectRetryIntervalMilliseconds { get; set; } = 5000;
     }
 }

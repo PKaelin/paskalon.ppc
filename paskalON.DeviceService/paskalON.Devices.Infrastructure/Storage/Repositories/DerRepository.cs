@@ -41,7 +41,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
 
             // Load communications 
             await Context.ModbusConfigs.Include(mc => mc.ModbusConnectionConfig).ToListAsync();
-            await Context.C37Configs.ToListAsync();
+            await Context.C37Configs.Include(cc => cc.C37ConnectionConfig).ToListAsync();
             // Load DER devices
             await Context.PowerConversionSystemConfigs.Where(a => a.IsActive == isActive).Include(pcs => pcs.PowerConversionSystemDeviceConfig).ToListAsync();
             await Context.BatteryBankConfigs.Where(a => a.IsActive == isActive).Include(bb => bb.BatteryBankDeviceConfig).ToListAsync();

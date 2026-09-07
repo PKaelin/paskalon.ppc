@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Communication.Protocols.C37118.Types;
 using paskalON.Domains;
+using System.Net.Sockets;
 
 namespace paskalON.Devices.Domain.Configs
 {
@@ -12,6 +13,18 @@ namespace paskalON.Devices.Domain.Configs
     /// </summary>
     public class C37Config : NameBase
     {
+        /// <summary>
+        /// Relationship to C37ConnectionConfig Id.
+        /// </summary>
+        public int C37ConnectionConfigId { get; set; }
+
+
+        /// <summary>
+        /// Relationship to C37ConnectionConfig.
+        /// </summary>
+        public required C37ConnectionConfig C37ConnectionConfig { get; set; }
+
+
         /// <summary>
         /// IP address of the device.
         /// </summary>
@@ -30,6 +43,12 @@ namespace paskalON.Devices.Domain.Configs
             get;
             set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
         }
+
+
+        /// <summary>
+        /// Address family to connect with. Default is IP4.
+        /// </summary>
+        public required AddressFamily AddressFamily { get; set; } = AddressFamily.InterNetwork;
 
 
         /// <summary>

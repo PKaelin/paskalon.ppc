@@ -52,6 +52,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 // Core
                 context.Configurations.Add(new Configuration { ChangedBy = "Test", Key = "Key", Value = "Value", Description = "Desc" });
                 context.ModbusConnectionConfigs.Add(sample.ModbusConnectionConfig!);
+                context.C37ConnectionConfigs.Add(sample.C37ConnectionConfig!);
                 // Devices
                 context.PowerConversionSystemDeviceConfigs.Add(sample.PowerConversionSystemDeviceConfig!);
                 context.PowerConversionSystemDeviceCustomConfigs.Add(sample.PowerConversionSystemDeviceCustomConfig!);
@@ -188,6 +189,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 
                 // Core
                 context.ModbusConnectionConfigs.Add(sample.ModbusConnectionConfig!);
+                context.C37ConnectionConfigs.Add(sample.C37ConnectionConfig!);
                 // Maps
                 context.PowerMeterMapC37Configs.Add(sample.PowerMeterMapC37Config!);
                 context.PowerMeterMapModbusConfigs.Add(sample.PowerMeterMapModbusConfig!);
