@@ -4,7 +4,6 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using paskalON.Devices.Application;
 using paskalON.Devices.Client.Subscribers;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.EnergyResources.Solars;
@@ -213,11 +212,11 @@ namespace paskalON.Devices.Client.UnitTest
         private DerDto CreateBatteryDevicesDto()
         {
             // Devices
-            BbDefinitionDto bbDefinition1 = new BbDefinitionDto { DeviceId = 1, Name = "BB1" };
+            BbDefinitionDto bbDefinition1 = new BbDefinitionDto { DeviceId = 1, Name = "BB1", TargetAddress = "localhost", TargetPort = 111 };
             BbDto bb1 = new BbDto(bbDefinition1);
-            BbDefinitionDto bbDefinition2 = new BbDefinitionDto { DeviceId = 2, Name = "BB2" };
+            BbDefinitionDto bbDefinition2 = new BbDefinitionDto { DeviceId = 2, Name = "BB2", TargetAddress = "localhost", TargetPort = 111 };
             BbDto bb2 = new BbDto(bbDefinition2);
-            PcsDefinitionDto pcsDef1 = new PcsDefinitionDto { DeviceId = 1, Name = "PCS1" };
+            PcsDefinitionDto pcsDef1 = new PcsDefinitionDto { DeviceId = 1, Name = "PCS1", TargetAddress = "localhost", TargetPort = 111 };
             PcsDto pcs1 = new PcsDto(pcsDef1);
             // Structure
             DerBatteryStorageUnitDto unit1 = new DerBatteryStorageUnitDto { PowerConversionSystem = pcs1, BatteryBanks = new List<BbDto> { bb1, bb2 } };
@@ -232,15 +231,15 @@ namespace paskalON.Devices.Client.UnitTest
         private DerDto CreateSolarDevicesDto()
         {
             // Devices
-            PvDefinitionDto pvDef1 = new PvDefinitionDto { DeviceId = 1, Name = "PV1" };
+            PvDefinitionDto pvDef1 = new PvDefinitionDto { DeviceId = 1, Name = "PV1", TargetAddress = "localhost", TargetPort = 111 };
             PvDto pv1 = new PvDto(pvDef1);
-            PvDefinitionDto pvDef2 = new PvDefinitionDto { DeviceId = 2, Name = "PV2" };
+            PvDefinitionDto pvDef2 = new PvDefinitionDto { DeviceId = 2, Name = "PV2", TargetAddress = "localhost", TargetPort = 111 };
             PvDto pv2 = new PvDto(pvDef2);
-            PvDefinitionDto pvDef3 = new PvDefinitionDto { DeviceId = 3, Name = "PV3" };
+            PvDefinitionDto pvDef3 = new PvDefinitionDto { DeviceId = 3, Name = "PV3", TargetAddress = "localhost", TargetPort = 111 };
             PvDto pv3 = new PvDto(pvDef3);
-            PcsDefinitionDto pcsDef1 = new PcsDefinitionDto { DeviceId = 1, Name = "PCS1" };
+            PcsDefinitionDto pcsDef1 = new PcsDefinitionDto { DeviceId = 1, Name = "PCS1", TargetAddress = "localhost", TargetPort = 111 };
             PcsDto pcs1 = new PcsDto(pcsDef1);
-            PcsDefinitionDto pcsDef2 = new PcsDefinitionDto { DeviceId = 2, Name = "PCS2" };
+            PcsDefinitionDto pcsDef2 = new PcsDefinitionDto { DeviceId = 2, Name = "PCS2", TargetAddress = "localhost", TargetPort = 111 };
             PcsDto pcs2 = new PcsDto(pcsDef2);
             // Structure
             DerSolarUnitDto unit1 = new DerSolarUnitDto { PowerConversionSystem = pcs1, SolarPanels = new List<PvDto> { pv1, pv2 } };
@@ -256,15 +255,15 @@ namespace paskalON.Devices.Client.UnitTest
         private DerDto CreateMeterDevicesDto()
         {
             // Devices
-            PmSystemDefinitionDto pmSysDef1 = new PmSystemDefinitionDto { DeviceId = 1, Name = "SysPm1" };
+            PmSystemDefinitionDto pmSysDef1 = new PmSystemDefinitionDto { DeviceId = 1, Name = "SysPm1", TargetAddress = "localhost", TargetPort = 111 };
             PmSystemDto pmSys1 = new PmSystemDto(pmSysDef1);
-            PmExternalDefinitionDto pmExDef1 = new PmExternalDefinitionDto { DeviceId = 1, Name = "ExPm1" };
+            PmExternalDefinitionDto pmExDef1 = new PmExternalDefinitionDto { DeviceId = 1, Name = "ExPm1", TargetAddress = "localhost", TargetPort = 111 };
             PmExternalDto pmEx1 = new PmExternalDto(pmExDef1);
-            PmExternalDefinitionDto pmExDef2 = new PmExternalDefinitionDto { DeviceId = 2, Name = "ExPm2" };
+            PmExternalDefinitionDto pmExDef2 = new PmExternalDefinitionDto { DeviceId = 2, Name = "ExPm2", TargetAddress = "localhost", TargetPort = 111 };
             PmExternalDto pmEx2 = new PmExternalDto(pmExDef2);
-            PmAuxiliaryDefinitionDto pmAuxDef1 = new PmAuxiliaryDefinitionDto { DeviceId = 1, Name = "AuxPm1" };
+            PmAuxiliaryDefinitionDto pmAuxDef1 = new PmAuxiliaryDefinitionDto { DeviceId = 1, Name = "AuxPm1", TargetAddress = "localhost", TargetPort = 111 };
             PmAuxiliaryDto pmAux1 = new PmAuxiliaryDto(pmAuxDef1);
-            PmCircuitDefinitionDto pmCircDef1 = new PmCircuitDefinitionDto { DeviceId = 1, Name = "CircPm1" };
+            PmCircuitDefinitionDto pmCircDef1 = new PmCircuitDefinitionDto { DeviceId = 1, Name = "CircPm1", TargetAddress = "localhost", TargetPort = 111 };
             PmCircuitDto pmCirc1 = new PmCircuitDto(pmCircDef1);
             // Structure
             DerCircuitDto circuit1 = new DerCircuitDto { CircuitPowerMeter = pmCirc1 };

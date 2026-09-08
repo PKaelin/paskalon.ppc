@@ -18,6 +18,14 @@ namespace paskalON.Devices.Dto.EnergyResources.Solars
         public required int DeviceId { get; init; }
 
 
+        /// <inheritdoc/>
+        public required string TargetAddress { get; init; }
+
+
+        /// <inheritdoc/>
+        public required int TargetPort { get; init; }
+
+
         /// <summary>
         /// Name of the device.
         /// </summary>

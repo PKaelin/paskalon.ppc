@@ -39,7 +39,7 @@ namespace paskalON.Devices.Client.UnitTest.Registers
             DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto> register =
                 new DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>(NullLogger.Instance);
 
-            PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test" });
+            PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test", TargetAddress = "localhost", TargetPort = 111 });
             register.Add(device);
 
             Assert.HasCount(1, register.Devices);
@@ -53,8 +53,8 @@ namespace paskalON.Devices.Client.UnitTest.Registers
             DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto> register =
                 new DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>(NullLogger.Instance);
 
-            PcsDto firstDevice = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test" });
-            PcsDto secondDevice = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test" });
+            PcsDto firstDevice = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test", TargetAddress = "localhost", TargetPort = 111 });
+            PcsDto secondDevice = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test", TargetAddress = "localhost", TargetPort = 111 });
             register.Add(firstDevice);
 
             Assert.ThrowsExactly<InvalidOperationException>(() => { register.Add(secondDevice); });
@@ -67,7 +67,7 @@ namespace paskalON.Devices.Client.UnitTest.Registers
             DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto> register =
                 new DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>(NullLogger.Instance);
 
-            PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test" });
+            PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test", TargetAddress = "localhost", TargetPort = 111 });
             register.Add(device);
 
             bool result = register.TryGet(1, out PcsDto? foundDevice);
@@ -97,10 +97,10 @@ namespace paskalON.Devices.Client.UnitTest.Registers
             DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto> register =
                 new DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>(NullLogger.Instance);
 
-            PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test" });
+            PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test", TargetAddress = "localhost", TargetPort = 111 });
             register.Add(device);
 
-            PcsDefinitionDto update = new PcsDefinitionDto { DeviceId = 1, Name = "Updated" };
+            PcsDefinitionDto update = new PcsDefinitionDto { DeviceId = 1, Name = "Updated", TargetAddress = "localhost", TargetPort = 111 };
             register.UpdateDefinition(update);
 
             Assert.HasCount(1, register.Devices.Where(d => d.DeviceId == device.DeviceId));
@@ -114,7 +114,7 @@ namespace paskalON.Devices.Client.UnitTest.Registers
             DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto> register =
                 new DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>(NullLogger.Instance);
 
-            PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test" });
+            PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test", TargetAddress = "localhost", TargetPort = 111 });
             register.Add(device);
 
             PcsCoreDto update = new PcsCoreDto { DeviceId = 1, State = PcsState.Starting };
@@ -132,7 +132,7 @@ namespace paskalON.Devices.Client.UnitTest.Registers
             DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto> register =
                 new DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>(NullLogger.Instance);
 
-            PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test" });
+            PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test", TargetAddress = "localhost", TargetPort = 111 });
             register.Add(device);
 
             ActivePower activePower = new ActivePower(11);

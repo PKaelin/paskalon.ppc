@@ -88,6 +88,14 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         public int DeviceId { get => _config.DeviceId; }
 
 
+        /// <inheritdoc/>
+        public string TargetAddress { get => (_config.C37Config?.Address ?? _config.ModbusConfig?.Address) ?? "NoAddressConfigured"; }
+
+
+        /// <inheritdoc/>
+        public int TargetPort { get => (_config.C37Config?.Port ?? _config.ModbusConfig?.Port) ?? 0; }
+
+
         /// <summary>
         /// Is reverse power flow from configuration.
         /// </summary>        

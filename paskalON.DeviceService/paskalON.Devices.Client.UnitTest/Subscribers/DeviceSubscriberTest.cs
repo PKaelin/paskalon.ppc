@@ -142,6 +142,8 @@ namespace paskalON.Devices.Client.UnitTest.Subscribers
             {
                 DeviceId = 1,
                 Name = "Test",
+                TargetAddress = "localhost",
+                TargetPort = 111,
                 MaximumDCVoltage = 11,
                 MinimumDCVoltage = 12,
                 NameplateMaximumACCurrent = 13,
@@ -235,9 +237,6 @@ namespace paskalON.Devices.Client.UnitTest.Subscribers
         }
 
 
-
-
-        //---------------------------------------------------------------------------------------------
 
         [TestMethod]
         public void DeviceSubscriberUpdateDetailValidJsonTest()

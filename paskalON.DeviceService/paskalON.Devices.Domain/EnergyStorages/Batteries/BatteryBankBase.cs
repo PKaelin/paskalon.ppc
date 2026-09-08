@@ -93,6 +93,14 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         public int DeviceId { get => _config.DeviceId; }
 
 
+        /// <inheritdoc/>
+        public string TargetAddress { get => _config.ModbusConfig.Address; }
+
+
+        /// <inheritdoc/>
+        public int TargetPort { get => _config.ModbusConfig.Port; }
+
+
         /// <summary>
         /// Indicates whether the battery bank is initially connected or not.
         /// </summary>

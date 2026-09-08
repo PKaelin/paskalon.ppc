@@ -146,6 +146,8 @@ namespace paskalON.Devices.Application
             {
                 DeviceId = pcs.Id,
                 Name = pcs.Name,
+                TargetAddress = pcs.TargetAddress,
+                TargetPort = pcs.TargetPort,
                 NameplateMaximumActivePower = pcs.NameplateMaximumActivePower,
                 NameplateMaximumReactivePower = pcs.NameplateMaximumReactivePower,
                 NameplateMaximumApparentPower = pcs.NameplateMaximumApparentPower,
@@ -232,6 +234,8 @@ namespace paskalON.Devices.Application
             {
                 DeviceId = batteryBank.Id,
                 Name = batteryBank.Name,
+                TargetAddress = batteryBank.TargetAddress,
+                TargetPort = batteryBank.TargetPort,
                 InitiallyConnected = batteryBank.InitiallyConnected,
                 NameplateCapacity = batteryBank.NameplateCapacity,
                 NameplateMaximumChargeRate = batteryBank.NameplateMaximumChargeRate,
@@ -330,6 +334,8 @@ namespace paskalON.Devices.Application
             {
                 DeviceId = solarPanel.Id,
                 Name = solarPanel.Name,
+                TargetAddress = solarPanel.TargetAddress,
+                TargetPort = solarPanel.TargetPort,
                 NumberOfPanels = solarPanel.NumberOfPanels,
                 MinimumVoltageSum = solarPanel.MinimumVoltageSum,
                 MaximumVoltageSum = solarPanel.MaximumVoltageSum,
@@ -442,6 +448,8 @@ namespace paskalON.Devices.Application
             {
                 DeviceId = meter.Id,
                 Name = meter.Name,
+                TargetAddress = meter.TargetAddress,
+                TargetPort = meter.TargetPort,
                 IsReversePowerFlow = meter.IsReversePowerFlow,
                 IsCurrentSigned = meter.IsCurrentSigned,
                 PowerFactorStandard = meter.PowerFactorStandard

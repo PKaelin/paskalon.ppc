@@ -20,6 +20,14 @@ namespace paskalON.Devices.Dto.Meters.PowerMeters
         public int DeviceId { get; init; }
 
 
+        /// <inheritdoc/>
+        public string TargetAddress { get; init; } = string.Empty;
+
+
+        /// <inheritdoc/>
+        public int TargetPort { get; init; }
+
+
         /// <summary>
         /// Name of the device.
         /// </summary>

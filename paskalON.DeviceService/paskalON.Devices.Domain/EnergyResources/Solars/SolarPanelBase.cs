@@ -94,6 +94,14 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         public int DeviceId { get => _config.DeviceId; }
 
 
+        /// <inheritdoc/>
+        public string TargetAddress { get => "NoCommunication"; }
+
+
+        /// <inheritdoc/>
+        public int TargetPort { get => 0; }
+
+
         /// <summary>
         /// Number of solar panels.
         /// </summary>

@@ -21,6 +21,18 @@ namespace paskalON.Devices.Domain
 
 
         /// <summary>
+        /// Target address of the device.
+        /// </summary>
+        string TargetAddress { get; }
+
+
+        /// <summary>
+        /// Target port of the device.
+        /// </summary>
+        int TargetPort { get; }
+
+
+        /// <summary>
         /// Data setters for total loose coupled interfaces.
         /// </summary>
         IDataface Dataface { get; }

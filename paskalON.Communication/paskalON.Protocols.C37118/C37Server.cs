@@ -172,6 +172,13 @@ namespace paskalON.Protocols.C37118
                 using (NetworkStream stream = client.GetStream())
                 {
                     await stream.WriteAsync(C37FrameCodec.CreateConfigurationFrame(_simulations, _dataRate), cancellationToken).ConfigureAwait(false);
+                    // DataRate | Math | Interval | Milliseconds
+                    //   60     | 1/60 | 0.01666s | 16.67ms
+                    //   50     | 1/50 | 0.2s     | 20.00ms
+                    //   30     | 1/30 | 0.03333s | 33.33ms
+                    //   25     | 1/25 | 0.04s    | 40.00ms
+                    //   10     | 1/10 | 0.1s     | 100.00ms
+                    //   1      | 1/1  | 1s       | 1s
                     TimeSpan interval = TimeSpan.FromSeconds(1d / _dataRate);
                     State = C37ServerState.Streaming;
 

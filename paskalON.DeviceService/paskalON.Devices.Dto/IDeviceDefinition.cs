@@ -13,5 +13,17 @@ namespace paskalON.Devices.Dto
         /// Name of the device.
         /// </summary>
         string Name { get; }
+
+
+        /// <summary>
+        /// Target address of the device.
+        /// </summary>
+        string TargetAddress { get; }
+
+
+        /// <summary>
+        /// Target port of the device.
+        /// </summary>
+        int TargetPort { get; }
     }
 }

@@ -122,6 +122,14 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public int DeviceId { get => _config.DeviceId; }
 
 
+        /// <inheritdoc/>
+        public string TargetAddress { get => _config.ModbusConfig.Address; }
+
+
+        /// <inheritdoc/>
+        public int TargetPort { get => _config.ModbusConfig.Port; }
+
+
         /// <summary>
         /// Flag whether this PCS is initially started or not.
         /// </summary>
