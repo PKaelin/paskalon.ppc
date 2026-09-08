@@ -27,16 +27,32 @@ class Program
     {
         try
         {
+            // Read arguments to create simulator data
+            if (bool.TryParse(args.Length > 0 ? args[0] : "false", out bool createSimulatorData) == false)
+            {
+                createSimulatorData = false;
+            }
+
             // Setup configuration
             IConfigurationRoot configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
             // Read arguments or configuration
             // Use specific: "SchemaVersion": "20260530987654_v_0_1"
             // Use latest:   "SchemaVersion": ""
-            string? schemaVersion = args.Length > 0 ? args[0] : configuration.GetSection("SchemaVersion")?.Value;
+            string? schemaVersion = args.Length > 1 ? args[1] : configuration.GetSection("SchemaVersion")?.Value;
 
             // Read database connection string and create db context options
-            string? connectionString = configuration.GetConnectionString("DatabaseContext");
+            string? connectionString;
+
+            if (createSimulatorData == true)
+            {
+                connectionString = configuration.GetConnectionString("DatabaseContextSim");
+            }
+            else
+            {
+                connectionString = configuration.GetConnectionString("DatabaseContext");
+            }
+
             ArgumentException.ThrowIfNullOrEmpty(connectionString);
             DbContextOptions<DeviceServiceContext> options = new DbContextOptionsBuilder<DeviceServiceContext>().UseNpgsql(connectionString).Options;
 
@@ -66,7 +82,7 @@ class Program
 
                 // Create and save the data
                 await CommonData.CreateAsync(context);
-                await ServiceData.CreateAsync(context);
+                await ServiceData.CreateAsync(context, createSimulatorData);
             }
 
             Console.WriteLine("Successfully created the data");

@@ -29,12 +29,13 @@ namespace paskalON.DemoSimple.Devices.Data
         /// Main method to create the service data.
         /// </summary>
         /// <param name="context">DB context interface.</param>
-        public static async Task CreateAsync(IDeviceServiceContext context)
+        public static async Task CreateAsync(IDeviceServiceContext context, bool createSimulatorData)
         {
             await CreateCore(context);
-            DerConfig derConfig = await CreateStructureAndDevicesAsync(context);
+            DerConfig derConfig = await CreateStructureAndDevicesAsync(context, createSimulatorData);
             await CreateMetersAsync(context, derConfig);
         }
+
 
         /// <summary>
         /// Create core configuration of the service.
@@ -75,7 +76,7 @@ namespace paskalON.DemoSimple.Devices.Data
         /// Create the DER structure and its devices.
         /// </summary>
         /// <param name="context">Database context.</param>
-        private static async Task<DerConfig> CreateStructureAndDevicesAsync(IDeviceServiceContext context)
+        private static async Task<DerConfig> CreateStructureAndDevicesAsync(IDeviceServiceContext context, bool createSimulatorData)
         {
             DerConfig derConfig = new DerConfig { ChangedBy = ChangedBy, Name = "Der 1", };
             context.DerConfigs.Add(derConfig);
@@ -143,6 +144,11 @@ namespace paskalON.DemoSimple.Devices.Data
                 ZeroOutputOnCommLoss = true
             };
             context.PowerConversionSystemDeviceConfigs.Add(devicePcs);
+
+            if (createSimulatorData == true)
+            {
+                ServiceSimulatorData.CreatePowerConversionSystemDeviceSim(context, devicePcs);
+            }
 
             ModbusConfig pcs1Modbus = new ModbusConfig
             {
@@ -247,6 +253,11 @@ namespace paskalON.DemoSimple.Devices.Data
                 ZeroCapacityOnCommLoss = true
             };
             context.BatteryBankDeviceConfigs.Add(bbDevice);
+
+            if (createSimulatorData == true)
+            {
+                ServiceSimulatorData.CreateBatteryBankDeviceSim(context, bbDevice);
+            }
 
             ModbusConfig bb11Modbus = new ModbusConfig
             {
