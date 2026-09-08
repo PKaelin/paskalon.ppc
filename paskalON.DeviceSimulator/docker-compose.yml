@@ -1,16 +1,61 @@
 services:
+  # Database
+  paskalon.devicesimulator.data:
+    container_name: paskalon.devicesimulator.data
+    image: postgres:18.6
+    restart: unless-stopped
+    ports:
+      - 45501:5432
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/db_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_DB: devicesimulator
+    secrets:
+      - db_user
+      - db_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d devicesimulator -U $$(cat /run/secrets/db_user)"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - paskalon.devicesimulator.data:/var/lib/postgresql
+    networks:
+      - ppc.network
+
+
+  # Device simulator service
   paskalon.devicesimulator.service:
     container_name: paskalon.devicesimulator.service
     image: ${DOCKER_REGISTRY-}paskalondevicesimulatorservice
     build:
       context: .
       dockerfile: paskalON.DeviceSimulator.Service/Dockerfile
+    depends_on:
+      paskalon.devicesimulator.data:
+        condition: service_healthy
     ports:
       - 45500:8080
     environment:
-      - DEVICE_SERVICE_GETDER_ENDPOINT=http://paskalon.devices.service:8080/api/v1/der/getder
+      - DATABASE_CONNECTION_FILE=/run/secrets/database_connection
+      - PMU_DATA_RATE=1
+    secrets:
+      - database_connection
     networks:
       - ppc.network
+
+secrets:
+  database_connection:
+    file: ./secrets/database_connection
+  db_user:
+    file: ./secrets/db_user
+  db_password:
+    file: ./secrets/db_password
+
+volumes:
+  paskalon.devicesimulator.data:
+    name: paskalon.devicesimulator.data
 
 networks:
   ppc.network:
