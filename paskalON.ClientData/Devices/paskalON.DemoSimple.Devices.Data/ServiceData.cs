@@ -24,6 +24,17 @@ namespace paskalON.DemoSimple.Devices.Data
         /// </summary>
         private const string ChangedBy = "System Init";
 
+        // TODO: Refactor
+        private static string Pcs1 = "paskalon.devicesimulator.service";
+        private static string Pcs2 = "paskalon.devicesimulator.service";
+        private static string Pcs3 = "paskalon.devicesimulator.service";
+        private static string Bb1_1 = "paskalon.devicesimulator.service";
+        private static string Bb1_2 = "paskalon.devicesimulator.service";
+        private static string Bb2_1 = "paskalon.devicesimulator.service";
+        private static string Bb2_2 = "paskalon.devicesimulator.service";
+        private static string Bb3_1 = "paskalon.devicesimulator.service";
+        private static string Bb3_2 = "paskalon.devicesimulator.service";
+        private static string PmSys1 = "paskalon.devicesimulator.service";
 
         /// <summary>
         /// Main method to create the service data.
@@ -154,7 +165,7 @@ namespace paskalON.DemoSimple.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConfigPcs1",
-                Address = Constants.Ip4Localhost,
+                Address = Pcs1,
                 Port = Constants.PortStartPcs,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
@@ -179,7 +190,7 @@ namespace paskalON.DemoSimple.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConfigPcs2",
-                Address = Constants.Ip4Localhost,
+                Address = Pcs2,
                 Port = Constants.PortStartPcs + 1,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
@@ -204,7 +215,7 @@ namespace paskalON.DemoSimple.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConfigPcs3",
-                Address = Constants.Ip4Localhost,
+                Address = Pcs3,
                 Port = Constants.PortStartPcs + 2,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
@@ -263,7 +274,7 @@ namespace paskalON.DemoSimple.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConfigBB1.1",
-                Address = Constants.Ip4Localhost,
+                Address = Bb1_1,
                 Port = Constants.PortStartBms,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
@@ -288,13 +299,13 @@ namespace paskalON.DemoSimple.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConfigBB1.2",
-                Address = Constants.Ip4Localhost,
+                Address = Bb1_2,
                 Port = Constants.PortStartBms + 1,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
             };
-            context.ModbusConfigs.Add(bb11Modbus);
+            context.ModbusConfigs.Add(bb12Modbus);
 
             BatteryBankConfig bb12 = new BatteryBankConfig
             {
@@ -313,7 +324,7 @@ namespace paskalON.DemoSimple.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConfigBB2.1",
-                Address = Constants.Ip4Localhost,
+                Address = Bb2_1,
                 Port = Constants.PortStartBms + 2,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
@@ -338,7 +349,7 @@ namespace paskalON.DemoSimple.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConfigBB2.2",
-                Address = Constants.Ip4Localhost,
+                Address = Bb2_2,
                 Port = Constants.PortStartBms + 3,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
@@ -353,7 +364,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Name = "BB 2.2",
                 DeviceId = 22,
                 InitiallyConnected = true,
-                ModbusConfig = bb21Modbus,
+                ModbusConfig = bb22Modbus,
                 BatteryBankDeviceConfig = bbDevice,
                 DerUnitConfig = unit2
             };
@@ -363,7 +374,7 @@ namespace paskalON.DemoSimple.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConfigBB3.1",
-                Address = Constants.Ip4Localhost,
+                Address = Bb3_1,
                 Port = Constants.PortStartBms + 4,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
@@ -388,7 +399,7 @@ namespace paskalON.DemoSimple.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConfigBB3.2",
-                Address = Constants.Ip4Localhost,
+                Address = Bb3_2,
                 Port = Constants.PortStartBms + 5,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
@@ -403,7 +414,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Name = "BB 3.2",
                 DeviceId = 33,
                 InitiallyConnected = true,
-                ModbusConfig = bb31Modbus,
+                ModbusConfig = bb32Modbus,
                 BatteryBankDeviceConfig = bbDevice,
                 DerUnitConfig = unit3
             };
@@ -486,7 +497,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 Name = "SystemPowerMeter 1",
                 C37ConnectionConfig = c37ConnectionConfig,
                 AddressFamily = AddressFamily.InterNetwork,
-                Address = Constants.Ip4Localhost,
+                Address = PmSys1,
                 Port = Constants.PortStartMeter,
                 ConfigFrameTimeoutMilliseconds = 3000,
                 DataFrameRetryCount = 3,
