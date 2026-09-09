@@ -52,5 +52,11 @@ namespace paskalON.Protocols.C37118.Configs
         /// How long to wait before retrying to connect in milliseconds.
         /// </summary>
         public required int ConnectRetryIntervalMilliseconds { get; init; }
+
+
+        /// <summary>
+        /// Timeout for sending/reading a response in milliseconds or -1 when no timeout
+        /// </summary>
+        public required int OperationTimeoutMilliseconds { get; init; }
     }
 }

@@ -34,5 +34,11 @@ namespace paskalON.Devices.Domain.Configs
         /// How long to wait before retrying to connect in milliseconds.
         /// </summary>
         public int ConnectRetryIntervalMilliseconds { get; set; } = 5000;
+
+
+        /// <summary>
+        /// Timeout for sending/reading a response in milliseconds or -1 when no timeout
+        /// </summary>
+        public int OperationTimeoutMilliseconds { get; set; } = 30000;
     }
 }

@@ -52,6 +52,7 @@ namespace paskalON.Devices.Application.Factories
                 DisconnectionTimeoutMilliseconds = config.C37ConnectionConfig.DisconnectionTimeoutMilliseconds,
                 ConnectRetryCount = config.C37ConnectionConfig.ConnectRetryCount,
                 ConnectRetryIntervalMilliseconds = config.C37ConnectionConfig.ConnectRetryIntervalMilliseconds,
+                OperationTimeoutMilliseconds = config.C37ConnectionConfig.OperationTimeoutMilliseconds
             };
 
             IC37Client client = new C37Client(logger, connectionConfig);

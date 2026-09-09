@@ -127,6 +127,18 @@ namespace paskalON.Protocols.C37118
                         timeoutCts.CancelAfter(_clientConnection.ConnectionTimeoutMilliseconds);
                         await tcpClient.ConnectAsync(ServerAddress, ServerPort, timeoutCts.Token).ConfigureAwait(false);
                         _tcpClient = tcpClient;
+
+                        if (System.Diagnostics.Debugger.IsAttached == true)
+                        {
+                            tcpClient.SendTimeout = 240000;
+                            tcpClient.ReceiveTimeout = 240000;
+                        }
+                        else
+                        {
+                            tcpClient.SendTimeout = _clientConnection.OperationTimeoutMilliseconds;
+                            tcpClient.ReceiveTimeout = _clientConnection.OperationTimeoutMilliseconds;
+                        }
+
                         _stream = _tcpClient.GetStream();
                         _shutdownReceiverLoop = new CancellationTokenSource();
                         State = C37ClientState.Connected;

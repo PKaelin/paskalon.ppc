@@ -184,8 +184,17 @@ namespace paskalON.Protocols.Modbus.NModbus
                         _tcpClient = tcpClient;
                         _master = _factory.CreateMaster(tcpClient);
                         // NModbus Modbus-level settings
-                        _master.Transport.ReadTimeout = _clientConnection.OperationTimeoutMilliseconds;
-                        _master.Transport.WriteTimeout = _clientConnection.OperationTimeoutMilliseconds;
+                        if (System.Diagnostics.Debugger.IsAttached == true)
+                        {
+                            _master.Transport.ReadTimeout = 240000;
+                            _master.Transport.WriteTimeout = 240000;
+                        }
+                        else
+                        {
+                            _master.Transport.ReadTimeout = _clientConnection.OperationTimeoutMilliseconds;
+                            _master.Transport.WriteTimeout = _clientConnection.OperationTimeoutMilliseconds;
+                        }
+
                         _master.Transport.Retries = _clientConnection.SendRetryCount;
                         _master.Transport.WaitToRetryMilliseconds = _clientConnection.SendRetryIntervalMilliseconds;
                         _state = ModbusClientState.Connected;

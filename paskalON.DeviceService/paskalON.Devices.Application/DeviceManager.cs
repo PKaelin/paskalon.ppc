@@ -5,7 +5,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using paskalON.Dataface;
 using paskalON.Dataface.C37s;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Application.Factories;
@@ -716,7 +715,6 @@ namespace paskalON.Devices.Application
         private DerSolarUnit CreateSolarUnit(DerSolarUnitConfig config, DerCircuit circuit)
         {
             DerSolarUnit unit = new(_logger, config, circuit);
-
             IMetricsPublisher pcsMetrics = _publisherFactory.Create();
             MetricsPublishers.Add(pcsMetrics);
             (IModbusDataface pcsDataface, IModbusClient pcsClient) = _deviceFactoryModbus.Create(config.PowerConversionSystemConfig.ModbusConfig);
@@ -726,11 +724,14 @@ namespace paskalON.Devices.Application
                 config.PowerConversionSystemConfig.PowerConversionSystemDeviceConfig.ClassName, _logger,
                 config.PowerConversionSystemConfig, unit, pcsMetrics, pcsDataface, pcsClient);
 
-            IMetricsPublisher solarMetrics = _publisherFactory.Create();
-            MetricsPublishers.Add(solarMetrics);
-            IDataface solarDataface = _services.GetRequiredService<IDataface>();
-            unit.SolarPanels.Add(Create<SolarPanelBase>(config.SolarPanelConfig.SolarPanelDeviceConfig.ClassName, _logger,
-                config.SolarPanelConfig, unit, solarMetrics, solarDataface));
+            // We dont communicate with solar panels at this point
+            //IMetricsPublisher solarMetrics = _publisherFactory.Create();
+            //MetricsPublishers.Add(solarMetrics);
+            //(IModbusDataface solarDataface, IModbusClient solarClient) = _deviceFactoryModbus.Create(config.SolarPanelConfig.ModbusConfig);
+            //ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, solarClient, solarDataface));
+
+            //unit.SolarPanels.Add(Create<SolarPanelBase>(config.SolarPanelConfig.SolarPanelDeviceConfig.ClassName, _logger,
+            //    config.SolarPanelConfig, unit, solarMetrics, solarDataface));
 
             return unit;
         }

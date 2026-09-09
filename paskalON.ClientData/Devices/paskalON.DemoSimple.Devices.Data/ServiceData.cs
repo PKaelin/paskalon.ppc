@@ -91,17 +91,17 @@ namespace paskalON.DemoSimple.Devices.Data
         {
             DerConfig derConfig = new DerConfig { ChangedBy = ChangedBy, Name = "Der 1", };
             context.DerConfigs.Add(derConfig);
-            DerGroupConfig derGroupConfig = new DerGroupConfig { ChangedBy = ChangedBy, Name = "Der Group 1", DerConfig = derConfig };
+            DerGroupConfig derGroupConfig = new DerGroupConfig { ChangedBy = ChangedBy, Name = "Group 1", DerConfig = derConfig };
             context.DerGroupConfigs.Add(derGroupConfig);
-            DerCircuitConfig derCircuitBessConfig = new DerCircuitConfig { ChangedBy = ChangedBy, Name = "Circuit Bess 1", DerGroupConfig = derGroupConfig, };
-            context.DerCircuitConfigs.Add(derCircuitBessConfig);
+            DerCircuitConfig derCircuitConfig = new DerCircuitConfig { ChangedBy = ChangedBy, Name = "Circuit 1", DerGroupConfig = derGroupConfig, };
+            context.DerCircuitConfigs.Add(derCircuitConfig);
 
             DerBatteryStorageUnitConfig unit1 = new DerBatteryStorageUnitConfig
             {
                 ChangedBy = ChangedBy,
                 Name = "BMS-Unit 1",
                 IncludeBatteryInOperations = true,
-                DerCircuitConfig = derCircuitBessConfig
+                DerCircuitConfig = derCircuitConfig
             };
             context.DerBatteryStorageUnitConfigs.Add(unit1);
 
@@ -110,7 +110,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 ChangedBy = ChangedBy,
                 Name = "BMS-Unit 2",
                 IncludeBatteryInOperations = true,
-                DerCircuitConfig = derCircuitBessConfig
+                DerCircuitConfig = derCircuitConfig
             };
             context.DerBatteryStorageUnitConfigs.Add(unit2);
 
@@ -119,7 +119,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 ChangedBy = ChangedBy,
                 Name = "BMS-Unit 3",
                 IncludeBatteryInOperations = true,
-                DerCircuitConfig = derCircuitBessConfig
+                DerCircuitConfig = derCircuitConfig
             };
             context.DerBatteryStorageUnitConfigs.Add(unit3);
 
@@ -487,6 +487,7 @@ namespace paskalON.DemoSimple.Devices.Data
                 DisconnectionTimeoutMilliseconds = 5000,
                 ConnectRetryCount = 3,
                 ConnectRetryIntervalMilliseconds = 5000,
+                OperationTimeoutMilliseconds = 5000
             };
             context.C37ConnectionConfigs.Add(c37ConnectionConfig);
 
