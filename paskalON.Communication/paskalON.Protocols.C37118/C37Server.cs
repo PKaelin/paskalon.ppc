@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Logging;
 using paskalON.Protocols.C37118.Frames;
 using paskalON.Protocols.C37118.Simulations;
 using System.Net;
@@ -14,6 +15,12 @@ namespace paskalON.Protocols.C37118
     /// </summary>
     public sealed class C37Server : IC37Server, IAsyncDisposable
     {
+        /// <summary>
+        /// Logger for application logging and diagnostics.
+        /// </summary>
+        private readonly ILogger<C37Server> _logger;
+
+
         /// <summary>
         /// TCP listener for the C37 server.
         /// </summary>
@@ -36,6 +43,7 @@ namespace paskalON.Protocols.C37118
         /// </summary>
         private CancellationTokenSource _shutdownClientConnects = new CancellationTokenSource();
 
+
         /// <summary>
         /// Client acceptance task.
         /// </summary>
@@ -49,19 +57,29 @@ namespace paskalON.Protocols.C37118
 
 
         /// <inheritdoc/>
-        public C37ServerState State { get; private set; } = C37ServerState.Disconnected;
+        public C37ServerState State { get; private set; } = C37ServerState.Idle;
+
+
+        /// <inheritdoc/>
+        public event EventHandler<EventArgs>? OnCommunicationError;
 
 
         /// <summary>
         /// Constructor of <see cref="C37Server"/>.
         /// </summary>
-        public C37Server(int port, IReadOnlyList<IPmuDataSimulation> simulations, ushort dataRate)
+        /// <param name="logger">Logger for application logging and diagnostics.</param>
+        /// <param name="simulations">List of PMU simulations.</param>
+        /// <param name="port">Port of the C37 server.</param>
+        /// <param name="dataRate">Data rate in which the server streams the data.</param>
+        public C37Server(ILogger<C37Server> logger, IReadOnlyList<IPmuDataSimulation> simulations, int port, ushort dataRate)
         {
+            ArgumentNullException.ThrowIfNull(logger);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(port);
             ArgumentNullException.ThrowIfNull(simulations);
             ArgumentOutOfRangeException.ThrowIfZero(simulations.Count);
             ArgumentOutOfRangeException.ThrowIfZero(dataRate);
 
+            _logger = logger;
             _listener = new TcpListener(IPAddress.Any, port);
             _simulations = simulations;
             _dataRate = dataRate;
@@ -71,15 +89,28 @@ namespace paskalON.Protocols.C37118
         /// <inheritdoc/>
         public Task StartAsync(CancellationToken cancellationToken = default)
         {
-            if (State != C37ServerState.Disconnected)
+            if (State != C37ServerState.Idle)
             {
                 return Task.CompletedTask;
             }
 
-            _listener.Start();
-            _shutdownClientConnects = new CancellationTokenSource();
-            State = C37ServerState.Connected;
-            _acceptTask = AcceptClientsAsync(_shutdownClientConnects.Token);
+            State = C37ServerState.Starting;
+
+            try
+            {
+                _listener.Start();
+                _shutdownClientConnects = new CancellationTokenSource();
+                State = C37ServerState.Started;
+                _logger.LogInformation("C37 server started. {Address}", _listener.LocalEndpoint);
+                _acceptTask = AcceptClientsAsync(_shutdownClientConnects.Token);
+            }
+            catch (Exception ex)
+            {
+                State = C37ServerState.Idle;
+                RaiseCommunicationError();
+                _logger.LogError("Unexpected C37 server exception occurred {Address}. {Error}", _listener?.LocalEndpoint, ex);
+                throw;
+            }
 
             return Task.CompletedTask;
         }
@@ -88,7 +119,7 @@ namespace paskalON.Protocols.C37118
         /// <inheritdoc/>
         public async Task StopAsync(CancellationToken cancellationToken = default)
         {
-            if (State == C37ServerState.Disconnected)
+            if (State == C37ServerState.Idle)
             {
                 return;
             }
@@ -123,7 +154,7 @@ namespace paskalON.Protocols.C37118
                 // Expected when active streaming sessions are canceled during shutdown.
             }
 
-            State = C37ServerState.Disconnected;
+            State = C37ServerState.Idle;
         }
 
 
@@ -182,17 +213,33 @@ namespace paskalON.Protocols.C37118
                     TimeSpan interval = TimeSpan.FromSeconds(1d / _dataRate);
                     State = C37ServerState.Streaming;
 
-                    while (cancellationToken.IsCancellationRequested == false)
+                    try
                     {
-                        foreach (IPmuDataSimulation simulation in _simulations)
+                        while (cancellationToken.IsCancellationRequested == false)
                         {
-                            await stream.WriteAsync(C37FrameCodec.CreateDataFrame(simulation), cancellationToken).ConfigureAwait(false);
-                        }
+                            foreach (IPmuDataSimulation simulation in _simulations)
+                            {
+                                await stream.WriteAsync(C37FrameCodec.CreateDataFrame(simulation), cancellationToken).ConfigureAwait(false);
+                            }
 
-                        await Task.Delay(interval, cancellationToken).ConfigureAwait(false);
+                            await Task.Delay(interval, cancellationToken).ConfigureAwait(false);
+                        }
+                    }
+                    catch (IOException ex) when (ex.InnerException is SocketException socketEx && socketEx.SocketErrorCode == SocketError.ConnectionReset)
+                    {
+                        _logger.LogInformation("C37 client disconnected/reset the connection. {Server}", _listener?.LocalEndpoint);
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Raise communication error.
+        /// </summary>
+        private void RaiseCommunicationError()
+        {
+            OnCommunicationError?.Invoke(this, EventArgs.Empty);
         }
 
 

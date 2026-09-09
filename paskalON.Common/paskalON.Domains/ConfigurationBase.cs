@@ -32,6 +32,6 @@ namespace paskalON.Domains
         /// <summary>
         /// Description of the configuration entry.
         /// </summary>
-        public string? Description { get; set; }
+        public required string Description { get; set; }
     }
 }

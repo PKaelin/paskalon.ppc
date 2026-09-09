@@ -204,6 +204,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                     State = PcsState.Started;
                     CommunicationError = false;
                     break;
+                case (int)PcsSimpleV1Description.State.Unknown:
                 case (int)PcsSimpleV1Description.State.Off:
                 case (int)PcsSimpleV1Description.State.Stop:
                 case (int)PcsSimpleV1Description.State.Fault:

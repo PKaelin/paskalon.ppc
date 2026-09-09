@@ -59,7 +59,7 @@ namespace paskalON.Protocols.Modbus
         /// <param name="startAddress">The start address of the read.</param>
         /// <param name="endAddress">The end address of the read.</param>
         /// <param name="cancellationToken">Cancelation token.</param>
-        Task<bool[]> ReadCoilsAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default);
+        Task<bool[]?> ReadCoilsAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default);
 
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace paskalON.Protocols.Modbus
         /// <param name="startAddress">The start address of the read.</param>
         /// <param name="endAddress">The end address of the read.</param>
         /// <param name="cancellationToken">Cancelation token.</param>
-        Task<bool[]> ReadDiscreteInputsAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default);
+        Task<bool[]?> ReadDiscreteInputsAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default);
 
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace paskalON.Protocols.Modbus
         /// <param name="startAddress">The start address of the read.</param>
         /// <param name="endAddress">The end address of the read.</param>
         /// <param name="cancellationToken">Cancelation token.</param>
-        Task<ushort[]> ReadHoldingRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default);
+        Task<ushort[]?> ReadHoldingRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default);
 
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace paskalON.Protocols.Modbus
         /// <param name="startAddress">The start address of the read.</param>
         /// <param name="endAddress">The end address of the read.</param>
         /// <param name="cancellationToken">Cancelation token.</param>
-        Task<ushort[]> ReadInputRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default);
+        Task<ushort[]?> ReadInputRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default);
 
 
         /// <summary>

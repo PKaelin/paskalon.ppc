@@ -10,6 +10,12 @@ namespace paskalON.Protocols.C37118
     public interface IC37Server
     {
         /// <summary>
+        /// Triggered when a communication error occurred.
+        /// </summary>
+        event EventHandler<EventArgs> OnCommunicationError;
+
+
+        /// <summary>
         /// Current server state.
         /// </summary>
         C37ServerState State { get; }

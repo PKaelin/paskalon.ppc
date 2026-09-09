@@ -175,6 +175,8 @@ namespace paskalON.Protocols.Modbus.NModbus
 
                     try
                     {
+                        // Start dispatcher before connecting
+                        _dispatcher.Start();
                         tcpClient = new TcpClient(_clientConnection.AddressFamily);
                         using CancellationTokenSource timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                         timeoutCts.CancelAfter(_clientConnection.ConnectionTimeoutMilliseconds);
@@ -186,7 +188,6 @@ namespace paskalON.Protocols.Modbus.NModbus
                         _master.Transport.WriteTimeout = _clientConnection.OperationTimeoutMilliseconds;
                         _master.Transport.Retries = _clientConnection.SendRetryCount;
                         _master.Transport.WaitToRetryMilliseconds = _clientConnection.SendRetryIntervalMilliseconds;
-                        _dispatcher.Start();
                         _state = ModbusClientState.Connected;
 
                         return;
@@ -250,7 +251,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public Task<bool[]> ReadCoilsAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
+        public Task<bool[]?> ReadCoilsAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Read, startAddress, 3,
                 () => ExecuteReadAsync<bool[]>(() => _master!.ReadCoilsAsync(UnitId, startAddress, ToCount(startAddress, endAddress))), cancellationToken);
@@ -260,7 +261,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public Task<bool[]> ReadDiscreteInputsAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
+        public Task<bool[]?> ReadDiscreteInputsAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Read, startAddress, 3,
                 () => ExecuteReadAsync<bool[]>(() => _master!.ReadInputsAsync(UnitId, startAddress, ToCount(startAddress, endAddress))), cancellationToken);
@@ -270,7 +271,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public Task<ushort[]> ReadHoldingRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
+        public Task<ushort[]?> ReadHoldingRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Read, startAddress, 3,
                 () => ExecuteReadAsync<ushort[]>(() => _master!.ReadHoldingRegistersAsync(UnitId, startAddress, ToCount(startAddress, endAddress))), cancellationToken);
@@ -280,7 +281,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public Task<ushort[]> ReadInputRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
+        public Task<ushort[]?> ReadInputRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Read, startAddress, 3,
                 () => ExecuteReadAsync<ushort[]>(() => _master!.ReadInputRegistersAsync(UnitId, startAddress, ToCount(startAddress, endAddress))), cancellationToken);

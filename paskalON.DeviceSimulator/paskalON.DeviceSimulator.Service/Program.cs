@@ -2,19 +2,32 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-
-using paskalON.Devices.Client;
-using paskalON.Devices.Dto.Ders;
+using Microsoft.EntityFrameworkCore;
+using paskalON.Devices.Application;
+using paskalON.Devices.Application.Factories;
+using paskalON.Devices.Infrastructure.Storage;
+using paskalON.Devices.Infrastructure.Storage.Repositories;
+using paskalON.DeviceSimulator.Application;
+using paskalON.DeviceSimulator.Service.Workers;
+using paskalON.Telemetry;
 
 WebApplication? app = null;
 Console.WriteLine("Starting service.....");
 
 try
 {
-    // Get device service endpoint
     Console.WriteLine("Getting environments.....");
-    string? getDerEndpointString = Environment.GetEnvironmentVariable("DEVICE_SERVICE_GETDER_ENDPOINT");
-    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(getDerEndpointString);
+    string? dbConnectionStringFile = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_FILE");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dbConnectionStringFile, "Cannot find the database secret file. DATABASE_CONNECTION_FILE");
+    string dbConnectionString = (await File.ReadAllTextAsync(dbConnectionStringFile)).Trim();
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dbConnectionString, "Cannot find the database connection string definition");
+    // Get data rate
+    string? dataRateString = Environment.GetEnvironmentVariable("PMU_DATA_RATE");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dataRateString);
+    if (ushort.TryParse(dataRateString, out ushort dataRate) == false)
+    {
+        throw new ApplicationException("PMU_DATA_RATE is not configured as a number");
+    }
 
     // Create builder
     Console.WriteLine("Building service.....");
@@ -24,16 +37,42 @@ try
     builder.Services.AddControllers();
     builder.Services.AddOpenApi();
 
+    // Add databases
+    builder.Services.AddDbContext<DeviceServiceContext>(options => options.UseNpgsql(dbConnectionString));
+    builder.Services.AddScoped<IDerRepository, DerRepository>();
+    builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+
+    // Create server service
+    builder.Services.AddSingleton<ServerService>();
+    builder.Services.AddHostedService<ServerService>(provider => provider.GetRequiredService<ServerService>());
+
+    // Add communications
+    builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
+    builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
+    builder.Services.AddSingleton<IModbusDeviceFactory, ModbusDeviceFactory>();
+    builder.Services.AddSingleton<IC37DeviceFactory, C37DeviceFactory>();
+    builder.Services.AddSingleton<IDeviceManager, DeviceManagerSimulator>();
+
+    // Build application
     app = builder.Build();
     app.Logger.LogInformation("Application has been built");
     IHostApplicationLifetime lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
     lifetime.ApplicationStarted.Register(() => app.Logger.LogInformation("Microservice Device Simulator has started"));
     lifetime.ApplicationStopping.Register(() => app.Logger.LogInformation("Microservice Device Simulator is stopping"));
     app.Logger.LogInformation("Application starts initializing services");
+    // Create and load device manager
+    DeviceManagerSimulator deviceManager = (DeviceManagerSimulator)app.Services.GetRequiredService<IDeviceManager>();
+    deviceManager.Initialize(dataRate, lifetime.ApplicationStopping);
 
-    // Get DER DTO
-    IDeviceServer deviceServer = new DeviceServer(getDerEndpointString);
-    DerDto derDto = await deviceServer.GetDer();
+    using (IServiceScope scope = app.Services.CreateScope())
+    {
+        IDerRepository repository = scope.ServiceProvider.GetRequiredService<IDerRepository>();
+        await deviceManager.LoadDerAsync(repository);
+    }
+
+    // Initialize server service
+    ServerService serverService = app.Services.GetRequiredService<ServerService>();
+
 
     app.Logger.LogInformation("Application finished initializing services");
 

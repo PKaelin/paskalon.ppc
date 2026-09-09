@@ -17,6 +17,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// </summary>
         public enum State
         {
+            Unknown = 0,
             Initialization = 1,
             Off = 2,
             On = 3,

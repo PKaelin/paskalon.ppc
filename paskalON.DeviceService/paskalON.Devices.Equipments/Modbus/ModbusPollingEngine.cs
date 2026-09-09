@@ -31,10 +31,12 @@ namespace paskalON.Devices.Equipments.Modbus
         private readonly IModbusDataface _dataface;
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
-        public string ModbusPollingDestination { get => $"{_client.ServerAddress}:{_client.ServerPort}"; }
+        public string DestinationAddress { get => _client.ServerAddress; }
+
+
+        /// <inheritdoc/>
+        public int DestinationPort { get => _client.ServerPort; }
 
 
         /// <summary>

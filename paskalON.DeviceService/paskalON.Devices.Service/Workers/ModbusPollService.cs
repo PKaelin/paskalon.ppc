@@ -128,7 +128,7 @@ namespace paskalON.Devices.Service.Workers
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError("Error polling Modbus engine {Engine}. Error: {Error}", engine.ModbusPollingDestination, ex);
+                        _logger.LogError("Error polling Modbus engine {Engine}. Error: {Error}", $"{engine.DestinationAddress}:{engine.DestinationPort}", ex);
                     }
                 }
             }

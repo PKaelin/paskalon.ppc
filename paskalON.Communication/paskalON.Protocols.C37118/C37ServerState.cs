@@ -12,11 +12,15 @@ namespace paskalON.Protocols.C37118
         /// <summary>
         /// C37 server is disconnected.
         /// </summary>
-        Disconnected,
+        Idle,
+        /// <summary>
+        /// C37 server is starting.
+        /// </summary>
+        Starting,
         /// <summary>
         /// C37 server is connected.
         /// </summary>
-        Connected,
+        Started,
         /// <summary>
         /// C37 server is streaming.
         /// </summary>

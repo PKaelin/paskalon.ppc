@@ -7,6 +7,27 @@ namespace paskalON.Devices.Equipments.C37
     public interface IC37TransmissionEngine
     {
         /// <summary>
+        /// C37 stream id within the C37 data stream.
+        /// </summary>
+        /// <remarks>
+        /// This identifies the PMU.
+        /// </remarks>
+        ushort StreamId { get; }
+
+
+        /// <summary>
+        /// C37 destination address (IP or hostname).
+        /// </summary>
+        string DestinationAddress { get; }
+
+
+        /// <summary>
+        /// C37 destination port.
+        /// </summary>
+        int DestinationPort { get; }
+
+
+        /// <summary>
         /// Current registered mappings that were generated via the configuration frame.
         /// </summary>
         List<C37RegisterMapEntry> Mappings { get; }

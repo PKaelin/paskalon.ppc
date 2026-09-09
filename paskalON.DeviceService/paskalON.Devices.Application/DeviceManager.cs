@@ -52,7 +52,7 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// Service provider used to resolve dependencies of configured equipment.
         /// </summary>
-        private readonly IServiceProvider _services;
+        protected readonly IServiceProvider _services;
 
 
         /// <summary>
@@ -212,7 +212,7 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public async Task LoadDerAsync(IDerRepository repository)
+        public virtual async Task LoadDerAsync(IDerRepository repository)
         {
             ArgumentNullException.ThrowIfNull(repository);
 
@@ -803,7 +803,7 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// Connect all devices.
         /// </summary>
-        private void ConnectDevices()
+        protected virtual void ConnectDevices()
         {
             _logger.LogInformation("Connect all device during startup");
 

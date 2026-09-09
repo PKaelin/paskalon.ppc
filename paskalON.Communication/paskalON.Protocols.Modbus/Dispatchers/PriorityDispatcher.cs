@@ -141,11 +141,11 @@ namespace paskalON.Protocols.Modbus.Dispatchers
         /// <param name="action">Action to execute by the queue.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Generic Task</returns>
-        public async Task<T> EnqueueAsync<T>(ModbusOperation operation, ushort address, short priority, Func<Task<T>> action, CancellationToken cancellationToken)
+        public async Task<T?> EnqueueAsync<T>(ModbusOperation operation, ushort address, short priority, Func<Task<T>> action, CancellationToken cancellationToken)
         {
             object? result = await EnqueueCoreAsync(operation, address, priority, async () => await action().ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
 
-            return (T)result!;
+            return (T?)result;
         }
 
 
@@ -161,13 +161,14 @@ namespace paskalON.Protocols.Modbus.Dispatchers
         private Task<object?> EnqueueCoreAsync(ModbusOperation operation, ushort address, short priority, Func<Task<object?>> action, CancellationToken cancellationToken)
         {
             TaskCompletionSource<object?>? tcs = null;
-            WorkKey key = new WorkKey(operation, address);
             bool added = false;
 
             if (_loopTask is not null)
             {
                 lock (_dataLock)
                 {
+                    WorkKey key = new WorkKey(operation, address);
+
                     if (_queueKeys.Contains(key) == false && _queueKeys.Count < MaxQueueSize)
                     {
                         tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -178,13 +179,18 @@ namespace paskalON.Protocols.Modbus.Dispatchers
                     }
                 }
 
-                if (added)
+                // Call release outside the lock statement
+                if (added == true && tcs != null)
                 {
                     _signal.Release();
+
+                    return tcs.Task;
                 }
+
+                return Task.FromResult<object?>(null);
             }
 
-            return tcs != null ? tcs.Task : Task.FromException<object?>(new InvalidOperationException("The dispatcher is not running."));
+            throw new InvalidOperationException("The dispatcher is not running.");
         }
 
 

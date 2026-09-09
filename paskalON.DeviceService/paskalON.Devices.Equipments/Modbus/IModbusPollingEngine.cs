@@ -10,9 +10,15 @@ namespace paskalON.Devices.Equipments.Modbus
     public interface IModbusPollingEngine
     {
         /// <summary>
-        /// Gets the Modbus destination address (IP or hostname + Port).
+        /// Modbus destination address (IP or hostname).
         /// </summary>
-        string ModbusPollingDestination { get; }
+        string DestinationAddress { get; }
+
+
+        /// <summary>
+        /// Modbus destination port.
+        /// </summary>
+        int DestinationPort { get; }
 
 
         /// <summary>

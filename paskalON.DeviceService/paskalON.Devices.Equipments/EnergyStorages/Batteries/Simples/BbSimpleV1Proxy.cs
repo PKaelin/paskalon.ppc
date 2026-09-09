@@ -7,7 +7,6 @@ using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
-using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
 using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
 
@@ -93,13 +92,13 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                 (int)BbSimpleV1Description.Register.TotalDCCurrent, ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass1));
             // State, Warnings, Faults, VendorEvents
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, int>(this, nameof(State),
-                (x, v) => x.SetState(v), (int)PcsSimpleV1Description.Register.CurrentState, ModbusScale.NoScale, ModbusDataType.MbInt16));
+                (x, v) => x.SetState(v), (int)BbSimpleV1Description.Register.CurrentState, ModbusScale.NoScale, ModbusDataType.MbInt16));
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, int>(this, nameof(WarningStates),
-                (x, v) => x.SetWarning(v), (int)PcsSimpleV1Description.Register.CurrentWarning, ModbusScale.NoScale, ModbusDataType.MbInt16));
+                (x, v) => x.SetWarning(v), (int)BbSimpleV1Description.Register.CurrentWarning, ModbusScale.NoScale, ModbusDataType.MbInt16));
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, int>(this, nameof(FaultStates),
-                (x, v) => x.SetFault(v), (int)PcsSimpleV1Description.Register.CurrentFault, ModbusScale.NoScale, ModbusDataType.MbInt16));
+                (x, v) => x.SetFault(v), (int)BbSimpleV1Description.Register.CurrentFault, ModbusScale.NoScale, ModbusDataType.MbInt16));
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, int>(this, nameof(VendorEvents),
-                (x, v) => x.SetVendorEvent(v), (int)PcsSimpleV1Description.Register.CurrentVendorEvent, ModbusScale.NoScale, ModbusDataType.MbInt16));
+                (x, v) => x.SetVendorEvent(v), (int)BbSimpleV1Description.Register.CurrentVendorEvent, ModbusScale.NoScale, ModbusDataType.MbInt16));
             // State, Warnings, Faults, VendorEvents range
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)BbSimpleV1Description.Register.CurrentState,
                 (int)BbSimpleV1Description.Register.CurrentVendorEvent, ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass2));

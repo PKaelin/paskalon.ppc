@@ -62,6 +62,18 @@ namespace paskalON.Devices.Equipments.C37
         private volatile C37RegisterMapEntry[] _runtimeMappings = Array.Empty<C37RegisterMapEntry>();
 
 
+        /// <inheritdoc/>
+        public string DestinationAddress { get => _client.ServerAddress; }
+
+
+        /// <inheritdoc/>
+        public int DestinationPort { get => _client.ServerPort; }
+
+
+        /// <inheritdoc/>
+        public ushort StreamId { get => _streamId; }
+
+
         /// <summary>
         /// <inheritdoc/>
         /// </summary>

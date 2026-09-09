@@ -1,14 +1,25 @@
 <Solution>
   <Folder Name="/InitialDevelopment/">
+    <Project Path="../paskalON.Common/paskalON.Dataface/paskalON.Dataface.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
     <Project Path="../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Messaging/paskalON.Messaging.csproj" />
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
     <Project Path="../paskalON.Communication/paskalON.Protocols.C37118/paskalON.Protocols.C37118.csproj" />
     <Project Path="../paskalON.Communication/paskalON.Protocols.Modbus/paskalON.Protocols.Modbus.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Application/paskalON.Devices.Application.csproj" />
     <Project Path="../paskalON.DeviceService/paskalON.Devices.Client/paskalON.Devices.Client.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Domain.Configs/paskalON.Devices.Domain.Configs.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Domain/paskalON.Devices.Domain.csproj" />
     <Project Path="../paskalON.DeviceService/paskalON.Devices.Dto/paskalON.Devices.Dto.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Equipments/paskalON.Devices.Equipments.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Infrastructure/paskalON.Devices.Infrastructure.csproj" />
   </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
+  <Project Path="paskalON.DeviceSimulator.Application/paskalON.DeviceSimulator.Application.csproj" Id="bb58600d-de93-4223-a7a6-4e569f0a437d" />
+  <Project Path="paskalON.DeviceSimulator.Equipments/paskalON.DeviceSimulator.Equipments.csproj" Id="d38956f3-660b-43c1-b238-296daf75050c" />
   <Project Path="paskalON.DeviceSimulator.Service/paskalON.DeviceSimulator.Service.csproj" />
 </Solution>

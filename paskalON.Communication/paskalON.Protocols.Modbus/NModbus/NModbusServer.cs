@@ -103,10 +103,11 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <summary>
         /// Constructor of <see cref="NModbusServer"/>.
         /// </summary>
+        /// <param name="logger">Logger for application logging and diagnostics.</param>
+        /// <param name="dataStore">Modbus data store.</param>
         /// <param name="listenAddress">Local address to bind, e.g. "0.0.0.0" for all interfaces, or "127.0.0.1".</param>
         /// <param name="listenPort">TCP port to listen on (standard Modbus TCP is 502; ports below 1024 need elevated privileges on most OSes).</param>
         /// <param name="unitId">Modbus unit/slave id this server responds as.</param>
-        /// <param name="converter">Optional custom data converter; defaults to <see cref="ModbusDataConverter"/>.</param>
         public NModbusServer(ILogger<NModbusServer> logger, IModbusDataStore dataStore, string listenAddress, int listenPort, byte unitId = 1)
         {
             ArgumentNullException.ThrowIfNull(logger);
@@ -138,8 +139,7 @@ namespace paskalON.Protocols.Modbus.NModbus
 
             try
             {
-                IPAddress address = string.IsNullOrEmpty(ListenAddress) || ListenAddress == "0.0.0.0" ? IPAddress.Any : IPAddress.Parse(ListenAddress);
-                _listener = new TcpListener(address, ListenPort);
+                _listener = new TcpListener(IPAddress.Any, ListenPort);
                 _listener.Start();
 
                 _network = _factory.CreateSlaveNetwork(_listener);
@@ -167,11 +167,13 @@ namespace paskalON.Protocols.Modbus.NModbus
                 }, loopToken);
 
                 _state = ModbusServerState.Listening;
+                _logger.LogInformation("Modbus server started. {Address}", _listener?.LocalEndpoint);
             }
-            catch
+            catch (Exception ex)
             {
                 _state = ModbusServerState.Faulted;
                 RaiseCommunicationError();
+                _logger.LogError("Unexpected Modbus server exception occurred {Address}. {Error}", _listener?.LocalEndpoint, ex);
                 throw;
             }
         }
