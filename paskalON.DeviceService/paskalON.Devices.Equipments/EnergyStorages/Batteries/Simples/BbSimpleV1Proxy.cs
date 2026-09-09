@@ -234,6 +234,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         {
             // Logging and even invocation is done in the setter of the CommunicationError property
             CommunicationError = true;
+            State = BatteryBankState.Fault;
         }
 
 

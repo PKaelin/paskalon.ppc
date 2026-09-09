@@ -358,6 +358,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         {
             // Logging and even invocation is done in the setter of the CommunicationError property
             CommunicationError = true;
+            State = PcsState.Fault;
         }
 
 

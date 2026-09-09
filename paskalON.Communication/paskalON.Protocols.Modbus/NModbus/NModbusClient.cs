@@ -90,7 +90,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         public ModbusClientState State
         {
             get { return _state; }
-            private set { _state = value; }
+            private set { if (_state != value) { _state = value; SetState(value); } }
         }
 
 
@@ -306,6 +306,7 @@ namespace paskalON.Protocols.Modbus.NModbus
             }
             catch
             {
+                State = ModbusClientState.Faulted;
                 RaiseCommunicationError();
                 throw;
             }
@@ -391,6 +392,7 @@ namespace paskalON.Protocols.Modbus.NModbus
             }
             catch
             {
+                State = ModbusClientState.Faulted;
                 RaiseCommunicationError();
                 throw;
             }
@@ -433,6 +435,16 @@ namespace paskalON.Protocols.Modbus.NModbus
         private void RaiseCommunicationError()
         {
             OnCommunicationError?.Invoke(this, EventArgs.Empty);
+        }
+
+
+        /// <summary>
+        /// Logs the Modbus client state change.
+        /// </summary>
+        /// <param name="state">Modbus client state.</param>
+        private void SetState(ModbusClientState state)
+        {
+            _logger.LogInformation("Modbus client {Endpoint} state changed to {State}", $"{ServerAddress}:{ServerPort}", State);
         }
 
 

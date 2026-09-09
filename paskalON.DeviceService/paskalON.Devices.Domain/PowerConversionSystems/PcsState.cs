@@ -55,5 +55,9 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// NightMode means PCS is in night mode.
         /// </summary>
         NightMode = 9,
+        /// <summary>
+        /// Fault means that the PCS encountered an error or abnormal condition that requires attention.
+        /// </summary>
+        Fault = 99
     }
 }

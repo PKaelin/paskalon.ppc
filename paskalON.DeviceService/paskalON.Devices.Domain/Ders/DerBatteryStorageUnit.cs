@@ -92,8 +92,11 @@ namespace paskalON.Devices.Domain.Ders
         {
             if (BatteryBanks.All(b => b.State == BatteryBankState.Disconnected || b.State == BatteryBankState.Unknown || b.State == BatteryBankState.Fault))
             {
-                // Stops the PCS when all battery banks are disconnected, unknown or fault.
-                PowerConversionSystem?.StopAsync();
+                if (PowerConversionSystem?.State == PcsState.Started || PowerConversionSystem?.State == PcsState.Standby)
+                {
+                    // Stops the PCS when all battery banks are disconnected, unknown or fault.
+                    PowerConversionSystem?.StopAsync();
+                }
             }
         }
 

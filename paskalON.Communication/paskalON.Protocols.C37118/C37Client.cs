@@ -39,6 +39,12 @@ namespace paskalON.Protocols.C37118
 
 
         /// <summary>
+        /// C37 client state.
+        /// </summary>
+        private volatile C37ClientState _state = C37ClientState.Disconnected;
+
+
+        /// <summary>
         /// Cancellation token for the receiver loop.
         /// </summary>
         private CancellationTokenSource _shutdownReceiverLoop = new CancellationTokenSource();
@@ -63,7 +69,11 @@ namespace paskalON.Protocols.C37118
 
 
         /// <inheritdoc/>
-        public C37ClientState State { get; private set; } = C37ClientState.Disconnected;
+        public C37ClientState State
+        {
+            get { return _state; }
+            private set { if (_state != value) { _state = value; SetState(value); } }
+        }
 
 
         /// <inheritdoc/>
@@ -147,10 +157,11 @@ namespace paskalON.Protocols.C37118
                 _logger.LogError(msgConnect);
                 throw new InvalidOperationException(msgConnect, lastException);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                DisposeConnection();
                 State = C37ClientState.Disconnected;
+                DisposeConnection();
+                _logger.LogError("C37 streaming async failed. Destination: {ServerAddress}:{ServerPort} {Error}", ServerAddress, ServerPort, ex);
                 RaiseCommunicationError();
                 throw;
             }
@@ -242,6 +253,7 @@ namespace paskalON.Protocols.C37118
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
             catch (Exception ex)
             {
+                State = C37ClientState.Disconnected;
                 _logger.LogError("C37 client receive loop failed. Destination: {ServerAddress}:{ServerPort} {Error}", ServerAddress, ServerPort, ex);
                 RaiseCommunicationError();
             }
@@ -307,6 +319,17 @@ namespace paskalON.Protocols.C37118
             _stream = null;
             _tcpClient = null;
         }
+
+
+        /// <summary>
+        /// Logs the Modbus client state change.
+        /// </summary>
+        /// <param name="state">Modbus client state.</param>
+        private void SetState(C37ClientState state)
+        {
+            _logger.LogInformation("C37 client {Endpoint} state changed to {State}", $"{ServerAddress}:{ServerPort}", State);
+        }
+
 
 
         /// <inheritdoc/>
