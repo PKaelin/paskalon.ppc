@@ -10,6 +10,12 @@ namespace paskalON.Protocols.Modbus.Stores
     public record ModbusDataMemoryStoreKey
     {
         /// <summary>
+        /// Address of the Modbus server.
+        /// </summary>
+        public string Address { get; init; } = string.Empty;
+
+
+        /// <summary>
         /// Port of the Modbus.
         /// </summary>
         public int Port { get; init; }

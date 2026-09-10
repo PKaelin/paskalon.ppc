@@ -27,7 +27,7 @@ namespace paskalON.Protocols.C37118.IntegrationTest
                 Analogs = new[] { new AnalogMeasurement("P", 5.25f) }
             };
 
-            C37Server server = new C37Server(port, new[] { simulation }, 20);
+            C37Server server = new C37Server(NullLogger<C37Server>.Instance, new[] { simulation }, port, 1);
             C37Client client = new C37Client(NullLogger<C37Client>.Instance, CreateConfiguration(port));
             TaskCompletionSource<bool> configurationReceived = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             TaskCompletionSource<bool> dataReceived = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -77,7 +77,8 @@ namespace paskalON.Protocols.C37118.IntegrationTest
                 AddressFamily = System.Net.Sockets.AddressFamily.InterNetwork,
                 ConnectionTimeoutMilliseconds = 1000,
                 ConnectRetryCount = 0,
-                ConnectRetryIntervalMilliseconds = 1
+                ConnectRetryIntervalMilliseconds = 1,
+                OperationTimeoutMilliseconds = 1
             };
         }
 

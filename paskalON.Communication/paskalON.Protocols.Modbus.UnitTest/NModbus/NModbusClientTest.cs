@@ -68,7 +68,7 @@ namespace paskalON.Protocols.Modbus.UnitTest.NModbus
         {
             await using NModbusClient client = new NModbusClient(NullLogger<NModbusClient>.Instance, CreateConfiguration());
 
-            Task<ushort[]> result = client.ReadHoldingRegistersAsync(10, 11);
+            Task<ushort[]?> result = client.ReadHoldingRegistersAsync(10, 11);
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () => await result);
         }

@@ -31,9 +31,9 @@ namespace paskalON.Protocols.Modbus.IntegrationTest
             {
                 await server.StartAsync();
                 await client.ConnectAsync();
-                bool[] coils = await client.ReadCoilsAsync(2, 4);
-                bool[] inputs = await client.ReadDiscreteInputsAsync(2, 4);
-                ushort[] inputRegisters = await client.ReadInputRegistersAsync(2, 4);
+                bool[]? coils = await client.ReadCoilsAsync(2, 4);
+                bool[]? inputs = await client.ReadDiscreteInputsAsync(2, 4);
+                ushort[]? inputRegisters = await client.ReadInputRegistersAsync(2, 4);
                 await client.WriteMultipleRegistersAsync(5, new ushort[] { 11, 22, 33 }, ModbusDataType.MbUint16);
                 ushort[] writtenRegisters = store.HoldingRegisters.ReadPoints(5, 3);
 

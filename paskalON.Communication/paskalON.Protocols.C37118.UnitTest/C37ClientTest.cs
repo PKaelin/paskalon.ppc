@@ -60,7 +60,8 @@ namespace paskalON.Protocols.C37118.UnitTest
                 AddressFamily = AddressFamily.InterNetwork,
                 ConnectionTimeoutMilliseconds = 50,
                 ConnectRetryCount = 0,
-                ConnectRetryIntervalMilliseconds = 1
+                ConnectRetryIntervalMilliseconds = 1,
+                OperationTimeoutMilliseconds = 1
             };
         }
 

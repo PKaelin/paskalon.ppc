@@ -105,9 +105,8 @@ namespace paskalON.Protocols.Modbus.UnitTest.Dispatchers
         {
             PriorityDispatcher dispatcher = new PriorityDispatcher();
 
-            Task result = dispatcher.EnqueueAsync(ModbusOperation.Read, 1, 3, () => Task.CompletedTask, CancellationToken.None);
-
-            await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () => await result);
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
+                dispatcher.EnqueueAsync(ModbusOperation.Read, 1, 3, () => Task.CompletedTask, CancellationToken.None));
         }
 
 
