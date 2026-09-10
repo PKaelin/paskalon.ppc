@@ -50,7 +50,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// </summary>
         public override async Task StartAsync()
         {
-            if (_client.State != ModbusClientState.Connected || _client.State != ModbusClientState.Connecting)
+            if (_client.State != ModbusClientState.Connected && _client.State != ModbusClientState.Connecting)
             {
                 await _client.ConnectAsync();
             }
