@@ -767,5 +767,18 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(Frequency), MetricType.Gauge, x => x.Frequency, _config.MetricsFactorClass4);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(StandbyActivePowerKiloWatts), MetricType.Gauge, x => x.StandbyActivePowerKiloWatts, _config.MetricsFactorClass4);
         }
+
+
+        /// <summary>
+        ///  Triggered on client communication error.
+        /// </summary>
+        /// <param name="sender">The communication client.</param>
+        /// <param name="e">The event arguments.</param>
+        protected void OnCommunicationError(object? sender, EventArgs e)
+        {
+            // Logging and even invocation is done in the setter of the CommunicationError property
+            CommunicationError = true;
+            State = PcsState.Fault;
+        }
     }
 }

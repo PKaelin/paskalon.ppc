@@ -350,19 +350,6 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
 
 
         /// <summary>
-        ///  Triggered on client communication error.
-        /// </summary>
-        /// <param name="sender">The communication client.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnCommunicationError(object? sender, EventArgs e)
-        {
-            // Logging and even invocation is done in the setter of the CommunicationError property
-            CommunicationError = true;
-            State = PcsState.Fault;
-        }
-
-
-        /// <summary>
         /// Dispose instance.
         /// </summary>
         public void Dispose()
