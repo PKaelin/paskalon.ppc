@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Dataface.Modbus;
+using paskalON.Protocols.Modbus.Converters;
 using paskalON.Protocols.Modbus.Stores;
 
 namespace paskalON.Protocols.Modbus.UnitTest
@@ -89,6 +90,23 @@ namespace paskalON.Protocols.Modbus.UnitTest
             ushort[] registers = store.HoldingRegisters.ReadPoints(1, 2);
             Assert.AreEqual((ushort)12, registers[0]);
             Assert.AreEqual((ushort)0, registers[1]);
+        }
+
+
+        [TestMethod]
+        public async Task MemoryModbusClientWritesFourRegisterDoubleTest()
+        {
+            ModbusDataMemoryStore store = new ModbusDataMemoryStore(holdingRegisterCount: 8);
+            MemoryModbusClient client = new MemoryModbusClient(store);
+
+            await client.WriteSingleRegisterAsync(1, 12.5, ModbusDataType.MbDoubleBe);
+
+            ushort[] registers = store.HoldingRegisters.ReadPoints(1, 4);
+            ModbusDataConverter converter = new ModbusDataConverter();
+            ushort[] expectedRegisters = converter.RegisterArrayFromValue(12.5, ModbusDataType.MbDoubleBe, 1);
+
+            Assert.HasCount(4, registers);
+            CollectionAssert.AreEqual(expectedRegisters, registers);
         }
     }
 }

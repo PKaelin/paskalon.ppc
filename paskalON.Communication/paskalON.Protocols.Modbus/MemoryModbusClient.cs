@@ -21,8 +21,9 @@ namespace paskalON.Protocols.Modbus
 
 
         /// <inheritdoc/>
+#pragma warning disable CS0067 // Event is never used
         public event EventHandler<EventArgs>? OnCommunicationError;
-
+#pragma warning restore CS0067
 
         /// <inheritdoc/>
         public ModbusClientState State { get; } = ModbusClientState.Connected;
@@ -57,8 +58,6 @@ namespace paskalON.Protocols.Modbus
 
             Store = store;
             UnitId = unitId;
-            // Dummy call
-            RaiseCommunicationError();
         }
 
 
@@ -162,7 +161,14 @@ namespace paskalON.Protocols.Modbus
         }
 
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Reads a range from a Modbus point source.
+        /// </summary>
+        /// <typeparam name="T">Point value type.</typeparam>
+        /// <param name="source">Point source to read.</param>
+        /// <param name="startAddress">First address to read.</param>
+        /// <param name="endAddress">Last address to read.</param>
+        /// <returns>The requested point values.</returns>
         private T[] ReadPoints<T>(IPointSource<T> source, ushort startAddress, ushort endAddress)
         {
             ArgumentOutOfRangeException.ThrowIfGreaterThan(startAddress, endAddress);
@@ -170,18 +176,6 @@ namespace paskalON.Protocols.Modbus
             ushort count = checked((ushort)(endAddress - startAddress + 1));
 
             return source.ReadPoints(startAddress, count);
-        }
-
-
-        /// <summary>
-        /// Raise communication error.
-        /// </summary>
-        private void RaiseCommunicationError()
-        {
-            if (UnitId < 0)
-            {
-                OnCommunicationError?.Invoke(this, EventArgs.Empty);
-            }
         }
     }
 }
