@@ -525,6 +525,67 @@ namespace paskalON.Devices.Application
 
 
         /// <summary>
+        /// Gets total active power from all PCS devices.
+        /// </summary>
+        /// <returns>Total active power in watts.</returns>
+        public double GetSystemActivePower()
+        {
+            return SystemPowerMeters.Where(device => device.ActivePowerValue.HasValue).Sum(device => device.ActivePowerValue!.Value);
+        }
+
+
+        /// <summary>
+        /// Gets total reactive power from all PCS devices.
+        /// </summary>
+        /// <returns>Total reactive power in vars.</returns>
+        public double GetSystemReactivePower()
+        {
+            return SystemPowerMeters.Where(device => device.ReactivePowerValue.HasValue).Sum(device => device.ReactivePowerValue!.Value);
+        }
+
+
+        /// <summary>
+        /// Gets active power from PCS devices belonging to one circuit.
+        /// </summary>
+        /// <returns>Total circuit active power in watts.</returns>
+        public double GetCircuitActivePower(DerCircuit circuit)
+        {
+            ArgumentNullException.ThrowIfNull(circuit);
+
+            return circuit.DerUnits
+                .Select(unit => unit switch
+                {
+                    DerBatteryStorageUnit battery => battery.PowerConversionSystem,
+                    DerSolarUnit solar => solar.PowerConversionSystem,
+                    _ => null
+                })
+                .Where(device => device?.ActivePowerValue.HasValue == true)
+                .Sum(device => device!.ActivePowerValue!.Value);
+        }
+
+
+        /// <summary>
+        /// Gets reactive power from PCS devices belonging to one circuit.
+        /// </summary>
+        /// <param name="circuit">Circuit whose units are included.</param>
+        /// <returns>Total circuit reactive power in vars.</returns>
+        public double GetCircuitReactivePower(DerCircuit circuit)
+        {
+            ArgumentNullException.ThrowIfNull(circuit);
+
+            return circuit.DerUnits
+                .Select(unit => unit switch
+                {
+                    DerBatteryStorageUnit battery => battery.PowerConversionSystem,
+                    DerSolarUnit solar => solar.PowerConversionSystem,
+                    _ => null
+                })
+                .Where(device => device?.ReactivePowerValue.HasValue == true)
+                .Sum(device => device!.ReactivePowerValue!.Value);
+        }
+
+
+        /// <summary>
         /// Loads the Distributed Energy Resource (DER) root configuration object with all its content.
         /// </summary>
         /// <returns>Distributed Energy Resource (DER) root configuration object with all its content</returns>

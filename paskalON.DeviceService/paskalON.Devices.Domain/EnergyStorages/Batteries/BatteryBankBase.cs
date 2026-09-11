@@ -264,6 +264,17 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 
 
         /// <summary>
+        /// Active power allocated to this bank by its battery storage unit.
+        /// Positive values represent discharge and negative values represent charge.
+        /// </summary>
+        public double? AllocatedActivePowerValue
+        {
+            get { lock (dataLock) { return field; } }
+            set { lock (dataLock) { field = value; } }
+        }
+
+
+        /// <summary>
         /// State of health of the battery bank as a percentage of capacity / nameplate capacity.
         /// </summary>
         public double? StateOfHealth

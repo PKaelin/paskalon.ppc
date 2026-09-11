@@ -26,6 +26,12 @@ namespace paskalON.Devices.Domain.Ders
 
 
         /// <summary>
+        /// Provides battery-bank power allocation within this unit.
+        /// </summary>
+        private readonly BatteryPowerAllocator _powerAllocator = new BatteryPowerAllocator();
+
+
+        /// <summary>
         /// Power conversion system for this battery storage unit.
         /// </summary>
         public PowerConversionSystemBase? PowerConversionSystem { get; set; }
@@ -98,6 +104,17 @@ namespace paskalON.Devices.Domain.Ders
                     PowerConversionSystem?.StopAsync();
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Distributes the PCS active power across eligible battery banks.
+        /// Positive power represents discharge and negative power represents charge.
+        /// State of charge and configured charge/discharge limits are considered.
+        /// </summary>
+        public void DistributeAllocatedActivePower()
+        {
+            _powerAllocator.Allocate(this);
         }
 
 

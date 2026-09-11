@@ -561,6 +561,11 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                     _logger.LogInformation("{Name} - Set active power target to: {activePowerTarget}", Name, _activePowerTarget);
                 }
             }
+
+            if (DerUnit is DerBatteryStorageUnit)
+            {
+                ((DerBatteryStorageUnit)DerUnit).DistributeAllocatedActivePower();
+            }
         }
 
 
