@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using paskalON.Dataface.C37s;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Application.Factories;
+using paskalON.Devices.Domain;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Configs.GenericModbusDevices;
@@ -130,6 +131,10 @@ namespace paskalON.Devices.Application
         /// <inheritdoc/>
         /// </summary>
         public ICollection<IModbusPollingEngine> ModbusPollingEngines { get; protected set; } = new List<IModbusPollingEngine>();
+
+
+        /// <inheritdoc/>
+        public ICollection<IDeviceHeartbeat> DeviceHeartbeats { get; protected set; } = new List<IDeviceHeartbeat>();
 
 
         /// <summary>
@@ -287,7 +292,23 @@ namespace paskalON.Devices.Application
             LoadRootMeters(der, config);
             LoadRootGenericModbusDevices(der, config);
             Der = der;
-            ConnectDevices();
+        }
+
+
+        /// <inheritdoc/>>
+        public virtual void ConnectDevices()
+        {
+            _logger.LogInformation("Connect all device during startup");
+
+            foreach (IC37TransmissionEngine engine in C37TransmissionEngines)
+            {
+                _ = Task.Run(() => engine.StartStreaming(_shutdownToken));
+            }
+
+            foreach (IModbusPollingEngine engine in ModbusPollingEngines)
+            {
+                _ = Task.Run(() => engine.ConnectAsync(_shutdownToken));
+            }
         }
 
 
@@ -752,6 +773,7 @@ namespace paskalON.Devices.Application
             unit.PowerConversionSystem = Create<PowerConversionSystemBase>(
                 config.PowerConversionSystemConfig.PowerConversionSystemDeviceConfig.ClassName, _logger,
                 config.PowerConversionSystemConfig, unit, pcsMetrics, pcsDataface, pcsClient);
+            DeviceHeartbeats.Add(unit.PowerConversionSystem);
 
             foreach (BatteryBankConfig batteryConfig in config.BatteryBankConfigs)
             {
@@ -759,8 +781,10 @@ namespace paskalON.Devices.Application
                 MetricsPublishers.Add(batteryMetrics);
                 (IModbusDataface batteryDataface, IModbusClient batteryClient) = _deviceFactoryModbus.Create(batteryConfig.ModbusConfig);
                 ModbusPollingEngines.Add(new ModbusPollingEngine(_logger, batteryClient, batteryDataface));
-                unit.BatteryBanks.Add(Create<BatteryBankBase>(batteryConfig.BatteryBankDeviceConfig.ClassName, _logger, batteryConfig,
-                    unit, batteryMetrics, batteryDataface, batteryClient));
+                BatteryBankBase batteryBankBase = Create<BatteryBankBase>(batteryConfig.BatteryBankDeviceConfig.ClassName, _logger, batteryConfig,
+                    unit, batteryMetrics, batteryDataface, batteryClient);
+                unit.BatteryBanks.Add(batteryBankBase);
+                DeviceHeartbeats.Add(batteryBankBase);
             }
 
             return unit;
@@ -784,6 +808,7 @@ namespace paskalON.Devices.Application
             unit.PowerConversionSystem = Create<PowerConversionSystemBase>(
                 config.PowerConversionSystemConfig.PowerConversionSystemDeviceConfig.ClassName, _logger,
                 config.PowerConversionSystemConfig, unit, pcsMetrics, pcsDataface, pcsClient);
+            DeviceHeartbeats.Add(unit.PowerConversionSystem);
 
             // We dont communicate with solar panels at this point
             //IMetricsPublisher solarMetrics = _publisherFactory.Create();
@@ -859,25 +884,6 @@ namespace paskalON.Devices.Application
             }
 
             return (T)ActivatorUtilities.CreateInstance(_services, type, arguments);
-        }
-
-
-        /// <summary>
-        /// Connect all devices.
-        /// </summary>
-        protected virtual void ConnectDevices()
-        {
-            _logger.LogInformation("Connect all device during startup");
-
-            foreach (IC37TransmissionEngine engine in C37TransmissionEngines)
-            {
-                _ = Task.Run(() => engine.StartStreaming(_shutdownToken));
-            }
-
-            foreach (IModbusPollingEngine engine in ModbusPollingEngines)
-            {
-                _ = Task.Run(() => engine.ConnectAsync(_shutdownToken));
-            }
         }
     }
 }

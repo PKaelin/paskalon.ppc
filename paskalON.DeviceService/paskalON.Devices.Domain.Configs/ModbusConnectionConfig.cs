@@ -72,12 +72,6 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// Master HeartBeat interval in milliseconds.
-        /// </summary>
-        public long MasterHeartBeatIntervalMilliseconds { get; set; }
-
-
-        /// <summary>
         /// Whether this device should utilize connection pipelining.
         /// </summary>
         /// <remarks>

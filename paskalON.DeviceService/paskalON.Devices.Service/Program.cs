@@ -73,6 +73,9 @@ try
     builder.Services.AddSingleton<MetricsPublisherService>();
     builder.Services.AddHostedService<MetricsPublisherService>(provider => provider.GetRequiredService<MetricsPublisherService>());
     builder.Services.AddSingleton<IDeviceManager, DeviceManager>();
+    builder.Services.AddSingleton<DeviceHeartbeatService>();
+    builder.Services.AddHostedService<DeviceHeartbeatService>(provider => provider.GetRequiredService<DeviceHeartbeatService>());
+
 
     // Configure OpenTelemetry logging, metrics, & tracing with auto-start using the
     // AddOpenTelemetry extension from OpenTelemetry.Extensions.Hosting.
@@ -141,15 +144,13 @@ try
         SystemConfig? config = repository.GetAsync(0, 1, (o) => o.Id).Result.FirstOrDefault();
         ArgumentNullException.ThrowIfNull(config, "System configuration contains no record");
 
-        // Give the devices and device manager some time to connect.
-        await Task.Delay(config.StartupDelayForDevices / 2);
-
         // Create and load Modbus polling service
         ModbusPollService modbusPollService = app.Services.GetRequiredService<ModbusPollService>();
         modbusPollService.Initialize(deviceManager.ModbusPollingEngines, config.PollingIntervalMilliseconds);
 
-        // Give the devices and device manager some time to get some data before publishing
-        await Task.Delay(config.StartupDelayForDevices / 2);
+        // Create the heartbeat service
+        DeviceHeartbeatService heartbeatService = app.Services.GetRequiredService<DeviceHeartbeatService>();
+        heartbeatService.Initialize(deviceManager.DeviceHeartbeats, config.DeviceHeartbeatIntervalMilliseconds);
 
         // Create and load device publisher
         DevicePublisherService devicePublisherService = app.Services.GetRequiredService<DevicePublisherService>();
@@ -158,11 +159,11 @@ try
         DeviceMapper deviceMapper = new DeviceMapper();
         PublisherTopic topic = PublisherTopic.Create(config);
         DevicePublisher devicePublisher = new DevicePublisher(logger, deviceManager, deviceMapper, messagePublisher, topic, config.DeviceFactorCore, config.DeviceFactorDetail);
-        devicePublisherService.Initialize(devicePublisher, config.MetricsIntervalMilliseconds);
+        devicePublisherService.Initialize(devicePublisher, config.MetricsIntervalMilliseconds, config.StartupDelayForDevices);
 
         // Create and load metric publisher
         MetricsPublisherService metricsPublisherService = app.Services.GetRequiredService<MetricsPublisherService>();
-        metricsPublisherService.Initialize(deviceManager.MetricsPublishers, config.MetricsIntervalMilliseconds);
+        metricsPublisherService.Initialize(deviceManager.MetricsPublishers, config.MetricsIntervalMilliseconds, config.StartupDelayForDevices);
     }
     app.Logger.LogInformation("Application finished initializing services");
 
@@ -173,6 +174,8 @@ try
 
     app.UseAuthorization();
     app.MapControllers();
+    // Connect to all devices before application starts running
+    deviceManager.ConnectDevices();
     app.Run();
 }
 catch (Exception ex)

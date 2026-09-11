@@ -51,7 +51,6 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage.SampleData
             {
                 ChangedBy = "Test",
                 Name = "ModbusConfig for all",
-                MasterHeartBeatIntervalMilliseconds = 900,
                 IsPipeliningEnabled = false,
                 ConnectionTimeoutMilliseconds = 1001,
                 DisconnectionTimeoutMilliseconds = 1002,

@@ -116,6 +116,16 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
         }
 
 
+        /// <inheritdoc/>>
+        public override async Task HeartbeatAsync(CancellationToken cancellationToken)
+        {
+            if (_client.State == ModbusClientState.Connected)
+            {
+                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.Heartbeat, ControllerToDeviceHeartbeat, ModbusDataType.MbInt16);
+            }
+        }
+
+
         protected override void RegisterDataface()
         {
             throw new NotImplementedException();

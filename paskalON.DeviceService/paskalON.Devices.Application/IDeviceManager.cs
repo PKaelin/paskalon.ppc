@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Devices.Domain;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.EnergyResources.Solars;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
@@ -35,6 +36,12 @@ namespace paskalON.Devices.Application
         /// List of Modbus polling engine interfaces.
         /// </summary>
         ICollection<IModbusPollingEngine> ModbusPollingEngines { get; }
+
+
+        /// <summary>
+        /// List of device heartbeat interfaces
+        /// </summary>
+        ICollection<IDeviceHeartbeat> DeviceHeartbeats { get; }
 
 
         /// <summary>
@@ -83,6 +90,12 @@ namespace paskalON.Devices.Application
         /// Collection of Circuit Power Meters (CPM) that are withing the DER.
         /// </summary>
         ICollection<CircuitPowerMeter> CircuitPowerMeters { get; }
+
+
+        /// <summary>
+        /// Connect all devices.
+        /// </summary>
+        void ConnectDevices();
 
 
         /// <summary>

@@ -7,6 +7,7 @@ using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
+using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
 using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
 
@@ -68,6 +69,16 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
             {
                 await base.DisconnectAsync();
                 await _client.WriteSingleRegisterAsync((ushort)BbSimpleV1Description.Register.SelectorState, 0, ModbusDataType.MbInt16);
+            }
+        }
+
+
+        /// <inheritdoc/>>
+        public override async Task HeartbeatAsync(CancellationToken cancellationToken)
+        {
+            if (_client.State == ModbusClientState.Connected)
+            {
+                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.Heartbeat, ControllerToDeviceHeartbeat, ModbusDataType.MbInt16);
             }
         }
 

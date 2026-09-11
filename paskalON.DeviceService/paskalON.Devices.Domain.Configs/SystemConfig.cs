@@ -32,6 +32,13 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
+        /// Indicates the minimum valid heartbeat interval value.
+        /// If this value is less than 100 milliseconds it will cause an exception.
+        /// </summary>
+        private const long MinimumHeartbeatIntervalMilliseconds = 100;
+
+
+        /// <summary>
         /// Metrics publishing interval in milliseconds.
         /// </summary>
         /// <remarks>
@@ -70,6 +77,20 @@ namespace paskalON.Devices.Domain.Configs
         {
             get;
             set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDataLoggingIntervalMilliseconds); field = value; }
+        } = 1000;
+
+
+        /// <summary>
+        /// Device publishing interval in milliseconds.
+        /// </summary>
+        /// <remarks>
+        /// Used in combination with the DeviceFactorCore, DeviceFactorDetail to determine the publishing interval for each class.
+        /// Defined in: <see cref="SystemConfig"/>.
+        /// </remarks>
+        public int DeviceHeartbeatIntervalMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumHeartbeatIntervalMilliseconds); field = value; }
         } = 1000;
 
 

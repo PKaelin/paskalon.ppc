@@ -270,6 +270,12 @@ namespace paskalON.Devices.Application.UnitTest.Publishers
             protected override void RegisterDataface()
             {
             }
+
+            public override Task HeartbeatAsync(CancellationToken cancellationToken)
+            {
+                // Not required for unit tests.
+                return Task.CompletedTask;
+            }
         }
     }
 }

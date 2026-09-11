@@ -25,7 +25,7 @@ namespace paskalON.Devices.Service.UnitTest.Publishers
         public void MetricsPublisherServiceInitializeNullPublishersTest()
         {
             MetricsPublisherService service = new MetricsPublisherService(NullLogger<MetricsPublisherService>.Instance);
-            Assert.ThrowsExactly<ArgumentNullException>(() => service.Initialize(null!, 10));
+            Assert.ThrowsExactly<ArgumentNullException>(() => service.Initialize(null!, 10, 0));
         }
 
 
@@ -34,7 +34,7 @@ namespace paskalON.Devices.Service.UnitTest.Publishers
         {
             Mock<IMetricsPublisher> publisherMock = new Mock<IMetricsPublisher>();
             MetricsPublisherService service = new MetricsPublisherService(NullLogger<MetricsPublisherService>.Instance);
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => service.Initialize([publisherMock.Object], 0));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => service.Initialize([publisherMock.Object], 0, 0));
         }
 
 
@@ -43,7 +43,7 @@ namespace paskalON.Devices.Service.UnitTest.Publishers
         {
             Mock<IMetricsPublisher> publisherMock = new Mock<IMetricsPublisher>();
             MetricsPublisherService service = new MetricsPublisherService(NullLogger<MetricsPublisherService>.Instance);
-            service.Initialize([publisherMock.Object], 10);
+            service.Initialize([publisherMock.Object], 10, 0);
 
             Assert.IsNotNull(service);
         }
@@ -53,7 +53,7 @@ namespace paskalON.Devices.Service.UnitTest.Publishers
         public async Task MetricsPublisherServiceExecuteEmptyPublishersTest()
         {
             MetricsPublisherService service = new MetricsPublisherService(NullLogger<MetricsPublisherService>.Instance);
-            service.Initialize([], 1);
+            service.Initialize([], 1, 0);
             using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
             Task execution = service.StartAsync(cancellationTokenSource.Token);
@@ -71,7 +71,7 @@ namespace paskalON.Devices.Service.UnitTest.Publishers
             Mock<IMetricsPublisher> firstPublisherMock = new Mock<IMetricsPublisher>();
             Mock<IMetricsPublisher> secondPublisherMock = new Mock<IMetricsPublisher>();
             MetricsPublisherService service = new MetricsPublisherService(NullLogger<MetricsPublisherService>.Instance);
-            service.Initialize([firstPublisherMock.Object, secondPublisherMock.Object], 1);
+            service.Initialize([firstPublisherMock.Object, secondPublisherMock.Object], 1, 0);
             using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
             Task execution = service.StartAsync(cancellationTokenSource.Token);
@@ -93,7 +93,7 @@ namespace paskalON.Devices.Service.UnitTest.Publishers
             publisherMock.Setup(publisher => publisher.Publish(It.IsAny<int>()))
                 .Throws(new InvalidOperationException("Test exception"));
             MetricsPublisherService service = new MetricsPublisherService(logger);
-            service.Initialize([publisherMock.Object], 1);
+            service.Initialize([publisherMock.Object], 1, 0);
             using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
             Task execution = service.StartAsync(cancellationTokenSource.Token);

@@ -15,7 +15,6 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
     /// </remarks>
     public struct ApparentPower : IComparable, IComparable<ApparentPower>, IEquatable<ApparentPower>
     {
-
         /// <summary>
         /// Volt ampere per kilovolt ampere.
         /// </summary>
@@ -154,10 +153,11 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <returns>An object whose value is the orthogonal sum of p and q or null if either p or q are null.</returns>
         public static ApparentPower? OrthogonalSum(ActivePower? p, ReactivePower? q)
         {
-            return p.HasValue && q.HasValue ? OrthogonalSum(p.Value, q.Value) : (ApparentPower?)null;
+            return p.HasValue && q.HasValue ?
+                new ApparentPower(Math.Sqrt(p.Value.Watts * p.Value.Watts + q.Value.VoltAmperesReactive * q.Value.VoltAmperesReactive))
+                : null;
         }
 
-        public static void Test() { }
 
         /// <summary>
         /// Returns a hash code for this instance.

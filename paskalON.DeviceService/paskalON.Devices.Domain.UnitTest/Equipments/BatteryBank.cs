@@ -40,5 +40,11 @@ namespace paskalON.Devices.Domain.UnitTest.Equipments
             Dataface.Register<BatteryBank, IModbusRegister>(r => r.Register<BatteryBank, double?>(this, nameof(TotalDCVoltage), (x, v) => x.TotalDCVoltage = v, 1004, 1, ModbusDataType.MbInt16));
             Dataface.Register<BatteryBank, IModbusRegister>(r => r.Register<BatteryBank, double?>(this, nameof(TotalDCCurrent), (x, v) => x.TotalDCCurrent = v, 1005, 1, ModbusDataType.MbInt16));
         }
+
+        public override Task HeartbeatAsync(CancellationToken cancellationToken)
+        {
+            // Not required for unit tests.
+            return Task.CompletedTask;
+        }
     }
 }

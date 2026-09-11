@@ -33,6 +33,12 @@ namespace paskalON.Devices.Service.Publishers
 
 
         /// <summary>
+        /// Startup delay for the device to connect and get some data.
+        /// </summary>
+        private int _startupDelay;
+
+
+        /// <summary>
         /// Constructor of <see cref="MetricsPublisherService"/>.
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>
@@ -49,14 +55,17 @@ namespace paskalON.Devices.Service.Publishers
         /// </summary>
         /// <param name="metricsPublishers">List of metric publishers.</param>
         /// <param name="intervalMilliseconds">Time based interval for metrics publishers.</param>
-        public void Initialize(IEnumerable<IMetricsPublisher> metricsPublishers, int intervalMilliseconds)
+        /// <param name="startupDelay">Startup delay for the device to connect and get some data.</param>
+        public void Initialize(IEnumerable<IMetricsPublisher> metricsPublishers, int intervalMilliseconds, int startupDelay)
         {
             _logger.LogInformation("Initializing MetricsPublisherService with {Interval}ms interval", intervalMilliseconds);
             ArgumentNullException.ThrowIfNull(metricsPublishers);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMilliseconds);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(startupDelay);
 
             _metricsPublishers = metricsPublishers;
             _intervalMilliseconds = intervalMilliseconds;
+            _startupDelay = startupDelay;
         }
 
 
@@ -68,6 +77,7 @@ namespace paskalON.Devices.Service.Publishers
         /// </remarks>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await Task.Delay(TimeSpan.FromMilliseconds(_startupDelay));
             int interval = 0;
             using PeriodicTimer timer = new(TimeSpan.FromMilliseconds(_intervalMilliseconds));
 

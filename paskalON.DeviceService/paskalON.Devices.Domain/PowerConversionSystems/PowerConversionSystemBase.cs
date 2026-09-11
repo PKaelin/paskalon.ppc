@@ -20,7 +20,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
     /// <summary>
     /// Power Conversion System (PCS) base class for all PCSs.
     /// </summary>
-    public abstract class PowerConversionSystemBase : DerDeviceBase, IPowerConversionSystem, INotifyPropertyChanged
+    public abstract class PowerConversionSystemBase : DerDeviceBase, IPowerConversionSystem, IDeviceHeartbeat, INotifyPropertyChanged
     {
         /// <summary>
         /// Power conversion system configuration of this instance.
@@ -190,7 +190,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public bool IsInMaintenanceMode { get => DerUnit.IsInMaintenanceMode; }
 
 
-        private ushort deviceHeartbeat = 0;
         /// <summary>
         /// Controller heartbeat value that increments on each call and wraps around at 256.
         /// A value of 0 is skipped to avoid confusion with uninitialized state.
@@ -199,11 +198,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <remarks>
         /// Controller heartbeat is sometimes referred to as Modbus master heartbeat.
         /// </remarks>
-        public ushort ControllerHeartbeat
+        private ushort controllerHeartbeat = 0;
+        public virtual ushort ControllerToDeviceHeartbeat
         {
             get
             {
-                ushort newHeartbeat = (ushort)(++deviceHeartbeat % 256);
+                ushort newHeartbeat = (ushort)(++controllerHeartbeat % 256);
                 return newHeartbeat == 0 ? ++newHeartbeat : newHeartbeat;
             }
         }
@@ -216,7 +216,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <remarks>
         /// Device heartbeat is sometimes referred to as Modbus slave heartbeat.
         /// </remarks>
-        public ushort DeviceHeartbeat
+        public virtual ushort DeviceToControllerHeartbeat
         {
             get { lock (dataLock) { return field; } }
             set { lock (dataLock) { field = value; } }
@@ -498,6 +498,10 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             RegisterMetrics();
             RegisterDataface();
         }
+
+
+        /// <inheritdoc/>
+        public abstract Task HeartbeatAsync(CancellationToken cancellationToken);
 
 
         /// <summary>

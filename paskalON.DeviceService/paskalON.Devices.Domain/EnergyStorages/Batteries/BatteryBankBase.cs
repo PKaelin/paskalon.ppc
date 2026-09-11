@@ -21,7 +21,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
     /// <remarks>
     /// Battery bank is a collection of individual batteries wired together in series or parallel to function as a single large-scale energy storage.
     /// </remarks>
-    public abstract class BatteryBankBase : DerDeviceBase, IBatteryBank, INotifyPropertyChanged
+    public abstract class BatteryBankBase : DerDeviceBase, IBatteryBank, IDeviceHeartbeat, INotifyPropertyChanged
     {
         /// <summary>
         /// Battery bank configuration.
@@ -225,6 +225,39 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// Configured value determining whether the proxy should report 0 capability in the event of communication loss.
         /// </summary>
         public bool ZeroCapacityOnCommLoss { get => _config.BatteryBankDeviceConfig.ZeroCapacityOnCommLoss; }
+
+
+        /// <summary>
+        /// Controller heartbeat value that increments on each call and wraps around at 256.
+        /// A value of 0 is skipped to avoid confusion with uninitialized state.
+        /// PPC controller (DeviceService) writes --> to Device
+        /// </summary>
+        /// <remarks>
+        /// Controller heartbeat is sometimes referred to as Modbus master heartbeat.
+        /// </remarks>
+        private ushort controllerHeartbeat = 0;
+        public virtual ushort ControllerToDeviceHeartbeat
+        {
+            get
+            {
+                ushort newHeartbeat = (ushort)(++controllerHeartbeat % 256);
+                return newHeartbeat == 0 ? ++newHeartbeat : newHeartbeat;
+            }
+        }
+
+
+        /// <summary>
+        /// Device heartbeat value that gets read from the device.
+        /// PPC controller (DeviceService) reads <-- from Device
+        /// </summary>
+        /// <remarks>
+        /// Device heartbeat is sometimes referred to as Modbus slave heartbeat.
+        /// </remarks>
+        public virtual ushort DeviceToControllerHeartbeat
+        {
+            get { lock (dataLock) { return field; } }
+            set { lock (dataLock) { field = value; } }
+        }
 
 
         /// <summary>
@@ -450,6 +483,10 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
             RegisterMetrics();
             RegisterDataface();
         }
+
+
+        /// <inheritdoc/>
+        public abstract Task HeartbeatAsync(CancellationToken cancellationToken);
 
 
         /// <summary>

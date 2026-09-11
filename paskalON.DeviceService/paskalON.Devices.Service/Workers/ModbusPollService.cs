@@ -12,7 +12,7 @@ namespace paskalON.Devices.Service.Workers
         /// <summary>
         /// Logger for application logging and diagnostics.
         /// </summary>
-        private readonly ILogger _logger;
+        private readonly ILogger<ModbusPollService> _logger;
 
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace paskalON.Devices.Service.Workers
         /// <summary>
         /// Constructor of <see cref="ModbusPollService"/>.
         /// </summary>
-        /// <param name="logger"></param>
+        /// <param name="logger">Logger for application logging and diagnostics.</param>
         public ModbusPollService(ILogger<ModbusPollService> logger)
         {
             ArgumentNullException.ThrowIfNull(logger);
