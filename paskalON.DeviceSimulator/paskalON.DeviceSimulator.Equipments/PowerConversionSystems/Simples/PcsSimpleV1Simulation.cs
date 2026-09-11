@@ -6,6 +6,7 @@ using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
 using paskalON.DeviceSimulator.Application.Simulations;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Protocols.Modbus.Stores;
+using System.Diagnostics;
 
 namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
 {
@@ -34,6 +35,7 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
         /// <inheritdoc/>
         public Task TickAsync(TimeSpan elapsed, CancellationToken cancellationToken)
         {
+            ushort heartbeat = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.Heartbeat);
             ushort selector = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.SelectorState);
             ushort reactiveTarget = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.QReference);
             ushort activeTarget = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.PReference);
@@ -46,6 +48,15 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
             RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.QAvailable, 60000);
             RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.ACBreaker, 1);
             RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.DcContactor, 1);
+
+            if (System.Diagnostics.Debugger.IsAttached == true)
+            {
+                Debug.WriteLine($"PCS Sim Time: {DateTime.Now.ToString("HH:mm:ss")}");
+                Debug.WriteLine($"Heartbeat: {heartbeat}");
+                Debug.WriteLine($"Selector: {selector}");
+                Debug.WriteLine($"ActiveTarget: {activeTarget}");
+                Debug.WriteLine($"ReactiveTarget: {reactiveTarget}");
+            }
 
             return Task.CompletedTask;
         }

@@ -114,7 +114,7 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <inheritdoc/>
-        protected override void ConnectDevices()
+        public override void ConnectDevices()
         {
             // Dont connect to the devices as the device simulator simulates the devices
         }
@@ -147,6 +147,7 @@ namespace paskalON.DeviceSimulator.Application
                     .Where(entry => entry.Key.Address == key.Address && entry.Key.Port == key.Port)
                     .Select(entry => entry.Value)
                     .First();
+
                 NModbusServer server = new NModbusServer(modbusLogger, store, engine.DestinationAddress, engine.DestinationPort);
                 _ = Task.Run(() => server.StartAsync(_cancellationToken));
             }

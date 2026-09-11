@@ -11,8 +11,16 @@ namespace paskalON.DeviceSimulator.Service.Workers
     /// </summary>
     public sealed class SimulationWorker : BackgroundService
     {
+        /// <summary>
+        /// Simulation device registry.
+        /// </summary>
         private readonly SimulationDeviceRegistry _devices;
-        private TimeSpan _interval;
+
+
+        /// <summary>
+        /// Time based interval for simulation executions.
+        /// </summary>
+        private int _intervalMilliseconds;
 
 
         /// <summary>
@@ -22,8 +30,8 @@ namespace paskalON.DeviceSimulator.Service.Workers
         public SimulationWorker(SimulationDeviceRegistry devices)
         {
             ArgumentNullException.ThrowIfNull(devices);
+
             _devices = devices;
-            _interval = TimeSpan.FromMilliseconds(100);
         }
 
 
@@ -35,14 +43,15 @@ namespace paskalON.DeviceSimulator.Service.Workers
         {
             ArgumentOutOfRangeException.ThrowIfLessThan(intervalMilliseconds, 50);
 
-            _interval = TimeSpan.FromMilliseconds(intervalMilliseconds);
+            _intervalMilliseconds = intervalMilliseconds;
         }
 
 
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            PeriodicTimer timer = new PeriodicTimer(_interval);
+            TimeSpan interval = TimeSpan.FromMilliseconds(_intervalMilliseconds);
+            PeriodicTimer timer = new PeriodicTimer(interval);
 
             using (timer)
             {
@@ -50,7 +59,7 @@ namespace paskalON.DeviceSimulator.Service.Workers
                 {
                     foreach (ISimulatedDevice device in _devices.Devices)
                     {
-                        await device.TickAsync(_interval, stoppingToken);
+                        await device.TickAsync(interval, stoppingToken);
                     }
                 }
             }

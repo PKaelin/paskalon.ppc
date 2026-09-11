@@ -64,7 +64,7 @@ try
 
     // Add simulations
     builder.Services.AddSingleton<SimulationWorker>();
-    builder.Services.AddHostedService<SimulationWorker>();
+    builder.Services.AddHostedService<SimulationWorker>(provider => provider.GetRequiredService<SimulationWorker>());
 
     // Build application
     app = builder.Build();
