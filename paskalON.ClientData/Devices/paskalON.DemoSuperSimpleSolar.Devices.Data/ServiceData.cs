@@ -54,6 +54,7 @@ namespace paskalON.DemoSuperSimpleSolar.Devices.Data
                 PollingIntervalMilliseconds = 1000,
                 MetricsIntervalMilliseconds = 5000,
                 DeviceIntervalMilliseconds = 1000,
+                DeviceHeartbeatIntervalMilliseconds = 1000,
                 DeviceFactorCore = 1,
                 DeviceFactorDetail = 5,
                 PublisherTopicPcsCore = "ppc:device:pcs:core",
@@ -95,7 +96,6 @@ namespace paskalON.DemoSuperSimpleSolar.Devices.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "ModbusConnection for all",
-                MasterHeartBeatIntervalMilliseconds = 1000,
                 IsPipeliningEnabled = false,
                 ConnectionTimeoutMilliseconds = 5000,
                 DisconnectionTimeoutMilliseconds = 5000,
