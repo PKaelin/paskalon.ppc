@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Client\paskalON.Devices.Client.csproj" />
     <ProjectReference Include="..\paskalON.DeviceSimulator.Application\paskalON.DeviceSimulator.Application.csproj" />
+    <ProjectReference Include="..\paskalON.DeviceSimulator.Equipments\paskalON.DeviceSimulator.Equipments.csproj" />
   </ItemGroup>
 
 </Project>

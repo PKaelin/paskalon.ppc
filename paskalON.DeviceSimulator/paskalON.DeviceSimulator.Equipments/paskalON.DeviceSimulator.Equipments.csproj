@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\paskalON.DeviceSimulator.Application\paskalON.DeviceSimulator.Application.csproj" />
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Equipments\paskalON.Devices.Equipments.csproj" />
   </ItemGroup>

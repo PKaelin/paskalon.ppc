@@ -1,5 +1,10 @@
 # Coding Standard Instructions
 
+## Compiling Rules
+- When writing or refactoring code, assume the environment is set to "Automatically build with confirmation".
+- Ensure all code changes are clean and syntactically correct so compilation passes without triggering unnecessary build-error alerts in the IDE.
+
+
 ## Project Definitions
 - **Nullability:** Nullable reference types are strictly enforced (`<Nullable>enable</Nullable>`).
 
@@ -16,12 +21,12 @@ Add the header below at the beginning of all code files that end with `.cs`. Do 
 
 ## Formatting
 - **Spacing:** Always use two single blank lines after class member definitions, such as methods, fields, properties.
-- **Newlines:** Always insert a single blank line immediately before `try`, `switch`, `if` statements, unless they are the very first line inside a code block.
+- **Newlines:** Always insert a single blank line immediately before `try`, `switch`, `if`, `using` statements, unless they are the very first line inside a code block.
 - **XML Documentation Comments:** All public and internal classes, methods, properties, and fields must have XML documentation comments. 
     - Use <inheritdoc/> when documentation can be inherited from a base class or interface.    
     - XML documentation tags must use multi-line formatting. Opening and closing tags must be on separate lines, with the documentation text on its own line(s).
     - Exception: <inheritdoc/> is always a self-closing single-line tag and must not be wrapped in <summary> or formatted across multiple lines.
-- **Return:** Always insert a single blank line immediately before a `return` command within a method if there is code before it.
+- **Return:** Always insert a single blank line immediately before a `return` command within a method if there is code before it and unless they are the very first line inside a code block.
 
 
 ## Variables & Conditions

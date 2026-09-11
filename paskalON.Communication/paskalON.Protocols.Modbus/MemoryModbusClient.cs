@@ -30,11 +30,11 @@ namespace paskalON.Protocols.Modbus
 
 
         /// <inheritdoc/>
-        public string ServerAddress { get => "MemoryClient"; }
+        public string ServerAddress { get; init; }
 
 
         /// <inheritdoc/>
-        public int ServerPort { get => 0; }
+        public int ServerPort { get; init; }
 
 
         /// <inheritdoc/>
@@ -52,11 +52,15 @@ namespace paskalON.Protocols.Modbus
         /// </summary>
         /// <param name="store">The Modbus data store.</param>
         /// <param name="unitId">Teh unit id.</param>
-        public MemoryModbusClient(IModbusDataStore store, byte unitId = 1)
+        public MemoryModbusClient(IModbusDataStore store, string serverAddress, int serverPort, byte unitId = 1)
         {
             ArgumentNullException.ThrowIfNull(store);
+            ArgumentNullException.ThrowIfNull(serverAddress);
+            ArgumentOutOfRangeException.ThrowIfLessThan(serverPort, 0);
 
             Store = store;
+            ServerAddress = serverAddress;
+            ServerPort = serverPort;
             UnitId = unitId;
         }
 

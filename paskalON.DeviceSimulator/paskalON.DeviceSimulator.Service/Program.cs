@@ -8,6 +8,9 @@ using paskalON.Devices.Application.Factories;
 using paskalON.Devices.Infrastructure.Storage;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.DeviceSimulator.Application;
+using paskalON.DeviceSimulator.Application.Factories;
+using paskalON.DeviceSimulator.Application.Simulations;
+using paskalON.DeviceSimulator.Equipments.PowerConversionSystems;
 using paskalON.DeviceSimulator.Service.Workers;
 using paskalON.Telemetry;
 
@@ -28,6 +31,13 @@ try
     {
         throw new ApplicationException("PMU_DATA_RATE is not configured as a number");
     }
+    // Get simulation interval
+    string? simulationIntervalString = Environment.GetEnvironmentVariable("SIMULATION_INTERVAL_MILLISECONDS");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(simulationIntervalString);
+    if (ushort.TryParse(simulationIntervalString, out ushort simulationInterval) == false)
+    {
+        throw new ApplicationException("SIMULATION_INTERVAL_MILLISECONDS is not configured as a number");
+    }
 
     // Create builder
     Console.WriteLine("Building service.....");
@@ -42,16 +52,19 @@ try
     builder.Services.AddScoped<IDerRepository, DerRepository>();
     builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
 
-    // Create server service
-    builder.Services.AddSingleton<ServerService>();
-    builder.Services.AddHostedService<ServerService>(provider => provider.GetRequiredService<ServerService>());
-
     // Add communications
     builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
-    builder.Services.AddSingleton<IModbusDeviceFactory, ModbusDeviceFactory>();
+    builder.Services.AddSingleton<ISimulationStoreRegistry, SimulationStoreRegistry>();
+    builder.Services.AddSingleton<SimulationDeviceRegistry>();
+    builder.Services.AddSingleton<ISimulationModelFactory, PowerConversionSystemSimulationModelFactory>();
+    builder.Services.AddSingleton<IModbusDeviceFactory, SimulationModbusDeviceFactory>();
     builder.Services.AddSingleton<IC37DeviceFactory, C37DeviceFactory>();
     builder.Services.AddSingleton<IDeviceManager, DeviceManagerSimulator>();
+
+    // Add simulations
+    builder.Services.AddSingleton<SimulationWorker>();
+    builder.Services.AddHostedService<SimulationWorker>();
 
     // Build application
     app = builder.Build();
@@ -70,9 +83,9 @@ try
         await deviceManager.LoadDerAsync(repository);
     }
 
-    // Initialize server service
-    ServerService serverService = app.Services.GetRequiredService<ServerService>();
-
+    // Initialize simulation service
+    SimulationWorker simulationService = app.Services.GetRequiredService<SimulationWorker>();
+    simulationService.Initialize(simulationInterval);
 
     app.Logger.LogInformation("Application finished initializing services");
 
