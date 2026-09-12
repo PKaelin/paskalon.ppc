@@ -48,8 +48,20 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
             ushort reactiveTarget = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.QReference);
             ushort activeTarget = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.PReference);
 
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.CurrentState,
-                selector == 1 ? (ushort)PcsSimpleV1Description.State.On : (ushort)PcsSimpleV1Description.State.Off);
+            ushort? currentState = null;
+
+            switch (selector)
+            {
+                case 0: currentState = (ushort)PcsSimpleV1Description.State.Off; break;
+                case 1: currentState = (ushort)PcsSimpleV1Description.State.On; break;
+                case 3: currentState = (ushort)PcsSimpleV1Description.State.Standby; break;
+            }
+
+            if (currentState != null)
+            {
+                RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.CurrentState, (ushort)currentState);
+            }
+
             RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.P, activeTarget);
             RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.Q, reactiveTarget);
             RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.PAvailable, 60000);

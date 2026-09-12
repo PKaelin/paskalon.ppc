@@ -36,6 +36,19 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
+        /// PCS pending state is so that the device update doesn't update a state
+        /// when the device is in a state transformation.
+        /// </summary>
+        protected PcsState? _pendingState;
+
+
+        /// <summary>
+        /// PCS pending state timer in case we get stuck in the of nowhere.
+        /// </summary>
+        protected Timer? _pendingStateTimer;
+
+
+        /// <summary>
         /// Event when the Power Conversion System state <see cref="PcsState"/> changes.
         /// </summary>
         public event EventHandler<PcsStateChangedEventArgs>? StateChanged;
@@ -510,7 +523,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public virtual async Task StartAsync()
         {
             _logger.LogInformation("{Name} start requested.", Name);
-            State = PcsState.Starting;
+
+            lock (dataLock)
+            {
+                SetPendingState(PcsState.Starting);
+                State = PcsState.Starting;
+            }
         }
 
 
@@ -520,9 +538,15 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public virtual async Task StopAsync()
         {
             _logger.LogInformation("{Name} stop requested.", Name);
-            State = PcsState.Stopping;
-            await SetActivePowerTargetAsync(0);
-            await SetReactivePowerTargetAsync(0);
+
+            lock (dataLock)
+            {
+                SetPendingState(PcsState.Stopping);
+                State = PcsState.Stopping;
+            }
+
+            _activePowerTarget = 0;
+            _reactivePowerTarget = 0;
         }
 
 
@@ -540,6 +564,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                     _activePowerTarget = StandbyActivePowerKiloWatts * 1000;
                 }
 
+                SetPendingState(PcsState.EnteringStandby);
                 State = PcsState.EnteringStandby;
             }
         }
@@ -555,9 +580,11 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             lock (dataLock)
             {
-                if (State == PcsState.EnteringStandby || State == PcsState.Standby)
+                if (State == PcsState.EnteringStandby || State == PcsState.Standby || State == PcsState.Stopping || State == PcsState.Stopped)
                 {
-                    _logger.LogWarning("{Name} - Is entering or is in standby. No new active power target can be set: {activePowerTarget}", Name, _activePowerTarget);
+                    _logger.LogWarning("{Name} - Entering or is in standby, stopping or is stopped. " +
+                        "No new active power target can be set: {activePowerTarget}", Name, _activePowerTarget);
+
                     return;
                 }
 
@@ -586,9 +613,11 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             lock (dataLock)
             {
-                if (State == PcsState.EnteringStandby || State == PcsState.Standby)
+                if (State == PcsState.EnteringStandby || State == PcsState.Standby || State == PcsState.Stopping || State == PcsState.Stopped)
                 {
-                    _logger.LogWarning("{Name} - Is entering or is in standby. No new reactive power target can be set: {reactivePowerTarget}", Name, _reactivePowerTarget);
+                    _logger.LogWarning("{Name} - Entering or is in standby, stopping or is stopped. " +
+                        "No new reactive power target can be set: {reactivePowerTarget}", Name, _reactivePowerTarget);
+
                     return;
                 }
 
@@ -607,6 +636,108 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public async virtual Task CheckHealthAsync()
         {
             // TODO: Implement state check, data received check and com error update if necessary.
+        }
+
+
+        /// <summary>
+        /// Entry point for all state update to handle read and write racing conditions.
+        /// </summary>
+        /// <param name="reportedState">The reported state from the device.</param>
+        protected void UpdateState(PcsState reportedState)
+        {
+            lock (dataLock)
+            {
+                if (_pendingState.HasValue == true)
+                {
+                    if (reportedState == _pendingState.Value)
+                    {
+                        ClearPendingState();
+                    }
+                    else if (IsInTransitionState(_pendingState.Value, reportedState) == true)
+                    {
+                        _logger.LogDebug("{Name} Ignoring stale device state {Reported} while pending {Pending}.", Name, reportedState, _pendingState);
+                        return;
+                    }
+                    else
+                    {
+                        // Device moved somewhere else on its own (Fault/Standby/NightMode/)
+                        ClearPendingState();
+                    }
+                }
+
+                State = reportedState;
+            }
+        }
+
+
+        /// <summary>
+        /// Check transitional states.
+        /// </summary>
+        /// <param name="pending">The pending state.</param>
+        /// <param name="reported">The reported state.</param>
+        /// <returns>True if it is in transition otherwise false.</returns>
+        protected virtual bool IsInTransitionState(PcsState pending, PcsState reported)
+        {
+            return pending switch
+            {
+                PcsState.Starting => reported is PcsState.Stopped or PcsState.Standby or PcsState.Fault,
+                PcsState.Stopping => reported is PcsState.Started or PcsState.Standby,
+                PcsState.EnteringStandby => reported is PcsState.Stopped or PcsState.Started or PcsState.Fault,
+                _ => false
+            };
+        }
+
+
+        /// <summary>
+        /// Set pending state structure.
+        /// </summary>
+        /// <param name="pending">The pending state.</param>
+        protected virtual void SetPendingState(PcsState pending)
+        {
+            lock (dataLock)
+            {
+                _pendingState = pending;
+                _pendingStateTimer?.Dispose();
+                _pendingStateTimer = new Timer(OnPendingStateTimeout, pending, TimeSpan.FromSeconds(60), Timeout.InfiniteTimeSpan);
+            }
+        }
+
+
+        /// <summary>
+        /// Clear pending state structure.
+        /// </summary>
+        protected void ClearPendingState()
+        {
+            lock (dataLock)
+            {
+                _pendingState = null;
+                _pendingStateTimer?.Dispose();
+                _pendingStateTimer = null;
+            }
+        }
+
+
+        /// <summary>
+        /// Triggered when pending state is timed out.
+        /// </summary>
+        /// <param name="state">The expected state.</param>
+        protected void OnPendingStateTimeout(object? state)
+        {
+            var expected = (PcsState)state!;
+
+            lock (dataLock)
+            {
+                // If it already resolved between the timer firing and us getting the lock, do nothing.
+                if (_pendingState != expected)
+                {
+                    return;
+                }
+
+                _logger.LogError("{Name} Timed out waiting for state {Expected} but current {State}. Device did not confirm within Timeout.", Name, expected, State);
+                _pendingState = null;
+                _pendingStateTimer?.Dispose();
+                _pendingStateTimer = null;
+            }
         }
 
 
@@ -630,7 +761,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             if (state == true)
             {
                 _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
-                State = PcsState.Stopped;
+                State = PcsState.Fault;
 
                 if (ZeroOutputOnCommLoss == true)
                 {
