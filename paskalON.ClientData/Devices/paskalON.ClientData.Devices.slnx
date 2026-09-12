@@ -10,5 +10,6 @@
     <Project Path="../../paskalON.DeviceService/paskalON.Devices.Infrastructure/paskalON.Devices.Infrastructure.csproj" />
   </Folder>
   <Project Path="paskalON.DemoSimple.Devices.Data/paskalON.DemoSimple.Devices.Data.csproj" Id="6eb9e0b1-22bd-407c-88bb-6804f6b9595a" />
+  <Project Path="paskalON.DemoSuperSimpleBattery.Devices.Data.csproj/paskalON.DemoSuperSimpleBattery.Devices.Data.csproj" Id="a5eb54b2-1bdc-43ee-9ff0-d9e33fa43b20" />
   <Project Path="paskalON.DemoSuperSimpleSolar.Devices.Data/paskalON.DemoSuperSimpleSolar.Devices.Data.csproj" Id="8df84521-8044-49e6-bfb8-c5321d203656" />
 </Solution>

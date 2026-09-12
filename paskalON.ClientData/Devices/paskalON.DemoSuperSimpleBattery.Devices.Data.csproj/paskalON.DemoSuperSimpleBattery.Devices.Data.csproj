@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\paskalON.DeviceService\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />
     <ProjectReference Include="..\..\..\paskalON.DeviceService\paskalON.Devices.Infrastructure\paskalON.Devices.Infrastructure.csproj" />
   </ItemGroup>
 
