@@ -37,6 +37,19 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 
 
         /// <summary>
+        /// Battery bank pending state is so that the device update doesn't update a state
+        /// when the device is in a state transformation.
+        /// </summary>
+        protected BatteryBankState? _pendingState;
+
+
+        /// <summary>
+        /// Battery bank pending state timer in case we get stuck in the of nowhere.
+        /// </summary>
+        protected Timer? _pendingStateTimer;
+
+
+        /// <summary>
         /// Event when the battery bank state <see cref="BatteryBankState"/> changes.
         /// </summary>
         public event EventHandler<BatteryBankStateChangedEventArgs>? StateChanged;
@@ -519,6 +532,107 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 
 
         /// <summary>
+        /// Entry point for all state update to handle read and write racing conditions.
+        /// </summary>
+        /// <param name="reportedState">The reported state from the device.</param>
+        protected void UpdateState(BatteryBankState reportedState)
+        {
+            lock (dataLock)
+            {
+                if (_pendingState.HasValue == true)
+                {
+                    if (reportedState == _pendingState.Value)
+                    {
+                        ClearPendingState();
+                    }
+                    else if (IsInTransitionState(_pendingState.Value, reportedState) == true)
+                    {
+                        _logger.LogDebug("{Name} Ignoring stale device state {Reported} while pending {Pending}.", Name, reportedState, _pendingState);
+                        return;
+                    }
+                    else
+                    {
+                        // Device moved somewhere else on its own (Fault/Standby/NightMode/)
+                        ClearPendingState();
+                    }
+                }
+
+                State = reportedState;
+            }
+        }
+
+
+        /// <summary>
+        /// Check transitional states.
+        /// </summary>
+        /// <param name="pending">The pending state.</param>
+        /// <param name="reported">The reported state.</param>
+        /// <returns>True if it is in transition otherwise false.</returns>
+        protected virtual bool IsInTransitionState(BatteryBankState pending, BatteryBankState reported)
+        {
+            return pending switch
+            {
+                BatteryBankState.Connecting => reported is BatteryBankState.Disconnected or BatteryBankState.Initializing or BatteryBankState.Fault,
+                BatteryBankState.Disconnecting => reported is BatteryBankState.Connected or BatteryBankState.SocProtection or BatteryBankState.Fault,
+                _ => false
+            };
+        }
+
+
+        /// <summary>
+        /// Set pending state structure.
+        /// </summary>
+        /// <param name="pending">The pending state.</param>
+        protected virtual void SetPendingState(BatteryBankState pending)
+        {
+            lock (dataLock)
+            {
+                _pendingState = pending;
+                _pendingStateTimer?.Dispose();
+                _pendingStateTimer = new Timer(OnPendingStateTimeout, pending, TimeSpan.FromSeconds(60), Timeout.InfiniteTimeSpan);
+            }
+        }
+
+
+        /// <summary>
+        /// Clear pending state structure.
+        /// </summary>
+        protected virtual void ClearPendingState()
+        {
+            lock (dataLock)
+            {
+                _pendingState = null;
+                _pendingStateTimer?.Dispose();
+                _pendingStateTimer = null;
+            }
+        }
+
+
+        /// <summary>
+        /// Triggered when pending state is timed out.
+        /// </summary>
+        /// <param name="state">The expected state.</param>
+        private void OnPendingStateTimeout(object? state)
+        {
+            BatteryBankState expected = (BatteryBankState)state!;
+
+            lock (dataLock)
+            {
+                // If it already resolved between the timer firing and us getting the lock, do nothing.
+                if (_pendingState != expected)
+                {
+                    return;
+                }
+
+                _logger.LogError("{Name} Timed out waiting for state {Expected} but current {State}. Device did not confirm within Timeout.", Name, expected, State);
+                _pendingState = null;
+                _pendingStateTimer?.Dispose();
+                _pendingStateTimer = null;
+            }
+        }
+
+
+        /// <summary>
         /// <inheritdoc/>
         /// </summary>
         protected override void RegisterMetrics()
@@ -665,6 +779,29 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+        /// <summary>
+        ///  Triggered on client communication error.
+        /// </summary>
+        /// <param name="sender">The communication client.</param>
+        /// <param name="e">The event arguments.</param>
+        protected void OnCommunicationError(object? sender, EventArgs e)
+        {
+            // Logging and even invocation is done in the setter of the CommunicationError property
+            RaiseCommunicationError();
+        }
+
+
+        /// <summary>
+        /// Raise communication error.
+        /// </summary>
+        protected void RaiseCommunicationError()
+        {
+            ClearPendingState();
+            CommunicationError = true;
+            State = BatteryBankState.Fault;
         }
     }
 }

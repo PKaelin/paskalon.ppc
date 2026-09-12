@@ -9,8 +9,7 @@ using paskalON.Devices.Infrastructure.Storage;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.DeviceSimulator.Application;
 using paskalON.DeviceSimulator.Application.Factories;
-using paskalON.DeviceSimulator.Application.Simulations;
-using paskalON.DeviceSimulator.Equipments.PowerConversionSystems;
+using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.DeviceSimulator.Service.Workers;
 using paskalON.Telemetry;
 

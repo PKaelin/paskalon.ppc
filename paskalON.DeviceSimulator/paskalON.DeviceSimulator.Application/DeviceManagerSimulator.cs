@@ -6,11 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using paskalON.Devices.Application;
 using paskalON.Devices.Application.Factories;
+using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Equipments.C37;
 using paskalON.Devices.Equipments.Modbus;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
-using paskalON.DeviceSimulator.Application.Simulations;
+using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Protocols.C37118;
 using paskalON.Protocols.C37118.Simulations;
 using paskalON.Protocols.Modbus.NModbus;
@@ -157,6 +158,23 @@ namespace paskalON.DeviceSimulator.Application
         private void RegisterSimulationModels()
         {
             foreach (PowerConversionSystemBase device in PowerConversionSystems)
+            {
+                IModbusDataStore store = _stores.Stores
+                    .Where(entry => entry.Key.Address == device.TargetAddress && entry.Key.Port == device.TargetPort)
+                    .Select(entry => entry.Value)
+                    .First();
+
+                ISimulatedDevice? simulation = _simulationFactories
+                    .Select(factory => factory.Create(device, store))
+                    .FirstOrDefault(candidate => candidate is not null);
+
+                if (simulation is not null)
+                {
+                    _simulationDevices.Add(simulation);
+                }
+            }
+
+            foreach (BatteryBankBase device in BatteryBanks)
             {
                 IModbusDataStore store = _stores.Stores
                     .Where(entry => entry.Key.Address == device.TargetAddress && entry.Key.Port == device.TargetPort)

@@ -2,7 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-namespace paskalON.DeviceSimulator.Application.Simulations
+namespace paskalON.DeviceSimulator.Equipments.Simulations
 {
     /// <summary>
     /// Registry of simulated devices driven by the simulation worker.

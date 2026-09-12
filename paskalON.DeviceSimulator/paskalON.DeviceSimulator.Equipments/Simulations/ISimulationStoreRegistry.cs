@@ -5,7 +5,7 @@
 using paskalON.Devices.Domain.Configs;
 using paskalON.Protocols.Modbus.Stores;
 
-namespace paskalON.DeviceSimulator.Application.Simulations
+namespace paskalON.DeviceSimulator.Equipments.Simulations
 {
     /// <summary>
     /// Provides the memory store associated with a configured Modbus endpoint.

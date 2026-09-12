@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Application\paskalON.Devices.Application.csproj" />
+    <ProjectReference Include="..\paskalON.DeviceSimulator.Equipments\paskalON.DeviceSimulator.Equipments.csproj" />
   </ItemGroup>
 
 </Project>

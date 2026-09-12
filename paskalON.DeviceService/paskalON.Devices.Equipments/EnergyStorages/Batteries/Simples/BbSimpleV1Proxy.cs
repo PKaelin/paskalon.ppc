@@ -55,8 +55,20 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                 await _client.ConnectAsync();
             }
 
-            await base.ConnectAsync();
-            await _client.WriteSingleRegisterAsync((ushort)BbSimpleV1Description.Register.SelectorState, 1, ModbusDataType.MbInt16);
+            try
+            {
+                await base.ConnectAsync();
+                await _client.WriteSingleRegisterAsync((ushort)BbSimpleV1Description.Register.SelectorState,
+                    (ushort)BbSimpleV1Description.State.Connected, ModbusDataType.MbInt16);
+            }
+            catch
+            {
+                lock (dataLock)
+                {
+                    RaiseCommunicationError();
+                    throw;
+                }
+            }
         }
 
 
@@ -67,8 +79,20 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         {
             if (_client.State == ModbusClientState.Connected)
             {
-                await base.DisconnectAsync();
-                await _client.WriteSingleRegisterAsync((ushort)BbSimpleV1Description.Register.SelectorState, 0, ModbusDataType.MbInt16);
+                try
+                {
+                    await base.DisconnectAsync();
+                    await _client.WriteSingleRegisterAsync((ushort)BbSimpleV1Description.Register.SelectorState,
+                        (ushort)BbSimpleV1Description.State.Disconnected, ModbusDataType.MbInt16);
+                }
+                catch
+                {
+                    lock (dataLock)
+                    {
+                        RaiseCommunicationError();
+                        throw;
+                    }
+                }
             }
         }
 
@@ -135,20 +159,20 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
             switch (state)
             {
                 case (int)BbSimpleV1Description.State.Disconnected:
-                    State = BatteryBankState.Disconnected;
+                    UpdateState(BatteryBankState.Disconnected);
                     BatteryBankFlowDirection = Domain.EnergyStorages.Batteries.BatteryBankFlowDirection.Idle;
                     break;
                 case (int)BbSimpleV1Description.State.Connected:
                 case (int)BbSimpleV1Description.State.Idle:
-                    State = BatteryBankState.Connected;
+                    UpdateState(BatteryBankState.Connected);
                     BatteryBankFlowDirection = Domain.EnergyStorages.Batteries.BatteryBankFlowDirection.Idle;
                     break;
                 case (int)BbSimpleV1Description.State.Discharging:
-                    State = BatteryBankState.Connected;
+                    UpdateState(BatteryBankState.Connected);
                     BatteryBankFlowDirection = Domain.EnergyStorages.Batteries.BatteryBankFlowDirection.Discharging;
                     break;
                 case (int)BbSimpleV1Description.State.Charging:
-                    State = BatteryBankState.Connected;
+                    UpdateState(BatteryBankState.Connected);
                     BatteryBankFlowDirection = Domain.EnergyStorages.Batteries.BatteryBankFlowDirection.Charging;
                     break;
                 default:
@@ -233,19 +257,6 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                     SetVendorEvent(code.ToString(), true);
                 }
             }
-        }
-
-
-        /// <summary>
-        ///  Triggered on client communication error.
-        /// </summary>
-        /// <param name="sender">The communication client.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnCommunicationError(object? sender, EventArgs e)
-        {
-            // Logging and even invocation is done in the setter of the CommunicationError property
-            CommunicationError = true;
-            State = BatteryBankState.Fault;
         }
 
 

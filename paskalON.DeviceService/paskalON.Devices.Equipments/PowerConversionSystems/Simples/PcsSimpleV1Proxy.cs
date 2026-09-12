@@ -58,7 +58,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             try
             {
                 await base.StartAsync();
-                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 1, ModbusDataType.MbInt16);
+                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState,
+                    (ushort)PcsSimpleV1Description.State.On, ModbusDataType.MbInt16);
             }
             catch
             {
@@ -83,7 +84,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                     await base.StopAsync();
                     await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, 0, ModbusDataType.MbInt16);
                     await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, 0, ModbusDataType.MbInt16);
-                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 0, ModbusDataType.MbInt16);
+                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState,
+                        (ushort)PcsSimpleV1Description.State.Off, ModbusDataType.MbInt16);
                 }
                 catch
                 {
@@ -113,7 +115,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                         await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, (double)standbyActivePower, ModbusDataType.MbInt16);
                     }
 
-                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 3, ModbusDataType.MbInt16);
+                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState,
+                        (ushort)PcsSimpleV1Description.State.Standby, ModbusDataType.MbInt16);
                 }
                 catch
                 {
@@ -391,17 +394,6 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             {
                 IsDcContactorClosed = new[] { true };
             }
-        }
-
-
-        /// <summary>
-        /// Raise communication error.
-        /// </summary>
-        private void RaiseCommunicationError()
-        {
-            ClearPendingState();
-            CommunicationError = true;
-            State = PcsState.Fault;
         }
 
 

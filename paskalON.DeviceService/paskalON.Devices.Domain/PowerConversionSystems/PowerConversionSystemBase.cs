@@ -681,7 +681,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             return pending switch
             {
                 PcsState.Starting => reported is PcsState.Stopped or PcsState.Standby or PcsState.Fault,
-                PcsState.Stopping => reported is PcsState.Started or PcsState.Standby,
+                PcsState.Stopping => reported is PcsState.Started or PcsState.Standby or PcsState.Fault,
                 PcsState.EnteringStandby => reported is PcsState.Stopped or PcsState.Started or PcsState.Fault,
                 _ => false
             };
@@ -919,6 +919,16 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         protected void OnCommunicationError(object? sender, EventArgs e)
         {
             // Logging and even invocation is done in the setter of the CommunicationError property
+            RaiseCommunicationError();
+        }
+
+
+        /// <summary>
+        /// Raise communication error.
+        /// </summary>
+        protected void RaiseCommunicationError()
+        {
+            ClearPendingState();
             CommunicationError = true;
             State = PcsState.Fault;
         }

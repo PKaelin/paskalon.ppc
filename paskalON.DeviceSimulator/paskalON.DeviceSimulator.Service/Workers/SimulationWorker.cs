@@ -2,7 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.DeviceSimulator.Application.Simulations;
+using paskalON.DeviceSimulator.Equipments.Simulations;
 
 namespace paskalON.DeviceSimulator.Service.Workers
 {

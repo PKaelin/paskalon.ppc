@@ -3,7 +3,6 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics;
-using paskalON.DeviceSimulator.Application.Simulations;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Protocols.Modbus.Stores;
 

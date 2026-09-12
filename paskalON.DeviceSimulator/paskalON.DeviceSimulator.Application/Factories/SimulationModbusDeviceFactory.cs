@@ -5,7 +5,7 @@
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Application.Factories;
 using paskalON.Devices.Domain.Configs;
-using paskalON.DeviceSimulator.Application.Simulations;
+using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Protocols.Modbus;
 
 namespace paskalON.DeviceSimulator.Application.Factories
@@ -15,6 +15,9 @@ namespace paskalON.DeviceSimulator.Application.Factories
     /// </summary>
     public sealed class SimulationModbusDeviceFactory : IModbusDeviceFactory
     {
+        /// <summary>
+        /// Simulation store registry.
+        /// </summary>
         private readonly ISimulationStoreRegistry _stores;
 
 

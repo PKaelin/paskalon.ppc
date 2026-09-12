@@ -3,7 +3,6 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics;
-using paskalON.DeviceSimulator.Application.Simulations;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Protocols.Modbus.Stores;
 
@@ -12,7 +11,7 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.PowerElectr
     /// <summary>
     /// Simulates the command and telemetry registers of a HEMK V4 PCS.
     /// </summary>
-    public class PcsHemkV4Simulation : ISimulatedDevice
+    public sealed class PcsHemkV4Simulation : ISimulatedDevice
     {
         /// <summary>
         /// Modbus data store for this device simulation.
