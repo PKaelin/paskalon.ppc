@@ -10,6 +10,12 @@ namespace paskalON.DeviceSimulator.Application.Simulations
     public interface ISimulatedDevice
     {
         /// <summary>
+        /// Name of the simulated device.
+        /// </summary>
+        string Name { get; }
+
+
+        /// <summary>
         /// Advances the model by one simulation interval.
         /// </summary>
         /// <param name="elapsed">Time elapsed since the previous tick.</param>

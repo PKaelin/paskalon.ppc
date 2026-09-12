@@ -20,14 +20,22 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.PowerElectr
         private readonly IModbusDataStore _store;
 
 
+        /// <inheritdoc/>
+        public string Name { get; init; }
+
+
         /// <summary>
         /// Constructor of <see cref="PcsHemkV4Simulation"/>.
         /// </summary>
         /// <param name="store">Backing Modbus store.</param>
-        public PcsHemkV4Simulation(IModbusDataStore store)
+        /// <param name="name">Name of the simulated device.</param>
+        public PcsHemkV4Simulation(IModbusDataStore store, string name)
         {
             ArgumentNullException.ThrowIfNull(store);
+            ArgumentNullException.ThrowIfNull(name);
+
             _store = store;
+            Name = name;
         }
 
 

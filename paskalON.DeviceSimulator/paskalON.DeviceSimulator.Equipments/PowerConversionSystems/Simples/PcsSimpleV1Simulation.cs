@@ -21,14 +21,22 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
         private readonly IModbusDataStore _store;
 
 
+        /// <inheritdoc/>
+        public string Name { get; init; }
+
+
         /// <summary>
         /// Constructor of <see cref="PcsSimpleV1Simulation"/>.
         /// </summary>
         /// <param name="store">Backing Modbus store.</param>
-        public PcsSimpleV1Simulation(IModbusDataStore store)
+        /// <param name="name">Name of the simulated device.</param>
+        public PcsSimpleV1Simulation(IModbusDataStore store, string name)
         {
             ArgumentNullException.ThrowIfNull(store);
+            ArgumentNullException.ThrowIfNull(name);
+
             _store = store;
+            Name = name;
         }
 
 
@@ -51,11 +59,8 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
 
             if (System.Diagnostics.Debugger.IsAttached == true)
             {
-                Debug.WriteLine($"PCS Sim Time: {DateTime.Now.ToString("HH:mm:ss")}");
-                Debug.WriteLine($"Heartbeat: {heartbeat}");
-                Debug.WriteLine($"Selector: {selector}");
-                Debug.WriteLine($"ActiveTarget: {activeTarget}");
-                Debug.WriteLine($"ReactiveTarget: {reactiveTarget}");
+                Debug.WriteLine($"{DateTime.Now.ToString("HH:mm:ss")} - {Name} - Heartbeat: {heartbeat} " +
+                    $"Selector: {selector} ActiveTarget: {activeTarget} ReactiveTarget: {reactiveTarget}");
             }
 
             return Task.CompletedTask;

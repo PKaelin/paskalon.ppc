@@ -25,9 +25,9 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
 
             return device switch
             {
-                PcsSimpleV1Proxy => new PcsSimpleV1Simulation(store),
-                PcsPcskV4Proxy => new PcsPcskV4Simulation(store),
-                PcsHemkV4Proxy => new PcsHemkV4Simulation(store),
+                PcsSimpleV1Proxy => new PcsSimpleV1Simulation(store, device.Name),
+                PcsPcskV4Proxy => new PcsPcskV4Simulation(store, device.Name),
+                PcsHemkV4Proxy => new PcsHemkV4Simulation(store, device.Name),
                 _ => null
             };
         }
