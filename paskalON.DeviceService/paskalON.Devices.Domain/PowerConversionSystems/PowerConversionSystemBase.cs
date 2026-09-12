@@ -521,6 +521,8 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             _logger.LogInformation("{Name} stop requested.", Name);
             State = PcsState.Stopping;
+            await SetActivePowerTargetAsync(0);
+            await SetReactivePowerTargetAsync(0);
         }
 
 
@@ -562,7 +564,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                 if (_activePowerTarget != value)
                 {
                     _activePowerTarget = value;
-                    _logger.LogInformation("{Name} - Set active power target to: {activePowerTarget}", Name, _activePowerTarget);
+                    _logger.LogInformation("{Name} - Set active power target to: {activePowerTarget} Watt", Name, _activePowerTarget);
                 }
             }
 
@@ -593,7 +595,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                 if (_reactivePowerTarget != value)
                 {
                     _reactivePowerTarget = value;
-                    _logger.LogInformation("{Name} - Set reactive power target to: {reactivePowerTarget}", Name, _reactivePowerTarget);
+                    _logger.LogInformation("{Name} - Set reactive power target to: {reactivePowerTarget} Vars", Name, _reactivePowerTarget);
                 }
             }
         }
@@ -642,7 +644,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                         _activePowerTarget = 0;
                         _reactivePowerTarget = 0;
                     }
-                    _logger.LogInformation("{Name} - Set power targets to 0 due as ZeroOutputOnCommLoss is true on CommunicationError", Name);
+                    _logger.LogInformation("{Name} - Set power targets to 0 as ZeroOutputOnCommLoss configuration is true on CommunicationError", Name);
                     // Desperate attempt in case there is still a connection.
                     _ = SetActivePowerTargetAsync(0);
                     _ = SetReactivePowerTargetAsync(0);

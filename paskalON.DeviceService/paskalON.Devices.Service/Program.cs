@@ -46,6 +46,18 @@ try
     string? tracingEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_TRACING_ENDPOINT");
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(tracingEndpointString, "Cannot find the tracing endpoint. TELEMETRY_TRACING_ENDPOINT");
 
+    // Get start options
+    string startPublisherString = Environment.GetEnvironmentVariable("START_PUBLISHERS") ?? "true";
+    if (bool.TryParse(startPublisherString, out var startPublisher) == false)
+    {
+        throw new ApplicationException("START_PUBLISHERS is not configured as a boolean");
+    }
+    string startWorkerString = Environment.GetEnvironmentVariable("START_WORKERS") ?? "true";
+    if (bool.TryParse(startWorkerString, out var startWorker) == false)
+    {
+        throw new ApplicationException("START_WORKERS is not configured as a boolean");
+    }
+
     // Create builder
     Console.WriteLine("Building service.....");
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -66,16 +78,23 @@ try
     builder.Services.AddSingleton<IC37DeviceFactory, C37DeviceFactory>();
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
     builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
-    builder.Services.AddSingleton<ModbusPollService>();
-    builder.Services.AddHostedService<ModbusPollService>(provider => provider.GetRequiredService<ModbusPollService>());
     builder.Services.AddSingleton<DevicePublisherService>();
-    builder.Services.AddHostedService<DevicePublisherService>(provider => provider.GetRequiredService<DevicePublisherService>());
     builder.Services.AddSingleton<MetricsPublisherService>();
-    builder.Services.AddHostedService<MetricsPublisherService>(provider => provider.GetRequiredService<MetricsPublisherService>());
-    builder.Services.AddSingleton<IDeviceManager, DeviceManager>();
     builder.Services.AddSingleton<DeviceHeartbeatService>();
-    builder.Services.AddHostedService<DeviceHeartbeatService>(provider => provider.GetRequiredService<DeviceHeartbeatService>());
+    builder.Services.AddSingleton<ModbusPollService>();
+    builder.Services.AddSingleton<IDeviceManager, DeviceManager>();
 
+    if (startPublisher == true)
+    {
+        builder.Services.AddHostedService<DevicePublisherService>(provider => provider.GetRequiredService<DevicePublisherService>());
+        builder.Services.AddHostedService<MetricsPublisherService>(provider => provider.GetRequiredService<MetricsPublisherService>());
+    }
+
+    if (startWorker == true)
+    {
+        builder.Services.AddHostedService<DeviceHeartbeatService>(provider => provider.GetRequiredService<DeviceHeartbeatService>());
+        builder.Services.AddHostedService<ModbusPollService>(provider => provider.GetRequiredService<ModbusPollService>());
+    }
 
     // Configure OpenTelemetry logging, metrics, & tracing with auto-start using the
     // AddOpenTelemetry extension from OpenTelemetry.Extensions.Hosting.
