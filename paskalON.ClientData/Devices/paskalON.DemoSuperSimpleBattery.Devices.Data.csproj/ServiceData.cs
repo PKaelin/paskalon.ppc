@@ -320,6 +320,7 @@ namespace paskalON.DemoSuperSimpleBattery.Devices.Data
                 DerConfig = derConfig
             };
             context.SystemPowerMeterConfigs.Add(powerMeterConfig);
+            derConfig.SystemPowerMeterConfigs.Add(powerMeterConfig);
 
             await context.SaveChangesAsync();
         }
