@@ -147,13 +147,13 @@ namespace paskalON.Protocols.Modbus.NModbus
                 _network.AddSlave(slave);
 
                 _listenCts = new CancellationTokenSource();
-                CancellationToken loopToken = _listenCts.Token;
+                CancellationTokenSource linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _listenCts.Token);
 
                 _listenTask = Task.Run(async () =>
                 {
                     try
                     {
-                        await _network.ListenAsync(loopToken).ConfigureAwait(false);
+                        await _network.ListenAsync(linkedToken.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -164,7 +164,7 @@ namespace paskalON.Protocols.Modbus.NModbus
                         _state = ModbusServerState.Faulted;
                         RaiseCommunicationError();
                     }
-                }, loopToken);
+                }, linkedToken.Token);
 
                 _state = ModbusServerState.Listening;
                 _logger.LogInformation("Modbus server started. {Address}", _listener?.LocalEndpoint);

@@ -66,7 +66,7 @@ namespace paskalON.Devices.Service.Workers
         {
             Task[] tasks = _deviceHeartbeats.Select(heart => RunEngineAsync(heart, stoppingToken)).ToArray();
 
-            Task.WaitAll(tasks);
+            await Task.WhenAll(tasks);
         }
 
 

@@ -97,6 +97,25 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
 
 
         /// <summary>
+        /// The station name of the C37 data stream which identifies
+        /// the phasor measurement unit (PMU) or phasor data contractor (PDC).
+        /// </summary>
+        public string TargetStationName { get => _config.C37Config?.StationName ?? "Undefined"; }
+
+
+        /// <summary>
+        /// C37 stream identifier of the device.
+        /// </summary>
+        public ushort TargetStreamId { get => _config.C37Config?.StreamId ?? 0; }
+
+
+        /// <summary>
+        /// C37 power meter configuration.
+        /// </summary>
+        public PowerMeterMapC37Config? C37Map { get => _config.PowerMeterDeviceConfig.PowerMeterMapC37Config; }
+
+
+        /// <summary>
         /// Is reverse power flow from configuration.
         /// </summary>        
         public bool IsReversePowerFlow { get => _config.PowerMeterDeviceConfig.IsReversePowerFlow; }

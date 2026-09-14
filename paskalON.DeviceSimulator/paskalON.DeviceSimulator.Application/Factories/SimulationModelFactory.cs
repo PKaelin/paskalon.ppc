@@ -3,14 +3,18 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
+using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples;
+using paskalON.Devices.Equipments.Meters.PowerMeters.Simples;
 using paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics;
 using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
 using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries.Simples;
+using paskalON.DeviceSimulator.Equipments.Meters.PowerMeters.Simples;
 using paskalON.DeviceSimulator.Equipments.PowerConversionSystems.PowerElectronics;
 using paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples;
 using paskalON.DeviceSimulator.Equipments.Simulations;
+using paskalON.Protocols.C37118.Simulations;
 using paskalON.Protocols.Modbus.Stores;
 
 namespace paskalON.DeviceSimulator.Application.Factories
@@ -45,6 +49,21 @@ namespace paskalON.DeviceSimulator.Application.Factories
             return device switch
             {
                 BbSimpleV1Proxy => new BbSimpleV1Simulation(store, device.Name),
+                _ => null
+            };
+        }
+
+
+        /// <inheritdoc/>
+        public ISimulatedDevice? Create(PowerMeterBase device, PmuDataSimulation stream)
+        {
+            ArgumentNullException.ThrowIfNull(device);
+            ArgumentNullException.ThrowIfNull(stream);
+
+
+            return device switch
+            {
+                SystemPowerMeterSimpleV1Proxy => new SystemPowerMeterSimpleV1Simulation(stream, device.Name),
                 _ => null
             };
         }

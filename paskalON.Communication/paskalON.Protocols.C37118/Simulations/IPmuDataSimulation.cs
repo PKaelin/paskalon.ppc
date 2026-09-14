@@ -10,6 +10,12 @@ namespace paskalON.Protocols.C37118.Simulations
     public interface IPmuDataSimulation
     {
         /// <summary>
+        /// Station name identifier of PMU or PDC.
+        /// </summary>
+        string StationName { get; init; }
+
+
+        /// <summary>
         /// PMU stream identifier.
         /// </summary>
         ushort StreamId { get; }

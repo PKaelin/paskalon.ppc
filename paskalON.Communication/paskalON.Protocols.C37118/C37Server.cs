@@ -26,6 +26,7 @@ namespace paskalON.Protocols.C37118
         /// </summary>
         private readonly TcpListener _listener;
 
+
         /// <summary>
         /// List of PMU simulation data.
         /// </summary>
@@ -100,9 +101,10 @@ namespace paskalON.Protocols.C37118
             {
                 _listener.Start();
                 _shutdownClientConnects = new CancellationTokenSource();
+                CancellationTokenSource linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _shutdownClientConnects.Token);
                 State = C37ServerState.Started;
                 _logger.LogInformation("C37 server started. {Address}", _listener.LocalEndpoint);
-                _acceptTask = AcceptClientsAsync(_shutdownClientConnects.Token);
+                _acceptTask = AcceptClientsAsync(linkedToken.Token);
             }
             catch (Exception ex)
             {

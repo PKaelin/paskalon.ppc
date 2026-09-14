@@ -14,6 +14,8 @@ using paskalON.DeviceSimulator.Application.Factories;
 using paskalON.DeviceSimulator.Application.Simulations;
 using paskalON.DeviceSimulator.Equipments.PowerConversionSystems.PowerElectronics;
 using paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples;
+using paskalON.DeviceSimulator.Equipments.Simulations;
+using paskalON.Protocols.C37118.Simulations;
 using paskalON.Protocols.Modbus;
 using paskalON.Protocols.Modbus.Stores;
 
@@ -69,6 +71,23 @@ namespace paskalON.DeviceSimulator.IntegrationTest
                 (ushort)PcsPcskV4Description.Register.Q, 1)[0]);
             Assert.AreEqual((ushort)60000, store.HoldingRegisters.ReadPoints(
                 (ushort)PcsPcskV4Description.Register.QCapability, 1)[0]);
+        }
+
+
+        [TestMethod]
+        public void SimulationStreamRegistryKeepsStreamsDistinctAndStableTest()
+        {
+            SimulationStreamRegistry streams = new SimulationStreamRegistry();
+
+            PmuDataSimulation firstStream = streams.GetOrCreate(5503, 1);
+            PmuDataSimulation sameStream = streams.GetOrCreate(5503, 1);
+            PmuDataSimulation secondStream = streams.GetOrCreate(5503, 2);
+
+            Assert.AreSame(firstStream, sameStream);
+            Assert.AreNotSame(firstStream, secondStream);
+            Assert.AreEqual((ushort)1, firstStream.StreamId);
+            Assert.AreEqual((ushort)2, secondStream.StreamId);
+            Assert.HasCount(2, streams.Streams);
         }
     }
 }

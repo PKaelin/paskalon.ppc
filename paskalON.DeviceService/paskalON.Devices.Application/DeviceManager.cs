@@ -35,7 +35,7 @@ namespace paskalON.Devices.Application
     /// The device manager gets the device service configuration and
     /// creates a domain structure accordingly.
     /// </summary>
-    public class DeviceManager : IDeviceManager
+    public class DeviceManager : IDeviceManager, IDisposable
     {
         /// <summary>
         /// Logger for application logging and diagnostics.
@@ -112,7 +112,7 @@ namespace paskalON.Devices.Application
         /// <summary>
         /// Dictionary with device id and Circuit Meter.
         /// </summary>
-        protected readonly Dictionary<int, CircuitPowerMeter> _circuitPowerMeters = new Dictionary<int, CircuitPowerMeter>();
+        protected Dictionary<int, CircuitPowerMeter> _circuitPowerMeters = new Dictionary<int, CircuitPowerMeter>();
 
 
         /// <summary>
@@ -286,6 +286,9 @@ namespace paskalON.Devices.Application
                         circuit.DerUnits.Add(unit);
                     }
                 }
+
+                _circuitPowerMeters = der.DerGroups.SelectMany(c => c.DerCircuits)
+                    .Select(m => m.CircuitPowerMeter).OfType<CircuitPowerMeter>().ToDictionary(d => d.DeviceId);
             }
 
             LoadDevicesToCollections(der);
@@ -649,9 +652,6 @@ namespace paskalON.Devices.Application
 
             _batteryBanks = units.OfType<DerBatteryStorageUnit>().SelectMany(u => u.BatteryBanks).ToDictionary(d => d.DeviceId);
             _solarPanels = units.OfType<DerSolarUnit>().SelectMany(u => u.SolarPanels).ToDictionary(d => d.DeviceId);
-            _systemPowerMeters = der.SystemPowerMeters.ToDictionary(d => d.DeviceId); ;
-            _auxiliaryPowerMeters = der.AuxiliaryPowerMeters.ToDictionary(d => d.DeviceId); ;
-            _externalPowerMeters = der.ExternalPowerMeters.ToDictionary(d => d.DeviceId); ;
         }
 
 
@@ -724,6 +724,10 @@ namespace paskalON.Devices.Application
                         meterConfig, meterMetrics, dataface, client));
                 }
             }
+
+            _systemPowerMeters = der.SystemPowerMeters.ToDictionary(d => d.DeviceId);
+            _auxiliaryPowerMeters = der.AuxiliaryPowerMeters.ToDictionary(d => d.DeviceId);
+            _externalPowerMeters = der.ExternalPowerMeters.ToDictionary(d => d.DeviceId);
         }
 
 
@@ -884,6 +888,15 @@ namespace paskalON.Devices.Application
             }
 
             return (T)ActivatorUtilities.CreateInstance(_services, type, arguments);
+        }
+
+
+        /// <summary>
+        /// Disposes device manager simulator.
+        /// Managed by Dependency Injection and therefore called when application shuts down.
+        /// </summary>
+        public virtual void Dispose()
+        {
         }
     }
 }

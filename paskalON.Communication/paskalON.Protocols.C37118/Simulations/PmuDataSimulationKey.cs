@@ -10,14 +10,25 @@ namespace paskalON.Protocols.C37118.Simulations
     public record PmuDataSimulationKey
     {
         /// <summary>
+        /// Address of the simulated C37 endpoint.
+        /// </summary>
+        public string Address { get; init; } = string.Empty;
+
+        /// <summary>
         /// Port of the PMU.
         /// </summary>
-        public int Port { get; init; }
+        public required int Port { get; init; }
+
+
+        /// <summary>
+        /// Station name of PMU or PDC.
+        /// </summary>
+        public required string StationName { get; init; }
 
 
         /// <summary>
         /// PMU stream identifier.
         /// </summary>
-        public ushort StreamId { get; init; }
+        public required ushort StreamId { get; init; }
     }
 }

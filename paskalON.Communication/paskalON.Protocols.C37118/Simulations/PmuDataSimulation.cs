@@ -9,8 +9,12 @@ namespace paskalON.Protocols.C37118.Simulations
     /// </summary>
     public class PmuDataSimulation : IPmuDataSimulation
     {
+        /// <inheritdoc/>
+        public required string StationName { get; init; }
+
+
         /// <inheritdoc/>        
-        public ushort StreamId { get; init; }
+        public required ushort StreamId { get; init; }
 
 
         /// <inheritdoc/>

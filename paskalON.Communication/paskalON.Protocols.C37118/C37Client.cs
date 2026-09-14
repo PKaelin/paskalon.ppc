@@ -56,6 +56,12 @@ namespace paskalON.Protocols.C37118
         private Task? _receiveTask;
 
 
+        /// <summary>
+        /// Serializes connect and disconnect operations for shared clients.
+        /// </summary>
+        private readonly SemaphoreSlim _lifecycleLock = new SemaphoreSlim(1, 1);
+
+
         /// <inheritdoc/>
         public event EventHandler<EventArgs>? OnCommunicationError;
 
@@ -104,78 +110,88 @@ namespace paskalON.Protocols.C37118
         /// <inheritdoc/>
         public async Task StartStreamingAsync(CancellationToken cancellationToken = default)
         {
-            if (State == C37ClientState.Connected)
-            {
-                return;
-            }
-
-            State = C37ClientState.Connecting;
-            Exception? lastException = null;
-            // Number of attempts = initial attempt + retries.
-            int maxAttempts = _clientConnection.ConnectRetryCount + 1;
+            await _lifecycleLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             try
             {
-                for (int attempt = 1; attempt <= maxAttempts; attempt++)
+                if (State == C37ClientState.Connected || State == C37ClientState.Connecting)
                 {
-                    TcpClient? tcpClient = null;
-
-                    try
-                    {
-                        tcpClient = new TcpClient(_clientConnection.AddressFamily);
-                        using CancellationTokenSource timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                        timeoutCts.CancelAfter(_clientConnection.ConnectionTimeoutMilliseconds);
-                        await tcpClient.ConnectAsync(ServerAddress, ServerPort, timeoutCts.Token).ConfigureAwait(false);
-                        _tcpClient = tcpClient;
-
-                        if (System.Diagnostics.Debugger.IsAttached == true)
-                        {
-                            tcpClient.SendTimeout = 240000;
-                            tcpClient.ReceiveTimeout = 240000;
-                        }
-                        else
-                        {
-                            tcpClient.SendTimeout = _clientConnection.OperationTimeoutMilliseconds;
-                            tcpClient.ReceiveTimeout = _clientConnection.OperationTimeoutMilliseconds;
-                        }
-
-                        _stream = _tcpClient.GetStream();
-                        _shutdownReceiverLoop = new CancellationTokenSource();
-                        State = C37ClientState.Connected;
-                        _receiveTask = ReceiveFramesAsync(_shutdownReceiverLoop.Token);
-
-                        return;
-                    }
-                    catch (Exception ex) when (ex is SocketException || (ex is OperationCanceledException && cancellationToken.IsCancellationRequested == false))
-                    {
-                        string msgAttempt = $"Device connect to {ServerAddress}:{ServerPort} failed. Attempt {attempt} timed out after {_clientConnection.ConnectionTimeoutMilliseconds} ms";
-                        _logger.LogError(msgAttempt);
-                        lastException = new TimeoutException(msgAttempt);
-                    }
-                    catch (Exception ex)
-                    {
-                        lastException = ex;
-                    }
-
-                    tcpClient?.Dispose();
-
-                    if (attempt < maxAttempts)
-                    {
-                        await Task.Delay(_clientConnection.ConnectRetryIntervalMilliseconds, cancellationToken).ConfigureAwait(false);
-                    }
+                    return;
                 }
 
-                string msgConnect = $"Device connect to {ServerAddress}:{ServerPort} failed. Unable to connect {maxAttempts} attempt(s)";
-                _logger.LogError(msgConnect);
-                throw new InvalidOperationException(msgConnect, lastException);
+                State = C37ClientState.Connecting;
+                Exception? lastException = null;
+                // Number of attempts = initial attempt + retries.
+                int maxAttempts = _clientConnection.ConnectRetryCount + 1;
+
+                try
+                {
+                    for (int attempt = 1; attempt <= maxAttempts; attempt++)
+                    {
+                        TcpClient? tcpClient = null;
+
+                        try
+                        {
+                            tcpClient = new TcpClient(_clientConnection.AddressFamily);
+                            using CancellationTokenSource timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                            timeoutCts.CancelAfter(_clientConnection.ConnectionTimeoutMilliseconds);
+                            await tcpClient.ConnectAsync(ServerAddress, ServerPort, timeoutCts.Token).ConfigureAwait(false);
+                            _tcpClient = tcpClient;
+
+                            if (System.Diagnostics.Debugger.IsAttached == true)
+                            {
+                                tcpClient.SendTimeout = 240000;
+                                tcpClient.ReceiveTimeout = 240000;
+                            }
+                            else
+                            {
+                                tcpClient.SendTimeout = _clientConnection.OperationTimeoutMilliseconds;
+                                tcpClient.ReceiveTimeout = _clientConnection.OperationTimeoutMilliseconds;
+                            }
+
+                            _stream = _tcpClient.GetStream();
+                            _shutdownReceiverLoop = new CancellationTokenSource();
+                            CancellationTokenSource linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _shutdownReceiverLoop.Token);
+                            State = C37ClientState.Connected;
+                            _receiveTask = ReceiveFramesAsync(linkedToken.Token);
+
+                            return;
+                        }
+                        catch (Exception ex) when (ex is SocketException || (ex is OperationCanceledException && cancellationToken.IsCancellationRequested == false))
+                        {
+                            string msgAttempt = $"Device connect to {ServerAddress}:{ServerPort} failed. Attempt {attempt} timed out after {_clientConnection.ConnectionTimeoutMilliseconds} ms";
+                            _logger.LogError(msgAttempt);
+                            lastException = new TimeoutException(msgAttempt);
+                        }
+                        catch (Exception ex)
+                        {
+                            lastException = ex;
+                        }
+
+                        tcpClient?.Dispose();
+
+                        if (attempt < maxAttempts)
+                        {
+                            await Task.Delay(_clientConnection.ConnectRetryIntervalMilliseconds, cancellationToken).ConfigureAwait(false);
+                        }
+                    }
+
+                    string msgConnect = $"Device connect to {ServerAddress}:{ServerPort} failed. Unable to connect {maxAttempts} attempt(s)";
+                    _logger.LogError(msgConnect);
+                    throw new InvalidOperationException(msgConnect, lastException);
+                }
+                catch (Exception ex)
+                {
+                    State = C37ClientState.Disconnected;
+                    DisposeConnection();
+                    _logger.LogError("C37 streaming async failed. Destination: {ServerAddress}:{ServerPort} {Error}", ServerAddress, ServerPort, ex);
+                    RaiseCommunicationError();
+                    throw;
+                }
             }
-            catch (Exception ex)
+            finally
             {
-                State = C37ClientState.Disconnected;
-                DisposeConnection();
-                _logger.LogError("C37 streaming async failed. Destination: {ServerAddress}:{ServerPort} {Error}", ServerAddress, ServerPort, ex);
-                RaiseCommunicationError();
-                throw;
+                _lifecycleLock.Release();
             }
         }
 
@@ -183,33 +199,42 @@ namespace paskalON.Protocols.C37118
         /// <inheritdoc/>
         public async Task StopStreamingAsync(CancellationToken cancellationToken = default)
         {
-            if (State == C37ClientState.Disconnected)
+            await _lifecycleLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            try
             {
-                return;
+                if (State == C37ClientState.Disconnected)
+                {
+                    return;
+                }
+
+                State = C37ClientState.Disconnecting;
+
+                _shutdownReceiverLoop.Cancel();
+
+                if (_receiveTask is not null)
+                {
+                    try
+                    {
+                        await _receiveTask.ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Expected when canceled
+                    }
+                    catch (IOException)
+                    {
+                        // Possible when canceled
+                    }
+                }
+
+                DisposeConnection();
+                State = C37ClientState.Disconnected;
             }
-
-            State = C37ClientState.Disconnecting;
-
-            _shutdownReceiverLoop.Cancel();
-
-            if (_receiveTask is not null)
+            finally
             {
-                try
-                {
-                    await _receiveTask.ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                    // Expected when canceled
-                }
-                catch (IOException)
-                {
-                    // Possible when canceled
-                }
+                _lifecycleLock.Release();
             }
-
-            DisposeConnection();
-            State = C37ClientState.Disconnected;
         }
 
 

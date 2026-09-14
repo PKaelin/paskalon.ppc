@@ -77,7 +77,7 @@ namespace paskalON.Devices.Service.Publishers
         /// </remarks>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(_startupDelay));
+            await Task.Delay(TimeSpan.FromMilliseconds(_startupDelay), stoppingToken);
             int interval = 0;
             using PeriodicTimer timer = new(TimeSpan.FromMilliseconds(_intervalMilliseconds));
 

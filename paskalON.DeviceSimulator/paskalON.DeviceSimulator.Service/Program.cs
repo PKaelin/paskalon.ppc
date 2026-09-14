@@ -55,6 +55,7 @@ try
     builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
     builder.Services.AddSingleton<ISimulationStoreRegistry, SimulationStoreRegistry>();
+    builder.Services.AddSingleton<ISimulationStreamRegistry, SimulationStreamRegistry>();
     builder.Services.AddSingleton<SimulationDeviceRegistry>();
     builder.Services.AddSingleton<ISimulationModelFactory, PowerConversionSystemSimulationModelFactory>();
     builder.Services.AddSingleton<IModbusDeviceFactory, SimulationModbusDeviceFactory>();

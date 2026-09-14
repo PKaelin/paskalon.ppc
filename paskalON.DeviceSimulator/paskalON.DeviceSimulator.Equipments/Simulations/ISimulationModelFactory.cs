@@ -3,7 +3,9 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
+using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
+using paskalON.Protocols.C37118.Simulations;
 using paskalON.Protocols.Modbus.Stores;
 
 namespace paskalON.DeviceSimulator.Equipments.Simulations
@@ -29,5 +31,14 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
         /// <param name="store">Backing Modbus store.</param>
         /// <returns>A simulation model, or null when unsupported.</returns>
         ISimulatedDevice? Create(BatteryBankBase device, IModbusDataStore store);
+
+
+        /// <summary>
+        /// Creates a simulation model when the power meter type is supported.
+        /// </summary>
+        /// <param name="device">Production power meter.</param>
+        /// <param name="stream">Backing C37 stream.</param>
+        /// <returns>A simulation model, or null when unsupported.</returns>
+        ISimulatedDevice? Create(PowerMeterBase device, PmuDataSimulation stream);
     }
 }

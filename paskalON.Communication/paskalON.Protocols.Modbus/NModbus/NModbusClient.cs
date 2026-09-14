@@ -244,14 +244,12 @@ namespace paskalON.Protocols.Modbus.NModbus
             }
 
             _state = ModbusClientState.Disconnecting;
-
-            await _dispatcher.StopAsync().ConfigureAwait(false);
-
             _master?.Dispose();
             _master = null;
             _tcpClient?.Close();
             _tcpClient?.Dispose();
             _tcpClient = null;
+            await _dispatcher.StopAsync().ConfigureAwait(false);
 
             _state = ModbusClientState.Disconnected;
         }

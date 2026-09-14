@@ -109,7 +109,7 @@ namespace paskalON.Devices.Equipments.C37
         /// </summary>        
         public async Task StartStreaming(CancellationToken stoppingToken)
         {
-            _ = Task.Run(() => _client.StartStreamingAsync());
+            await _client.StartStreamingAsync(stoppingToken);
         }
 
 
@@ -122,14 +122,21 @@ namespace paskalON.Devices.Equipments.C37
         {
             try
             {
+                // A shared client can receive configuration frames for several streams.
+                if (e.Header.StreamIdCode != _streamId)
+                {
+                    return;
+                }
+
                 C37ConfigBlueprint activeBlueprint = e.Blueprint;
                 IEnumerable<PmuLayoutMetadata> pmuLayouts = activeBlueprint.Pmus.Where(p => p.StationName == _stationName);
 
-                // Only configure if the station name and stream id matches the configured name and id
-                if ((pmuLayouts.Count() > 0) && (e.Header.StreamIdCode == _streamId))
-                {
-                    _mappings.Clear();
+                _mappings.Clear();
+                _runtimeMappings = Array.Empty<C37RegisterMapEntry>();
 
+                // The station name is available in configuration frames, but not data frames.
+                if (pmuLayouts.Any())
+                {
                     // Map registers to protocol structural coordinates by matching names            
                     foreach (IC37RegisterEntry register in _dataface.Registers)
                     {
@@ -169,6 +176,12 @@ namespace paskalON.Devices.Equipments.C37
         {
             try
             {
+                // A shared client can receive data frames for several streams.
+                if (e.Header.StreamIdCode != _streamId)
+                {
+                    return;
+                }
+
                 // Capture a local reference snapshot of the current array instance
                 C37RegisterMapEntry[] mappings = _runtimeMappings;
 

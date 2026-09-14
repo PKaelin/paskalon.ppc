@@ -58,7 +58,8 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// The station name of the C37 data stream which identifies the phasor measurement unit (PMU) or phasor data contractor (PDC).
+        /// The station name of the C37 data stream which identifies
+        /// the phasor measurement unit (PMU) or phasor data contractor (PDC).
         /// </summary>
         public required string StationName { get; set; } = "PMU";
 
@@ -69,8 +70,13 @@ namespace paskalON.Devices.Domain.Configs
         /// <remarks>
         /// A device may be acting as a phasor data concentrator (PDC) which means that the C37 data stream will contain
         /// data off of multiple micro PMUs. In this case, the data within the data stream is identified using this value.
+        /// Stream ID of 0 is reserved by the C37 protocol hence the ID cannot be 0 or negative.
         /// </remarks>
-        public required ushort StreamId { get; set; } = 1;
+        public required ushort StreamId
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, 0); }
+        } = 1;
 
 
         /// <summary>

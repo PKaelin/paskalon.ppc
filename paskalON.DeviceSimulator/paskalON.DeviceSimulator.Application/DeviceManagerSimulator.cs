@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using paskalON.Devices.Application;
 using paskalON.Devices.Application.Factories;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
+using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Equipments.C37;
 using paskalON.Devices.Equipments.Modbus;
@@ -22,7 +23,7 @@ namespace paskalON.DeviceSimulator.Application
     /// <summary>
     /// Device manager that hosts simulated communication endpoints.
     /// </summary>
-    public class DeviceManagerSimulator : DeviceManager
+    public class DeviceManagerSimulator : DeviceManager, IDisposable
     {
         /// <summary>
         /// Logger for application logging and diagnostics.
@@ -48,6 +49,12 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
+        /// Registry of simulator C37 streams.
+        /// </summary>
+        private readonly ISimulationStreamRegistry _streams;
+
+
+        /// <summary>
         /// Factories for supported simulator models.
         /// </summary>
         private readonly IEnumerable<ISimulationModelFactory> _simulationFactories;
@@ -60,9 +67,15 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
-        /// C37 simulation instances by endpoint.
+        /// C37 servers hosted by the simulator.
         /// </summary>
-        Dictionary<PmuDataSimulationKey, IPmuDataSimulation> c37Simulations = new Dictionary<PmuDataSimulationKey, IPmuDataSimulation>();
+        private readonly List<C37Server> _c37Servers = new List<C37Server>();
+
+
+        /// <summary>
+        /// Modbus servers hosted by the simulator.
+        /// </summary>
+        private readonly List<NModbusServer> _modbusServers = new List<NModbusServer>();
 
 
         /// <summary>
@@ -74,20 +87,25 @@ namespace paskalON.DeviceSimulator.Application
         /// <param name="deviceFactoryModbus">Modbus device factory.</param>
         /// <param name="deviceFactoryC37">C37 device factory.</param>
         /// <param name="stores">Simulation store registry.</param>
+        /// <param name="simulationFactories">Factories for supported simulator models.</param>
+        /// <param name="simulationDevices">Registry of simulator models.</param>
+        /// <param name="streams">Simulation stream registry.</param>
         public DeviceManagerSimulator(ILogger<DeviceManagerSimulator> logger, IServiceProvider services, IMetricsPublisherFactory publisherFactory,
-            IModbusDeviceFactory deviceFactoryModbus, IC37DeviceFactory deviceFactoryC37,
-            ISimulationStoreRegistry? stores = null,
-            IEnumerable<ISimulationModelFactory>? simulationFactories = null,
-            SimulationDeviceRegistry? simulationDevices = null)
+            IModbusDeviceFactory deviceFactoryModbus, IC37DeviceFactory deviceFactoryC37, ISimulationStoreRegistry stores, ISimulationStreamRegistry streams,
+            IEnumerable<ISimulationModelFactory> simulationFactories, SimulationDeviceRegistry simulationDevices)
             : base(logger, services, publisherFactory, deviceFactoryModbus, deviceFactoryC37)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(stores);
+            ArgumentNullException.ThrowIfNull(streams);
+            ArgumentNullException.ThrowIfNull(simulationFactories);
+            ArgumentNullException.ThrowIfNull(simulationDevices);
 
             _logger = logger;
             _stores = stores;
-            _simulationFactories = simulationFactories ?? [];
-            _simulationDevices = simulationDevices ?? new SimulationDeviceRegistry();
+            _streams = streams;
+            _simulationFactories = simulationFactories;
+            _simulationDevices = simulationDevices;
         }
 
 
@@ -127,12 +145,15 @@ namespace paskalON.DeviceSimulator.Application
             ILogger<NModbusServer> modbusLogger = _services.GetRequiredService<ILogger<NModbusServer>>();
             ILogger<C37Server> c37Logger = _services.GetRequiredService<ILogger<C37Server>>();
 
-            foreach (IC37TransmissionEngine engine in C37TransmissionEngines)
+            foreach (IGrouping<(string Address, int Port), IC37TransmissionEngine> engineGroup in C37TransmissionEngines
+                .GroupBy(engine => (engine.DestinationAddress.ToUpperInvariant(), engine.DestinationPort)))
             {
-                PmuDataSimulation simulation = new PmuDataSimulation();
-                List<PmuDataSimulation> simulations = new List<PmuDataSimulation> { simulation };
-                C37Server server = new C37Server(c37Logger, simulations, engine.DestinationPort, _dataRate);
-                c37Simulations.Add(new PmuDataSimulationKey { Port = engine.DestinationPort, StreamId = engine.StreamId }, simulation);
+                IReadOnlyList<IPmuDataSimulation> simulations = _streams.Streams
+                    .Where(entry => entry.Key.Address.ToUpperInvariant() == engineGroup.Key.Address && entry.Key.Port == engineGroup.Key.Port)
+                    .Select(entry => (IPmuDataSimulation)entry.Value)
+                    .ToArray();
+                C37Server server = new C37Server(c37Logger, simulations, engineGroup.Key.Port, _dataRate);
+                _c37Servers.Add(server);
                 _ = Task.Run(() => server.StartAsync(_cancellationToken));
             }
 
@@ -150,6 +171,7 @@ namespace paskalON.DeviceSimulator.Application
                     .First();
 
                 NModbusServer server = new NModbusServer(modbusLogger, store, engine.DestinationAddress, engine.DestinationPort);
+                _modbusServers.Add(server);
                 _ = Task.Run(() => server.StartAsync(_cancellationToken));
             }
         }
@@ -189,6 +211,44 @@ namespace paskalON.DeviceSimulator.Application
                 {
                     _simulationDevices.Add(simulation);
                 }
+            }
+
+            IEnumerable<PowerMeterBase> powerMeters = SystemPowerMeters.Cast<PowerMeterBase>()
+                .Concat(AuxiliaryPowerMeters)
+                .Concat(ExternalPowerMeters)
+                .Concat(CircuitPowerMeters);
+
+            foreach (PowerMeterBase device in powerMeters.Where(device => device.TargetStreamId is not 0))
+            {
+                PmuDataSimulation stream = _streams.GetOrCreate(device);
+                ISimulatedDevice? simulation = _simulationFactories
+                    .Select(factory => factory.Create(device, stream))
+                    .FirstOrDefault(candidate => candidate is not null);
+
+                if (simulation is not null)
+                {
+                    _simulationDevices.Add(simulation);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Disposes device manager simulator.
+        /// Managed by Dependency Injection and therefore called when application shuts down.
+        /// </summary>
+        public override async void Dispose()
+        {
+            foreach (C37Server server in _c37Servers)
+            {
+                await server.StopAsync();
+                await server.DisposeAsync();
+            }
+
+            foreach (NModbusServer server in _modbusServers)
+            {
+                await server.StopAsync();
+                await server.DisposeAsync();
             }
         }
     }

@@ -118,6 +118,31 @@ namespace paskalON.Devices.Equipments.UnitTest.C37
 
 
         [TestMethod]
+        public void TransmissionEngineIgnoresDataFrameForAnotherStreamTest()
+        {
+            string stationName = "PMU";
+            ushort streamId = 1;
+            string signalName = "ActivePower";
+            float signalFrequencyValue = 50;
+            C37Register dataface = new C37Register("Test");
+            dataface.Register<C37TransmissionEngineTest, IC37Register>(r => r.Register<C37TransmissionEngineTest, float>(this, signalName, C37SignalType.Analog, (x, v) => x._analogValue = v));
+            dataface.Register<C37TransmissionEngineTest, IC37Register>(r => r.Register<C37TransmissionEngineTest, float>(this, "FREQUENCY", C37SignalType.Frequency, (x, v) => x._frequencyValue = v));
+            Mock<IC37Client> client = new Mock<IC37Client>();
+            C37TransmissionEngine engine = new C37TransmissionEngine(NullLogger.Instance, client.Object, dataface, stationName, streamId);
+
+            client.Raise(c => c.ConfigFrameReceived += null, this,
+                new C37ConfigFrameEventArgs(C37DataGenerator.CreateConfigFrame(stationName, streamId, new List<string>(), new List<string> { signalName })));
+            // Raise data from another stream ID
+            client.Raise(c => c.DataFrameReceived += null, this,
+                new C37DataFrameEventArgs(C37DataGenerator.CreateDataFrame(2, new List<(float Mag, float Ang)>(), new List<float> { 12 }, signalFrequencyValue)));
+
+            Assert.AreEqual(0, _analogValue);
+            Assert.AreEqual(0, _frequencyValue);
+            Assert.HasCount(dataface.Registers.Count, engine.Mappings);
+        }
+
+
+        [TestMethod]
         public async Task TransmissionEngineDataFrameWithOnePhasorTest()
         {
             string stationName = "PMU";
