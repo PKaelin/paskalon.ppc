@@ -316,19 +316,8 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>
         public double? ReactivePowerValue
         {
-            get
-            {
-                if (State != PcsState.Started)
-                {
-                    return null;
-                }
-
-                lock (dataLock)
-                {
-                    return field;
-                }
-            }
             set { lock (dataLock) { field = value; } }
+            get { lock (dataLock) { return field; } }
         }
 
 
@@ -346,7 +335,18 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>
         public double? ReactiveAvailablePowerValue
         {
-            get { lock (dataLock) { return field; } }
+            get
+            {
+                if (State != PcsState.Started)
+                {
+                    return null;
+                }
+
+                lock (dataLock)
+                {
+                    return field;
+                }
+            }
             set { lock (dataLock) { field = value; } }
         }
 

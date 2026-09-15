@@ -61,6 +61,8 @@ try
     builder.Services.AddSingleton<IModbusDeviceFactory, SimulationModbusDeviceFactory>();
     builder.Services.AddSingleton<IC37DeviceFactory, C37DeviceFactory>();
     builder.Services.AddSingleton<IDeviceManager, DeviceManagerSimulator>();
+    builder.Services.AddSingleton<ModbusPollService>();
+    builder.Services.AddHostedService<ModbusPollService>(provider => provider.GetRequiredService<ModbusPollService>());
 
     // Add simulations
     builder.Services.AddSingleton<SimulationWorker>();
@@ -86,6 +88,10 @@ try
     // Initialize simulation service
     SimulationWorker simulationService = app.Services.GetRequiredService<SimulationWorker>();
     simulationService.Initialize(simulationInterval);
+
+    // Initialize Modbus poll service
+    ModbusPollService pollService = app.Services.GetRequiredService<ModbusPollService>();
+    pollService.Initialize(deviceManager.ModbusPollingEngines, simulationInterval);
 
     app.Logger.LogInformation("Application finished initializing services");
 

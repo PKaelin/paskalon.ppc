@@ -312,7 +312,7 @@ namespace paskalON.DemoSuperSimpleBattery.Devices.Data
             {
                 IsActive = true,
                 ChangedBy = ChangedBy,
-                Name = "C37 System Power Meter 1",
+                Name = "SM 1",
                 DeviceId = 1,
                 PowerFactorStandard = PowerFactorStandard.IEEE,
                 C37Config = systemMeterC37,

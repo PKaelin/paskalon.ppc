@@ -32,9 +32,9 @@ namespace paskalON.DeviceSimulator.Application.Factories
 
             return device switch
             {
-                PcsSimpleV1Proxy => new PcsSimpleV1Simulation(store, device.Name),
-                PcsPcskV4Proxy => new PcsPcskV4Simulation(store, device.Name),
-                PcsHemkV4Proxy => new PcsHemkV4Simulation(store, device.Name),
+                PcsSimpleV1Proxy => new PcsSimpleV1Simulation(store, (PcsSimpleV1Proxy)device),
+                PcsPcskV4Proxy => new PcsPcskV4Simulation(store, (PcsPcskV4Proxy)device),
+                PcsHemkV4Proxy => new PcsHemkV4Simulation(store, (PcsHemkV4Proxy)device),
                 _ => null
             };
         }
@@ -55,7 +55,7 @@ namespace paskalON.DeviceSimulator.Application.Factories
 
 
         /// <inheritdoc/>
-        public ISimulatedDevice? Create(PowerMeterBase device, PmuDataSimulation stream)
+        public ISimulatedDevice? Create(PowerMeterBase device, PmuDataSimulation stream, ICollection<PowerConversionSystemBase> powerConversionSystems)
         {
             ArgumentNullException.ThrowIfNull(device);
             ArgumentNullException.ThrowIfNull(stream);
@@ -63,7 +63,7 @@ namespace paskalON.DeviceSimulator.Application.Factories
 
             return device switch
             {
-                SystemPowerMeterSimpleV1Proxy => new SystemPowerMeterSimpleV1Simulation(stream, device.Name),
+                SystemPowerMeterSimpleV1Proxy => new SystemPowerMeterSimpleV1Simulation(stream, (SystemPowerMeterSimpleV1Proxy)device, powerConversionSystems),
                 _ => null
             };
         }

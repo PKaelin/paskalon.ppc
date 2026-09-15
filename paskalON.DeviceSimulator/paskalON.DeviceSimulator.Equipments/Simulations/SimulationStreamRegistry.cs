@@ -55,7 +55,7 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
                     return stream;
                 }
 
-                (List<AnalogMeasurement> Analogs, List<PhasorMeasurement> Phasors) measures = GetMeasurements(device);
+                (Dictionary<string, AnalogMeasurement> Analogs, Dictionary<string, PhasorMeasurement> Phasors) measures = GetMeasurements(device);
                 stream = new PmuDataSimulation
                 {
                     StationName = device.TargetStationName,
@@ -69,10 +69,11 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
             }
         }
 
-        private (List<AnalogMeasurement> Analogs, List<PhasorMeasurement> Phasors) GetMeasurements(PowerMeterBase device)
+
+        private (Dictionary<string, AnalogMeasurement> Analogs, Dictionary<string, PhasorMeasurement> Phasors) GetMeasurements(PowerMeterBase device)
         {
-            List<AnalogMeasurement> analogs = new List<AnalogMeasurement>();
-            List<PhasorMeasurement> phasors = new List<PhasorMeasurement>();
+            Dictionary<string, AnalogMeasurement> analogs = new Dictionary<string, AnalogMeasurement>();
+            Dictionary<string, PhasorMeasurement> phasors = new Dictionary<string, PhasorMeasurement>();
 
             if (device.C37Map != null)
             {
@@ -106,20 +107,21 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
             return (analogs, phasors);
         }
 
-        private void AddAnalog(List<AnalogMeasurement> analogs, string? name)
+
+        private void AddAnalog(Dictionary<string, AnalogMeasurement> analogs, string? name)
         {
             if (string.IsNullOrEmpty(name) == false)
             {
-                analogs.Add(new AnalogMeasurement(name, 0));
+                analogs.Add(name, new AnalogMeasurement(name, 0));
             }
         }
 
 
-        private void AddPhasor(List<PhasorMeasurement> phasors, string? name, PhasorUnitTypes type)
+        private void AddPhasor(Dictionary<string, PhasorMeasurement> phasors, string? name, PhasorUnitTypes type)
         {
             if (string.IsNullOrEmpty(name) == false)
             {
-                phasors.Add(new PhasorMeasurement(name, 0, 0, type));
+                phasors.Add(name, new PhasorMeasurement(name, 0, 0, type));
             }
         }
     }

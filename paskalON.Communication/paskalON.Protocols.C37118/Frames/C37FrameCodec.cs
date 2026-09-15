@@ -39,12 +39,12 @@ namespace paskalON.Protocols.C37118.Frames
                 WriteUInt16(payload, checked((ushort)simulation.Analogs.Count));
                 WriteUInt16(payload, 0);
 
-                foreach (PhasorMeasurement phasor in simulation.Phasors)
+                foreach (PhasorMeasurement phasor in simulation.Phasors.Values)
                 {
                     WriteName(payload, phasor.Name);
                 }
 
-                foreach (AnalogMeasurement analog in simulation.Analogs)
+                foreach (AnalogMeasurement analog in simulation.Analogs.Values)
                 {
                     WriteName(payload, analog.Name);
                 }
@@ -77,7 +77,7 @@ namespace paskalON.Protocols.C37118.Frames
             using MemoryStream payload = new MemoryStream();
             WriteUInt16(payload, 0);
 
-            foreach (PhasorMeasurement phasor in simulation.Phasors)
+            foreach (PhasorMeasurement phasor in simulation.Phasors.Values)
             {
                 WriteSingle(payload, phasor.Magnitude);
                 WriteSingle(payload, phasor.Angle);
@@ -86,7 +86,7 @@ namespace paskalON.Protocols.C37118.Frames
             WriteSingle(payload, simulation.Frequency);
             WriteSingle(payload, simulation.FrequencyRateOfChange);
 
-            foreach (AnalogMeasurement analog in simulation.Analogs)
+            foreach (AnalogMeasurement analog in simulation.Analogs.Values)
             {
                 WriteSingle(payload, analog.Measurement);
             }

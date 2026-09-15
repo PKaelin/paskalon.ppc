@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Protocols.Modbus.Stores;
@@ -20,22 +21,35 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
         private readonly IModbusDataStore _store;
 
 
+        /// <summary>
+        /// Simulated device instance.
+        /// </summary>
+        private readonly PcsSimpleV1Proxy _device;
+
+
+        /// <summary>
+        /// Battery storage unit of the device instance.
+        /// </summary>
+        private readonly DerBatteryStorageUnit _unit;
+
+
         /// <inheritdoc/>
-        public string Name { get; init; }
+        public string Name { get => _device.Name; }
 
 
         /// <summary>
         /// Constructor of <see cref="PcsSimpleV1Simulation"/>.
         /// </summary>
         /// <param name="store">Backing Modbus store.</param>
-        /// <param name="name">Name of the simulated device.</param>
-        public PcsSimpleV1Simulation(IModbusDataStore store, string name)
+        /// <param name="device">Simulated device.</param>
+        public PcsSimpleV1Simulation(IModbusDataStore store, PcsSimpleV1Proxy device)
         {
             ArgumentNullException.ThrowIfNull(store);
-            ArgumentNullException.ThrowIfNull(name);
+            ArgumentNullException.ThrowIfNull(device);
 
             _store = store;
-            Name = name;
+            _device = device;
+            _unit = (DerBatteryStorageUnit)device.DerUnit;
         }
 
 
@@ -51,9 +65,9 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
 
             switch (selector)
             {
-                case 0: currentState = (ushort)PcsSimpleV1Description.State.Off; break;
-                case 1: currentState = (ushort)PcsSimpleV1Description.State.On; break;
-                case 3: currentState = (ushort)PcsSimpleV1Description.State.Standby; break;
+                case 2: currentState = (ushort)PcsSimpleV1Description.State.Off; break;
+                case 3: currentState = (ushort)PcsSimpleV1Description.State.On; break;
+                case 6: currentState = (ushort)PcsSimpleV1Description.State.Standby; break;
             }
 
             if (currentState != null)

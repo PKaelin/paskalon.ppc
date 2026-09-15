@@ -2,6 +2,8 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using System.Collections.ObjectModel;
+
 namespace paskalON.Protocols.C37118.Simulations
 {
     /// <summary>
@@ -36,12 +38,12 @@ namespace paskalON.Protocols.C37118.Simulations
         /// <summary>
         /// Configured phasor measurements.
         /// </summary>
-        IReadOnlyList<PhasorMeasurement> Phasors { get; }
+        ReadOnlyDictionary<string, PhasorMeasurement> Phasors { get; }
 
 
         /// <summary>
         /// Configured analog measurements.
         /// </summary>
-        IReadOnlyList<AnalogMeasurement> Analogs { get; }
+        ReadOnlyDictionary<string, AnalogMeasurement> Analogs { get; }
     }
 }

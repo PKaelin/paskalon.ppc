@@ -39,6 +39,6 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
         /// <param name="device">Production power meter.</param>
         /// <param name="stream">Backing C37 stream.</param>
         /// <returns>A simulation model, or null when unsupported.</returns>
-        ISimulatedDevice? Create(PowerMeterBase device, PmuDataSimulation stream);
+        ISimulatedDevice? Create(PowerMeterBase device, PmuDataSimulation stream, ICollection<PowerConversionSystemBase> powerConversionSystems);
     }
 }

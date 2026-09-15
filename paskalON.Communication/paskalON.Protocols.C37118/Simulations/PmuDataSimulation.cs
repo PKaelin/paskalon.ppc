@@ -2,6 +2,8 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using System.Collections.ObjectModel;
+
 namespace paskalON.Protocols.C37118.Simulations
 {
     /// <summary>
@@ -18,18 +20,18 @@ namespace paskalON.Protocols.C37118.Simulations
 
 
         /// <inheritdoc/>
-        public float Frequency { get; init; }
+        public float Frequency { get; set; }
 
 
         /// <inheritdoc/>
-        public float FrequencyRateOfChange { get; init; }
+        public float FrequencyRateOfChange { get; set; }
 
 
         /// <inheritdoc/>
-        public IReadOnlyList<PhasorMeasurement> Phasors { get; init; } = Array.Empty<PhasorMeasurement>();
+        public ReadOnlyDictionary<string, PhasorMeasurement> Phasors { get; init; } = ReadOnlyDictionary<string, PhasorMeasurement>.Empty;
 
 
         /// <inheritdoc/>
-        public IReadOnlyList<AnalogMeasurement> Analogs { get; init; } = Array.Empty<AnalogMeasurement>();
+        public ReadOnlyDictionary<string, AnalogMeasurement> Analogs { get; init; } = ReadOnlyDictionary<string, AnalogMeasurement>.Empty;
     }
 }

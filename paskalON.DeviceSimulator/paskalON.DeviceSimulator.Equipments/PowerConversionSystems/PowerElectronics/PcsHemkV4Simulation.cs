@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Protocols.Modbus.Stores;
@@ -19,22 +20,35 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.PowerElectr
         private readonly IModbusDataStore _store;
 
 
+        /// <summary>
+        /// Simulated device instance.
+        /// </summary>
+        private readonly PcsHemkV4Proxy _device;
+
+
+        /// <summary>
+        /// Battery storage unit of the device instance.
+        /// </summary>
+        private readonly DerBatteryStorageUnit _unit;
+
+
         /// <inheritdoc/>
-        public string Name { get; init; }
+        public string Name { get => _device.Name; }
 
 
         /// <summary>
         /// Constructor of <see cref="PcsHemkV4Simulation"/>.
         /// </summary>
         /// <param name="store">Backing Modbus store.</param>
-        /// <param name="name">Name of the simulated device.</param>
-        public PcsHemkV4Simulation(IModbusDataStore store, string name)
+        /// <param name="device">Simulated device.</param>
+        public PcsHemkV4Simulation(IModbusDataStore store, PcsHemkV4Proxy device)
         {
             ArgumentNullException.ThrowIfNull(store);
-            ArgumentNullException.ThrowIfNull(name);
+            ArgumentNullException.ThrowIfNull(device);
 
             _store = store;
-            Name = name;
+            _device = device;
+            _unit = (DerBatteryStorageUnit)device.DerUnit;
         }
 
 

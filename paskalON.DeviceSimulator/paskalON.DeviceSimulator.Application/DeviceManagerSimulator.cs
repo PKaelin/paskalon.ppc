@@ -222,7 +222,7 @@ namespace paskalON.DeviceSimulator.Application
             {
                 PmuDataSimulation stream = _streams.GetOrCreate(device);
                 ISimulatedDevice? simulation = _simulationFactories
-                    .Select(factory => factory.Create(device, stream))
+                    .Select(factory => factory.Create(device, stream, PowerConversionSystems))
                     .FirstOrDefault(candidate => candidate is not null);
 
                 if (simulation is not null)
