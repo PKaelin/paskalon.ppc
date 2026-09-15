@@ -9,7 +9,7 @@ namespace paskalON.Maths.Randoms
         /// <summary>
         /// Returns a double number between a range (min/max)
         /// </summary>
-        /// <param name="min">Minumum range</param>
+        /// <param name="min">Minimum range</param>
         /// <param name="max">Maximum range</param>
         /// <returns>Random number in range [min, max]</returns>
         public static double NextDoubleInRange(this Random random, double min, double max)
