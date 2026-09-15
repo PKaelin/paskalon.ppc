@@ -144,7 +144,7 @@ namespace paskalON.Devices.Application
 
             return new PcsDefinitionDto
             {
-                DeviceId = pcs.Id,
+                DeviceId = pcs.DeviceId,
                 Name = pcs.Name,
                 TargetAddress = pcs.TargetAddress,
                 TargetPort = pcs.TargetPort,
@@ -169,7 +169,7 @@ namespace paskalON.Devices.Application
 
             return new PcsCoreDto
             {
-                DeviceId = pcs.Id,
+                DeviceId = pcs.DeviceId,
                 State = pcs.State,
                 CommunicationError = pcs.CommunicationError,
                 ActivePower = pcs.ActivePower,
@@ -195,7 +195,7 @@ namespace paskalON.Devices.Application
 
             return new PcsDetailDto
             {
-                DeviceId = pcs.Id,
+                DeviceId = pcs.DeviceId,
                 IsInMaintenanceMode = pcs.IsInMaintenanceMode,
                 ActivePowerTarget = pcs.ActivePowerTarget,
                 ReactivePowerTarget = pcs.ReactivePowerTarget,
@@ -232,7 +232,7 @@ namespace paskalON.Devices.Application
 
             return new BbDefinitionDto
             {
-                DeviceId = batteryBank.Id,
+                DeviceId = batteryBank.DeviceId,
                 Name = batteryBank.Name,
                 TargetAddress = batteryBank.TargetAddress,
                 TargetPort = batteryBank.TargetPort,
@@ -269,7 +269,7 @@ namespace paskalON.Devices.Application
 
             return new BbCoreDto
             {
-                DeviceId = batteryBank.Id,
+                DeviceId = batteryBank.DeviceId,
                 State = batteryBank.State,
                 CommunicationError = batteryBank.CommunicationError,
                 BatteryBankFlowDirection = batteryBank.BatteryBankFlowDirection,
@@ -290,7 +290,7 @@ namespace paskalON.Devices.Application
 
             return new BbDetailDto
             {
-                DeviceId = batteryBank.Id,
+                DeviceId = batteryBank.DeviceId,
                 IsInMaintenanceMode = batteryBank.IsInMaintenanceMode,
                 StateOfHealth = batteryBank.StateOfHealth,
                 MinimumCellVoltage = batteryBank.MinimumCellVoltage,
@@ -332,7 +332,7 @@ namespace paskalON.Devices.Application
 
             return new PvDefinitionDto
             {
-                DeviceId = solarPanel.Id,
+                DeviceId = solarPanel.DeviceId,
                 Name = solarPanel.Name,
                 TargetAddress = solarPanel.TargetAddress,
                 TargetPort = solarPanel.TargetPort,
@@ -354,7 +354,7 @@ namespace paskalON.Devices.Application
 
             return new PvCoreDto
             {
-                DeviceId = solarPanel.Id,
+                DeviceId = solarPanel.DeviceId,
                 State = solarPanel.State,
                 CommunicationError = solarPanel.CommunicationError
             };
@@ -370,7 +370,7 @@ namespace paskalON.Devices.Application
 
             return new PvDetailDto
             {
-                DeviceId = solarPanel.Id,
+                DeviceId = solarPanel.DeviceId,
                 IsInMaintenanceMode = solarPanel.IsInMaintenanceMode
             };
         }
@@ -446,7 +446,7 @@ namespace paskalON.Devices.Application
 
             return new TDefinition() with
             {
-                DeviceId = meter.Id,
+                DeviceId = meter.DeviceId,
                 Name = meter.Name,
                 TargetAddress = meter.TargetAddress,
                 TargetPort = meter.TargetPort,
@@ -467,7 +467,7 @@ namespace paskalON.Devices.Application
 
             return new TCore() with
             {
-                DeviceId = meter.Id,
+                DeviceId = meter.DeviceId,
                 State = meter.State,
                 CommunicationError = meter.CommunicationError,
                 ActivePower = meter.ActivePower,
@@ -489,7 +489,7 @@ namespace paskalON.Devices.Application
 
             return new TDetail() with
             {
-                DeviceId = meter.Id,
+                DeviceId = meter.DeviceId,
                 VoltageLLAvg = meter.VoltageLLAvg,
                 ActivePowerA = meter.ActivePowerA,
                 ActivePowerB = meter.ActivePowerB,

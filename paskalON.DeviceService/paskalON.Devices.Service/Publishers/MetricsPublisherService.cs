@@ -61,7 +61,7 @@ namespace paskalON.Devices.Service.Publishers
             _logger.LogInformation("Initializing MetricsPublisherService with {Interval}ms interval", intervalMilliseconds);
             ArgumentNullException.ThrowIfNull(metricsPublishers);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMilliseconds);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(startupDelay);
+            ArgumentOutOfRangeException.ThrowIfNegative(startupDelay);
 
             _metricsPublishers = metricsPublishers;
             _intervalMilliseconds = intervalMilliseconds;

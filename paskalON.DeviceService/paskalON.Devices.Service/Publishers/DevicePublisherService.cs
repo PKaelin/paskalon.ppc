@@ -58,7 +58,7 @@ namespace paskalON.Devices.Service.Publishers
             _logger.LogInformation("Initializing DevicePublisherService with {Interval}ms interval", intervalMilliseconds);
             ArgumentNullException.ThrowIfNull(devicePublisher);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMilliseconds);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(startupDelay);
+            ArgumentOutOfRangeException.ThrowIfNegative(startupDelay);
 
             _devicePublisher = devicePublisher;
             _intervalMilliseconds = intervalMilliseconds;

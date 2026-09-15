@@ -128,7 +128,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
             Mock<IModbusClient> client = new Mock<IModbusClient>();
 
-            ushort? stateTarget = 1;
+            ushort stateTarget = (ushort)PcsSimpleV1Description.State.On;
             ushort? address = null;
             ModbusDataType? modbusDataType = null;
             double? state = null;
@@ -158,7 +158,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             Mock<IModbusClient> client = new Mock<IModbusClient>();
             client.Setup(x => x.State).Returns(ModbusClientState.Connected);
 
-            ushort? stateTarget = 0;
+            ushort stateTarget = (ushort)PcsSimpleV1Description.State.Off;
             ushort? address = null;
             ModbusDataType? modbusDataType = null;
             double? state = null;
@@ -172,7 +172,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
 
             await pcs.StopAsync();
 
-            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
             Assert.AreEqual((ushort)PcsSimpleV1Description.Register.SelectorState, address);
             Assert.AreEqual(ModbusDataType.MbInt16, modbusDataType);
             Assert.AreEqual(stateTarget, state);
