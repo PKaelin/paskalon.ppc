@@ -60,7 +60,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.EnergyStorages.Batteries.S
                 ChangedBy = "Test",
                 Name = "ModbusConfig",
                 Address = Constants.Ip4Localhost,
-                Port = Constants.PortStartContainer,
+                Port = Constants.PortStartBms,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
@@ -92,7 +92,8 @@ namespace paskalON.Devices.Equipments.IntegrationTest.EnergyStorages.Batteries.S
             client.Setup(x => x.ConvertRawData(It.IsAny<ushort[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
                 .Returns((ushort[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
 
-            double totalStateOfCharge = 11;
+            // totalStateOfCharge per BbSimpleProxy is UsableStateOfCharge
+            double totalStateOfCharge = 10;
             double totalStateOfHealth = 12;
             double totalDCVoltage = 13;
             double totalDCCurrent = 14;
@@ -118,7 +119,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.EnergyStorages.Batteries.S
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.TotalStateOfCharge, (ushort)BbSimpleV1Description.Register.TotalDCCurrent, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
 
-            Assert.AreEqual(totalStateOfCharge, bb.StateOfCharge);
+            Assert.AreEqual(totalStateOfCharge, bb.UsableStateOfCharge);
             Assert.AreEqual(totalStateOfHealth, bb.StateOfHealth);
             Assert.AreEqual(totalDCVoltage, bb.TotalDCVoltage);
             Assert.AreEqual(totalDCCurrent, bb.TotalDCCurrent);

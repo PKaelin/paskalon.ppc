@@ -135,7 +135,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
 
             client
                 .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
-                .Callback<ushort, ushort, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; state = val; modbusDataType = type; })
+                .Callback<ushort, ushort, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; state = val * scale; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
@@ -165,7 +165,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
 
             client
                 .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
-                .Callback<ushort, ushort, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; state = val; modbusDataType = type; })
+                .Callback<ushort, ushort, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; state = val * scale; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
@@ -195,7 +195,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
 
             client
                 .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<double>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
-                .Callback<ushort, double, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; activePower = val; modbusDataType = type; })
+                .Callback<ushort, double, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; activePower = val * scale; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);
@@ -225,7 +225,7 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
 
             client
                 .Setup(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<double>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
-                .Callback<ushort, double, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; reactivePower = val; modbusDataType = type; })
+                .Callback<ushort, double, ModbusDataType, short, double, CancellationToken>((adr, val, type, priority, scale, token) => { address = adr; reactivePower = val * scale; modbusDataType = type; })
                 .Returns(Task.CompletedTask);
 
             PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, publisher.Object, dataface.Object, client.Object);

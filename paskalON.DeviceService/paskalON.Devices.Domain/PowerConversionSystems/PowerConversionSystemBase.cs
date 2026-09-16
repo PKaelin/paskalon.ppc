@@ -252,7 +252,19 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public double? ActivePowerValue
         {
             get { lock (dataLock) { return field; } }
-            set { lock (dataLock) { field = value; } }
+            set
+            {
+                lock (dataLock)
+                {
+                    bool changed = field != value;
+                    field = value;
+
+                    if (changed == true && DerUnit is DerBatteryStorageUnit)
+                    {
+                        ((DerBatteryStorageUnit)DerUnit).DistributeAllocatedActivePower();
+                    }
+                }
+            }
         }
 
 
@@ -529,6 +541,11 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                 SetPendingState(PcsState.Starting);
                 State = PcsState.Starting;
             }
+
+            if (DerUnit is DerBatteryStorageUnit)
+            {
+                await ((DerBatteryStorageUnit)DerUnit).ConnectBatteries();
+            }
         }
 
 
@@ -593,11 +610,6 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                     _activePowerTarget = value;
                     _logger.LogInformation("{Name} - Set active power target to: {activePowerTarget} Watt", Name, _activePowerTarget);
                 }
-            }
-
-            if (DerUnit is DerBatteryStorageUnit)
-            {
-                ((DerBatteryStorageUnit)DerUnit).DistributeAllocatedActivePower();
             }
         }
 

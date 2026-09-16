@@ -164,6 +164,9 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// A strict lower bound on how far the IC is allowed to discharge the battery.
         /// Expressed as a percentage of actual capacity, not usable capacity.
         /// </summary>
+        /// <remarks>
+        /// <see cref="BatteryBankDeviceConfig"/> for more information.
+        /// </remarks>
         public double AbsoluteMinimumStateOfCharge { get => _config.BatteryBankDeviceConfig.AbsoluteMinimumStateOfCharge; }
 
 
@@ -171,7 +174,46 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// A strict upper bound on how far the IC is allowed to discharge the battery.
         /// Expressed as a percentage of actual capacity, not usable capacity.
         /// </summary>
+        /// <remarks>
+        /// <see cref="BatteryBankDeviceConfig"/> for more information.
+        /// </remarks>
         public double AbsoluteMaximumStateOfCharge { get => _config.BatteryBankDeviceConfig.AbsoluteMaximumStateOfCharge; }
+
+
+        /// <summary>
+        /// The usable minimum state of charge in percent.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="BatteryBankDeviceConfig"/> for more information.
+        /// </remarks>
+        public double UsableMinimumStateOfCharge { get => _config.BatteryBankDeviceConfig.UsableMinimumStateOfCharge; }
+
+
+        /// <summary>
+        /// The usable maximum state of charge in percent.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="BatteryBankDeviceConfig"/> for more information.
+        /// </remarks>
+        public double UsableMaximumStateOfCharge { get => _config.BatteryBankDeviceConfig.UsableMaximumStateOfCharge; }
+
+
+        /// <summary>
+        /// The preferred maximum state of charge in percentage.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="BatteryBankDeviceConfig"/> for more information.
+        /// </remarks>
+        public double PreferredMinimumStateOfCharge { get => _config.BatteryBankDeviceConfig.PreferredMinimumStateOfCharge; }
+
+
+        /// <summary>
+        /// The preferred maximum state of charge, as a percentage of usable capacity.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="BatteryBankDeviceConfig"/> for more information.
+        /// </remarks>
+        public double PreferredMaximumStateOfCharge { get => _config.BatteryBankDeviceConfig.PreferredMaximumStateOfCharge; }
 
 
         /// <summary>
@@ -186,16 +228,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         public double AbsoluteMaximumTemperature { get => _config.BatteryBankDeviceConfig.AbsoluteMaximumTemperature; }
 
 
-        /// <summary>
-        /// The preferred minimum state of charge, as a percentage of usable capacity.
-        /// </summary>
-        public double PreferredMinimumStateOfCharge { get => _config.BatteryBankDeviceConfig.PreferredMinimumStateOfCharge; }
 
-
-        /// <summary>
-        /// The preferred maximum state of charge, as a percentage of usable capacity.
-        /// </summary>
-        public double PreferredMaximumStateOfCharge { get => _config.BatteryBankDeviceConfig.PreferredMaximumStateOfCharge; }
 
 
         /// <summary>
@@ -286,25 +319,44 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         }
 
 
-        // TODO: Return the usable state of charge if configured else the actual state of charge.
         /// <summary>
-        /// Usable state of charge as a percentage of the battery's capacity.        
+        /// Preferred state of charge as a percentage of the battery.
         /// </summary>
-        /// <remarks>StateOfCharge is as a floating point value between 0 and 100.</remarks>
+        /// <remarks>
+        /// StateOfCharge is as a floating point value between 0 and 100.
+        /// This state is shown to systems/users.
+        /// <remarks>
+        /// <see cref="BatteryBankDeviceConfig"/> for more information.
+        /// </remarks>
         public double? StateOfCharge
         {
-            get { lock (dataLock) { return field; } }
+            get { lock (dataLock) { return field is null ? null : Math.Clamp((double)field, 0, 100); } }
             set { lock (dataLock) { field = value; } }
         }
 
 
         /// <summary>
-        /// Actual state of charge as a percentage of the battery's actual capacity rather than its usable capacity.
+        /// Usable state of charge as a percentage of the battery.
         /// </summary>
-        /// <remarks>ActualStateOfCharge is as a floating point value between 0 and 100.</remarks>
-        public double? ActualStateOfCharge
+        /// <remarks>
+        /// <see cref="BatteryBankDeviceConfig"/> for more information.
+        /// </remarks>
+        public double? UsableStateOfCharge
         {
-            get { lock (dataLock) { return field; } }
+            get { lock (dataLock) { return field is null ? null : Math.Clamp((double)field, 0, 100); } }
+            set { lock (dataLock) { field = value; } }
+        }
+
+
+        /// <summary>
+        /// Absolute state of charge as a percentage of the battery.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="BatteryBankDeviceConfig"/> for more information.
+        /// </remarks>
+        public double? AbsoluteStateOfCharge
+        {
+            get { lock (dataLock) { return field is null ? null : Math.Clamp((double)field, 0, 100); } }
             set { lock (dataLock) { field = value; } }
         }
 
@@ -313,6 +365,9 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// Active power allocated to this bank by its battery storage unit.
         /// Positive values represent discharge and negative values represent charge.
         /// </summary>
+        /// <remarks>
+        /// Power unit is Watts.
+        /// </remarks>
         public double? AllocatedActivePowerValue
         {
             get { lock (dataLock) { return field; } }
@@ -650,7 +705,8 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
             MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(TotalDCVoltage), MetricType.Gauge, x => x.TotalDCVoltage, _config.MetricsFactorClass1);
             MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(TotalDCCurrent), MetricType.Gauge, x => x.TotalDCCurrent, _config.MetricsFactorClass1);
             MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(StateOfCharge), MetricType.Gauge, x => x.StateOfCharge, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(ActualStateOfCharge), MetricType.Gauge, x => x.ActualStateOfCharge, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(UsableStateOfCharge), MetricType.Gauge, x => x.UsableStateOfCharge, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(AbsoluteStateOfCharge), MetricType.Gauge, x => x.UsableStateOfCharge, _config.MetricsFactorClass1);
             // MetricsFactorClass2            
             MetricsPublisher.Register<BatteryBankBase, double>(this, nameof(StateOfHealth), MetricType.Gauge, x => x.StateOfHealth, _config.MetricsFactorClass2);
             MetricsPublisher.Register<BatteryBankBase, int>(this, nameof(State), MetricType.Gauge, x => (int)x.State, _config.MetricsFactorClass2);

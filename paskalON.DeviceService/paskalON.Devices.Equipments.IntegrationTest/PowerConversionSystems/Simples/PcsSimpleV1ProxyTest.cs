@@ -59,7 +59,7 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
                 ChangedBy = "Test",
                 Name = "ModbusConfig",
                 Address = Constants.Ip4Localhost,
-                Port = Constants.PortStartContainer,
+                Port = Constants.PortStartPcs,
                 AddressFamily = AddressFamily.InterNetwork,
                 UnitId = 1,
                 ModbusConnectionConfig = modbusConnection
@@ -139,10 +139,14 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.Frequency, (ushort)PcsSimpleV1Description.Register.ACVoltage, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
 
-            Assert.AreEqual(p, pcs.ActivePowerValue);
-            Assert.AreEqual(q, pcs.ReactivePowerValue);
-            Assert.AreEqual(pAvailable, pcs.ActiveAvailablePowerValue);
-            Assert.AreEqual(qAvailable, pcs.ReactiveAvailablePowerValue);
+            Assert.IsNotNull(pcs.ActivePower);
+            Assert.AreEqual(p, pcs.ActivePower.Value.KiloWatts);
+            Assert.IsNotNull(pcs.ReactivePower);
+            Assert.AreEqual(q, pcs.ReactivePower.Value.KiloVoltAmperesReactive);
+            Assert.IsNotNull(pcs.ActiveAvailablePower);
+            Assert.AreEqual(pAvailable, pcs.ActiveAvailablePower.Value.KiloWatts);
+            Assert.IsNotNull(pcs.ReactiveAvailablePower);
+            Assert.AreEqual(qAvailable, pcs.ReactiveAvailablePower.Value.KiloVoltAmperesReactive);
             Assert.AreEqual(frequency, pcs.Frequency);
             Assert.AreEqual(dcCurrent, pcs.DCCurrent);
             Assert.AreEqual(dcVoltage, pcs.DCVoltage);

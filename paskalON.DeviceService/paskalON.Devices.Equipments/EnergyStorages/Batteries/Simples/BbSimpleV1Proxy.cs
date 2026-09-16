@@ -26,6 +26,36 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
 
 
         /// <summary>
+        /// Set state of charge by using the battery banks SOC endpoint value.
+        /// </summary>
+        private double? LocalStateOfCharge
+        {
+            set
+            {
+                double? usableSoc = value;
+
+                if (field != usableSoc)
+                {
+                    field = value;
+
+                    if (usableSoc == null)
+                    {
+                        AbsoluteStateOfCharge = null;
+                        UsableStateOfCharge = null;
+                        StateOfCharge = null;
+                    }
+                    else
+                    {
+
+                        UsableStateOfCharge = usableSoc;
+                        AbsoluteStateOfCharge = UsableMinimumStateOfCharge + usableSoc * (UsableMaximumStateOfCharge - UsableMinimumStateOfCharge) / AbsoluteMaximumStateOfCharge;
+                        StateOfCharge = (AbsoluteStateOfCharge - PreferredMinimumStateOfCharge) / (PreferredMaximumStateOfCharge - PreferredMinimumStateOfCharge) * AbsoluteMaximumStateOfCharge;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Constructor of <see cref="BbSimpleV1Proxy"/>
         /// </summary>
         /// <param name="logger">The logging instance.</param>
@@ -114,7 +144,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         {
             // State of charge and health
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, double?>(this, nameof(StateOfCharge),
-                (x, v) => x.StateOfCharge = v, (int)BbSimpleV1Description.Register.TotalStateOfCharge, ModbusScale.Downscale100, ModbusDataType.MbUint16));
+                (x, v) => x.LocalStateOfCharge = v, (int)BbSimpleV1Description.Register.TotalStateOfCharge, ModbusScale.Downscale100, ModbusDataType.MbUint16));
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.Register<BbSimpleV1Proxy, double?>(this, nameof(StateOfHealth),
                 (x, v) => x.StateOfHealth = v, (int)BbSimpleV1Description.Register.TotalStateOfHealth, ModbusScale.Downscale100, ModbusDataType.MbUint16));
             // Current, Voltage

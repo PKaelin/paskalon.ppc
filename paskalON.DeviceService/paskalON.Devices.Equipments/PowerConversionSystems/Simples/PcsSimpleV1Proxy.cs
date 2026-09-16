@@ -112,14 +112,14 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
 
                     if (standbyActivePower != null)
                     {
-                        // Use parameter is in watt so ModbusScale.Downscale1000
-                        await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, (double)standbyActivePower, ModbusDataType.MbInt16,
-                            3, ModbusScale.Downscale1000);
+                        await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, (double)standbyActivePower,
+                            ModbusDataType.MbInt16, 2, ModbusScale.Downscale1000);
                     }
                     else
                     {
                         // Use kilo watts instead of ModbusScale.Downscale1000
-                        await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, StandbyActivePowerKiloWatts, ModbusDataType.MbInt16);
+                        await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, StandbyActivePowerKiloWatts,
+                            ModbusDataType.MbInt16, 2);
                     }
 
                     await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState,
@@ -148,8 +148,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
 
                 if (ActivePowerTarget.HasValue)
                 {
-                    // Use kilo watts instead of ModbusScale.Downscale1000
-                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, ActivePowerTarget.Value.KiloWatts, ModbusDataType.MbInt16);
+                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, ActivePowerTarget.Value.Watts,
+                        ModbusDataType.MbInt16, 2, ModbusScale.Downscale1000);
                 }
             }
         }
@@ -166,8 +166,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
 
                 if (ReactivePowerTarget.HasValue)
                 {
-                    // Use kilo volt ampere reactive instead of ModbusScale.Downscale1000
-                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, ReactivePowerTarget.Value.KiloVoltAmperesReactive, ModbusDataType.MbInt16);
+                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, ReactivePowerTarget.Value.VoltAmperesReactive,
+                        ModbusDataType.MbInt16, 2, ModbusScale.Downscale1000);
                 }
             }
         }
@@ -190,13 +190,13 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         {
             // Power
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ActivePower),
-                (x, v) => x.ActivePowerValue = v, (int)PcsSimpleV1Description.Register.P, ModbusScale.Upscale1000, ModbusDataType.MbUint16));
+                (x, v) => x.ActivePowerValue = v, (int)PcsSimpleV1Description.Register.P, ModbusScale.Upscale1000, ModbusDataType.MbInt16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ActiveAvailablePower),
-                (x, v) => x.ActiveAvailablePowerValue = v, (int)PcsSimpleV1Description.Register.PAvailable, ModbusScale.Upscale1000, ModbusDataType.MbUint16));
+                (x, v) => x.ActiveAvailablePowerValue = v, (int)PcsSimpleV1Description.Register.PAvailable, ModbusScale.Upscale1000, ModbusDataType.MbInt16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ReactivePower),
-                (x, v) => x.ReactivePowerValue = v, (int)PcsSimpleV1Description.Register.Q, ModbusScale.Upscale1000, ModbusDataType.MbUint16));
+                (x, v) => x.ReactivePowerValue = v, (int)PcsSimpleV1Description.Register.Q, ModbusScale.Upscale1000, ModbusDataType.MbInt16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ReactiveAvailablePower),
-                (x, v) => x.ReactiveAvailablePowerValue = v, (int)PcsSimpleV1Description.Register.QAvailable, ModbusScale.Upscale1000, ModbusDataType.MbUint16));
+                (x, v) => x.ReactiveAvailablePowerValue = v, (int)PcsSimpleV1Description.Register.QAvailable, ModbusScale.Upscale1000, ModbusDataType.MbInt16));
             // Power range
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.P, (int)PcsSimpleV1Description.Register.QAvailable,
                 ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass1));
@@ -204,13 +204,13 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(Frequency),
                 (x, v) => x.Frequency = v, (int)PcsSimpleV1Description.Register.Frequency, ModbusScale.Downscale100, ModbusDataType.MbUint16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(DCCurrent),
-                (x, v) => x.DCCurrent = v, (int)PcsSimpleV1Description.Register.DCCurrent, ModbusScale.NoScale, ModbusDataType.MbUint16));
+                (x, v) => x.DCCurrent = v, (int)PcsSimpleV1Description.Register.DCCurrent, ModbusScale.NoScale, ModbusDataType.MbInt16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(DCVoltage),
-                (x, v) => x.DCVoltage = v, (int)PcsSimpleV1Description.Register.DCVoltage, ModbusScale.NoScale, ModbusDataType.MbUint16));
+                (x, v) => x.DCVoltage = v, (int)PcsSimpleV1Description.Register.DCVoltage, ModbusScale.NoScale, ModbusDataType.MbInt16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ACCurrent),
-                (x, v) => x.ACCurrent = v, (int)PcsSimpleV1Description.Register.ACCurrent, ModbusScale.NoScale, ModbusDataType.MbUint16));
+                (x, v) => x.ACCurrent = v, (int)PcsSimpleV1Description.Register.ACCurrent, ModbusScale.NoScale, ModbusDataType.MbInt16));
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.Register<PcsSimpleV1Proxy, double?>(this, nameof(ACVoltage),
-                (x, v) => x.ACVoltage = v, (int)PcsSimpleV1Description.Register.ACVoltage, ModbusScale.NoScale, ModbusDataType.MbUint16));
+                (x, v) => x.ACVoltage = v, (int)PcsSimpleV1Description.Register.ACVoltage, ModbusScale.NoScale, ModbusDataType.MbInt16));
             // Current, Voltage, Frequency range
             Dataface.Register<PcsSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)PcsSimpleV1Description.Register.Frequency, (int)PcsSimpleV1Description.Register.ACVoltage,
                 ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass1));

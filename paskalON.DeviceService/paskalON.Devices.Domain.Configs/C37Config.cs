@@ -75,7 +75,7 @@ namespace paskalON.Devices.Domain.Configs
         public required ushort StreamId
         {
             get;
-            set { ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, 0); }
+            set { ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, 0); field = value; }
         } = 1;
 
 

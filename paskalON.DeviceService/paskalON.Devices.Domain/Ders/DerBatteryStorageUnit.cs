@@ -119,6 +119,21 @@ namespace paskalON.Devices.Domain.Ders
 
 
         /// <summary>
+        /// Connect all batteries.
+        /// </summary>
+        /// <returns>Task</returns>
+        public async Task ConnectBatteries()
+        {
+            foreach (BatteryBankBase battery in BatteryBanks)
+            {
+                if (battery.State != BatteryBankState.Connected)
+                {
+                    await battery.ConnectAsync();
+                }
+            }
+        }
+
+        /// <summary>
         /// Dispose instance.
         /// </summary>
         public void Dispose()

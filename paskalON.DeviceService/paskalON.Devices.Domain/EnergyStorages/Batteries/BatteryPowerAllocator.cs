@@ -19,7 +19,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         {
             ArgumentNullException.ThrowIfNull(unit);
 
-            double totalPower = unit.PowerConversionSystem?.ActivePowerValue ?? 0;
+            double totalPower = unit.PowerConversionSystem?.ActivePower?.Watts ?? 0;
             IReadOnlyCollection<BatteryBankBase> banks = unit.BatteryBanks;
 
             if (banks.Count == 0)

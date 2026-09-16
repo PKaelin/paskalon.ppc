@@ -274,7 +274,7 @@ namespace paskalON.Devices.Application
                 CommunicationError = batteryBank.CommunicationError,
                 BatteryBankFlowDirection = batteryBank.BatteryBankFlowDirection,
                 StateOfCharge = batteryBank.StateOfCharge,
-                ActualStateOfCharge = batteryBank.ActualStateOfCharge,
+                ActualStateOfCharge = batteryBank.UsableStateOfCharge,
                 TotalDCVoltage = batteryBank.TotalDCVoltage,
                 TotalDCCurrent = batteryBank.TotalDCCurrent
             };
