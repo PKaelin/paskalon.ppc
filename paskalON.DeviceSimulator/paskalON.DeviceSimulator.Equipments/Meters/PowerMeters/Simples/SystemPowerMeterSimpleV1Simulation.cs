@@ -71,19 +71,19 @@ namespace paskalON.DeviceSimulator.Equipments.Meters.PowerMeters.Simples
         public Task TickAsync(TimeSpan elapsed, CancellationToken cancellationToken)
         {
             // System meter is at the POI so it measures units that are IsInMaintenanceMode too
-            double sumKiloActive = _powerConversionSystems.Where(p =>
-                p.ActivePower.HasValue).Sum(s => s.ActivePower!.Value.KiloWatts);
-            double sumKiloReactive = _powerConversionSystems.Where(p =>
-                p.ReactivePower.HasValue).Sum(s => s.ReactivePower!.Value.KiloVoltAmperesReactive);
+            double sumActivePower = _powerConversionSystems.Where(p =>
+                p.ActivePower.HasValue).Sum(s => s.ActivePower!.Value.Watts);
+            double sumReactivePower = _powerConversionSystems.Where(p =>
+                p.ReactivePower.HasValue).Sum(s => s.ReactivePower!.Value.VoltAmperesReactive);
 
             _stream.Frequency = _frequencyWalker.Next();
-            _stream.Analogs["Analog1"].Measurement = (float)sumKiloActive;
-            _stream.Analogs["Analog5"].Measurement = (float)sumKiloReactive;
+            _stream.Analogs["Analog1"].Measurement = (float)sumActivePower;
+            _stream.Analogs["Analog5"].Measurement = (float)sumReactivePower;
 
             if (System.Diagnostics.Debugger.IsAttached == true)
             {
                 Debug.WriteLine($"{DateTime.Now.ToString("HH:mm:ss")} - {Name} - " +
-                    $"StationName: {_stream.StationName} StreamId: {_stream.StreamId} " +
+                    $"Station: {_stream.StationName} StreamId: {_stream.StreamId} " +
                     $"Active Power: {_stream.Analogs["Analog1"].Measurement} " +
                     $"Reactive Power: {_stream.Analogs["Analog5"].Measurement} " +
                     $"Frequency: {_stream.Frequency}");

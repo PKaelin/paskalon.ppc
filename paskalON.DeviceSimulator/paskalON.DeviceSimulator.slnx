@@ -16,6 +16,10 @@
     <Project Path="../paskalON.DeviceService/paskalON.Devices.Equipments/paskalON.Devices.Equipments.csproj" />
     <Project Path="../paskalON.DeviceService/paskalON.Devices.Infrastructure/paskalON.Devices.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="paskalON.DeviceSimulator.Application.IntegrationTest/paskalON.DeviceSimulator.Application.IntegrationTest.csproj" />
+    <Project Path="paskalON.DeviceSimulator.Equipments.IntegrationTest/paskalON.DeviceSimulator.Equipments.IntegrationTest.csproj" />
+  </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>

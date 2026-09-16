@@ -105,6 +105,21 @@ namespace paskalON.DeviceSimulator.Equipments.IntegrationTest.PowerConversionSys
 
 
         [TestMethod]
+        public void PcsSimpleV1SimulationConstructorTest()
+        {
+            SimulationStoreRegistry stores = new SimulationStoreRegistry();
+            SimulationModbusDeviceFactory factory = new SimulationModbusDeviceFactory(stores);
+            (IModbusDataface dataface, IModbusClient client) = factory.Create(_pcsModbusConfig!);
+            PcsSimpleV1Proxy device = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, _publisher.Object, dataface, client);
+
+            PcsSimpleV1Simulation simulation = new PcsSimpleV1Simulation(((MemoryModbusClient)client).Store, device);
+
+            Assert.IsNotNull(simulation);
+            Assert.AreEqual(device.Name, simulation.Name);
+        }
+
+
+        [TestMethod]
         public async Task PcsSimpleV1SimulationWritesTargetAndReadsSimulatedOutputTest()
         {
             SimulationStoreRegistry stores = new SimulationStoreRegistry();

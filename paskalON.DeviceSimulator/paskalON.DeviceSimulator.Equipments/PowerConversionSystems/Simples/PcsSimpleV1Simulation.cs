@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
 using paskalON.DeviceSimulator.Equipments.Simulations;
@@ -58,8 +59,8 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
         {
             ushort heartbeat = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.Heartbeat);
             ushort selector = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.SelectorState);
-            ushort reactiveTarget = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.QReference);
-            ushort activeTarget = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.PReference);
+            double reactiveTarget = RegisterSimulation.Read<double>(_store, (int)PcsSimpleV1Description.Register.QReference, ModbusDataType.MbInt16, ModbusScale.Upscale1000);
+            double activeTarget = RegisterSimulation.Read<double>(_store, (int)PcsSimpleV1Description.Register.PReference, ModbusDataType.MbInt16, ModbusScale.Upscale1000);
 
             ushort? currentState = null;
 
@@ -75,10 +76,12 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
                 RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.CurrentState, (ushort)currentState);
             }
 
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.P, activeTarget);
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.Q, reactiveTarget);
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.PAvailable, 60000);
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.QAvailable, 60000);
+            // Whatever the reference is also the actual output in a perfect system
+            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.P, activeTarget, ModbusDataType.MbInt16, ModbusScale.Downscale1000);
+            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.Q, reactiveTarget, ModbusDataType.MbInt16, ModbusScale.Downscale1000);
+            // For now we just set the nameplate
+            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.PAvailable, _device.NameplateMaximumActivePower.KiloWatts, ModbusDataType.MbInt16);
+            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.QAvailable, _device.NameplateMaximumReactivePower.KiloVoltAmperesReactive, ModbusDataType.MbInt16);
             RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.ACBreaker, 1);
             RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.DcContactor, 1);
 

@@ -48,7 +48,7 @@ namespace paskalON.DeviceSimulator.Application.Factories
 
             return device switch
             {
-                BbSimpleV1Proxy => new BbSimpleV1Simulation(store, device.Name),
+                BbSimpleV1Proxy => new BbSimpleV1Simulation(store, (BbSimpleV1Proxy)device),
                 _ => null
             };
         }
