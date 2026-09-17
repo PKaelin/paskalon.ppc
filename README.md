@@ -20,10 +20,7 @@ This project is not yet an actual power plant controller.
   - Implemented operating mode closed loop Reactive Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#voltage--active-power-p-control-modes)
 
 ## Not implemented for sure
-- Solid threat safety
-- Solid tests
-- Not all code have XML Documentation Comments at this point
-- Protocols
+- Full Generic Modbus Support
 - Just a simple power control and constraint engine (not even an engine) 
 ---
 ---
