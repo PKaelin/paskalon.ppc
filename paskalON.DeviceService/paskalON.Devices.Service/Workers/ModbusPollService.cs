@@ -31,6 +31,12 @@ namespace paskalON.Devices.Service.Workers
 
 
         /// <summary>
+        /// Time based interval to try to reconnect if engine is disconnected.
+        /// </summary>
+        private int _intervalReconnectMilliseconds;
+
+
+        /// <summary>
         /// Constructor of <see cref="ModbusPollService"/>.
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>
@@ -47,14 +53,20 @@ namespace paskalON.Devices.Service.Workers
         /// </summary>
         /// <param name="modbusEngines">List of Modbus polling engines.</param>
         /// <param name="intervalMilliseconds">Time based interval for Modbus polls.</param>
-        public void Initialize(IEnumerable<IModbusPollingEngine> modbusEngines, int intervalMilliseconds)
+        /// <param name="intervalReconnectMilliseconds">Reconnect timer in case connections was lost.</param>
+        /// <remarks>
+        /// intervalReconnectMilliseconds has to consider the connect timeouts and the retry connect attempt's.
+        /// </remarks>
+        public void Initialize(IEnumerable<IModbusPollingEngine> modbusEngines, int intervalMilliseconds, int intervalReconnectMilliseconds = 60000)
         {
             _logger.LogInformation("Initializing ModbusPollService with {Interval}ms interval", intervalMilliseconds);
             ArgumentNullException.ThrowIfNull(modbusEngines);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMilliseconds);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalReconnectMilliseconds);
 
             _modbusEngines = modbusEngines;
             _intervalMilliseconds = intervalMilliseconds;
+            _intervalReconnectMilliseconds = intervalReconnectMilliseconds;
         }
 
 
@@ -66,9 +78,10 @@ namespace paskalON.Devices.Service.Workers
         /// </remarks>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Task[] tasks = _modbusEngines.Select(engine => RunEngineAsync(engine, stoppingToken)).ToArray();
+            Task[] tasksPoll = _modbusEngines.Select(engine => RunEngineAsync(engine, stoppingToken)).ToArray();
+            Task[] tasksReconnect = _modbusEngines.Select(engine => ReconnectEngineAsync(engine, stoppingToken)).ToArray();
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasksPoll.Concat(tasksReconnect));
         }
 
 
@@ -135,6 +148,31 @@ namespace paskalON.Devices.Service.Workers
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
                 // Expected when normal shutdown
+            }
+        }
+
+
+        /// <summary>
+        /// Reconnects the engine in case a disconnect happened.
+        /// </summary>
+        /// <param name="engine">The engine.</param>
+        /// <param name="stoppingToken">The cancellation token.</param>
+        /// <returns>Task</returns>
+        private async Task ReconnectEngineAsync(IModbusPollingEngine engine, CancellationToken stoppingToken)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(90), stoppingToken);
+            PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_intervalReconnectMilliseconds));
+
+            while (await timer.WaitForNextTickAsync(stoppingToken))
+            {
+                try
+                {
+                    await engine.ConnectAsync(stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Could not reconnect Modbus engine {Engine}. Error: {Error}", $"{engine.DestinationAddress}:{engine.DestinationPort}", ex);
+                }
             }
         }
     }

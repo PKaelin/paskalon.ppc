@@ -82,6 +82,7 @@ try
     builder.Services.AddSingleton<MetricsPublisherService>();
     builder.Services.AddSingleton<DeviceHeartbeatService>();
     builder.Services.AddSingleton<ModbusPollService>();
+    builder.Services.AddSingleton<C37StreamService>();
     builder.Services.AddSingleton<IDeviceManager, DeviceManager>();
 
     if (startPublisher == true)
@@ -94,6 +95,7 @@ try
     {
         builder.Services.AddHostedService<DeviceHeartbeatService>(provider => provider.GetRequiredService<DeviceHeartbeatService>());
         builder.Services.AddHostedService<ModbusPollService>(provider => provider.GetRequiredService<ModbusPollService>());
+        builder.Services.AddHostedService<C37StreamService>(provider => provider.GetRequiredService<C37StreamService>());
     }
 
     // Configure OpenTelemetry logging, metrics, & tracing with auto-start using the
@@ -166,6 +168,10 @@ try
         // Create and load Modbus polling service
         ModbusPollService modbusPollService = app.Services.GetRequiredService<ModbusPollService>();
         modbusPollService.Initialize(deviceManager.ModbusPollingEngines, config.PollingIntervalMilliseconds);
+
+        // Create and load C37 stream service
+        C37StreamService c37StreamService = app.Services.GetRequiredService<C37StreamService>();
+        c37StreamService.Initialize(deviceManager.C37TransmissionEngines);
 
         // Create the heartbeat service
         DeviceHeartbeatService heartbeatService = app.Services.GetRequiredService<DeviceHeartbeatService>();

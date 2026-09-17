@@ -63,7 +63,10 @@ namespace paskalON.Devices.Equipments.Modbus
         /// </summary>
         public async Task ConnectAsync(CancellationToken cancellationToken)
         {
-            await _client.ConnectAsync(cancellationToken);
+            if (_client.State != ModbusClientState.Connected)
+            {
+                await _client.ConnectAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
 
@@ -74,11 +77,6 @@ namespace paskalON.Devices.Equipments.Modbus
         {
             try
             {
-                if (_client.State != ModbusClientState.Connected)
-                {
-                    await _client.ConnectAsync(cancellationToken).ConfigureAwait(false);
-                }
-
                 foreach (ModbusPollingRangeEntry range in _dataface.PollingRanges)
                 {
                     if (currentInterval % range.Interval == 0 && _client.State == ModbusClientState.Connected)
