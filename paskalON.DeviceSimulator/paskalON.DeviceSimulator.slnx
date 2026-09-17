@@ -20,6 +20,7 @@
     <Project Path="paskalON.DeviceSimulator.Application.IntegrationTest/paskalON.DeviceSimulator.Application.IntegrationTest.csproj" />
     <Project Path="paskalON.DeviceSimulator.Equipments.IntegrationTest/paskalON.DeviceSimulator.Equipments.IntegrationTest.csproj" />
   </Folder>
+  <Project Path="paskalON.DeviceSimulator.Dto/paskalON.DeviceSimulator.Dto.csproj" Id="10994fd1-a53d-45eb-99fe-a07f67e320d9" />
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
