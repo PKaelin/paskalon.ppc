@@ -61,6 +61,12 @@ namespace paskalON.Protocols.Modbus.NModbus
 
 
         /// <summary>
+        /// Serializes connect and disconnect operations.
+        /// </summary>
+        private readonly SemaphoreSlim _lifecycleLock = new SemaphoreSlim(1, 1);
+
+
+        /// <summary>
         /// TCP client for the Modbus client.
         /// </summary>
         private TcpClient? _tcpClient;
@@ -157,78 +163,87 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// </summary>
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
-            if (_state == ModbusClientState.Connected)
-            {
-                return;
-            }
-
-            _state = ModbusClientState.Connecting;
-            Exception? lastException = null;
-            // Number of attempts = initial attempt + retries.
-            int maxAttempts = _clientConnection.ConnectRetryCount + 1;
+            await _lifecycleLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             try
             {
-                for (int attempt = 1; attempt <= maxAttempts; attempt++)
+                if (State == ModbusClientState.Connected)
                 {
-                    TcpClient? tcpClient = null;
-
-                    try
-                    {
-                        // Start dispatcher before connecting
-                        _dispatcher.Start();
-                        tcpClient = new TcpClient(_clientConnection.AddressFamily);
-                        using CancellationTokenSource timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                        timeoutCts.CancelAfter(_clientConnection.ConnectionTimeoutMilliseconds);
-                        await tcpClient.ConnectAsync(ServerAddress, ServerPort, timeoutCts.Token).ConfigureAwait(false);
-                        _tcpClient = tcpClient;
-                        _master = _factory.CreateMaster(tcpClient);
-                        // NModbus Modbus-level settings
-                        if (System.Diagnostics.Debugger.IsAttached == true)
-                        {
-                            _master.Transport.ReadTimeout = 240000;
-                            _master.Transport.WriteTimeout = 240000;
-                        }
-                        else
-                        {
-                            _master.Transport.ReadTimeout = _clientConnection.OperationTimeoutMilliseconds;
-                            _master.Transport.WriteTimeout = _clientConnection.OperationTimeoutMilliseconds;
-                        }
-
-                        _master.Transport.Retries = _clientConnection.SendRetryCount;
-                        _master.Transport.WaitToRetryMilliseconds = _clientConnection.SendRetryIntervalMilliseconds;
-                        _state = ModbusClientState.Connected;
-
-                        return;
-                    }
-                    catch (Exception ex) when (ex is SocketException || (ex is OperationCanceledException && cancellationToken.IsCancellationRequested == false))
-                    {
-                        string msgAttempt = $"Device connect to {ServerAddress}:{ServerPort} failed. Attempt {attempt} timed out after {_clientConnection.ConnectionTimeoutMilliseconds} ms";
-                        _logger.LogError(msgAttempt);
-                        lastException = new TimeoutException(msgAttempt);
-                    }
-                    catch (Exception ex)
-                    {
-                        lastException = ex;
-                    }
-
-                    tcpClient?.Dispose();
-
-                    if (attempt < maxAttempts)
-                    {
-                        await Task.Delay(_clientConnection.ConnectRetryIntervalMilliseconds, cancellationToken).ConfigureAwait(false);
-                    }
+                    return;
                 }
 
-                string msgConnect = $"Device connect to {ServerAddress}:{ServerPort} failed. Unable to connect {maxAttempts} attempt(s)";
-                _logger.LogError(msgConnect);
-                throw new InvalidOperationException(msgConnect, lastException);
+                State = ModbusClientState.Connecting;
+                Exception? lastException = null;
+                // Number of attempts = initial attempt + retries.
+                int maxAttempts = _clientConnection.ConnectRetryCount + 1;
+
+                try
+                {
+                    for (int attempt = 1; attempt <= maxAttempts; attempt++)
+                    {
+                        TcpClient? tcpClient = null;
+
+                        try
+                        {
+                            // Start dispatcher before connecting
+                            _dispatcher.Start();
+                            tcpClient = new TcpClient(_clientConnection.AddressFamily);
+                            using CancellationTokenSource timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                            timeoutCts.CancelAfter(_clientConnection.ConnectionTimeoutMilliseconds);
+                            await tcpClient.ConnectAsync(ServerAddress, ServerPort, timeoutCts.Token).ConfigureAwait(false);
+                            _tcpClient = tcpClient;
+                            _master = _factory.CreateMaster(tcpClient);
+                            // NModbus Modbus-level settings
+                            if (System.Diagnostics.Debugger.IsAttached == true)
+                            {
+                                _master.Transport.ReadTimeout = 240000;
+                                _master.Transport.WriteTimeout = 240000;
+                            }
+                            else
+                            {
+                                _master.Transport.ReadTimeout = _clientConnection.OperationTimeoutMilliseconds;
+                                _master.Transport.WriteTimeout = _clientConnection.OperationTimeoutMilliseconds;
+                            }
+
+                            _master.Transport.Retries = _clientConnection.SendRetryCount;
+                            _master.Transport.WaitToRetryMilliseconds = _clientConnection.SendRetryIntervalMilliseconds;
+                            State = ModbusClientState.Connected;
+
+                            return;
+                        }
+                        catch (Exception ex) when (ex is SocketException || (ex is OperationCanceledException && cancellationToken.IsCancellationRequested == false))
+                        {
+                            string msgAttempt = $"Device connect to {ServerAddress}:{ServerPort} failed. Attempt {attempt} timed out after {_clientConnection.ConnectionTimeoutMilliseconds} ms";
+                            _logger.LogError(msgAttempt);
+                            lastException = new TimeoutException(msgAttempt);
+                        }
+                        catch (Exception ex)
+                        {
+                            lastException = ex;
+                        }
+
+                        tcpClient?.Dispose();
+
+                        if (attempt < maxAttempts)
+                        {
+                            await Task.Delay(_clientConnection.ConnectRetryIntervalMilliseconds, cancellationToken).ConfigureAwait(false);
+                        }
+                    }
+
+                    string msgConnect = $"Device connect to {ServerAddress}:{ServerPort} failed. Unable to connect {maxAttempts} attempt(s)";
+                    _logger.LogError(msgConnect);
+                    throw new InvalidOperationException(msgConnect, lastException);
+                }
+                catch (Exception)
+                {
+                    State = ModbusClientState.Faulted;
+                    RaiseCommunicationError();
+                    throw;
+                }
             }
-            catch (Exception)
+            finally
             {
-                _state = ModbusClientState.Faulted;
-                RaiseCommunicationError();
-                throw;
+                _lifecycleLock.Release();
             }
         }
 
@@ -238,20 +253,29 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// </summary>
         public async Task DisconnectAsync(CancellationToken cancellationToken = default)
         {
-            if (_state == ModbusClientState.Disconnected)
+            await _lifecycleLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            try
             {
-                return;
+                if (State == ModbusClientState.Disconnected)
+                {
+                    return;
+                }
+
+                State = ModbusClientState.Disconnecting;
+                _master?.Dispose();
+                _master = null;
+                _tcpClient?.Close();
+                _tcpClient?.Dispose();
+                _tcpClient = null;
+                await _dispatcher.StopAsync().ConfigureAwait(false);
+
+                State = ModbusClientState.Disconnected;
             }
-
-            _state = ModbusClientState.Disconnecting;
-            _master?.Dispose();
-            _master = null;
-            _tcpClient?.Close();
-            _tcpClient?.Dispose();
-            _tcpClient = null;
-            await _dispatcher.StopAsync().ConfigureAwait(false);
-
-            _state = ModbusClientState.Disconnected;
+            finally
+            {
+                _lifecycleLock.Release();
+            }
         }
 
 

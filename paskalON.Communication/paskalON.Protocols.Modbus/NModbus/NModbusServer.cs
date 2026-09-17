@@ -70,6 +70,12 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// </summary>
         private volatile ModbusServerState _state = ModbusServerState.Stopped;
 
+
+        /// <summary>
+        /// Serializes start and stop operations.
+        /// </summary>
+        private readonly SemaphoreSlim _lifecycleLock = new SemaphoreSlim(1, 1);
+
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
@@ -130,51 +136,60 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <param name="cancellationToken">The cancellation token.</param>
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
-            if (_state == ModbusServerState.Listening)
-            {
-                return;
-            }
-
-            _state = ModbusServerState.BeginListen;
+            await _lifecycleLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             try
             {
-                _listener = new TcpListener(IPAddress.Any, ListenPort);
-                _listener.Start();
-
-                _network = _factory.CreateSlaveNetwork(_listener);
-                IModbusSlave slave = _factory.CreateSlave(UnitId, _dataStore);
-                _network.AddSlave(slave);
-
-                _listenCts = new CancellationTokenSource();
-                CancellationTokenSource linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _listenCts.Token);
-
-                _listenTask = Task.Run(async () =>
+                if (_state == ModbusServerState.Listening)
                 {
-                    try
-                    {
-                        await _network.ListenAsync(linkedToken.Token).ConfigureAwait(false);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        // expected on StopAsync
-                    }
-                    catch
-                    {
-                        _state = ModbusServerState.Faulted;
-                        RaiseCommunicationError();
-                    }
-                }, linkedToken.Token);
+                    return;
+                }
 
-                _state = ModbusServerState.Listening;
-                _logger.LogInformation("Modbus server started. {Address}", _listener?.LocalEndpoint);
+                _state = ModbusServerState.BeginListen;
+
+                try
+                {
+                    _listener = new TcpListener(IPAddress.Any, ListenPort);
+                    _listener.Start();
+
+                    _network = _factory.CreateSlaveNetwork(_listener);
+                    IModbusSlave slave = _factory.CreateSlave(UnitId, _dataStore);
+                    _network.AddSlave(slave);
+
+                    _listenCts = new CancellationTokenSource();
+                    CancellationTokenSource linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _listenCts.Token);
+
+                    _listenTask = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await _network.ListenAsync(linkedToken.Token).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            // expected on StopAsync
+                        }
+                        catch
+                        {
+                            _state = ModbusServerState.Faulted;
+                            RaiseCommunicationError();
+                        }
+                    }, linkedToken.Token);
+
+                    _state = ModbusServerState.Listening;
+                    _logger.LogInformation("Modbus server started. {Address}", _listener?.LocalEndpoint);
+                }
+                catch (Exception ex)
+                {
+                    _state = ModbusServerState.Faulted;
+                    RaiseCommunicationError();
+                    _logger.LogError("Unexpected Modbus server exception occurred {Address}. {Error}", _listener?.LocalEndpoint, ex);
+                    throw;
+                }
             }
-            catch (Exception ex)
+            finally
             {
-                _state = ModbusServerState.Faulted;
-                RaiseCommunicationError();
-                _logger.LogError("Unexpected Modbus server exception occurred {Address}. {Error}", _listener?.LocalEndpoint, ex);
-                throw;
+                _lifecycleLock.Release();
             }
         }
 
@@ -185,30 +200,42 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// <param name="cancellationToken">The cancellation token.</param>        
         public async Task StopAsync(CancellationToken cancellationToken = default)
         {
-            if (_state == ModbusServerState.Stopped) return;
-
-            _state = ModbusServerState.StopListen;
-            _listenCts?.Cancel();
+            await _lifecycleLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             try
             {
-                if (_listenTask is not null)
+                if (_state == ModbusServerState.Stopped)
                 {
-                    await _listenTask.ConfigureAwait(false);
+                    return;
                 }
+
+                _state = ModbusServerState.StopListen;
+                _listenCts?.Cancel();
+
+                try
+                {
+                    if (_listenTask is not null)
+                    {
+                        await _listenTask.ConfigureAwait(false);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // expected exception when canceling
+                }
+
+                _listener?.Stop();
+                _listener = null;
+                _network = null;
+                _listenCts = null;
+                _listenTask = null;
+
+                _state = ModbusServerState.Stopped;
             }
-            catch (OperationCanceledException)
+            finally
             {
-                // expected exception when canceling
+                _lifecycleLock.Release();
             }
-
-            _listener?.Stop();
-            _listener = null;
-            _network = null;
-            _listenCts = null;
-            _listenTask = null;
-
-            _state = ModbusServerState.Stopped;
         }
 
 

@@ -46,6 +46,12 @@ namespace paskalON.Protocols.C37118
 
 
         /// <summary>
+        /// C37 server state.
+        /// </summary>
+        private volatile C37ServerState _state = C37ServerState.Idle;
+
+
+        /// <summary>
         /// Client acceptance task.
         /// </summary>
         private Task? _acceptTask;
@@ -58,7 +64,15 @@ namespace paskalON.Protocols.C37118
 
 
         /// <inheritdoc/>
-        public C37ServerState State { get; private set; } = C37ServerState.Idle;
+        private readonly SemaphoreSlim _lifecycleLock = new SemaphoreSlim(1, 1);
+
+
+        /// <inheritdoc/>
+        public C37ServerState State
+        {
+            get { return _state; }
+            private set { _state = value; }
+        }
 
 
         /// <inheritdoc/>
@@ -88,75 +102,96 @@ namespace paskalON.Protocols.C37118
 
 
         /// <inheritdoc/>
-        public Task StartAsync(CancellationToken cancellationToken = default)
+        public async Task StartAsync(CancellationToken cancellationToken = default)
         {
-            if (State != C37ServerState.Idle)
-            {
-                return Task.CompletedTask;
-            }
-
-            State = C37ServerState.Starting;
+            await _lifecycleLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             try
             {
-                _listener.Start();
-                _shutdownClientConnects = new CancellationTokenSource();
-                CancellationTokenSource linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _shutdownClientConnects.Token);
-                State = C37ServerState.Started;
-                _logger.LogInformation("C37 server started. {Address}", _listener.LocalEndpoint);
-                _acceptTask = AcceptClientsAsync(linkedToken.Token);
-            }
-            catch (Exception ex)
-            {
-                State = C37ServerState.Idle;
-                RaiseCommunicationError();
-                _logger.LogError("Unexpected C37 server exception occurred {Address}. {Error}", _listener?.LocalEndpoint, ex);
-                throw;
-            }
+                if (State != C37ServerState.Idle)
+                {
+                    return;
+                }
 
-            return Task.CompletedTask;
+                State = C37ServerState.Starting;
+
+                try
+                {
+                    _listener.Start();
+                    _shutdownClientConnects = new CancellationTokenSource();
+                    CancellationTokenSource linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _shutdownClientConnects.Token);
+                    State = C37ServerState.Started;
+                    _logger.LogInformation("C37 server started. {Address}", _listener.LocalEndpoint);
+                    _acceptTask = AcceptClientsAsync(linkedToken.Token);
+                }
+                catch (Exception ex)
+                {
+                    State = C37ServerState.Idle;
+                    RaiseCommunicationError();
+                    _logger.LogError("Unexpected C37 server exception occurred {Address}. {Error}", _listener?.LocalEndpoint, ex);
+                    throw;
+                }
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
         }
 
 
         /// <inheritdoc/>
         public async Task StopAsync(CancellationToken cancellationToken = default)
         {
-            if (State == C37ServerState.Idle)
-            {
-                return;
-            }
-
-            _shutdownClientConnects.Cancel();
-            _listener.Stop();
-
-            if (_acceptTask is not null)
-            {
-                try
-                {
-                    await _acceptTask.ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                    // Expected when canceled
-                }
-                catch (SocketException)
-                {
-                    // Possible when canceled
-                }
-            }
-
-            Task[] sessions = _clientSessions.ToArray();
+            await _lifecycleLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             try
             {
-                await Task.WhenAll(sessions).WaitAsync(cancellationToken).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException) when (_shutdownClientConnects.IsCancellationRequested)
-            {
-                // Expected when active streaming sessions are canceled during shutdown.
-            }
+                if (State == C37ServerState.Idle)
+                {
+                    return;
+                }
 
-            State = C37ServerState.Idle;
+                _shutdownClientConnects.Cancel();
+                _listener.Stop();
+
+                if (_acceptTask is not null)
+                {
+                    try
+                    {
+                        await _acceptTask.ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Expected when canceled
+                    }
+                    catch (SocketException)
+                    {
+                        // Possible when canceled
+                    }
+                }
+
+                Task[] sessions;
+
+                lock (_clientSessions)
+                {
+                    sessions = _clientSessions.ToArray();
+                }
+
+                try
+                {
+                    await Task.WhenAll(sessions).WaitAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (_shutdownClientConnects.IsCancellationRequested)
+                {
+                    // Expected when active streaming sessions are canceled during shutdown.
+                }
+
+                State = C37ServerState.Idle;
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
         }
 
 

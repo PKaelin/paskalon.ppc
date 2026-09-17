@@ -36,6 +36,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
+        /// Serializes lifecycle operations for this device and its derived implementations.
+        /// </summary>
+        protected readonly SemaphoreSlim _lifecycleLock = new SemaphoreSlim(1, 1);
+
+
+        /// <summary>
         /// PCS pending state is so that the device update doesn't update a state
         /// when the device is in a state transformation.
         /// </summary>
@@ -579,6 +585,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                 if (StandbyActivePowerKiloWatts > 0)
                 {
                     _activePowerTarget = StandbyActivePowerKiloWatts * 1000;
+                    _reactivePowerTarget = 0;
+                }
+                else
+                {
+                    _activePowerTarget = 0;
+                    _reactivePowerTarget = 0;
                 }
 
                 SetPendingState(PcsState.EnteringStandby);

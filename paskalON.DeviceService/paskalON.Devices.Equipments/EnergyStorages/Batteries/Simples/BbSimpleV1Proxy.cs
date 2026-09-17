@@ -80,40 +80,20 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         /// </summary>
         public override async Task ConnectAsync()
         {
-            if (_client.State != ModbusClientState.Connected && _client.State != ModbusClientState.Connecting)
-            {
-                await _client.ConnectAsync();
-            }
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
 
             try
             {
-                await base.ConnectAsync();
-                await _client.WriteSingleRegisterAsync((ushort)BbSimpleV1Description.Register.SelectorState,
-                    (ushort)BbSimpleV1Description.State.Connected, ModbusDataType.MbInt16);
-            }
-            catch
-            {
-                lock (dataLock)
+                if (_client.State != ModbusClientState.Connected && _client.State != ModbusClientState.Connecting)
                 {
-                    RaiseCommunicationError();
-                    throw;
+                    await _client.ConnectAsync();
                 }
-            }
-        }
 
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public override async Task DisconnectAsync()
-        {
-            if (_client.State == ModbusClientState.Connected)
-            {
                 try
                 {
-                    await base.DisconnectAsync();
+                    await base.ConnectAsync();
                     await _client.WriteSingleRegisterAsync((ushort)BbSimpleV1Description.Register.SelectorState,
-                        (ushort)BbSimpleV1Description.State.Disconnected, ModbusDataType.MbInt16);
+                        (ushort)BbSimpleV1Description.State.Connected, ModbusDataType.MbInt16);
                 }
                 catch
                 {
@@ -123,6 +103,44 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                         throw;
                     }
                 }
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public override async Task DisconnectAsync()
+        {
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                if (_client.State == ModbusClientState.Connected)
+                {
+                    try
+                    {
+                        await base.DisconnectAsync();
+                        await _client.WriteSingleRegisterAsync((ushort)BbSimpleV1Description.Register.SelectorState,
+                            (ushort)BbSimpleV1Description.State.Disconnected, ModbusDataType.MbInt16);
+                    }
+                    catch
+                    {
+                        lock (dataLock)
+                        {
+                            RaiseCommunicationError();
+                            throw;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                _lifecycleLock.Release();
             }
         }
 

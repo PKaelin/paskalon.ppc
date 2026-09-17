@@ -50,42 +50,20 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         /// </summary>
         public override async Task StartAsync()
         {
-            if (_client.State != ModbusClientState.Connected && _client.State != ModbusClientState.Connecting)
-            {
-                await _client.ConnectAsync();
-            }
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
 
             try
             {
-                await base.StartAsync();
-                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState,
-                    (ushort)PcsSimpleV1Description.State.On, ModbusDataType.MbInt16);
-            }
-            catch
-            {
-                lock (dataLock)
+                if (_client.State != ModbusClientState.Connected && _client.State != ModbusClientState.Connecting)
                 {
-                    RaiseCommunicationError();
-                    throw;
+                    await _client.ConnectAsync();
                 }
-            }
-        }
 
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public override async Task StopAsync()
-        {
-            if (_client.State == ModbusClientState.Connected)
-            {
                 try
                 {
-                    await base.StopAsync();
-                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, 0, ModbusDataType.MbInt16);
-                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, 0, ModbusDataType.MbInt16);
+                    await base.StartAsync();
                     await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState,
-                        (ushort)PcsSimpleV1Description.State.Off, ModbusDataType.MbInt16);
+                        (ushort)PcsSimpleV1Description.State.On, ModbusDataType.MbInt16);
                 }
                 catch
                 {
@@ -95,6 +73,46 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                         throw;
                     }
                 }
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
+        }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public override async Task StopAsync()
+        {
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                if (_client.State == ModbusClientState.Connected)
+                {
+                    try
+                    {
+                        await base.StopAsync();
+                        await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, 0, ModbusDataType.MbInt16);
+                        await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, 0, ModbusDataType.MbInt16);
+                        await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState,
+                            (ushort)PcsSimpleV1Description.State.Off, ModbusDataType.MbInt16);
+                    }
+                    catch
+                    {
+                        lock (dataLock)
+                        {
+                            RaiseCommunicationError();
+                            throw;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                _lifecycleLock.Release();
             }
         }
 
@@ -121,6 +139,9 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                         await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, StandbyActivePowerKiloWatts,
                             ModbusDataType.MbInt16, 2);
                     }
+
+                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, 0,
+                            ModbusDataType.MbInt16, 2, ModbusScale.Downscale1000);
 
                     await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState,
                         (ushort)PcsSimpleV1Description.State.Standby, ModbusDataType.MbInt16);

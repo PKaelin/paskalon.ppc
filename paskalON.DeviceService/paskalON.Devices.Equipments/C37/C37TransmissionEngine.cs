@@ -109,7 +109,10 @@ namespace paskalON.Devices.Equipments.C37
         /// </summary>        
         public async Task StartStreaming(CancellationToken stoppingToken)
         {
-            await _client.StartStreamingAsync(stoppingToken);
+            if (_client.State != C37ClientState.Connected)
+            {
+                await _client.StartStreamingAsync(stoppingToken).ConfigureAwait(false);
+            }
         }
 
 

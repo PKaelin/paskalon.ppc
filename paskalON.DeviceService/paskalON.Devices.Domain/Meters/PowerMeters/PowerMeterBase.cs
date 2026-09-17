@@ -40,6 +40,12 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
 
 
         /// <summary>
+        /// Serializes lifecycle operations for this device and its derived implementations.
+        /// </summary>
+        protected readonly SemaphoreSlim _lifecycleLock = new SemaphoreSlim(1, 1);
+
+
+        /// <summary>
         /// Event when the Power Meter state <see cref="PowerMeterStateChangedEventArgs"/> changes.
         /// </summary>
         public event EventHandler<PowerMeterStateChangedEventArgs>? StateChanged;
@@ -64,8 +70,26 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// </summary>
         public PowerMeterState State
         {
-            get;
-            set { if (field != value) { field = value; SetState(value); } }
+            get { lock (dataLock) { return field; } }
+            set
+            {
+                bool changed;
+
+                lock (dataLock)
+                {
+                    changed = field != value;
+
+                    if (changed)
+                    {
+                        field = value;
+                    }
+                }
+
+                if (changed)
+                {
+                    SetState(value);
+                }
+            }
         }
 
 

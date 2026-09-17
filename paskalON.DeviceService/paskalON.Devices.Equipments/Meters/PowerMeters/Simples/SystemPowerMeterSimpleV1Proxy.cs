@@ -38,13 +38,22 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
         /// </summary>
         public override async Task ConnectAsync()
         {
-            if (_client.State != C37ClientState.Connected || _client.State != C37ClientState.Connecting)
-            {
-                await _client.StartStreamingAsync();
-            }
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
 
-            await base.ConnectAsync();
-            await _client.SendCommandAsync(C37CommandType.TurnOnTransmission);
+            try
+            {
+                if (_client.State != C37ClientState.Connected && _client.State != C37ClientState.Connecting)
+                {
+                    await _client.StartStreamingAsync();
+                }
+
+                await base.ConnectAsync();
+                await _client.SendCommandAsync(C37CommandType.TurnOnTransmission);
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
         }
 
 
@@ -53,8 +62,17 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
         /// </summary>
         public override async Task DisconnectAsync()
         {
-            await base.DisconnectAsync();
-            await _client.SendCommandAsync(C37CommandType.TurnOffTransmission);
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                await base.DisconnectAsync();
+                await _client.SendCommandAsync(C37CommandType.TurnOffTransmission);
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
         }
 
 

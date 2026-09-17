@@ -37,6 +37,12 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
 
 
         /// <summary>
+        /// Serializes lifecycle operations for this device and its derived implementations.
+        /// </summary>
+        protected readonly SemaphoreSlim _lifecycleLock = new SemaphoreSlim(1, 1);
+
+
+        /// <summary>
         /// Battery bank pending state is so that the device update doesn't update a state
         /// when the device is in a state transformation.
         /// </summary>
@@ -79,8 +85,26 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// </summary>
         public BatteryBankState State
         {
-            get;
-            set { if (field != value) { field = value; SetState(value); } }
+            get { lock (dataLock) { return field; } }
+            set
+            {
+                bool changed;
+
+                lock (dataLock)
+                {
+                    changed = field != value;
+
+                    if (changed)
+                    {
+                        field = value;
+                    }
+                }
+
+                if (changed)
+                {
+                    SetState(value);
+                }
+            }
         }
 
 
@@ -226,9 +250,6 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// The absolute maximum temperature the battery can operate at.
         /// </summary>
         public double AbsoluteMaximumTemperature { get => _config.BatteryBankDeviceConfig.AbsoluteMaximumTemperature; }
-
-
-
 
 
         /// <summary>

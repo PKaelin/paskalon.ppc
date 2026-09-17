@@ -42,13 +42,22 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
         /// </summary>
         public override async Task StartAsync()
         {
-            if (_client.State != ModbusClientState.Connected && _client.State != ModbusClientState.Connecting)
-            {
-                await _client.ConnectAsync();
-            }
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
 
-            await base.StartAsync();
-            await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 1, ModbusDataType.MbInt16);
+            try
+            {
+                if (_client.State != ModbusClientState.Connected && _client.State != ModbusClientState.Connecting)
+                {
+                    await _client.ConnectAsync();
+                }
+
+                await base.StartAsync();
+                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 1, ModbusDataType.MbInt16);
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
         }
 
 
@@ -57,10 +66,19 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
         /// </summary>
         public override async Task StopAsync()
         {
-            if (_client.State == ModbusClientState.Connected)
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
+
+            try
             {
-                await base.StopAsync();
-                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 0, ModbusDataType.MbInt16);
+                if (_client.State == ModbusClientState.Connected)
+                {
+                    await base.StopAsync();
+                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 0, ModbusDataType.MbInt16);
+                }
+            }
+            finally
+            {
+                _lifecycleLock.Release();
             }
         }
 

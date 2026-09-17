@@ -23,6 +23,18 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
     public abstract class GenericModbusDeviceBase : DerDeviceBase, IGenericModbusDevice, INotifyPropertyChanged
     {
         /// <summary>
+        /// Serializes lifecycle operations.
+        /// </summary>
+        protected readonly SemaphoreSlim _lifecycleLock = new SemaphoreSlim(1, 1);
+
+
+        /// <summary>
+        /// Protects state and communication properties.
+        /// </summary>
+        protected readonly object dataLock = new();
+
+
+        /// <summary>
         /// Generic Modbus base configuration.
         /// </summary>
         /// <remarks>
@@ -55,8 +67,26 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// </summary>
         public GenericModbusDeviceState State
         {
-            get;
-            set { if (field != value) { field = value; SetState(value); } }
+            get { lock (dataLock) { return field; } }
+            set
+            {
+                bool changed;
+
+                lock (dataLock)
+                {
+                    changed = field != value;
+
+                    if (changed)
+                    {
+                        field = value;
+                    }
+                }
+
+                if (changed)
+                {
+                    SetState(value);
+                }
+            }
         }
 
 
@@ -117,8 +147,17 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// </summary>
         public virtual async Task ConnectAsync()
         {
-            _logger.LogInformation("{Name} connect requested.", Name);
-            State = GenericModbusDeviceState.Connecting;
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                _logger.LogInformation("{Name} connect requested.", Name);
+                State = GenericModbusDeviceState.Connecting;
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
         }
 
 
@@ -127,8 +166,17 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         /// </summary>
         public virtual async Task DisconnectAsync()
         {
-            _logger.LogInformation("{Name} disconnect requested.", Name);
-            State = GenericModbusDeviceState.Disconnecting;
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                _logger.LogInformation("{Name} disconnect requested.", Name);
+                State = GenericModbusDeviceState.Disconnecting;
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
         }
 
 

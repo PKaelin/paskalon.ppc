@@ -31,6 +31,18 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
 
 
         /// <summary>
+        /// Serializes lifecycle operations.
+        /// </summary>
+        protected readonly SemaphoreSlim _lifecycleLock = new SemaphoreSlim(1, 1);
+
+
+        /// <summary>
+        /// Protects state and communication properties.
+        /// </summary>
+        protected readonly object dataLock = new();
+
+
+        /// <summary>
         /// Event when the solar panel state <see cref="SolarPanelStateChangedEventArgs"/> changes.
         /// </summary>
         public event EventHandler<SolarPanelStateChangedEventArgs>? StateChanged;
@@ -62,8 +74,26 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         {
             // At this point there is no communication with solar panels but we might with smart solar panels in the future.
             // Default value will always be false.
-            get;
-            set { if (field != value) { field = value; SetState(value); } }
+            get { lock (dataLock) { return field; } }
+            set
+            {
+                bool changed;
+
+                lock (dataLock)
+                {
+                    changed = field != value;
+
+                    if (changed)
+                    {
+                        field = value;
+                    }
+                }
+
+                if (changed)
+                {
+                    SetState(value);
+                }
+            }
         }
 
 
@@ -161,8 +191,17 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// </summary>
         public virtual async Task ConnectAsync()
         {
-            _logger.LogInformation("{Name} connect requested.", Name);
-            // We dont communicate at this point.
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                _logger.LogInformation("{Name} connect requested.", Name);
+                // We dont communicate at this point.
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
         }
 
 
@@ -171,8 +210,17 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
         /// </summary>
         public virtual async Task DisconnectAsync()
         {
-            _logger.LogInformation("{Name} disconnect requested.", Name);
-            // We dont communicate at this point.
+            await _lifecycleLock.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                _logger.LogInformation("{Name} disconnect requested.", Name);
+                // We dont communicate at this point.
+            }
+            finally
+            {
+                _lifecycleLock.Release();
+            }
         }
 
 
