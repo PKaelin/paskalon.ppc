@@ -32,6 +32,7 @@ namespace paskalON.Devices.Application
 
             DerDto dto = new DerDto
             {
+                Name = der.Name,
                 SystemPowerMeters = der.SystemPowerMeters.Select(MapSystemPowerMeter).ToList(),
                 AuxiliaryPowerMeters = der.AuxiliaryPowerMeters.Select(MapAuxiliaryPowerMeter).ToList(),
                 ExternalPowerMeters = der.ExternalPowerMeters.Select(MapExternalPowerMeter).ToList()
@@ -50,7 +51,7 @@ namespace paskalON.Devices.Application
         {
             ArgumentNullException.ThrowIfNull(group);
 
-            return new DerGroupDto { DerCircuits = group.DerCircuits.Select(MapDerCircuit).ToList() };
+            return new DerGroupDto { Name = group.Name, DerCircuits = group.DerCircuits.Select(MapDerCircuit).ToList() };
         }
 
         /// <summary>
@@ -62,6 +63,7 @@ namespace paskalON.Devices.Application
 
             return new DerCircuitDto
             {
+                Name = circuit.Name,
                 DerUnits = circuit.DerUnits.Select(MapDerUnit).ToList(),
                 CircuitPowerMeter = circuit.CircuitPowerMeter is null ? null : MapCircuitPowerMeter(circuit.CircuitPowerMeter)
             };
@@ -93,6 +95,7 @@ namespace paskalON.Devices.Application
 
             DerBatteryStorageUnitDto dto = new DerBatteryStorageUnitDto
             {
+                Name = unit.Name,
                 PowerConversionSystem = MapPowerConversionSystem(unit.PowerConversionSystem ?? throw new InvalidOperationException("Battery storage unit has no power conversion system.")),
                 IncludeBatteryInOperations = unit.IncludeBatteryInOperations,
                 IsInMaintenanceMode = unit.IsInMaintenanceMode,
@@ -112,6 +115,7 @@ namespace paskalON.Devices.Application
 
             return new DerSolarUnitDto
             {
+                Name = unit.Name,
                 PowerConversionSystem = MapPowerConversionSystem(unit.PowerConversionSystem ?? throw new InvalidOperationException("Solar unit has no power conversion system.")),
                 IsInMaintenanceMode = unit.IsInMaintenanceMode,
                 SolarPanels = unit.SolarPanels.Select(MapSolarPanel).ToList(),

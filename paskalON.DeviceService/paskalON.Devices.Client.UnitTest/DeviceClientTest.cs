@@ -83,7 +83,7 @@ namespace paskalON.Devices.Client.UnitTest
         [TestMethod]
         public async Task DeviceClientInitializeEmptyDerTest()
         {
-            DerDto der = new DerDto();
+            DerDto der = new DerDto { Name = "Der" };
             _deviceServerMock.Setup(x => x.GetDer()).ReturnsAsync(der);
             DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
 
@@ -113,7 +113,7 @@ namespace paskalON.Devices.Client.UnitTest
         [TestMethod]
         public async Task DeviceClientInitializeSubscribesToConfiguredTopicsTest()
         {
-            DerDto der = new DerDto();
+            DerDto der = new DerDto { Name = "Der" };
             _deviceServerMock.Setup(x => x.GetDer()).ReturnsAsync(der);
             _subscriberTopic = CreateSubscriberTopicWithTopics();
             DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
@@ -127,7 +127,7 @@ namespace paskalON.Devices.Client.UnitTest
         [TestMethod]
         public async Task DeviceClientInitializeWithoutConfiguredTopicsTest()
         {
-            DerDto der = new DerDto();
+            DerDto der = new DerDto { Name = "Der" };
             _deviceServerMock.Setup(x => x.GetDer()).ReturnsAsync(der);
             DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
 
@@ -219,10 +219,10 @@ namespace paskalON.Devices.Client.UnitTest
             PcsDefinitionDto pcsDef1 = new PcsDefinitionDto { DeviceId = 1, Name = "PCS1", TargetAddress = "localhost", TargetPort = 111 };
             PcsDto pcs1 = new PcsDto(pcsDef1);
             // Structure
-            DerBatteryStorageUnitDto unit1 = new DerBatteryStorageUnitDto { PowerConversionSystem = pcs1, BatteryBanks = new List<BbDto> { bb1, bb2 } };
-            DerCircuitDto circuit1 = new DerCircuitDto { DerUnits = new List<DerUnitDto> { unit1 } };
-            DerGroupDto group1 = new DerGroupDto { DerCircuits = new List<DerCircuitDto> { circuit1 } };
-            DerDto der = new DerDto { DerGroups = new List<DerGroupDto> { group1 } };
+            DerBatteryStorageUnitDto unit1 = new DerBatteryStorageUnitDto { Name = "Unit", PowerConversionSystem = pcs1, BatteryBanks = new List<BbDto> { bb1, bb2 } };
+            DerCircuitDto circuit1 = new DerCircuitDto { Name = "Circuit", DerUnits = new List<DerUnitDto> { unit1 } };
+            DerGroupDto group1 = new DerGroupDto { Name = "Group", DerCircuits = new List<DerCircuitDto> { circuit1 } };
+            DerDto der = new DerDto { Name = "Der", DerGroups = new List<DerGroupDto> { group1 } };
 
             return der;
         }
@@ -242,11 +242,11 @@ namespace paskalON.Devices.Client.UnitTest
             PcsDefinitionDto pcsDef2 = new PcsDefinitionDto { DeviceId = 2, Name = "PCS2", TargetAddress = "localhost", TargetPort = 111 };
             PcsDto pcs2 = new PcsDto(pcsDef2);
             // Structure
-            DerSolarUnitDto unit1 = new DerSolarUnitDto { PowerConversionSystem = pcs1, SolarPanels = new List<PvDto> { pv1, pv2 } };
-            DerSolarUnitDto unit2 = new DerSolarUnitDto { PowerConversionSystem = pcs2, SolarPanels = new List<PvDto> { pv3 } };
-            DerCircuitDto circuit1 = new DerCircuitDto { DerUnits = new List<DerUnitDto> { unit1, unit2 } };
-            DerGroupDto group1 = new DerGroupDto { DerCircuits = new List<DerCircuitDto> { circuit1 } };
-            DerDto der = new DerDto { DerGroups = new List<DerGroupDto> { group1 } };
+            DerSolarUnitDto unit1 = new DerSolarUnitDto { Name = "Unit1", PowerConversionSystem = pcs1, SolarPanels = new List<PvDto> { pv1, pv2 } };
+            DerSolarUnitDto unit2 = new DerSolarUnitDto { Name = "Unit2", PowerConversionSystem = pcs2, SolarPanels = new List<PvDto> { pv3 } };
+            DerCircuitDto circuit1 = new DerCircuitDto { Name = "Circuit", DerUnits = new List<DerUnitDto> { unit1, unit2 } };
+            DerGroupDto group1 = new DerGroupDto { Name = "Group", DerCircuits = new List<DerCircuitDto> { circuit1 } };
+            DerDto der = new DerDto { Name = "Der", DerGroups = new List<DerGroupDto> { group1 } };
 
             return der;
         }
@@ -266,10 +266,11 @@ namespace paskalON.Devices.Client.UnitTest
             PmCircuitDefinitionDto pmCircDef1 = new PmCircuitDefinitionDto { DeviceId = 1, Name = "CircPm1", TargetAddress = "localhost", TargetPort = 111 };
             PmCircuitDto pmCirc1 = new PmCircuitDto(pmCircDef1);
             // Structure
-            DerCircuitDto circuit1 = new DerCircuitDto { CircuitPowerMeter = pmCirc1 };
-            DerGroupDto group1 = new DerGroupDto { DerCircuits = new List<DerCircuitDto> { circuit1 } };
+            DerCircuitDto circuit1 = new DerCircuitDto { Name = "Circuit", CircuitPowerMeter = pmCirc1 };
+            DerGroupDto group1 = new DerGroupDto { Name = "Group", DerCircuits = new List<DerCircuitDto> { circuit1 } };
             DerDto der = new DerDto
             {
+                Name = "Der",
                 DerGroups = new List<DerGroupDto> { group1 },
                 SystemPowerMeters = new List<PmSystemDto> { pmSys1 },
                 ExternalPowerMeters = new List<PmExternalDto> { pmEx1, pmEx2 },

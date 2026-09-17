@@ -8,6 +8,12 @@ namespace paskalON.Devices.Dto.Ders
     public record DerCircuitDto
     {
         /// <summary>
+        /// Name of the Distributed Energy Resource (DER) Data Transfer Object (DTO.
+        /// </summary>
+        public required string Name { get; set; }
+
+
+        /// <summary>
         /// List of DER units.
         /// </summary>
         public List<DerUnitDto> DerUnits { get; set; } = new List<DerUnitDto>();

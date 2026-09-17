@@ -25,6 +25,7 @@ namespace paskalON.Devices.Application.UnitTest
             DerDto result = _mapper.MapDer(der);
 
             Assert.IsNotNull(result);
+            Assert.AreEqual(config.Name, result.Name);
             Assert.HasCount(0, result.DerGroups);
             Assert.HasCount(0, result.SystemPowerMeters);
             Assert.HasCount(0, result.AuxiliaryPowerMeters);
@@ -49,6 +50,7 @@ namespace paskalON.Devices.Application.UnitTest
             DerGroupDto result = _mapper.MapDerGroup(group);
 
             Assert.IsNotNull(result);
+            Assert.AreEqual(config.Name, result.Name);
             Assert.HasCount(0, result.DerCircuits);
         }
 
@@ -72,6 +74,7 @@ namespace paskalON.Devices.Application.UnitTest
             DerCircuitDto result = _mapper.MapDerCircuit(circuit);
 
             Assert.IsNotNull(result);
+            Assert.AreEqual(config.Name, result.Name);
             Assert.HasCount(0, result.DerUnits);
             Assert.IsNull(result.CircuitPowerMeter);
         }

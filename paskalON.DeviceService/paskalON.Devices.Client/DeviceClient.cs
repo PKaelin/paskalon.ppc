@@ -3,7 +3,6 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
-using paskalON.Devices.Application;
 using paskalON.Devices.Client.Registers;
 using paskalON.Devices.Client.Subscribers;
 using paskalON.Devices.Dto;
@@ -138,7 +137,7 @@ namespace paskalON.Devices.Client
         /// <summary>
         /// The DER (Distributed Energy Resource) root DTO object.
         /// </summary>
-        public DerDto Der { get; private set; } = new DerDto();
+        public DerDto Der { get; private set; } = new DerDto { Name = "Init" };
 
 
         /// <summary>
