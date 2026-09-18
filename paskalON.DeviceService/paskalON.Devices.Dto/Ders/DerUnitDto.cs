@@ -2,12 +2,17 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using System.Text.Json.Serialization;
+
 namespace paskalON.Devices.Dto.Ders
 {
     /// <summary>
     /// Data Transfer Object for DER unit.
     /// </summary>
-    public record DerUnitDto
+    [JsonPolymorphic(TypeDiscriminatorPropertyName = "unitType")]
+    [JsonDerivedType(typeof(DerBatteryStorageUnitDto), "battery")]
+    [JsonDerivedType(typeof(DerSolarUnitDto), "solar")]
+    public abstract record DerUnitDto
     {
         /// <summary>
         /// Name of the Distributed Energy Resource (DER) Data Transfer Object (DTO.
