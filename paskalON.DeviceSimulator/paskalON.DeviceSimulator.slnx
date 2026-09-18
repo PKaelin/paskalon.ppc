@@ -18,13 +18,15 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="paskalON.DeviceSimulator.Application.IntegrationTest/paskalON.DeviceSimulator.Application.IntegrationTest.csproj" />
+    <Project Path="paskalON.DeviceSimulator.Application.UnitTest/paskalON.DeviceSimulator.Application.UnitTest.csproj" />
     <Project Path="paskalON.DeviceSimulator.Equipments.IntegrationTest/paskalON.DeviceSimulator.Equipments.IntegrationTest.csproj" />
   </Folder>
-  <Project Path="paskalON.DeviceSimulator.Dto/paskalON.DeviceSimulator.Dto.csproj" Id="10994fd1-a53d-45eb-99fe-a07f67e320d9" />
+  <Project Path="paskalON.DeviceSimulator.Service.Dto/paskalON.DeviceSimulator.Service.Dto.csproj" Id="83d43ab5-9b2f-4825-9015-9b8c60e1b85e" />
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
   <Project Path="paskalON.DeviceSimulator.Application/paskalON.DeviceSimulator.Application.csproj" Id="bb58600d-de93-4223-a7a6-4e569f0a437d" />
+  <Project Path="paskalON.DeviceSimulator.Dto/paskalON.DeviceSimulator.Dto.csproj" Id="10994fd1-a53d-45eb-99fe-a07f67e320d9" />
   <Project Path="paskalON.DeviceSimulator.Equipments/paskalON.DeviceSimulator.Equipments.csproj" Id="d38956f3-660b-43c1-b238-296daf75050c" />
   <Project Path="paskalON.DeviceSimulator.Service/paskalON.DeviceSimulator.Service.csproj" />
 </Solution>
