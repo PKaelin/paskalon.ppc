@@ -23,7 +23,7 @@ namespace paskalON.DeviceSimulator.Application
     /// <summary>
     /// Device manager that hosts simulated communication endpoints.
     /// </summary>
-    public class DeviceManagerSimulator : DeviceManager, IDisposable
+    public class DeviceManagerSimulator : DeviceManager, IDeviceManagerSimulator, IDisposable
     {
         /// <summary>
         /// Logger for application logging and diagnostics.
@@ -40,18 +40,6 @@ namespace paskalON.DeviceSimulator.Application
         /// Cancellation token for simulator servers.
         /// </summary>
         private CancellationToken _cancellationToken;
-
-
-        /// <summary>
-        /// Registry of simulator Modbus stores.
-        /// </summary>
-        private readonly ISimulationStoreRegistry _stores;
-
-
-        /// <summary>
-        /// Registry of simulator C37 streams.
-        /// </summary>
-        private readonly ISimulationStreamRegistry _streams;
 
 
         /// <summary>
@@ -79,6 +67,36 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
+        /// Data lock object
+        /// </summary>
+        protected readonly object _dataLock = new();
+
+
+        /// <inheritdoc/>
+        public ISimulationStoreRegistry StoreRegisters { get; init; }
+
+
+        /// <inheritdoc/>
+        public ISimulationStreamRegistry StreamRegisters { get; init; }
+
+
+        /// <inheritdoc/>
+        public List<string> ExpandedUnits
+        {
+            get { lock (_dataLock) { return field; } }
+            set { lock (_dataLock) { field = value; } }
+        } = new List<string>();
+
+
+        /// <inheritdoc/>
+        public List<string> ExpandedDevices
+        {
+            get { lock (_dataLock) { return field; } }
+            set { lock (_dataLock) { field = value; } }
+        } = new List<string>();
+
+
+        /// <summary>
         /// Constructor of <see cref="DeviceManagerSimulator"/>.
         /// </summary>
         /// <param name="logger">Application logger.</param>
@@ -102,8 +120,8 @@ namespace paskalON.DeviceSimulator.Application
             ArgumentNullException.ThrowIfNull(simulationDevices);
 
             _logger = logger;
-            _stores = stores;
-            _streams = streams;
+            StoreRegisters = stores;
+            StreamRegisters = streams;
             _simulationFactories = simulationFactories;
             _simulationDevices = simulationDevices;
         }
@@ -148,7 +166,7 @@ namespace paskalON.DeviceSimulator.Application
             foreach (IGrouping<(string Address, int Port), IC37TransmissionEngine> engineGroup in C37TransmissionEngines
                 .GroupBy(engine => (engine.DestinationAddress.ToUpperInvariant(), engine.DestinationPort)))
             {
-                IReadOnlyList<IPmuDataSimulation> simulations = _streams.Streams
+                IReadOnlyList<IPmuDataSimulation> simulations = StreamRegisters.Streams
                     .Where(entry => entry.Key.Address.ToUpperInvariant() == engineGroup.Key.Address && entry.Key.Port == engineGroup.Key.Port)
                     .Select(entry => (IPmuDataSimulation)entry.Value)
                     .ToArray();
@@ -165,7 +183,7 @@ namespace paskalON.DeviceSimulator.Application
                     Port = engine.DestinationPort
                 };
 
-                IModbusDataStore store = _stores.Stores
+                IModbusDataStore store = StoreRegisters.Stores
                     .Where(entry => entry.Key.Address == key.Address && entry.Key.Port == key.Port)
                     .Select(entry => entry.Value)
                     .First();
@@ -181,7 +199,7 @@ namespace paskalON.DeviceSimulator.Application
         {
             foreach (PowerConversionSystemBase device in PowerConversionSystems)
             {
-                IModbusDataStore store = _stores.Stores
+                IModbusDataStore store = StoreRegisters.Stores
                     .Where(entry => entry.Key.Address == device.TargetAddress && entry.Key.Port == device.TargetPort)
                     .Select(entry => entry.Value)
                     .First();
@@ -198,7 +216,7 @@ namespace paskalON.DeviceSimulator.Application
 
             foreach (BatteryBankBase device in BatteryBanks)
             {
-                IModbusDataStore store = _stores.Stores
+                IModbusDataStore store = StoreRegisters.Stores
                     .Where(entry => entry.Key.Address == device.TargetAddress && entry.Key.Port == device.TargetPort)
                     .Select(entry => entry.Value)
                     .First();
@@ -220,7 +238,7 @@ namespace paskalON.DeviceSimulator.Application
 
             foreach (PowerMeterBase device in powerMeters.Where(device => device.TargetStreamId is not 0))
             {
-                PmuDataSimulation stream = _streams.GetOrCreate(device);
+                PmuDataSimulation stream = StreamRegisters.GetOrCreate(device);
                 ISimulatedDevice? simulation = _simulationFactories
                     .Select(factory => factory.Create(device, stream, PowerConversionSystems))
                     .FirstOrDefault(candidate => candidate is not null);
