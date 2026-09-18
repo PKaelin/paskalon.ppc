@@ -4,6 +4,22 @@
 @paskalON.DeviceSimulator.Service_HostAddress = http://localhost:45500
 
 
+#------------------------------------------------------------------------------
+# DER Controller
+#------------------------------------------------------------------------------
+GET {{paskalON.DeviceSimulator.Service_HostAddress}}/api/v1/der/getder
+
+###
+
+POST {{paskalON.DeviceSimulator.Service_HostAddress}}/api/v1/der/setexpanded
+Content-Type: application/json
+
+{
+  "ExpandedUnits": ["BMS-Unit 1"],
+  "ExpandedDevices": ["PCS Bess 1", "BB 1.1", "SM 1"]
+}
+
+###
 
 #------------------------------------------------------------------------------
 # Simulations

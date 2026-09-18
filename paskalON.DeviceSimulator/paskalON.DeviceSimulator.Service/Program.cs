@@ -3,13 +3,13 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
-using paskalON.Devices.Application;
 using paskalON.Devices.Application.Factories;
 using paskalON.Devices.Infrastructure.Storage;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.DeviceSimulator.Application;
 using paskalON.DeviceSimulator.Application.Factories;
 using paskalON.DeviceSimulator.Equipments.Simulations;
+using paskalON.DeviceSimulator.Service.Publishers;
 using paskalON.DeviceSimulator.Service.Workers;
 using paskalON.Telemetry;
 
@@ -37,6 +37,14 @@ try
     {
         throw new ApplicationException("SIMULATION_INTERVAL_MILLISECONDS is not configured as a number");
     }
+    // Get simulation publishing interval
+    string? simulationPublishingIntervalString = Environment.GetEnvironmentVariable("SIMULATION_PUBLISHING_INTERVAL_MILLISECONDS");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(simulationPublishingIntervalString);
+    if (ushort.TryParse(simulationPublishingIntervalString, out ushort simulationPublishingInterval) == false)
+    {
+        throw new ApplicationException("SIMULATION_PUBLISHING_INTERVAL_MILLISECONDS is not configured as a number");
+    }
+
 
     // Create builder
     Console.WriteLine("Building service.....");
@@ -60,13 +68,15 @@ try
     builder.Services.AddSingleton<ISimulationModelFactory, PowerConversionSystemSimulationModelFactory>();
     builder.Services.AddSingleton<IModbusDeviceFactory, SimulationModbusDeviceFactory>();
     builder.Services.AddSingleton<IC37DeviceFactory, C37DeviceFactory>();
-    builder.Services.AddSingleton<IDeviceManager, DeviceManagerSimulator>();
+    builder.Services.AddSingleton<IDeviceManagerSimulator, DeviceManagerSimulator>();
     builder.Services.AddSingleton<ModbusPollService>();
     builder.Services.AddHostedService<ModbusPollService>(provider => provider.GetRequiredService<ModbusPollService>());
 
     // Add simulations
     builder.Services.AddSingleton<SimulationWorker>();
     builder.Services.AddHostedService<SimulationWorker>(provider => provider.GetRequiredService<SimulationWorker>());
+    builder.Services.AddSingleton<SimulationPublisher>();
+    builder.Services.AddHostedService<SimulationPublisher>(provider => provider.GetRequiredService<SimulationPublisher>());
 
     // Build application
     app = builder.Build();
@@ -76,7 +86,7 @@ try
     lifetime.ApplicationStopping.Register(() => app.Logger.LogInformation("Microservice Device Simulator is stopping"));
     app.Logger.LogInformation("Application starts initializing services");
     // Create and load device manager
-    DeviceManagerSimulator deviceManager = (DeviceManagerSimulator)app.Services.GetRequiredService<IDeviceManager>();
+    DeviceManagerSimulator deviceManager = (DeviceManagerSimulator)app.Services.GetRequiredService<IDeviceManagerSimulator>();
     deviceManager.Initialize(dataRate, lifetime.ApplicationStopping);
 
     using (IServiceScope scope = app.Services.CreateScope())
@@ -92,6 +102,10 @@ try
     // Initialize Modbus poll service
     ModbusPollService pollService = app.Services.GetRequiredService<ModbusPollService>();
     pollService.Initialize(deviceManager.ModbusPollingEngines, simulationInterval);
+
+    // Initialize simulation publishing service
+    SimulationPublisher simulationPublisher = app.Services.GetRequiredService<SimulationPublisher>();
+    simulationPublisher.Initialize(simulationPublishingInterval);
 
     app.Logger.LogInformation("Application finished initializing services");
 
