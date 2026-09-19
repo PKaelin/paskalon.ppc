@@ -32,7 +32,20 @@ namespace paskalON.DeviceSimulator.Dto.Endpoints
         /// <summary>
         /// The parsed endpoint value.
         /// </summary>
-        public required object Value { get; init; }
+        public required object Value
+        {
+            get
+            {
+                return field switch
+                {
+                    double d => Math.Round(d, 3),
+                    float f => Math.Round(f, 3),
+                    decimal m => Math.Round(m, 3),
+                    _ => field // Return as is if it's an int, string, bool, etc.
+                };
+            }
+            init;
+        }
 
 
         /// <summary>

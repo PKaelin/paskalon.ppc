@@ -272,10 +272,11 @@ namespace paskalON.DeviceSimulator.Application
                 return new List<C37EndpointDto>();
             }
 
-            return device.C37Map.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Select(property => property.GetValue(device.C37Map) as string)
-                .Where(name => string.IsNullOrWhiteSpace(name) == false)
-                .Select(name => MapC37Endpoint(name!, stream)).ToList();
+            return device.C37Map.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                .Select(property => new { Property = property, Endpoint = property.GetValue(device.C37Map) as string })
+                .Where(item => string.IsNullOrWhiteSpace(item.Endpoint) == false)
+                .OrderBy(item => item.Property.Name)
+                .Select(item => MapC37Endpoint(item.Property.Name, item.Endpoint!, stream)).ToList();
         }
 
 
@@ -285,19 +286,19 @@ namespace paskalON.DeviceSimulator.Application
         /// <param name="name">Name of the endpoint.</param>
         /// <param name="stream">Stream of the endpoint.</param>
         /// <returns>C37 Endpoint</returns>
-        private C37EndpointDto MapC37Endpoint(string name, PmuDataSimulation stream)
+        private C37EndpointDto MapC37Endpoint(string name, string endpoint, PmuDataSimulation stream)
         {
-            if (stream.Analogs.TryGetValue(name, out AnalogMeasurement? analog))
+            if (stream.Analogs.TryGetValue(endpoint, out AnalogMeasurement? analog))
             {
-                return new C37EndpointDto { Name = name, SignalType = C37SignalType.Analog, Value = analog.Measurement };
+                return new C37EndpointDto { Name = name, Endpoint = endpoint, SignalType = C37SignalType.Analog, Value = analog.Measurement };
             }
 
-            if (stream.Phasors.TryGetValue(name, out PhasorMeasurement? phasor))
+            if (stream.Phasors.TryGetValue(endpoint, out PhasorMeasurement? phasor))
             {
-                return new C37EndpointDto { Name = name, SignalType = C37SignalType.Phasor, Value = phasor.Magnitude };
+                return new C37EndpointDto { Name = name, Endpoint = endpoint, SignalType = C37SignalType.Phasor, Value = phasor.Magnitude };
             }
 
-            return new C37EndpointDto { Name = name, SignalType = C37SignalType.Analog, Value = null };
+            return new C37EndpointDto { Name = name, Endpoint = endpoint, SignalType = C37SignalType.Analog, Value = null };
         }
 
 

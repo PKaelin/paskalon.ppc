@@ -12,9 +12,15 @@ namespace paskalON.DeviceSimulator.Dto.Endpoints
     public record C37EndpointDto
     {
         /// <summary>
-        /// Name of the endpoint.
+        /// Name of the property.
         /// </summary>
         public required string Name { get; init; }
+
+
+        /// <summary>
+        /// Name of the endpoint.
+        /// </summary>
+        public required string Endpoint { get; init; }
 
 
         /// <summary>
@@ -26,7 +32,11 @@ namespace paskalON.DeviceSimulator.Dto.Endpoints
         /// <summary>
         /// The endpoint value.
         /// </summary>
-        public required double? Value { get; init; }
+        public required double? Value
+        {
+            get { return field == null ? null : Math.Round((double)field, 3); }
+            init;
+        }
 
 
         /// <summary>
