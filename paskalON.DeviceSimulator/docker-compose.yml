@@ -28,7 +28,8 @@ services:
   # Device simulator service
   paskalon.devicesimulator.service:
     container_name: paskalon.devicesimulator.service
-    image: ${DOCKER_REGISTRY-}paskalondevicesimulatorservice
+    image: ${DOCKER_REGISTRY-}paskalon.devicesimulator.service
+    restart: unless-stopped
     build:
       context: .
       dockerfile: paskalON.DeviceSimulator.Service/Dockerfile
@@ -46,6 +47,35 @@ services:
       - database_connection
     networks:
       - ppc.network
+
+
+  # Device simulator web application
+  paskalon.devicesimulator.web:
+    container_name: paskalon.devicesimulator.web
+    image: paskalon.devicesimulator.web:latest
+    restart: unless-stopped
+    build:
+      context: ./paskalON.DeviceSimulator.Web
+      dockerfile: Dockerfile
+    depends_on:
+      - paskalon.devicesimulator.service
+    ports:
+      - 45502:8080
+    environment:
+      - DER_API_URL=http://paskalon.devicesimulator.service:8080
+      - APP_API_BASE_URL=/api
+      - APP_DER_ENDPOINT=/v1/der/getder
+      - APP_SET_EXPANDED_ENDPOINT=/v1/der/setexpanded
+      - APP_ENABLE_WRITE_BACK=false
+      - APP_AUTO_REFRESH_SECONDS=15
+      - APP_ENABLE_EXPANSION_SYNC=true
+      - APP_EXPANSION_SYNC_DEBOUNCE_MS=250
+      # SignalR hub for the live values (proxied through nginx incl. WebSocket upgrade)
+      - APP_ENABLE_SIGNALR=true
+      - APP_SIGNALR_HUB_URL=/hubs/der
+    networks:
+      - ppc.network
+      
 
 secrets:
   database_connection:

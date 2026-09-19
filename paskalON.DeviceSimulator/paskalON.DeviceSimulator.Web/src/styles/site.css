@@ -1,0 +1,288 @@
+/*
+ * Application specific styles.
+ *
+ * IMPORTANT: this file intentionally does NOT introduce new colours. Everything below
+ * is derived from the palette of the supplied custom stylesheet:
+ *   body      #2b3e50    primary #4e5d6c    secondary #6496be
+ *   dark      #20374c    text    #ebebeb
+ */
+
+
+/* ==========================================================================
+   LAYOUT - sticky footer
+   ========================================================================== */
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 0;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+.footer {
+    flex-shrink: 0;
+    padding: .75rem 0;
+    border-top: 1px solid rgba(255, 255, 255, .15) !important;
+    background-color: #20374c;
+    font-size: .875rem;
+}
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.navbar-brand img {
+    height: 32px;
+    width: auto;
+}
+
+.app-title {
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+
+.app-subtitle {
+    color: rgba(235, 235, 235, .75);
+    font-size: .8125rem;
+}
+
+/* The toolbar with the search box sticks under the navbar while scrolling. */
+.app-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background-color: #2b3e50;
+    border-bottom: 1px solid rgba(255, 255, 255, .15);
+    padding: .75rem 0;
+    margin-bottom: 1rem;
+}
+
+/* ==========================================================================
+   ACCORDIONS (themed with the colours of the supplied stylesheet)
+   ========================================================================== */
+
+.accordion {
+    --bs-accordion-color: #ebebeb;
+    --bs-accordion-bg: #2b3e50;
+    --bs-accordion-border-color: rgba(255, 255, 255, .15);
+    --bs-accordion-border-radius: 0;
+    --bs-accordion-inner-border-radius: 0;
+    --bs-accordion-btn-color: #ebebeb;
+    --bs-accordion-btn-bg: #4e5d6c;
+    --bs-accordion-btn-padding-y: .625rem;
+    --bs-accordion-btn-padding-x: .875rem;
+    --bs-accordion-btn-focus-box-shadow: 0 0 0 .2rem rgba(100, 150, 190, .25);
+    --bs-accordion-active-color: #fff;
+    --bs-accordion-active-bg: #43505d;
+    --bs-accordion-body-padding-y: .75rem;
+    --bs-accordion-body-padding-x: .875rem;
+}
+
+.accordion-button {
+    font-weight: 700;
+}
+
+.accordion-button:not(.collapsed) {
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .15);
+}
+
+/* Bootstrap renders the chevron as a dark SVG - invert it for the dark theme. */
+.accordion-button::after,
+.accordion-button:not(.collapsed)::after {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Nesting levels: each level gets a slightly different header shade so the
+   hierarchy stays readable. All shades are tints of the theme colours. */
+.accordion-level-0 > .accordion-item > .accordion-header .accordion-button {
+    background-color: #4e5d6c;
+}
+
+.accordion-level-1 > .accordion-item > .accordion-header .accordion-button {
+    background-color: #46535f;
+}
+
+.accordion-level-2 > .accordion-item > .accordion-header .accordion-button {
+    background-color: #3e4955;
+}
+
+.accordion-level-3 > .accordion-item > .accordion-header .accordion-button {
+    background-color: #364049;
+}
+
+.accordion-level-4 > .accordion-item > .accordion-header .accordion-button,
+.accordion-level-5 > .accordion-item > .accordion-header .accordion-button {
+    background-color: #2f383f;
+}
+
+.accordion-item + .accordion-item {
+    margin-top: 2px;
+}
+
+/* Collapse transition (the accordions are driven by Vue, not by the Bootstrap
+   collapse plugin, so the animation is implemented here). */
+.collapse-enter-active,
+.collapse-leave-active {
+    transition: height .2s ease;
+    overflow: hidden;
+}
+
+.collapse-enter-from,
+.collapse-leave-to {
+    height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .collapse-enter-active,
+    .collapse-leave-active {
+        transition: none;
+    }
+}
+
+.node-type-badge {
+    font-size: .6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.node-count-badge {
+    font-size: .6875rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, .75);
+}
+
+/* ==========================================================================
+   GRIDS
+   ========================================================================== */
+
+.grid-caption {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: rgba(235, 235, 235, .75);
+    margin-bottom: .25rem;
+}
+
+.table-endpoints {
+    margin-bottom: .5rem;
+    font-size: .875rem;
+}
+
+.table-endpoints > thead > tr > th {
+    background-color: #20374c;
+    color: #fff;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    white-space: nowrap;
+}
+
+.table-endpoints > tbody > tr > td {
+    vertical-align: middle;
+}
+
+/* No column of an endpoint grid is ever wider than 600px. Long names/values wrap
+   inside the cell instead of stretching the table. */
+.table-endpoints > thead > tr > th,
+.table-endpoints > tbody > tr > td {
+    max-width: 600px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.table-endpoints .endpoint-value-input {
+    max-width: 600px;
+}
+
+.table-endpoints .col-address {
+    width: 7rem;
+}
+
+.table-endpoints .col-datatype {
+    width: 10rem;
+}
+
+.table-endpoints .col-value {
+    width: 16rem;
+    max-width: 600px;
+}
+
+.table-endpoints .col-flags {
+    width: 7rem;
+}
+
+.table-properties {
+    font-size: .875rem;
+    max-width: 42rem;
+}
+
+.table-properties th {
+    width: 14rem;
+    color: rgba(235, 235, 235, .75);
+    font-weight: 400;
+}
+
+/* Value inputs inside the grids */
+.endpoint-value-input {
+    font-family: var(--bs-font-monospace);
+    font-size: .8125rem;
+    padding: .2rem .4rem;
+}
+
+.endpoint-value-input[readonly] {
+    color: rgba(235, 235, 235, .75);
+    cursor: default;
+}
+
+.endpoint-dirty {
+    border-color: #ffc107 !important;
+}
+
+/* ==========================================================================
+   SEARCH
+   ========================================================================== */
+
+mark.search-hit {
+    background-color: #ffc107;
+    color: #212529;
+    padding: 0 .1em;
+    border-radius: 0;
+}
+
+.search-summary {
+    font-size: .8125rem;
+    color: rgba(235, 235, 235, .75);
+}
+
+/* ==========================================================================
+   MISC
+   ========================================================================== */
+
+.app-status-bar {
+    font-size: .8125rem;
+}
+
+.spinner-inline {
+    width: 1rem;
+    height: 1rem;
+    border-width: .15em;
+}

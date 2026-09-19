@@ -12,3 +12,18 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  paskalon.devicesimulator.web:
+    build:
+      target: dev
+    ports: !override
+      - 45502:5173
+    environment:
+      - VITE_USE_POLLING=true
+    volumes:
+      - ./paskalON.DeviceSimulator.Web:/app
+      - paskalON.DeviceSimulator.web.nodemodules:/app/node_modules
+
+volumes:
+  paskalON.DeviceSimulator.web.nodemodules:
+    name: paskalON.DeviceSimulator.web.nodemodules

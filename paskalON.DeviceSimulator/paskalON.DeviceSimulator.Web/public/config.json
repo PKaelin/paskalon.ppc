@@ -1,0 +1,13 @@
+{
+  "apiBaseUrl": "/api",
+  "derEndpoint": "/v1/der/getder",
+  "setExpandedEndpoint": "/v1/der/setexpanded",
+  "enableExpansionSync": true,
+  "expansionSyncDebounceMs": 250,
+  "enableSignalR": true,
+  "signalRHubUrl": "/hubs/der",
+  "enableWriteBack": false,
+  "writeBackEndpoint": "/v1/der/setendpointvalue",
+  "autoRefreshSeconds": 0,
+  "pascalCaseApi": false
+}

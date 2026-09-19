@@ -1,0 +1,31 @@
+{
+  "name": "paskalon.devicesimulator.web",
+  "displayName": "paskalON.DeviceSimulator.Web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --build --force && vite build",
+    "preview": "vite preview --port 5173",
+    "type-check": "vue-tsc --build --force",
+    "mock-api": "node ../../mock-api/server.mjs"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^10.0.11",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/bootstrap": "^5.2.10",
+    "@types/node": "^22.20.3",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.7.3",
+    "vite": "^6.0.7",
+    "vue-tsc": "^2.2.0"
+  }
+}

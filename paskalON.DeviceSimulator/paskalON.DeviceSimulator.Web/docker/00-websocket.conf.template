@@ -1,0 +1,6 @@
+# Loaded into the http context (/etc/nginx/conf.d/*.conf is included there).
+# Required so the SignalR WebSocket upgrade is forwarded correctly.
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
