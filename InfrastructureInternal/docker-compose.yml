@@ -180,11 +180,17 @@ services:
 # Volumes for the services
 volumes:
   paskalon.pgadmin:
+    name: paskalon.pgadmin
   paskalon.redis:
-  paskalon.loki:  
+    name: paskalon.redis
+  paskalon.loki:
+    name: paskalon.loki
   paskalon.indluxdb:
+    name: paskalon.indluxdb
   paskalon.tempo:
+    name: paskalon.tempo
   paskalon.grafana:
+    name: paskalon.grafana
 
 
 # Secrets have to be changed in QAT/PRD according to ./secrets/README.md
