@@ -6,6 +6,7 @@ using paskalON.Dataface.Modbus;
 using paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Maths.Randoms;
+using paskalON.PhysicalUnits.Percentages;
 using paskalON.Protocols.Modbus.Stores;
 using System.Diagnostics;
 
@@ -72,12 +73,15 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries.Simples
             _electricalWalker = new RandomWalker<float>(500, 1, 100, 900, 50);
             // Start of with 100% preferred maximum
             double preferredStateOfCharge = 100;
-            double absoluteStateOfCharge = device.PreferredMinimumStateOfCharge + (preferredStateOfCharge / device.AbsoluteMaximumStateOfCharge) *
-                    (device.PreferredMaximumStateOfCharge - device.PreferredMinimumStateOfCharge);
-            UsableStateOfCharge = (absoluteStateOfCharge - device.UsableMinimumStateOfCharge) /
-                (device.UsableMaximumStateOfCharge - device.UsableMinimumStateOfCharge) * device.AbsoluteMaximumStateOfCharge;
-            UsableCapacity = device.NameplateCapacity * (device.UsableMaximumStateOfCharge - device.UsableMinimumStateOfCharge) /
-                (device.AbsoluteMaximumStateOfCharge - device.AbsoluteMinimumStateOfCharge);
+
+            double absoluteStateOfCharge = StateOfChargeCalculator.GetAbsoluteStateOfChargeFromPreferred(preferredStateOfCharge, device.PreferredMinimumStateOfCharge,
+                device.PreferredMaximumStateOfCharge, device.AbsoluteMaximumStateOfCharge);
+
+            UsableStateOfCharge = StateOfChargeCalculator.GetUsableStateOfChargeFromAbsolute(absoluteStateOfCharge, device.UsableMinimumStateOfCharge,
+                device.UsableMaximumStateOfCharge, device.AbsoluteMaximumStateOfCharge);
+
+            UsableCapacity = StateOfChargeCalculator.GetUsableCapacity(device.NameplateCapacity, device.UsableMinimumStateOfCharge, device.UsableMaximumStateOfCharge,
+                device.AbsoluteMinimumStateOfCharge, device.AbsoluteMaximumStateOfCharge);
         }
 
 

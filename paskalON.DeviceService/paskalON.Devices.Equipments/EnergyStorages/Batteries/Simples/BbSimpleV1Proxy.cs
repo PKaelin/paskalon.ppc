@@ -8,6 +8,7 @@ using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
+using paskalON.PhysicalUnits.Percentages;
 using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
 
@@ -46,10 +47,11 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                     }
                     else
                     {
-
                         UsableStateOfCharge = usableSoc;
-                        AbsoluteStateOfCharge = UsableMinimumStateOfCharge + usableSoc * (UsableMaximumStateOfCharge - UsableMinimumStateOfCharge) / AbsoluteMaximumStateOfCharge;
-                        StateOfCharge = (AbsoluteStateOfCharge - PreferredMinimumStateOfCharge) / (PreferredMaximumStateOfCharge - PreferredMinimumStateOfCharge) * AbsoluteMaximumStateOfCharge;
+                        AbsoluteStateOfCharge = StateOfChargeCalculator.GetAbsoluteStateOfChargeFromUsable(usableSoc, UsableMinimumStateOfCharge,
+                            UsableMaximumStateOfCharge, AbsoluteMaximumStateOfCharge);
+                        StateOfCharge = StateOfChargeCalculator.GetPreferredStateOfChargeFromAbsolute(AbsoluteStateOfCharge, PreferredMinimumStateOfCharge,
+                            PreferredMaximumStateOfCharge, AbsoluteMaximumStateOfCharge);
                     }
                 }
             }
