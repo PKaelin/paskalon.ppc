@@ -19,11 +19,57 @@ namespace paskalON.PhysicalUnits.UnitTest.Percentages
         [DataRow(133.33, 20, 80, 100, 100)]
         [DataRow(-50, 20, 80, 100, -10)]
         [DataRow(150, 20, 80, 100, 110)]
-        public void GetAbsoluteStateOfChargeTest(double preferredSoc, double preferredMinimumSoc, double preferredMaximumSoc, double absoluteMaximumSoc, double expected)
+        public void GetAbsoluteStateOfChargeFromPreferredTest(double preferredSoc, double preferredMinimumSoc, double preferredMaximumSoc,
+            double absoluteMaximumSoc, double expected)
         {
-            double result = StateOfCharge.GetAbsoluteStateOfCharge(preferredSoc, preferredMinimumSoc, preferredMaximumSoc, absoluteMaximumSoc);
+            double result = StateOfChargeCalculator.GetAbsoluteStateOfChargeFromPreferred(preferredSoc, preferredMinimumSoc,
+                preferredMaximumSoc, absoluteMaximumSoc);
 
             Assert.AreEqual(expected, Math.Round(result, 2));
+        }
+
+
+        [TestMethod]
+        [DataRow(null, 10, 90, 100, null)]
+        [DataRow(0.0, 10, 90, 100, 10.0)]
+        [DataRow(10.0, 10, 90, 100, 18.0)]
+        [DataRow(20.0, 10, 90, 100, 26.0)]
+        [DataRow(25.0, 10, 90, 100, 30.0)]
+        [DataRow(50.0, 10, 90, 100, 50.0)]
+        [DataRow(75.0, 10, 90, 100, 70.0)]
+        [DataRow(80.0, 10, 90, 100, 74.0)]
+        [DataRow(90.0, 10, 90, 100, 82.0)]
+        [DataRow(100.0, 10, 90, 100, 90.0)]
+        public void GetAbsoluteStateOfChargeFromUsableTest(double? usableSoc, double usableMinimumSoc, double usableMaximumSoc,
+            double absoluteMaximumSoc, double? expected)
+        {
+            double? result = StateOfChargeCalculator.GetAbsoluteStateOfChargeFromUsable(usableSoc, usableMinimumSoc,
+                usableMaximumSoc, absoluteMaximumSoc);
+
+            Assert.AreEqual(expected, result == null ? (double?)null : Math.Round((double)result, 2));
+        }
+
+
+        [TestMethod]
+        [DataRow(null, 20, 80, 100, null)]
+        [DataRow(0.0, 20, 80, 100, -33.33)]
+        [DataRow(10.0, 20, 80, 100, -16.67)]
+        [DataRow(20.0, 20, 80, 100, 0.00)]
+        [DataRow(30.0, 20, 80, 100, 16.67)]
+        [DataRow(40.0, 20, 80, 100, 33.33)]
+        [DataRow(50.0, 20, 80, 100, 50.00)]
+        [DataRow(60.0, 20, 80, 100, 66.67)]
+        [DataRow(70.0, 20, 80, 100, 83.33)]
+        [DataRow(80.0, 20, 80, 100, 100.00)]
+        [DataRow(90.0, 20, 80, 100, 116.67)]
+        [DataRow(100.0, 20, 80, 100, 133.33)]
+        public void GetPreferredStateOfChargeFromAbsoluteTest(double? absoluteSoc, double preferredMinimumStateOfCharge,
+            double preferredMaximumStateOfCharge, double absoluteMaximumStateOfCharge, double? expected)
+        {
+            double? result = StateOfChargeCalculator.GetPreferredStateOfChargeFromAbsolute(absoluteSoc, preferredMinimumStateOfCharge,
+                preferredMaximumStateOfCharge, absoluteMaximumStateOfCharge);
+
+            Assert.AreEqual(expected, result == null ? (double?)null : Math.Round((double)result, 2));
         }
 
 
@@ -39,9 +85,11 @@ namespace paskalON.PhysicalUnits.UnitTest.Percentages
         [DataRow(80, 10, 90, 100, 87.5)]
         [DataRow(90, 10, 90, 100, 100)]
         [DataRow(100, 10, 90, 100, 112.5)]
-        public void GetUsableStateOfChargeTest(double absoluteSoc, double usableMinimumSoc, double usableMaximumSoc, double absoluteMaximumSoc, double expected)
+        public void GetUsableStateOfChargeFromAbsoluteTest(double absoluteSoc, double usableMinimumSoc, double usableMaximumSoc,
+            double absoluteMaximumSoc, double expected)
         {
-            double result = StateOfCharge.GetUsableStateOfCharge(absoluteSoc, usableMinimumSoc, usableMaximumSoc, absoluteMaximumSoc);
+            double result = StateOfChargeCalculator.GetUsableStateOfChargeFromAbsolute(absoluteSoc, usableMinimumSoc,
+                usableMaximumSoc, absoluteMaximumSoc);
 
             Assert.AreEqual(expected, Math.Round(result, 2));
         }
@@ -60,10 +108,10 @@ namespace paskalON.PhysicalUnits.UnitTest.Percentages
         public void GetUsableCapacityTest(double nameplateCapacity, double usableMinimumSoc,
             double usableMaximumSoc, double absoluteMinimumSoc, double absoluteMaximumSoc, double expected)
         {
-            double result = StateOfCharge.GetUsableCapacity(nameplateCapacity, usableMinimumSoc, usableMaximumSoc, absoluteMinimumSoc, absoluteMaximumSoc);
+            double result = StateOfChargeCalculator.GetUsableCapacity(nameplateCapacity, usableMinimumSoc, usableMaximumSoc,
+                absoluteMinimumSoc, absoluteMaximumSoc);
 
             Assert.AreEqual(expected, Math.Round(result, 2));
         }
-
     }
 }
