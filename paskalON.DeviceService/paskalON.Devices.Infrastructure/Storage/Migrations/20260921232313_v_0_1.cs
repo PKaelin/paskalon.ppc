@@ -33,10 +33,12 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     InverterBusNumber = table.Column<int>(type: "integer", nullable: false),
                     AbsoluteMinimumStateOfCharge = table.Column<double>(type: "double precision", nullable: false),
                     AbsoluteMaximumStateOfCharge = table.Column<double>(type: "double precision", nullable: false),
-                    AbsoluteMinimumTemperature = table.Column<double>(type: "double precision", nullable: false),
-                    AbsoluteMaximumTemperature = table.Column<double>(type: "double precision", nullable: false),
+                    UsableMinimumStateOfCharge = table.Column<double>(type: "double precision", nullable: false),
+                    UsableMaximumStateOfCharge = table.Column<double>(type: "double precision", nullable: false),
                     PreferredMinimumStateOfCharge = table.Column<double>(type: "double precision", nullable: false),
                     PreferredMaximumStateOfCharge = table.Column<double>(type: "double precision", nullable: false),
+                    AbsoluteMinimumTemperature = table.Column<double>(type: "double precision", nullable: false),
+                    AbsoluteMaximumTemperature = table.Column<double>(type: "double precision", nullable: false),
                     PreferredMinimumTemperature = table.Column<double>(type: "double precision", nullable: false),
                     PreferredMaximumTemperature = table.Column<double>(type: "double precision", nullable: false),
                     AbsoluteMaxDischargeCurrentAmps = table.Column<double>(type: "double precision", nullable: false),
@@ -51,25 +53,22 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "C37Config",
+                name: "C37ConnectionConfig",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    Address = table.Column<string>(type: "text", nullable: false),
-                    Port = table.Column<int>(type: "integer", nullable: false),
-                    TransportLayer = table.Column<int>(type: "integer", nullable: false),
-                    StationName = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
-                    StreamId = table.Column<int>(type: "integer", nullable: false),
-                    ConfigFrameTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
-                    DataFrameTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
-                    DataFrameRetryCount = table.Column<int>(type: "integer", nullable: false)
+                    ConnectionTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    DisconnectionTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    ConnectRetryCount = table.Column<int>(type: "integer", nullable: false),
+                    ConnectRetryIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    OperationTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_C37Config", x => x.Id);
+                    table.PrimaryKey("PK_C37ConnectionConfig", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -149,19 +148,17 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    PollingIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     PollingFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     PollingFactorClass2 = table.Column<int>(type: "integer", nullable: false),
                     PollingFactorClass3 = table.Column<int>(type: "integer", nullable: false),
                     PollingFactorClass4 = table.Column<int>(type: "integer", nullable: false),
                     PollingFactorClass5 = table.Column<int>(type: "integer", nullable: false),
-                    MasterHeartBeatIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
                     IsPipeliningEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     ConnectionTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     DisconnectionTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     ConnectRetryCount = table.Column<int>(type: "integer", nullable: false),
                     ConnectRetryIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
-                    SendTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    OperationTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     SendRetryCount = table.Column<int>(type: "integer", nullable: false),
                     SendRetryIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     ServerToClientAliveIntervalSeconds = table.Column<int>(type: "integer", nullable: false),
@@ -277,7 +274,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     MetricsIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    PollingIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     DeviceIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    DeviceHeartbeatIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     DeviceFactorCore = table.Column<int>(type: "integer", nullable: false),
                     DeviceFactorDetail = table.Column<int>(type: "integer", nullable: false),
                     PublisherTopicPcsCore = table.Column<string>(type: "text", nullable: true),
@@ -320,6 +319,36 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                         name: "FK_BatteryBankDeviceCustomConfig_BatteryBankDeviceConfig_Batte~",
                         column: x => x.BatteryBankDeviceConfigId,
                         principalTable: "BatteryBankDeviceConfig",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "C37Config",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
+                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    C37ConnectionConfigId = table.Column<int>(type: "integer", nullable: false),
+                    Address = table.Column<string>(type: "text", nullable: false),
+                    Port = table.Column<int>(type: "integer", nullable: false),
+                    AddressFamily = table.Column<int>(type: "integer", nullable: false),
+                    TransportLayer = table.Column<int>(type: "integer", nullable: false),
+                    StationName = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
+                    StreamId = table.Column<int>(type: "integer", nullable: false),
+                    ConfigFrameTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    DataFrameTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    DataFrameRetryCount = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_C37Config", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_C37Config_C37ConnectionConfig_C37ConnectionConfigId",
+                        column: x => x.C37ConnectionConfigId,
+                        principalTable: "C37ConnectionConfig",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -487,7 +516,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
                     AddressFamily = table.Column<int>(type: "integer", nullable: false),
-                    StationId = table.Column<byte>(type: "smallint", nullable: false)
+                    UnitId = table.Column<byte>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -769,7 +798,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
                     AddressFamily = table.Column<int>(type: "integer", nullable: false),
-                    StationId = table.Column<byte>(type: "smallint", nullable: false),
+                    UnitId = table.Column<byte>(type: "smallint", nullable: false),
                     DerConfigId = table.Column<int>(type: "integer", nullable: false),
                     GenericModbusDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
@@ -812,7 +841,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
                     AddressFamily = table.Column<int>(type: "integer", nullable: false),
-                    StationId = table.Column<byte>(type: "smallint", nullable: false),
+                    UnitId = table.Column<byte>(type: "smallint", nullable: false),
                     DerUnitConfigId = table.Column<int>(type: "integer", nullable: false),
                     GenericModbusDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
@@ -1029,7 +1058,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
                     AddressFamily = table.Column<int>(type: "integer", nullable: false),
-                    StationId = table.Column<byte>(type: "smallint", nullable: false),
+                    UnitId = table.Column<byte>(type: "smallint", nullable: false),
                     DerConfigId = table.Column<int>(type: "integer", nullable: false),
                     AutomaticTransferSwitchDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
@@ -1072,7 +1101,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
                     AddressFamily = table.Column<int>(type: "integer", nullable: false),
-                    StationId = table.Column<byte>(type: "smallint", nullable: false),
+                    UnitId = table.Column<byte>(type: "smallint", nullable: false),
                     DerCircuitConfigId = table.Column<int>(type: "integer", nullable: false),
                     CircuitBreakerDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
@@ -1471,8 +1500,19 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 column: "BatteryBankDeviceConfigId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_C37Config_C37ConnectionConfigId",
+                table: "C37Config",
+                column: "C37ConnectionConfigId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_C37Config_Name",
                 table: "C37Config",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_C37ConnectionConfig_Name",
+                table: "C37ConnectionConfig",
                 column: "Name",
                 unique: true);
 
@@ -2199,6 +2239,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
             migrationBuilder.DropTable(
                 name: "DerCircuitConfig");
+
+            migrationBuilder.DropTable(
+                name: "C37ConnectionConfig");
 
             migrationBuilder.DropTable(
                 name: "PowerMeterMapC37Config");

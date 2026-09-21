@@ -12,7 +12,7 @@ using paskalON.Devices.Infrastructure.Storage;
 namespace paskalON.Devices.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(DeviceServiceContext))]
-    [Migration("20260901183852_v_0_1")]
+    [Migration("20260921232313_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -136,10 +136,16 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<int>("DeviceFactorDetail")
                         .HasColumnType("integer");
 
+                    b.Property<int>("DeviceHeartbeatIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<int>("DeviceIntervalMilliseconds")
                         .HasColumnType("integer");
 
                     b.Property<int>("MetricsIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PollingIntervalMilliseconds")
                         .HasColumnType("integer");
 
                     b.Property<string>("PublisherTopicAuxiliaryPowerMeterCore")
@@ -266,6 +272,12 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("AddressFamily")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("C37ConnectionConfigId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ConfigFrameTimeoutMilliseconds")
                         .HasColumnType("integer");
 
@@ -289,7 +301,31 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<int>("TransportLayer")
                         .HasColumnType("integer");
 
+                    b.HasIndex("C37ConnectionConfigId");
+
                     b.ToTable("C37Config");
+                });
+
+            modelBuilder.Entity("paskalON.Devices.Domain.Configs.C37ConnectionConfig", b =>
+                {
+                    b.HasBaseType("paskalON.Domains.NameBase");
+
+                    b.Property<int>("ConnectRetryCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ConnectRetryIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ConnectionTimeoutMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DisconnectionTimeoutMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("OperationTimeoutMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.ToTable("C37ConnectionConfig");
                 });
 
             modelBuilder.Entity("paskalON.Devices.Domain.Configs.Ders.DerCircuitConfig", b =>
@@ -555,6 +591,12 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
                     b.Property<int>("RackCount")
                         .HasColumnType("integer");
+
+                    b.Property<double>("UsableMaximumStateOfCharge")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("UsableMinimumStateOfCharge")
+                        .HasColumnType("double precision");
 
                     b.Property<bool>("ZeroCapacityOnCommLoss")
                         .HasColumnType("boolean");
@@ -1115,7 +1157,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<int>("Port")
                         .HasColumnType("integer");
 
-                    b.Property<byte>("StationId")
+                    b.Property<byte>("UnitId")
                         .HasColumnType("smallint");
 
                     b.HasIndex("ModbusConnectionConfigId");
@@ -1142,8 +1184,8 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<bool>("IsPipeliningEnabled")
                         .HasColumnType("boolean");
 
-                    b.Property<long>("MasterHeartBeatIntervalMilliseconds")
-                        .HasColumnType("bigint");
+                    b.Property<int>("OperationTimeoutMilliseconds")
+                        .HasColumnType("integer");
 
                     b.Property<int>("PollingFactorClass1")
                         .HasColumnType("integer");
@@ -1160,16 +1202,10 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<int>("PollingFactorClass5")
                         .HasColumnType("integer");
 
-                    b.Property<long>("PollingIntervalMilliseconds")
-                        .HasColumnType("bigint");
-
                     b.Property<int>("SendRetryCount")
                         .HasColumnType("integer");
 
                     b.Property<int>("SendRetryIntervalMilliseconds")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SendTimeoutMilliseconds")
                         .HasColumnType("integer");
 
                     b.Property<int>("ServerMaximumConnections")
@@ -1489,6 +1525,17 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                         .IsRequired();
 
                     b.Navigation("PowerConversionSystemDeviceConfig");
+                });
+
+            modelBuilder.Entity("paskalON.Devices.Domain.Configs.C37Config", b =>
+                {
+                    b.HasOne("paskalON.Devices.Domain.Configs.C37ConnectionConfig", "C37ConnectionConfig")
+                        .WithMany()
+                        .HasForeignKey("C37ConnectionConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("C37ConnectionConfig");
                 });
 
             modelBuilder.Entity("paskalON.Devices.Domain.Configs.Ders.DerCircuitConfig", b =>
