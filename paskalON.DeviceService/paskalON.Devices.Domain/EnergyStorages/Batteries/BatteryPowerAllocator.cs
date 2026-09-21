@@ -27,55 +27,43 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
                 return;
             }
 
-            List<(BatteryBankBase Bank, double Capacity)> available = banks
+            List<(BatteryBankBase Bank, double Weight)> available = banks
                 .Where(b => b.IsInMaintenanceMode is false &&
                     (b.State == BatteryBankState.Connected || b.State == BatteryBankState.Standby) && b.StateOfCharge.HasValue)
-                .Select(bank => (bank, Capacity: GetAvailablePower(bank, totalPower)))
-                .Where(item => item.Capacity > 0)
+                .Select(bank => (bank, Weight: bank.StateOfCharge ?? 0))
+                .Where(item => item.Weight > 0)
                 .ToList();
 
-            double totalCapacity = available.Sum(item => item.Capacity);
+            double totalWeight = available.Sum(item => item.Weight);
 
-            if (totalCapacity <= 0)
+            if (available.Count > 0)
             {
-                foreach ((BatteryBankBase bank, double capacity) in available)
+                // Allocate simple distribution. At this point do not realocated when nameplate hits one of the banks
+                foreach ((BatteryBankBase bank, double Weight) in available)
+                {
+                    // Discharge
+                    if (totalPower > 0)
+                    {
+                        bank.AllocatedActivePowerValue = Math.Min(totalPower * Weight / totalWeight, bank.NameplateMaximumDischargeRate);
+                    }
+                    // Charge
+                    else if (totalPower < 0)
+                    {
+                        bank.AllocatedActivePowerValue = Math.Max(totalPower * Weight / totalWeight, bank.NameplateMaximumChargeRate * -1);
+                    }
+                    else
+                    {
+                        bank.AllocatedActivePowerValue = 0;
+                    }
+                }
+            }
+            else
+            {
+                foreach (BatteryBankBase bank in banks)
                 {
                     bank.AllocatedActivePowerValue = 0;
                 }
-
-                return;
             }
-
-            foreach ((BatteryBankBase bank, double capacity) in available)
-            {
-                bank.AllocatedActivePowerValue = totalPower * capacity / totalCapacity;
-            }
-        }
-
-
-
-        /// <summary>
-        /// Gets the capacity of the battery bank using state of charge and nameplate definitions.
-        /// </summary>
-        /// <param name="bank">The battery bank.</param>
-        /// <param name="totalPower">The total power to allocate.</param>
-        /// <returns>The available power.</returns>
-        private double GetAvailablePower(BatteryBankBase bank, double totalPower)
-        {
-            double stateOfCharge = Math.Clamp(bank.StateOfCharge!.Value, 0, 100);
-
-            if (totalPower > 0)
-            {
-                double dischargeRange = 100 - bank.AbsoluteMinimumStateOfCharge;
-
-                return dischargeRange <= 0 ? 0 : bank.NameplateMaximumDischargeRate *
-                    Math.Clamp((stateOfCharge - bank.AbsoluteMinimumStateOfCharge) / dischargeRange, 0, 1);
-            }
-
-            double chargeRange = bank.AbsoluteMaximumStateOfCharge;
-
-            return chargeRange <= 0 ? 0 : bank.NameplateMaximumChargeRate *
-                Math.Clamp((bank.AbsoluteMaximumStateOfCharge - stateOfCharge) / chargeRange, 0, 1);
         }
     }
 }

@@ -39,12 +39,18 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// <summary>
         /// NameplateMaximumChargeRate in watts.
         /// </summary>
+        /// <remarks>
+        /// Maximum active power the battery bank can absorb while charging.
+        /// </remarks>
         public double NameplateMaximumChargeRate { get; set; }
 
 
         /// <summary>
         /// NameplateMaximumDischargeRate in watts.
         /// </summary>
+        /// <remarks>
+        /// Maximum active power that the battery bank can deliver during discharge.
+        /// </remarks>
         public double NameplateMaximumDischargeRate { get; set; }
 
 
