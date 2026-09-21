@@ -102,5 +102,22 @@ namespace paskalON.PhysicalUnits.Percentages
             return nameplateCapacity * (usableMaximumStateOfCharge - usableMinimumStateOfCharge) /
                 (absoluteMaximumStateOfCharge - absoluteMinimumStateOfCharge);
         }
+
+
+        /// <summary>
+        /// Gets the preferred capacity from the nameplate capacity.
+        /// </summary>
+        /// <param name="nameplateCapacity">The nameplate capacity.</param>
+        /// <param name="preferredMinimumStateOfCharge">Preferred minimum SOC.</param>
+        /// <param name="preferredMaximumStateOfCharge">Preferred maximum SOC.</param>
+        /// <param name="absoluteMinimumStateOfCharge">Absolute minimum SOC.</param>
+        /// <param name="absoluteMaximumStateOfCharge">Absolute maximum SOC.</param>
+        /// <returns>Returns the preferred capacity.</returns>
+        public static double GetPreferredCapacity(double nameplateCapacity, double preferredMinimumStateOfCharge,
+            double preferredMaximumStateOfCharge, double absoluteMinimumStateOfCharge, double absoluteMaximumStateOfCharge)
+        {
+            return nameplateCapacity * (preferredMaximumStateOfCharge - preferredMinimumStateOfCharge) /
+                (absoluteMaximumStateOfCharge - absoluteMinimumStateOfCharge);
+        }
     }
 }

@@ -113,5 +113,26 @@ namespace paskalON.PhysicalUnits.UnitTest.Percentages
 
             Assert.AreEqual(expected, Math.Round(result, 2));
         }
+
+
+        [TestMethod]
+        [DataRow(5000000, 20, 80, 0, 100, 3000000)]
+        [DataRow(5000000, 10, 90, 0, 100, 4000000)]
+        [DataRow(5000000, 0, 100, 0, 100, 5000000)]
+        [DataRow(1000000, 20, 80, 0, 100, 600000)]
+        [DataRow(10000000, 20, 80, 0, 100, 6000000)]
+        [DataRow(5000000, 30, 70, 0, 100, 2000000)]
+        [DataRow(5000000, 25, 75, 0, 100, 2500000)]
+        [DataRow(5000000, 40, 60, 0, 100, 1000000)]
+        [DataRow(5000000, 20, 80, 10, 90, 3750000)]
+        [DataRow(5000000, 30, 70, 10, 90, 2500_000)]
+        public void GetPreferredCapacityTest(double nameplateCapacity, double preferredMinimumSoc,
+            double preferredMaximumSoc, double absoluteMinimumSoc, double absoluteMaximumSoc, double expected)
+        {
+            double result = StateOfChargeCalculator.GetPreferredCapacity(nameplateCapacity, preferredMinimumSoc, preferredMaximumSoc,
+                absoluteMinimumSoc, absoluteMaximumSoc);
+
+            Assert.AreEqual(expected, Math.Round(result, 2));
+        }
     }
 }
