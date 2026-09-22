@@ -41,6 +41,7 @@ try
 
     app.UseAuthorization();
     app.MapControllers();
+    app.Logger.LogInformation("Application about to run");
     app.Run();
 }
 catch (Exception ex)

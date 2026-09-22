@@ -201,6 +201,7 @@ try
     app.MapControllers();
     // Connect to all devices before application starts running
     deviceManager.ConnectDevices();
+    app.Logger.LogInformation("Application about to run");
     app.Run();
 }
 catch (Exception ex)

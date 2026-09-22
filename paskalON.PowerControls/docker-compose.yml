@@ -1,0 +1,66 @@
+services:
+  # Database
+  paskalon.powercontrols.data:
+    container_name: paskalon.powercontrols.data
+    image: postgres:18.6
+    restart: unless-stopped
+    ports:
+      - 45011:5432
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/db_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_DB: devices
+    secrets:
+      - db_user
+      - db_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d devices -U $$(cat /run/secrets/db_user)"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - paskalon.powercontrols.data:/var/lib/postgresql
+    networks:
+      - ppc.network
+
+  # Power Controls Service
+  paskalon.powercontrols.service:
+    container_name: paskalon.powercontrols.service
+    image: ${DOCKER_REGISTRY-}paskalonpowercontrolsservice
+    build:
+      context: .
+      dockerfile: paskalON.PowerControls.Service/Dockerfile
+    ports:
+      - 45010:8080
+    environment:
+      - DATABASE_CONNECTION_FILE=/run/secrets/database_connection
+      - MESSAGING_CONNECTION_FILE=/run/secrets/messaging_connection
+      - TELEMETRY_LOGGING_ENDPOINT=http://collector:4317
+      - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
+      - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
+    secrets:
+      - database_connection
+      - messaging_connection
+    networks:
+      - ppc.network
+
+secrets:
+  database_connection:
+    file: ./secrets/database_connection
+  messaging_connection:
+    file: ./secrets/messaging_connection
+  db_user:
+    file: ./secrets/db_user
+  db_password:
+    file: ./secrets/db_password
+
+volumes:
+  paskalon.powercontrols.data:
+    name: paskalon.powercontrols.data
+
+networks:
+  ppc.network:
+    name: ppc.network
+    # Attachable only for development and test
+    attachable: true
