@@ -1,0 +1,6 @@
+@paskalON.PowerControls.Service_HostAddress = http://localhost:5278
+
+GET {{paskalON.PowerControls.Service_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
