@@ -39,37 +39,37 @@ namespace paskalON.ConstraintEngine.Domain
         /// </summary>
         public override void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower, bool shallLogViolations = true)
         {
-            if (_config.MaximumActivePowerKiloWatt.HasValue && activePower.KiloWatts > _config.MaximumActivePowerKiloWatt)
+            if (_config.MaximumActivePowerWatt.HasValue && activePower.Watts > _config.MaximumActivePowerWatt)
             {
                 if (shallLogViolations == true)
                 {
-                    _logger.LogWarning("{Name} active power {ActivePower} exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, activePower.KiloWatts, _config.MaximumActivePowerKiloWatt);
+                    _logger.LogWarning("{Name} active power {ActivePower} exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, activePower.Watts, _config.MaximumActivePowerWatt);
                 }
-                activePower.KiloWatts = _config.MaximumActivePowerKiloWatt.Value;
+                activePower.Watts = _config.MaximumActivePowerWatt.Value;
             }
-            else if (_config.MinimumActivePowerKiloWatt.HasValue && activePower.KiloWatts < _config.MinimumActivePowerKiloWatt)
+            else if (_config.MinimumActivePowerWatt.HasValue && activePower.Watts < _config.MinimumActivePowerWatt)
             {
                 if (shallLogViolations == true)
                 {
-                    _logger.LogWarning("{Name} active power {ActivePower} below minimum limit {MinLimit}. Clamping to minimum.", Name, activePower.KiloWatts, _config.MinimumActivePowerKiloWatt);
+                    _logger.LogWarning("{Name} active power {ActivePower} below minimum limit {MinLimit}. Clamping to minimum.", Name, activePower.Watts, _config.MinimumActivePowerWatt);
                 }
-                activePower.KiloWatts = _config.MinimumActivePowerKiloWatt.Value;
+                activePower.Watts = _config.MinimumActivePowerWatt.Value;
             }
-            if (_config.MaximumReactivePowerKiloVars.HasValue && reactivePower.KiloVoltAmperesReactive > _config.MaximumReactivePowerKiloVars)
+            if (_config.MaximumReactivePowerVars.HasValue && reactivePower.VoltAmperesReactive > _config.MaximumReactivePowerVars)
             {
                 if (shallLogViolations == true)
                 {
-                    _logger.LogWarning("{Name} reactive power {ReactivePower} exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, reactivePower.KiloVoltAmperesReactive, _config.MaximumReactivePowerKiloVars);
+                    _logger.LogWarning("{Name} reactive power {ReactivePower} exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, reactivePower.VoltAmperesReactive, _config.MaximumReactivePowerVars);
                 }
-                reactivePower.KiloVoltAmperesReactive = _config.MaximumReactivePowerKiloVars.Value;
+                reactivePower.VoltAmperesReactive = _config.MaximumReactivePowerVars.Value;
             }
-            else if (_config.MinimumReactivePowerKiloVars.HasValue && reactivePower.KiloVoltAmperesReactive < _config.MinimumReactivePowerKiloVars)
+            else if (_config.MinimumReactivePowerVars.HasValue && reactivePower.VoltAmperesReactive < _config.MinimumReactivePowerVars)
             {
                 if (shallLogViolations == true)
                 {
-                    _logger.LogWarning("{Name} reactive power {ReactivePower} below minimum limit {MinLimit}. Clamping to minimum.", Name, reactivePower.KiloVoltAmperesReactive, _config.MinimumReactivePowerKiloVars);
+                    _logger.LogWarning("{Name} reactive power {ReactivePower} below minimum limit {MinLimit}. Clamping to minimum.", Name, reactivePower.VoltAmperesReactive, _config.MinimumReactivePowerVars);
                 }
-                reactivePower.KiloVoltAmperesReactive = _config.MinimumReactivePowerKiloVars.Value;
+                reactivePower.VoltAmperesReactive = _config.MinimumReactivePowerVars.Value;
             }
         }
     }

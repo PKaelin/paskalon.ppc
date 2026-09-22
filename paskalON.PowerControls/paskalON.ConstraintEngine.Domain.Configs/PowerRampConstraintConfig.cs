@@ -9,7 +9,7 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <summary>
         /// Maximum ramp rate allowed by the constraint in active power per second.
         /// </summary>
-        public double MaximumActivePowerKiloWattRampRatePerSecond
+        public double MaximumActivePowerWattRampRatePerSecond
         {
             get;
             set
@@ -23,7 +23,7 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <summary>
         /// Maximum ramp up rate allowed by the constraint in reactive power per second.
         /// </summary>
-        public double MaximumReactivePowerKiloVarsRampRatePerSecond
+        public double MaximumReactivePowerVarsRampRatePerSecond
         {
             get;
             set

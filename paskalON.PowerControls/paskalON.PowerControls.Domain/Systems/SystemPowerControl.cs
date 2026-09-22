@@ -107,7 +107,7 @@ namespace paskalON.PowerControls.Domain.Systems
 
                 if (activePower.Watts != systemActivePowerTarget || reactivePower.VoltAmperesReactivePrecision != systemReactivePowerTarget)
                 {
-                    _logger.LogInformation("Update system power control. Active Power Kilo {ActivePower}, Reactive Power Kilo {ReactivePower}", activePower.KiloWatts, reactivePower.KiloVoltAmperesReactive);
+                    _logger.LogInformation("Update system power control. Active Power {ActivePower}, Reactive Power {ReactivePower}", activePower.Watts, reactivePower.VoltAmperesReactive);
                     _actualSystemActivePowerTarget = new ActivePower(SystemActivePowerTarget.Watts);
                     _actualSystemReactivePowerTarget = new ReactivePower(SystemReactivePowerTarget.VoltAmperesReactive);
 

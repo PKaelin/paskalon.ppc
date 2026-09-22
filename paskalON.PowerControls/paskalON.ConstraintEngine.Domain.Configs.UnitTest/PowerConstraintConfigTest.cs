@@ -14,10 +14,10 @@ namespace paskalON.ConstraintEngine.Domain.Configs.UnitTest
             {
                 ChangedBy = "Test",
                 Name = "PowerConstraintConfig",
-                MinimumActivePowerKiloWatt = 0
+                MinimumActivePowerWatt = 0
             };
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => config.MaximumActivePowerKiloWatt = -1);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => config.MaximumActivePowerWatt = -1);
         }
 
 
@@ -28,10 +28,10 @@ namespace paskalON.ConstraintEngine.Domain.Configs.UnitTest
             {
                 ChangedBy = "Test",
                 Name = "PowerConstraintConfig",
-                MaximumActivePowerKiloWatt = 0
+                MaximumActivePowerWatt = 0
             };
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => config.MinimumActivePowerKiloWatt = 1);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => config.MinimumActivePowerWatt = 1);
         }
 
 
@@ -42,14 +42,14 @@ namespace paskalON.ConstraintEngine.Domain.Configs.UnitTest
             {
                 ChangedBy = "Test",
                 Name = "PowerConstraintConfig",
-                MinimumActivePowerKiloWatt = -10,
-                MaximumActivePowerKiloWatt = 10
+                MinimumActivePowerWatt = -10,
+                MaximumActivePowerWatt = 10
             };
 
-            Assert.AreEqual(10, config.MaximumActivePowerKiloWatt);
-            Assert.AreEqual(-10, config.MinimumActivePowerKiloWatt);
-            Assert.IsNull(config.MaximumReactivePowerKiloVars);
-            Assert.IsNull(config.MinimumReactivePowerKiloVars);
+            Assert.AreEqual(10, config.MaximumActivePowerWatt);
+            Assert.AreEqual(-10, config.MinimumActivePowerWatt);
+            Assert.IsNull(config.MaximumReactivePowerVars);
+            Assert.IsNull(config.MinimumReactivePowerVars);
         }
 
 
@@ -60,10 +60,10 @@ namespace paskalON.ConstraintEngine.Domain.Configs.UnitTest
             {
                 ChangedBy = "Test",
                 Name = "PowerConstraintConfig",
-                MinimumReactivePowerKiloVars = 0
+                MinimumReactivePowerVars = 0
             };
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => config.MaximumReactivePowerKiloVars = -1);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => config.MaximumReactivePowerVars = -1);
         }
 
 
@@ -74,10 +74,10 @@ namespace paskalON.ConstraintEngine.Domain.Configs.UnitTest
             {
                 ChangedBy = "Test",
                 Name = "PowerConstraintConfig",
-                MaximumReactivePowerKiloVars = 0
+                MaximumReactivePowerVars = 0
             };
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => config.MinimumReactivePowerKiloVars = 1);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => config.MinimumReactivePowerVars = 1);
         }
 
 
@@ -88,14 +88,14 @@ namespace paskalON.ConstraintEngine.Domain.Configs.UnitTest
             {
                 ChangedBy = "Test",
                 Name = "PowerConstraintConfig",
-                MinimumReactivePowerKiloVars = -10,
-                MaximumReactivePowerKiloVars = 10
+                MinimumReactivePowerVars = -10,
+                MaximumReactivePowerVars = 10
             };
 
-            Assert.AreEqual(10, config.MaximumReactivePowerKiloVars);
-            Assert.AreEqual(-10, config.MinimumReactivePowerKiloVars);
-            Assert.IsNull(config.MaximumActivePowerKiloWatt);
-            Assert.IsNull(config.MinimumActivePowerKiloWatt);
+            Assert.AreEqual(10, config.MaximumReactivePowerVars);
+            Assert.AreEqual(-10, config.MinimumReactivePowerVars);
+            Assert.IsNull(config.MaximumActivePowerWatt);
+            Assert.IsNull(config.MinimumActivePowerWatt);
         }
     }
 }

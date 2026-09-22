@@ -81,10 +81,10 @@ namespace paskalON.PowerControls.Domain.Ders
 
             if (pc != null)
             {
-                MaximumActivePower = pc.MaximumActivePowerKiloWatt.HasValue ? ActivePower.FromKilo((double)pc.MaximumActivePowerKiloWatt) : new ActivePower(0);
-                MinimumActivePower = pc.MinimumActivePowerKiloWatt.HasValue ? ActivePower.FromKilo((double)pc.MinimumActivePowerKiloWatt) : new ActivePower(0);
-                MaximumReactivePower = pc.MaximumReactivePowerKiloVars.HasValue ? ReactivePower.FromKilo((double)pc.MaximumReactivePowerKiloVars) : new ReactivePower(0);
-                MinimumReactivePower = pc.MinimumReactivePowerKiloVars.HasValue ? ReactivePower.FromKilo((double)pc.MinimumReactivePowerKiloVars) : new ReactivePower(0);
+                MaximumActivePower = pc.MaximumActivePowerWatt.HasValue ? new ActivePower(pc.MaximumActivePowerWatt.Value) : new ActivePower(0);
+                MinimumActivePower = pc.MinimumActivePowerWatt.HasValue ? new ActivePower(pc.MinimumActivePowerWatt.Value) : new ActivePower(0);
+                MaximumReactivePower = pc.MaximumReactivePowerVars.HasValue ? new ReactivePower(pc.MaximumReactivePowerVars.Value) : new ReactivePower(0);
+                MinimumReactivePower = pc.MinimumReactivePowerVars.HasValue ? new ReactivePower(pc.MinimumReactivePowerVars.Value) : new ReactivePower(0);
             }
         }
 

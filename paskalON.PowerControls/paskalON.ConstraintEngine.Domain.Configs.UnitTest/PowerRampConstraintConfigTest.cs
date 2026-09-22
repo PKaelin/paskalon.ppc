@@ -16,7 +16,7 @@ namespace paskalON.ConstraintEngine.Domain.Configs.UnitTest
                 {
                     ChangedBy = "Test",
                     Name = "PowerRampConstraintConfig",
-                    MaximumActivePowerKiloWattRampRatePerSecond = -1
+                    MaximumActivePowerWattRampRatePerSecond = -1
                 };
             });
         }
@@ -31,7 +31,7 @@ namespace paskalON.ConstraintEngine.Domain.Configs.UnitTest
                 {
                     ChangedBy = "Test",
                     Name = "PowerRampConstraintConfig",
-                    MaximumReactivePowerKiloVarsRampRatePerSecond = -1
+                    MaximumReactivePowerVarsRampRatePerSecond = -1
                 };
             });
         }
@@ -44,12 +44,12 @@ namespace paskalON.ConstraintEngine.Domain.Configs.UnitTest
             {
                 ChangedBy = "Test",
                 Name = "PowerRampConstraintConfig",
-                MaximumActivePowerKiloWattRampRatePerSecond = 1,
-                MaximumReactivePowerKiloVarsRampRatePerSecond = 2
+                MaximumActivePowerWattRampRatePerSecond = 1,
+                MaximumReactivePowerVarsRampRatePerSecond = 2
             };
 
-            Assert.AreEqual(1, config.MaximumActivePowerKiloWattRampRatePerSecond);
-            Assert.AreEqual(2, config.MaximumReactivePowerKiloVarsRampRatePerSecond);
+            Assert.AreEqual(1, config.MaximumActivePowerWattRampRatePerSecond);
+            Assert.AreEqual(2, config.MaximumReactivePowerVarsRampRatePerSecond);
         }
     }
 }

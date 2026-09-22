@@ -51,9 +51,9 @@ namespace paskalON.PowerControls.Domain.Strategies
             }
 
             _logger.LogDebug("Active power requested: {SystemActivePower}. Active power achieved: {UnitsActivePower}",
-                systemActivePower.KiloWatts, units.Sum(t => t.TargetActivePower.KiloWatts));
+                systemActivePower.Watts, units.Sum(t => t.TargetActivePower.Watts));
             _logger.LogDebug("Reactive power requested: {SystemReactivePower}. Reactive power achieved: {UnitsReactivePower}",
-                systemReactivePower.KiloVoltAmperesReactive, units.Sum(t => t.TargetReactivePower.KiloVoltAmperesReactive));
+                systemReactivePower.VoltAmperesReactive, units.Sum(t => t.TargetReactivePower.VoltAmperesReactive));
         }
     }
 }

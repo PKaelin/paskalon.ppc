@@ -15,14 +15,14 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <remarks>
         /// This value can be the systems or units nameplate or less.
         /// </remarks>
-        public double? MaximumActivePowerKiloWatt
+        public double? MaximumActivePowerWatt
         {
             get;
             set
             {
-                if (value != null && MinimumActivePowerKiloWatt.HasValue && MinimumActivePowerKiloWatt.Value > value)
+                if (value != null && MinimumActivePowerWatt.HasValue && MinimumActivePowerWatt.Value > value)
                 {
-                    throw new ArgumentOutOfRangeException($"{nameof(MaximumActivePowerKiloWatt)} has to be bigger than {nameof(MinimumActivePowerKiloWatt)}");
+                    throw new ArgumentOutOfRangeException($"{nameof(MaximumActivePowerWatt)} has to be bigger than {nameof(MinimumActivePowerWatt)}");
                 }
 
                 field = value;
@@ -36,14 +36,14 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <remarks>
         /// This value can be the systems or units nameplate or less.
         /// </remarks>
-        public double? MinimumActivePowerKiloWatt
+        public double? MinimumActivePowerWatt
         {
             get;
             set
             {
-                if (value != null && MaximumActivePowerKiloWatt.HasValue && MaximumActivePowerKiloWatt.Value < value)
+                if (value != null && MaximumActivePowerWatt.HasValue && MaximumActivePowerWatt.Value < value)
                 {
-                    throw new ArgumentOutOfRangeException($"{nameof(MaximumActivePowerKiloWatt)} has to be smaller than {nameof(MaximumActivePowerKiloWatt)}");
+                    throw new ArgumentOutOfRangeException($"{nameof(MaximumActivePowerWatt)} has to be smaller than {nameof(MaximumActivePowerWatt)}");
                 }
 
                 field = value;
@@ -57,14 +57,14 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <remarks>
         /// This value can be the systems or units nameplate or less.
         /// </remarks>
-        public double? MaximumReactivePowerKiloVars
+        public double? MaximumReactivePowerVars
         {
             get;
             set
             {
-                if (value != null && MinimumReactivePowerKiloVars.HasValue && MinimumReactivePowerKiloVars.Value > value)
+                if (value != null && MinimumReactivePowerVars.HasValue && MinimumReactivePowerVars.Value > value)
                 {
-                    throw new ArgumentOutOfRangeException($"{nameof(MaximumReactivePowerKiloVars)} has to be bigger than {nameof(MinimumReactivePowerKiloVars)}");
+                    throw new ArgumentOutOfRangeException($"{nameof(MaximumReactivePowerVars)} has to be bigger than {nameof(MinimumReactivePowerVars)}");
                 }
 
                 field = value;
@@ -78,14 +78,14 @@ namespace paskalON.ConstraintEngine.Domain.Configs
         /// <remarks>
         /// This value can be the systems or units nameplate or less.
         /// </remarks>
-        public double? MinimumReactivePowerKiloVars
+        public double? MinimumReactivePowerVars
         {
             get;
             set
             {
-                if (value != null && MaximumReactivePowerKiloVars.HasValue && MaximumReactivePowerKiloVars.Value < value)
+                if (value != null && MaximumReactivePowerVars.HasValue && MaximumReactivePowerVars.Value < value)
                 {
-                    throw new ArgumentOutOfRangeException($"{nameof(MinimumReactivePowerKiloVars)} has to be smaller than {nameof(MaximumReactivePowerKiloVars)}");
+                    throw new ArgumentOutOfRangeException($"{nameof(MinimumReactivePowerVars)} has to be smaller than {nameof(MaximumReactivePowerVars)}");
                 }
 
                 field = value;

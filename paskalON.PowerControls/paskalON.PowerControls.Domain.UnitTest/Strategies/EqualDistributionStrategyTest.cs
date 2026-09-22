@@ -253,10 +253,10 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             {
                 ChangedBy = "Test",
                 Name = "DerUnitPowerConstraintConfig",
-                MaximumActivePowerKiloWatt = 20,
-                MinimumActivePowerKiloWatt = -20,
-                MaximumReactivePowerKiloVars = 10,
-                MinimumReactivePowerKiloVars = -10
+                MaximumActivePowerWatt = 20000,
+                MinimumActivePowerWatt = -20000,
+                MaximumReactivePowerVars = 10000,
+                MinimumReactivePowerVars = -10000
             };
 
             DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
@@ -292,10 +292,10 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             {
                 ChangedBy = "Test",
                 Name = "DerUnitPowerConstraintConfig",
-                MaximumActivePowerKiloWatt = 20,
-                MinimumActivePowerKiloWatt = -20,
-                MaximumReactivePowerKiloVars = 10,
-                MinimumReactivePowerKiloVars = -10
+                MaximumActivePowerWatt = 20000,
+                MinimumActivePowerWatt = -20000,
+                MaximumReactivePowerVars = 10000,
+                MinimumReactivePowerVars = -10000
             };
 
             DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
@@ -330,10 +330,10 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             {
                 ChangedBy = "Test",
                 Name = "DerUnitPowerConstraintConfig",
-                MaximumActivePowerKiloWatt = 8,
-                MinimumActivePowerKiloWatt = -8,
-                MaximumReactivePowerKiloVars = 4,
-                MinimumReactivePowerKiloVars = -4
+                MaximumActivePowerWatt = 8000,
+                MinimumActivePowerWatt = -8000,
+                MaximumReactivePowerVars = 4000,
+                MinimumReactivePowerVars = -4000
             };
 
             DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
@@ -368,10 +368,10 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             {
                 ChangedBy = "Test",
                 Name = "DerUnitPowerConstraintConfig",
-                MaximumActivePowerKiloWatt = 8,
-                MinimumActivePowerKiloWatt = -8,
-                MaximumReactivePowerKiloVars = 4,
-                MinimumReactivePowerKiloVars = -4
+                MaximumActivePowerWatt = 8000,
+                MinimumActivePowerWatt = -8000,
+                MaximumReactivePowerVars = 4000,
+                MinimumReactivePowerVars = -4000
             };
 
             DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());

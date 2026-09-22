@@ -26,8 +26,8 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
             {
                 ChangedBy = "Test",
                 Name = "DerUnitRampConstraintConfig",
-                MaximumActivePowerKiloWattRampRatePerSecond = double.MaxValue,
-                MaximumReactivePowerKiloVarsRampRatePerSecond = double.MaxValue,
+                MaximumActivePowerWattRampRatePerSecond = double.MaxValue,
+                MaximumReactivePowerVarsRampRatePerSecond = double.MaxValue,
             };
 
             _map = new DerUnitRampConstraintMap
@@ -82,7 +82,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumActivePowerKiloWattRampRatePerSecond = 10;
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(5);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -102,7 +102,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumActivePowerKiloWattRampRatePerSecond = 10;
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(20);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -122,7 +122,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumActivePowerKiloWattRampRatePerSecond = 10;
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(-20);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -142,7 +142,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumActivePowerKiloWattRampRatePerSecond = 10;
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -165,7 +165,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumActivePowerKiloWattRampRatePerSecond = 10;
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -188,7 +188,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumActivePowerKiloWattRampRatePerSecond = 10;
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -211,7 +211,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumActivePowerKiloWattRampRatePerSecond = 10;
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -234,7 +234,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumActivePowerKiloWattRampRatePerSecond = 10;
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -257,7 +257,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumReactivePowerKiloVarsRampRatePerSecond = 20;
+            _config!.MaximumReactivePowerVarsRampRatePerSecond = 20000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(10);
@@ -277,7 +277,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumReactivePowerKiloVarsRampRatePerSecond = 10;
+            _config!.MaximumReactivePowerVarsRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(20);
@@ -297,7 +297,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumReactivePowerKiloVarsRampRatePerSecond = 10;
+            _config!.MaximumReactivePowerVarsRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(-20);
@@ -317,7 +317,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumReactivePowerKiloVarsRampRatePerSecond = 10;
+            _config!.MaximumReactivePowerVarsRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -340,7 +340,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumReactivePowerKiloVarsRampRatePerSecond = 10;
+            _config!.MaximumReactivePowerVarsRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -363,7 +363,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumReactivePowerKiloVarsRampRatePerSecond = 10;
+            _config!.MaximumReactivePowerVarsRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -386,7 +386,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumReactivePowerKiloVarsRampRatePerSecond = 10;
+            _config!.MaximumReactivePowerVarsRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -409,7 +409,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumReactivePowerKiloVarsRampRatePerSecond = 10;
+            _config!.MaximumReactivePowerVarsRampRatePerSecond = 10000;
             DerUnitRampConstraint constraint = new DerUnitRampConstraint(logger, _config!, _map!, timeProvider);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);

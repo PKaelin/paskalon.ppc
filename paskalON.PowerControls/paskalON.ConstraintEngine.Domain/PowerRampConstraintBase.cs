@@ -17,15 +17,15 @@ namespace paskalON.ConstraintEngine.Domain
 
 
         /// <summary>
-        /// Last active watt power in kilo watt.
+        /// Last active watt power in watt.
         /// </summary>
-        protected double _lastActiveKiloWattPower = 0;
+        protected double _lastActiveWattPower = 0;
 
 
         /// <summary>
-        /// Last reactive voltage ampere reactive in kilo var.
+        /// Last reactive voltage ampere reactive in var.
         /// </summary>
-        protected double _lastReactiveKiloVarsPower = 0;
+        protected double _lastReactiveVarsPower = 0;
 
 
         /// <summary>
@@ -63,50 +63,52 @@ namespace paskalON.ConstraintEngine.Domain
         public override void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower, bool shallLogViolations = true)
         {
             // Active power
-            double allowedActiveRamp = _config.MaximumActivePowerKiloWattRampRatePerSecond * TimeSpan.FromTicks(_timeProvider.GetUtcNow().Ticks - _lastApply.Ticks).TotalSeconds;
+            double allowedActiveRamp = _config.MaximumActivePowerWattRampRatePerSecond * TimeSpan.FromTicks(_timeProvider.GetUtcNow().Ticks - _lastApply.Ticks).TotalSeconds;
 
-            if (_lastApply == DateTimeOffset.MinValue && Math.Abs(activePower.KiloWatts) > _config.MaximumActivePowerKiloWattRampRatePerSecond)
+            if (_lastApply == DateTimeOffset.MinValue && Math.Abs(activePower.Watts) > _config.MaximumActivePowerWattRampRatePerSecond)
             {
                 if (shallLogViolations == true)
                 {
-                    _logger.LogWarning("{Name} initial active power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, _config.MaximumActivePowerKiloWattRampRatePerSecond);
+                    _logger.LogWarning("{Name} initial active power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, _config.MaximumActivePowerWattRampRatePerSecond);
                 }
-                activePower.KiloWatts = activePower.Watts < 0 ?
-                    _config.MaximumActivePowerKiloWattRampRatePerSecond * -1 : _config.MaximumActivePowerKiloWattRampRatePerSecond;
+
+                activePower.Watts = activePower.Watts < 0 ?
+                    _config.MaximumActivePowerWattRampRatePerSecond * -1 : _config.MaximumActivePowerWattRampRatePerSecond;
             }
-            else if ((Math.Abs(activePower.KiloWatts) - Math.Abs(_lastActiveKiloWattPower)) > allowedActiveRamp)
+            else if ((Math.Abs(activePower.Watts) - Math.Abs(_lastActiveWattPower)) > allowedActiveRamp)
             {
                 if (shallLogViolations == true)
                 {
                     _logger.LogWarning("{Name} active power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, allowedActiveRamp);
                 }
-                activePower.KiloWatts = activePower.Watts < 0 ? allowedActiveRamp * -1 : allowedActiveRamp;
+
+                activePower.Watts = activePower.Watts < 0 ? allowedActiveRamp * -1 : allowedActiveRamp;
             }
 
-            _lastActiveKiloWattPower = activePower.KiloWatts;
+            _lastActiveWattPower = activePower.Watts;
 
             // Reactive power
-            double allowedReactiveRamp = _config.MaximumReactivePowerKiloVarsRampRatePerSecond * TimeSpan.FromTicks(_timeProvider.GetUtcNow().Ticks - _lastApply.Ticks).TotalSeconds;
+            double allowedReactiveRamp = _config.MaximumReactivePowerVarsRampRatePerSecond * TimeSpan.FromTicks(_timeProvider.GetUtcNow().Ticks - _lastApply.Ticks).TotalSeconds;
 
-            if (_lastApply == DateTimeOffset.MinValue && Math.Abs(reactivePower.KiloVoltAmperesReactive) > _config.MaximumReactivePowerKiloVarsRampRatePerSecond)
+            if (_lastApply == DateTimeOffset.MinValue && Math.Abs(reactivePower.VoltAmperesReactive) > _config.MaximumReactivePowerVarsRampRatePerSecond)
             {
                 if (shallLogViolations == true)
                 {
-                    _logger.LogWarning("{Name} initial reactive power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, _config.MaximumReactivePowerKiloVarsRampRatePerSecond);
+                    _logger.LogWarning("{Name} initial reactive power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, _config.MaximumReactivePowerVarsRampRatePerSecond);
                 }
-                reactivePower.KiloVoltAmperesReactive = reactivePower.VoltAmperesReactive < 0 ?
-                    _config.MaximumReactivePowerKiloVarsRampRatePerSecond * -1 : _config.MaximumReactivePowerKiloVarsRampRatePerSecond * 1;
+                reactivePower.VoltAmperesReactive = reactivePower.VoltAmperesReactive < 0 ?
+                    _config.MaximumReactivePowerVarsRampRatePerSecond * -1 : _config.MaximumReactivePowerVarsRampRatePerSecond * 1;
             }
-            else if ((Math.Abs(reactivePower.KiloVoltAmperesReactive) - Math.Abs(_lastReactiveKiloVarsPower)) > allowedReactiveRamp)
+            else if ((Math.Abs(reactivePower.VoltAmperesReactive) - Math.Abs(_lastReactiveVarsPower)) > allowedReactiveRamp)
             {
                 if (shallLogViolations == true)
                 {
                     _logger.LogWarning("{Name} reactive power ramp exceeds maximum limit {MaxLimit}. Clamping to maximum.", Name, allowedReactiveRamp);
                 }
-                reactivePower.KiloVoltAmperesReactive = reactivePower.VoltAmperesReactive < 0 ? allowedReactiveRamp * -1 : allowedReactiveRamp;
+                reactivePower.VoltAmperesReactive = reactivePower.VoltAmperesReactive < 0 ? allowedReactiveRamp * -1 : allowedReactiveRamp;
             }
 
-            _lastReactiveKiloVarsPower = reactivePower.KiloVoltAmperesReactive;
+            _lastReactiveVarsPower = reactivePower.VoltAmperesReactive;
             _lastApply = _timeProvider.GetUtcNow();
         }
     }

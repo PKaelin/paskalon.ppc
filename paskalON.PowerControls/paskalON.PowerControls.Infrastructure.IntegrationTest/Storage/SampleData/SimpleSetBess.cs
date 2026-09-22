@@ -47,10 +47,10 @@ namespace paskalON.PowerControls.Infrastructure.IntegrationTest.Storage.SampleDa
             {
                 ChangedBy = "Test",
                 Name = "SystemPowerConstraintConfig",
-                MaximumActivePowerKiloWatt = 11111,
-                MinimumActivePowerKiloWatt = -11110,
-                MaximumReactivePowerKiloVars = 2222,
-                MinimumReactivePowerKiloVars = -2220,
+                MaximumActivePowerWatt = 11111,
+                MinimumActivePowerWatt = -11110,
+                MaximumReactivePowerVars = 2222,
+                MinimumReactivePowerVars = -2220,
                 DeratePerUnitInMaintenance = true,
                 DeratePerUnitStopped = false,
             };
@@ -59,26 +59,26 @@ namespace paskalON.PowerControls.Infrastructure.IntegrationTest.Storage.SampleDa
             {
                 ChangedBy = "Test",
                 Name = "SystemRampConstraintConfig",
-                MaximumActivePowerKiloWattRampRatePerSecond = 10101,
-                MaximumReactivePowerKiloVarsRampRatePerSecond = 202
+                MaximumActivePowerWattRampRatePerSecond = 10101,
+                MaximumReactivePowerVarsRampRatePerSecond = 202
             };
 
             DerUnitPowerConstraintConfig = new DerUnitPowerConstraintConfig
             {
                 ChangedBy = "Test",
                 Name = "DerUnitPowerConstraintConfig",
-                MaximumActivePowerKiloWatt = 1111,
-                MinimumActivePowerKiloWatt = -1110,
-                MaximumReactivePowerKiloVars = 222,
-                MinimumReactivePowerKiloVars = -220,
+                MaximumActivePowerWatt = 1111,
+                MinimumActivePowerWatt = -1110,
+                MaximumReactivePowerVars = 222,
+                MinimumReactivePowerVars = -220,
             };
 
             DerUnitRampConstraintConfig = new DerUnitRampConstraintConfig
             {
                 ChangedBy = "Test",
                 Name = "DerUnitRampConstraintConfig",
-                MaximumActivePowerKiloWattRampRatePerSecond = 1010,
-                MaximumReactivePowerKiloVarsRampRatePerSecond = 20
+                MaximumActivePowerWattRampRatePerSecond = 1010,
+                MaximumReactivePowerVarsRampRatePerSecond = 20
             };
         }
 

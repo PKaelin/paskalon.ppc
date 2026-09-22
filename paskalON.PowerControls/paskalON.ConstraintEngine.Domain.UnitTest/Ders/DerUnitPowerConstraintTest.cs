@@ -25,10 +25,10 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
             {
                 ChangedBy = "Test",
                 Name = "DerUnitPowerConstraintConfig",
-                MaximumActivePowerKiloWatt = double.MaxValue,
-                MinimumActivePowerKiloWatt = double.MinValue,
-                MaximumReactivePowerKiloVars = double.MaxValue,
-                MinimumReactivePowerKiloVars = double.MinValue
+                MaximumActivePowerWatt = double.MaxValue,
+                MinimumActivePowerWatt = double.MinValue,
+                MaximumReactivePowerVars = double.MaxValue,
+                MinimumReactivePowerVars = double.MinValue
             };
 
             _map = new DerUnitPowerConstraintMap
@@ -68,7 +68,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         public void CreateApplyActivePowerMaximumLimitTest()
         {
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumActivePowerKiloWatt = 10;
+            _config!.MaximumActivePowerWatt = 10000;
             DerUnitPowerConstraint constraint = new DerUnitPowerConstraint(logger, _config!, _map!);
             ActivePower activePower = ActivePower.FromKilo(20);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -87,7 +87,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         public void CreateApplyActivePowerMinimumLimitTest()
         {
             FakeLogger logger = new FakeLogger();
-            _config!.MinimumActivePowerKiloWatt = -20;
+            _config!.MinimumActivePowerWatt = -20000;
             DerUnitPowerConstraint constraint = new DerUnitPowerConstraint(logger, _config!, _map!);
             ActivePower activePower = ActivePower.FromKilo(-40);
             ReactivePower reactivePower = ReactivePower.FromKilo(0);
@@ -106,7 +106,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         public void CreateApplyReactivePowerMaximumLimitTest()
         {
             FakeLogger logger = new FakeLogger();
-            _config!.MaximumReactivePowerKiloVars = 10;
+            _config!.MaximumReactivePowerVars = 10000;
             DerUnitPowerConstraint constraint = new DerUnitPowerConstraint(logger, _config!, _map!);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(20);
@@ -125,7 +125,7 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
         public void CreateApplyReactivePowerMinimumLimitTest()
         {
             FakeLogger logger = new FakeLogger();
-            _config!.MinimumReactivePowerKiloVars = -20;
+            _config!.MinimumReactivePowerVars = -20000;
             DerUnitPowerConstraint constraint = new DerUnitPowerConstraint(logger, _config!, _map!);
             ActivePower activePower = ActivePower.FromKilo(0);
             ReactivePower reactivePower = ReactivePower.FromKilo(-40);
