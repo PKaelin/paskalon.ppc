@@ -2,7 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-namespace paskalON.PowerControls.Domain.Configs
+namespace paskalON.Domains.Configs
 {
     /// <summary>
     /// Type of the power control.

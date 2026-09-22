@@ -12,11 +12,11 @@ namespace paskalON.PowerControls.Domain.Ders
 {
     public class DerUnitPowerEnergyStorageControl : PowerControlBase
     {
-        private readonly DerUnitPowerEnergyStorageControlConfig _config;
+        private readonly DerUnitEnergyStoragePowerControlConfig _config;
         private readonly DerUnitPowerEnergyStorageControlMap _map;
         private readonly IEnumerable<IDerUnitConstraint> _constraints;
 
-        public DerUnitPowerEnergyStorageControl(ILogger logger, DerUnitPowerEnergyStorageControlConfig config, DerUnitPowerEnergyStorageControlMap map,
+        public DerUnitPowerEnergyStorageControl(ILogger logger, DerUnitEnergyStoragePowerControlConfig config, DerUnitPowerEnergyStorageControlMap map,
             IMetricsPublisher publisher, IEnumerable<IDerUnitConstraint> constraints)
             : base(logger, config, map, publisher)
         {

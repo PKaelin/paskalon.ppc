@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Domains;
+using paskalON.Domains.Configs;
 
 namespace paskalON.PowerControls.Domain.Configs
 {

@@ -34,7 +34,9 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
         {
             using DeviceServiceContext context = new DeviceServiceContext(_options!);
             context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
+            bool created = context.Database.EnsureCreated();
+
+            Assert.IsTrue(created);
         }
 
 
