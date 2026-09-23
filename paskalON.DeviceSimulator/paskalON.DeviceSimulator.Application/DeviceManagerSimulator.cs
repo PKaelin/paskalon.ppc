@@ -17,6 +17,7 @@ using paskalON.Protocols.C37118;
 using paskalON.Protocols.C37118.Simulations;
 using paskalON.Protocols.Modbus.NModbus;
 using paskalON.Protocols.Modbus.Stores;
+using paskalON.Telemetry.Factories;
 
 namespace paskalON.DeviceSimulator.Application
 {

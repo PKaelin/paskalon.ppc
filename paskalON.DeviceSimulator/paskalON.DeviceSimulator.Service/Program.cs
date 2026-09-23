@@ -11,7 +11,9 @@ using paskalON.DeviceSimulator.Application.Factories;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.DeviceSimulator.Service.Publishers;
 using paskalON.DeviceSimulator.Service.Workers;
+using paskalON.Infrastructure.Repositories;
 using paskalON.Telemetry;
+using paskalON.Telemetry.Factories;
 
 WebApplication? app = null;
 Console.WriteLine("Starting service.....");
