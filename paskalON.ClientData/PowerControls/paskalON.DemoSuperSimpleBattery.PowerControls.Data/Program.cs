@@ -1,0 +1,84 @@
+﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Licensed under the paskalON Source-Available License (PSAL).
+// See LICENSE for the full license terms.
+//----------------------------------------‐------------------------------------
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using paskalON.DemoSuperSimpleBattery.PowerControls.Data;
+using paskalON.PowerControls.Infrastructure.Storage;
+
+/// <summary>
+/// Program class for data handling.
+/// </summary>
+/// <remarks>
+/// Either checkout latest version of this code or specific version.
+/// Whatever version is checked out the SchemaVersion has to be aligned.
+/// </remarks>
+class Program
+{
+    /// <summary>
+    /// Entry point for data handling.
+    /// </summary>
+    /// <param name="args">Arguments for program control.</param>
+    /// <remarks>
+    /// Don't do any exception handling.
+    /// </remarks>
+    public static async Task<int> Main(string[] args)
+    {
+        try
+        {
+            // Setup configuration
+            IConfigurationRoot configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
+            // Read arguments or configuration
+            // Use specific: "SchemaVersion": "20260530987654_v_0_1"
+            // Use latest:   "SchemaVersion": ""
+            string? schemaVersion = args.Length > 0 ? args[0] : configuration.GetSection("SchemaVersion")?.Value;
+
+            // Read database connection string and create db context options
+            string? connectionString = configuration.GetConnectionString("DatabaseContext");
+
+            ArgumentException.ThrowIfNullOrEmpty(connectionString);
+            DbContextOptions<PowerControlContext> options = new DbContextOptionsBuilder<PowerControlContext>().UseNpgsql(connectionString).Options;
+
+            // ----------------------------------------------------------------------------
+            // Important the microservice database must be running.
+            // ----------------------------------------------------------------------------
+            using (PowerControlContext context = new PowerControlContext(options))
+            {
+                // Always start from scratch
+                await context.Database.EnsureDeletedAsync();
+
+                // ----------------------------------------------------------------------------
+                // Important to be able to migrate to a version a migration entry has to exist:
+                // [Microservice].Infrastructure.Storage.Migrations
+                // See README.md in [Microservice].Infrastructure\README.md
+                // ----------------------------------------------------------------------------
+                if (string.IsNullOrEmpty(schemaVersion) == false)
+                {
+                    // Migrate the database to a specific version
+                    await context.Database.MigrateAsync(schemaVersion);
+                }
+                else
+                {
+                    // Migrate the database to the latest version
+                    await context.Database.MigrateAsync();
+                }
+
+                // Create and save the data
+                await CommonData.CreateAsync(context);
+                await ServiceData.CreateAsync(context);
+            }
+
+            Console.WriteLine("Successfully created the data");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("Unexpected error during data creation. Error: ", ex.Message);
+            return -1;
+        }
+
+        return 0;
+    }
+}
+

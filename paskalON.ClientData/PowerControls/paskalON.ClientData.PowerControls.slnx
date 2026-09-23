@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/InitialDevelopment/">
+    <Project Path="../../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
+    <Project Path="../../paskalON.PowerControls/paskalON.ConstraintEngine.Domain.Configs/paskalON.ConstraintEngine.Domain.Configs.csproj" />
+    <Project Path="../../paskalON.PowerControls/paskalON.PowerControls.Domain.Configs/paskalON.PowerControls.Domain.Configs.csproj" />
+    <Project Path="../../paskalON.PowerControls/paskalON.PowerControls.Infrastructure/paskalON.PowerControls.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="paskalON.DemoSuperSimpleBattery.PowerControls.Data/paskalON.DemoSuperSimpleBattery.PowerControls.Data.csproj" Id="e7f977ac-a1b4-4b9a-b91c-d70dfa639829" />
+</Solution>
