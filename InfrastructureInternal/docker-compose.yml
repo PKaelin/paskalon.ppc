@@ -177,6 +177,19 @@ services:
       - grafana_user
       - grafana_password
 
+  # Official GUI for Redis
+  # redis://default@paskalon.redis:6379
+  # redisinsight:
+  #   container_name: paskalon.redisinsight
+  #   image: redis/redisinsight:3.8.0
+  #   restart: no
+  #   ports:
+  #     - 41006:5540
+  #   depends_on:
+  #     - redis
+  #   networks:
+  #     - ppc.network
+
 # Volumes for the services
 volumes:
   paskalon.pgadmin:
