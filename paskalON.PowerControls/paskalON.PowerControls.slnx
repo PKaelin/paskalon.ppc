@@ -1,9 +1,12 @@
 <Solution>
   <Folder Name="/InitialDevelopment/">
     <Project Path="../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Infrastructure/paskalON.Infrastructure.csproj" />
     <Project Path="../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Messaging/paskalON.Messaging.csproj" />
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
     <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Client/paskalON.Devices.Client.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="README.md" />
@@ -20,6 +23,7 @@
   </Project>
   <Project Path="paskalON.ConstraintEngine.Domain.Configs/paskalON.ConstraintEngine.Domain.Configs.csproj" Id="ae28f480-f435-4a13-ba91-5422ba83880b" />
   <Project Path="paskalON.ConstraintEngine.Domain/paskalON.ConstraintEngine.Domain.csproj" Id="3fff01ab-e7f9-49cf-9ba6-db0841784cdd" />
+  <Project Path="paskalON.PowerControls.Application/paskalON.PowerControls.Application.csproj" Id="915de4ba-7b20-4080-92a3-20490e15cb99" />
   <Project Path="paskalON.PowerControls.Domain.Configs/paskalON.PowerControls.Domain.Configs.csproj" />
   <Project Path="paskalON.PowerControls.Domain/paskalON.PowerControls.Domain.csproj" />
   <Project Path="paskalON.PowerControls.Infrastructure/paskalON.PowerControls.Infrastructure.csproj" Id="e4a0de33-33d8-4b3e-ac71-c75b9c5f10ab" />

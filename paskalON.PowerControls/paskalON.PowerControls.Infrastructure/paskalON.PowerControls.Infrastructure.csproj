@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Infrastructure\paskalON.Infrastructure.csproj" />
     <ProjectReference Include="..\paskalON.PowerControls.Domain.Configs\paskalON.PowerControls.Domain.Configs.csproj" />
   </ItemGroup>
 

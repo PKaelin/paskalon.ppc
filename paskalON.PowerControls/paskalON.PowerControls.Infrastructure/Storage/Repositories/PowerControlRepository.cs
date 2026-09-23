@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Infrastructure.Repositories;
 
 namespace paskalON.PowerControls.Infrastructure.Storage.Repositories
 {

@@ -31,17 +31,23 @@ services:
     build:
       context: .
       dockerfile: paskalON.PowerControls.Service/Dockerfile
+    depends_on:
+      paskalon.powercontrols.data:
+        condition: service_healthy
     ports:
       - 45010:8080
     environment:
       - DATABASE_CONNECTION_FILE=/run/secrets/database_connection
       - MESSAGING_CONNECTION_FILE=/run/secrets/messaging_connection
+      - DEVICESERVICE_CONNECTION_FILE=/run/secrets/deviceservice_connection
       - TELEMETRY_LOGGING_ENDPOINT=http://collector:4317
       - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
       - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
+      - START_PUBLISHERS=true
     secrets:
       - database_connection
       - messaging_connection
+      - deviceservice_connection
     networks:
       - ppc.network
 
@@ -50,6 +56,8 @@ secrets:
     file: ./secrets/database_connection
   messaging_connection:
     file: ./secrets/messaging_connection
+  deviceservice_connection:
+    file: ./secrets/deviceservice_connection
   db_user:
     file: ./secrets/db_user
   db_password:
