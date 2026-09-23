@@ -11,6 +11,7 @@
   </Folder>
   <Project Path="paskalON.Dataface/paskalON.Dataface.csproj" Id="0d59507d-03de-441a-af88-59f15348c1d9" />
   <Project Path="paskalON.Domains/paskalON.Domains.csproj" />
+  <Project Path="paskalON.Infrastructure/paskalON.Infrastructure.csproj" Id="c27de749-35c1-4733-8634-3ac790832162" />
   <Project Path="paskalON.Maths/paskalON.Maths.csproj" />
   <Project Path="paskalON.Messaging/paskalON.Messaging.csproj" Id="c6b709bd-8864-48d0-b743-11676a1cc11a" />
   <Project Path="paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
