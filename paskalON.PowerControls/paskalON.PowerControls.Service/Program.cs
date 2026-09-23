@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
 using paskalON.PowerControls.Infrastructure.Storage;
+using paskalON.PowerControls.Infrastructure.Storage.Repositories;
 
 WebApplication? app = null;
 Console.WriteLine("Starting service.....");
@@ -29,10 +30,13 @@ try
 
     // Add database
     builder.Services.AddDbContext<PowerControlContext>(options => options.UseNpgsql(dbConnectionString));
+    builder.Services.AddScoped<IVersionRepository, VersionRepository>();
+    builder.Services.AddScoped<IPowerControlRepository, PowerControlRepository>();
 
     // Build application
+    Console.WriteLine("Building application.....");
     app = builder.Build();
-    app.Logger.LogInformation("Application has been build");
+    app.Logger.LogInformation("Application built.....");
 
     if (app.Environment.IsDevelopment())
     {
@@ -41,7 +45,7 @@ try
 
     app.UseAuthorization();
     app.MapControllers();
-    app.Logger.LogInformation("Application about to run");
+    app.Logger.LogInformation("Application about to run.....");
     app.Run();
 }
 catch (Exception ex)

@@ -1,6 +1,12 @@
-@paskalON.PowerControls.Service_HostAddress = http://localhost:5278
+#------------------------------------------------------------------------------
+# Variables
+#------------------------------------------------------------------------------
+@paskalON.PowerControls.Service_HostAddress = http://localhost:45010
 
-GET {{paskalON.PowerControls.Service_HostAddress}}/weatherforecast/
+#------------------------------------------------------------------------------
+# Version controller
+#------------------------------------------------------------------------------
+GET {{paskalON.PowerControls.Service_HostAddress}}/api/v1/version/
 Accept: application/json
 
 ###

@@ -142,13 +142,14 @@ try
         });
 
     // Build application
+    Console.WriteLine("Building application.....");
     app = builder.Build();
-    app.Logger.LogInformation("Application has been build");
+    app.Logger.LogInformation("Application built.....");
     // Register start/stop of the service
     IHostApplicationLifetime lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
     lifetime.ApplicationStarted.Register(() => { app.Logger.LogInformation("Microservice Device Service has started"); });
     lifetime.ApplicationStopping.Register(() => { app.Logger.LogInformation("Microservice Device Service is stopping"); });
-    app.Logger.LogInformation("Application starts initializing services");
+    app.Logger.LogInformation("Application starts initializing services.....");
     // Create and load device manager
     IDeviceManager deviceManager = app.Services.GetRequiredService<IDeviceManager>();
 
@@ -190,7 +191,7 @@ try
         MetricsPublisherService metricsPublisherService = app.Services.GetRequiredService<MetricsPublisherService>();
         metricsPublisherService.Initialize(deviceManager.MetricsPublishers, config.MetricsIntervalMilliseconds, config.StartupDelayForDevices);
     }
-    app.Logger.LogInformation("Application finished initializing services");
+    app.Logger.LogInformation("Application finished initializing services.....");
 
     if (app.Environment.IsDevelopment())
     {
@@ -201,7 +202,7 @@ try
     app.MapControllers();
     // Connect to all devices before application starts running
     deviceManager.ConnectDevices();
-    app.Logger.LogInformation("Application about to run");
+    app.Logger.LogInformation("Application about to run.....");
     app.Run();
 }
 catch (Exception ex)
