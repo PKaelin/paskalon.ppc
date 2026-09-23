@@ -6,7 +6,7 @@ using StackExchange.Redis;
 
 namespace paskalON.Messaging.Redis
 {
-    public class RedisMessagePublisher : IMessagePublisher
+    public class RedisMessagePublisher : IMessagePublisher, IDisposable
     {
         private readonly IConnectionMultiplexer _redis;
 
@@ -27,6 +27,11 @@ namespace paskalON.Messaging.Redis
             ISubscriber subscriber = _redis.GetSubscriber();
 
             await subscriber.PublishAsync(RedisChannel.Literal(topic), json);
+        }
+
+        public void Dispose()
+        {
+            _redis.Dispose();
         }
     }
 }
