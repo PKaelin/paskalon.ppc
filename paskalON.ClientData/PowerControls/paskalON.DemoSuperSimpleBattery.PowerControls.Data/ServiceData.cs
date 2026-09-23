@@ -43,7 +43,22 @@ namespace paskalON.DemoSuperSimpleBattery.PowerControls.Data
             SystemConfig systemConfig = new SystemConfig
             {
                 ChangedBy = ChangedBy,
-                Type = PowerControlType.Bess
+                Type = PowerControlType.Bess,
+                MetricsIntervalMilliseconds = 5000,
+                SubscriberTopicPcsCore = "ppc:device:pcs:core",
+                SubscriberTopicPcsDetail = "ppc:device:pcs:detail",
+                SubscriberTopicBatteryBankCore = "ppc:device:bb:core",
+                SubscriberTopicBatteryBankDetail = "ppc:device:bb:detail",
+                SubscriberTopicSolarPanelCore = "ppc:device:pv:core",
+                SubscriberTopicSolarPanelDetail = "ppc:device:pv:detail",
+                SubscriberTopicExternalPowerMeterCore = "ppc:device:pm:external:core",
+                SubscriberTopicExternalPowerMeterDetail = "ppc:device:pm:external:detail",
+                SubscriberTopicAuxiliaryPowerMeterCore = "ppc:device:pm:auxiliary:core",
+                SubscriberTopicAuxiliaryPowerMeterDetail = "ppc:device:pm:auxiliary:detail",
+                SubscriberTopicSystemPowerMeterCore = "ppc:device:pm:system:core",
+                SubscriberTopicSystemPowerMeterDetail = "ppc:device:pm:system:detail",
+                SubscriberTopicCircuitPowerMeterCore = "ppc:device:pm:circuit:core",
+                SubscriberTopicCircuitPowerMeterDetail = "ppc:device:pm:circuit:detail",
             };
             context.SystemConfigs.Add(systemConfig);
 
