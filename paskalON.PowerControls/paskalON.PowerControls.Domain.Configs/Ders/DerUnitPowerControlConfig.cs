@@ -2,7 +2,6 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.ConstraintEngine.Domain.Configs;
 using paskalON.PowerControls.Domain.Configs.Strategies;
 
 namespace paskalON.PowerControls.Domain.Configs.Ders
@@ -55,11 +54,5 @@ namespace paskalON.PowerControls.Domain.Configs.Ders
                 field = value;
             }
         }
-
-
-        /// <summary>
-        /// Collection of constraints.
-        /// </summary>
-        public ICollection<ConstraintBaseConfig> Constraints { get; set; } = [];
     }
 }

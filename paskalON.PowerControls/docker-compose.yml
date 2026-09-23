@@ -9,12 +9,12 @@ services:
     environment:
       POSTGRES_USER_FILE: /run/secrets/db_user
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      POSTGRES_DB: devices
+      POSTGRES_DB: powercontrols
     secrets:
       - db_user
       - db_password
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d devices -U $$(cat /run/secrets/db_user)"]
+      test: ["CMD-SHELL", "pg_isready -d powercontrols -U $$(cat /run/secrets/db_user)"]
       interval: 5s
       timeout: 5s
       retries: 5

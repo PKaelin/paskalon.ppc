@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
     <ProjectReference Include="..\paskalON.PowerControls.Domain.Configs\paskalON.PowerControls.Domain.Configs.csproj" />
   </ItemGroup>
 
