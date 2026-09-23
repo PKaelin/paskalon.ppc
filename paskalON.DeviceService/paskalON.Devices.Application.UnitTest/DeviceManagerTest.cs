@@ -17,6 +17,7 @@ using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Telemetry;
+using paskalON.Telemetry.Factories;
 
 namespace paskalON.Devices.Application.UnitTest
 {

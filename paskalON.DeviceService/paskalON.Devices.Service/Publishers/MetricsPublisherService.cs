@@ -14,7 +14,7 @@ namespace paskalON.Devices.Service.Publishers
         /// <summary>
         /// Logger for application logging and diagnostics.
         /// </summary>
-        private readonly ILogger _logger;
+        private readonly ILogger<MetricsPublisherService> _logger;
 
 
         /// <summary>

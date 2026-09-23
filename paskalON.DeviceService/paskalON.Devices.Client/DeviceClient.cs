@@ -25,7 +25,7 @@ namespace paskalON.Devices.Client
         /// <summary>
         /// Logger for application logging and diagnostics.
         /// </summary>
-        private readonly ILogger _logger;
+        private readonly ILogger<DeviceClient> _logger;
 
 
         /// <summary>
@@ -38,12 +38,6 @@ namespace paskalON.Devices.Client
         /// Message subscriber interface for API calls to the message subscriber.
         /// </summary>
         private readonly IMessageSubscriber _subscriber;
-
-
-        /// <summary>
-        /// Subscriber topic class containing all the subscriber topics used in device client.
-        /// </summary>
-        private readonly SubscriberTopic _subscriberTopic;
 
 
         #region Registers and Subscribers
@@ -187,19 +181,16 @@ namespace paskalON.Devices.Client
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>
         /// <param name="subscriber">Message subscriber interface for API calls to the message subscriber.</param>
-        /// <param name="deviceServer">Device servicer interface for API calls to the device service.</param>
-        /// <param name="subscriberTopic">Subscriber topic class containing all the subscriber topics used in device client.</param>
-        public DeviceClient(ILogger logger, IMessageSubscriber subscriber, IDeviceServer deviceServer, SubscriberTopic subscriberTopic)
+        /// <param name="deviceServer">Device servicer interface for API calls to the device service.</param>        
+        public DeviceClient(ILogger<DeviceClient> logger, IMessageSubscriber subscriber, IDeviceServer deviceServer)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(subscriber);
             ArgumentNullException.ThrowIfNull(deviceServer);
-            ArgumentNullException.ThrowIfNull(subscriberTopic);
 
             _logger = logger;
             _subscriber = subscriber;
             _deviceServer = deviceServer;
-            _subscriberTopic = subscriberTopic;
             // PCS, BB, PV registers    
             _pcsRegisters = new DeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>(_logger);
             _bbRegisters = new DeviceRegister<BbDto, BbDefinitionDto, BbCoreDto, BbDetailDto>(_logger);
@@ -215,8 +206,10 @@ namespace paskalON.Devices.Client
         /// <summary>
         /// Initializes the device client.
         /// </summary>
-        public async Task Initialize()
+        public async Task Initialize(SubscriberTopic subscriberTopic)
         {
+            ArgumentNullException.ThrowIfNull(subscriberTopic);
+
             // Handle exception where client is created and initialized.
             Der = await _deviceServer.GetDer();
 
@@ -236,22 +229,23 @@ namespace paskalON.Devices.Client
             // Solars
             units.OfType<DerSolarUnitDto>().SelectMany(s => s.SolarPanels).ToList().ForEach(d => { _pvRegisters.Add(d); });
 
-            Subscribe();
+            Subscribe(subscriberTopic);
         }
 
 
         /// <summary>
         /// Create subscribers for all devices.
         /// </summary>
-        private void Subscribe()
+        /// <param name="subscriberTopic">Subscriber topic class containing all the subscriber topics used in device client.</param>
+        private void Subscribe(SubscriberTopic subscriberTopic)
         {
-            _pcsSubscriber = CreateSubscriber(_logger, _subscriber, _pcsRegisters, _subscriberTopic.PowerConversionSystemTopic);
-            _bbSubscriber = CreateSubscriber(_logger, _subscriber, _bbRegisters, _subscriberTopic.BatteryBankTopic);
-            _pvSubscriber = CreateSubscriber(_logger, _subscriber, _pvRegisters, _subscriberTopic.SolarPanelTopic);
-            _pmExternalSubscriber = CreateSubscriber(_logger, _subscriber, _pmExternalRegisters, _subscriberTopic.ExternalPowerMeterTopic);
-            _pmAuxiliarySubscriber = CreateSubscriber(_logger, _subscriber, _pmAuxiliaryRegisters, _subscriberTopic.AuxiliaryPowerMeterTopic);
-            _pmCircuitSubscriber = CreateSubscriber(_logger, _subscriber, _pmCircuitRegisters, _subscriberTopic.CircuitPowerMeterTopic);
-            _pmSystemSubscriber = CreateSubscriber(_logger, _subscriber, _pmSystemRegisters, _subscriberTopic.SystemPowerMeterTopic);
+            _pcsSubscriber = CreateSubscriber(_logger, _subscriber, _pcsRegisters, subscriberTopic.PowerConversionSystemTopic);
+            _bbSubscriber = CreateSubscriber(_logger, _subscriber, _bbRegisters, subscriberTopic.BatteryBankTopic);
+            _pvSubscriber = CreateSubscriber(_logger, _subscriber, _pvRegisters, subscriberTopic.SolarPanelTopic);
+            _pmExternalSubscriber = CreateSubscriber(_logger, _subscriber, _pmExternalRegisters, subscriberTopic.ExternalPowerMeterTopic);
+            _pmAuxiliarySubscriber = CreateSubscriber(_logger, _subscriber, _pmAuxiliaryRegisters, subscriberTopic.AuxiliaryPowerMeterTopic);
+            _pmCircuitSubscriber = CreateSubscriber(_logger, _subscriber, _pmCircuitRegisters, subscriberTopic.CircuitPowerMeterTopic);
+            _pmSystemSubscriber = CreateSubscriber(_logger, _subscriber, _pmSystemRegisters, subscriberTopic.SystemPowerMeterTopic);
         }
 
 

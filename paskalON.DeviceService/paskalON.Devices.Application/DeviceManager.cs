@@ -27,6 +27,7 @@ using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Protocols.C37118;
 using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
+using paskalON.Telemetry.Factories;
 using System.Reflection;
 
 namespace paskalON.Devices.Application

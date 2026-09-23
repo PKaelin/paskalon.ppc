@@ -5,6 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using paskalON.Domains;
+using paskalON.Infrastructure.Repositories;
 
 namespace paskalON.Devices.Infrastructure.Storage.Repositories
 {

@@ -15,9 +15,11 @@ using paskalON.Devices.Infrastructure.Storage;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Devices.Service.Publishers;
 using paskalON.Devices.Service.Workers;
+using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
 using paskalON.Telemetry;
+using paskalON.Telemetry.Factories;
 using StackExchange.Redis;
 
 WebApplication? app = null;
@@ -166,30 +168,36 @@ try
         SystemConfig? config = repository.GetAsync(0, 1, (o) => o.Id).Result.FirstOrDefault();
         ArgumentNullException.ThrowIfNull(config, "System configuration contains no record");
 
-        // Create and load Modbus polling service
-        ModbusPollService modbusPollService = app.Services.GetRequiredService<ModbusPollService>();
-        modbusPollService.Initialize(deviceManager.ModbusPollingEngines, config.PollingIntervalMilliseconds);
+        if (startWorker == true)
+        {
+            // Create and load Modbus polling service
+            ModbusPollService modbusPollService = app.Services.GetRequiredService<ModbusPollService>();
+            modbusPollService.Initialize(deviceManager.ModbusPollingEngines, config.PollingIntervalMilliseconds);
 
-        // Create and load C37 stream service
-        C37StreamService c37StreamService = app.Services.GetRequiredService<C37StreamService>();
-        c37StreamService.Initialize(deviceManager.C37TransmissionEngines);
+            // Create and load C37 stream service
+            C37StreamService c37StreamService = app.Services.GetRequiredService<C37StreamService>();
+            c37StreamService.Initialize(deviceManager.C37TransmissionEngines);
 
-        // Create the heartbeat service
-        DeviceHeartbeatService heartbeatService = app.Services.GetRequiredService<DeviceHeartbeatService>();
-        heartbeatService.Initialize(deviceManager.DeviceHeartbeats, config.DeviceHeartbeatIntervalMilliseconds);
+            // Create the heartbeat service
+            DeviceHeartbeatService heartbeatService = app.Services.GetRequiredService<DeviceHeartbeatService>();
+            heartbeatService.Initialize(deviceManager.DeviceHeartbeats, config.DeviceHeartbeatIntervalMilliseconds);
+        }
 
         // Create and load device publisher
-        DevicePublisherService devicePublisherService = app.Services.GetRequiredService<DevicePublisherService>();
-        ILogger<DevicePublisher> logger = app.Services.GetRequiredService<ILogger<DevicePublisher>>();
-        IMessagePublisher messagePublisher = app.Services.GetRequiredService<IMessagePublisher>();
-        DeviceMapper deviceMapper = new DeviceMapper();
-        PublisherTopic topic = PublisherTopic.Create(config);
-        DevicePublisher devicePublisher = new DevicePublisher(logger, deviceManager, deviceMapper, messagePublisher, topic, config.DeviceFactorCore, config.DeviceFactorDetail);
-        devicePublisherService.Initialize(devicePublisher, config.MetricsIntervalMilliseconds, config.StartupDelayForDevices);
+        if (startPublisher == true)
+        {
+            DevicePublisherService devicePublisherService = app.Services.GetRequiredService<DevicePublisherService>();
+            ILogger<DevicePublisher> logger = app.Services.GetRequiredService<ILogger<DevicePublisher>>();
+            IMessagePublisher messagePublisher = app.Services.GetRequiredService<IMessagePublisher>();
+            DeviceMapper deviceMapper = new DeviceMapper();
+            PublisherTopic topic = PublisherTopic.Create(config);
+            DevicePublisher devicePublisher = new DevicePublisher(logger, deviceManager, deviceMapper, messagePublisher, topic, config.DeviceFactorCore, config.DeviceFactorDetail);
+            devicePublisherService.Initialize(devicePublisher, config.MetricsIntervalMilliseconds, config.StartupDelayForDevices);
 
-        // Create and load metric publisher
-        MetricsPublisherService metricsPublisherService = app.Services.GetRequiredService<MetricsPublisherService>();
-        metricsPublisherService.Initialize(deviceManager.MetricsPublishers, config.MetricsIntervalMilliseconds, config.StartupDelayForDevices);
+            // Create and load metric publisher
+            MetricsPublisherService metricsPublisherService = app.Services.GetRequiredService<MetricsPublisherService>();
+            metricsPublisherService.Initialize(deviceManager.MetricsPublishers, config.MetricsIntervalMilliseconds, config.StartupDelayForDevices);
+        }
     }
     app.Logger.LogInformation("Application finished initializing services.....");
 

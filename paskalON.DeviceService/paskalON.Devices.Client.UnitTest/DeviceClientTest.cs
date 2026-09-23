@@ -36,7 +36,7 @@ namespace paskalON.Devices.Client.UnitTest
         public void DeviceClientConstructorNullLoggerTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() =>
-                { new DeviceClient(null!, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!); });
+                { new DeviceClient(null!, _subscriberMock.Object, _deviceServerMock.Object); });
         }
 
 
@@ -44,7 +44,7 @@ namespace paskalON.Devices.Client.UnitTest
         public void DeviceClientConstructorNullSubscriberTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() =>
-                { new DeviceClient(NullLogger.Instance, null!, _deviceServerMock.Object, _subscriberTopic!); });
+                { new DeviceClient(NullLogger<DeviceClient>.Instance, null!, _deviceServerMock.Object); });
         }
 
 
@@ -52,22 +52,22 @@ namespace paskalON.Devices.Client.UnitTest
         public void DeviceClientConstructorNullDeviceServerTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() =>
-                { new DeviceClient(NullLogger.Instance, _subscriberMock.Object, null!, _subscriberTopic!); });
+                { new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, null!); });
         }
 
 
         [TestMethod]
-        public void DeviceClientConstructorNullSubscriberTopicTest()
+        public async Task DeviceClientInitializeNullSubscriberTopicTest()
         {
-            Assert.ThrowsExactly<ArgumentNullException>(() =>
-                { new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, null!); });
+            DeviceClient client = new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, _deviceServerMock.Object);
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await client.Initialize(null!));
         }
 
 
         [TestMethod]
         public void DeviceClientConstructorTest()
         {
-            DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
+            DeviceClient client = new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, _deviceServerMock.Object);
 
             Assert.IsNotNull(client);
             Assert.IsNotNull(client.Der);
@@ -85,9 +85,9 @@ namespace paskalON.Devices.Client.UnitTest
         {
             DerDto der = new DerDto { Name = "Der" };
             _deviceServerMock.Setup(x => x.GetDer()).ReturnsAsync(der);
-            DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
+            DeviceClient client = new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, _deviceServerMock.Object);
 
-            await client.Initialize();
+            await client.Initialize(_subscriberTopic!);
 
             _deviceServerMock.Verify(x => x.GetDer(), Times.Once);
             Assert.AreSame(der, client.Der);
@@ -104,9 +104,9 @@ namespace paskalON.Devices.Client.UnitTest
         public async Task DeviceClientInitializeDeviceServerThrowsExceptionTest()
         {
             _deviceServerMock.Setup(x => x.GetDer()).ThrowsAsync(new InvalidOperationException("Test exception"));
-            DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
+            DeviceClient client = new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, _deviceServerMock.Object);
 
-            await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () => { await client.Initialize(); });
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () => { await client.Initialize(_subscriberTopic!); });
         }
 
 
@@ -116,9 +116,9 @@ namespace paskalON.Devices.Client.UnitTest
             DerDto der = new DerDto { Name = "Der" };
             _deviceServerMock.Setup(x => x.GetDer()).ReturnsAsync(der);
             _subscriberTopic = CreateSubscriberTopicWithTopics();
-            DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
+            DeviceClient client = new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, _deviceServerMock.Object);
 
-            await client.Initialize();
+            await client.Initialize(_subscriberTopic!);
 
             _subscriberMock.Verify(x => x.Subscribe(It.IsAny<string>(), It.IsAny<Action<string>>()), Times.AtLeastOnce);
         }
@@ -129,9 +129,9 @@ namespace paskalON.Devices.Client.UnitTest
         {
             DerDto der = new DerDto { Name = "Der" };
             _deviceServerMock.Setup(x => x.GetDer()).ReturnsAsync(der);
-            DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
+            DeviceClient client = new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, _deviceServerMock.Object);
 
-            await client.Initialize();
+            await client.Initialize(_subscriberTopic!);
 
             _subscriberMock.Verify(x => x.Subscribe(It.IsAny<string>(), It.IsAny<Action<string>>()), Times.Never);
         }
@@ -142,9 +142,9 @@ namespace paskalON.Devices.Client.UnitTest
         {
             DerDto der = CreateBatteryDevicesDto();
             _deviceServerMock.Setup(x => x.GetDer()).ReturnsAsync(der);
-            DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
+            DeviceClient client = new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, _deviceServerMock.Object);
 
-            await client.Initialize();
+            await client.Initialize(_subscriberTopic!);
 
             _deviceServerMock.Verify(x => x.GetDer(), Times.Once);
             Assert.AreSame(der, client.Der);
@@ -166,9 +166,9 @@ namespace paskalON.Devices.Client.UnitTest
         {
             DerDto der = CreateSolarDevicesDto();
             _deviceServerMock.Setup(x => x.GetDer()).ReturnsAsync(der);
-            DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
+            DeviceClient client = new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, _deviceServerMock.Object);
 
-            await client.Initialize();
+            await client.Initialize(_subscriberTopic!);
 
             _deviceServerMock.Verify(x => x.GetDer(), Times.Once);
             Assert.AreSame(der, client.Der);
@@ -190,9 +190,9 @@ namespace paskalON.Devices.Client.UnitTest
         {
             DerDto der = CreateMeterDevicesDto();
             _deviceServerMock.Setup(x => x.GetDer()).ReturnsAsync(der);
-            DeviceClient client = new DeviceClient(NullLogger.Instance, _subscriberMock.Object, _deviceServerMock.Object, _subscriberTopic!);
+            DeviceClient client = new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, _deviceServerMock.Object);
 
-            await client.Initialize();
+            await client.Initialize(_subscriberTopic!);
 
             _deviceServerMock.Verify(x => x.GetDer(), Times.Once);
             Assert.AreSame(der, client.Der);
