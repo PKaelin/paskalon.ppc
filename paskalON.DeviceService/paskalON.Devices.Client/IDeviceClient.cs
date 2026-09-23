@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Devices.Client.Subscribers;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.EnergyResources.Solars;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
@@ -65,5 +66,11 @@ namespace paskalON.Devices.Client
         /// </summary>
         ICollection<PmCircuitDto> CircuitPowerMeters { get; }
 
+
+        /// <summary>
+        /// Initializes the device client.
+        /// </summary>
+        /// <param name="subscriberTopic">Subscriber topic configuration.</param>
+        Task Initialize(SubscriberTopic subscriberTopic);
     }
 }

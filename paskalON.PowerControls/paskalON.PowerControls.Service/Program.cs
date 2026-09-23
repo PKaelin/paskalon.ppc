@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
 using paskalON.Devices.Client;
+using paskalON.Devices.Client.Subscribers;
 using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
@@ -39,7 +40,7 @@ try
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsConnectionStringFile, "Cannot find the device service secret file. DEVICESERVICE_CONNECTION_FILE");
     string dsConnectionString = (await File.ReadAllTextAsync(dsConnectionStringFile)).Trim();
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsConnectionString, "Cannot find the device service connection string definition");
-
+    
     // Get Logging, Metrics, Tracing endpoint strings
     string? logEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_LOGGING_ENDPOINT");
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(logEndpointString, "Cannot find the logging endpoint. TELEMETRY_LOGGING_ENDPOINT");
@@ -102,6 +103,9 @@ try
         IRepository<PowerControlContext, SystemConfig> repository = scope.ServiceProvider.GetRequiredService<IRepository<PowerControlContext, SystemConfig>>();
         SystemConfig? config = repository.GetAsync(0, 1, (o) => o.Id).Result.FirstOrDefault();
         ArgumentNullException.ThrowIfNull(config, "System configuration contains no record");
+        SubscriberTopic topics = GetSubscriberTopic(config);
+        IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
+        await deviceClient.Initialize(topics);
 
         if (startPublisher == true)
         {
@@ -134,4 +138,51 @@ catch (Exception ex)
     }
 
     throw;
+}
+
+
+/// <summary>
+/// Get subscriber topic configuration object.
+/// </summary>
+static SubscriberTopic GetSubscriberTopic(SystemConfig config)
+{
+    SubscriberTopic topic = new SubscriberTopic();
+    {
+        if (config.SubscriberTopicPcsCore != null && config.SubscriberTopicPcsDetail != null)
+        {
+            topic.PowerConversionSystemTopic = new SubscriberTopicEntry(config.SubscriberTopicPcsCore, config.SubscriberTopicPcsDetail);
+        }
+
+        if (config.SubscriberTopicBatteryBankCore != null && config.SubscriberTopicBatteryBankDetail != null)
+        {
+            topic.BatteryBankTopic = new SubscriberTopicEntry(config.SubscriberTopicBatteryBankCore, config.SubscriberTopicBatteryBankDetail);
+        }
+
+        if (config.SubscriberTopicSolarPanelCore != null && config.SubscriberTopicSolarPanelDetail != null)
+        {
+            topic.SolarPanelTopic = new SubscriberTopicEntry(config.SubscriberTopicSolarPanelCore, config.SubscriberTopicSolarPanelDetail);
+        }
+
+        if (config.SubscriberTopicExternalPowerMeterCore != null && config.SubscriberTopicExternalPowerMeterDetail != null)
+        {
+            topic.ExternalPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicExternalPowerMeterCore, config.SubscriberTopicExternalPowerMeterDetail);
+        }
+
+        if (config.SubscriberTopicAuxiliaryPowerMeterCore != null && config.SubscriberTopicAuxiliaryPowerMeterDetail != null)
+        {
+            topic.AuxiliaryPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicAuxiliaryPowerMeterCore, config.SubscriberTopicAuxiliaryPowerMeterDetail);
+        }
+
+        if (config.SubscriberTopicSystemPowerMeterCore != null && config.SubscriberTopicSystemPowerMeterDetail != null)
+        {
+            topic.SystemPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicSystemPowerMeterCore, config.SubscriberTopicSystemPowerMeterDetail);
+        }
+
+        if (config.SubscriberTopicCircuitPowerMeterCore != null && config.SubscriberTopicCircuitPowerMeterDetail != null)
+        {
+            topic.CircuitPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicCircuitPowerMeterCore, config.SubscriberTopicCircuitPowerMeterDetail);
+        }
+    };
+
+    return topic;
 }

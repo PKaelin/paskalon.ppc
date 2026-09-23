@@ -203,9 +203,7 @@ namespace paskalON.Devices.Client
         }
 
 
-        /// <summary>
-        /// Initializes the device client.
-        /// </summary>
+        /// <inheritdoc/>
         public async Task Initialize(SubscriberTopic subscriberTopic)
         {
             ArgumentNullException.ThrowIfNull(subscriberTopic);
