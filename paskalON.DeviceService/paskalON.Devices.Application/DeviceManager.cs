@@ -584,8 +584,8 @@ namespace paskalON.Devices.Application
                     DerSolarUnit solar => solar.PowerConversionSystem,
                     _ => null
                 })
-                .Where(device => device?.ActivePowerValue.HasValue == true)
-                .Sum(device => device!.ActivePowerValue!.Value);
+                .Where(device => device?.ActivePower.HasValue == true)
+                .Sum(device => device!.ActivePower!.Value.Watts);
         }
 
 

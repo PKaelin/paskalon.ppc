@@ -260,12 +260,19 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             get { lock (dataLock) { return field; } }
             set
             {
+                bool changed;
+
                 lock (dataLock)
                 {
-                    bool changed = field != value;
+                    changed = field != value;
                     field = value;
+                }
 
-                    if (changed == true && DerUnit is DerBatteryStorageUnit)
+                if (DerUnit is DerBatteryStorageUnit)
+                {
+                    CheckSafety(((DerBatteryStorageUnit)DerUnit));
+
+                    if (changed == true)
                     {
                         ((DerBatteryStorageUnit)DerUnit).DistributeAllocatedActivePower();
                     }
@@ -955,6 +962,36 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             ClearPendingState();
             CommunicationError = true;
             State = PcsState.Fault;
+        }
+
+
+        /// <summary>
+        /// As last defence. Check the SOC limit of the battery and react on it if hit.
+        /// </summary>
+        /// <param name="unit">Der battery storage unit.</param>
+        /// <returns>Task</returns>
+        private void CheckSafety(DerBatteryStorageUnit unit)
+        {
+            bool safety = false;
+
+            if (ActivePowerTarget != null)
+            {
+                if (ActivePowerTarget.Value.Watts > 0)
+                {
+                    safety = unit.BatteryBanks.Any(b => b.UsableStateOfCharge < b.UsableMinimumStateOfCharge - 1);
+                }
+                else if (ActivePowerTarget.Value.Watts < 0)
+                {
+                    safety = unit.BatteryBanks.Any(b => b.UsableStateOfCharge > b.UsableMaximumStateOfCharge + 1);
+                }
+
+                if (safety == true)
+                {
+                    _logger.LogError("{Name} battery SOC safety limit hit. Set power targets to 0", Name);
+                    Task.Run(() => SetActivePowerTargetAsync(0));
+                    Task.Run(() => SetReactivePowerTargetAsync(0));
+                }
+            }
         }
     }
 }
