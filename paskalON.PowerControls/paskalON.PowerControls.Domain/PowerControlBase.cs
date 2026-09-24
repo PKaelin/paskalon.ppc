@@ -77,12 +77,6 @@ namespace paskalON.PowerControls.Domain
         public ref ReactivePower TargetReactivePower { get => ref _targetReactivePower; }
 
 
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public abstract void UpdatePower(ActivePower activePower, ReactivePower reactivePower);
-
-
         public PowerControlBase(ILogger logger, PowerControlBaseConfig config, PowerControlBaseMap map, IMetricsPublisher publisher)
         {
             ArgumentNullException.ThrowIfNull(logger);
@@ -95,5 +89,17 @@ namespace paskalON.PowerControls.Domain
             _map = map;
             MetricsPublisher = publisher;
         }
+
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public abstract void UpdatePower(ActivePower activePower, ReactivePower reactivePower);
+
+
+        /// <summary>
+        /// Register metrics at the publisher.
+        /// </summary>
+        protected abstract void RegisterMetrics();
     }
 }

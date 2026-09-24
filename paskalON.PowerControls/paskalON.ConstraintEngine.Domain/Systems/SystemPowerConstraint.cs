@@ -25,6 +25,18 @@ namespace paskalON.ConstraintEngine.Domain.Systems
 
 
         /// <summary>
+        /// Indicates whether the system should derate per unit stopped.
+        /// </summary>
+        public bool DeratePerUnitStopped { get => _config.DeratePerUnitStopped; }
+
+
+        /// <summary>
+        /// Indicates whether the system should derate per unit in maintenance.
+        /// </summary>
+        public bool DeratePerUnitInMaintenance { get => _config.DeratePerUnitInMaintenance; }
+
+
+        /// <summary>
         /// Constructor of <see cref="SystemPowerConstraint"/>.
         /// </summary>
         /// <param name="logger">ILogger for handling application logging and diagnostics.</param>

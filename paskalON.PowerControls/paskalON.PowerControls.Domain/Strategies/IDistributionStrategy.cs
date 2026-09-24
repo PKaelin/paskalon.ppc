@@ -18,6 +18,6 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// <param name="systemActivePower">The systems constraint active power target.</param>
         /// <param name="systemReactivePower">The systems constraint reactive power target.</param>
         /// <param name="alUnits">All DER unit power controls.</param>
-        void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> alUnits);
+        void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<IDerUnitPowerControl> alUnits);
     }
 }

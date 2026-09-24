@@ -9,7 +9,7 @@ namespace paskalON.PowerControls.Domain.Configs.Ders
     public class DerUnitEnergyStoragePowerControlConfig : PowerControlBaseConfig
     {
         /// <summary>
-        /// Corresponding DER unit name for which this power constraint is defined.
+        /// Corresponding DER unit name for which this power control configuration is defined.
         /// </summary>
         public required string DerUnitName { get; set; }
 

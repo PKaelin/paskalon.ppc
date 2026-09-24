@@ -25,7 +25,7 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> allUnits)
+        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<IDerUnitPowerControl> allUnits)
         {
             // TODO: throw new NotImplementedException();
         }

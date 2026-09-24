@@ -4,7 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.ConstraintEngine.Domain;
-using paskalON.ConstraintEngine.Domain.Configs.Systems;
+using paskalON.ConstraintEngine.Domain.Systems;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.PowerControls.Domain.Configs.Strategies;
 using paskalON.PowerControls.Domain.Configs.Systems;
@@ -24,9 +24,7 @@ namespace paskalON.PowerControls.Domain.Systems
         private readonly SystemPowerControlConfig _config;
         private readonly SystemPowerControlMap _map;
         private readonly IEnumerable<ISystemConstraint> _constraints;
-        private readonly IEnumerable<DerUnitPowerControl> _units;
-        private ActivePower _actualSystemActivePowerTarget;
-        private ReactivePower _actualSystemReactivePowerTarget;
+        private readonly IEnumerable<IDerUnitPowerControl> _units;
 
         /// <summary>
         /// This lock object needs to be used by this class and derived classes.
@@ -36,36 +34,50 @@ namespace paskalON.PowerControls.Domain.Systems
 
         public SystemState State { get => _map.State.Invoke(); }
 
-        public ActivePower SystemActivePowerTarget
+
+        /// <summary>
+        /// Setpoint active power is the setpoint received from the operating mode.
+        /// </summary>
+        public ActivePower SetpointActivePower
         {
             get { lock (dataLock) { return field; } }
             private set { lock (dataLock) { field = value; } }
         }
 
 
-        public ReactivePower SystemReactivePowerTarget
+        /// <summary>
+        /// Setpoint reactive power is the setpoint received from the operating mode.
+        /// </summary>
+        public ReactivePower SetpointReactivePower
         {
             get { lock (dataLock) { return field; } }
             private set { lock (dataLock) { field = value; } }
         }
 
 
-        public ActivePower ActualSystemActivePowerTarget
+        /// <summary>
+        /// Setpoint active power actual is the setpoint after applying constraints and derating.
+        /// </summary>
+        public ActivePower SetpointActivePowerActual
         {
-            get { lock (dataLock) { return _actualSystemActivePowerTarget; } }
-            private set { lock (dataLock) { _actualSystemActivePowerTarget = value; } }
+            get { lock (dataLock) { return field; } }
+            private set { lock (dataLock) { field = value; } }
         }
 
 
-        public ReactivePower ActualSystemReactivePowerTarget
+        /// <summary>
+        /// Setpoint reactive power actual is the setpoint after applying constraints and derating.
+        /// </summary>
+        public ReactivePower SetpointReactivePowerActual
         {
-            get { lock (dataLock) { return _actualSystemReactivePowerTarget; } }
-            private set { lock (dataLock) { _actualSystemReactivePowerTarget = value; } }
+            get { lock (dataLock) { return field; } }
+            private set { lock (dataLock) { field = value; } }
         }
+
 
 
         public SystemPowerControl(ILogger logger, SystemPowerControlConfig config, SystemPowerControlMap map, IMetricsPublisher publisher,
-            IEnumerable<ISystemConstraint> constraints, IEnumerable<DerUnitPowerControl> units, DistributionStrategyProfile distribution)
+            IEnumerable<ISystemConstraint> constraints, IEnumerable<IDerUnitPowerControl> units, DistributionStrategyProfile distribution)
             : base(logger, config, map, publisher)
         {
             ArgumentNullException.ThrowIfNull(config);
@@ -83,6 +95,7 @@ namespace paskalON.PowerControls.Domain.Systems
             _weightedDistribution = distribution.WeightedDistribution;
             _proportionalDistribution = distribution.ProportionalDistribution;
             _waterFillingDistribution = distribution.WaterFillingDistribution;
+            RegisterMetrics();
         }
 
 
@@ -91,71 +104,86 @@ namespace paskalON.PowerControls.Domain.Systems
         {
             if (IsEnabled == true)
             {
-                double systemActivePowerTarget = SystemActivePowerTarget.Watts;
-                double systemReactivePowerTarget = SystemReactivePowerTarget.VoltAmperesReactive;
+                // Asign current setpoints to local variables.
+                double? systemActivePowerDerated = null;
+                double? systemReactivePowerDerated = null;
                 int unitCount = _units.Count();
                 // Get derate stop & maintenance configuration
-                SystemPowerConstraintConfig? derate = _constraints.OfType<SystemPowerConstraintConfig>().FirstOrDefault();
+                SystemPowerConstraint? derate = _constraints.OfType<SystemPowerConstraint>().FirstOrDefault();
 
+                // Check whether we have to derate the setpoints by the actual unit stopped or in maintenance.
                 if (unitCount > 0 && derate != null && (derate.DeratePerUnitStopped || derate.DeratePerUnitInMaintenance))
                 {
-                    int toDerate = _units.Count(u => derate.DeratePerUnitStopped && u.State == DerState.Stopped || derate.DeratePerUnitInMaintenance && u.State == DerState.Maintenance);
-
-                    systemActivePowerTarget = systemActivePowerTarget / unitCount * toDerate;
-                    systemReactivePowerTarget = systemReactivePowerTarget / unitCount * toDerate;
+                    int toDerate = 0;
+                    toDerate += _units.Count(u => derate.DeratePerUnitStopped && u.State == DerState.Stopped);
+                    toDerate += _units.Count(u => derate.DeratePerUnitInMaintenance && u.State == DerState.Maintenance);
+                    systemActivePowerDerated = activePower.Watts / unitCount * (unitCount - toDerate);
+                    systemReactivePowerDerated = reactivePower.VoltAmperesReactive / unitCount * (unitCount - toDerate);
                 }
 
-                if (activePower.Watts != systemActivePowerTarget || reactivePower.VoltAmperesReactivePrecision != systemReactivePowerTarget)
+                _logger.LogInformation("Update system power control. Active Power {ActivePower}, Reactive Power {ReactivePower}", activePower.Watts, reactivePower.KiloVoltAmperesReactive);
+                SetpointActivePower = new ActivePower(activePower.Watts);
+                SetpointReactivePower = new ReactivePower(reactivePower.VoltAmperesReactive);
+                SetpointActivePowerActual = systemActivePowerDerated.HasValue ? new ActivePower((double)systemActivePowerDerated)
+                    : new ActivePower(activePower.Watts);
+                SetpointReactivePowerActual = systemReactivePowerDerated.HasValue ? new ReactivePower((double)systemReactivePowerDerated)
+                    : new ReactivePower(reactivePower.VoltAmperesReactive);
+
+                // Check constraints and apply them to the setpoints
+                foreach (ISystemConstraint constraint in _constraints)
                 {
-                    _logger.LogInformation("Update system power control. Active Power {ActivePower}, Reactive Power {ReactivePower}", activePower.Watts, reactivePower.VoltAmperesReactive);
-                    _actualSystemActivePowerTarget = new ActivePower(SystemActivePowerTarget.Watts);
-                    _actualSystemReactivePowerTarget = new ReactivePower(SystemReactivePowerTarget.VoltAmperesReactive);
-
-                    foreach (ISystemConstraint constraint in _constraints)
-                    {
-                        constraint.ApplyConstraints(ref _actualSystemActivePowerTarget, ref _actualSystemReactivePowerTarget);
-                    }
-
-                    // Distribute to all units that can have different distribution strategies.
-                    DistributePriority();
-                    DistributeEqual();
-                    DistributeWeighted();
-                    DistributeProportional();
-                    DistributeWaterFilling();
+                    constraint.ApplyConstraints(ref _targetActivePower, ref _targetReactivePower);
                 }
+
+                // Distribute to all units that can have different distribution strategies.
+                DistributePriority();
+                DistributeEqual();
+                DistributeWeighted();
+                DistributeProportional();
+                DistributeWaterFilling();
             }
+        }
+
+
+        protected override void RegisterMetrics()
+        {
+            IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>()
+            {
+                { "Name", _config.Name }
+            };
+
+            MetricsPublisher.Initialize(nameof(SystemPowerControl), tags);
         }
 
 
         private void DistributePriority()
         {
-            _priorityDistribution?.Distribute(ActualSystemActivePowerTarget, ActualSystemReactivePowerTarget,
+            _priorityDistribution?.Distribute(SetpointActivePowerActual, SetpointReactivePowerActual,
                 _units.Where(u => u.DistributionStrategyType == DistributionStrategyType.Priority));
         }
 
         private void DistributeEqual()
         {
-            _equalDistribution?.Distribute(ActualSystemActivePowerTarget, ActualSystemReactivePowerTarget,
+            _equalDistribution?.Distribute(SetpointActivePowerActual, SetpointReactivePowerActual,
                 _units.Where(u => u.DistributionStrategyType == DistributionStrategyType.Equal));
         }
 
         private void DistributeWeighted()
         {
-            _weightedDistribution?.Distribute(ActualSystemActivePowerTarget, ActualSystemReactivePowerTarget,
+            _weightedDistribution?.Distribute(SetpointActivePowerActual, SetpointReactivePowerActual,
                 _units.Where(u => u.DistributionStrategyType == DistributionStrategyType.Weight));
         }
 
         private void DistributeProportional()
         {
-            _proportionalDistribution?.Distribute(ActualSystemActivePowerTarget, ActualSystemReactivePowerTarget,
+            _proportionalDistribution?.Distribute(SetpointActivePowerActual, SetpointReactivePowerActual,
                 _units.Where(u => u.DistributionStrategyType == DistributionStrategyType.Proportional));
         }
 
         private void DistributeWaterFilling()
         {
-            _waterFillingDistribution?.Distribute(ActualSystemActivePowerTarget, ActualSystemReactivePowerTarget,
+            _waterFillingDistribution?.Distribute(SetpointActivePowerActual, SetpointReactivePowerActual,
                 _units.Where(u => u.DistributionStrategyType == DistributionStrategyType.WaterFilling));
         }
-
     }
 }

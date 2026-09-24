@@ -27,9 +27,9 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<DerUnitPowerControl> allUnits)
+        public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<IDerUnitPowerControl> allUnits)
         {
-            IEnumerable<DerUnitPowerControl> units = allUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
+            IEnumerable<IDerUnitPowerControl> units = allUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
 
             double totalMaxActive = units.Sum(u => u.MaximumActivePower.Watts);
             double totalMinActive = units.Sum(u => u.MinimumActivePower.Watts);

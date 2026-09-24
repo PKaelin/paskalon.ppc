@@ -40,7 +40,7 @@ try
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsConnectionStringFile, "Cannot find the device service secret file. DEVICESERVICE_CONNECTION_FILE");
     string dsConnectionString = (await File.ReadAllTextAsync(dsConnectionStringFile)).Trim();
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsConnectionString, "Cannot find the device service connection string definition");
-    
+
     // Get Logging, Metrics, Tracing endpoint strings
     string? logEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_LOGGING_ENDPOINT");
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(logEndpointString, "Cannot find the logging endpoint. TELEMETRY_LOGGING_ENDPOINT");
@@ -101,11 +101,13 @@ try
     using (IServiceScope scope = app.Services.CreateScope())
     {
         IRepository<PowerControlContext, SystemConfig> repository = scope.ServiceProvider.GetRequiredService<IRepository<PowerControlContext, SystemConfig>>();
-        SystemConfig? config = repository.GetAsync(0, 1, (o) => o.Id).Result.FirstOrDefault();
+        SystemConfig? config = repository.GetAsync(0, 1, (o) => o.Id).Result.Single();
         ArgumentNullException.ThrowIfNull(config, "System configuration contains no record");
         SubscriberTopic topics = GetSubscriberTopic(config);
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
         await deviceClient.Initialize(topics);
+        PowerControlContext context = scope.ServiceProvider.GetRequiredService<PowerControlContext>();
+        await manager.Initialize(context);
 
         if (startPublisher == true)
         {
@@ -182,7 +184,8 @@ static SubscriberTopic GetSubscriberTopic(SystemConfig config)
         {
             topic.CircuitPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicCircuitPowerMeterCore, config.SubscriberTopicCircuitPowerMeterDetail);
         }
-    };
+    }
+    ;
 
     return topic;
 }

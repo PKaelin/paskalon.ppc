@@ -165,7 +165,7 @@ try
     {
         // Load system configuration
         IRepository<DeviceServiceContext, SystemConfig> repository = scope.ServiceProvider.GetRequiredService<IRepository<DeviceServiceContext, SystemConfig>>();
-        SystemConfig? config = repository.GetAsync(0, 1, (o) => o.Id).Result.FirstOrDefault();
+        SystemConfig? config = repository.GetAsync(0, 1, (o) => o.Id).Result.Single();
         ArgumentNullException.ThrowIfNull(config, "System configuration contains no record");
 
         if (startWorker == true)

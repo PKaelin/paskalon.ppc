@@ -12,7 +12,7 @@ using paskalON.Telemetry;
 
 namespace paskalON.PowerControls.Domain.Ders
 {
-    public class DerUnitPowerControl : PowerControlBase
+    public class DerUnitPowerControl : PowerControlBase, IDerUnitPowerControl
     {
         private readonly DerUnitPowerControlConfig _config;
         private readonly DerUnitPowerControlMap _map;
@@ -86,6 +86,8 @@ namespace paskalON.PowerControls.Domain.Ders
                 MaximumReactivePower = pc.MaximumReactivePowerVars.HasValue ? new ReactivePower(pc.MaximumReactivePowerVars.Value) : new ReactivePower(0);
                 MinimumReactivePower = pc.MinimumReactivePowerVars.HasValue ? new ReactivePower(pc.MinimumReactivePowerVars.Value) : new ReactivePower(0);
             }
+
+            RegisterMetrics();
         }
 
 
@@ -98,6 +100,18 @@ namespace paskalON.PowerControls.Domain.Ders
                     constraint.ApplyConstraints(ref activePower, ref reactivePower);
                 }
             }
+        }
+
+
+        protected override void RegisterMetrics()
+        {
+            IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>()
+            {
+                { "Name", _config.Name },
+                { "Unit", _config.DerUnitName }
+            };
+
+            MetricsPublisher.Initialize(nameof(DerUnitPowerControl), tags);
         }
     }
 }
