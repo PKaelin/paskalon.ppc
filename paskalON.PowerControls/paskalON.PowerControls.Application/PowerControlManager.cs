@@ -218,6 +218,7 @@ namespace paskalON.PowerControls.Application
         {
             DerUnitPowerControlMap map = new DerUnitPowerControlMap
             {
+                PcsDeviceId = GetPcs(unit)?.DeviceId ?? 0,
                 State = () => GetDerState(unit, GetPcs(unit))
             };
 
@@ -239,6 +240,7 @@ namespace paskalON.PowerControls.Application
         {
             DerUnitPowerEnergyStorageControlMap map = new DerUnitPowerEnergyStorageControlMap
             {
+                PcsDeviceId = unit.PowerConversionSystem?.DeviceId ?? 0,
                 State = () => GetDerState(unit, unit.PowerConversionSystem),
                 StateOfCharge = () => unit.BatteryBanks.Select(b => b.Core?.StateOfCharge ?? 0).DefaultIfEmpty().Average(),
                 StateOfChargeMaximum = () => unit.BatteryBanks.Select(b => b.Definition.PreferredMaximumStateOfCharge).DefaultIfEmpty().Average(),

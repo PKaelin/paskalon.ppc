@@ -36,6 +36,12 @@ namespace paskalON.PowerControls.Domain.Ders
 
 
         /// <summary>
+        /// DER unit power conversion systems identifier.
+        /// </summary>
+        public int PcsDeviceId { get => _map.PcsDeviceId; }
+
+
+        /// <summary>
         /// DER unit energy storage power control state.
         /// </summary>
         public DerState State { get => _map.State.Invoke(); }

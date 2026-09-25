@@ -89,7 +89,7 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             ActivePower active = ActivePower.FromKilo(20);
             ReactivePower reactive = ReactivePower.FromKilo(10);
 
-            DerUnitPowerControlMap map = new DerUnitPowerControlMap { State = () => DerState.Stopped };
+            DerUnitPowerControlMap map = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Stopped };
             DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map, _publisher.Object, new List<IDerUnitConstraint>());
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1 };
 
@@ -110,7 +110,7 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             ActivePower active = ActivePower.FromKilo(20);
             ReactivePower reactive = ReactivePower.FromKilo(10);
 
-            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
             DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint>());
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1 };
 
@@ -133,8 +133,8 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             ActivePower active = ActivePower.FromKilo(20);
             ReactivePower reactive = ReactivePower.FromKilo(10);
 
-            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
-            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
+            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Started };
             DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint>());
             DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint>());
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2 };
@@ -160,8 +160,8 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             ActivePower active = ActivePower.FromKilo(0);
             ReactivePower reactive = ReactivePower.FromKilo(0);
 
-            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
-            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
+            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Started };
             DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint>());
             DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint>());
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2 };
@@ -187,9 +187,9 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             ActivePower active = ActivePower.FromKilo(20);
             ReactivePower reactive = ReactivePower.FromKilo(10);
 
-            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
-            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { State = () => DerState.Started };
-            DerUnitPowerControlMap map3 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
+            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Started };
+            DerUnitPowerControlMap map3 = new DerUnitPowerControlMap { PcsDeviceId = 3, State = () => DerState.Started };
             DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint>());
             DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint>());
             DerUnitPowerControl unit3 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig3!, map3, _publisher.Object, new List<IDerUnitConstraint>());
@@ -218,9 +218,9 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             ActivePower active = ActivePower.FromKilo(20);
             ReactivePower reactive = ReactivePower.FromKilo(10);
 
-            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
-            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { State = () => DerState.Stopped };
-            DerUnitPowerControlMap map3 = new DerUnitPowerControlMap { State = () => DerState.Maintenance };
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
+            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Stopped };
+            DerUnitPowerControlMap map3 = new DerUnitPowerControlMap { PcsDeviceId = 3, State = () => DerState.Maintenance };
             DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint>());
             DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint>());
             DerUnitPowerControl unit3 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig3!, map3, _publisher.Object, new List<IDerUnitConstraint>());
@@ -260,8 +260,8 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             };
 
             DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
-            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
-            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
+            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Started };
             DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2 };
@@ -299,8 +299,8 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             };
 
             DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
-            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
-            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
+            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Started };
             DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2 };
@@ -337,8 +337,8 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             };
 
             DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
-            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
-            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
+            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Started };
             DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2 };
@@ -375,8 +375,8 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             };
 
             DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
-            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { State = () => DerState.Started };
-            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { State = () => DerState.Started };
+            DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
+            DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Started };
             DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2 };
