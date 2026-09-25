@@ -215,7 +215,18 @@ namespace paskalON.PowerControls.Domain.Systems
                 { "Name", _config.Name }
             };
 
+            // Initialize metrics
             MetricsPublisher.Initialize(nameof(SystemPowerControl), tags);
+            // MetricsFactorClass1
+            MetricsPublisher.Register<SystemPowerControl, int>(this, nameof(State), MetricType.Gauge, x => (int)x.State, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<SystemPowerControl, double>(this, nameof(TargetActivePower), MetricType.Gauge, x => x.TargetActivePower.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<SystemPowerControl, double>(this, nameof(TargetReactivePower), MetricType.Gauge, x => x.TargetReactivePower.VoltAmperesReactive, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<SystemPowerControl, double>(this, nameof(SetpointActivePower), MetricType.Gauge, x => x.SetpointActivePower.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<SystemPowerControl, double>(this, nameof(SetpointReactivePower), MetricType.Gauge, x => x.SetpointReactivePower.VoltAmperesReactive, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<SystemPowerControl, double>(this, nameof(SetpointActivePowerActual), MetricType.Gauge, x => x.SetpointActivePowerActual.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<SystemPowerControl, double>(this, nameof(SetpointReactivePowerActual), MetricType.Gauge, x => x.SetpointReactivePowerActual.VoltAmperesReactive, _config.MetricsFactorClass1);
+            // MetricsFactorClass4
+            MetricsPublisher.Register<SystemPowerControl, int>(this, nameof(IsEnabled), MetricType.Gauge, x => x.IsEnabled ? 1 : 0, _config.MetricsFactorClass4);
         }
 
 

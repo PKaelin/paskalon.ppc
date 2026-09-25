@@ -143,7 +143,14 @@ namespace paskalON.PowerControls.Domain.Ders
                 { "Unit", _config.DerUnitName }
             };
 
+            // Initialize metrics
             MetricsPublisher.Initialize(nameof(DerUnitPowerControl), tags);
+            // MetricsFactorClass1
+            MetricsPublisher.Register<DerUnitPowerControl, int>(this, nameof(State), MetricType.Gauge, x => (int)x.State, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<DerUnitPowerControl, double>(this, nameof(TargetActivePower), MetricType.Gauge, x => x.TargetActivePower.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<DerUnitPowerControl, double>(this, nameof(TargetReactivePower), MetricType.Gauge, x => x.TargetReactivePower.VoltAmperesReactive, _config.MetricsFactorClass1);
+            // MetricsFactorClass4
+            MetricsPublisher.Register<DerUnitPowerControl, int>(this, nameof(IsEnabled), MetricType.Gauge, x => x.IsEnabled ? 1 : 0, _config.MetricsFactorClass4);
         }
     }
 }
