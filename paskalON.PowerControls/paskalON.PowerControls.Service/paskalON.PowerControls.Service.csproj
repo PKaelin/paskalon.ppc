@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Client\paskalON.Devices.Client.csproj" />
+    <ProjectReference Include="..\..\paskalON.PowerControls.Service.Dto\paskalON.PowerControls.Service.Dto.csproj" />
     <ProjectReference Include="..\paskalON.PowerControls.Application\paskalON.PowerControls.Application.csproj" />
     <ProjectReference Include="..\paskalON.PowerControls.Infrastructure\paskalON.PowerControls.Infrastructure.csproj" />
   </ItemGroup>

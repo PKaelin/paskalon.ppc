@@ -40,6 +40,9 @@ try
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsConnectionStringFile, "Cannot find the device service secret file. DEVICESERVICE_CONNECTION_FILE");
     string dsConnectionString = (await File.ReadAllTextAsync(dsConnectionStringFile)).Trim();
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsConnectionString, "Cannot find the device service connection string definition");
+    // Get device service DER endpoint
+    string? dsEndpoint = Environment.GetEnvironmentVariable("DEVICE_SERVICE_ENDPOINT");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsEndpoint, "Cannot find the device service endpoint. DEVICE_SERVICE_ENDPOINT");
 
     // Get Logging, Metrics, Tracing endpoint strings
     string? logEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_LOGGING_ENDPOINT");
@@ -75,7 +78,7 @@ try
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
     builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
     builder.Services.AddSingleton<MetricsPublisherService>();
-    builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(dsConnectionString));
+    builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(dsConnectionString + dsEndpoint + "/der/getder"));
     builder.Services.AddSingleton<IMessageSubscriber, RedisMessageSubscriber>();
     builder.Services.AddSingleton<IDeviceClient, DeviceClient>();
 

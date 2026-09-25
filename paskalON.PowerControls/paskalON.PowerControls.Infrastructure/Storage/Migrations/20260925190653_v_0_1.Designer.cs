@@ -12,7 +12,7 @@ using paskalON.PowerControls.Infrastructure.Storage;
 namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(PowerControlContext))]
-    [Migration("20260923193328_v_0_1")]
+    [Migration("20260925190653_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -191,6 +191,18 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("MetricsFactorClass1")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MetricsFactorClass2")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MetricsFactorClass3")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MetricsFactorClass4")
+                        .HasColumnType("integer");
 
                     b.ToTable((string)null);
                 });

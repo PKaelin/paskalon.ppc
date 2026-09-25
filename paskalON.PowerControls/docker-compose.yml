@@ -44,6 +44,7 @@ services:
       - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
       - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
       - START_PUBLISHERS=true
+      - DEVICE_SERVICE_ENDPOINT=/api/v1
     secrets:
       - database_connection
       - messaging_connection

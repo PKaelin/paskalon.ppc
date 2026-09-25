@@ -189,6 +189,18 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("MetricsFactorClass1")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MetricsFactorClass2")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MetricsFactorClass3")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MetricsFactorClass4")
+                        .HasColumnType("integer");
+
                     b.ToTable((string)null);
                 });
 

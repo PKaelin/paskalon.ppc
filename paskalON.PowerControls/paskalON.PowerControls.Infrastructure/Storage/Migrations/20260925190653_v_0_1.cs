@@ -40,6 +40,10 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass4 = table.Column<int>(type: "integer", nullable: false),
                     DerUnitName = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     DistributionStrategyType = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -77,6 +81,10 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass4 = table.Column<int>(type: "integer", nullable: false),
                     DerUnitName = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     DistributionStrategyType = table.Column<int>(type: "integer", nullable: false),
                     Priority = table.Column<int>(type: "integer", nullable: true),
@@ -164,7 +172,11 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    IsEnabled = table.Column<bool>(type: "boolean", nullable: false)
+                    IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass4 = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -4,6 +4,19 @@
 @paskalON.PowerControls.Service_HostAddress = http://localhost:45010
 
 #------------------------------------------------------------------------------
+# System controller
+#------------------------------------------------------------------------------
+POST {{paskalON.PowerControls.Service_HostAddress}}/api/v1/system/setpowersetpoints
+Content-Type: application/json
+
+{
+    "ActivePowerWatt": 100000,
+    "ReactivePowerVar": 20000
+}
+
+###
+
+#------------------------------------------------------------------------------
 # Version controller
 #------------------------------------------------------------------------------
 GET {{paskalON.PowerControls.Service_HostAddress}}/api/v1/version/
