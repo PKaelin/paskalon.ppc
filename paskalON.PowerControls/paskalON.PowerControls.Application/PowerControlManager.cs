@@ -27,6 +27,9 @@ using System.Collections.ObjectModel;
 
 namespace paskalON.PowerControls.Application
 {
+    /// <summary>
+    /// Power control manager responsible for managing system and DER unit power controls, configurations, and constraints.
+    /// </summary>
     public class PowerControlManager : IPowerControlManager
     {
         /// <summary>
@@ -41,59 +44,92 @@ namespace paskalON.PowerControls.Application
         private readonly IDeviceClient _deviceClient;
 
 
+        /// <summary>
+        /// Metrics publisher factory to create metrics publishers for telemetry.
+        /// </summary>
         private readonly IMetricsPublisherFactory _metricsPublisherFactory;
 
-
+        /// <summary>
+        /// Lock object for synchronizing access to shared data.
+        /// </summary>
         private readonly object _dataLock = new();
 
 
+        /// <summary>
+        /// System power control instance.
+        /// </summary>
         private SystemPowerControl? _systemPowerControl;
 
 
+        /// <summary>
+        /// List of system power control configurations.
+        /// </summary>
         private IReadOnlyList<SystemPowerControlConfig> _systemPowerControlConfigurations = [];
 
 
+        /// <summary>
+        /// List of DER unit power control configurations.
+        /// </summary>
         private IReadOnlyList<DerUnitPowerControlConfig> _derUnitPowerControlConfigurations = [];
 
 
+        /// <summary>
+        /// List of DER unit energy storage power control configurations.
+        /// </summary>
         private IReadOnlyList<DerUnitEnergyStoragePowerControlConfig> _derUnitEnergyStoragePowerControlConfigurations = [];
 
 
+        /// <summary>
+        /// List of constraint configurations.
+        /// </summary>
         private IReadOnlyList<ConstraintBaseConfig> _constraintConfigurations = [];
 
+
+        /// <inheritdoc/>
         public ICollection<IMetricsPublisher> MetricsPublishers { get; } = new List<IMetricsPublisher>();
 
 
+        /// <inheritdoc/>
         public IReadOnlyList<SystemPowerControlConfig> SystemPowerControlConfigurations
         {
             get { lock (_dataLock) { return _systemPowerControlConfigurations; } }
         }
 
 
+        /// <inheritdoc/>
         public IReadOnlyList<DerUnitPowerControlConfig> DerUnitPowerControlConfigurations
         {
             get { lock (_dataLock) { return _derUnitPowerControlConfigurations; } }
         }
 
 
+        /// <inheritdoc/>
         public IReadOnlyList<DerUnitEnergyStoragePowerControlConfig> DerUnitEnergyStoragePowerControlConfigurations
         {
             get { lock (_dataLock) { return _derUnitEnergyStoragePowerControlConfigurations; } }
         }
 
 
+        /// <inheritdoc/>
         public IReadOnlyList<ConstraintBaseConfig> ConstraintConfigurations
         {
             get { lock (_dataLock) { return _constraintConfigurations; } }
         }
 
 
+        /// <inheritdoc/>
         public SystemPowerControl? SystemPowerControl
         {
             get { lock (_dataLock) { return _systemPowerControl; } }
         }
 
 
+        /// <summary>
+        /// Constructo of <see cref="PowerControlManager"/>.
+        /// </summary>
+        /// <param name="logger">The logger instance.</param>
+        /// <param name="deviceClient">The device client instance.</param>
+        /// <param name="metricsPublisherFactory">The metrics publisher factory instance.</param>
         public PowerControlManager(ILogger<PowerControlManager> logger, IDeviceClient deviceClient, IMetricsPublisherFactory metricsPublisherFactory)
         {
             ArgumentNullException.ThrowIfNull(logger);
@@ -105,6 +141,8 @@ namespace paskalON.PowerControls.Application
             _metricsPublisherFactory = metricsPublisherFactory;
         }
 
+
+        /// <inheritdoc/>
         public async Task Initialize(PowerControlContext context)
         {
             // Load power control configurations and constraints from the database
@@ -153,12 +191,29 @@ namespace paskalON.PowerControls.Application
         }
 
 
+        /// <inheritdoc/>
+        public async Task SetSystemPowerTarget(ActivePower activePower, ReactivePower reactivePower)
+        {
+            _systemPowerControl?.UpdatePower(activePower, reactivePower);
+        }
+
+
+        /// <summary>
+        /// Get all DER units from the device client.
+        /// </summary>
+        /// <returns>An enumerable collection of <see cref="DerUnitDto"/> representing all DER units.</returns>
         private IEnumerable<DerUnitDto> GetDerUnits()
         {
             return _deviceClient.Der.DerGroups.SelectMany(g => g.DerCircuits).SelectMany(c => c.DerUnits);
         }
 
 
+        /// <summary>
+        /// Create a DER unit power control instance for the specified DER unit and configuration.
+        /// </summary>
+        /// <param name="unit">The DER unit for which to create the power control.</param>
+        /// <param name="config">The configuration for the DER unit power control.</param>
+        /// <returns>A <see cref="DerUnitPowerControl"/> instance.</returns>
         private DerUnitPowerControl CreateUnitPowerControl(DerUnitDto unit, DerUnitPowerControlConfig config)
         {
             DerUnitPowerControlMap map = new DerUnitPowerControlMap
@@ -174,12 +229,12 @@ namespace paskalON.PowerControls.Application
         }
 
 
-        public async Task SetSystemPowerTarget(ActivePower activePower, ReactivePower reactivePower)
-        {
-            _systemPowerControl?.UpdatePower(activePower, reactivePower);
-        }
-
-
+        /// <summary>
+        /// Create a DER unit energy storage power control instance for the specified battery storage unit and configuration.
+        /// </summary>
+        /// <param name="unit">The battery storage unit for which to create the power control.</param>
+        /// <param name="config">The configuration for the DER unit energy storage power control.</param>
+        /// <returns>A <see cref="DerUnitPowerEnergyStorageControl"/> instance.</returns>
         private DerUnitPowerEnergyStorageControl CreateStoragePowerControl(DerBatteryStorageUnitDto unit, DerUnitEnergyStoragePowerControlConfig config)
         {
             DerUnitPowerEnergyStorageControlMap map = new DerUnitPowerEnergyStorageControlMap
@@ -199,6 +254,11 @@ namespace paskalON.PowerControls.Application
         }
 
 
+        /// <summary>
+        /// Get the power conversion system (PCS) associated with the specified DER unit.
+        /// </summary>
+        /// <param name="unit">The DER unit for which to get the PCS.</param>
+        /// <returns>The PCS associated with the DER unit, or null if none exists.</returns>
         private PcsDto? GetPcs(DerUnitDto unit)
         {
             return unit switch
@@ -210,6 +270,12 @@ namespace paskalON.PowerControls.Application
         }
 
 
+        /// <summary>
+        /// Get the DER state based on the unit and its associated PCS.
+        /// </summary>
+        /// <param name="unit">The DER unit for which to get the state.</param>
+        /// <param name="pcs">The PCS associated with the DER unit.</param>
+        /// <returns>The state of the DER unit.</returns>
         private DerState GetDerState(DerUnitDto unit, PcsDto? pcs)
         {
             if (unit.IsInMaintenanceMode == true)
@@ -221,6 +287,10 @@ namespace paskalON.PowerControls.Application
         }
 
 
+        /// <summary>
+        /// Create a system power control map that defines the state of the system based on the states of its DER units.
+        /// </summary>
+        /// <returns>The system power control map.</returns>
         private SystemPowerControlMap CreateSystemMap()
         {
             return new SystemPowerControlMap
@@ -230,6 +300,11 @@ namespace paskalON.PowerControls.Application
         }
 
 
+        /// <summary>
+        /// Create a list of system constraints based on the provided configurations.
+        /// </summary>
+        /// <param name="configurations">The configurations used to create the system constraints.</param>
+        /// <returns>A list of system constraints.</returns>
         private List<ISystemConstraint> CreateSystemConstraints(IEnumerable<ConstraintBaseConfig> configurations)
         {
             List<ISystemConstraint> constraints = new List<ISystemConstraint>();
@@ -252,6 +327,11 @@ namespace paskalON.PowerControls.Application
         }
 
 
+        /// <summary>
+        /// Create a list of DER unit constraints based on the provided configurations.
+        /// </summary>
+        /// <param name="configurations">The configurations used to create the DER unit constraints.</param>
+        /// <returns>A list of DER unit constraints.</returns>
         private List<IDerUnitConstraint> CreateUnitConstraints(IEnumerable<ConstraintBaseConfig> configurations)
         {
             List<IDerUnitConstraint> constraints = new();
@@ -274,6 +354,10 @@ namespace paskalON.PowerControls.Application
         }
 
 
+        /// <summary>
+        /// Create a distribution strategy profile that defines the available distribution strategies for power control.
+        /// </summary>
+        /// <returns>A distribution strategy profile.</returns>
         private DistributionStrategyProfile CreateDistributionProfile()
         {
             return new DistributionStrategyProfile
