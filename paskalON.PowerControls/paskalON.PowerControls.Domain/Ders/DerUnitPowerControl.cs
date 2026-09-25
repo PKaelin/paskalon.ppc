@@ -12,15 +12,32 @@ using paskalON.Telemetry;
 
 namespace paskalON.PowerControls.Domain.Ders
 {
+    /// <summary>
+    /// DER unit power control.
+    /// </summary>
     public class DerUnitPowerControl : PowerControlBase, IDerUnitPowerControl
     {
+        /// <summary>
+        /// DER unit power control configuration.
+        /// </summary>
         private readonly DerUnitPowerControlConfig _config;
+
+
+        /// <summary>
+        /// DER unit power control map.
+        /// </summary>
         private readonly DerUnitPowerControlMap _map;
 
 
+        /// <summary>
+        /// DER unit power control constraints.
+        /// </summary>
         public IEnumerable<IDerUnitConstraint> Constraints { get; init; }
 
 
+        /// <summary>
+        /// DER unit power control state.
+        /// </summary>
         public DerState State { get => _map.State.Invoke(); }
 
 
@@ -36,6 +53,9 @@ namespace paskalON.PowerControls.Domain.Ders
         public double Weight { get; set; }
 
 
+        /// <summary>
+        /// Distribution strategy type used for distribution.
+        /// </summary>
         public DistributionStrategyType DistributionStrategyType { get => _config.DistributionStrategyType; }
 
 
@@ -63,6 +83,14 @@ namespace paskalON.PowerControls.Domain.Ders
         public ReactivePower MinimumReactivePower { get; init; }
 
 
+        /// <summary>
+        /// Constructor of <see cref="DerUnitPowerControl"/>.
+        /// </summary>
+        /// <param name="logger">The logger instance.</param>
+        /// <param name="config">The DER unit power control configuration.</param>
+        /// <param name="map">The DER unit power control map.</param>
+        /// <param name="publisher">The metrics publisher.</param>
+        /// <param name="constraints">The DER unit constraints.</param>
         public DerUnitPowerControl(ILogger logger, DerUnitPowerControlConfig config, DerUnitPowerControlMap map, IMetricsPublisher publisher, IEnumerable<IDerUnitConstraint> constraints)
             : base(logger, config, map, publisher)
         {
@@ -91,6 +119,7 @@ namespace paskalON.PowerControls.Domain.Ders
         }
 
 
+        /// <inheritdoc/>
         public override void UpdatePower(ActivePower activePower, ReactivePower reactivePower)
         {
             if (IsEnabled == true)
@@ -99,10 +128,13 @@ namespace paskalON.PowerControls.Domain.Ders
                 {
                     constraint.ApplyConstraints(ref activePower, ref reactivePower);
                 }
+
+                SetTargetPower(activePower, reactivePower);
             }
         }
 
 
+        /// <inheritdoc/>
         protected override void RegisterMetrics()
         {
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>()

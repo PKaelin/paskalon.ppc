@@ -3,7 +3,6 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
-using paskalON.ConstraintEngine.Domain;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.PowerControls.Domain.Ders;
 
@@ -33,17 +32,15 @@ namespace paskalON.PowerControls.Domain.Strategies
 
             if (totalWeight > 0)
             {
-                foreach (DerUnitPowerControl unit in units)
+                foreach (IDerUnitPowerControl unit in units)
                 {
                     double unitTargetActivePower = systemActivePower.Watts / totalWeight * unit.Weight;
                     double unitTargetReactivePower = systemReactivePower.VoltAmperesReactive / totalWeight * unit.Weight;
-                    unit.TargetActivePower.Watts = unitTargetActivePower;
-                    unit.TargetReactivePower.VoltAmperesReactive = unitTargetReactivePower;
-
-                    foreach (IConstraint constraint in unit.Constraints)
-                    {
-                        constraint.ApplyConstraints(ref unit.TargetActivePower, ref unit.TargetReactivePower, false);
-                    }
+                    // Create local for thread safety
+                    ActivePower targetActivePower = new ActivePower(unitTargetActivePower);
+                    ReactivePower targetReactivePower = new ReactivePower(unitTargetReactivePower);
+                    // Updates the unit's power settings and considers possible contraints and limits
+                    unit.UpdatePower(targetActivePower, targetReactivePower);
                 }
             }
 

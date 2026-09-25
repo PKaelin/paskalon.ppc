@@ -18,6 +18,13 @@ namespace paskalON.PowerControls.Domain
 
 
         /// <summary>
+        /// This lock object needs to be used by this class and derived classes.
+        /// The classes need to use the same lock for thread safety.
+        /// </summary>
+        protected object dataLock = new();
+
+
+        /// <summary>
         /// Power control base configuration.
         /// </summary>
         private readonly PowerControlBaseConfig _config;
@@ -32,19 +39,13 @@ namespace paskalON.PowerControls.Domain
         /// <summary>
         /// Active power target for the power control.
         /// </summary>
-        /// <remarks>
-        /// For performance this is a class variable.
-        /// </remarks>
-        protected ActivePower _targetActivePower = new ActivePower(0);
+        private ActivePower _targetActivePower;
 
 
         /// <summary>
         /// Reactive power target for the power control.
         /// </summary>
-        /// <remarks>
-        /// For performance this is a class variable.
-        /// </remarks>
-        protected ReactivePower _targetReactivePower = new ReactivePower(0);
+        private ReactivePower _targetReactivePower;
 
 
         /// <summary>
@@ -68,13 +69,20 @@ namespace paskalON.PowerControls.Domain
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ref ActivePower TargetActivePower { get => ref _targetActivePower; }
+        public ActivePower TargetActivePower
+        {
+            get { lock (dataLock) { return _targetActivePower; } }
+        }
 
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public ref ReactivePower TargetReactivePower { get => ref _targetReactivePower; }
+        public ReactivePower TargetReactivePower
+        {
+            get { lock (dataLock) { return _targetReactivePower; } }
+        }
+
 
 
         public PowerControlBase(ILogger logger, PowerControlBaseConfig config, PowerControlBaseMap map, IMetricsPublisher publisher)
@@ -95,6 +103,21 @@ namespace paskalON.PowerControls.Domain
         /// <inheritdoc/>
         /// </summary>
         public abstract void UpdatePower(ActivePower activePower, ReactivePower reactivePower);
+
+
+        /// <summary>
+        /// Update the power targets in a thread safe manner.
+        /// </summary>
+        /// <param name="activePower">Active power target for the power control.</param>
+        /// <param name="reactivePower">Reactive power target for the power control.</param>
+        public void SetTargetPower(ActivePower activePower, ReactivePower reactivePower)
+        {
+            lock (dataLock)
+            {
+                _targetActivePower = activePower;
+                _targetReactivePower = reactivePower;
+            }
+        }
 
 
         /// <summary>

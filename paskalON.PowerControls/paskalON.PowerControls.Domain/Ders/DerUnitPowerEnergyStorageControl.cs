@@ -12,38 +12,103 @@ using paskalON.Telemetry;
 
 namespace paskalON.PowerControls.Domain.Ders
 {
+    /// <summary>
+    /// DER unit energy storage power control.
+    /// </summary>
     public class DerUnitPowerEnergyStorageControl : PowerControlBase, IDerUnitPowerControl
     {
+        /// <summary>
+        /// DER unit energy storagepower control configuration.
+        /// </summary>
         private readonly DerUnitEnergyStoragePowerControlConfig _config;
+
+
+        /// <summary>
+        /// DER unit energy storage power control map.
+        /// </summary>
         private readonly DerUnitPowerEnergyStorageControlMap _map;
 
 
+        /// <summary>
+        /// DER unit energy storage power control constraints.
+        /// </summary>
         public IEnumerable<IDerUnitConstraint> Constraints { get; init; }
 
 
+        /// <summary>
+        /// DER unit energy storage power control state.
+        /// </summary>
         public DerState State { get => _map.State.Invoke(); }
 
 
+        /// <summary>
+        /// DER unit energy storage state of charge.
+        /// </summary>
+        public double StateOfCharge { get => _map.StateOfCharge.Invoke(); }
+
+
+        /// <summary>
+        /// DER unit energy storage state of charge maximum.
+        /// </summary>
+        public double StateOfChargeMaximum { get => _map.StateOfChargeMaximum.Invoke(); }
+
+
+        /// <summary>
+        /// DER unit energy storage state of charge minimum.
+        /// </summary>
+        public double StateOfChargeMinimum { get => _map.StateOfChargeMinimum.Invoke(); }
+
+
+        /// <summary>
+        /// If priority distribution strategy is used then this priority is used.
+        /// </summary>
         public int Priority { get; init; }
 
 
+        /// <summary>
+        /// If weighted distribution strategy is used then this weight is used.
+        /// </summary>
         public double Weight { get; init; }
 
 
+        /// <summary>
+        /// Distribution strategy type used for distribution.
+        /// </summary>
         public DistributionStrategyType DistributionStrategyType { get => _config.DistributionStrategyType; }
 
 
+        /// <summary>
+        /// Maximum Active Power is the possible technical or nameplate limits of the unit.
+        /// </summary>
         public ActivePower MaximumActivePower { get; init; }
 
 
+        /// <summary>
+        /// Minimum Active Power is the possible technical or nameplate limits of the unit.
+        /// </summary>
         public ActivePower MinimumActivePower { get; init; }
 
 
+        /// <summary>
+        /// Maximum Reactive Power is the possible technical or nameplate limits of the unit.
+        /// </summary>
         public ReactivePower MaximumReactivePower { get; init; }
 
 
+        /// <summary>
+        /// Minimum Reactive Power is the possible technical or nameplate limits of the unit.
+        /// </summary>
         public ReactivePower MinimumReactivePower { get; init; }
 
+
+        /// <summary>
+        /// Constructor of <see cref="DerUnitPowerEnergyStorageControl"/>.
+        /// </summary>
+        /// <param name="logger">The logger instance.</param>
+        /// <param name="config">The DER unit energy storage power control configuration.</param>
+        /// <param name="map">The DER unit power energy storage control map.</param>
+        /// <param name="publisher">The metrics publisher.</param>
+        /// <param name="constraints">The DER unit constraints.</param>
         public DerUnitPowerEnergyStorageControl(ILogger logger, DerUnitEnergyStoragePowerControlConfig config, DerUnitPowerEnergyStorageControlMap map,
             IMetricsPublisher publisher, IEnumerable<IDerUnitConstraint> constraints)
             : base(logger, config, map, publisher)
@@ -73,15 +138,7 @@ namespace paskalON.PowerControls.Domain.Ders
         }
 
 
-        public double StateOfCharge { get => _map.StateOfCharge.Invoke(); }
-
-
-        public double StateOfChargeMaximum { get => _map.StateOfChargeMaximum.Invoke(); }
-
-
-        public double StateOfChargeMinimum { get => _map.StateOfChargeMinimum.Invoke(); }
-
-
+        /// <inheritdoc/>
         public override void UpdatePower(ActivePower activePower, ReactivePower reactivePower)
         {
             if (IsEnabled == true)
@@ -90,10 +147,13 @@ namespace paskalON.PowerControls.Domain.Ders
                 {
                     constraint.ApplyConstraints(ref activePower, ref reactivePower);
                 }
+
+                SetTargetPower(activePower, reactivePower);
             }
         }
 
 
+        /// <inheritdoc/>
         protected override void RegisterMetrics()
         {
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>()

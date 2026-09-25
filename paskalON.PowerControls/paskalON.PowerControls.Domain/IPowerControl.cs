@@ -24,15 +24,23 @@ namespace paskalON.PowerControls.Domain
 
 
         /// <summary>
-        /// Active power target for the power control.
+        /// Actual active power target of the power control after applying constraints and derating.
         /// </summary>
-        ref ActivePower TargetActivePower { get; }
+        ActivePower TargetActivePower { get; }
 
 
         /// <summary>
-        /// Reactive power target for the power control.
+        /// Actual reactive power target of the power control after applying constraints and derating.
         /// </summary>
-        ref ReactivePower TargetReactivePower { get; }
+        ReactivePower TargetReactivePower { get; }
+
+
+        /// <summary>
+        /// Sets the active and reactive power targets.
+        /// </summary>
+        /// <param name="activePower">Active power target.</param>
+        /// <param name="reactivePower">Reactive power target.</param>
+        void SetTargetPower(ActivePower activePower, ReactivePower reactivePower);
 
 
         /// <summary>

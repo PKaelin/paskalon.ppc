@@ -3,7 +3,6 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
-using paskalON.ConstraintEngine.Domain;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.PowerControls.Domain.Ders;
 
@@ -36,18 +35,15 @@ namespace paskalON.PowerControls.Domain.Strategies
             double totalMaxReactive = units.Sum(u => u.MaximumReactivePower.VoltAmperesReactive);
             double totalMinReactive = units.Sum(u => u.MinimumReactivePower.VoltAmperesReactive);
 
-            foreach (DerUnitPowerControl unit in units)
+            foreach (IDerUnitPowerControl unit in units)
             {
-                unit.TargetActivePower.Watts = Calculate(systemActivePower.Watts, unit.MinimumActivePower.Watts, unit.MaximumActivePower.Watts,
-                    totalMinActive, totalMaxActive);
-
-                unit.TargetReactivePower.VoltAmperesReactive = Calculate(systemReactivePower.VoltAmperesReactive, unit.MinimumReactivePower.VoltAmperesReactive,
-                    unit.MaximumReactivePower.VoltAmperesReactive, totalMinReactive, totalMaxReactive);
-
-                foreach (IConstraint constraint in unit.Constraints)
-                {
-                    constraint.ApplyConstraints(ref unit.TargetActivePower, ref unit.TargetReactivePower, false);
-                }
+                // Create local for thread safety
+                ActivePower targetActivePower = new ActivePower(Calculate(systemActivePower.Watts, unit.MinimumActivePower.Watts, unit.MaximumActivePower.Watts,
+                    totalMinActive, totalMaxActive));
+                ReactivePower targetReactivePower = new ReactivePower(Calculate(systemReactivePower.VoltAmperesReactive, unit.MinimumReactivePower.VoltAmperesReactive,
+                    unit.MaximumReactivePower.VoltAmperesReactive, totalMinReactive, totalMaxReactive));
+                // Updates the unit's power settings and considers possible contraints and limits
+                unit.UpdatePower(targetActivePower, targetReactivePower);
             }
 
             _logger.LogDebug("Active power requested: {SystemActivePower}. Active power achieved: {UnitsActivePower}",
