@@ -90,3 +90,13 @@ Content-Type: application/json
 {
   "DeviceId": 11
 }
+
+###
+
+#------------------------------------------------------------------------------
+# Version controller
+#------------------------------------------------------------------------------
+GET {{paskalON.Devices.Service_HostAddress}}/api/v1/version/
+Accept: application/json
+
+###

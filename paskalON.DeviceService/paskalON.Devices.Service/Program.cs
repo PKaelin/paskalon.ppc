@@ -70,6 +70,7 @@ try
 
     // Add databases
     builder.Services.AddDbContext<DeviceServiceContext>(options => options.UseNpgsql(dbConnectionString));
+    builder.Services.AddScoped<IVersionRepository, VersionRepository>();
     builder.Services.AddScoped<IDerRepository, DerRepository>();
     builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
 
