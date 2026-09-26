@@ -20,6 +20,18 @@ namespace paskalON.PowerControls.Domain.Ders
 
 
         /// <summary>
+        /// DER unit name.
+        /// </summary>
+        string DerUnitName { get; }
+
+
+        /// <summary>
+        /// Device identifier of the power conversion system (PCS) that controls this DER unit.
+        /// </summary>
+        int PcsDeviceId { get; }
+
+
+        /// <summary>
         /// DER unit constraints.
         /// </summary>
         IEnumerable<IDerUnitConstraint> Constraints { get; }

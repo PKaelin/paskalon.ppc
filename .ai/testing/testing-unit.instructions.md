@@ -9,7 +9,7 @@ This document defines the strict constraints, patterns, and style requirements f
 
 ## Scope of Unit Tests
 - **Isolation:** Ensure unit tests are entirely isolated, pure, and run completely in-memory.
-- **Dependencies:** Strictly prohibit all hardware-bound or external dependencies (e.g. Web-Service, Databases, File access, etc.).
+- **Dependencies:** Strictly prohibit all hardware-bound or external dependencies (e.g. Web-Service (HttpClient/HttpServer connections), Databases, File access, etc. those belong to integration tests).
 - **External Boundaries:** Use mocked interfaces or in-memory doubles to simulate external layer boundaries.
 - **Test Target:** Target the smallest piece of code that can be usefully and independently tested.
 

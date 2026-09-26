@@ -9,6 +9,7 @@ using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
 using paskalON.PowerControls.Application;
+using paskalON.PowerControls.Application.Dispatchers;
 using paskalON.PowerControls.Domain.Configs;
 using paskalON.PowerControls.Infrastructure.Storage;
 using paskalON.PowerControls.Infrastructure.Storage.Repositories;
@@ -78,9 +79,19 @@ try
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
     builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
     builder.Services.AddSingleton<MetricsPublisherService>();
-    builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(dsConnectionString + dsEndpoint + "/der/getder"));
+    // Long living HTTP client for the device service API
+    Uri dsBaseAddress = new Uri($"{dsConnectionString.TrimEnd('/')}/{dsEndpoint.Trim('/')}/");
+    builder.Services.AddKeyedSingleton(nameof(DeviceServer), (_, _) => new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
+    {
+        BaseAddress = dsBaseAddress,
+        Timeout = TimeSpan.FromSeconds(10)
+    });
+    builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(sp.GetRequiredKeyedService<HttpClient>(nameof(DeviceServer))));
     builder.Services.AddSingleton<IMessageSubscriber, RedisMessageSubscriber>();
     builder.Services.AddSingleton<IDeviceClient, DeviceClient>();
+    builder.Services.AddSingleton(TimeProvider.System);
+    builder.Services.AddSingleton(new DerUnitTargetDispatcherOptions());
+    builder.Services.AddSingleton<IDerUnitTargetDispatcher, DerUnitTargetDispatcher>();
 
     builder.Services.AddSingleton<IPowerControlManager, PowerControlManager>();
 

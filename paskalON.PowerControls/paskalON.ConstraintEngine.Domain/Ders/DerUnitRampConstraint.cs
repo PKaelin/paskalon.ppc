@@ -25,6 +25,18 @@ namespace paskalON.ConstraintEngine.Domain.Ders
 
 
         /// <summary>
+        /// Maximum active power ramp rate allowed by the constraint per second.
+        /// </summary>
+        public double? MaximumActivePowerWattRampRatePerSecond { get => _config.MaximumActivePowerWattRampRatePerSecond; }
+
+
+        /// <summary>
+        /// Maximum reactive power ramp rate allowed by the constraint per second.
+        /// </summary>
+        public double? MaximumReactivePowerVarsRampRatePerSecond { get => _config.MaximumReactivePowerVarsRampRatePerSecond; }
+
+
+        /// <summary>
         /// Constructor of <see cref="DerUnitRampConstraint"/>.
         /// </summary>
         /// <param name="logger">ILogger for handling application logging and diagnostics.</param>

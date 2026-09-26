@@ -345,13 +345,13 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StartPcsAsync(int deviceId)
         {
-            _logger.LogInformation("Start Power Conversion System with {DeviceId}", deviceId);
+            _logger.LogInformation("Start Power Conversion System with Device ID {DeviceId}", deviceId);
 
             try
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
-                    throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
+                    throw new InvalidOperationException($"Device Manager cannot find PCS with Device ID: {deviceId}");
                 }
 
                 await pcs.StartAsync();
@@ -393,13 +393,13 @@ namespace paskalON.Devices.Application
         /// </summary>
         public async Task StopPcsAsync(int deviceId)
         {
-            _logger.LogInformation("Stop Power Conversion System with {DeviceId}", deviceId);
+            _logger.LogInformation("Stop Power Conversion System with Device ID {DeviceId}", deviceId);
 
             try
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
-                    throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
+                    throw new InvalidOperationException($"Device Manager cannot find PCS with Device ID: {deviceId}");
                 }
 
                 await pcs.StopAsync();
@@ -447,7 +447,7 @@ namespace paskalON.Devices.Application
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
-                    throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
+                    throw new InvalidOperationException($"Device Manager cannot find PCS with Device ID: {deviceId}");
                 }
 
                 await pcs.StandbyAsync();
@@ -471,7 +471,7 @@ namespace paskalON.Devices.Application
             {
                 if (_batteryBanks.TryGetValue(deviceId, out var bb) == false)
                 {
-                    throw new InvalidOperationException($"Device Manager cannot find Battery Bank with device id: {deviceId}");
+                    throw new InvalidOperationException($"Device Manager cannot find Battery Bank with Device ID: {deviceId}");
                 }
 
                 await bb.ConnectAsync();
@@ -495,7 +495,7 @@ namespace paskalON.Devices.Application
             {
                 if (_batteryBanks.TryGetValue(deviceId, out var bb) == false)
                 {
-                    throw new InvalidOperationException($"Device Manager cannot find Battery Bank with device id: {deviceId}");
+                    throw new InvalidOperationException($"Device Manager cannot find Battery Bank with Device ID: {deviceId}");
                 }
 
                 await bb.DisconnectAsync();
@@ -535,11 +535,14 @@ namespace paskalON.Devices.Application
             {
                 if (_powerConversionSystems.TryGetValue(deviceId, out var pcs) == false)
                 {
-                    throw new InvalidOperationException($"Device Manager cannot find PCS with device id: {deviceId}");
+                    throw new InvalidOperationException($"Device Manager cannot find PCS with Device ID: {deviceId}");
                 }
 
                 await pcs.SetActivePowerTargetAsync(activePowerWatt);
                 await pcs.SetReactivePowerTargetAsync(reactivePowerVar);
+                _logger.LogInformation("Set PCS power target for Device ID {DeviceId} to Active Power: {ActivePowerWatt}, Reactive Power: {ReactivePowerVar}",
+                    deviceId, activePowerWatt, reactivePowerVar);
+
             }
             catch (Exception ex)
             {

@@ -25,6 +25,30 @@ namespace paskalON.ConstraintEngine.Domain.Ders
 
 
         /// <summary>
+        /// Maximum active power allowed by the constraint.
+        /// </summary>
+        public double? MaximumActivePowerWatt { get => _config.MaximumActivePowerWatt; }
+
+
+        /// <summary>
+        /// Minimum active power allowed by the constraint.
+        /// </summary>
+        public double? MinimumActivePowerWatt { get => _config.MinimumActivePowerWatt; }
+
+
+        /// <summary>
+        /// Maximum reactive power allowed by the constraint.
+        /// </summary>
+        public double? MaximumReactivePowerVars { get => _config.MaximumReactivePowerVars; }
+
+
+        /// <summary>
+        /// Minimum reactive power allowed by the constraint.
+        /// </summary>
+        public double? MinimumReactivePowerVars { get => _config.MinimumReactivePowerVars; }
+
+
+        /// <summary>
         /// Constructor of <see cref="DerUnitPowerConstraint"/>.
         /// </summary>
         /// <param name="logger">ILogger for handling application logging and diagnostics.</param>

@@ -28,7 +28,8 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// </summary>
         public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<IDerUnitPowerControl> allUnits)
         {
-            IEnumerable<IDerUnitPowerControl> units = allUnits.Where(u => u.IsEnabled && u.State == DerState.Started);
+            // Distribute the power to all units that are enabled and not in maintenance state
+            IEnumerable<IDerUnitPowerControl> units = allUnits.Where(u => u.IsEnabled && u.State != DerState.Maintenance);
 
             double totalMaxActive = units.Sum(u => u.MaximumActivePower.Watts);
             double totalMinActive = units.Sum(u => u.MinimumActivePower.Watts);
@@ -61,7 +62,7 @@ namespace paskalON.PowerControls.Domain.Strategies
         /// <param name="max">The units maximum.</param>
         /// <param name="totalMin">The units total minimum.</param>
         /// <param name="totalMax">The units total maximum.</param>
-        /// <returns></returns>
+        /// <returns>Returns the distributed value.</returns>
         private double Calculate(double target, double min, double max, double totalMin, double totalMax)
         {
             if (target < 0)

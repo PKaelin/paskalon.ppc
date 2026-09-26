@@ -4,7 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.ConstraintEngine.Domain;
-using paskalON.ConstraintEngine.Domain.Configs.Ders;
+using paskalON.ConstraintEngine.Domain.Ders;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.PowerControls.Domain.Configs.Ders;
 using paskalON.PowerControls.Domain.Configs.Strategies;
@@ -33,6 +33,12 @@ namespace paskalON.PowerControls.Domain.Ders
         /// DER unit energy storage power control constraints.
         /// </summary>
         public IEnumerable<IDerUnitConstraint> Constraints { get; init; }
+
+
+        /// <summary>
+        /// DER unit name.
+        /// </summary>
+        public string DerUnitName { get => _config.DerUnitName; }
 
 
         /// <summary>
@@ -130,8 +136,9 @@ namespace paskalON.PowerControls.Domain.Ders
             Weight = 1;
 
             // Get power constraints here and assign them to properties so that we dont have to do them in every control loop
-            DerUnitPowerConstraintConfig? pc = Constraints.OfType<DerUnitPowerConstraintConfig>().FirstOrDefault();
+            DerUnitPowerConstraint? pc = Constraints.OfType<DerUnitPowerConstraint>().FirstOrDefault();
 
+            // At this point we assume that there will always be a power constraint config, if not then we set the limits to 0
             if (pc != null)
             {
                 MaximumActivePower = pc.MaximumActivePowerWatt.HasValue ? new ActivePower(pc.MaximumActivePowerWatt.Value) : new ActivePower(0);

@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="paskalON.PowerControls.Application.UnitTest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Client\paskalON.Devices.Client.csproj" />
     <ProjectReference Include="..\paskalON.PowerControls.Domain.Configs\paskalON.PowerControls.Domain.Configs.csproj" />
     <ProjectReference Include="..\paskalON.PowerControls.Domain\paskalON.PowerControls.Domain.csproj" />

@@ -12,6 +12,12 @@ namespace paskalON.PowerControls.Domain
     public interface IPowerControl
     {
         /// <summary>
+        /// Raised every time new active and reactive power targets have been set.
+        /// </summary>
+        event EventHandler? TargetPowerChanged;
+
+
+        /// <summary>
         /// Is active means it is available for selection.
         /// </summary>
         public bool IsActive { get; }

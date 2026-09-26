@@ -186,8 +186,8 @@ namespace paskalON.PowerControls.Domain.Systems
                 SetpointReactivePowerActual = systemReactivePowerDerated.HasValue ? new ReactivePower((double)systemReactivePowerDerated)
                     : new ReactivePower(reactivePower.VoltAmperesReactive);
                 // Create local for thread safety
-                ActivePower constrainedActivePower = TargetActivePower;
-                ReactivePower constrainedReactivePower = TargetReactivePower;
+                ActivePower constrainedActivePower = SetpointActivePowerActual;
+                ReactivePower constrainedReactivePower = SetpointReactivePowerActual;
                 // Check constraints and apply them to the targets.
                 foreach (ISystemConstraint constraint in _constraints)
                 {
@@ -197,12 +197,13 @@ namespace paskalON.PowerControls.Domain.Systems
                 // Set the target power to the actual targets
                 SetTargetPower(constrainedActivePower, constrainedReactivePower);
 
-                // Distribute to all units that can have different distribution strategies.
+                // Distribute to all units that can have different distribution strategies
+                // The distribution strategies filter unit per configured distribution strategy
                 DistributePriority();
                 DistributeEqual();
                 DistributeWeighted();
                 DistributeProportional();
-                DistributeWaterFilling();
+                // DistributeWaterFilling();
             }
         }
 

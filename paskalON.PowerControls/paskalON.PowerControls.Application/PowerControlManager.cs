@@ -15,6 +15,7 @@ using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.PowerControls.Application.Dispatchers;
 using paskalON.PowerControls.Domain.Configs.Ders;
 using paskalON.PowerControls.Domain.Configs.Systems;
 using paskalON.PowerControls.Domain.Ders;
@@ -48,6 +49,13 @@ namespace paskalON.PowerControls.Application
         /// Metrics publisher factory to create metrics publishers for telemetry.
         /// </summary>
         private readonly IMetricsPublisherFactory _metricsPublisherFactory;
+
+
+        /// <summary>
+        /// Dispatcher to deliver the DER unit power targets to the device service.
+        /// </summary>
+        private readonly IDerUnitTargetDispatcher _targetDispatcher;
+
 
         /// <summary>
         /// Lock object for synchronizing access to shared data.
@@ -130,15 +138,19 @@ namespace paskalON.PowerControls.Application
         /// <param name="logger">The logger instance.</param>
         /// <param name="deviceClient">The device client instance.</param>
         /// <param name="metricsPublisherFactory">The metrics publisher factory instance.</param>
-        public PowerControlManager(ILogger<PowerControlManager> logger, IDeviceClient deviceClient, IMetricsPublisherFactory metricsPublisherFactory)
+        /// <param name="targetDispatcher">The dispatcher to deliver the DER unit power targets to the device service.</param>
+        public PowerControlManager(ILogger<PowerControlManager> logger, IDeviceClient deviceClient, IMetricsPublisherFactory metricsPublisherFactory,
+            IDerUnitTargetDispatcher targetDispatcher)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(deviceClient);
             ArgumentNullException.ThrowIfNull(metricsPublisherFactory);
+            ArgumentNullException.ThrowIfNull(targetDispatcher);
 
             _logger = logger;
             _deviceClient = deviceClient;
             _metricsPublisherFactory = metricsPublisherFactory;
+            _targetDispatcher = targetDispatcher;
         }
 
 
@@ -175,6 +187,7 @@ namespace paskalON.PowerControls.Application
                 }
             }
 
+            RegisterTargetDispatching(units);
             IMetricsPublisher systemPublisher = _metricsPublisherFactory.Create();
             SystemPowerControl systemPowerControl = new SystemPowerControl(_logger, systemConfig, CreateSystemMap(), systemPublisher,
                 CreateSystemConstraints(systemConfig.Constraints), units, CreateDistributionProfile());
@@ -195,6 +208,27 @@ namespace paskalON.PowerControls.Application
         public async Task SetSystemPowerTarget(ActivePower activePower, ReactivePower reactivePower)
         {
             _systemPowerControl?.UpdatePower(activePower, reactivePower);
+        }
+
+
+        /// <summary>
+        /// Register all DER units with a power conversion system (PCS) at the target dispatcher,
+        /// so that their power targets are delivered to the device service.
+        /// </summary>
+        /// <param name="units">The DER unit power controls to register.</param>
+        private void RegisterTargetDispatching(IEnumerable<IDerUnitPowerControl> units)
+        {
+            foreach (IDerUnitPowerControl unit in units)
+            {
+                if (unit.PcsDeviceId > 0)
+                {
+                    _targetDispatcher.Register(unit);
+                }
+                else
+                {
+                    _logger.LogWarning("DER unit has no power conversion system, targets will not be sent to the device service");
+                }
+            }
         }
 
 

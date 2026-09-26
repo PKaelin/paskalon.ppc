@@ -48,6 +48,10 @@ namespace paskalON.PowerControls.Domain
         private ReactivePower _targetReactivePower;
 
 
+        /// <inheritdoc/>
+        public event EventHandler? TargetPowerChanged;
+
+
         /// <summary>
         /// Interface for registering and publishing metrics for a given type T.
         /// </summary>
@@ -106,7 +110,7 @@ namespace paskalON.PowerControls.Domain
 
 
         /// <summary>
-        /// Update the power targets in a thread safe manner.
+        /// Update the power targets in a thread safe manner and notify subscribers about the new targets.
         /// </summary>
         /// <param name="activePower">Active power target for the power control.</param>
         /// <param name="reactivePower">Reactive power target for the power control.</param>
@@ -117,6 +121,10 @@ namespace paskalON.PowerControls.Domain
                 _targetActivePower = activePower;
                 _targetReactivePower = reactivePower;
             }
+
+            // Raise outside of the lock so subscribers can read the targets without deadlocking.
+            // Target power changed for system and units
+            TargetPowerChanged?.Invoke(this, EventArgs.Empty);
         }
 
 

@@ -15,6 +15,7 @@
   <Folder Name="/Tests/">
     <Project Path="paskalON.ConstraintEngine.Domain.Configs.UnitTest/paskalON.ConstraintEngine.Domain.Configs.UnitTest.csproj" Id="13eac196-d85e-4382-829f-f9317e36bbd6" />
     <Project Path="paskalON.ConstraintEngine.Domain.UnitTest/paskalON.ConstraintEngine.Domain.UnitTest.csproj" Id="28a73e5b-4c18-4d20-bb93-c9d97493df67" />
+    <Project Path="paskalON.PowerControls.Application.UnitTest/paskalON.PowerControls.Application.UnitTest.csproj" />
     <Project Path="paskalON.PowerControls.Domain.Configs.UnitTest/paskalON.PowerControls.Domain.Configs.UnitTest.csproj" Id="5f9725f3-028d-4350-8422-28c0de3eabeb" />
     <Project Path="paskalON.PowerControls.Domain.UnitTest/paskalON.PowerControls.Domain.UnitTest.csproj" Id="cf59208a-6da9-4a79-9871-b0fce912fff3" />
     <Project Path="paskalON.PowerControls.Infrastructure.IntegrationTest/paskalON.PowerControls.Infrastructure.IntegrationTest.csproj" Id="06039572-9062-4213-bed4-3afc886ee782" />
