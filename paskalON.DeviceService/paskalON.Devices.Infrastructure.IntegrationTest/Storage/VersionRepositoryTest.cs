@@ -41,7 +41,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             using DeviceServiceContext context = new DeviceServiceContext(_options!);
             await context.Database.EnsureDeletedAsync();
             await context.Database.EnsureCreatedAsync();
-            VersionRepository repository = new VersionRepository(NullLogger.Instance, context);
+            VersionRepository repository = new VersionRepository(NullLogger<VersionRepository>.Instance, context);
 
             // DBContext excludes this table:
             // modelBuilder.Entity<History>().ToTable(t => t.ExcludeFromMigrations(true));
@@ -56,7 +56,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             await context.Database.EnsureDeletedAsync();
             await context.Database.EnsureCreatedAsync();
             await context.Database.ExecuteSqlRawAsync(_sqlMigrationHistory);
-            VersionRepository repository = new VersionRepository(NullLogger.Instance, context);
+            VersionRepository repository = new VersionRepository(NullLogger<VersionRepository>.Instance, context);
 
             string version = await repository.GetDatabaseVersionAsync();
 
@@ -82,7 +82,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 
             using (DeviceServiceContext context = new DeviceServiceContext(_options!))
             {
-                VersionRepository repository = new VersionRepository(NullLogger.Instance, context);
+                VersionRepository repository = new VersionRepository(NullLogger<VersionRepository>.Instance, context);
                 version = await repository.GetDatabaseVersionAsync();
             }
 
