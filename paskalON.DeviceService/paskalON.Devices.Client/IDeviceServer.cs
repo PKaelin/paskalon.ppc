@@ -28,6 +28,31 @@ namespace paskalON.Devices.Client
 
 
         /// <summary>
+        /// Sends a start command to all power conversion systems (PCS) that are not in maintenance mode.
+        /// </summary>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task StartAllPcs(CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Sends a standby command to all power conversion systems (PCS) that are not in maintenance mode.
+        /// </summary>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task StandbyAllPcs(CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Sends a stop command to all power conversion systems (PCS) that are not in maintenance mode.
+        /// </summary>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+
+        Task StopAllPcs(CancellationToken cancellationToken = default);
+
+
+        /// <summary>
         /// Sends active and reactive power targets to a specific power conversion system (PCS).
         /// </summary>
         /// <param name="deviceId">Device identifier of the PCS to set the targets for.</param>

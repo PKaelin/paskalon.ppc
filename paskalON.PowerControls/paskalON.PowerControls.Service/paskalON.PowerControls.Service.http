@@ -16,6 +16,18 @@ Content-Type: application/json
 
 ###
 
+POST {{paskalON.PowerControls.Service_HostAddress}}/api/v1/system/startallpcs
+
+###
+
+POST {{paskalON.PowerControls.Service_HostAddress}}/api/v1/system/stopallpcs
+
+###
+
+POST {{paskalON.PowerControls.Service_HostAddress}}/api/v1/system/standbyallpcs
+
+###
+
 #------------------------------------------------------------------------------
 # Version controller
 #------------------------------------------------------------------------------

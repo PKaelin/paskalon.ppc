@@ -26,6 +26,23 @@ namespace paskalON.Devices.Client
 
 
         /// <summary>
+        /// Relative path of the start all PCS endpoint.
+        /// </summary>
+        private const string StartAllPcsPath = "pcs/startall";
+
+        /// <summary>
+        /// Relative path of the standby all PCS endpoint.
+        /// </summary>
+        private const string StandbyAllPcsPath = "pcs/standbyall";
+
+
+        /// <summary>
+        /// Relative path of the stop all PCS endpoint.
+        /// </summary>
+        private const string StopAllPcsPath = "pcs/stopall";
+
+
+        /// <summary>
         /// Relative path of the set PCS power target endpoint.
         /// </summary>
         private const string SetPcsPowerTargetPath = "pcs/setpowertarget";
@@ -73,6 +90,30 @@ namespace paskalON.Devices.Client
             StartPcsRequestDto request = new StartPcsRequestDto { DeviceId = deviceId };
 
             using HttpResponseMessage response = await _client.PostAsJsonAsync(StartPcsPath, request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        /// <inheritdoc/>
+        public async Task StartAllPcs(CancellationToken cancellationToken = default)
+        {
+            using HttpResponseMessage response = await _client.PostAsync(StartAllPcsPath, null, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        /// <inheritdoc/>
+        public async Task StandbyAllPcs(CancellationToken cancellationToken = default)
+        {
+            using HttpResponseMessage response = await _client.PostAsync(StandbyAllPcsPath, null, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        /// <inheritdoc/>
+        public async Task StopAllPcs(CancellationToken cancellationToken = default)
+        {
+            using HttpResponseMessage response = await _client.PostAsync(StopAllPcsPath, null, cancellationToken);
             response.EnsureSuccessStatusCode();
         }
 

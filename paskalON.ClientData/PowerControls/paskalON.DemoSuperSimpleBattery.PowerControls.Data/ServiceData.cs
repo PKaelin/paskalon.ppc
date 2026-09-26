@@ -82,7 +82,7 @@ namespace paskalON.DemoSuperSimpleBattery.PowerControls.Data
                 MaximumReactivePowerVars = 3630000,
                 MinimumReactivePowerVars = -3630000,
                 DeratePerUnitInMaintenance = true,
-                DeratePerUnitStopped = true,
+                DeratePerUnitStopped = false,
             };
             context.SystemPowerConstraintConfigs.Add(systemPowerConstraint);
 
