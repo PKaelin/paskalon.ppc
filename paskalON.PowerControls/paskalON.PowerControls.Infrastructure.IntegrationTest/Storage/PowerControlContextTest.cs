@@ -9,36 +9,35 @@ using paskalON.PowerControls.Infrastructure.Storage;
 namespace paskalON.PowerControls.Infrastructure.IntegrationTest.Storage
 {
     [TestClass]
-    public sealed class PowerControlContextTest
+    public sealed class PowerControlContextTest : DatabaseTestBase
     {
-        private DbContextOptions<PowerControlContext>? _options;
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            string variable = "DB_CONNECTION_STRING";
-            string? connectionString = Environment.GetEnvironmentVariable(variable);
-            ArgumentNullException.ThrowIfNullOrEmpty(connectionString);
-            _options = new DbContextOptionsBuilder<PowerControlContext>().UseNpgsql(connectionString).Options;
-        }
-
-
         [TestMethod]
-        public void CreatePowerControlContext()
+        public async Task CreatePowerControlContext()
         {
-            using PowerControlContext context = new PowerControlContext(_options!);
+            await using PowerControlContext context = CreateDbContext<PowerControlContext>();
             context.Database.EnsureDeleted();
             bool created = context.Database.EnsureCreated();
 
             Assert.IsTrue(created);
         }
 
+
         [TestMethod]
-        public void CreateBessTest()
+        public async Task CreatePowerControlMigrationContext()
+        {
+            await using PowerControlContext context = CreateDbContext<PowerControlContext>();
+            context.Database.EnsureDeleted();
+            await context.Database.MigrateAsync();
+        }
+
+
+
+        [TestMethod]
+        public async Task CreateBessTest()
         {
             SimpleSetBess sample = new SimpleSetBess();
 
-            using (PowerControlContext context = new PowerControlContext(_options!))
+            await using (PowerControlContext context = CreateDbContext<PowerControlContext>())
             {
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
@@ -56,7 +55,7 @@ namespace paskalON.PowerControls.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (PowerControlContext context = new PowerControlContext(_options!))
+            await using (PowerControlContext context = CreateDbContext<PowerControlContext>())
             {
                 Assert.AreEqual(1, context.SystemPowerConstraintConfigs.Count());
                 Assert.AreEqual(1, context.SystemRampConstraintConfigs.Count());
