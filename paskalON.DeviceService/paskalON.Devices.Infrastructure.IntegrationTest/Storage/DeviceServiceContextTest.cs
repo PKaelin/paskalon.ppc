@@ -18,7 +18,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
         [TestMethod]
         public async Task CreateDeviceServiceContext()
         {
-            await using DeviceServiceContext context = CreateDbContext();
+            await using DeviceServiceContext context = CreateDbContext<DeviceServiceContext>();
             context.Database.EnsureDeleted();
             bool created = context.Database.EnsureCreated();
 
@@ -29,7 +29,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
         [TestMethod]
         public async Task CreateDeviceServiceMigrationContext()
         {
-            await using DeviceServiceContext context = CreateDbContext();
+            await using DeviceServiceContext context = CreateDbContext<DeviceServiceContext>();
             context.Database.EnsureDeleted();
             await context.Database.MigrateAsync();
         }
@@ -41,7 +41,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             SimpleSetBess sample = new SimpleSetBess();
             List<DerConfig> configs = new List<DerConfig>();
 
-            await using (DeviceServiceContext context = CreateDbContext())
+            await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
             {
                 await context.Database.EnsureDeletedAsync();
                 await context.Database.EnsureCreatedAsync();
@@ -70,7 +70,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            await using (DeviceServiceContext context = CreateDbContext())
+            await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)
@@ -115,7 +115,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             SimpleSetSolar sample = new SimpleSetSolar();
             List<DerConfig> configs = new List<DerConfig>();
 
-            await using (DeviceServiceContext context = CreateDbContext())
+            await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
             {
                 await context.Database.EnsureDeletedAsync();
                 await context.Database.EnsureCreatedAsync();
@@ -137,7 +137,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            await using (DeviceServiceContext context = CreateDbContext())
+            await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)
@@ -179,7 +179,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             SimpleSetBess sample = new SimpleSetBess();
             List<DerConfig> configs = new List<DerConfig>();
 
-            await using (DeviceServiceContext context = CreateDbContext())
+            await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
             {
                 await context.Database.EnsureDeletedAsync();
                 await context.Database.EnsureCreatedAsync();
@@ -210,7 +210,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            await using (DeviceServiceContext context = CreateDbContext())
+            await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)
@@ -269,7 +269,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
             SimpleSetBess sample = new SimpleSetBess();
             List<DerConfig> configs = new List<DerConfig>();
 
-            await using (DeviceServiceContext context = CreateDbContext())
+            await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
             {
                 await context.Database.EnsureDeletedAsync();
                 await context.Database.EnsureCreatedAsync();
@@ -301,7 +301,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            await using (DeviceServiceContext context = CreateDbContext())
+            await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)

@@ -2,6 +2,8 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Infrastructure.PostgreSql.Tests;
+
 namespace paskalON.Devices.Infrastructure.IntegrationTest
 {
     /// <summary>

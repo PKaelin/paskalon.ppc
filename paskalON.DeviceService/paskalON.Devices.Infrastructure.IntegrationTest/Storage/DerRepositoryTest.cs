@@ -15,7 +15,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
         [TestMethod]
         public async Task VersionRepositoryEmptyTableTest()
         {
-            await using DeviceServiceContext context = CreateDbContext();
+            await using DeviceServiceContext context = CreateDbContext<DeviceServiceContext>();
             await context.Database.EnsureDeletedAsync();
             await context.Database.EnsureCreatedAsync();
             DerRepository repository = new DerRepository(NullLogger<DerRepository>.Instance, context);
@@ -29,7 +29,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
         {
             DerConfig? der = null;
 
-            await using (DeviceServiceContext context = CreateDbContext())
+            await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
             {
                 await context.Database.EnsureDeletedAsync();
                 await context.Database.EnsureCreatedAsync();
@@ -37,7 +37,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            await using (DeviceServiceContext context = CreateDbContext())
+            await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
             {
                 DerRepository repository = new DerRepository(NullLogger<DerRepository>.Instance, context);
                 der = await repository.GetDer();
