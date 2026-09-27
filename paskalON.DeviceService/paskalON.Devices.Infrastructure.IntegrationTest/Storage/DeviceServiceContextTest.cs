@@ -13,26 +13,12 @@ using paskalON.Devices.Infrastructure.Storage;
 namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 {
     [TestClass]
-    public class DeviceServiceContextTest
+    public class DeviceServiceContextTest : DatabaseTestBase
     {
-        private DbContextOptions<DeviceServiceContext>? _options;
-
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            string variable = "DB_CONNECTION_STRING";
-            string? connectionString = Environment.GetEnvironmentVariable(variable);
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(connectionString, variable);
-            _options = new DbContextOptionsBuilder<DeviceServiceContext>().UseNpgsql(connectionString).Options;
-        }
-
-
-
         [TestMethod]
-        public void CreateDeviceServiceContext()
+        public async Task CreateDeviceServiceContext()
         {
-            using DeviceServiceContext context = new DeviceServiceContext(_options!);
+            await using DeviceServiceContext context = CreateDbContext();
             context.Database.EnsureDeleted();
             bool created = context.Database.EnsureCreated();
 
@@ -41,15 +27,24 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 
 
         [TestMethod]
-        public void CreateBessTest()
+        public async Task CreateDeviceServiceMigrationContext()
+        {
+            await using DeviceServiceContext context = CreateDbContext();
+            context.Database.EnsureDeleted();
+            await context.Database.MigrateAsync();
+        }
+
+
+        [TestMethod]
+        public async Task CreateBessTest()
         {
             SimpleSetBess sample = new SimpleSetBess();
             List<DerConfig> configs = new List<DerConfig>();
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
 
                 // Core
                 context.Configurations.Add(new Configuration { ChangedBy = "Test", Key = "Key", Value = "Value", Description = "Desc" });
@@ -75,7 +70,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)
@@ -115,15 +110,15 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 
 
         [TestMethod]
-        public void CreateSolarTest()
+        public async Task CreateSolarTest()
         {
             SimpleSetSolar sample = new SimpleSetSolar();
             List<DerConfig> configs = new List<DerConfig>();
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
 
                 // Core
                 context.ModbusConnectionConfigs.Add(sample.ModbusConnectionConfig!);
@@ -142,7 +137,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)
@@ -179,15 +174,15 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 
 
         [TestMethod]
-        public void CreateMetersTest()
+        public async Task CreateMetersTest()
         {
             SimpleSetBess sample = new SimpleSetBess();
             List<DerConfig> configs = new List<DerConfig>();
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
 
                 // Core
                 context.ModbusConnectionConfigs.Add(sample.ModbusConnectionConfig!);
@@ -215,7 +210,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)
@@ -226,9 +221,9 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.ModbusConfigs.Include(mc => mc.ModbusConnectionConfig).ToList();
                 context.C37Configs.ToList();
                 // Load meters and maps
-                context.PowerMeterMapC37Configs.ToListAsync();
-                context.PowerMeterMapModbusConfigs.ToListAsync();
-                context.PowerMeterDeviceConfigs.ToListAsync();
+                context.PowerMeterMapC37Configs.ToList();
+                context.PowerMeterMapModbusConfigs.ToList();
+                context.PowerMeterDeviceConfigs.ToList();
                 context.SystemPowerMeterConfigs.ToList();
                 context.CircuitPowerMeterConfigs.ToList();
                 context.AuxiliaryPowerMeterConfigs.ToList();
@@ -269,15 +264,15 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 
 
         [TestMethod]
-        public void CreateGmdsTest()
+        public async Task CreateGmdsTest()
         {
             SimpleSetBess sample = new SimpleSetBess();
             List<DerConfig> configs = new List<DerConfig>();
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
 
                 // Core
                 context.ModbusConnectionConfigs.Add(sample.ModbusConnectionConfig!);
@@ -306,7 +301,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
                 configs = context.DerConfigs
                 .Include(d => d.DerGroupConfigs)

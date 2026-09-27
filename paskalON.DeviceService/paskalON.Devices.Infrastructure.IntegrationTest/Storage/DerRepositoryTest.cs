@@ -2,7 +2,6 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Infrastructure.Storage;
@@ -11,25 +10,12 @@ using paskalON.Devices.Infrastructure.Storage.Repositories;
 namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 {
     [TestClass]
-    public class DerRepositoryTest
+    public class DerRepositoryTest : DatabaseTestBase
     {
-        private DbContextOptions<DeviceServiceContext>? _options;
-
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            string variable = "DB_CONNECTION_STRING";
-            string? connectionString = Environment.GetEnvironmentVariable(variable);
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(connectionString, variable);
-            _options = new DbContextOptionsBuilder<DeviceServiceContext>().UseNpgsql(connectionString).Options;
-        }
-
-
         [TestMethod]
         public async Task VersionRepositoryEmptyTableTest()
         {
-            using DeviceServiceContext context = new DeviceServiceContext(_options!);
+            await using DeviceServiceContext context = CreateDbContext();
             await context.Database.EnsureDeletedAsync();
             await context.Database.EnsureCreatedAsync();
             DerRepository repository = new DerRepository(NullLogger<DerRepository>.Instance, context);
@@ -43,7 +29,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
         {
             DerConfig? der = null;
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
                 await context.Database.EnsureDeletedAsync();
                 await context.Database.EnsureCreatedAsync();
@@ -51,7 +37,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
                 DerRepository repository = new DerRepository(NullLogger<DerRepository>.Instance, context);
                 der = await repository.GetDer();

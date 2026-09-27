@@ -11,21 +11,8 @@ using paskalON.Domains;
 namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 {
     [TestClass]
-    public class VersionRepositoryTest
+    public class VersionRepositoryTest : DatabaseTestBase
     {
-        private DbContextOptions<DeviceServiceContext>? _options;
-
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            string variable = "DB_CONNECTION_STRING";
-            string? connectionString = Environment.GetEnvironmentVariable(variable);
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(connectionString, variable);
-            _options = new DbContextOptionsBuilder<DeviceServiceContext>().UseNpgsql(connectionString).Options;
-        }
-
-
         // DBContext excludes this table because its created via the migration tool hence create it before testing.
         private string _sqlMigrationHistory = @"
                 CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
@@ -38,7 +25,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
         [TestMethod]
         public async Task VersionRepositoryNoTableTest()
         {
-            using DeviceServiceContext context = new DeviceServiceContext(_options!);
+            await using DeviceServiceContext context = CreateDbContext();
             await context.Database.EnsureDeletedAsync();
             await context.Database.EnsureCreatedAsync();
             VersionRepository repository = new VersionRepository(NullLogger<VersionRepository>.Instance, context);
@@ -52,7 +39,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
         [TestMethod]
         public async Task VersionRepositoryEmptyTableTest()
         {
-            using DeviceServiceContext context = new DeviceServiceContext(_options!);
+            await using DeviceServiceContext context = CreateDbContext();
             await context.Database.EnsureDeletedAsync();
             await context.Database.EnsureCreatedAsync();
             await context.Database.ExecuteSqlRawAsync(_sqlMigrationHistory);
@@ -70,7 +57,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
         {
             string? version = null;
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
                 await context.Database.EnsureDeletedAsync();
                 await context.Database.EnsureCreatedAsync();
@@ -80,7 +67,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.SaveChanges();
             }
 
-            using (DeviceServiceContext context = new DeviceServiceContext(_options!))
+            await using (DeviceServiceContext context = CreateDbContext())
             {
                 VersionRepository repository = new VersionRepository(NullLogger<VersionRepository>.Instance, context);
                 version = await repository.GetDatabaseVersionAsync();
