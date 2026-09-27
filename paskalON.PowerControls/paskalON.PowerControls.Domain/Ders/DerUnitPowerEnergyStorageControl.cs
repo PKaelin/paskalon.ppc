@@ -136,16 +136,12 @@ namespace paskalON.PowerControls.Domain.Ders
             Weight = 1;
 
             // Get power constraints here and assign them to properties so that we dont have to do them in every control loop
-            DerUnitPowerConstraint? pc = Constraints.OfType<DerUnitPowerConstraint>().FirstOrDefault();
-
-            // At this point we assume that there will always be a power constraint config, if not then we set the limits to 0
-            if (pc != null)
-            {
-                MaximumActivePower = pc.MaximumActivePowerWatt.HasValue ? new ActivePower(pc.MaximumActivePowerWatt.Value) : new ActivePower(0);
-                MinimumActivePower = pc.MinimumActivePowerWatt.HasValue ? new ActivePower(pc.MinimumActivePowerWatt.Value) : new ActivePower(0);
-                MaximumReactivePower = pc.MaximumReactivePowerVars.HasValue ? new ReactivePower(pc.MaximumReactivePowerVars.Value) : new ReactivePower(0);
-                MinimumReactivePower = pc.MinimumReactivePowerVars.HasValue ? new ReactivePower(pc.MinimumReactivePowerVars.Value) : new ReactivePower(0);
-            }
+            DerUnitPowerConstraint pc = Constraints.OfType<DerUnitPowerConstraint>().Single();
+            // At this point we enforce that there will always be a power constraint config
+            MaximumActivePower = pc.MaximumActivePowerWatt.HasValue ? new ActivePower(pc.MaximumActivePowerWatt.Value) : new ActivePower(0);
+            MinimumActivePower = pc.MinimumActivePowerWatt.HasValue ? new ActivePower(pc.MinimumActivePowerWatt.Value) : new ActivePower(0);
+            MaximumReactivePower = pc.MaximumReactivePowerVars.HasValue ? new ReactivePower(pc.MaximumReactivePowerVars.Value) : new ReactivePower(0);
+            MinimumReactivePower = pc.MinimumReactivePowerVars.HasValue ? new ReactivePower(pc.MinimumReactivePowerVars.Value) : new ReactivePower(0);
 
             RegisterMetrics();
         }

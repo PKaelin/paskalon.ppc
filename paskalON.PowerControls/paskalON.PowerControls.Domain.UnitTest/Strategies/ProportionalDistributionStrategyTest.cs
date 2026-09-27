@@ -178,6 +178,7 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             VerifyUpdatePower(unit2, 0, 0);
         }
 
+
         [TestMethod]
         public void DistributePositiveActivePowerWhenTotalMaximumIsDoubleMaxReturnsZero()
         {
@@ -186,8 +187,8 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
 
             _distribution.Distribute(new ActivePower(5000), new ReactivePower(0), new[] { unit1.Object, unit2.Object });
 
-            VerifyUpdatePower(unit1, 2500, 0);
-            VerifyUpdatePower(unit2, 2500, 0);
+            VerifyUpdatePower(unit1, 0, 0);
+            VerifyUpdatePower(unit2, 0, 0);
         }
 
 

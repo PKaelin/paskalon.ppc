@@ -90,28 +90,28 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
             ReactivePower reactive = ReactivePower.FromKilo(10);
 
             DerUnitPowerControlMap map = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Stopped };
-            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map, _publisher.Object, new List<IDerUnitConstraint>());
-            List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1 };
-
-            _distribution!.Distribute(active, reactive, units);
-
-            IReadOnlyList<FakeLogRecord> logs = _logger.Collector.GetSnapshot();
-            Regex regexActive = new Regex(".*active.*requested: 20.*achieved: 0.*", RegexOptions.IgnoreCase);
-            Regex regexReactive = new Regex(".*reactive.*requested: 10.*achieved: 0.*", RegexOptions.IgnoreCase);
-
-            Assert.IsNotNull(logs.Where(m => regexActive.IsMatch(m.Message)).FirstOrDefault());
-            Assert.IsNotNull(logs.Where(m => regexReactive.IsMatch(m.Message)).FirstOrDefault());
+            Assert.ThrowsExactly<InvalidOperationException>(() => new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map, _publisher.Object, new List<IDerUnitConstraint>()));
         }
 
 
         [TestMethod]
-        public void EqualDistributionOneUnitStartedNoConstraintTest()
+        public void EqualDistributionOneUnitStartedTest()
         {
             ActivePower active = ActivePower.FromKilo(20);
             ReactivePower reactive = ReactivePower.FromKilo(10);
+            DerUnitPowerConstraintConfig unitConstraintConfig = new DerUnitPowerConstraintConfig
+            {
+                ChangedBy = "Test",
+                Name = "DerUnitPowerConstraintConfig",
+                MaximumActivePowerWatt = 20000,
+                MinimumActivePowerWatt = -20000,
+                MaximumReactivePowerVars = 10000,
+                MinimumReactivePowerVars = -10000
+            };
 
+            DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
             DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
-            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint>());
+            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1 };
 
             _distribution!.Distribute(active, reactive, units);
@@ -128,15 +128,26 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
 
 
         [TestMethod]
-        public void EqualDistributionTwoUnitStartedNoConstraintTest()
+        public void EqualDistributionTwoUnitStartedTest()
         {
             ActivePower active = ActivePower.FromKilo(20);
             ReactivePower reactive = ReactivePower.FromKilo(10);
+            DerUnitPowerConstraintConfig unitConstraintConfig = new DerUnitPowerConstraintConfig
+            {
+                ChangedBy = "Test",
+                Name = "DerUnitPowerConstraintConfig",
+                MaximumActivePowerWatt = 20000,
+                MinimumActivePowerWatt = -20000,
+                MaximumReactivePowerVars = 10000,
+                MinimumReactivePowerVars = -10000
+            };
+
+            DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
 
             DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
             DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Started };
-            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint>());
-            DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint>());
+            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
+            DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2 };
 
             _distribution!.Distribute(active, reactive, units);
@@ -155,15 +166,26 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
 
 
         [TestMethod]
-        public void EqualDistributionTwoUnitStartedNoConstraintZeroSystemTargetTest()
+        public void EqualDistributionTwoUnitStartedZeroSystemTargetTest()
         {
             ActivePower active = ActivePower.FromKilo(0);
             ReactivePower reactive = ReactivePower.FromKilo(0);
+            DerUnitPowerConstraintConfig unitConstraintConfig = new DerUnitPowerConstraintConfig
+            {
+                ChangedBy = "Test",
+                Name = "DerUnitPowerConstraintConfig",
+                MaximumActivePowerWatt = 20000,
+                MinimumActivePowerWatt = -20000,
+                MaximumReactivePowerVars = 10000,
+                MinimumReactivePowerVars = -10000
+            };
+
+            DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
 
             DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
             DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Started };
-            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint>());
-            DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint>());
+            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
+            DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2 };
 
             _distribution!.Distribute(active, reactive, units);
@@ -182,17 +204,28 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
 
 
         [TestMethod]
-        public void EqualDistributionThreeUnitStartedNoConstraintTest()
+        public void EqualDistributionThreeUnitStartedTest()
         {
             ActivePower active = ActivePower.FromKilo(20);
             ReactivePower reactive = ReactivePower.FromKilo(10);
+            DerUnitPowerConstraintConfig unitConstraintConfig = new DerUnitPowerConstraintConfig
+            {
+                ChangedBy = "Test",
+                Name = "DerUnitPowerConstraintConfig",
+                MaximumActivePowerWatt = 20000,
+                MinimumActivePowerWatt = -20000,
+                MaximumReactivePowerVars = 10000,
+                MinimumReactivePowerVars = -10000
+            };
+
+            DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
 
             DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
             DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Started };
             DerUnitPowerControlMap map3 = new DerUnitPowerControlMap { PcsDeviceId = 3, State = () => DerState.Started };
-            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint>());
-            DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint>());
-            DerUnitPowerControl unit3 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig3!, map3, _publisher.Object, new List<IDerUnitConstraint>());
+            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
+            DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
+            DerUnitPowerControl unit3 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig3!, map3, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2, unit3 };
 
             _distribution!.Distribute(active, reactive, units);
@@ -213,17 +246,28 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
 
 
         [TestMethod]
-        public void EqualDistributionThreeUnitStartedOneStoppedOneMaintenanceNoConstraintTest()
+        public void EqualDistributionThreeUnitStartedOneStoppedOneMaintenanceTest()
         {
             ActivePower active = ActivePower.FromKilo(20);
             ReactivePower reactive = ReactivePower.FromKilo(10);
+            DerUnitPowerConstraintConfig unitConstraintConfig = new DerUnitPowerConstraintConfig
+            {
+                ChangedBy = "Test",
+                Name = "DerUnitPowerConstraintConfig",
+                MaximumActivePowerWatt = 20000,
+                MinimumActivePowerWatt = -20000,
+                MaximumReactivePowerVars = 10000,
+                MinimumReactivePowerVars = -10000
+            };
+
+            DerUnitPowerConstraint unitConstraint = new DerUnitPowerConstraint(NullLogger.Instance, unitConstraintConfig, new DerUnitPowerConstraintMap());
 
             DerUnitPowerControlMap map1 = new DerUnitPowerControlMap { PcsDeviceId = 1, State = () => DerState.Started };
             DerUnitPowerControlMap map2 = new DerUnitPowerControlMap { PcsDeviceId = 2, State = () => DerState.Stopped };
             DerUnitPowerControlMap map3 = new DerUnitPowerControlMap { PcsDeviceId = 3, State = () => DerState.Maintenance };
-            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint>());
-            DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint>());
-            DerUnitPowerControl unit3 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig3!, map3, _publisher.Object, new List<IDerUnitConstraint>());
+            DerUnitPowerControl unit1 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig1!, map1, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
+            DerUnitPowerControl unit2 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig2!, map2, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
+            DerUnitPowerControl unit3 = new DerUnitPowerControl(NullLogger.Instance, _derUnitConfig3!, map3, _publisher.Object, new List<IDerUnitConstraint> { unitConstraint });
             List<DerUnitPowerControl> units = new List<DerUnitPowerControl> { unit1, unit2, unit3 };
 
             _distribution!.Distribute(active, reactive, units);
@@ -234,10 +278,10 @@ namespace paskalON.PowerControls.Domain.UnitTest.Strategies
 
             Assert.IsNotNull(logs.Where(m => regexActive.IsMatch(m.Message)).FirstOrDefault());
             Assert.IsNotNull(logs.Where(m => regexReactive.IsMatch(m.Message)).FirstOrDefault());
-            Assert.AreEqual(20, unit1.TargetActivePower.KiloWattsPrecision);
-            Assert.AreEqual(10, unit1.TargetReactivePower.KiloVoltAmperesReactivePrecision);
-            Assert.AreEqual(0, unit2.TargetActivePower.KiloWattsPrecision);
-            Assert.AreEqual(0, unit2.TargetReactivePower.KiloVoltAmperesReactivePrecision);
+            Assert.AreEqual(10, unit1.TargetActivePower.KiloWattsPrecision);
+            Assert.AreEqual(5, unit1.TargetReactivePower.KiloVoltAmperesReactivePrecision);
+            Assert.AreEqual(10, unit2.TargetActivePower.KiloWattsPrecision);
+            Assert.AreEqual(5, unit2.TargetReactivePower.KiloVoltAmperesReactivePrecision);
             Assert.AreEqual(0, unit3.TargetActivePower.KiloWattsPrecision);
             Assert.AreEqual(0, unit3.TargetReactivePower.KiloVoltAmperesReactivePrecision);
         }
