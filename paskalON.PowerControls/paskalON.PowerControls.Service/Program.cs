@@ -115,8 +115,7 @@ try
     using (IServiceScope scope = app.Services.CreateScope())
     {
         IRepository<PowerControlContext, SystemConfig> repository = scope.ServiceProvider.GetRequiredService<IRepository<PowerControlContext, SystemConfig>>();
-        SystemConfig? config = repository.GetAsync(0, 1, (o) => o.Id).Result.Single();
-        ArgumentNullException.ThrowIfNull(config, "System configuration contains no record");
+        SystemConfig config = (await repository.GetAsync(0, 1, o => o.Id)).Single();
         SubscriberTopic topics = GetSubscriberTopic(config);
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
         await deviceClient.Initialize(topics);
