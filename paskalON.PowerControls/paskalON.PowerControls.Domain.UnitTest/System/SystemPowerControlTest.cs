@@ -127,6 +127,15 @@ namespace paskalON.PowerControls.Domain.UnitTest.System
 
 
         [TestMethod]
+        public void SystemPowerControlDistributionStrategyValuesAreUniqueTest()
+        {
+            DistributionStrategyType[] values = Enum.GetValues<DistributionStrategyType>();
+
+            Assert.AreEqual(values.Length, values.Select(value => (int)value).Distinct().Count());
+        }
+
+
+        [TestMethod]
         public void UpdatePowerSetsActiveAndReactiveSetpointsTest()
         {
             SystemPowerControl system = CreateSystemPowerControl(units: [_unit1.Object]);

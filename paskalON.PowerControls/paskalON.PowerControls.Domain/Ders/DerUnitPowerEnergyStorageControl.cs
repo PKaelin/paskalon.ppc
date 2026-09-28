@@ -138,6 +138,13 @@ namespace paskalON.PowerControls.Domain.Ders
             // Get power constraints here and assign them to properties so that we dont have to do them in every control loop
             DerUnitPowerConstraint pc = Constraints.OfType<DerUnitPowerConstraint>().Single();
             // At this point we enforce that there will always be a power constraint config
+            if ((_config.DistributionStrategyType == DistributionStrategyType.Proportional || _config.DistributionStrategyType == DistributionStrategyType.WaterFilling) &&
+                (pc.MaximumActivePowerWatt == null || pc.MinimumActivePowerWatt == null ||
+                 pc.MaximumReactivePowerVars == null || pc.MinimumReactivePowerVars == null))
+            {
+                throw new InvalidOperationException("Proportional and water-filling distribution require all four DER power limits.");
+            }
+
             MaximumActivePower = pc.MaximumActivePowerWatt.HasValue ? new ActivePower(pc.MaximumActivePowerWatt.Value) : new ActivePower(0);
             MinimumActivePower = pc.MinimumActivePowerWatt.HasValue ? new ActivePower(pc.MinimumActivePowerWatt.Value) : new ActivePower(0);
             MaximumReactivePower = pc.MaximumReactivePowerVars.HasValue ? new ReactivePower(pc.MaximumReactivePowerVars.Value) : new ReactivePower(0);

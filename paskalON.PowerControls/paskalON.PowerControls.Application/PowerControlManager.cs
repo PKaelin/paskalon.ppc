@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
@@ -187,10 +187,10 @@ namespace paskalON.PowerControls.Application
                 }
             }
 
-            RegisterTargetDispatching(units);
             IMetricsPublisher systemPublisher = _metricsPublisherFactory.Create();
             SystemPowerControl systemPowerControl = new SystemPowerControl(_logger, systemConfig, CreateSystemMap(), systemPublisher,
                 CreateSystemConstraints(systemConfig.Constraints), units, CreateDistributionProfile());
+            RegisterTargetDispatching(units);
 
             lock (_dataLock)
             {

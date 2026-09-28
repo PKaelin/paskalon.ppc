@@ -254,6 +254,27 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Systems
 
 
         [TestMethod]
+        public void CreateApplyPowerRampUsesSignedDeltaFromPreviousTargetTest()
+        {
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
+            _config.MaximumReactivePowerVarsRampRatePerSecond = 10000;
+            SystemRampConstraint constraint = new SystemRampConstraint(NullLogger.Instance, _config, _map!, timeProvider);
+            ActivePower initialActivePower = ActivePower.FromKilo(5);
+            ReactivePower initialReactivePower = ReactivePower.FromKilo(5);
+            constraint.ApplyConstraints(ref initialActivePower, ref initialReactivePower);
+            timeProvider.Advance(TimeSpan.FromSeconds(1));
+            ActivePower activePower = ActivePower.FromKilo(20);
+            ReactivePower reactivePower = ReactivePower.FromKilo(-20);
+
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
+
+            Assert.AreEqual(15, activePower.KiloWatts);
+            Assert.AreEqual(-5, reactivePower.KiloVoltAmperesReactive);
+        }
+
+
+        [TestMethod]
         public void CreateApplyReactivePowerMaximumInitialInLimitTest()
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider();

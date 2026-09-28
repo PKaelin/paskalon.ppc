@@ -20,14 +20,14 @@ namespace paskalON.PowerControls.Domain.Configs.Strategies
         /// <summary>
         /// Distributes all to a weight.
         /// </summary>
-        Weight = 1,
+        Weight = 2,
         /// <summary>
         /// Distributes using a proportions or limits.
         /// </summary>
-        Proportional = 2,
+        Proportional = 3,
         /// <summary>
         /// Distributes lowest first then uniformly across.
         /// </summary>
-        WaterFilling = 3,
+        WaterFilling = 4,
     }
 }
