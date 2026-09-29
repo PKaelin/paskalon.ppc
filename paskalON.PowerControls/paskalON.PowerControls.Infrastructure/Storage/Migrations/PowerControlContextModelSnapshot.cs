@@ -286,6 +286,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     b.Property<int>("DistributionStrategyType")
                         .HasColumnType("integer");
 
+                    b.HasIndex("DerUnitName")
+                        .IsUnique();
+
                     b.ToTable("DerUnitEnergyStoragePowerControlConfig");
                 });
 
@@ -306,6 +309,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 
                     b.Property<double?>("Weight")
                         .HasColumnType("double precision");
+
+                    b.HasIndex("DerUnitName")
+                        .IsUnique();
 
                     b.ToTable("DerUnitPowerControlConfig");
                 });

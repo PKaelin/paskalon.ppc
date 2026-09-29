@@ -15,8 +15,8 @@ namespace paskalON.PowerControls.Infrastructure.IntegrationTest.Storage
         public async Task CreatePowerControlContext()
         {
             await using PowerControlContext context = CreateDbContext<PowerControlContext>();
-            context.Database.EnsureDeleted();
-            bool created = context.Database.EnsureCreated();
+            await context.Database.EnsureDeletedAsync();
+            bool created = await context.Database.EnsureCreatedAsync();
 
             Assert.IsTrue(created);
         }
@@ -26,7 +26,7 @@ namespace paskalON.PowerControls.Infrastructure.IntegrationTest.Storage
         public async Task CreatePowerControlMigrationContext()
         {
             await using PowerControlContext context = CreateDbContext<PowerControlContext>();
-            context.Database.EnsureDeleted();
+            await context.Database.EnsureDeletedAsync();
             await context.Database.MigrateAsync();
         }
 
@@ -39,8 +39,8 @@ namespace paskalON.PowerControls.Infrastructure.IntegrationTest.Storage
 
             await using (PowerControlContext context = CreateDbContext<PowerControlContext>())
             {
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
 
                 // Constraints
                 context.SystemPowerConstraintConfigs.Add(sample.SystemPowerConstraintConfig!);
@@ -52,7 +52,7 @@ namespace paskalON.PowerControls.Infrastructure.IntegrationTest.Storage
                 context.DerUnitPowerControlConfigs.Add(sample.DerUnitPowerControlConfig!);
                 context.DerUnitEnergyStoragePowerControlConfigs.Add(sample.DerUnitEnergyStoragePowerControlConfig!);
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             await using (PowerControlContext context = CreateDbContext<PowerControlContext>())

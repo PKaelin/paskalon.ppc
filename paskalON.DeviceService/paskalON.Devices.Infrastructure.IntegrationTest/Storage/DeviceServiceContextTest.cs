@@ -67,7 +67,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.ModbusConfigs.Add(sample.PowerConversionSystemBessModbusConfig!);
                 context.PowerConversionSystemConfigs.Add(sample.PowerConversionSystemBessConfig!);
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
@@ -134,7 +134,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.PowerConversionSystemConfigs.Add(sample.PowerConversionSystemPvConfig!);
                 context.SolarPanelConfigs.Add(sample.SolarPanelConfig!);
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
@@ -207,7 +207,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.ModbusConfigs.Add(sample.ExternalPowerMeterModbusConfig!);
                 context.ExternalPowerMeterConfigs.Add(sample.ExternalPowerMeterConfig!);
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())
@@ -298,7 +298,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
                 context.Add(sample.CircuitBreakerConfig!);
                 context.Add(sample.AutomaticTransferSwitchConfig!);
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             await using (DeviceServiceContext context = CreateDbContext<DeviceServiceContext>())

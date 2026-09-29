@@ -11,43 +11,27 @@ using paskalON.OperatingModes.Infrastructure.Storage;
 namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage
 {
     [TestClass]
-    public class OperatingModeContextTest
+    public class OperatingModeContextTest : DatabaseTestBase
     {
-        // TODO: Implement more tests to check required and relationships.
-
-
-        private DbContextOptions<OperatingModeContext>? _options;
-
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            string variable = "DB_CONNECTION_STRING";
-            string? connectionString = Environment.GetEnvironmentVariable(variable);
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(connectionString, variable);
-            _options = new DbContextOptionsBuilder<OperatingModeContext>().UseNpgsql(connectionString).Options;
-        }
-
-
         [TestMethod]
-        public void CreateDeviceServiceContext()
+        public async Task CreateOperatingModeContext()
         {
-            using OperatingModeContext context = new OperatingModeContext(_options!);
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
+            await using OperatingModeContext context = CreateDbContext<OperatingModeContext>();
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.EnsureCreatedAsync();
         }
 
 
         // TODO: Refine test
         [TestMethod]
-        public void CreateOperatingModeTest()
+        public async Task CreateOperatingModeTest()
         {
             SimpleOperatingMode sample = new SimpleOperatingMode();
 
-            using (OperatingModeContext context = new OperatingModeContext(_options!))
+            await using (OperatingModeContext context = CreateDbContext<OperatingModeContext>())
             {
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
                 // Core
                 context.SystemConfigs.Add(sample.SystemConfig!);
                 // Ramps
@@ -72,16 +56,16 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage
                 context.ActivePowerFixedModeConfigs.Add(sample.ActivePowerFixedModeConfig!);
                 context.ReactivePowerFixedModeConfigs.Add(sample.ReactivePowerFixedModeConfig!);
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             SystemConfig? systemConfig;
             ActivePowerModeConfig? activePowerModeConfig;
 
-            using (OperatingModeContext context = new OperatingModeContext(_options!))
+            await using (OperatingModeContext context = CreateDbContext<OperatingModeContext>())
             {
-                systemConfig = context.SystemConfigs.FirstOrDefault();
-                activePowerModeConfig = context.ActivePowerModeConfigs.Include(x => x.RampConfig).FirstOrDefault();
+                systemConfig = await context.SystemConfigs.FirstOrDefaultAsync();
+                activePowerModeConfig = await context.ActivePowerModeConfigs.Include(x => x.RampConfig).FirstOrDefaultAsync();
             }
 
             Assert.IsNotNull(systemConfig);
