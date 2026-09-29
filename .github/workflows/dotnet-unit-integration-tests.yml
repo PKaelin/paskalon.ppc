@@ -1,0 +1,141 @@
+#-------------------------------------------------------------------------------
+# Workflow to run unit and integration tests of a given .NET solution
+# Triggers/Jobs are in the specific Microservice-[ServiceName] workflow definitions.
+#-------------------------------------------------------------------------------
+name: .NET Unit And Integration Tests
+
+#-------------------------------------------------------------------------------
+# Permissions on repository
+#-------------------------------------------------------------------------------
+permissions:
+  contents: read
+
+#-------------------------------------------------------------------------------
+# Triggers
+#-------------------------------------------------------------------------------
+on:
+  workflow_call:
+    inputs:
+      service-path:
+        required: true
+        type: string
+      runs-on:
+        required: true
+        type: string
+      dotnet-version:
+        required: true
+        type: string
+      configuration:
+        required: false
+        type: string
+        default: "Release"
+
+jobs:
+  build-test:
+    #--------------------------------------------------------------------------
+    # Runs on
+    #--------------------------------------------------------------------------
+    runs-on: ${{ inputs.runs-on }}
+
+    steps:
+      #--------------------------------------------------------------------------  
+      # Diagnostics
+      #--------------------------------------------------------------------------
+      - name: Show GitHub Context
+        run: |
+          echo "Workflow      : ${{ github.workflow }}"
+          echo "Event         : ${{ github.event_name }}"
+          echo "Repository    : ${{ github.repository }}"
+          echo "Branch        : ${{ github.ref_name }}"
+          echo "SHA           : ${{ github.sha }}"
+          echo "Actor         : ${{ github.actor }}"
+          echo "Triggered By  : ${{ github.triggering_actor }}"
+          echo "Run Number    : ${{ github.run_number }}"
+          echo "Run Attempt   : ${{ github.run_attempt }}"
+          echo "Runner        : ${{ runner.os }}"
+          echo "Workspace     : ${{ github.workspace }}"
+          echo "Service path  : ${{ inputs.service-path }}"
+
+      #--------------------------------------------------------------------------    
+      # Checkout
+      #--------------------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v5
+      #--------------------------------------------------------------------------    
+      # Setup
+      #--------------------------------------------------------------------------
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+      - name: Display .NET Information
+        run: dotnet --info
+      #--------------------------------------------------------------------------    
+      # Restore
+      #--------------------------------------------------------------------------
+      - name: Restore dependencies
+        working-directory: ${{ inputs.service-path }}
+        run: dotnet restore
+      #--------------------------------------------------------------------------    
+      # Build
+      #--------------------------------------------------------------------------
+      - name: Build
+        working-directory: ${{ inputs.service-path }}  
+        run: dotnet build --no-restore --configuration ${{ inputs.configuration }}
+      #--------------------------------------------------------------------------
+      # Unit Tests
+      #--------------------------------------------------------------------------
+      - name: Run Unit Tests
+        working-directory: ${{ inputs.service-path }}  
+        shell: bash
+        run: |
+          for project in $(find . -type f -name "*.UnitTest.csproj"); do
+            echo "Running unit test $project"
+            dotnet test "$project" --configuration ${{ inputs.configuration }} --no-build --logger "trx;LogFileName=unit-tests.trx" --collect:"XPlat Code Coverage"
+          done
+      #--------------------------------------------------------------------------
+      # Integration Tests 
+      # (Backing services like DB/Telemetry/etc. are setup in the service section)
+      #--------------------------------------------------------------------------
+      - name: Run Integration Tests
+        working-directory: ${{ inputs.service-path }}  
+        shell: bash
+        run: |
+          for project in $(find . -type f -name "*.IntegrationTest.csproj"); do
+            echo "Running integration test $project"
+            dotnet test "$project" --configuration ${{ inputs.CONFIGURATION }} --no-build --logger "trx;LogFileName=integration-tests.trx" --collect:"XPlat Code Coverage"
+          done
+      #--------------------------------------------------------------------------
+      # Report generator
+      #--------------------------------------------------------------------------
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+      # Merge code coverage files
+      - name: Generate coverage report
+        shell: bash
+        run: |
+          reportgenerator \
+            -reports:"${{ inputs.service-path }}/**/TestResults/**/coverage.cobertura.xml" \
+            -targetdir:"${{ inputs.service-path }}/TestResults/CoverageReport" \
+            -reporttypes:"Html;Cobertura"
+
+      #--------------------------------------------------------------------------
+      # Publish test results and reports
+      #--------------------------------------------------------------------------
+      - name: Publish test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-results-${{ inputs.service-path }}
+          path: |
+            ${{ inputs.service-path }}/**/TestResults/**/*.trx
+          if-no-files-found: warn
+
+      - name: Publish coverage report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage-${{ inputs.service-path }}
+          path: |
+            ${{ inputs.service-path }}/TestResults/CoverageReport/
+          if-no-files-found: warn

@@ -1,0 +1,37 @@
+#-------------------------------------------------------------------------------
+# Build & Test for pushes and pull requests on the main branch.
+# (In theory only pull requests should happen on the main branch.)
+# Run all unit tests and integration tests.
+#-------------------------------------------------------------------------------
+name: paskalON.DeviceService
+
+#-------------------------------------------------------------------------------
+# Triggers
+#-------------------------------------------------------------------------------
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'paskalON.DeviceService/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'paskalON.DeviceService/**'
+      - '.github/workflows/**'
+
+
+#-------------------------------------------------------------------------------
+# Jobs
+#-------------------------------------------------------------------------------
+jobs:  
+  dotnet-unit-integration:
+    uses: ./.github/workflows/dotnet-unit-integration-tests.yml
+    with:
+      service-path: paskalON.DeviceService
+      # Docker comes pre-installed on GitHub-hosted Linux runners (such as ubuntu-latest)
+      runs-on: ubuntu-latest
+      dotnet-version: "10.0.x"
+      configuration: "Release"
