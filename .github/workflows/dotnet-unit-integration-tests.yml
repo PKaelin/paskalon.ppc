@@ -81,7 +81,7 @@ jobs:
       #--------------------------------------------------------------------------
       - name: Build
         working-directory: ${{ inputs.service-path }}  
-        run: dotnet build --no-restore --configuration ${{ inputs.configuration }}
+        run: dotnet build --no-restore --configuration "${{ inputs.service-path }}/*.sln"
       #--------------------------------------------------------------------------
       # Unit Tests
       #--------------------------------------------------------------------------
