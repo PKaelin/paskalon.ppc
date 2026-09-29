@@ -75,13 +75,27 @@ jobs:
       #--------------------------------------------------------------------------
       - name: Restore dependencies
         working-directory: ${{ inputs.service-path }}
-        run: dotnet restore
+        shell: bash
+        run: |
+          solution="$(find . -maxdepth 1 -type f -name "*.sln*" -print -quit)"
+          if [ -z "$solution" ]; then
+            echo "No solution file found in $PWD"
+            exit 1
+          fi
+          dotnet restore "$solution"
       #--------------------------------------------------------------------------    
       # Build
       #--------------------------------------------------------------------------
       - name: Build
-        working-directory: ${{ inputs.service-path }}  
-        run: dotnet build --no-restore --configuration "${{ inputs.service-path }}/*.sln"
+        working-directory: ${{ inputs.service-path }}
+        shell: bash
+        run: |
+          solution="$(find . -maxdepth 1 -type f -name "*.sln*" -print -quit)"
+          if [ -z "$solution" ]; then
+            echo "No solution file found in $PWD"
+            exit 1
+          fi
+          dotnet build "$solution" --no-restore --configuration "${{ inputs.configuration }}"
       #--------------------------------------------------------------------------
       # Unit Tests
       #--------------------------------------------------------------------------
