@@ -51,14 +51,14 @@ namespace paskalON.Infrastructure.PostgreSql.Tests
         /// <summary>
         /// Create a new instance of the DbContext using the temporary database connection string.
         /// </summary>
-        /// <returns>A new instance of <see cref="T"/>.</returns>
-        protected T CreateDbContext<T>() where T : DbContext
+        /// <returns>A new instance of <see cref="TContext"/>.</returns>
+        protected TContext CreateDbContext<TContext>() where TContext : DbContext
         {
-            var options = new DbContextOptionsBuilder<T>()
+            var options = new DbContextOptionsBuilder<TContext>()
                 .UseNpgsql(ConnectionString)
                 .Options;
 
-            return (T)Activator.CreateInstance(typeof(T), options)!;
+            return (TContext)Activator.CreateInstance(typeof(TContext), options)!;
         }
 
 
