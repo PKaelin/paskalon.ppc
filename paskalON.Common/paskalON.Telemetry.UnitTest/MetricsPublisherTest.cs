@@ -81,15 +81,18 @@ namespace paskalON.Telemetry.UnitTest
         {
             MetricsPublisher publisher = new MetricsPublisher();
             MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
+            string counterValueName = "countervalue";
+            string gaugeValueName = "gaugevalue";
+            string updownValueName = "updownvalue";
 
             publisher.Initialize(nameof(MetricsPublisherHelper), _tags);
-            publisher.Register<MetricsPublisherHelper, int>(helper, "CounterValue", MetricType.Counter, x => x.CounterValue, 1);
-            publisher.Register<MetricsPublisherHelper, double>(helper, "GaugeValue", MetricType.Gauge, x => x.GaugeValue, 1);
-            publisher.Register<MetricsPublisherHelper, int>(helper, "UpDownValue", MetricType.UpDownCounter, x => x.UpDownValue, 1);
+            publisher.Register<MetricsPublisherHelper, int>(helper, counterValueName, MetricType.Counter, x => x.CounterValue, 1);
+            publisher.Register<MetricsPublisherHelper, double>(helper, gaugeValueName, MetricType.Gauge, x => x.GaugeValue, 1);
+            publisher.Register<MetricsPublisherHelper, int>(helper, updownValueName, MetricType.UpDownCounter, x => x.UpDownValue, 1);
 
-            MetricCollector<int> colCounter = new MetricCollector<int>(publisher.Meter!, "CounterValue");
-            MetricCollector<double> colGauge = new MetricCollector<double>(publisher.Meter!, "GaugeValue");
-            MetricCollector<int> colUpDown = new MetricCollector<int>(publisher.Meter!, "UpDownValue");
+            MetricCollector<int> colCounter = new MetricCollector<int>(publisher.Meter!, $"{nameof(MetricsPublisherHelper).ToLower()}_{counterValueName}");
+            MetricCollector<double> colGauge = new MetricCollector<double>(publisher.Meter!, $"{nameof(MetricsPublisherHelper).ToLower()}_{gaugeValueName}");
+            MetricCollector<int> colUpDown = new MetricCollector<int>(publisher.Meter!, $"{nameof(MetricsPublisherHelper).ToLower()}_{updownValueName}");
 
             publisher.Publish(1);
 
@@ -100,19 +103,23 @@ namespace paskalON.Telemetry.UnitTest
 
 
         [TestMethod]
-        public void PublishAllIntervalOfOneNullableTest()
+        public void PublishAllIntervalOfOneAndTwoNullableTest()
         {
             MetricsPublisher publisher = new MetricsPublisher();
             MetricsPublisherHelperNullable helper = new MetricsPublisherHelperNullable(publisher) { CounterValue = 1, GaugeValue = null, UpDownValue = null };
+            string counterValueName = "countervalue";
+            string gaugeValueName = "gaugevalue";
+            string updownValueName = "updownvalue";
 
             publisher.Initialize(nameof(MetricsPublisherHelperNullable), _tags);
-            publisher.Register<MetricsPublisherHelperNullable, int>(helper, "CounterValue", MetricType.Counter, x => x.CounterValue, 1);
-            publisher.Register<MetricsPublisherHelperNullable, double>(helper, "GaugeValue", MetricType.Gauge, x => x.GaugeValue, 1);
-            publisher.Register<MetricsPublisherHelperNullable, int>(helper, "UpDownValue", MetricType.UpDownCounter, x => x.UpDownValue, 1);
 
-            MetricCollector<int> colCounter = new MetricCollector<int>(publisher.Meter!, "CounterValue");
-            MetricCollector<double> colGauge = new MetricCollector<double>(publisher.Meter!, "GaugeValue");
-            MetricCollector<int> colUpDown = new MetricCollector<int>(publisher.Meter!, "UpDownValue");
+            publisher.Register<MetricsPublisherHelperNullable, int>(helper, counterValueName, MetricType.Counter, x => x.CounterValue, 1);
+            publisher.Register<MetricsPublisherHelperNullable, double>(helper, gaugeValueName, MetricType.Gauge, x => x.GaugeValue, 1);
+            publisher.Register<MetricsPublisherHelperNullable, int>(helper, updownValueName, MetricType.UpDownCounter, x => x.UpDownValue, 1);
+
+            MetricCollector<int> colCounter = new MetricCollector<int>(publisher.Meter!, $"{nameof(MetricsPublisherHelperNullable).ToLower()}_{counterValueName}");
+            MetricCollector<double> colGauge = new MetricCollector<double>(publisher.Meter!, $"{nameof(MetricsPublisherHelperNullable).ToLower()}_{gaugeValueName}");
+            MetricCollector<int> colUpDown = new MetricCollector<int>(publisher.Meter!, $"{nameof(MetricsPublisherHelperNullable).ToLower()}_{updownValueName}");
 
             publisher.Publish(1);
 
@@ -128,15 +135,18 @@ namespace paskalON.Telemetry.UnitTest
         {
             MetricsPublisher publisher = new MetricsPublisher();
             MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
+            string counterValueName = "countervalue";
+            string gaugeValueName = "gaugevalue";
+            string updownValueName = "updownvalue";
 
             publisher.Initialize(nameof(MetricsPublisherHelper), _tags);
-            publisher.Register<MetricsPublisherHelper, int>(helper, "CounterValue", MetricType.Counter, x => x.CounterValue, 1);
-            publisher.Register<MetricsPublisherHelper, double>(helper, "GaugeValue", MetricType.Gauge, x => x.GaugeValue, 2);
-            publisher.Register<MetricsPublisherHelper, int>(helper, "UpDownValue", MetricType.UpDownCounter, x => x.UpDownValue, 3);
+            publisher.Register<MetricsPublisherHelper, int>(helper, counterValueName, MetricType.Counter, x => x.CounterValue, 1);
+            publisher.Register<MetricsPublisherHelper, double>(helper, gaugeValueName, MetricType.Gauge, x => x.GaugeValue, 2);
+            publisher.Register<MetricsPublisherHelper, int>(helper, updownValueName, MetricType.UpDownCounter, x => x.UpDownValue, 3);
 
-            MetricCollector<int> colCounter = new MetricCollector<int>(publisher.Meter!, "CounterValue");
-            MetricCollector<double> colGauge = new MetricCollector<double>(publisher.Meter!, "GaugeValue");
-            MetricCollector<int> colUpDown = new MetricCollector<int>(publisher.Meter!, "UpDownValue");
+            MetricCollector<int> colCounter = new MetricCollector<int>(publisher.Meter!, $"{nameof(MetricsPublisherHelper).ToLower()}_{counterValueName}");
+            MetricCollector<double> colGauge = new MetricCollector<double>(publisher.Meter!, $"{nameof(MetricsPublisherHelper).ToLower()}_{gaugeValueName}");
+            MetricCollector<int> colUpDown = new MetricCollector<int>(publisher.Meter!, $"{nameof(MetricsPublisherHelper).ToLower()}_{updownValueName}");
 
             publisher.Publish(1);
             Assert.AreEqual(1, colCounter.GetMeasurementSnapshot().Last().Value);
@@ -168,15 +178,18 @@ namespace paskalON.Telemetry.UnitTest
         {
             MetricsPublisher publisher = new MetricsPublisher();
             MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
+            string counterValueName = "countervalue";
+            string gaugeValueName = "gaugevalue";
+            string updownValueName = "updownvalue";
 
             publisher.Initialize(nameof(MetricsPublisherHelper), _tags);
-            publisher.Register<MetricsPublisherHelper, int>(helper, "CounterValue", MetricType.Counter, x => x.CounterValue, 1);
-            publisher.Register<MetricsPublisherHelper, double>(helper, "GaugeValue", MetricType.Gauge, x => x.GaugeValue, 1);
-            publisher.Register<MetricsPublisherHelper, int>(helper, "UpDownValue", MetricType.UpDownCounter, x => x.UpDownValue, 1);
+            publisher.Register<MetricsPublisherHelper, int>(helper, counterValueName, MetricType.Counter, x => x.CounterValue, 1);
+            publisher.Register<MetricsPublisherHelper, double>(helper, gaugeValueName, MetricType.Gauge, x => x.GaugeValue, 1);
+            publisher.Register<MetricsPublisherHelper, int>(helper, updownValueName, MetricType.UpDownCounter, x => x.UpDownValue, 1);
 
-            MetricCollector<int> colCounter = new MetricCollector<int>(publisher.Meter!, "CounterValue");
-            MetricCollector<double> colGauge = new MetricCollector<double>(publisher.Meter!, "GaugeValue");
-            MetricCollector<int> colUpDown = new MetricCollector<int>(publisher.Meter!, "UpDownValue");
+            MetricCollector<int> colCounter = new MetricCollector<int>(publisher.Meter!, $"{nameof(MetricsPublisherHelper).ToLower()}_{counterValueName}");
+            MetricCollector<double> colGauge = new MetricCollector<double>(publisher.Meter!, $"{nameof(MetricsPublisherHelper).ToLower()}_{gaugeValueName}");
+            MetricCollector<int> colUpDown = new MetricCollector<int>(publisher.Meter!, $"{nameof(MetricsPublisherHelper).ToLower()}_{updownValueName}");
 
             publisher.IsEnabled = false;
             publisher.Publish(1);
