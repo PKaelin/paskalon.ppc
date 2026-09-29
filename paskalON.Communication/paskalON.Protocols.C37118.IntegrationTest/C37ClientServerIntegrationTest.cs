@@ -20,11 +20,12 @@ namespace paskalON.Protocols.C37118.IntegrationTest
 
             PmuDataSimulation simulation = new PmuDataSimulation
             {
+                StationName = "PMU",
                 StreamId = 15,
                 Frequency = 50,
                 FrequencyRateOfChange = 0.1f,
-                Phasors = new[] { new PhasorMeasurement("VA", 0.2f, 1.5f, PhasorUnitTypes.Voltage) },
-                Analogs = new[] { new AnalogMeasurement("P", 5.25f) }
+                Phasors = new Dictionary<string, PhasorMeasurement> { { "VA", new PhasorMeasurement("VA", 0.2f, 1.5f, PhasorUnitTypes.Voltage) } }.AsReadOnly(),
+                Analogs = new Dictionary<string, AnalogMeasurement> { { "P", new AnalogMeasurement("P", 5.25f) } }.AsReadOnly()
             };
 
             C37Server server = new C37Server(NullLogger<C37Server>.Instance, new[] { simulation }, port, 1);

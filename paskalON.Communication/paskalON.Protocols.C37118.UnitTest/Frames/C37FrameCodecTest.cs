@@ -15,11 +15,12 @@ namespace paskalON.Protocols.C37118.UnitTest.Frames
         {
             PmuDataSimulation simulation = new PmuDataSimulation
             {
+                StationName = "PMU",
                 StreamId = 42,
                 Frequency = 50.0f,
                 FrequencyRateOfChange = -0.25f,
-                Phasors = new[] { new PhasorMeasurement("VA", 0.25f, 12.5f, PhasorUnitTypes.Voltage) },
-                Analogs = new[] { new AnalogMeasurement("P", 3.5f) }
+                Phasors = new Dictionary<string, PhasorMeasurement> { { "VA", new PhasorMeasurement("VA", 0.25f, 12.5f, PhasorUnitTypes.Voltage) } }.AsReadOnly(),
+                Analogs = new Dictionary<string, AnalogMeasurement> { { "P", new AnalogMeasurement("P", 3.5f) } }.AsReadOnly()
             };
 
             byte[] bytes = C37FrameCodec.CreateDataFrame(simulation);
@@ -40,10 +41,11 @@ namespace paskalON.Protocols.C37118.UnitTest.Frames
         {
             PmuDataSimulation simulation = new PmuDataSimulation
             {
+                StationName = "PMU",
                 StreamId = 7,
                 Frequency = 50,
-                Phasors = new[] { new PhasorMeasurement("VA", 0, 1, PhasorUnitTypes.Voltage) },
-                Analogs = new[] { new AnalogMeasurement("P", 2) }
+                Phasors = new Dictionary<string, PhasorMeasurement> { { "VA", new PhasorMeasurement("VA", 0, 1, PhasorUnitTypes.Voltage) } }.AsReadOnly(),
+                Analogs = new Dictionary<string, AnalogMeasurement> { { "P", new AnalogMeasurement("P", 2) } }.AsReadOnly()
             };
 
             byte[] bytes = C37FrameCodec.CreateConfigurationFrame(new[] { simulation }, 30);
@@ -71,7 +73,7 @@ namespace paskalON.Protocols.C37118.UnitTest.Frames
         [TestMethod]
         public void C37FrameCodecRejectsCorruptedChecksumTest()
         {
-            PmuDataSimulation simulation = new PmuDataSimulation { StreamId = 1, Frequency = 50 };
+            PmuDataSimulation simulation = new PmuDataSimulation { StationName = "PMU", StreamId = 1, Frequency = 50 };
             byte[] bytes = C37FrameCodec.CreateDataFrame(simulation);
             bytes[14] = 1;
 

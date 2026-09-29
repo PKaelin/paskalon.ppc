@@ -14,7 +14,7 @@ namespace paskalON.Protocols.Modbus.UnitTest
         [TestMethod]
         public void MemoryModbusClientRejectsNullStoreTest()
         {
-            Assert.ThrowsExactly<ArgumentNullException>(() => new MemoryModbusClient(null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new MemoryModbusClient(null!, "localhost", 12));
         }
 
 
@@ -22,7 +22,7 @@ namespace paskalON.Protocols.Modbus.UnitTest
         public async Task MemoryModbusClientReadsAndWritesCoilDiscretesTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(4, 4, 8, 8);
-            MemoryModbusClient client = new MemoryModbusClient(store, 2);
+            MemoryModbusClient client = new MemoryModbusClient(store, "localhost", 12, 2);
             store.CoilDiscretes.WritePoints(1, new[] { true, false });
 
             bool[]? coils = await client.ReadCoilsAsync(1, 2);
@@ -37,7 +37,7 @@ namespace paskalON.Protocols.Modbus.UnitTest
         public async Task MemoryModbusClientReadsAndWritesCoilInputsTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(4, 4, 8, 8);
-            MemoryModbusClient client = new MemoryModbusClient(store, 2);
+            MemoryModbusClient client = new MemoryModbusClient(store, "localhost", 12, 2);
             store.CoilInputs.WritePoints(1, new[] { false, true });
 
             bool[]? inputs = await client.ReadDiscreteInputsAsync(1, 2);
@@ -52,7 +52,7 @@ namespace paskalON.Protocols.Modbus.UnitTest
         public async Task MemoryModbusClientReadsAndWritesInputRegisterTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(4, 4, 8, 8);
-            MemoryModbusClient client = new MemoryModbusClient(store, 2);
+            MemoryModbusClient client = new MemoryModbusClient(store, "localhost", 12, 2);
             store.InputRegisters.WritePoints(1, new ushort[] { 30, 40 });
 
             ushort[]? inputRegisters = await client.ReadInputRegistersAsync(1, 2);
@@ -68,7 +68,7 @@ namespace paskalON.Protocols.Modbus.UnitTest
         public async Task MemoryModbusClientReadsAndWritesHoldingRegisterTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(4, 4, 8, 8);
-            MemoryModbusClient client = new MemoryModbusClient(store, 2);
+            MemoryModbusClient client = new MemoryModbusClient(store, "localhost", 12, 2);
 
             await client.WriteSingleRegisterAsync(3, (ushort)123, ModbusDataType.MbUint16);
             await client.WriteMultipleRegistersAsync(4, new ushort[] { 456, 789 }, ModbusDataType.MbUint16);
@@ -83,7 +83,7 @@ namespace paskalON.Protocols.Modbus.UnitTest
         public async Task MemoryModbusClientConvertsDoubleWritesTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(holdingRegisterCount: 4);
-            MemoryModbusClient client = new MemoryModbusClient(store);
+            MemoryModbusClient client = new MemoryModbusClient(store, "localhost", 12);
 
             await client.WriteSingleRegisterAsync(1, 12.5, ModbusDataType.MbInt16);
 
@@ -97,7 +97,7 @@ namespace paskalON.Protocols.Modbus.UnitTest
         public async Task MemoryModbusClientWritesFourRegisterDoubleTest()
         {
             ModbusDataMemoryStore store = new ModbusDataMemoryStore(holdingRegisterCount: 8);
-            MemoryModbusClient client = new MemoryModbusClient(store);
+            MemoryModbusClient client = new MemoryModbusClient(store, "localhost", 12);
 
             await client.WriteSingleRegisterAsync(1, 12.5, ModbusDataType.MbDoubleBe);
 
