@@ -22,6 +22,7 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Configurations
             builder.Property(x => x.IsActive).IsRequired();
             builder.Property(x => x.IsEnabled).IsRequired();
             builder.Property(x => x.DerUnitName).HasMaxLength(250).IsRequired();
+            builder.HasIndex(x => x.DerUnitName).IsUnique();
             builder.Property(x => x.DistributionStrategyType).IsRequired();
         }
     }
