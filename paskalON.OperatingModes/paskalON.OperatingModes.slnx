@@ -2,6 +2,7 @@
   <Folder Name="/InitialDevelopment/">
     <Project Path="../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
     <Project Path="../paskalON.Common/paskalON.Infrastructure.PostgreSql/paskalON.Infrastructure.PostgreSql.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Infrastructure/paskalON.Infrastructure.csproj" />
     <Project Path="../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
     <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
@@ -21,4 +22,5 @@
   <Project Path="paskalON.OperatingModes.Domain.Configs/paskalON.OperatingModes.Domain.Configs.csproj" Id="c61f2d23-a0d7-405f-bab7-706d7e6910e3" />
   <Project Path="paskalON.OperatingModes.Domain/paskalON.OperatingModes.Domain.csproj" />
   <Project Path="paskalON.OperatingModes.Infrastructure/paskalON.OperatingModes.Infrastructure.csproj" Id="91a381b4-3370-4e7a-a992-28b79cca865a" />
+  <Project Path="paskalON.OperatingModes.Service/paskalON.OperatingModes.Service.csproj" Id="375c7069-74cf-4df7-9bff-de2d79c63e86" />
 </Solution>
