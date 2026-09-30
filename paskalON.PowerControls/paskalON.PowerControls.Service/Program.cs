@@ -3,6 +3,10 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using paskalON.Devices.Client;
 using paskalON.Devices.Client.Subscribers;
 using paskalON.Infrastructure.Repositories;
@@ -11,6 +15,8 @@ using paskalON.Messaging.Redis;
 using paskalON.PowerControls.Application;
 using paskalON.PowerControls.Application.Dispatchers;
 using paskalON.PowerControls.Domain.Configs;
+using paskalON.PowerControls.Domain.Ders;
+using paskalON.PowerControls.Domain.Systems;
 using paskalON.PowerControls.Infrastructure.Storage;
 using paskalON.PowerControls.Infrastructure.Storage.Repositories;
 using paskalON.PowerControls.Service.Publishers;
@@ -100,6 +106,47 @@ try
         builder.Services.AddHostedService<MetricsPublisherService>(provider => provider.GetRequiredService<MetricsPublisherService>());
     }
 
+    // Configure OpenTelemetry logging, metrics, & tracing with auto-start using the
+    // AddOpenTelemetry extension from OpenTelemetry.Extensions.Hosting.
+    builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r
+        .AddService(
+            serviceName: builder.Environment.ApplicationName,
+            serviceVersion: typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",
+            serviceInstanceId: Environment.MachineName))
+        .WithLogging(builder =>
+        {
+            builder.AddOtlpExporter((otlpOptions, logRecordExportProcessorOptions) =>
+            {
+                otlpOptions.Endpoint = new Uri(logEndpointString);
+                otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+            });
+        })
+        .WithMetrics(builder =>
+        {
+            builder.AddAspNetCoreInstrumentation();
+            builder.AddMeter(nameof(DerUnitPowerControl));
+            builder.AddMeter(nameof(DerUnitPowerEnergyStorageControl));
+            builder.AddMeter(nameof(SystemPowerControl));
+
+            builder.AddOtlpExporter((otlpOptions, metricReaderOptions) =>
+            {
+                otlpOptions.Endpoint = new Uri(metricsEndpointString);
+                otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 5000;
+            });
+        })
+        .WithTracing(builder =>
+        {
+            builder.AddAspNetCoreInstrumentation();
+            builder.AddSource("PPC.PowerControls");
+            builder.AddOtlpExporter((otlpOptions) =>
+            {
+                otlpOptions.Endpoint = new Uri(tracingEndpointString);
+                otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+            });
+        });
+
     // Build application
     Console.WriteLine("Building application.....");
     app = builder.Build();
@@ -162,43 +209,40 @@ catch (Exception ex)
 static SubscriberTopic GetSubscriberTopic(SystemConfig config)
 {
     SubscriberTopic topic = new SubscriberTopic();
+
+    if (config.SubscriberTopicPcsCore != null && config.SubscriberTopicPcsDetail != null)
     {
-        if (config.SubscriberTopicPcsCore != null && config.SubscriberTopicPcsDetail != null)
-        {
-            topic.PowerConversionSystemTopic = new SubscriberTopicEntry(config.SubscriberTopicPcsCore, config.SubscriberTopicPcsDetail);
-        }
-
-        if (config.SubscriberTopicBatteryBankCore != null && config.SubscriberTopicBatteryBankDetail != null)
-        {
-            topic.BatteryBankTopic = new SubscriberTopicEntry(config.SubscriberTopicBatteryBankCore, config.SubscriberTopicBatteryBankDetail);
-        }
-
-        if (config.SubscriberTopicSolarPanelCore != null && config.SubscriberTopicSolarPanelDetail != null)
-        {
-            topic.SolarPanelTopic = new SubscriberTopicEntry(config.SubscriberTopicSolarPanelCore, config.SubscriberTopicSolarPanelDetail);
-        }
-
-        if (config.SubscriberTopicExternalPowerMeterCore != null && config.SubscriberTopicExternalPowerMeterDetail != null)
-        {
-            topic.ExternalPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicExternalPowerMeterCore, config.SubscriberTopicExternalPowerMeterDetail);
-        }
-
-        if (config.SubscriberTopicAuxiliaryPowerMeterCore != null && config.SubscriberTopicAuxiliaryPowerMeterDetail != null)
-        {
-            topic.AuxiliaryPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicAuxiliaryPowerMeterCore, config.SubscriberTopicAuxiliaryPowerMeterDetail);
-        }
-
-        if (config.SubscriberTopicSystemPowerMeterCore != null && config.SubscriberTopicSystemPowerMeterDetail != null)
-        {
-            topic.SystemPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicSystemPowerMeterCore, config.SubscriberTopicSystemPowerMeterDetail);
-        }
-
-        if (config.SubscriberTopicCircuitPowerMeterCore != null && config.SubscriberTopicCircuitPowerMeterDetail != null)
-        {
-            topic.CircuitPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicCircuitPowerMeterCore, config.SubscriberTopicCircuitPowerMeterDetail);
-        }
+        topic.PowerConversionSystemTopic = new SubscriberTopicEntry(config.SubscriberTopicPcsCore, config.SubscriberTopicPcsDetail);
     }
-    ;
 
+    if (config.SubscriberTopicBatteryBankCore != null && config.SubscriberTopicBatteryBankDetail != null)
+    {
+        topic.BatteryBankTopic = new SubscriberTopicEntry(config.SubscriberTopicBatteryBankCore, config.SubscriberTopicBatteryBankDetail);
+    }
+
+    if (config.SubscriberTopicSolarPanelCore != null && config.SubscriberTopicSolarPanelDetail != null)
+    {
+        topic.SolarPanelTopic = new SubscriberTopicEntry(config.SubscriberTopicSolarPanelCore, config.SubscriberTopicSolarPanelDetail);
+    }
+
+    if (config.SubscriberTopicExternalPowerMeterCore != null && config.SubscriberTopicExternalPowerMeterDetail != null)
+    {
+        topic.ExternalPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicExternalPowerMeterCore, config.SubscriberTopicExternalPowerMeterDetail);
+    }
+
+    if (config.SubscriberTopicAuxiliaryPowerMeterCore != null && config.SubscriberTopicAuxiliaryPowerMeterDetail != null)
+    {
+        topic.AuxiliaryPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicAuxiliaryPowerMeterCore, config.SubscriberTopicAuxiliaryPowerMeterDetail);
+    }
+
+    if (config.SubscriberTopicSystemPowerMeterCore != null && config.SubscriberTopicSystemPowerMeterDetail != null)
+    {
+        topic.SystemPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicSystemPowerMeterCore, config.SubscriberTopicSystemPowerMeterDetail);
+    }
+
+    if (config.SubscriberTopicCircuitPowerMeterCore != null && config.SubscriberTopicCircuitPowerMeterDetail != null)
+    {
+        topic.CircuitPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicCircuitPowerMeterCore, config.SubscriberTopicCircuitPowerMeterDetail);
+    }
     return topic;
 }
