@@ -1,0 +1,75 @@
+services:
+  # Database
+  paskalon.operatingmodes.data:
+    container_name: paskalon.operatingmodes.data
+    image: postgres:18.6
+    restart: unless-stopped
+    ports:
+      - 45021:5432
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/db_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_DB: operatingmodes
+    secrets:
+      - db_user
+      - db_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d operatingmodes -U $$(cat /run/secrets/db_user)"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - paskalon.operatingmodes.data:/var/lib/postgresql
+    networks:
+      - ppc.network
+
+  # Operating Mode Service
+  paskalon.operatingmodes.service:
+    container_name: paskalon.operatingmodes.service
+    image: ${DOCKER_REGISTRY-}paskalonoperatingmodesservice
+    build:
+      context: .
+      dockerfile: paskalON.OperatingModes.Service/Dockerfile
+    depends_on:
+      paskalon.operatingmodes.data:
+        condition: service_healthy
+    ports:
+      - 45020:8080
+    environment:
+      - DATABASE_CONNECTION_FILE=/run/secrets/database_connection
+      - MESSAGING_CONNECTION_FILE=/run/secrets/messaging_connection
+      - DEVICESERVICE_CONNECTION_FILE=/run/secrets/deviceservice_connection
+      - TELEMETRY_LOGGING_ENDPOINT=http://collector:4317
+      - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
+      - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
+      - START_PUBLISHERS=true
+      - DEVICE_SERVICE_ENDPOINT=/api/v1
+    secrets:
+      - database_connection
+      - messaging_connection
+      - deviceservice_connection
+    networks:
+      - ppc.network
+
+secrets:
+  database_connection:
+    file: ./secrets/database_connection
+  messaging_connection:
+    file: ./secrets/messaging_connection
+  deviceservice_connection:
+    file: ./secrets/deviceservice_connection
+  db_user:
+    file: ./secrets/db_user
+  db_password:
+    file: ./secrets/db_password
+
+volumes:
+  paskalon.operatingmodes.data:
+    name: paskalon.operatingmodes.data
+
+networks:
+  ppc.network:
+    name: ppc.network
+    # Attachable only for development and test
+    attachable: true
