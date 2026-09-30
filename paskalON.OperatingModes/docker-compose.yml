@@ -39,7 +39,7 @@ services:
     environment:
       - DATABASE_CONNECTION_FILE=/run/secrets/database_connection
       - MESSAGING_CONNECTION_FILE=/run/secrets/messaging_connection
-      - DEVICESERVICE_CONNECTION_FILE=/run/secrets/deviceservice_connection
+      - DEVICESERVICE_CONNECTION_FILE=/run/secrets/deviceservice_connections
       - TELEMETRY_LOGGING_ENDPOINT=http://collector:4317
       - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
       - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
@@ -48,7 +48,7 @@ services:
     secrets:
       - database_connection
       - messaging_connection
-      - deviceservice_connection
+      - deviceservice_connections
     networks:
       - ppc.network
 
@@ -57,8 +57,8 @@ secrets:
     file: ./secrets/database_connection
   messaging_connection:
     file: ./secrets/messaging_connection
-  deviceservice_connection:
-    file: ./secrets/deviceservice_connection
+  deviceservice_connections:
+    file: ./secrets/deviceservice_connections
   db_user:
     file: ./secrets/db_user
   db_password:
