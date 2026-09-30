@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/InitialDevelopment/">
+    <Project Path="../../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
+    <Project Path="../../paskalON.OperatingModes/paskalON.OperatingModes.Domain.Configs/paskalON.OperatingModes.Domain.Configs.csproj" />
+    <Project Path="../../paskalON.OperatingModes/paskalON.OperatingModes.Infrastructure/paskalON.OperatingModes.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="paskalON.DemoSuperSimpleBattery.OperatingModes.Data/paskalON.DemoSuperSimpleBattery.OperatingModes.Data.csproj" Id="5fe438a6-f6a0-497d-9902-e5f53fbcf62e" />
+</Solution>
