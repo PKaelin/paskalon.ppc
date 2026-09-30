@@ -89,10 +89,10 @@ namespace paskalON.OperatingModes.Domain.OpenModes
                     // Apply configured limits if configured
                     targetActive = ApplyActiveLimits(targetActive.Value);
                     _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetActive.Value);
-                    RampControllerActive.Start(TargetActivePower.KiloWatts, targetActive.Value);
+                    RampControllerActive.Start(TargetActivePower.Watts, targetActive.Value);
                 }
 
-                _targetActivePower.KiloWatts = RampControllerActive.Calculate();
+                _targetActivePower.Watts = RampControllerActive.Calculate();
                 CheckFinalActiveTarget();
             }
 
@@ -107,10 +107,10 @@ namespace paskalON.OperatingModes.Domain.OpenModes
                     // Apply configured limits if configured
                     targetReactive = ApplyReactiveLimits(targetReactive.Value);
                     _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetReactive.Value);
-                    RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, targetReactive.Value);
+                    RampControllerReactive.Start(TargetReactivePower.VoltAmperesReactive, targetReactive.Value);
                 }
 
-                _targetReactivePower.KiloVoltAmperesReactive = RampControllerReactive.Calculate();
+                _targetReactivePower.VoltAmperesReactive = RampControllerReactive.Calculate();
                 CheckFinalReactiveTarget();
             }
 

@@ -5,6 +5,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
 using paskalON.OperatingModes.Domain.Curves;
@@ -66,12 +67,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             _systemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 ReferenceFrequency = 50,
-                NameplateMinimumActivePowerKiloWatt = double.MinValue,
-                NameplateMaximumActivePowerKiloWatt = double.MaxValue,
-                NameplateMinimumReactivePowerKiloVars = double.MinValue,
-                NameplateMaximumReactivePowerKiloVars = double.MaxValue,
+                NameplateMinimumActivePowerWatt = double.MinValue,
+                NameplateMaximumActivePowerWatt = double.MaxValue,
+                NameplateMinimumReactivePowerVars = double.MinValue,
+                NameplateMaximumReactivePowerVars = double.MaxValue,
             };
 
             _config = new OperatingModeConfigTest
@@ -79,7 +80,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
                 ChangedBy = "Test",
                 Name = "ActivePowerFixedModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 RampConfig = new Mock<RampBaseConfig>().Object,
             };
 
@@ -100,10 +101,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             Mock<OperatingModeBaseConfig> config = new Mock<OperatingModeBaseConfig>();
             Mock<OperatingModeBaseMap> map = new Mock<OperatingModeBaseMap>();
             Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(null, TimeProvider.System, publisher.Object, systemConfig.Object,
+            Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(null!, TimeProvider.System, publisher.Object, systemConfig.Object,
                 config.Object, map.Object, ramp.Object, curve.Object));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
 
@@ -115,10 +114,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             Mock<ICurveController> curve = new Mock<ICurveController>();
             Mock<OperatingModeBaseConfig> config = new Mock<OperatingModeBaseConfig>();
             Mock<OperatingModeBaseMap> map = new Mock<OperatingModeBaseMap>();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(NullLogger.Instance, TimeProvider.System, publisher.Object,
-                null, config.Object, map.Object, ramp.Object, curve.Object));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+                null!, config.Object, map.Object, ramp.Object, curve.Object));
         }
 
 
@@ -130,10 +127,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             Mock<ICurveController> curve = new Mock<ICurveController>();
             Mock<OperatingModeBaseMap> map = new Mock<OperatingModeBaseMap>();
             Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(NullLogger.Instance, TimeProvider.System, publisher.Object,
-                systemConfig.Object, null, map.Object, ramp.Object, curve.Object));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+                systemConfig.Object, null!, map.Object, ramp.Object, curve.Object));
         }
 
 
@@ -145,10 +140,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             Mock<OperatingModeBaseConfig> config = new Mock<OperatingModeBaseConfig>();
             Mock<OperatingModeBaseMap> map = new Mock<OperatingModeBaseMap>();
             Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(NullLogger.Instance, TimeProvider.System, publisher.Object,
-                systemConfig.Object, config.Object, map.Object, null, curve.Object));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+                systemConfig.Object, config.Object, map.Object, null!, curve.Object));
         }
 
 
@@ -160,10 +153,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             Mock<ICurveController> curve = new Mock<ICurveController>();
             Mock<OperatingModeBaseConfig> config = new Mock<OperatingModeBaseConfig>();
             Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(NullLogger.Instance, TimeProvider.System, publisher.Object,
-                systemConfig.Object, config.Object, null, ramp.Object, curve.Object));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+                systemConfig.Object, config.Object, null!, ramp.Object, curve.Object));
         }
 
 
@@ -171,7 +162,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void SetActivePowerSetpointBiggerThanNameplateTest()
         {
-            _systemConfig!.NameplateMaximumActivePowerKiloWatt = 100;
+            _systemConfig!.NameplateMaximumActivePowerWatt = 100;
             Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointActivePower = ActivePower.FromKilo(200));
         }
 
@@ -179,7 +170,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void SetActivePowerSetpointSmallerThanNameplateTest()
         {
-            _systemConfig!.NameplateMinimumActivePowerKiloWatt = -100;
+            _systemConfig!.NameplateMinimumActivePowerWatt = -100;
             Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointActivePower = ActivePower.FromKilo(-200));
         }
 
@@ -187,7 +178,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void SetReactivePowerSetpointBiggerThanNameplateTest()
         {
-            _systemConfig!.NameplateMaximumReactivePowerKiloVars = 100;
+            _systemConfig!.NameplateMaximumReactivePowerVars = 100;
             Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointReactivePower = ReactivePower.FromKilo(200));
         }
 
@@ -195,7 +186,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void SetReactivePowerSetpointSmallerThanNameplateTest()
         {
-            _systemConfig!.NameplateMinimumReactivePowerKiloVars = -100;
+            _systemConfig!.NameplateMinimumReactivePowerVars = -100;
             Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointReactivePower = ReactivePower.FromKilo(-200));
         }
 
@@ -256,7 +247,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             _mode!.SetpointActivePower = new ActivePower(20000);
             double setpoint = _mode!.TestGetActiveSetpoint();
 
-            Assert.AreEqual(10, setpoint);
+            Assert.AreEqual(10000, setpoint);
             Assert.IsNotNull(_mode!.LastAvailableActive);
             Assert.IsNotNull(_mode!.LastSetpointActive);
         }
@@ -269,7 +260,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             _mode!.SetpointActivePower = new ActivePower(50000);
             double setpoint = _mode!.TestGetActiveSetpoint();
 
-            Assert.AreEqual(50, setpoint);
+            Assert.AreEqual(50000, setpoint);
             Assert.IsNotNull(_mode!.LastAvailableActive);
             Assert.IsNotNull(_mode!.LastSetpointActive);
         }
@@ -331,7 +322,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             _mode!.SetpointReactivePower = new ReactivePower(20000);
             double setpoint = _mode!.TestGetReactiveSetpoint();
 
-            Assert.AreEqual(10, setpoint);
+            Assert.AreEqual(10000, setpoint);
             Assert.IsNotNull(_mode!.LastAvailableReactive);
             Assert.IsNotNull(_mode!.LastSetpointReactive);
         }
@@ -344,7 +335,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             _mode!.SetpointReactivePower = new ReactivePower(50000);
             double setpoint = _mode!.TestGetReactiveSetpoint();
 
-            Assert.AreEqual(50, setpoint);
+            Assert.AreEqual(50000, setpoint);
             Assert.IsNotNull(_mode!.LastAvailableReactive);
             Assert.IsNotNull(_mode!.LastSetpointReactive);
         }
@@ -403,7 +394,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             // Operating mode is enabling but not ramping yet.
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampActive!.Verify(x => x.Start(0, 20), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 20000), Times.Once);
         }
 
 
@@ -418,7 +409,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             // Operating mode is enabling but not ramping yet.
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 10), Times.Once);
+            _rampReactive!.Verify(x => x.Start(0, 10000), Times.Once);
         }
 
 
@@ -467,8 +458,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void ApplyActiveLimitsUpperOperatingModeLimitsTest()
         {
-            _systemConfig!.NameplateMaximumActivePowerKiloWatt = 10;
-            _config!.MaximumActivePowerLimitKiloWatt = 5;
+            _systemConfig!.NameplateMaximumActivePowerWatt = 10;
+            _config!.MaximumActivePowerLimitWatt = 5;
 
             Assert.AreEqual(5, _mode!.TestApplyActiveLimits(20));
         }
@@ -477,8 +468,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void ApplyActiveLimitsUpperNameplateLimitsTest()
         {
-            _systemConfig!.NameplateMaximumActivePowerKiloWatt = 10;
-            _config!.MaximumActivePowerLimitKiloWatt = null;
+            _systemConfig!.NameplateMaximumActivePowerWatt = 10;
+            _config!.MaximumActivePowerLimitWatt = null;
 
             Assert.AreEqual(10, _mode!.TestApplyActiveLimits(20));
         }
@@ -487,8 +478,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void ApplyActiveLimitsLowerOperatingModeLimitsTest()
         {
-            _systemConfig!.NameplateMinimumActivePowerKiloWatt = -10;
-            _config!.MinimumActivePowerLimitKiloWatt = -5;
+            _systemConfig!.NameplateMinimumActivePowerWatt = -10;
+            _config!.MinimumActivePowerLimitWatt = -5;
 
             Assert.AreEqual(-5, _mode!.TestApplyActiveLimits(-20));
         }
@@ -496,8 +487,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void ApplyActiveLimitsLowerNameplateLimitsTest()
         {
-            _systemConfig!.NameplateMinimumActivePowerKiloWatt = -10;
-            _config!.MinimumActivePowerLimitKiloWatt = null;
+            _systemConfig!.NameplateMinimumActivePowerWatt = -10;
+            _config!.MinimumActivePowerLimitWatt = null;
 
             Assert.AreEqual(-10, _mode!.TestApplyActiveLimits(-20));
         }
@@ -506,8 +497,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void ApplyReactiveLimitsUpperOperatingModeLimitsTest()
         {
-            _systemConfig!.NameplateMaximumReactivePowerKiloVars = 10;
-            _config!.MaximumReactivePowerLimitKiloVars = 5;
+            _systemConfig!.NameplateMaximumReactivePowerVars = 10;
+            _config!.MaximumReactivePowerLimitVars = 5;
 
             Assert.AreEqual(5, _mode!.TestApplyReactiveLimits(20));
         }
@@ -516,8 +507,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void ApplyReactiveLimitsUpperNameplateLimitsTest()
         {
-            _systemConfig!.NameplateMaximumReactivePowerKiloVars = 10;
-            _config!.MaximumReactivePowerLimitKiloVars = null;
+            _systemConfig!.NameplateMaximumReactivePowerVars = 10;
+            _config!.MaximumReactivePowerLimitVars = null;
 
             Assert.AreEqual(10, _mode!.TestApplyReactiveLimits(20));
         }
@@ -526,8 +517,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void ApplyReactiveLimitsLowerOperatingModeLimitsTest()
         {
-            _systemConfig!.NameplateMinimumReactivePowerKiloVars = -10;
-            _config!.MinimumReactivePowerLimitKiloVars = -5;
+            _systemConfig!.NameplateMinimumReactivePowerVars = -10;
+            _config!.MinimumReactivePowerLimitVars = -5;
 
             Assert.AreEqual(-5, _mode!.TestApplyReactiveLimits(-20));
         }
@@ -535,8 +526,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         [TestMethod]
         public void ApplyReactiveLimitsLowerNameplateLimitsTest()
         {
-            _systemConfig!.NameplateMinimumReactivePowerKiloVars = -10;
-            _config!.MinimumReactivePowerLimitKiloVars = null;
+            _systemConfig!.NameplateMinimumReactivePowerVars = -10;
+            _config!.MinimumReactivePowerLimitVars = null;
 
             Assert.AreEqual(-10, _mode!.TestApplyReactiveLimits(-20));
         }

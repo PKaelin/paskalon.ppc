@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Domains;
+using paskalON.Domains.Configs;
 
 namespace paskalON.OperatingModes.Domain.Configs
 {
@@ -17,13 +18,13 @@ namespace paskalON.OperatingModes.Domain.Configs
         /// <remarks>
         /// Though this is a flag this operating mode system should be configured to only serve one type.
         /// </remarks>
-        public required OperatingModeType Type
+        public required PowerControlType Type
         {
             get;
             set
             {
                 int v = (int)value;
-                if (Enum.IsDefined(typeof(OperatingModeType), value) == false) throw new ArgumentException("Only one type per operating mode system is allowed.");
+                if (Enum.IsDefined(typeof(PowerControlType), value) == false) throw new ArgumentException("Only one type per operating mode system is allowed.");
                 field = value;
             }
         }
@@ -40,9 +41,9 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// System reference voltage in kilo volts.
+        /// System reference voltage in volts.
         /// </summary>
-        public double ReferenceKiloVoltage
+        public double ReferenceVoltage
         {
             get { return field; }
             set { ArgumentOutOfRangeException.ThrowIfNegative(field); field = value; }
@@ -50,13 +51,13 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Systems maximum kilo voltage nameplate.
+        /// Systems maximum voltage nameplate.
         /// </summary>
         /// <remarks>
         /// Maximum voltage nameplate refers to the highest operating voltage a system can continuously and safely operate.
         /// Most equipment are designed to operate safely with a voltage variation of +/- 10% from the rated nameplate.
         /// </remarks>
-        public double NameplateMaximumKiloVoltage
+        public double NameplateMaximumVoltage
         {
             get { return field; }
             set { ArgumentOutOfRangeException.ThrowIfNegative(field); field = value; }
@@ -64,9 +65,9 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Systems minimum kilo voltage nameplate.
+        /// Systems minimum voltage nameplate.
         /// </summary>
-        public double NameplateMinimumKiloVoltage
+        public double NameplateMinimumVoltage
         {
             get { return field; }
             set { field = value; }
@@ -95,10 +96,10 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Systems maximum active power nameplate in kilo watt.
+        /// Systems maximum active power nameplate in watt.
         /// </summary>
         /// <remarks>
-        public double NameplateMaximumActivePowerKiloWatt
+        public double NameplateMaximumActivePowerWatt
         {
             get { return field; }
             set { ArgumentOutOfRangeException.ThrowIfNegative(field); field = value; }
@@ -106,10 +107,10 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Systems minimum active power nameplate in kilo wat.
+        /// Systems minimum active power nameplate in Watt.
         /// </summary>
         /// <remarks>
-        public double NameplateMinimumActivePowerKiloWatt
+        public double NameplateMinimumActivePowerWatt
         {
             get { return field; }
             set { field = value; }
@@ -117,10 +118,10 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Systems maximum reactive power nameplate in kilo vars.
+        /// Systems maximum reactive power nameplate in vars.
         /// </summary>
         /// <remarks>
-        public double NameplateMaximumReactivePowerKiloVars
+        public double NameplateMaximumReactivePowerVars
         {
             get { return field; }
             set { ArgumentOutOfRangeException.ThrowIfNegative(field); field = value; }
@@ -128,10 +129,10 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Systems minimum reactive power nameplate in kilo vars.
+        /// Systems minimum reactive power nameplate in vars.
         /// </summary>
         /// <remarks>
-        public double NameplateMinimumReactivePowerKiloVars
+        public double NameplateMinimumReactivePowerVars
         {
             get { return field; }
             set { field = value; }

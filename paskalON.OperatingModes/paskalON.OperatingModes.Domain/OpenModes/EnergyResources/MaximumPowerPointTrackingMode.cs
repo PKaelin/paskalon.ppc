@@ -72,10 +72,10 @@ namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
                     // Apply configured limits if configured
                     target = ApplyActiveLimits(target.Value);
                     _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, target.Value);
-                    RampControllerActive.Start(TargetActivePower.KiloWatts, target.Value);
+                    RampControllerActive.Start(TargetActivePower.Watts, target.Value);
                 }
 
-                _targetActivePower.KiloWatts = RampControllerActive.Calculate();
+                _targetActivePower.Watts = RampControllerActive.Calculate();
                 CheckFinalActiveTarget();
             }
 

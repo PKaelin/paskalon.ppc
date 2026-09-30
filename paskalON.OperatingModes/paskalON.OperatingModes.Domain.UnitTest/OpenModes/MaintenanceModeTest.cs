@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Ders;
+using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
@@ -55,12 +56,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
             _systemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 ReferenceFrequency = 50,
-                NameplateMinimumActivePowerKiloWatt = double.MinValue,
-                NameplateMaximumActivePowerKiloWatt = double.MaxValue,
-                NameplateMinimumReactivePowerKiloVars = double.MinValue,
-                NameplateMaximumReactivePowerKiloVars = double.MaxValue,
+                NameplateMinimumActivePowerWatt = double.MinValue,
+                NameplateMaximumActivePowerWatt = double.MaxValue,
+                NameplateMinimumReactivePowerVars = double.MinValue,
+                NameplateMaximumReactivePowerVars = double.MaxValue,
             };
 
             _config = new MaintenanceModeConfig
@@ -68,11 +69,11 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
                 ChangedBy = "Test",
                 Name = "MaintenanceModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
-                MaximumActivePowerLimitKiloWatt = double.MaxValue,
-                MinimumActivePowerLimitKiloWatt = double.MinValue,
-                MaximumReactivePowerLimitKiloVars = double.MaxValue,
-                MinimumReactivePowerLimitKiloVars = double.MinValue,
+                Type = PowerControlType.Bess,
+                MaximumActivePowerLimitWatt = double.MaxValue,
+                MinimumActivePowerLimitWatt = double.MinValue,
+                MaximumReactivePowerLimitVars = double.MaxValue,
+                MinimumReactivePowerLimitVars = double.MinValue,
                 RampConfig = new Mock<RampBaseConfig>().Object
             };
 
@@ -93,10 +94,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
             Mock<MaintenanceModeConfig> config = new Mock<MaintenanceModeConfig>();
             Mock<MaintenanceModeMap> map = new Mock<MaintenanceModeMap>();
             Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             Assert.ThrowsExactly<ArgumentNullException>(() => new MaintenanceMode(NullLogger.Instance, TimeProvider.System, publisher.Object,
-                systemConfig.Object, config.Object, null, map.Object, ramp.Object, curve.Object));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+                systemConfig.Object, config.Object, null!, map.Object, ramp.Object, curve.Object));
         }
 
 
@@ -176,9 +175,9 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
             Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
             Assert.AreEqual(0, _mode!.TargetReactivePower.VoltAmperesReactive);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampActive!.Verify(x => x.Start(0, 10000), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 10000000), Times.Once);
             _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 5000), Times.Once);
+            _rampReactive!.Verify(x => x.Start(0, 5000000), Times.Once);
         }
 
 
@@ -198,17 +197,17 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
             Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
             Assert.AreEqual(0, _mode!.TargetReactivePower.VoltAmperesReactive);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampActive!.Verify(x => x.Start(0, -10000), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, -10000000), Times.Once);
             _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, -5000), Times.Once);
+            _rampReactive!.Verify(x => x.Start(0, -5000000), Times.Once);
         }
 
 
         [TestMethod]
         public void CalculateModeEnabledAvailableUpperLimitTest()
         {
-            _config!.MaximumActivePowerLimitKiloWatt = 700;
-            _config!.MaximumReactivePowerLimitKiloVars = 600;
+            _config!.MaximumActivePowerLimitWatt = 700;
+            _config!.MaximumReactivePowerLimitVars = 600;
             _map!.AvailableActivePower = () => ActivePower.FromKilo(1000);
             _map!.AvailableReactivePower = () => ReactivePower.FromKilo(1000);
             _mode!.Enable();
@@ -229,8 +228,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
         [TestMethod]
         public void CalculateModeEnabledAvailableLowerLimitTest()
         {
-            _config!.MinimumActivePowerLimitKiloWatt = -500;
-            _config!.MinimumReactivePowerLimitKiloVars = -400;
+            _config!.MinimumActivePowerLimitWatt = -500;
+            _config!.MinimumReactivePowerLimitVars = -400;
 
             _map!.AvailableActivePower = () => ActivePower.FromKilo(-1000);
             _map!.AvailableReactivePower = () => ReactivePower.FromKilo(-1000);

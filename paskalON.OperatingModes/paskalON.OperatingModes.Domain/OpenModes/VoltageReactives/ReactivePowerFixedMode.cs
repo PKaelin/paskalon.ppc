@@ -73,10 +73,10 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
                     targetSetpoint = ApplyReactiveLimits(targetSetpoint.Value);
 
                     _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint.Value);
-                    RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, targetSetpoint.Value);
+                    RampControllerReactive.Start(TargetReactivePower.VoltAmperesReactive, targetSetpoint.Value);
                 }
 
-                _targetReactivePower.KiloVoltAmperesReactive = RampControllerReactive.Calculate();
+                _targetReactivePower.VoltAmperesReactive = RampControllerReactive.Calculate();
                 CheckFinalReactiveTarget();
             }
 

@@ -10,12 +10,12 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes
     public class OperatingClosedModeBaseConfig : OperatingModeBaseConfig
     {
         /// <summary>
-        /// Deadband in kilo threshold used to filter minor error noise signals.
+        /// Deadband in threshold used to filter minor error noise signals.
         /// </summary>
-        public double DeadbandErrorKilo
+        public double DeadbandError
         {
             get;
             set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
-        } = 100;
+        } = 100000;
     }
 }

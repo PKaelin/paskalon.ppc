@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
@@ -35,12 +36,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
             _systemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 ReferenceFrequency = 50,
-                NameplateMinimumActivePowerKiloWatt = double.MinValue,
-                NameplateMaximumActivePowerKiloWatt = double.MaxValue,
-                NameplateMinimumReactivePowerKiloVars = double.MinValue,
-                NameplateMaximumReactivePowerKiloVars = double.MaxValue,
+                NameplateMinimumActivePowerWatt = double.MinValue,
+                NameplateMaximumActivePowerWatt = double.MaxValue,
+                NameplateMinimumReactivePowerVars = double.MinValue,
+                NameplateMaximumReactivePowerVars = double.MaxValue,
             };
 
             _config = new ActivePowerFixedModeConfig
@@ -48,7 +49,9 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
                 ChangedBy = "Test",
                 Name = "ActivePowerFixedModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
+                DeadbandSetpoint = 1000,
+                DeadbandAvailable = 1000,
                 RampConfig = new Mock<RampBaseConfig>().Object
             };
 
@@ -132,7 +135,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
             Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
             Assert.AreEqual(0, _mode!.TargetReactivePower.VoltAmperesReactive);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampActive!.Verify(x => x.Start(0, 10000), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 10000000), Times.Once);
         }
 
 
@@ -150,7 +153,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
             Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
             Assert.AreEqual(0, _mode!.TargetReactivePower.VoltAmperesReactive);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampActive!.Verify(x => x.Start(0, -1000), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, -1000000), Times.Once);
         }
 
 
@@ -168,7 +171,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
             Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
             Assert.AreEqual(0, _mode!.TargetReactivePower.VoltAmperesReactive);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampActive!.Verify(x => x.Start(0, 100), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 100000), Times.Once);
         }
 
 
@@ -186,7 +189,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
             Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
             Assert.AreEqual(0, _mode!.TargetReactivePower.VoltAmperesReactive);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampActive!.Verify(x => x.Start(0, -100), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, -100000), Times.Once);
         }
 
 
@@ -198,12 +201,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
             _mode!.SetpointActivePower = ActivePower.FromKilo(100);
             _mode!.CalculateAsync();
 
-            Assert.AreEqual(OperatingModeState.Enabling, _mode!.State);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             Assert.AreEqual(100, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(0, _mode!.SetpointReactivePower.VoltAmperesReactive);
             Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
             Assert.AreEqual(0, _mode!.TargetReactivePower.VoltAmperesReactive);
-            _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
+            _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
         }
 
 
@@ -215,12 +218,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
             _mode!.SetpointActivePower = ActivePower.FromKilo(-100);
             _mode!.CalculateAsync();
 
-            Assert.AreEqual(OperatingModeState.Enabling, _mode!.State);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             Assert.AreEqual(-100, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(0, _mode!.SetpointReactivePower.VoltAmperesReactive);
             Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
             Assert.AreEqual(0, _mode!.TargetReactivePower.VoltAmperesReactive);
-            _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
+            _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
         }
 
 
@@ -230,14 +233,14 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
             _map!.AvailableActivePower = () => ActivePower.FromKilo(100);
             _mode!.SetpointActivePower = ActivePower.FromKilo(101);
             _mode!.Enable();
-            _rampActive!.Setup(x => x.Calculate()).Returns(100);
+            _rampActive!.Setup(x => x.Calculate()).Returns(100000);
             _mode!.CalculateAsync();
 
             Assert.AreEqual(OperatingModeState.Enabled, _mode!.State);
             Assert.AreEqual(101, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(101, _mode!.TargetActivePower.KiloWatts);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampActive!.Verify(x => x.Start(0, 100), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 100000), Times.Once);
         }
 
 
@@ -248,13 +251,13 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
             _mode!.SetpointActivePower = ActivePower.FromKilo(100);
             _mode!.Enable();
             _mode!.Disable();
-            _rampActive!.Setup(x => x.Calculate()).Returns(10);
+            _rampActive!.Setup(x => x.Calculate()).Returns(10000);
             _mode!.CalculateAsync();
 
             Assert.AreEqual(OperatingModeState.Disabled, _mode!.State);
             Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Exactly(2));
-            _rampActive!.Verify(x => x.Start(0, 100), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 100000), Times.Once);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), 0), Times.Once);
             _rampActive!.Verify(x => x.Stop(), Times.Once);
         }
@@ -263,7 +266,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
         [TestMethod]
         public void CalculateModeEnabledAvailableUpperLimitTest()
         {
-            _config!.MaximumActivePowerLimitKiloWatt = 500;
+            _config!.MaximumActivePowerLimitWatt = 500;
 
             _map!.AvailableActivePower = () => ActivePower.FromKilo(1000);
             _mode!.Enable();
@@ -280,7 +283,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
         [TestMethod]
         public void CalculateModeEnabledAvailableLowerLimitTest()
         {
-            _config!.MinimumActivePowerLimitKiloWatt = -400;
+            _config!.MinimumActivePowerLimitWatt = -400;
 
             _map!.AvailableActivePower = () => ActivePower.FromKilo(-1000);
             _mode!.Enable();
@@ -309,7 +312,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
             Assert.AreEqual(100, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
             _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampActive!.Verify(x => x.Start(0, 100), Times.Once);
+            _rampActive!.Verify(x => x.Start(0, 100000), Times.Once);
         }
 
 

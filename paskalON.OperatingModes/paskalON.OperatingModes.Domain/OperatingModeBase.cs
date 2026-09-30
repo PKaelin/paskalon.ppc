@@ -209,17 +209,17 @@ namespace paskalON.OperatingModes.Domain
             {
                 lock (dataLock)
                 {
-                    if (value.KiloWatts < SystemConfig.NameplateMinimumActivePowerKiloWatt || value.KiloWatts > SystemConfig.NameplateMaximumActivePowerKiloWatt)
+                    if (value.Watts < SystemConfig.NameplateMinimumActivePowerWatt || value.Watts > SystemConfig.NameplateMaximumActivePowerWatt)
                     {
-                        _logger.LogError("{Name} SetpointActivePower is outside the defined nameplates. Min: {NameplateMinimumActivePowerKiloWatt} Max: {NameplateMaximumActivePowerKiloWatt}", Name,
-                            SystemConfig.NameplateMinimumActivePowerKiloWatt, SystemConfig.NameplateMaximumActivePowerKiloWatt);
+                        _logger.LogError("{Name} SetpointActivePower is outside the defined nameplates. Min: {NameplateMinimumActivePowerWatt} Max: {NameplateMaximumActivePowerWatt}", Name,
+                            SystemConfig.NameplateMinimumActivePowerWatt, SystemConfig.NameplateMaximumActivePowerWatt);
                         throw new InvalidOperationException($"{Name} SetpointActivePower is outside the defined nameplates.");
                     }
 
                     if (value.Watts != field.Watts)
                     {
                         field = value;
-                        _logger.LogInformation("{Name} SetpointActivePower changed to: {SetpointActivePower}", Name, value.KiloWatts);
+                        _logger.LogInformation("{Name} SetpointActivePower changed to: {SetpointActivePower}", Name, value.Watts);
                     }
                 }
             }
@@ -248,17 +248,17 @@ namespace paskalON.OperatingModes.Domain
             {
                 lock (dataLock)
                 {
-                    if (value.KiloVoltAmperesReactive < SystemConfig.NameplateMinimumReactivePowerKiloVars || value.KiloVoltAmperesReactive > SystemConfig.NameplateMaximumReactivePowerKiloVars)
+                    if (value.VoltAmperesReactive < SystemConfig.NameplateMinimumReactivePowerVars || value.VoltAmperesReactive > SystemConfig.NameplateMaximumReactivePowerVars)
                     {
-                        _logger.LogError("{Name} SetpointReactivePower is outside the defined nameplates. Min: {NameplateMinimumReactivePowerKiloVars} Max: {NameplateMaximumReactivePowerKiloVars}", Name,
-                            SystemConfig.NameplateMinimumReactivePowerKiloVars, SystemConfig.NameplateMaximumReactivePowerKiloVars);
+                        _logger.LogError("{Name} SetpointReactivePower is outside the defined nameplates. Min: {NameplateMinimumReactivePowerVars} Max: {NameplateMaximumReactivePowerVars}", Name,
+                            SystemConfig.NameplateMinimumReactivePowerVars, SystemConfig.NameplateMaximumReactivePowerVars);
                         throw new InvalidOperationException($"{Name} SetpointReactivePower is outside the defined nameplates.");
                     }
 
                     if (value.VoltAmperesReactive != field.VoltAmperesReactive)
                     {
                         field = value;
-                        _logger.LogInformation("{Name} SetpointReactivePower changed to: {SetpointReactivePower}", Name, value.KiloVoltAmperesReactive);
+                        _logger.LogInformation("{Name} SetpointReactivePower changed to: {SetpointReactivePower}", Name, value.VoltAmperesReactive);
                     }
                 }
             }
@@ -353,7 +353,7 @@ namespace paskalON.OperatingModes.Domain
                 if (setpointActive != 0)
                 {
                     _logger.LogInformation("{Name} operating mode enabled. Active Target-Setpoint: {ActiveTargetSetpoint}.", Name, setpointActive);
-                    RampControllerActive.Start(TargetActivePower.KiloWatts, setpointActive);
+                    RampControllerActive.Start(TargetActivePower.Watts, setpointActive);
                     StateActive = OperatingModeState.RampingToEnabled;
                 }
             }
@@ -366,7 +366,7 @@ namespace paskalON.OperatingModes.Domain
                 if (setpointReactive != 0)
                 {
                     _logger.LogInformation("{Name} operating mode enabled. Reactive Target-Setpoint: {ReactiveTargetSetpoint}.", Name, setpointReactive);
-                    RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, setpointReactive);
+                    RampControllerReactive.Start(TargetReactivePower.VoltAmperesReactive, setpointReactive);
                     StateReactive = OperatingModeState.RampingToEnabled;
                 }
             }
@@ -386,7 +386,7 @@ namespace paskalON.OperatingModes.Domain
                 _logger.LogInformation("{Name} operating mode disabled. Active Target-Setpoint: {ActiveTargetSetpoint}.", Name, 0);
                 SetpointActivePower = new ActivePower(0);
                 StateActive = OperatingModeState.RampingToDisabled;
-                RampControllerActive.Start(TargetActivePower.KiloWatts, 0);
+                RampControllerActive.Start(TargetActivePower.Watts, 0);
             }
 
             if (StateReactive.HasValue && StateReactive != OperatingModeState.Disabled)
@@ -394,7 +394,7 @@ namespace paskalON.OperatingModes.Domain
                 _logger.LogInformation("{Name} operating mode disabled. Reactive Target-Setpoint: {ReactiveTargetSetpoint}.", Name, 0);
                 SetpointReactivePower = new ReactivePower(0);
                 StateReactive = OperatingModeState.RampingToDisabled;
-                RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, 0);
+                RampControllerReactive.Start(TargetReactivePower.VoltAmperesReactive, 0);
             }
         }
 
@@ -411,14 +411,14 @@ namespace paskalON.OperatingModes.Domain
             if (available != null)
             {
                 // Available is less then setpoint use available so that we dont set an unachievable setpoint.
-                if (Math.Abs(available.Value.KiloWatts) <= Math.Abs(SetpointActivePower.KiloWatts))
+                if (Math.Abs(available.Value.Watts) <= Math.Abs(SetpointActivePower.Watts))
                 {
-                    targetSetpoint = available.Value.KiloWatts;
+                    targetSetpoint = available.Value.Watts;
                 }
                 // Available is more then setpoint use setpoint that might or might not be 0
                 else
                 {
-                    targetSetpoint = SetpointActivePower.KiloWatts;
+                    targetSetpoint = SetpointActivePower.Watts;
                 }
 
                 // Set last to the initial values
@@ -448,14 +448,14 @@ namespace paskalON.OperatingModes.Domain
             if (available != null)
             {
                 // Available is less then setpoint use available so that we dont set an unachievable setpoint.
-                if (Math.Abs(available.Value.KiloVoltAmperesReactive) <= Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive))
+                if (Math.Abs(available.Value.VoltAmperesReactive) <= Math.Abs(SetpointReactivePower.VoltAmperesReactive))
                 {
-                    targetSetpoint = available.Value.KiloVoltAmperesReactive;
+                    targetSetpoint = available.Value.VoltAmperesReactive;
                 }
                 // Available is more then setpoint use setpoint that might or might not be 0
                 else
                 {
-                    targetSetpoint = SetpointReactivePower.KiloVoltAmperesReactive;
+                    targetSetpoint = SetpointReactivePower.VoltAmperesReactive;
                 }
 
                 // Set last to the initial values
@@ -483,19 +483,19 @@ namespace paskalON.OperatingModes.Domain
             double? targetSetpoint = null;
             // If available is outside deadband of lastAvailable or if setpoint is outside deadband of lastSetpoint
             if (StateActive.HasValue && StateActive != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableActive != null && _lastSetpointActive != null) &&
-                  ((Math.Abs(available.Value.KiloWatts) > (Math.Abs(_lastAvailableActive.Value.KiloWatts) + _config.DeadbandAvailableKilo)) ||
-                  (Math.Abs(SetpointActivePower.KiloWatts) > (Math.Abs(_lastSetpointActive.Value.KiloWatts) + _config.DeadbandSetpointKilo))))
+                  ((Math.Abs(available.Value.Watts) > (Math.Abs(_lastAvailableActive.Value.Watts) + _config.DeadbandAvailable)) ||
+                  (Math.Abs(SetpointActivePower.Watts) > (Math.Abs(_lastSetpointActive.Value.Watts) + _config.DeadbandSetpoint))))
             {
                 // Available is less then setpoint use available so that we dont set an unachievable setpoint.
-                if (Math.Abs(available.Value.KiloWatts) <= Math.Abs(SetpointActivePower.KiloWatts))
+                if (Math.Abs(available.Value.Watts) <= Math.Abs(SetpointActivePower.Watts))
                 {
-                    targetSetpoint = available.Value.KiloWatts;
+                    targetSetpoint = available.Value.Watts;
                     _logger.LogDebug("{Name} new available for active power", Name);
                 }
                 // Available is more then setpoint use setpoint
                 else
                 {
-                    targetSetpoint = SetpointActivePower.KiloWatts;
+                    targetSetpoint = SetpointActivePower.Watts;
                     _logger.LogDebug("{Name} new setpoint for active power", Name);
                 }
 
@@ -504,7 +504,7 @@ namespace paskalON.OperatingModes.Domain
                     // Restart/Start when setpoint wasn't set before or setpoint was 0 before and now it is not 0 anymore
                     // Don't restart when if available gets bigger but still bigger than setpoint and setpoint hasn't changed
                     if (targetSetpoint.Value != 0 && (_lastSetpointActive.HasValue == false || _lastSetpointActive.Value.Watts == 0) &&
-                       (targetSetpoint != _lastSetpointActive?.KiloWatts))
+                       (targetSetpoint != _lastSetpointActive?.Watts))
                     {
                         if (StateActive == OperatingModeState.Enabling)
                         {
@@ -537,23 +537,23 @@ namespace paskalON.OperatingModes.Domain
             if (StateActive.HasValue && StateActive != OperatingModeState.Enabled && StateActive != OperatingModeState.Disabled)
             {
                 // Set final target and change state to enabled if we are within a deadband
-                if (Math.Abs(TargetActivePower.KiloWatts) > (Math.Abs(SetpointActivePower.KiloWatts) - _config.DeadbandSetpointKilo))
+                if (Math.Abs(TargetActivePower.Watts) >= (Math.Abs(SetpointActivePower.Watts) - _config.DeadbandSetpoint))
                 {
                     if (StateActive == OperatingModeState.RampingToEnabled)
                     {
                         // Once within deadband we set the actual the precise target regardless available and set state to enabled 
-                        _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
+                        _targetActivePower.Watts = SetpointActivePower.Watts;
                         StateActive = OperatingModeState.Enabled;
                     }
                     else if (StateActive == OperatingModeState.RampingToDisabled)
                     {
                         // Once within deadband we set the actual the precise target regardless available and set state to disabled
-                        _targetActivePower.KiloWatts = SetpointActivePower.KiloWatts;
+                        _targetActivePower.Watts = SetpointActivePower.Watts;
                         StateActive = OperatingModeState.Disabled;
                         RampControllerActive.Stop();
                     }
 
-                    _logger.LogDebug("{Name} final target reached setpoint for active power: {ActiveTargetSetpoint}", Name, _targetActivePower.KiloWatts);
+                    _logger.LogDebug("{Name} final target reached setpoint for active power: {ActiveTargetSetpoint}", Name, _targetActivePower.Watts);
                 }
             }
         }
@@ -569,19 +569,19 @@ namespace paskalON.OperatingModes.Domain
             double? targetSetpoint = null;
             // If available is outside deadband of lastAvailable or if setpoint is outside deadband of lastSetpoint
             if (StateReactive.HasValue && StateReactive != OperatingModeState.RampingToDisabled && (available != null && _lastAvailableReactive != null && _lastSetpointReactive != null) &&
-                  ((Math.Abs(available.Value.KiloVoltAmperesReactive) > (Math.Abs(_lastAvailableReactive.Value.KiloVoltAmperesReactive) + _config.DeadbandAvailableKilo)) ||
-                  (Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive) > (Math.Abs(_lastSetpointReactive.Value.KiloVoltAmperesReactive) + _config.DeadbandSetpointKilo))))
+                  ((Math.Abs(available.Value.VoltAmperesReactive) > (Math.Abs(_lastAvailableReactive.Value.VoltAmperesReactive) + _config.DeadbandAvailable)) ||
+                  (Math.Abs(SetpointReactivePower.VoltAmperesReactive) > (Math.Abs(_lastSetpointReactive.Value.VoltAmperesReactive) + _config.DeadbandSetpoint))))
             {
                 // Available is less then setpoint use available so that we dont set an unachievable setpoint.
-                if (Math.Abs(available.Value.KiloVoltAmperesReactive) <= Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive))
+                if (Math.Abs(available.Value.VoltAmperesReactive) <= Math.Abs(SetpointReactivePower.VoltAmperesReactive))
                 {
-                    targetSetpoint = available.Value.KiloVoltAmperesReactive;
+                    targetSetpoint = available.Value.VoltAmperesReactive;
                     _logger.LogDebug("{Name} new available for reactive power.", Name);
                 }
                 // Available is more then setpoint use setpoint
                 else
                 {
-                    targetSetpoint = SetpointReactivePower.KiloVoltAmperesReactive;
+                    targetSetpoint = SetpointReactivePower.VoltAmperesReactive;
                     _logger.LogDebug("{Name} new setpoint for reactive power.", Name);
                 }
 
@@ -590,7 +590,7 @@ namespace paskalON.OperatingModes.Domain
                     // Restart/Start when setpoint wasn't set before or setpoint was 0 before and now it is not 0 anymore
                     // Don't restart when if available gets bigger but still bigger than setpoint and setpoint hasn't changed
                     if (targetSetpoint.Value != 0 && (_lastSetpointReactive.HasValue == false || _lastSetpointReactive.Value.VoltAmperesReactive == 0) &&
-                       (targetSetpoint != _lastSetpointReactive?.KiloVoltAmperesReactive))
+                       (targetSetpoint != _lastSetpointReactive?.VoltAmperesReactive))
                     {
                         if (StateReactive == OperatingModeState.Enabling)
                         {
@@ -624,23 +624,23 @@ namespace paskalON.OperatingModes.Domain
             if (StateReactive.HasValue && StateReactive != OperatingModeState.Enabled && StateReactive != OperatingModeState.Disabled)
             {
                 // Set final target and change state to enabled if we are within a deadband
-                if (Math.Abs(TargetReactivePower.KiloVoltAmperesReactive) > (Math.Abs(SetpointReactivePower.KiloVoltAmperesReactive) - _config.DeadbandSetpointKilo))
+                if (Math.Abs(TargetReactivePower.VoltAmperesReactive) >= (Math.Abs(SetpointReactivePower.VoltAmperesReactive) - _config.DeadbandSetpoint))
                 {
                     if (StateReactive == OperatingModeState.RampingToEnabled)
                     {
                         // Once within deadband we set the actual the precise target regardless available and set state to enabled 
-                        _targetReactivePower.KiloVoltAmperesReactive = SetpointReactivePower.KiloVoltAmperesReactive;
+                        _targetReactivePower.VoltAmperesReactive = SetpointReactivePower.VoltAmperesReactive;
                         StateReactive = OperatingModeState.Enabled;
                     }
                     else if (StateReactive == OperatingModeState.RampingToDisabled)
                     {
                         // Once within deadband we set the actual the precise target regardless available and set state to disabled
-                        _targetReactivePower.KiloVoltAmperesReactive = SetpointReactivePower.KiloVoltAmperesReactive;
+                        _targetReactivePower.VoltAmperesReactive = SetpointReactivePower.VoltAmperesReactive;
                         StateReactive = OperatingModeState.Disabled;
                         RampControllerReactive.Stop();
                     }
 
-                    _logger.LogDebug("{Name} final target reached setpoint for reactive power: {ReactiveTargetSetpoint}", Name, _targetReactivePower.KiloVoltAmperesReactive);
+                    _logger.LogDebug("{Name} final target reached setpoint for reactive power: {ReactiveTargetSetpoint}", Name, _targetReactivePower.VoltAmperesReactive);
                 }
             }
         }
@@ -654,25 +654,25 @@ namespace paskalON.OperatingModes.Domain
         protected double ApplyActiveLimits(double targetSetpoint)
         {
             // Careful this is intentional. Local operating mode configuration can overwrite the nameplate
-            if ((_config.MaximumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint > _config.MaximumActivePowerLimitKiloWatt.Value))
+            if ((_config.MaximumActivePowerLimitWatt.HasValue == true) && (targetSetpoint > _config.MaximumActivePowerLimitWatt.Value))
             {
-                _logger.LogWarning("{Name} operating mode limited due MaximumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MaximumActivePowerLimitKiloWatt.Value;
+                _logger.LogWarning("{Name} operating mode limited due MaximumActivePowerLimitWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MaximumActivePowerLimitWatt.Value;
             }
-            else if ((_config.MaximumActivePowerLimitKiloWatt.HasValue == false) && (targetSetpoint > SystemConfig.NameplateMaximumActivePowerKiloWatt))
+            else if ((_config.MaximumActivePowerLimitWatt.HasValue == false) && (targetSetpoint > SystemConfig.NameplateMaximumActivePowerWatt))
             {
-                _logger.LogWarning("{Name} operating mode limited due NameplateMaximumActivePowerKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = SystemConfig.NameplateMaximumActivePowerKiloWatt;
+                _logger.LogWarning("{Name} operating mode limited due NameplateMaximumActivePowerWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = SystemConfig.NameplateMaximumActivePowerWatt;
             }
-            else if ((_config.MinimumActivePowerLimitKiloWatt.HasValue == true) && (targetSetpoint < _config.MinimumActivePowerLimitKiloWatt.Value))
+            else if ((_config.MinimumActivePowerLimitWatt.HasValue == true) && (targetSetpoint < _config.MinimumActivePowerLimitWatt.Value))
             {
-                _logger.LogWarning("{Name} operating mode limited due MinimumActivePowerLimitKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MinimumActivePowerLimitKiloWatt.Value;
+                _logger.LogWarning("{Name} operating mode limited due MinimumActivePowerLimitWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MinimumActivePowerLimitWatt.Value;
             }
-            else if ((_config.MinimumActivePowerLimitKiloWatt.HasValue == false) && (targetSetpoint < SystemConfig.NameplateMinimumActivePowerKiloWatt))
+            else if ((_config.MinimumActivePowerLimitWatt.HasValue == false) && (targetSetpoint < SystemConfig.NameplateMinimumActivePowerWatt))
             {
-                _logger.LogWarning("{Name} operating mode limited due NameplateMinimumActivePowerKiloWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = SystemConfig.NameplateMinimumActivePowerKiloWatt;
+                _logger.LogWarning("{Name} operating mode limited due NameplateMinimumActivePowerWatt configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = SystemConfig.NameplateMinimumActivePowerWatt;
             }
 
             return targetSetpoint;
@@ -687,26 +687,26 @@ namespace paskalON.OperatingModes.Domain
         protected double ApplyReactiveLimits(double targetSetpoint)
         {
             // Careful this is intentional. Local operating mode configuration can overwrite the nameplate
-            if ((_config.MaximumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint > _config.MaximumReactivePowerLimitKiloVars.Value))
+            if ((_config.MaximumReactivePowerLimitVars.HasValue == true) && (targetSetpoint > _config.MaximumReactivePowerLimitVars.Value))
             {
-                _logger.LogInformation("{Name} operating mode limited due MaximumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MaximumReactivePowerLimitKiloVars.Value;
+                _logger.LogInformation("{Name} operating mode limited due MaximumReactivePowerLimitVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MaximumReactivePowerLimitVars.Value;
             }
-            else if ((_config.MaximumReactivePowerLimitKiloVars.HasValue == false) && (targetSetpoint > SystemConfig.NameplateMaximumReactivePowerKiloVars))
+            else if ((_config.MaximumReactivePowerLimitVars.HasValue == false) && (targetSetpoint > SystemConfig.NameplateMaximumReactivePowerVars))
             {
-                _logger.LogWarning("{Name} operating mode limited due NameplateMaximumReactivePowerKiloVars configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = SystemConfig.NameplateMaximumReactivePowerKiloVars;
+                _logger.LogWarning("{Name} operating mode limited due NameplateMaximumReactivePowerVars configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = SystemConfig.NameplateMaximumReactivePowerVars;
             }
-            else if ((_config.MinimumReactivePowerLimitKiloVars.HasValue == true) && (targetSetpoint < _config.MinimumReactivePowerLimitKiloVars.Value))
+            else if ((_config.MinimumReactivePowerLimitVars.HasValue == true) && (targetSetpoint < _config.MinimumReactivePowerLimitVars.Value))
             {
-                _logger.LogInformation("{Name} operating mode limited due MinimumReactivePowerLimitKiloVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = _config.MinimumReactivePowerLimitKiloVars.Value;
+                _logger.LogInformation("{Name} operating mode limited due MinimumReactivePowerLimitVars configuration. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = _config.MinimumReactivePowerLimitVars.Value;
 
             }
-            else if ((_config.MinimumReactivePowerLimitKiloVars.HasValue == false) && (targetSetpoint < SystemConfig.NameplateMinimumReactivePowerKiloVars))
+            else if ((_config.MinimumReactivePowerLimitVars.HasValue == false) && (targetSetpoint < SystemConfig.NameplateMinimumReactivePowerVars))
             {
-                _logger.LogWarning("{Name} operating mode limited due NameplateMinimumReactivePowerKiloVars configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
-                targetSetpoint = SystemConfig.NameplateMinimumReactivePowerKiloVars;
+                _logger.LogWarning("{Name} operating mode limited due NameplateMinimumReactivePowerVars configuration. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetSetpoint);
+                targetSetpoint = SystemConfig.NameplateMinimumReactivePowerVars;
             }
 
             return targetSetpoint;
@@ -726,17 +726,17 @@ namespace paskalON.OperatingModes.Domain
             // Initialize metrics
             MetricsPublisher.Initialize("OperatingMode", tags);
             // MetricsFactorClass1
-            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(TargetActivePower), MetricType.Gauge, x => x.TargetActivePower.KiloWatts, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(TargetReactivePower), MetricType.Gauge, x => x.TargetReactivePower.KiloVoltAmperesReactive, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(AvailableActivePower), MetricType.Gauge, x => x.AvailableActivePower?.KiloWatts, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(AvailableReactivePower), MetricType.Gauge, x => x.AvailableReactivePower?.KiloVoltAmperesReactive, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(TargetActivePower), MetricType.Gauge, x => x.TargetActivePower.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(TargetReactivePower), MetricType.Gauge, x => x.TargetReactivePower.VoltAmperesReactive, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(AvailableActivePower), MetricType.Gauge, x => x.AvailableActivePower?.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(AvailableReactivePower), MetricType.Gauge, x => x.AvailableReactivePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
             // MetricsFactorClass2
             MetricsPublisher.Register<OperatingModeBase, OperatingModeState>(this, nameof(State), MetricType.Gauge, x => x.State, _config.MetricsFactorClass2);
             MetricsPublisher.Register<OperatingModeBase, OperatingModeState>(this, nameof(StateActive), MetricType.Gauge, x => x.StateActive, _config.MetricsFactorClass2);
             MetricsPublisher.Register<OperatingModeBase, OperatingModeState>(this, nameof(StateReactive), MetricType.Gauge, x => x.StateReactive, _config.MetricsFactorClass2);
             MetricsPublisher.Register<OperatingModeBase, bool>(this, nameof(IsEnabled), MetricType.Gauge, x => x.IsEnabled, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(SetpointActivePower), MetricType.Gauge, x => x.SetpointActivePower.KiloWatts, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(SetpointReactivePower), MetricType.Gauge, x => x.SetpointReactivePower.KiloVoltAmperesReactive, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(SetpointActivePower), MetricType.Gauge, x => x.SetpointActivePower.Watts, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(SetpointReactivePower), MetricType.Gauge, x => x.SetpointReactivePower.VoltAmperesReactive, _config.MetricsFactorClass2);
         }
 
 

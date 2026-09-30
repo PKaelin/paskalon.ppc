@@ -4,9 +4,8 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using paskalON.PowerControls.Infrastructure.Storage;
 
-namespace paskalON.PowerControls.Infrastructure
+namespace paskalON.PowerControls.Infrastructure.Storage
 {
     public class PowerControlContextFactory : IDesignTimeDbContextFactory<PowerControlContext>
     {

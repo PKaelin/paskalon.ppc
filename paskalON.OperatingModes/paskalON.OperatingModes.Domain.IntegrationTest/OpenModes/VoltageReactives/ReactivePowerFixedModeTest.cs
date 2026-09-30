@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
@@ -32,12 +33,12 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.VoltageReacti
             _systemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 ReferenceFrequency = 50,
-                NameplateMinimumActivePowerKiloWatt = double.MinValue,
-                NameplateMaximumActivePowerKiloWatt = double.MaxValue,
-                NameplateMinimumReactivePowerKiloVars = double.MinValue,
-                NameplateMaximumReactivePowerKiloVars = double.MaxValue,
+                NameplateMinimumActivePowerWatt = double.MinValue,
+                NameplateMaximumActivePowerWatt = double.MaxValue,
+                NameplateMinimumReactivePowerVars = double.MinValue,
+                NameplateMaximumReactivePowerVars = double.MaxValue,
             };
 
             _config = new ReactivePowerFixedModeConfig
@@ -45,7 +46,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.VoltageReacti
                 ChangedBy = "Test",
                 Name = "ReactivePowerFixedModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 RampConfig = new Mock<RampBaseConfig>().Object
             };
 
@@ -69,21 +70,21 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.VoltageReacti
             Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
             Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
 
-            _rampReactive!.Setup(x => x.Calculate()).Returns(10);
+            _rampReactive!.Setup(x => x.Calculate()).Returns(10000);
             _mode!.CalculateAsync();
 
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
             Assert.AreEqual(10, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
 
-            _rampReactive!.Setup(x => x.Calculate()).Returns(100);
+            _rampReactive!.Setup(x => x.Calculate()).Returns(100000);
             _mode!.CalculateAsync();
 
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
             Assert.AreEqual(100, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
 
-            _rampReactive!.Setup(x => x.Calculate()).Returns(950);
+            _rampReactive!.Setup(x => x.Calculate()).Returns(950000);
             _mode!.CalculateAsync();
 
             // Target is within the deadband so enabled and target = setpoint
@@ -105,21 +106,21 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.VoltageReacti
             Assert.AreEqual(-1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
             Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
 
-            _rampReactive!.Setup(x => x.Calculate()).Returns(-10);
+            _rampReactive!.Setup(x => x.Calculate()).Returns(-10000);
             _mode!.CalculateAsync();
 
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             Assert.AreEqual(-1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
             Assert.AreEqual(-10, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
 
-            _rampReactive!.Setup(x => x.Calculate()).Returns(-100);
+            _rampReactive!.Setup(x => x.Calculate()).Returns(-100000);
             _mode!.CalculateAsync();
 
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             Assert.AreEqual(-1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
             Assert.AreEqual(-100, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
 
-            _rampReactive!.Setup(x => x.Calculate()).Returns(-950);
+            _rampReactive!.Setup(x => x.Calculate()).Returns(-950000);
             _mode!.CalculateAsync();
 
             // Target is within the deadband so enabled and target = setpoint

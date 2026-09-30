@@ -78,8 +78,8 @@ namespace paskalON.OperatingModes.Domain
         protected override void RegisterMetrics()
         {
             base.RegisterMetrics();
-            MetricsPublisher.Register<OperatingClosedModeBase, double>(this, nameof(ErrorAdjustmentActive), MetricType.Gauge, x => x.ErrorAdjustmentActive.KiloWatts, _config.MetricsFactorClass1);
-            MetricsPublisher.Register<OperatingClosedModeBase, double>(this, nameof(ErrorAdjustmentReactive), MetricType.Gauge, x => x.ErrorAdjustmentReactive.KiloVoltAmperesReactive, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<OperatingClosedModeBase, double>(this, nameof(ErrorAdjustmentActive), MetricType.Gauge, x => x.ErrorAdjustmentActive.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<OperatingClosedModeBase, double>(this, nameof(ErrorAdjustmentReactive), MetricType.Gauge, x => x.ErrorAdjustmentReactive.VoltAmperesReactive, _config.MetricsFactorClass1);
         }
     }
 }

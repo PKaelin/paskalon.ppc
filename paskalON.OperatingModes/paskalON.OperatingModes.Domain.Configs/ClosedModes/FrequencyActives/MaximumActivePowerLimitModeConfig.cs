@@ -15,6 +15,6 @@ namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives
         /// <remarks>
         /// If this value is not set the systems nameplate for active power is used.
         /// </remarks>
-        public double? MaximumActivePowerLimitKiloWatts { get; set; }
+        public double? MaximumActivePowerLimitWatts { get; set; }
     }
 }

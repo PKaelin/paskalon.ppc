@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
@@ -32,12 +33,12 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
             _systemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 ReferenceFrequency = 50,
-                NameplateMinimumActivePowerKiloWatt = double.MinValue,
-                NameplateMaximumActivePowerKiloWatt = double.MaxValue,
-                NameplateMinimumReactivePowerKiloVars = double.MinValue,
-                NameplateMaximumReactivePowerKiloVars = double.MaxValue,
+                NameplateMinimumActivePowerWatt = double.MinValue,
+                NameplateMaximumActivePowerWatt = double.MaxValue,
+                NameplateMinimumReactivePowerVars = double.MinValue,
+                NameplateMaximumReactivePowerVars = double.MaxValue,
             };
 
             _config = new ActivePowerFixedModeConfig
@@ -45,8 +46,10 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
                 ChangedBy = "Test",
                 Name = "ActivePowerFixedModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
-                RampConfig = new Mock<RampBaseConfig>().Object
+                Type = PowerControlType.Bess,
+                RampConfig = new Mock<RampBaseConfig>().Object,
+                DeadbandAvailable = 100000,
+                DeadbandSetpoint = 100000,
             };
 
             _map = new ActivePowerFixedModeMap { AvailableActivePower = () => null, AvailableReactivePower = () => null };
@@ -69,21 +72,21 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
             Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
 
-            _rampActive!.Setup(x => x.Calculate()).Returns(10);
+            _rampActive!.Setup(x => x.Calculate()).Returns(10000);
             _mode!.CalculateAsync();
 
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(10, _mode!.TargetActivePower.KiloWatts);
 
-            _rampActive!.Setup(x => x.Calculate()).Returns(100);
+            _rampActive!.Setup(x => x.Calculate()).Returns(100000);
             _mode!.CalculateAsync();
 
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             Assert.AreEqual(1000, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(100, _mode!.TargetActivePower.KiloWatts);
 
-            _rampActive!.Setup(x => x.Calculate()).Returns(950);
+            _rampActive!.Setup(x => x.Calculate()).Returns(950000);
             _mode!.CalculateAsync();
 
             // Target is within the deadband so enabled and target = setpoint
@@ -105,21 +108,21 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
             Assert.AreEqual(-1000, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
 
-            _rampActive!.Setup(x => x.Calculate()).Returns(-10);
+            _rampActive!.Setup(x => x.Calculate()).Returns(-10000);
             _mode!.CalculateAsync();
 
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             Assert.AreEqual(-1000, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(-10, _mode!.TargetActivePower.KiloWatts);
 
-            _rampActive!.Setup(x => x.Calculate()).Returns(-100);
+            _rampActive!.Setup(x => x.Calculate()).Returns(-100000);
             _mode!.CalculateAsync();
 
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
             Assert.AreEqual(-1000, _mode!.SetpointActivePower.KiloWatts);
             Assert.AreEqual(-100, _mode!.TargetActivePower.KiloWatts);
 
-            _rampActive!.Setup(x => x.Calculate()).Returns(-950);
+            _rampActive!.Setup(x => x.Calculate()).Returns(-950000);
             _mode!.CalculateAsync();
 
             // Target is within the deadband so enabled and target = setpoint

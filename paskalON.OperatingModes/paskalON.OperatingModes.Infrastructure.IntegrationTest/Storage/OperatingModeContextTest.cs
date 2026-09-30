@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
+using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage.SampleData;
@@ -69,7 +70,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage
             }
 
             Assert.IsNotNull(systemConfig);
-            Assert.AreEqual(OperatingModeType.Bess, systemConfig.Type);
+            Assert.AreEqual(PowerControlType.Bess, systemConfig.Type);
             Assert.IsNotNull(activePowerModeConfig);
             Assert.IsNotNull(activePowerModeConfig.RampConfig);
         }

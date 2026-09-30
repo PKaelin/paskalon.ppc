@@ -78,14 +78,14 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
                     // Apply configured limits if configured
                     target = ApplyActiveLimits(target.Value);
                     _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, target.Value);
-                    RampControllerActive.Start(TargetActivePower.KiloWatts, target.Value);
+                    RampControllerActive.Start(TargetActivePower.Watts, target.Value);
                 }
 
                 // Calculate the error between the current target and the measured feedback
                 double powerAtPoi = _map.ActivePowerAtPoi?.Invoke()?.Watts ?? 0;
 
                 // Don't try to fix minor noise. Set the error adjustment within this statement
-                if (Math.Abs(TargetActivePower.Watts - powerAtPoi) < _config.DeadbandErrorKilo * 1000)
+                if (Math.Abs(TargetActivePower.Watts - powerAtPoi) < _config.DeadbandError)
                 {
                     _errorAdjustmentActive.Watts = 0;
                 }
@@ -95,14 +95,14 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
                     if (_lastActivePowerAtPoi.HasValue == false || _lastActivePowerAtPoi.Value != powerAtPoi)
                     {
                         // Apply proportional gain to the error to calculate the adjustment for the next iteration
-                        _errorAdjustmentActive.KiloWatts = (TargetActivePower.Watts - powerAtPoi) * _config.ProportionalGain / 1000;
+                        _errorAdjustmentActive.Watts = (TargetActivePower.Watts - powerAtPoi) * _config.ProportionalGain;
                     }
                 }
 
                 // Set last active power
                 _lastActivePowerAtPoi = powerAtPoi;
                 // Include the error into the next iteration but don't exceed the configured limits
-                _targetActivePower.KiloWatts = ApplyActiveLimits(RampControllerActive.Calculate() + _errorAdjustmentActive.KiloWatts);
+                _targetActivePower.Watts = ApplyActiveLimits(RampControllerActive.Calculate() + _errorAdjustmentActive.Watts);
                 CheckFinalActiveTarget();
             }
 

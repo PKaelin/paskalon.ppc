@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.EnergyStorages;
@@ -87,12 +88,12 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage.SampleD
             SystemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 ReferenceFrequency = 50,
-                NameplateMaximumActivePowerKiloWatt = 1000,
-                NameplateMinimumActivePowerKiloWatt = -1000,
-                NameplateMaximumReactivePowerKiloVars = 900,
-                NameplateMinimumReactivePowerKiloVars = -900
+                NameplateMaximumActivePowerWatt = 1000,
+                NameplateMinimumActivePowerWatt = -1000,
+                NameplateMaximumReactivePowerVars = 900,
+                NameplateMinimumReactivePowerVars = -900
             };
         }
 
@@ -198,7 +199,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage.SampleD
                 ChangedBy = "Test",
                 Name = "ActivePowerModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 RampConfig = RampRateConfig!,
             };
 
@@ -207,7 +208,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage.SampleD
                 ChangedBy = "Test",
                 Name = "ReactivePowerModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 RampConfig = RampRateConfig!,
             };
         }
@@ -220,7 +221,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage.SampleD
                 ChangedBy = "Test",
                 Name = "MaintenanceModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 RampConfig = RampRateConfig!,
             };
 
@@ -229,7 +230,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage.SampleD
                 ChangedBy = "Test",
                 Name = "MaximumPowerPointTrackingModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 RampConfig = RampRateConfig!,
             };
 
@@ -238,7 +239,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage.SampleD
                 ChangedBy = "Test",
                 Name = "ActivePowerFixedModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 RampConfig = RampRateConfig!,
             };
 
@@ -247,7 +248,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage.SampleD
                 ChangedBy = "Test",
                 Name = "ReactivePowerFixedModeConfig",
                 IsActive = true,
-                Type = OperatingModeType.Bess,
+                Type = PowerControlType.Bess,
                 RampConfig = RampRateConfig!,
             };
         }

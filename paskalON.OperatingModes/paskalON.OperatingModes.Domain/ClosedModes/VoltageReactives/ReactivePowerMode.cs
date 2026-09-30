@@ -79,13 +79,13 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
                     // Apply configured limits if configured
                     target = ApplyReactiveLimits(target.Value);
                     _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, target.Value);
-                    RampControllerReactive.Start(TargetReactivePower.KiloVoltAmperesReactive, target.Value);
+                    RampControllerReactive.Start(TargetReactivePower.VoltAmperesReactive, target.Value);
                 }
 
                 // Calculate the error between the current target and the measured feedback
                 double powerAtPoi = _map.ReactivePowerAtPoi?.Invoke()?.VoltAmperesReactive ?? 0;
                 // Don't try to fix minor noise. Set the error adjustment within this statement
-                if (Math.Abs(TargetReactivePower.VoltAmperesReactive - powerAtPoi) < _config.DeadbandErrorKilo * 1000)
+                if (Math.Abs(TargetReactivePower.VoltAmperesReactive - powerAtPoi) < _config.DeadbandError)
                 {
                     _errorAdjustmentReactive.VoltAmperesReactive = 0;
                 }
@@ -95,14 +95,14 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
                     if (_lastReactivePowerAtPoi.HasValue == false || _lastReactivePowerAtPoi.Value != powerAtPoi)
                     {
                         // Apply proportional gain to the error to calculate the adjustment for the next iteration
-                        _errorAdjustmentReactive.KiloVoltAmperesReactive = (TargetReactivePower.VoltAmperesReactive - powerAtPoi) * _config.ProportionalGain / 1000;
+                        _errorAdjustmentReactive.VoltAmperesReactive = (TargetReactivePower.VoltAmperesReactive - powerAtPoi) * _config.ProportionalGain;
                     }
                 }
 
                 // Set last reactive power
                 _lastReactivePowerAtPoi = powerAtPoi;
                 // Include the error into the next iteration but don't exceed the configured limits
-                _targetReactivePower.KiloVoltAmperesReactive = ApplyReactiveLimits(RampControllerReactive.Calculate() + _errorAdjustmentReactive.KiloVoltAmperesReactive);
+                _targetReactivePower.VoltAmperesReactive = ApplyReactiveLimits(RampControllerReactive.Calculate() + _errorAdjustmentReactive.VoltAmperesReactive);
                 CheckFinalReactiveTarget();
             }
 
