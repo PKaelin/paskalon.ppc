@@ -105,6 +105,7 @@ try
     // AddOpenTelemetry extension from OpenTelemetry.Extensions.Hosting.
     builder.Services.AddOpenTelemetry()
     .ConfigureResource(r => r
+        .Clear()
         .AddService(
             serviceName: builder.Environment.ApplicationName,
             serviceVersion: typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",

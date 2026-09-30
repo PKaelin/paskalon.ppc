@@ -101,7 +101,7 @@ namespace paskalON.DemoSuperSimpleBattery.PowerControls.Data
             SystemPowerControlConfig systemPowerControl = new SystemPowerControlConfig
             {
                 ChangedBy = ChangedBy,
-                Name = "System power control",
+                Name = "SystemPowerControl",
                 IsActive = true,
                 IsEnabled = true,
                 Constraints = new List<ConstraintBaseConfig> { systemPowerConstraint }
@@ -111,7 +111,7 @@ namespace paskalON.DemoSuperSimpleBattery.PowerControls.Data
             DerUnitEnergyStoragePowerControlConfig derUnitEnergyStorageControl = new DerUnitEnergyStoragePowerControlConfig
             {
                 ChangedBy = ChangedBy,
-                Name = "DER unit power control - Unit1",
+                Name = "DerUnitPowerControlUnit1",
                 IsActive = true,
                 IsEnabled = true,
                 DerUnitName = "BMS-Unit 1",
