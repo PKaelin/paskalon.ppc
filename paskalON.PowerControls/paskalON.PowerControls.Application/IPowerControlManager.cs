@@ -7,7 +7,7 @@ using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.PowerControls.Domain.Configs.Ders;
 using paskalON.PowerControls.Domain.Configs.Systems;
 using paskalON.PowerControls.Domain.Systems;
-using paskalON.PowerControls.Infrastructure.Storage;
+using paskalON.PowerControls.Infrastructure.Storage.Repositories;
 using paskalON.Telemetry;
 
 namespace paskalON.PowerControls.Application
@@ -54,11 +54,11 @@ namespace paskalON.PowerControls.Application
 
 
         /// <summary>
-        /// Initializes the power control manager with the provided context.
+        /// Initializes the power control manager with the provided repository.
         /// </summary>
-        /// <param name="context">The power control context.</param>
+        /// <param name="repository">The power control repository.</param>
         /// <returns>Task.</returns>
-        Task Initialize(PowerControlContext context);
+        Task Initialize(IPowerControlRepository repository);
 
 
         /// <summary>

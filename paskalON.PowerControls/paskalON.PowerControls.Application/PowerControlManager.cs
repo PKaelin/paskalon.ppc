@@ -21,7 +21,7 @@ using paskalON.PowerControls.Domain.Configs.Systems;
 using paskalON.PowerControls.Domain.Ders;
 using paskalON.PowerControls.Domain.Strategies;
 using paskalON.PowerControls.Domain.Systems;
-using paskalON.PowerControls.Infrastructure.Storage;
+using paskalON.PowerControls.Infrastructure.Storage.Repositories;
 using paskalON.Telemetry;
 using paskalON.Telemetry.Factories;
 using System.Collections.ObjectModel;
@@ -155,20 +155,13 @@ namespace paskalON.PowerControls.Application
 
 
         /// <inheritdoc/>
-        public async Task Initialize(PowerControlContext context)
+        public async Task Initialize(IPowerControlRepository repository)
         {
             // Load power control configurations and constraints from the database
-            List<SystemPowerControlConfig> systemConfigs = await context.SystemPowerControlConfigs.Where(s => s.IsActive)
-                .AsNoTracking().Include(c => c.Constraints).ToListAsync();
-            List<DerUnitPowerControlConfig> unitConfigs = await context.DerUnitPowerControlConfigs.Where(s => s.IsActive)
-                .AsNoTracking().Include(c => c.Constraints).ToListAsync();
-            List<DerUnitEnergyStoragePowerControlConfig> storageConfigs = await context.DerUnitEnergyStoragePowerControlConfigs.Where(s => s.IsActive)
-                .AsNoTracking().Include(c => c.Constraints).ToListAsync();
-            List<ConstraintBaseConfig> constraintConfigs = systemConfigs.SelectMany(c => c.Constraints)
-                .Concat(unitConfigs.SelectMany(c => c.Constraints))
-                .Concat(storageConfigs.SelectMany(c => c.Constraints))
-                .DistinctBy(c => c.Name)
-                .ToList();
+            List<SystemPowerControlConfig> systemConfigs = await repository.GetSystemPowerControlConfigs();
+            List<DerUnitPowerControlConfig> unitConfigs = await repository.GetDerUnitPowerControlConfigs();
+            List<DerUnitEnergyStoragePowerControlConfig> storageConfigs = await repository.GetDerUnitEnergyStoragePowerControlConfigs();
+            List<ConstraintBaseConfig> constraintConfigs = await repository.GetConstraintConfigs();
 
             SystemPowerControlConfig systemConfig = systemConfigs.Single();
             List<IDerUnitPowerControl> units = new List<IDerUnitPowerControl>();

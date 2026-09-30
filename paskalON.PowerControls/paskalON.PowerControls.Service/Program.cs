@@ -167,8 +167,8 @@ try
         SubscriberTopic topics = GetSubscriberTopic(config);
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
         await deviceClient.Initialize(topics);
-        PowerControlContext context = scope.ServiceProvider.GetRequiredService<PowerControlContext>();
-        await manager.Initialize(context);
+        IPowerControlRepository powerControlRepository = scope.ServiceProvider.GetRequiredService<IPowerControlRepository>();
+        await manager.Initialize(powerControlRepository);
 
         if (startPublisher == true)
         {
