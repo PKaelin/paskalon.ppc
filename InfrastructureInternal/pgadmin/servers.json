@@ -35,6 +35,18 @@
         "sslmode": "prefer",
         "connect_timeout": 10
       }
+    },
+    "4": {
+      "Name": "OperatingModes",
+      "Group": "Servers",
+      "Port": 5432,
+      "Username": "admin",
+      "Host": "paskalon.operatingmodes.data",
+      "MaintenanceDB": "postgres",
+      "ConnectionParameters": {
+        "sslmode": "prefer",
+        "connect_timeout": 10
+      }
     }
   }
 }
