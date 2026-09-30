@@ -19,7 +19,7 @@ using paskalON.OperatingModes.Domain.Configs.Ramps;
 
 namespace paskalON.OperatingModes.Infrastructure.Storage
 {
-    internal interface IOperatingModeContext
+    public interface IOperatingModeContext
     {
         // Core DbSet
         DbSet<Configuration> Configurations { get; set; }            // General configuration class for the microservice

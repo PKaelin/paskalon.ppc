@@ -3,9 +3,9 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
-using paskalON.Devices.Domain.Configs;
 using paskalON.Infrastructure.Repositories;
 using paskalON.OperatingModes.Application;
+using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Infrastructure.Storage;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
 using paskalON.OperatingModes.Service.Publishers;
@@ -101,7 +101,7 @@ try
         if (startPublisher == true)
         {
             MetricsPublisherService metricsPublisherService = app.Services.GetRequiredService<MetricsPublisherService>();
-            metricsPublisherService.Initialize(manager.MetricsPublishers, config.MetricsIntervalMilliseconds, config.StartupDelayForDevices);
+            metricsPublisherService.Initialize(manager.MetricsPublishers, config.MetricsIntervalMilliseconds, config.StartupDelay);
         }
     }
 

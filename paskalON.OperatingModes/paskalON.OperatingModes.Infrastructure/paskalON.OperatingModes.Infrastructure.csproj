@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\**" />
-    <EmbeddedResource Remove="Migrations\**" />
-    <None Remove="Migrations\**" />
+      <Folder Include="Storage\Migrations\" />
   </ItemGroup>
 
   <ItemGroup>
