@@ -1,7 +1,39 @@
 #------------------------------------------------------------------------------
 # Variables
 #------------------------------------------------------------------------------
-@paskalON.OperatingModes.Service_HostAddress = http://localhost:5176
+@paskalON.OperatingModes.Service_HostAddress = http://localhost:45020
+
+#------------------------------------------------------------------------------
+# Stack controller
+#------------------------------------------------------------------------------
+POST {{paskalON.OperatingModes.Service_HostAddress}}/api/v1/stack/addoperatingmode
+Content-Type: application/json
+
+{
+    "operatingModeName": "ActivePowerFixedMode",
+    "priority": 1
+}
+
+###
+
+POST {{paskalON.OperatingModes.Service_HostAddress}}/api/v1/stack/moveoperatingmode
+Content-Type: application/json
+
+{
+    "operatingModeName": "ActivePowerFixedMode",
+    "priority": 2
+}
+
+###
+
+POST {{paskalON.OperatingModes.Service_HostAddress}}/api/v1/stack/removeoperatingmode
+Content-Type: application/json
+
+{
+    "operatingModeName": "ActivePowerFixedMode"
+}
+
+###
 
 #------------------------------------------------------------------------------
 # Version controller

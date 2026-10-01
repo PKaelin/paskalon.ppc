@@ -7,6 +7,9 @@ using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
 
 namespace paskalON.OperatingModes.Service.Controllers.V1
 {
+    /// <summary>
+    /// Controller to get the version informations.
+    /// </summary>
     [Route("api/v1/[controller]")]
     [ApiController]
     public class VersionController : ControllerBase

@@ -31,6 +31,7 @@
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />
     <ProjectReference Include="..\paskalON.OperatingModes.Application\paskalON.OperatingModes.Application.csproj" />
     <ProjectReference Include="..\paskalON.OperatingModes.Infrastructure\paskalON.OperatingModes.Infrastructure.csproj" />
+    <ProjectReference Include="..\paskalON.OperatingModes.Service.Dto\paskalON.OperatingModes.Service.Dto.csproj" />
   </ItemGroup>
 
 </Project>
