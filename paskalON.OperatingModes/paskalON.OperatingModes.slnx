@@ -16,6 +16,7 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="paskalON.OperatingModes.Application.IntegrationTest/paskalON.OperatingModes.Application.IntegrationTest.csproj" Id="9d2373e3-4d10-4fda-bf47-d7a16f0853ce" />
+    <Project Path="paskalON.OperatingModes.Application.UnitTest/paskalON.OperatingModes.Application.UnitTest.csproj" Id="0afb8daf-6b9d-40cf-ae9a-eb4b338bc273" />
     <Project Path="paskalON.OperatingModes.Domain.Configs.UnitTest/paskalON.OperatingModes.Domain.Configs.UnitTest.csproj" Id="96f4922f-58dc-43a5-9f98-b28693ee8fae" />
     <Project Path="paskalON.OperatingModes.Domain.IntegrationTest/paskalON.OperatingModes.Domain.IntegrationTest.csproj" Id="b26cda2d-60fe-4697-b6f2-32d558125864" />
     <Project Path="paskalON.OperatingModes.Domain.UnitTest/paskalON.OperatingModes.Domain.UnitTest.csproj" />

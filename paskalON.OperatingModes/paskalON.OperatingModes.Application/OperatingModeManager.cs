@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
@@ -47,14 +47,29 @@ namespace paskalON.OperatingModes.Application
         /// </summary>
         private readonly TimeProvider _timeProvider;
 
+
+        /// <summary>
+        /// Operating modes available for selection.
+        /// </summary>
+        private Dictionary<string, OperatingModeBase> _availableOperatingModes = new Dictionary<string, OperatingModeBase>(StringComparer.Ordinal);
+
+
+        /// <summary>
+        /// Stack of selected operating modes.
+        /// </summary>
+        private readonly OperatingModeStack _operatingModeStack = new OperatingModeStack();
+
+
         /// <inheritdoc/>
         public ICollection<IMetricsPublisher> MetricsPublishers { get; } = new List<IMetricsPublisher>();
 
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<OperatingModeBase> OperatingModes { get; private set; } = new List<OperatingModeBase>();
+        public IReadOnlyCollection<OperatingModeBase> AvailableOperatingModes => _availableOperatingModes.Values;
 
 
+        /// <inheritdoc/>
+        public IReadOnlyCollection<OperatingModeBase> SelectedOperatingModes => _operatingModeStack.OperatingModes;
 
 
         public OperatingModeManager(ILogger<OperatingModeManager> logger, IDeviceClient deviceClient, IMetricsPublisherFactory metricsPublisherFactory,
@@ -71,6 +86,34 @@ namespace paskalON.OperatingModes.Application
             _metricsPublisherFactory = metricsPublisherFactory;
             _operatingModeFactory = operatingModeFactory;
             _timeProvider = timeProvider;
+        }
+
+
+        /// <inheritdoc/>
+        public void AddOperatingMode(string operatingModeName, int priority)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(operatingModeName);
+
+            if (_availableOperatingModes.TryGetValue(operatingModeName, out OperatingModeBase? operatingMode) is false)
+            {
+                throw new KeyNotFoundException($"Operating mode '{operatingModeName}' is not configured.");
+            }
+
+            _operatingModeStack.Add(operatingMode, priority);
+        }
+
+
+        /// <inheritdoc/>
+        public void MoveOperatingMode(string operatingModeName, int priority)
+        {
+            _operatingModeStack.Move(operatingModeName, priority);
+        }
+
+
+        /// <inheritdoc/>
+        public void RemoveOperatingMode(string operatingModeName)
+        {
+            _operatingModeStack.Remove(operatingModeName);
         }
 
 
@@ -92,7 +135,8 @@ namespace paskalON.OperatingModes.Application
                 MetricsPublishers.Add(operatingModeMetrics);
             }
 
-            OperatingModes = operatingModes;
+            _availableOperatingModes = operatingModes.ToDictionary(operatingMode => operatingMode.Name, StringComparer.Ordinal);
+            _operatingModeStack.Clear();
         }
     }
 }
