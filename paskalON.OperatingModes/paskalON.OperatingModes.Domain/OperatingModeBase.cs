@@ -334,7 +334,6 @@ namespace paskalON.OperatingModes.Domain
             RampControllerReactive = rampController.ShallowCopy();
             CurveController = curveController;
             _logger.LogInformation("{Name} operating mode created.", Name);
-            RegisterMetrics();
         }
 
 

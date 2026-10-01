@@ -66,6 +66,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes
             _map = map;
             StateActive = OperatingModeState.Disabled;
             StateReactive = OperatingModeState.Disabled;
+            RegisterMetrics();
         }
 
 

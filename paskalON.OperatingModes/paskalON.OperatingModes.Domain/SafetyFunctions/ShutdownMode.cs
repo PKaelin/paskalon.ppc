@@ -44,6 +44,7 @@ namespace paskalON.OperatingModes.Domain.SafetyFunctions
             ArgumentNullException.ThrowIfNull(config);
 
             _config = config;
+            RegisterMetrics();
         }
 
 

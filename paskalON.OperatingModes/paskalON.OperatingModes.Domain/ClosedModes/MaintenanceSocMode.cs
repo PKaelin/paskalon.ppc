@@ -26,6 +26,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes
 
             _config = config;
             _map = map;
+            RegisterMetrics();
         }
 
 

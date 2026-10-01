@@ -54,6 +54,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
             _config = config;
             _map = map;
             StateActive = OperatingModeState.Disabled;
+            RegisterMetrics();
         }
 
 

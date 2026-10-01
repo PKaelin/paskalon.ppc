@@ -25,6 +25,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.EnergyStorages
 
             _config = config;
             _map = map;
+            RegisterMetrics();
         }
 
 

@@ -25,6 +25,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 
             _config = config;
             _map = map;
+            RegisterMetrics();
         }
 
 

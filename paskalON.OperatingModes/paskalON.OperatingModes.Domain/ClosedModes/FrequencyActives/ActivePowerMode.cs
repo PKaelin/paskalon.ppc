@@ -60,6 +60,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
             _config = config;
             _map = map;
             StateActive = OperatingModeState.Disabled;
+            RegisterMetrics();
         }
 
 

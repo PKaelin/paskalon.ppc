@@ -54,6 +54,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
             _config = config;
             _map = map;
             StateReactive = OperatingModeState.Disabled;
+            RegisterMetrics();
         }
 
 
