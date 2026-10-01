@@ -2,8 +2,10 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using paskalON.Infrastructure.Repositories;
+using paskalON.OperatingModes.Domain.Configs;
 
 namespace paskalON.OperatingModes.Infrastructure.Storage.Repositories
 {
@@ -19,6 +21,16 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Repositories
         /// <param name="context">The operating mode context.</param>
         public OperatingModeRepository(ILogger<OperatingModeRepository> logger, OperatingModeContext context) : base(logger, context)
         {
+        }
+
+
+        public async Task<List<OperatingModeBaseConfig>> GetAllOperatingModes(bool isActive = true)
+        {
+            return await Context.OperatingModeBaseConfigs
+                .Where(om => om.IsActive == isActive)
+                .Include(om => om.RampConfig)
+                .Include(om => om.CurveConfig)
+                .ToListAsync();
         }
     }
 }

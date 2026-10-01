@@ -12,7 +12,7 @@ using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageActives;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Configs.Curves;
-using paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower;
+using paskalON.OperatingModes.Domain.Configs.OpenModes;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.EnergyResources;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives;
@@ -40,6 +40,7 @@ namespace paskalON.OperatingModes.Infrastructure.Storage
         public DbSet<FrequencyWattCurveConfig> FrequencyWattCurveConfigs { get; set; }
 
         // Operating closed modes
+        public DbSet<OperatingModeBaseConfig> OperatingModeBaseConfigs { get; set; }
         public DbSet<MaintenanceSocModeConfig> MaintenanceSocModeConfigs { get; set; }
         // Operating closed modes Energy Storages
         public DbSet<ChargeDischargeModeConfig> ChargeDischargeModeConfigs { get; set; }

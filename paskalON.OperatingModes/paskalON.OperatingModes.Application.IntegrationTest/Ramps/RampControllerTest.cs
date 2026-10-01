@@ -18,10 +18,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
         {
             Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-                new RampController(NullLogger<RampController>.Instance, TimeProvider.System, null);
-                new RampController(NullLogger<RampController>.Instance, null, new RampTimeConfig { ChangedBy = "Test" });
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+                new RampController(NullLogger<RampController>.Instance, TimeProvider.System, null!);
+                new RampController(NullLogger<RampController>.Instance, null!, new RampTimeConfig { ChangedBy = "Test" });
             });
         }
 

@@ -2,6 +2,8 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.PhysicalUnits.Electricals.Powers;
+
 namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 {
     /// <summary>
@@ -9,5 +11,9 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     /// </summary>
     public class MaximumActivePowerLimitModeMap : OperatingModeBaseMap
     {
+        /// <summary>
+        /// Active power at the POI map.
+        /// </summary>
+        public required Func<ActivePower?> ActivePowerAtPoi { get; set; }
     }
 }

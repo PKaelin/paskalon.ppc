@@ -3,10 +3,9 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
-using paskalON.Devices.Domain.Ders;
 using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
-using paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower;
+using paskalON.OperatingModes.Domain.Configs.OpenModes;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -42,7 +41,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes
         /// A DER unit in maintenance mode is no longer included under control of the power control.
         /// Nonetheless it's influence in the input/output of the plant has to be considered.
         /// </remarks>
-        public DerUnit TargetDerUnit { get; init; }
+        public string TargetDerUnit { get => _config.DerUnitName; }
 
 
         /// <summary>
@@ -53,19 +52,16 @@ namespace paskalON.OperatingModes.Domain.OpenModes
         /// <param name="publisher">The publisher interface.</param>
         /// <param name="systemConfig">The system configuration.</param>
         /// <param name="config">The operating mode configuration.</param>
-        /// <param name="targetDerUnit"></param>
         /// <param name="map">Input mapping class for signals.</param>
         /// <param name="rampController">The ramp controller interface.</param>
         /// <param name="curveController">The curve controller interface.</param>
-        public MaintenanceMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, MaintenanceModeConfig config, DerUnit targetDerUnit,
+        public MaintenanceMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, MaintenanceModeConfig config,
             MaintenanceModeMap map, IRampController rampController, ICurveController? curveController = null)
             : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
             ArgumentNullException.ThrowIfNull(map);
-            ArgumentNullException.ThrowIfNull(targetDerUnit);
 
-            TargetDerUnit = targetDerUnit;
             _config = config;
             _map = map;
             StateActive = OperatingModeState.Disabled;

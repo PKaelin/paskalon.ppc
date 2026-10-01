@@ -4,8 +4,9 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
-using paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower;
+using paskalON.OperatingModes.Domain.Configs.OpenModes;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
+using paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
 using paskalON.OperatingModes.Infrastructure.Storage;
 
@@ -84,6 +85,7 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
             {
                 ChangedBy = ChangedBy,
                 Name = "MaintenanceMode",
+                DerUnitName = "BMS-Unit 1",
                 IsActive = true,
                 Type = PowerControlType.Bess,
                 RampConfig = rampRateConfig,
@@ -93,12 +95,22 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
             ActivePowerFixedModeConfig activePowerFixedModeConfig = new ActivePowerFixedModeConfig
             {
                 ChangedBy = ChangedBy,
-                Name = "ActivePowerFixedModeConfig",
+                Name = "ActivePowerFixedMode",
                 IsActive = true,
                 Type = PowerControlType.Bess,
                 RampConfig = rampRateConfig,
             };
             context.ActivePowerFixedModeConfigs.Add(activePowerFixedModeConfig);
+
+            ReactivePowerFixedModeConfig reactivePowerFixedModeConfig = new ReactivePowerFixedModeConfig
+            {
+                ChangedBy = ChangedBy,
+                Name = "ReactivePowerFixedMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                RampConfig = rampRateConfig,
+            };
+            context.ReactivePowerFixedModeConfigs.Add(reactivePowerFixedModeConfig);
 
             await context.SaveChangesAsync();
         }

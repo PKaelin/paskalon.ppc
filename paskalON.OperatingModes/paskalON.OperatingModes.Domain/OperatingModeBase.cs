@@ -334,6 +334,7 @@ namespace paskalON.OperatingModes.Domain
             RampControllerReactive = rampController.ShallowCopy();
             CurveController = curveController;
             _logger.LogInformation("{Name} operating mode created.", Name);
+            RegisterMetrics();
         }
 
 
@@ -731,10 +732,10 @@ namespace paskalON.OperatingModes.Domain
             MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(AvailableActivePower), MetricType.Gauge, x => x.AvailableActivePower?.Watts, _config.MetricsFactorClass1);
             MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(AvailableReactivePower), MetricType.Gauge, x => x.AvailableReactivePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
             // MetricsFactorClass2
-            MetricsPublisher.Register<OperatingModeBase, OperatingModeState>(this, nameof(State), MetricType.Gauge, x => x.State, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<OperatingModeBase, OperatingModeState>(this, nameof(StateActive), MetricType.Gauge, x => x.StateActive, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<OperatingModeBase, OperatingModeState>(this, nameof(StateReactive), MetricType.Gauge, x => x.StateReactive, _config.MetricsFactorClass2);
-            MetricsPublisher.Register<OperatingModeBase, bool>(this, nameof(IsEnabled), MetricType.Gauge, x => x.IsEnabled, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<OperatingModeBase, int>(this, nameof(State), MetricType.Gauge, x => (int)x.State, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<OperatingModeBase, int>(this, nameof(StateActive), MetricType.Gauge, x => x.StateActive.HasValue ? (int)x.StateActive.Value : -1, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<OperatingModeBase, int>(this, nameof(StateReactive), MetricType.Gauge, x => x.StateReactive.HasValue ? (int)x.StateReactive.Value : -1, _config.MetricsFactorClass2);
+            MetricsPublisher.Register<OperatingModeBase, int>(this, nameof(IsEnabled), MetricType.Gauge, x => x.IsEnabled ? 1 : 0, _config.MetricsFactorClass2);
             MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(SetpointActivePower), MetricType.Gauge, x => x.SetpointActivePower.Watts, _config.MetricsFactorClass2);
             MetricsPublisher.Register<OperatingModeBase, double>(this, nameof(SetpointReactivePower), MetricType.Gauge, x => x.SetpointReactivePower.VoltAmperesReactive, _config.MetricsFactorClass2);
         }

@@ -3,6 +3,11 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Devices.Client;
+using paskalON.OperatingModes.Application.Factories;
+using paskalON.OperatingModes.Domain;
+using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
 using paskalON.Telemetry;
 using paskalON.Telemetry.Factories;
 
@@ -25,17 +30,69 @@ namespace paskalON.OperatingModes.Application
         private readonly IMetricsPublisherFactory _metricsPublisherFactory;
 
 
+        /// <summary>
+        /// Device client to receive device DTOs from pub/sub.
+        /// </summary>
+        private readonly IDeviceClient _deviceClient;
+
+
+        /// <summary>
+        /// Operating mode factory to create operating mode instances based on configurations.
+        /// </summary>
+        private readonly IOperatingModeFactory _operatingModeFactory;
+
+
+        /// <summary>
+        /// Time provider to get the current time for operating mode operations.
+        /// </summary>
+        private readonly TimeProvider _timeProvider;
+
         /// <inheritdoc/>
         public ICollection<IMetricsPublisher> MetricsPublishers { get; } = new List<IMetricsPublisher>();
 
 
-        public OperatingModeManager(ILogger<OperatingModeManager> logger, IMetricsPublisherFactory metricsPublisherFactory)
+        /// <inheritdoc/>
+        public IReadOnlyCollection<OperatingModeBase> OperatingModes { get; private set; } = new List<OperatingModeBase>();
+
+
+
+
+        public OperatingModeManager(ILogger<OperatingModeManager> logger, IDeviceClient deviceClient, IMetricsPublisherFactory metricsPublisherFactory,
+            TimeProvider timeProvider, IOperatingModeFactory operatingModeFactory)
         {
             ArgumentNullException.ThrowIfNull(logger);
+            ArgumentNullException.ThrowIfNull(deviceClient);
             ArgumentNullException.ThrowIfNull(metricsPublisherFactory);
+            ArgumentNullException.ThrowIfNull(timeProvider);
+            ArgumentNullException.ThrowIfNull(operatingModeFactory);
 
             _logger = logger;
+            _deviceClient = deviceClient;
             _metricsPublisherFactory = metricsPublisherFactory;
+            _operatingModeFactory = operatingModeFactory;
+            _timeProvider = timeProvider;
+        }
+
+
+        public virtual async Task Initialize(IOperatingModeRepository repository, SystemConfig systemConfig)
+        {
+            ArgumentNullException.ThrowIfNull(repository);
+            ArgumentNullException.ThrowIfNull(systemConfig);
+
+            _logger.LogInformation("Initialize operating mode during startup");
+            List<OperatingModeBaseConfig> operatingModeConfigs = await repository.GetAllOperatingModes();
+
+            List<OperatingModeBase> operatingModes = new List<OperatingModeBase>();
+
+            foreach (OperatingModeBaseConfig config in operatingModeConfigs)
+            {
+                IMetricsPublisher operatingModeMetrics = _metricsPublisherFactory.Create();
+                OperatingModeBase operatingMode = _operatingModeFactory.Create(_logger, _timeProvider, operatingModeMetrics, systemConfig, config, _deviceClient.Der);
+                operatingModes.Add(operatingMode);
+                MetricsPublishers.Add(operatingModeMetrics);
+            }
+
+            OperatingModes = operatingModes;
         }
     }
 }

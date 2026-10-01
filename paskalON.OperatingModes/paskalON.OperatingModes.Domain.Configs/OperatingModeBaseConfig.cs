@@ -197,15 +197,6 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
-        /// Class name of the specialized operating mode to be initialized.
-        /// </summary>
-        /// <remarks>
-        /// If class name is empty the default operating mode instance is created.
-        /// </remarks>
-        public string? ClassName { get; set; }
-
-
-        /// <summary>
         /// Metrics publishing interval in milliseconds.
         /// </summary>
         public long MetricsIntervalMilliseconds

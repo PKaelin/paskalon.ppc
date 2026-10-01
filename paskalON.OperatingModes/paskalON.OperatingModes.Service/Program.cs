@@ -3,8 +3,13 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
+using paskalON.Devices.Client;
+using paskalON.Devices.Client.Subscribers;
 using paskalON.Infrastructure.Repositories;
+using paskalON.Messaging;
+using paskalON.Messaging.Redis;
 using paskalON.OperatingModes.Application;
+using paskalON.OperatingModes.Application.Factories;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Infrastructure.Storage;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
@@ -74,6 +79,20 @@ try
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
     builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
     builder.Services.AddSingleton<MetricsPublisherService>();
+    // Long living HTTP client for the device service API
+    // TODO: Refactor to multiple
+    Uri dsBaseAddress = new Uri($"{dsConnectionStrings[0].TrimEnd('/')}/{dsEndpoint.Trim('/')}/");
+    builder.Services.AddKeyedSingleton(nameof(DeviceServer), (_, _) => new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
+    {
+        BaseAddress = dsBaseAddress,
+        Timeout = TimeSpan.FromSeconds(10)
+    });
+    builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(sp.GetRequiredKeyedService<HttpClient>(nameof(DeviceServer))));
+    builder.Services.AddSingleton<IMessageSubscriber, RedisMessageSubscriber>();
+    builder.Services.AddSingleton<IDeviceClient, DeviceClient>();
+    builder.Services.AddSingleton(TimeProvider.System);
+    builder.Services.AddSingleton<IOperatingModeMapFactory, OperatingModeMapFactory>();
+    builder.Services.AddSingleton<IOperatingModeFactory, OperatingModeFactory>();
 
     builder.Services.AddSingleton<IOperatingModeManager, OperatingModeManager>();
 
@@ -92,11 +111,18 @@ try
     app.Logger.LogInformation("Application starts initializing services.....");
     // Create and load device manager
     IOperatingModeManager manager = app.Services.GetRequiredService<IOperatingModeManager>();
-    // Create and load manager
+
     using (IServiceScope scope = app.Services.CreateScope())
     {
-        IRepository<OperatingModeContext, SystemConfig> repository = scope.ServiceProvider.GetRequiredService<IRepository<OperatingModeContext, SystemConfig>>();
-        SystemConfig config = (await repository.GetAsync(0, 1, o => o.Id)).Single();
+        IRepository<OperatingModeContext, SystemConfig> systemConfigRepository = scope.ServiceProvider.GetRequiredService<IRepository<OperatingModeContext, SystemConfig>>();
+        SystemConfig config = (await systemConfigRepository.GetAsync(0, 1, o => o.Id)).Single();
+        // Load and initialize device client
+        SubscriberTopic topics = GetSubscriberTopic(config);
+        IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
+        await deviceClient.Initialize(topics);
+        // Load and initialize manager
+        IOperatingModeRepository repository = scope.ServiceProvider.GetRequiredService<IOperatingModeRepository>();
+        await manager.Initialize(repository, config);
 
         if (startPublisher == true)
         {
@@ -126,4 +152,49 @@ catch (Exception ex)
         app.Logger.LogError(errorMessage);
         app.Logger.LogError(ex.StackTrace);
     }
+}
+
+
+/// <summary>
+/// Get subscriber topic configuration object.
+/// </summary>
+static SubscriberTopic GetSubscriberTopic(SystemConfig config)
+{
+    SubscriberTopic topic = new SubscriberTopic();
+
+    if (config.SubscriberTopicPcsCore != null && config.SubscriberTopicPcsDetail != null)
+    {
+        topic.PowerConversionSystemTopic = new SubscriberTopicEntry(config.SubscriberTopicPcsCore, config.SubscriberTopicPcsDetail);
+    }
+
+    if (config.SubscriberTopicBatteryBankCore != null && config.SubscriberTopicBatteryBankDetail != null)
+    {
+        topic.BatteryBankTopic = new SubscriberTopicEntry(config.SubscriberTopicBatteryBankCore, config.SubscriberTopicBatteryBankDetail);
+    }
+
+    if (config.SubscriberTopicSolarPanelCore != null && config.SubscriberTopicSolarPanelDetail != null)
+    {
+        topic.SolarPanelTopic = new SubscriberTopicEntry(config.SubscriberTopicSolarPanelCore, config.SubscriberTopicSolarPanelDetail);
+    }
+
+    if (config.SubscriberTopicExternalPowerMeterCore != null && config.SubscriberTopicExternalPowerMeterDetail != null)
+    {
+        topic.ExternalPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicExternalPowerMeterCore, config.SubscriberTopicExternalPowerMeterDetail);
+    }
+
+    if (config.SubscriberTopicAuxiliaryPowerMeterCore != null && config.SubscriberTopicAuxiliaryPowerMeterDetail != null)
+    {
+        topic.AuxiliaryPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicAuxiliaryPowerMeterCore, config.SubscriberTopicAuxiliaryPowerMeterDetail);
+    }
+
+    if (config.SubscriberTopicSystemPowerMeterCore != null && config.SubscriberTopicSystemPowerMeterDetail != null)
+    {
+        topic.SystemPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicSystemPowerMeterCore, config.SubscriberTopicSystemPowerMeterDetail);
+    }
+
+    if (config.SubscriberTopicCircuitPowerMeterCore != null && config.SubscriberTopicCircuitPowerMeterDetail != null)
+    {
+        topic.CircuitPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicCircuitPowerMeterCore, config.SubscriberTopicCircuitPowerMeterDetail);
+    }
+    return topic;
 }

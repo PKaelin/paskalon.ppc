@@ -251,9 +251,6 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.NameBase");
 
-                    b.Property<string>("ClassName")
-                        .HasColumnType("text");
-
                     b.Property<int?>("CurveConfigId")
                         .HasColumnType("integer");
 
@@ -544,13 +541,6 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     b.ToTable("VoltageVarDroopModeConfig");
                 });
 
-            modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower.MaintenanceModeConfig", b =>
-                {
-                    b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
-
-                    b.ToTable("MaintenanceModeConfig");
-                });
-
             modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.OpenModes.EnergyResources.MaximumPowerPointTrackingModeConfig", b =>
                 {
                     b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
@@ -563,6 +553,17 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
 
                     b.ToTable("ActivePowerFixedModeConfig");
+                });
+
+            modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.OpenModes.MaintenanceModeConfig", b =>
+                {
+                    b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
+
+                    b.Property<string>("DerUnitName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.ToTable("MaintenanceModeConfig");
                 });
 
             modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives.ReactivePowerFixedModeConfig", b =>

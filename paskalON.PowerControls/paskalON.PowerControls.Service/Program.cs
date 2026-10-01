@@ -164,9 +164,11 @@ try
     {
         IRepository<PowerControlContext, SystemConfig> repository = scope.ServiceProvider.GetRequiredService<IRepository<PowerControlContext, SystemConfig>>();
         SystemConfig config = (await repository.GetAsync(0, 1, o => o.Id)).Single();
+        // Load and initialize device client
         SubscriberTopic topics = GetSubscriberTopic(config);
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
         await deviceClient.Initialize(topics);
+        // Load and initialize manager
         IPowerControlRepository powerControlRepository = scope.ServiceProvider.GetRequiredService<IPowerControlRepository>();
         await manager.Initialize(powerControlRepository);
 

@@ -2,8 +2,6 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Devices.Domain.Ders;
-
 namespace paskalON.OperatingModes.Domain.OpenModes
 {
     /// <summary>
@@ -14,6 +12,6 @@ namespace paskalON.OperatingModes.Domain.OpenModes
         /// <summary>
         /// DER unit to put into maintenance.
         /// </summary>
-        public required Func<DerUnit> DerUnit { get; set; }
+        public required string DerUnitName { get; set; }
     }
 }

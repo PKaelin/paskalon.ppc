@@ -9,5 +9,9 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     /// </summary>
     public class FrequencyDroopModeMap : OperatingModeBaseMap
     {
+        /// <summary>
+        /// Frequency at the POI map.
+        /// </summary>
+        public required Func<double?> FrequencyAtPoi { get; set; }
     }
 }

@@ -19,7 +19,7 @@ namespace paskalON.OperatingModes.Application.Ramps
         /// <summary>
         /// ILogger for handling application logging and diagnostics.
         /// </summary>
-        private readonly ILogger<RampController> _logger;
+        private readonly ILogger _logger;
 
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace paskalON.OperatingModes.Application.Ramps
         /// <param name="logger">ILogger for handling application logging and diagnostics.</param>
         /// <param name="timeProvider">Time provider for system time abstraction.</param>
         /// <param name="rampBaseConfig">Ramp base configuration containing concrete ramp configuration.</param>
-        public RampController(ILogger<RampController> logger, TimeProvider timeProvider, RampBaseConfig rampBaseConfig)
+        public RampController(ILogger logger, TimeProvider timeProvider, RampBaseConfig rampBaseConfig)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(timeProvider);

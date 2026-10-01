@@ -2,7 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-namespace paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower
+namespace paskalON.OperatingModes.Domain.Configs.OpenModes
 {
     /// <summary>
     /// Maintenance mode configuration.
@@ -13,5 +13,9 @@ namespace paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower
     /// </remarks>
     public class MaintenanceModeConfig : OperatingModeBaseConfig
     {
+        /// <summary>
+        /// Gets or sets the name of the unit associated with this maintenance mode configuration.
+        /// </summary>
+        public required string DerUnitName { get; set; }
     }
 }

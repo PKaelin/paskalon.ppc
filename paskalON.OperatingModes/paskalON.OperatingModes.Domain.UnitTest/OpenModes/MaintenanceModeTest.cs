@@ -4,13 +4,10 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using paskalON.Devices.Domain.Configs.Ders;
-using paskalON.Devices.Domain.Ders;
 using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
-using paskalON.OperatingModes.Domain.Configs.Modes.ComplexPower;
+using paskalON.OperatingModes.Domain.Configs.OpenModes;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
-using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.OpenModes;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -36,22 +33,6 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
         public void Initialize()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            // Der
-            Mock<DerConfig> derConfig = new Mock<DerConfig>();
-            derConfig.SetupGet(x => x.Name).Returns("DerConfig");
-            Mock<Der> der = new Mock<Der>(NullLogger.Instance, derConfig.Object);
-            // Group
-            Mock<DerGroupConfig> groupConfig = new Mock<DerGroupConfig>();
-            groupConfig.SetupGet(x => x.Name).Returns("DerGroupConfig");
-            Mock<DerGroup> group = new Mock<DerGroup>(NullLogger.Instance, groupConfig.Object, der.Object);
-            // Circuit
-            Mock<DerCircuitConfig> circuitConfig = new Mock<DerCircuitConfig>();
-            circuitConfig.SetupGet(x => x.Name).Returns("DerCircuitConfig");
-            Mock<DerCircuit> circuit = new Mock<DerCircuit>(NullLogger.Instance, circuitConfig.Object, group.Object);
-
-            Mock<DerBatteryStorageUnitConfig> unitConfig = new Mock<DerBatteryStorageUnitConfig>();
-            unitConfig.SetupGet(x => x.Name).Returns("DerBatteryStorageUnitConfig");
-            Mock<DerBatteryStorageUnit> derUnit = new Mock<DerBatteryStorageUnit>(NullLogger.Instance, unitConfig.Object, circuit.Object);
 
             _systemConfig = new SystemConfig
             {
@@ -68,6 +49,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
             {
                 ChangedBy = "Test",
                 Name = "MaintenanceModeConfig",
+                DerUnitName = "DerBatteryStorageUnitConfig",
                 IsActive = true,
                 Type = PowerControlType.Bess,
                 MaximumActivePowerLimitWatt = double.MaxValue,
@@ -77,26 +59,13 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
                 RampConfig = new Mock<RampBaseConfig>().Object
             };
 
-            _map = new MaintenanceModeMap { AvailableActivePower = () => null, AvailableReactivePower = () => null, DerUnit = () => derUnit.Object };
+            _map = new MaintenanceModeMap { AvailableActivePower = () => null, AvailableReactivePower = () => null, DerUnitName = _config.DerUnitName };
             _rampActive = new Mock<IRampController>();
             _rampReactive = new Mock<IRampController>();
             _rampActive.Setup(x => x.ShallowCopy()).Returns(_rampReactive.Object);
-            _mode = new MaintenanceMode(NullLogger.Instance, TimeProvider.System, publisher.Object, _systemConfig, _config, derUnit.Object, _map, _rampActive.Object);
+            _mode = new MaintenanceMode(NullLogger.Instance, TimeProvider.System, publisher.Object, _systemConfig, _config, _map, _rampActive.Object);
         }
 
-
-        [TestMethod]
-        public void CreateWithNullDerUnitTest()
-        {
-            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            Mock<IRampController> ramp = new Mock<IRampController>();
-            Mock<ICurveController> curve = new Mock<ICurveController>();
-            Mock<MaintenanceModeConfig> config = new Mock<MaintenanceModeConfig>();
-            Mock<MaintenanceModeMap> map = new Mock<MaintenanceModeMap>();
-            Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
-            Assert.ThrowsExactly<ArgumentNullException>(() => new MaintenanceMode(NullLogger.Instance, TimeProvider.System, publisher.Object,
-                systemConfig.Object, config.Object, null!, map.Object, ramp.Object, curve.Object));
-        }
 
 
         [TestMethod]
