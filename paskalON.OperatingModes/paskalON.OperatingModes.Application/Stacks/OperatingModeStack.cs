@@ -4,11 +4,15 @@
 //----------------------------------------‐------------------------------------
 using paskalON.OperatingModes.Domain;
 
-namespace paskalON.OperatingModes.Application
+namespace paskalON.OperatingModes.Application.Stacks
 {
     /// <summary>
     /// Stores selected operating modes in unique priority order.
     /// </summary>
+    /// <remarks>
+    /// OperatingModeStack is used by the StackManager to manage the selection and ordering of operating modes.
+    /// It ensures that each operating mode has a unique priority and provides thread-safe access to the stack.
+    /// </remarks>
     public class OperatingModeStack
     {
         /// <summary>

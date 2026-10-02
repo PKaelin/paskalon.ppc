@@ -5,6 +5,7 @@
 using Microsoft.Extensions.Logging;
 using paskalON.Devices.Client;
 using paskalON.OperatingModes.Application.Factories;
+using paskalON.OperatingModes.Application.Stacks;
 using paskalON.OperatingModes.Domain;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
@@ -48,28 +49,12 @@ namespace paskalON.OperatingModes.Application
         private readonly TimeProvider _timeProvider;
 
 
-        /// <summary>
-        /// Operating modes available for selection.
-        /// </summary>
-        private Dictionary<string, OperatingModeBase> _availableOperatingModes = new Dictionary<string, OperatingModeBase>(StringComparer.Ordinal);
-
-
-        /// <summary>
-        /// Stack of selected operating modes.
-        /// </summary>
-        private readonly OperatingModeStack _operatingModeStack = new OperatingModeStack();
-
-
         /// <inheritdoc/>
         public ICollection<IMetricsPublisher> MetricsPublishers { get; } = new List<IMetricsPublisher>();
 
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<OperatingModeBase> AvailableOperatingModes => _availableOperatingModes.Values;
-
-
-        /// <inheritdoc/>
-        public IReadOnlyCollection<OperatingModeBase> SelectedOperatingModes => _operatingModeStack.OperatingModes;
+        public IStackManager StackManager { get; } = new StackManager();
 
 
         public OperatingModeManager(ILogger<OperatingModeManager> logger, IDeviceClient deviceClient, IMetricsPublisherFactory metricsPublisherFactory,
@@ -88,33 +73,6 @@ namespace paskalON.OperatingModes.Application
             _timeProvider = timeProvider;
         }
 
-
-        /// <inheritdoc/>
-        public void AddOperatingMode(string operatingModeName, int priority)
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(operatingModeName);
-
-            if (_availableOperatingModes.TryGetValue(operatingModeName, out OperatingModeBase? operatingMode) is false)
-            {
-                throw new KeyNotFoundException($"Operating mode '{operatingModeName}' is not configured.");
-            }
-
-            _operatingModeStack.Add(operatingMode, priority);
-        }
-
-
-        /// <inheritdoc/>
-        public void MoveOperatingMode(string operatingModeName, int priority)
-        {
-            _operatingModeStack.Move(operatingModeName, priority);
-        }
-
-
-        /// <inheritdoc/>
-        public void RemoveOperatingMode(string operatingModeName)
-        {
-            _operatingModeStack.Remove(operatingModeName);
-        }
 
 
         public virtual async Task Initialize(IOperatingModeRepository repository, SystemConfig systemConfig)
@@ -135,8 +93,7 @@ namespace paskalON.OperatingModes.Application
                 MetricsPublishers.Add(operatingModeMetrics);
             }
 
-            _availableOperatingModes = operatingModes.ToDictionary(operatingMode => operatingMode.Name, StringComparer.Ordinal);
-            _operatingModeStack.Clear();
+            StackManager.InitializeStack(operatingModes.ToDictionary(operatingMode => operatingMode.Name, StringComparer.Ordinal));
         }
     }
 }

@@ -50,7 +50,7 @@ namespace paskalON.OperatingModes.Service.Controllers.V1
         [HttpPost]
         public IActionResult AddOperatingMode(AddOperatingModeStackRequest request)
         {
-            _manager.AddOperatingMode(request.OperatingModeName, request.Priority);
+            _manager.StackManager.AddOperatingMode(request.OperatingModeName, request.Priority);
 
             return Ok();
         }
@@ -64,7 +64,7 @@ namespace paskalON.OperatingModes.Service.Controllers.V1
         [HttpPost]
         public IActionResult MoveOperatingMode(MoveOperatingModeStackRequest request)
         {
-            _manager.MoveOperatingMode(request.OperatingModeName, request.Priority);
+            _manager.StackManager.MoveOperatingMode(request.OperatingModeName, request.Priority);
 
             return Ok();
         }
@@ -78,7 +78,7 @@ namespace paskalON.OperatingModes.Service.Controllers.V1
         [HttpPost]
         public IActionResult RemoveOperatingMode(RemoveOperatingModeStackRequest request)
         {
-            _manager.RemoveOperatingMode(request.OperatingModeName);
+            _manager.StackManager.RemoveOperatingMode(request.OperatingModeName);
 
             return Ok();
         }

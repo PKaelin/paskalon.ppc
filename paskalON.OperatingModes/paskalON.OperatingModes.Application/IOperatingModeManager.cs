@@ -2,7 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.OperatingModes.Domain;
+using paskalON.OperatingModes.Application.Stacks;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
 using paskalON.Telemetry;
@@ -21,38 +21,9 @@ namespace paskalON.OperatingModes.Application
 
 
         /// <summary>
-        /// Selected operating modes ordered by ascending priority.
+        /// Gets the stack manager responsible for managing operating mode stack.
         /// </summary>
-        IReadOnlyCollection<OperatingModeBase> AvailableOperatingModes { get; }
-
-
-        /// <summary>
-        /// Selected operating modes ordered by ascending priority.
-        /// </summary>
-        IReadOnlyCollection<OperatingModeBase> SelectedOperatingModes { get; }
-
-
-        /// <summary>
-        /// Adds an initialized operating mode to the selected stack.
-        /// </summary>
-        /// <param name="operatingModeName">The name of the operating mode to add.</param>
-        /// <param name="priority">The unique priority to assign.</param>
-        void AddOperatingMode(string operatingModeName, int priority);
-
-
-        /// <summary>
-        /// Moves a selected operating mode to a new priority.
-        /// </summary>
-        /// <param name="operatingModeName">The name of the operating mode to move.</param>
-        /// <param name="priority">The unique priority to assign.</param>
-        void MoveOperatingMode(string operatingModeName, int priority);
-
-
-        /// <summary>
-        /// Removes an operating mode from the selected stack.
-        /// </summary>
-        /// <param name="operatingModeName">The name of the operating mode to remove.</param>
-        void RemoveOperatingMode(string operatingModeName);
+        IStackManager StackManager { get; }
 
 
         /// <summary>

@@ -6,13 +6,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.Domains.Configs;
+using paskalON.OperatingModes.Application.Stacks;
 using paskalON.OperatingModes.Domain;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.Telemetry;
 
-namespace paskalON.OperatingModes.Application.UnitTest
+namespace paskalON.OperatingModes.Application.UnitTest.Stacks
 {
     /// <summary>
     /// Tests selection and priority behavior of <see cref="OperatingModeStack"/>.
