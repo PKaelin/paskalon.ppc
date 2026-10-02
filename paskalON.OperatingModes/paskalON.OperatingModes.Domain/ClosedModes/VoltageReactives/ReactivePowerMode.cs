@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Curves;
@@ -19,7 +20,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
     /// Output Controlled: Reactive Power (Q)
     /// What Output Influences: Reactive Power, Grid voltage
     /// </summary>
-    public class ReactivePowerMode : OperatingClosedModeBase
+    public class ReactivePowerMode : OperatingClosedModeBase, IAdditiveMode, IStackable
     {
         /// <summary>
         /// Last reactive power at point of interconnection (POI).

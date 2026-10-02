@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Curves;
@@ -19,7 +20,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
     /// Output Controlled: Active Power (P)
     /// What Output Influences: Active Power, Grid frequency, Power Balance
     /// </summary>
-    public class ActivePowerMode : OperatingClosedModeBase
+    public class ActivePowerMode : OperatingClosedModeBase, IAdditiveMode, IStackable
     {
         /// <summary>
         /// Last active power at point of interconnection (POI).

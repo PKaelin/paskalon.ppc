@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Curves;
@@ -19,7 +20,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
     /// Output Controlled: Active Power (P)
     /// What Output Influences: Active Power
     /// </summary>
-    public class ActivePowerFixedMode : OperatingOpenModeBase
+    public class ActivePowerFixedMode : OperatingOpenModeBase, IExclusiveMode, IStackable
     {
         /// <summary>
         /// Active power fixed mode configuration.

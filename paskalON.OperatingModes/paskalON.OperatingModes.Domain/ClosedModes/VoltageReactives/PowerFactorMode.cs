@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Curves;
@@ -11,10 +12,11 @@ using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
 {
-    public class PowerFactorMode : OperatingClosedModeBase
+    public class PowerFactorMode : OperatingClosedModeBase, IExclusiveMode, IStackable
     {
         protected readonly PowerFactorModeConfig _config;
         protected readonly PowerFactorModeMap _map;
+        public double PowerFactor { get; set; }
 
         public PowerFactorMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, PowerFactorModeConfig config,
             PowerFactorModeMap map, IRampController rampController, ICurveController? curveController)

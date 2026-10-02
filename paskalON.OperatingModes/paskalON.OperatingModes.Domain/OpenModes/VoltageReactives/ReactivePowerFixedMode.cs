@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Curves;
@@ -19,7 +20,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
     /// Output Controlled: Reactive Power (Q)
     /// What Output Influences: Reactive Power
     /// </summary>
-    public class ReactivePowerFixedMode : OperatingOpenModeBase
+    public class ReactivePowerFixedMode : OperatingOpenModeBase, IExclusiveMode, IStackable
     {
         /// <summary>
         /// Reactive power fixed mode configuration.

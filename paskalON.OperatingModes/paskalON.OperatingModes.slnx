@@ -28,6 +28,7 @@
   <Project Path="paskalON.OperatingModes.Application/paskalON.OperatingModes.Application.csproj" Id="4d9a038d-be7e-42a9-ab47-baae8e975c27" />
   <Project Path="paskalON.OperatingModes.Domain.Configs/paskalON.OperatingModes.Domain.Configs.csproj" Id="c61f2d23-a0d7-405f-bab7-706d7e6910e3" />
   <Project Path="paskalON.OperatingModes.Domain/paskalON.OperatingModes.Domain.csproj" />
+  <Project Path="paskalON.OperatingModes.Dto/paskalON.OperatingModes.Dto.csproj" Id="afbbea07-13bf-4906-a028-b241fceb813d" />
   <Project Path="paskalON.OperatingModes.Infrastructure/paskalON.OperatingModes.Infrastructure.csproj" Id="91a381b4-3370-4e7a-a992-28b79cca865a" />
   <Project Path="paskalON.OperatingModes.Service.Dto/paskalON.OperatingModes.Service.Dto.csproj" Id="fcaf0800-fcbd-44d7-b936-ed70c9d8f9ff" />
   <Project Path="paskalON.OperatingModes.Service/paskalON.OperatingModes.Service.csproj" Id="375c7069-74cf-4df7-9bff-de2d79c63e86" />
