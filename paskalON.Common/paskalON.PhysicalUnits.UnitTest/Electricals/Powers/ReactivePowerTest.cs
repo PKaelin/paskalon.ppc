@@ -248,5 +248,20 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             Assert.AreEqual(expected, rap.VoltAmperesReactive);
         }
 
+
+        [TestMethod]
+        [DataRow(10d, 20d, -1)]
+        [DataRow(20d, 10d, 1)]
+        [DataRow(15d, 15d, 0)]
+        public void ReactivePowerCompareToObjectTest(double value1, double value2, int expected)
+        {
+            ReactivePower first = new ReactivePower(value1);
+            object second = new ReactivePower(value2);
+
+            int result = first.CompareTo(second);
+
+            Assert.AreEqual(expected, Math.Sign(result));
+        }
+
     }
 }

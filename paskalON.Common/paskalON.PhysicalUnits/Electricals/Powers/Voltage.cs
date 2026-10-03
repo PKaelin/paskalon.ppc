@@ -276,7 +276,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
                 return -1;
             }
 
-            return CompareTo(other);
+            return CompareTo(other.Value);
         }
 
 

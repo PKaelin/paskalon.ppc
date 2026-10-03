@@ -248,5 +248,20 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             Assert.AreEqual(expected, ap.Watts);
         }
 
+
+        [TestMethod]
+        [DataRow(10d, 20d, -1)]
+        [DataRow(20d, 10d, 1)]
+        [DataRow(15d, 15d, 0)]
+        public void ActivePowerCompareToObjectTest(double value1, double value2, int expected)
+        {
+            ActivePower first = new ActivePower(value1);
+            object second = new ActivePower(value2);
+
+            int result = first.CompareTo(second);
+
+            Assert.AreEqual(expected, Math.Sign(result));
+        }
+
     }
 }

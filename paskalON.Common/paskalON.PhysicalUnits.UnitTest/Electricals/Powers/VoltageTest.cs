@@ -248,5 +248,20 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             Assert.AreEqual(expected, v.Volts);
         }
 
+
+        [TestMethod]
+        [DataRow(10d, 20d, -1)]
+        [DataRow(20d, 10d, 1)]
+        [DataRow(15d, 15d, 0)]
+        public void VoltageCompareToObjectTest(double value1, double value2, int expected)
+        {
+            Voltage first = new Voltage(value1);
+            object second = new Voltage(value2);
+
+            int result = first.CompareTo(second);
+
+            Assert.AreEqual(expected, Math.Sign(result));
+        }
+
     }
 }

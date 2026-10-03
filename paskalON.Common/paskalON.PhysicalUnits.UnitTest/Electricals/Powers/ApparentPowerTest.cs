@@ -262,5 +262,20 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             Assert.AreEqual(expected, rap.VoltAmperes);
         }
 
+
+        [TestMethod]
+        [DataRow(10d, 20d, -1)]
+        [DataRow(20d, 10d, 1)]
+        [DataRow(15d, 15d, 0)]
+        public void ApparentPowerCompareToObjectTest(double value1, double value2, int expected)
+        {
+            ApparentPower first = new ApparentPower(value1);
+            object second = new ApparentPower(value2);
+
+            int result = first.CompareTo(second);
+
+            Assert.AreEqual(expected, Math.Sign(result));
+        }
+
     }
 }

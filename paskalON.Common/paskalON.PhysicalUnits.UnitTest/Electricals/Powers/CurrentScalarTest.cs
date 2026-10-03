@@ -212,5 +212,20 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             Assert.AreEqual(expected, c1.IsNaN());
         }
 
+
+        [TestMethod]
+        [DataRow(10d, 20d, -1)]
+        [DataRow(20d, 10d, 1)]
+        [DataRow(15d, 15d, 0)]
+        public void CurrentScalarCompareToObjectTest(double value1, double value2, int expected)
+        {
+            CurrentScalar first = new CurrentScalar(value1);
+            object second = new CurrentScalar(value2);
+
+            int result = first.CompareTo(second);
+
+            Assert.AreEqual(expected, Math.Sign(result));
+        }
+
     }
 }
