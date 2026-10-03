@@ -54,7 +54,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
                 return null;
             }
 
-            return Calculate(activePower, reactivePower);
+            return Calculate(activePower.Value, reactivePower.Value);
         }
 
 

@@ -36,5 +36,17 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             double powerFactor = IecPowerFactor.Calculate(activePower, reactivePower).PowerFactor;
             Assert.AreEqual(expectedPowerFactor, Math.Round(powerFactor, 5));
         }
+
+
+        [TestMethod]
+        [DataRow(null, 10d)]
+        [DataRow(5d, null)]
+        [DataRow(null, null)]
+        public void PowerFactorIecCalculateNullableReturnsNullTest(double? activePower, double? reactivePower)
+        {
+            IecPowerFactor? powerFactor = IecPowerFactor.Calculate(activePower, reactivePower);
+
+            Assert.IsNull(powerFactor);
+        }
     }
 }
