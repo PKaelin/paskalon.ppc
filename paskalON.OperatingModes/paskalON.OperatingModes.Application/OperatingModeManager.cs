@@ -8,6 +8,7 @@ using paskalON.OperatingModes.Application.Factories;
 using paskalON.OperatingModes.Application.Stacks;
 using paskalON.OperatingModes.Domain;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Systems;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
 using paskalON.Telemetry;
 using paskalON.Telemetry.Factories;
@@ -35,6 +36,12 @@ namespace paskalON.OperatingModes.Application
         /// Device client to receive device DTOs from pub/sub.
         /// </summary>
         private readonly IDeviceClient _deviceClient;
+
+
+        /// <summary>
+        /// System operating mode control instance.
+        /// </summary>
+        private SystemOperatingModeControl? _systemOperatingModeControl;
 
 
         /// <summary>
@@ -94,6 +101,9 @@ namespace paskalON.OperatingModes.Application
             }
 
             StackManager.InitializeStack(operatingModes.ToDictionary(operatingMode => operatingMode.Name, StringComparer.Ordinal));
+            IMetricsPublisher systemModeMetrics = _metricsPublisherFactory.Create();
+            _systemOperatingModeControl = new SystemOperatingModeControl(_logger, operatingModes, systemModeMetrics);
+            MetricsPublishers.Add(systemModeMetrics);
         }
     }
 }

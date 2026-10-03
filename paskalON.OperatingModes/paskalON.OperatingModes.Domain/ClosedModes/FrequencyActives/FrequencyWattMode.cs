@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Curves;
@@ -11,7 +12,7 @@ using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 {
-    public class FrequencyWattMode : OperatingClosedModeBase
+    public class FrequencyWattMode : OperatingClosedModeBase, IAdditiveMode, IStackable
     {
         protected readonly FrequencyWattModeConfig _config;
         protected readonly FrequencyWattModeMap _map;

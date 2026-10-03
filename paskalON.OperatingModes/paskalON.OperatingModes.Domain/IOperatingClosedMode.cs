@@ -18,11 +18,5 @@ namespace paskalON.OperatingModes.Domain
         /// Error adjustment calculated from input and used to make adjustments in real time.
         /// </summary>
         ReactivePower ErrorAdjustmentReactive { get; }
-
-
-        /// <summary>
-        /// Calculates the operating modes power target.
-        /// </summary>
-        Task CalculateAsync(CancellationToken cancellationToken = default);
     }
 }

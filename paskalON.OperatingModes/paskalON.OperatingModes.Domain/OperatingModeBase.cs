@@ -337,6 +337,10 @@ namespace paskalON.OperatingModes.Domain
         }
 
 
+        /// <inheritdoc/>
+        public abstract Task CalculateAsync(CancellationToken cancellationToken);
+
+
         /// <summary>
         /// <inheritdoc/>
         /// </summary>

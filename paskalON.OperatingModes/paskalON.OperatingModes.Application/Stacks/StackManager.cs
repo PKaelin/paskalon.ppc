@@ -70,7 +70,14 @@ namespace paskalON.OperatingModes.Application.Stacks
         /// <inheritdoc/>
         public void RemoveOperatingMode(string operatingModeName)
         {
-            _operatingModeStack.Remove(operatingModeName);
+            ArgumentException.ThrowIfNullOrWhiteSpace(operatingModeName);
+
+            if (_availableOperatingModes.TryGetValue(operatingModeName, out OperatingModeBase? operatingMode) is false)
+            {
+                throw new KeyNotFoundException($"Operating mode '{operatingModeName}' is not configured.");
+            }
+
+            _operatingModeStack.Remove(operatingMode);
         }
     }
 }

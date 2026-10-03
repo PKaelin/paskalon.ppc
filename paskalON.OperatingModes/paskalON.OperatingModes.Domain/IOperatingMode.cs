@@ -116,6 +116,14 @@ namespace paskalON.OperatingModes.Domain
         /// Disables the operating mode.
         /// </summary>
         void Disable();
+
+
+        /// <summary>
+        /// Calculates the operating mode targets based on the setpoints, available power, and ramp/curve controllers.
+        /// </summary>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+        /// <returns></returns>
+        Task CalculateAsync(CancellationToken cancellationToken);
     }
 
 }

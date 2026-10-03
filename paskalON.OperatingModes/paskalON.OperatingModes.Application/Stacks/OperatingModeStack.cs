@@ -68,6 +68,7 @@ namespace paskalON.OperatingModes.Application.Stacks
                 }
 
                 InsertAtPriority(operatingMode, priority);
+                operatingMode.Enable();
             }
         }
 
@@ -108,18 +109,19 @@ namespace paskalON.OperatingModes.Application.Stacks
         /// <param name="operatingModeName">The name of the operating mode to remove.</param>
         /// <exception cref="ArgumentException">The operating mode name is null or empty.</exception>
         /// <exception cref="KeyNotFoundException">The operating mode is not in the stack.</exception>
-        public void Remove(string operatingModeName)
+        public void Remove(OperatingModeBase operatingMode)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(operatingModeName);
+            ArgumentNullException.ThrowIfNull(operatingMode);
 
             lock (_dataLock)
             {
-                if (_prioritiesByOperatingModeName.Remove(operatingModeName, out int priority) is false)
+                if (_prioritiesByOperatingModeName.Remove(operatingMode.Name, out int priority) is false)
                 {
-                    throw new KeyNotFoundException($"Operating mode '{operatingModeName}' is not in the stack.");
+                    throw new KeyNotFoundException($"Operating mode '{operatingMode.Name}' is not in the stack.");
                 }
 
                 _operatingModesByPriority.Remove(priority);
+                operatingMode.Enable();
             }
         }
 

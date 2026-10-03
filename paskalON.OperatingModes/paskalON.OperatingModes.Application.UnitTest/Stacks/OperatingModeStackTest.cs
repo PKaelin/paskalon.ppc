@@ -321,7 +321,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             stack.Add(firstMode, 1);
             stack.Add(removedMode, 2);
             stack.Add(lastMode, 3);
-            stack.Remove("ModeB");
+            stack.Remove(removedMode);
             stack.Add(insertedMode, 2);
 
             AssertModes(stack, firstMode, insertedMode, lastMode);
@@ -337,7 +337,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             OperatingModeStack stack = new OperatingModeStack();
             OperatingModeBase mode = CreateOperatingMode("ModeA");
             stack.Add(mode, 1);
-            stack.Remove("ModeA");
+            stack.Remove(mode);
             stack.Add(mode, 2);
 
             AssertModes(stack, mode);
@@ -353,7 +353,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             OperatingModeStack stack = new OperatingModeStack();
             OperatingModeBase mode = CreateOperatingMode("ModeA");
             stack.Add(mode, 1);
-            stack.Remove("ModeA");
+            stack.Remove(mode);
 
             Assert.IsEmpty(stack.OperatingModes);
         }
@@ -368,8 +368,9 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             OperatingModeStack stack = new OperatingModeStack();
             OperatingModeBase mode = CreateOperatingMode("ModeA");
             stack.Add(mode, 1);
+            OperatingModeBase missing = CreateOperatingMode("Missing");
 
-            Assert.ThrowsExactly<KeyNotFoundException>(() => stack.Remove("Missing"));
+            Assert.ThrowsExactly<KeyNotFoundException>(() => stack.Remove(missing));
             AssertModes(stack, mode);
         }
 
@@ -383,21 +384,6 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             OperatingModeStack stack = new OperatingModeStack();
 
             Assert.ThrowsExactly<ArgumentNullException>(() => stack.Remove(null!));
-            Assert.IsEmpty(stack.OperatingModes);
-        }
-
-
-        /// <summary>
-        /// Rejects empty and whitespace-only names for removal operations.
-        /// </summary>
-        [TestMethod]
-        [DataRow("")]
-        [DataRow(" ")]
-        public void OperatingModeStackRemoveEmptyNameThrowsTest(string operatingModeName)
-        {
-            OperatingModeStack stack = new OperatingModeStack();
-
-            Assert.ThrowsExactly<ArgumentException>(() => stack.Remove(operatingModeName));
             Assert.IsEmpty(stack.OperatingModes);
         }
 
@@ -456,6 +442,12 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
                 : base(logger, timeProvider, publisher, systemConfig, config, map, rampController)
             {
             }
+
+            public override Task CalculateAsync(CancellationToken cancellationToken)
+            {
+                return Task.CompletedTask;
+            }
+
         }
 
 

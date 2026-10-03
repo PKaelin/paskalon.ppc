@@ -37,11 +37,5 @@ namespace paskalON.OperatingModes.Domain
             : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
         {
         }
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public abstract Task CalculateAsync(CancellationToken cancellationToken = default);
     }
 }

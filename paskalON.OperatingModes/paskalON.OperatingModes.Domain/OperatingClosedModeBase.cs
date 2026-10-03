@@ -69,12 +69,6 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public abstract Task CalculateAsync(CancellationToken cancellationToken = default);
-
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
         protected override void RegisterMetrics()
         {
             base.RegisterMetrics();
