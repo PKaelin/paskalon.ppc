@@ -244,14 +244,17 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// </returns>
         public int CompareTo(object? obj)
         {
-            CurrentScalar? other = obj as CurrentScalar?;
-
-            if (other == null)
+            if (obj is null)
             {
-                return -1;
+                return 1;
             }
 
-            return CompareTo(other.Value);
+            if (obj is not CurrentScalar other)
+            {
+                throw new ArgumentException($"Object must be of type {nameof(CurrentScalar)}.", nameof(obj));
+            }
+
+            return CompareTo(other);
         }
 
 
@@ -289,7 +292,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <returns>Current Amperes as a string with suffix VAR</returns>
         public override string ToString()
         {
-            return $"{Amperes.ToString(CultureInfo.CurrentCulture)} V";
+            return $"{Amperes.ToString(CultureInfo.CurrentCulture)} A";
         }
     }
 }

@@ -308,14 +308,17 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// </returns>
         public int CompareTo(object? obj)
         {
-            ApparentPower? other = obj as ApparentPower?;
-
-            if (other == null)
+            if (obj is null)
             {
-                return -1;
+                return 1;
             }
 
-            return CompareTo(other.Value);
+            if (obj is not ApparentPower other)
+            {
+                throw new ArgumentException($"Object must be of type {nameof(ApparentPower)}.", nameof(obj));
+            }
+
+            return CompareTo(other);
         }
 
 

@@ -38,10 +38,11 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <returns>The sign of the associated power factor.</returns>
         /// <remarks>
         /// Uses IEEE power factor sign convention:
-        /// P+ Q+ = PF- (lag)
-        /// P+ Q- = PF+ (lead)
-        /// P- Q+ = PF+ (lead)
-        /// P- Q- = PF- (lag)
+        /// Quadrant1: P+ Q+ = PF- (lag)
+        /// Quadrant2: P- Q+ = PF+ (lead)
+        /// Quadrant3: P- Q- = PF- (lag)
+        /// Quadrant4: P+ Q- = PF+ (lead)
+        /// When active power and reactive power are both the same sign then return negative otherwise positive.
         /// </remarks>
         public static int IeeeSign(double activePower, double reactivePower)
         {

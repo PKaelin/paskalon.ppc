@@ -26,18 +26,20 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <returns>The sign of the associated power factor.</returns>
         /// <remarks>
         /// Uses IEC power factor sign convention:
-        /// P+ Q+ = PF+
-        /// P+ Q- = PF+
-        /// P- Q+ = PF-
-        /// P- Q- = PF-.
+        /// Quadrant1: P+ Q+ = PF+        
+        /// Quadrant2: P- Q+ = PF-
+        /// Quadrant3: P- Q- = PF-
+        /// Quadrant4: P+ Q- = PF+
+        /// When active power is negative, regardless of reactive power, then return negative sign otherwise positive.
         /// </remarks>
         public static int IecSign(double activePower, double reactivePower)
         {
-            if (activePower > 0d && reactivePower > 0d || activePower > 0d && reactivePower < 0d)
+            if (activePower < 0d && reactivePower > 0d || activePower < 0d && reactivePower < 0d)
             {
-                return 1;
+                return -1;
             }
-            return -1;
+
+            return 1;
         }
 
 

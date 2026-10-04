@@ -14,6 +14,10 @@ namespace paskalON.PhysicalUnits.Thermals
         /// <summary>
         /// Temperature value. The value is stored in the unit specified by the TemperatureUnit property.
         /// </summary>
+        /// <remarks>
+        /// If TemperatureUnit = Celsius then this value is in Celsius.
+        /// If TemperatureUnit = Fahrenheit then this value is in Fahrenheit.
+        /// </remarks>
         private double temperature;
 
 
@@ -29,6 +33,10 @@ namespace paskalON.PhysicalUnits.Thermals
         /// <summary>
         /// Temperature unit.
         /// </summary>
+        /// <remarks>
+        /// This temperatur unit is used to determine how the temperature value is interpreted and
+        /// converted between Celsius and Fahrenheit.
+        /// </remarks>
         public TemperatureUnit TemperatureUnit { get; private set; }
 
 

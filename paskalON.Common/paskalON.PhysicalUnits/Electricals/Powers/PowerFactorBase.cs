@@ -103,11 +103,14 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// </returns>
         public int CompareTo(object? obj)
         {
-            PowerFactorBase? other = obj as PowerFactorBase;
-
-            if (other == null)
+            if (obj is null)
             {
-                return -1;
+                return 1;
+            }
+
+            if (obj is not PowerFactorBase other)
+            {
+                throw new ArgumentException($"Object must be of type {nameof(PowerFactorBase)}.", nameof(obj));
             }
 
             return CompareTo(other);

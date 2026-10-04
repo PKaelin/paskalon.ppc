@@ -283,14 +283,17 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// </returns>
         public int CompareTo(object? obj)
         {
-            ActivePower? other = obj as ActivePower?;
-
-            if (other == null)
+            if (obj is null)
             {
-                return -1;
+                return 1;
             }
 
-            return CompareTo(other.Value);
+            if (obj is not ActivePower other)
+            {
+                throw new ArgumentException($"Object must be of type {nameof(ActivePower)}.", nameof(obj));
+            }
+
+            return CompareTo(other);
         }
 
 
