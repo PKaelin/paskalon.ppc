@@ -21,6 +21,8 @@ namespace paskalON.PhysicalUnits.Percentages
         public static double GetAbsoluteStateOfChargeFromPreferred(double preferredSoc, double preferredMinimumStateOfCharge,
             double preferredMaximumStateOfCharge, double absoluteMaximumStateOfCharge)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(absoluteMaximumStateOfCharge, "Absolute maximum state of charge cannot be 0 or less");
+
             return preferredMinimumStateOfCharge + (preferredSoc / absoluteMaximumStateOfCharge) *
                     (preferredMaximumStateOfCharge - preferredMinimumStateOfCharge);
         }
@@ -38,6 +40,8 @@ namespace paskalON.PhysicalUnits.Percentages
         public static double? GetAbsoluteStateOfChargeFromUsable(double? usableSoc, double usableMinimumStateOfCharge,
             double usableMaximumStateOfCharge, double absoluteMaximumStateOfCharge)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(absoluteMaximumStateOfCharge, "Absolute maximum state of charge cannot be 0 or less");
+
             if (usableSoc == null)
             {
                 return null;
@@ -61,6 +65,9 @@ namespace paskalON.PhysicalUnits.Percentages
         public static double GetUsableStateOfChargeFromAbsolute(double absoluteSoc, double usableMinimumStateOfCharge,
             double usableMaximumStateOfCharge, double absoluteMaximumStateOfCharge)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(absoluteMaximumStateOfCharge, "Absolute maximum state of charge cannot be 0 or less");
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(usableMaximumStateOfCharge - usableMinimumStateOfCharge, "Usable maximum - minimum SOC cannot be 0 or less");
+
             return (absoluteSoc - usableMinimumStateOfCharge) /
                 (usableMaximumStateOfCharge - usableMinimumStateOfCharge) * absoluteMaximumStateOfCharge;
         }
@@ -78,6 +85,9 @@ namespace paskalON.PhysicalUnits.Percentages
         public static double? GetPreferredStateOfChargeFromAbsolute(double? absoluteSoc, double preferredMinimumStateOfCharge,
             double preferredMaximumStateOfCharge, double absoluteMaximumStateOfCharge)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(absoluteMaximumStateOfCharge, "Absolute maximum state of charge cannot be 0 or less");
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(preferredMaximumStateOfCharge - preferredMinimumStateOfCharge, "Preferred maximum - minimum SOC cannot be 0 or less");
+
             if (absoluteSoc == null)
             {
                 return null;
@@ -99,6 +109,9 @@ namespace paskalON.PhysicalUnits.Percentages
         public static double GetUsableCapacity(double nameplateCapacity, double usableMinimumStateOfCharge,
             double usableMaximumStateOfCharge, double absoluteMinimumStateOfCharge, double absoluteMaximumStateOfCharge)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(absoluteMaximumStateOfCharge - absoluteMinimumStateOfCharge, "Absolute maximum - minimum SOC cannot be 0 or less");
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(usableMaximumStateOfCharge - usableMinimumStateOfCharge, "Usable maximum - minimum SOC cannot be 0 or less");
+
             return nameplateCapacity * (usableMaximumStateOfCharge - usableMinimumStateOfCharge) /
                 (absoluteMaximumStateOfCharge - absoluteMinimumStateOfCharge);
         }
@@ -116,6 +129,9 @@ namespace paskalON.PhysicalUnits.Percentages
         public static double GetPreferredCapacity(double nameplateCapacity, double preferredMinimumStateOfCharge,
             double preferredMaximumStateOfCharge, double absoluteMinimumStateOfCharge, double absoluteMaximumStateOfCharge)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(absoluteMaximumStateOfCharge - absoluteMinimumStateOfCharge, "Absolute maximum - minimum SOC cannot be 0 or less");
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(preferredMaximumStateOfCharge - preferredMinimumStateOfCharge, "Preferred maximum - minimum SOC cannot be 0 or less");
+
             return nameplateCapacity * (preferredMaximumStateOfCharge - preferredMinimumStateOfCharge) /
                 (absoluteMaximumStateOfCharge - absoluteMinimumStateOfCharge);
         }
