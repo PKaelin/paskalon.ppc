@@ -6,12 +6,27 @@ using StackExchange.Redis;
 
 namespace paskalON.Messaging.Redis
 {
-    public class RedisMessageSubscriber : IMessageSubscriber, IDisposable
+    /// <summary>
+    /// Implements a Redis message subscriber that allows subscribing to Redis topics and receiving messages.
+    /// </summary>
+    public class RedisMessageSubscriber : IMessageSubscriber
     {
+        /// <summary>
+        /// The Redis connection multiplexer used for subscribing to topics.
+        /// </summary>
         private readonly IConnectionMultiplexer _redis;
 
+
+        /// <summary>
+        /// The Redis subscriber used for subscribing to topics and receiving messages.
+        /// </summary>
         private readonly ISubscriber _subscriber;
 
+
+        /// <summary>
+        /// Constructor of <see cref="RedisMessageSubscriber"/>.
+        /// </summary>
+        /// <param name="redis">The Redis connection multiplexer.</param>
         public RedisMessageSubscriber(IConnectionMultiplexer redis)
         {
             ArgumentNullException.ThrowIfNull(redis);
@@ -21,18 +36,32 @@ namespace paskalON.Messaging.Redis
         }
 
 
+        /// <inheritdoc/>
         public void Subscribe(string topic, Action<string> callback)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(topic);
             ArgumentNullException.ThrowIfNull(callback);
 
-            _subscriber.Subscribe(RedisChannel.Literal(topic), (_, message) => callback(message.ToString()));
+            // The queue based subscription guarantees sequential, in-order handling of messages per channel.
+            ChannelMessageQueue queue = _subscriber.Subscribe(RedisChannel.Literal(topic));
+            queue.OnMessage(channelMessage => HandleMessage(channelMessage, callback));
         }
 
 
-        public void Dispose()
+        /// <summary>
+        /// Handles a received channel message and forwards its payload to the callback.
+        /// </summary>
+        /// <param name="channelMessage">The received channel message.</param>
+        /// <param name="callback">The action executed with the message payload.</param>
+        private void HandleMessage(ChannelMessage channelMessage, Action<string> callback)
         {
-            _redis.Dispose();
+            // Skip null or empty messages, since they cannot carry a valid json payload.
+            if (channelMessage.Message.IsNullOrEmpty)
+            {
+                return;
+            }
+
+            callback(channelMessage.Message.ToString());
         }
     }
 }

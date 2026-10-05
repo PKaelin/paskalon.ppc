@@ -75,7 +75,10 @@ try
     builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
 
     // Add communications
-    builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(msgConnectionString));
+    // Do not abort when Redis is not reachable at startup, the multiplexer keeps retrying to connect in the background.
+    ConfigurationOptions msgOptions = ConfigurationOptions.Parse(msgConnectionString);
+    msgOptions.AbortOnConnectFail = false;
+    builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(msgOptions));
     builder.Services.AddSingleton<IMessagePublisher, RedisMessagePublisher>();
     builder.Services.AddSingleton<IModbusDeviceFactory, ModbusDeviceFactory>();
     builder.Services.AddSingleton<IC37DeviceFactory, C37DeviceFactory>();

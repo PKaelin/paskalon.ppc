@@ -7,7 +7,7 @@ namespace paskalON.Messaging
     /// <summary>
     /// Defines an interface for subscribing to message brokers.
     /// </summary>
-    public interface IMessageSubscriber : IDisposable
+    public interface IMessageSubscriber
     {
         /// <summary>
         /// Subscribes a callback action to a specific message topic channel.

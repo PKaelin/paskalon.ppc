@@ -6,11 +6,21 @@ using StackExchange.Redis;
 
 namespace paskalON.Messaging.Redis
 {
-    public class RedisMessagePublisher : IMessagePublisher, IDisposable
+    /// <summary>
+    /// Redis message publisher that publishes messages to a Redis channel.
+    /// </summary>
+    public class RedisMessagePublisher : IMessagePublisher
     {
+        /// <summary>
+        /// Connection multiplexer for Redis.
+        /// </summary>
         private readonly IConnectionMultiplexer _redis;
 
 
+        /// <summary>
+        /// Constructor of <see cref="RedisMessagePublisher"/>.
+        /// </summary>
+        /// <param name="redis">The Redis connection multiplexer.</param>
         public RedisMessagePublisher(IConnectionMultiplexer redis)
         {
             ArgumentNullException.ThrowIfNull(redis);
@@ -19,6 +29,7 @@ namespace paskalON.Messaging.Redis
         }
 
 
+        /// <inheritdoc/>
         public async Task PublishAsync(string topic, string json)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(topic);
@@ -27,11 +38,6 @@ namespace paskalON.Messaging.Redis
             ISubscriber subscriber = _redis.GetSubscriber();
 
             await subscriber.PublishAsync(RedisChannel.Literal(topic), json);
-        }
-
-        public void Dispose()
-        {
-            _redis.Dispose();
         }
     }
 }
