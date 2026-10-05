@@ -21,14 +21,9 @@ namespace paskalON.Maths.Calculuses.Coordinates
     public class LinearPointFunction : ICalculateOutputFunction
     {
         /// <summary>
-        /// Used for random noise.
-        /// </summary>
-        private Random _random = new Random();
-
-        /// <summary>
         /// Definition of linear points X and Y.
         /// </summary>
-        public List<LinearPoint> LinearPoints { get; init; } = new List<LinearPoint>();
+        public IReadOnlyList<LinearPoint> LinearPoints { get; } = new List<LinearPoint>();
 
 
         /// <summary>
@@ -69,10 +64,21 @@ namespace paskalON.Maths.Calculuses.Coordinates
         public LinearPointFunction(List<LinearPoint> linearPoints, double offset, double noiseMin, double noiseMax)
         {
             ArgumentNullException.ThrowIfNull(linearPoints);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(noiseMin, noiseMax);
 
-            LinearPoints = linearPoints;
+            List<LinearPoint> linearPointsList = new List<LinearPoint>(linearPoints);
             // Ascend x points
-            LinearPoints.Sort((l1, l2) => l1.X.CompareTo(l2.X));
+            linearPointsList.Sort((l1, l2) => l1.X.CompareTo(l2.X));
+            LinearPoints = linearPointsList.AsReadOnly();
+
+            for (int i = 1; i < LinearPoints.Count; i++)
+            {
+                if (LinearPoints[i - 1].X == LinearPoints[i].X)
+                {
+                    throw new ArgumentException("Linear points cannot have duplicate x-values.", nameof(linearPoints));
+                }
+            }
+
             Offset = offset;
             NoiseMin = noiseMin;
             NoiseMax = noiseMax;
@@ -94,23 +100,24 @@ namespace paskalON.Maths.Calculuses.Coordinates
         {
             if (LinearPoints.Any())
             {
+                if (x < LinearPoints[0].X)
+                {
+                    return LinearPoints[0].Y + Offset;
+                }
+
                 for (int i = 0; i < LinearPoints.Count - 1; i++)
                 {
                     LinearPoint point1 = LinearPoints[i];
                     LinearPoint point2 = LinearPoints[i + 1];
 
-                    if (x < point1.X)
-                    {
-                        return 0;
-                    }
-                    else if (x == point1.X)
+                    if (x == point1.X)
                     {
                         if (NoiseMin == 0 && NoiseMax == 0)
                         {
                             return point1.Y + Offset;
                         }
 
-                        return point1.Y + Offset + _random.NextDoubleInRange(NoiseMin, NoiseMax);
+                        return point1.Y + Offset + Random.Shared.NextDoubleInRange(NoiseMin, NoiseMax);
                     }
                     else if (x == point2.X)
                     {
@@ -119,7 +126,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
                             return point2.Y + Offset;
                         }
 
-                        return point2.Y + Offset + _random.NextDoubleInRange(NoiseMin, NoiseMax);
+                        return point2.Y + Offset + Random.Shared.NextDoubleInRange(NoiseMin, NoiseMax);
                     }
                     else if (x < point2.X)
                     {
@@ -129,17 +136,12 @@ namespace paskalON.Maths.Calculuses.Coordinates
                             return (point2.Y - point1.Y) / (point2.X - point1.X) * (x - point1.X) + point1.Y + Offset;
                         }
 
-                        return (point2.Y - point1.Y) / (point2.X - point1.X) * (x - point1.X) + point1.Y + Offset + _random.NextDoubleInRange(NoiseMin, NoiseMax);
+                        return (point2.Y - point1.Y) / (point2.X - point1.X) * (x - point1.X) + point1.Y + Offset + Random.Shared.NextDoubleInRange(NoiseMin, NoiseMax);
                     }
                 }
 
                 if (LinearPoints.Count == 1)
                 {
-                    if (x < LinearPoints.First().X)
-                    {
-                        return Offset;
-                    }
-
                     return LinearPoints.First().Y + Offset;
                 }
 

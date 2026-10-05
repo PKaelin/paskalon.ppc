@@ -2,7 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Maths.IntegrationTest.Calculuses.Logarithmics;
+using paskalON.Maths.Calculuses.Logarithmics;
 
 namespace paskalON.Maths.UnitTest.Calculuses.Logarithmics
 {
@@ -59,6 +59,20 @@ namespace paskalON.Maths.UnitTest.Calculuses.Logarithmics
             double output = lf.CalculateOutputPrecision(x);
 
             Assert.AreEqual(expectedValue, output);
+        }
+
+
+        [TestMethod]
+        public void LogarithmicEasingFunctionInvalidPeriodThrowsTest()
+        {
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new LogarithmicEasingFunction(0, 1, 0, 0, 9, 0, 0, 0));
+        }
+
+
+        [TestMethod]
+        public void LogarithmicEasingFunctionInvalidTuningValueThrowsTest()
+        {
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new LogarithmicEasingFunction(0, 1, 1, 0, 0, 0, 0, 0));
         }
     }
 }

@@ -2,10 +2,9 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Maths.Calculuses;
 using paskalON.Maths.Randoms;
 
-namespace paskalON.Maths.IntegrationTest.Calculuses.Logarithmics
+namespace paskalON.Maths.Calculuses.Logarithmics
 {
     /// <summary>
     /// Class representing a normalized logarithmic function,
@@ -16,12 +15,6 @@ namespace paskalON.Maths.IntegrationTest.Calculuses.Logarithmics
     /// </remarks>
     public class LogarithmicEasingFunction : ICalculateOutputFunction
     {
-        /// <summary>
-        /// Used for random noise.
-        /// </summary>
-        private Random _random = new Random();
-
-
         /// <summary>
         /// Initial X.
         /// </summary>
@@ -114,6 +107,9 @@ namespace paskalON.Maths.IntegrationTest.Calculuses.Logarithmics
         /// <param name="noiseMax">Maximum of noise range that gets applied.</param>
         public LogarithmicEasingFunction(double initialValue, double targetValue, long period, long initialX, int tuningValue, double offset, double noiseMin, double noiseMax)
         {
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(period, 0);
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(tuningValue, 0);
+
             InitialX = initialX;
             InitialValue = initialValue;
             TargetValue = targetValue;
@@ -143,7 +139,7 @@ namespace paskalON.Maths.IntegrationTest.Calculuses.Logarithmics
                 return (InitialValue + (TargetValue - InitialValue) * factor) + Offset;
             }
 
-            return (InitialValue + (TargetValue - InitialValue) * factor + _random.NextDoubleInRange(NoiseMin, NoiseMax)) + Offset;
+            return (InitialValue + (TargetValue - InitialValue) * factor + Random.Shared.NextDoubleInRange(NoiseMin, NoiseMax)) + Offset;
         }
 
 

@@ -123,5 +123,26 @@ namespace paskalON.Maths.UnitTest.Randoms
             val = walker.Next();
             Assert.IsTrue(val >= 19 && val <= 21);
         }
+
+
+        [TestMethod]
+        public void RandomWalkerConcurrentNextTest()
+        {
+            RandomWalker<int> walker = new RandomWalker<int>(50, 1, 0, 100, int.MaxValue);
+            List<int> values = new List<int>();
+
+            Parallel.For(0, 1000, _ =>
+            {
+                int value = walker.Next();
+
+                lock (values)
+                {
+                    values.Add(value);
+                }
+            });
+
+            Assert.HasCount(1000, values);
+            Assert.IsTrue(values.TrueForAll(value => value >= 0 && value <= 100));
+        }
     }
 }

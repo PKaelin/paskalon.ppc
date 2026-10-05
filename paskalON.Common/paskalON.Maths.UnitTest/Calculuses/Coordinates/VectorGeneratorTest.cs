@@ -15,6 +15,7 @@ namespace paskalON.Maths.UnitTest.Calculuses.Coordinates
         [DataRow(3, 3, 10, 1000)]
         [DataRow(5, 5, 10, 1000)]
         [DataRow(10, 10, 100, 10000)]
+        [DataRow(3, 3, 10, 10)]
         public void CreateMultidimensionalVector(int rows, int dimension, int min, int max)
         {
             VectorGenerator generator = new VectorGenerator(NullLogger<VectorGenerator>.Instance);

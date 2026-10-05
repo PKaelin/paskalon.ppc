@@ -14,10 +14,7 @@ namespace paskalON.Maths.Randoms
         /// <returns>Random number in range [min, max]</returns>
         public static double NextDoubleInRange(this Random random, double min, double max)
         {
-            if (random == null)
-            {
-                throw new ArgumentNullException("Random");
-            }
+            ArgumentNullException.ThrowIfNull(random);
 
             if (min == double.NegativeInfinity || max == double.NegativeInfinity)
             {
@@ -29,20 +26,13 @@ namespace paskalON.Maths.Randoms
                 return double.MaxValue;
             }
 
-            if (min >= max)
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(min, max);
+
+            if (min == max)
             {
-                return 0;
+                return min;
             }
 
-            bool isNegative = random.Next(0, 1) == 0 ? false : true;
-
-            if ((isNegative && min < 0) || max <= 0)
-            {
-                // NextDouble e.g. 0.0 >< 1.0 -> 0.5 * 10 + -10 = -5
-                return random.NextDouble() * (0 - min) + min;
-            }
-
-            // NextDouble e.g. 0.0 >< 1.0 -> 0.5 * (10-0) + 0 = 5
             return random.NextDouble() * (max - min) + min;
         }
 

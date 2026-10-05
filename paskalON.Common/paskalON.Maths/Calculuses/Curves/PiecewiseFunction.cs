@@ -23,13 +23,13 @@ namespace paskalON.Maths.Calculuses.Curves
         /// <summary>
         /// Definition of linear points X and Y.
         /// </summary>
-        public List<PiecewisePoint> PiecewisePoints { get; private set; } = new List<PiecewisePoint>();
+        public IReadOnlyList<PiecewisePoint> PiecewisePoints { get; } = new List<PiecewisePoint>();
 
 
         /// <summary>
         /// Adds an offset to f(x).
         /// </summary>
-        public double Offset { get; init; } = 0;
+        public double Offset { get; } = 0;
 
 
         /// <summary>
@@ -44,8 +44,23 @@ namespace paskalON.Maths.Calculuses.Curves
                 throw new ArgumentException("PiecewisePoints cannot be null or empty");
             }
 
-            PiecewisePoints = piecewisePoints;
-            PiecewisePoints.Sort((l1, l2) => l1.X.CompareTo(l2.X));
+            if (piecewisePoints.Any(pf => pf.Type != PiecewiseFunctionType.LinearPointFunction && pf.Type != PiecewiseFunctionType.Exponential2PointFunction))
+            {
+                throw new ArgumentException("Piecewise points must be of type LinearPointFunction or Exponential2PointFunction.", nameof(piecewisePoints));
+            }
+
+            List<PiecewisePoint> piecewisePointsList = new List<PiecewisePoint>(piecewisePoints);
+            piecewisePointsList.Sort((l1, l2) => l1.X.CompareTo(l2.X));
+            PiecewisePoints = piecewisePointsList.AsReadOnly();
+
+            for (int i = 1; i < PiecewisePoints.Count; i++)
+            {
+                if (PiecewisePoints[i - 1].X == PiecewisePoints[i].X)
+                {
+                    throw new ArgumentException("Piecewise points cannot have duplicate x-values.", nameof(piecewisePoints));
+                }
+            }
+
             Offset = offset;
             InitializeFunctions();
         }
@@ -58,23 +73,36 @@ namespace paskalON.Maths.Calculuses.Curves
         /// <returns>Output value corresponding to the input X.</returns>
         public double CalculateOutput(double x)
         {
-            double key = _functions.Keys.Aggregate((k1, k2) => Math.Abs(k1 - x) < Math.Abs(k2 - x) ? (k1 > x && x > 0 ? k2 : k1) : (k2 > x ? k1 : k2));
-
-            if (key == 0 && x <= _functions.Keys.FirstOrDefault())
+            if (PiecewisePoints.Count == 1)
             {
-                key = _functions.Keys.FirstOrDefault();
-            }
-            else if (key == 0 && x >= _functions.Keys.LastOrDefault())
-            {
-                key = _functions.Keys.LastOrDefault();
+                return PiecewisePoints[0].Y + Offset;
             }
 
-            if ((key == 0) && (key == 0 && _functions.Keys.FirstOrDefault() != 0))
+            // First point is the minimum, last point is the maximum. If x is outside of the range, return the corresponding y value.
+            if (x < PiecewisePoints[0].X)
             {
-                return 0;
+                return PiecewisePoints[0].Y + Offset;
             }
 
-            return _functions[(double)key].CalculateOutput(x);
+            // Last point is the maximum. If x is outside of the range, return the corresponding y value.
+            if (x >= PiecewisePoints[^1].X)
+            {
+                return PiecewisePoints[^1].Y + Offset;
+            }
+
+            double key = PiecewisePoints[0].X;
+
+            for (int i = 1; i < PiecewisePoints.Count; i++)
+            {
+                if (x < PiecewisePoints[i].X)
+                {
+                    break;
+                }
+
+                key = PiecewisePoints[i].X;
+            }
+
+            return _functions[key].CalculateOutput(x);
         }
 
 
@@ -113,12 +141,17 @@ namespace paskalON.Maths.Calculuses.Curves
                         endpoint = (PiecewisePoints[i].X, PiecewisePoints[i].Y);
                     }
 
+                    if (i == PiecewisePoints.Count - 1)
+                    {
+                        continue;
+                    }
+
                     if (PiecewisePoints[i].Type == PiecewiseFunctionType.LinearPointFunction)
                     {
                         List<LinearPoint> points = new List<LinearPoint> { new(PiecewisePoints[i].X, PiecewisePoints[i].Y), new(endpoint.x, endpoint.y) };
                         _functions.Add(PiecewisePoints[i].X, new LinearPointFunction(points, Offset, PiecewisePoints[i].NoiseMin, PiecewisePoints[i].NoiseMax));
                     }
-                    else if ((PiecewisePoints[i].Type == PiecewiseFunctionType.Exponential2PointFunction) && (i < PiecewisePoints.Count - 1))
+                    else if (PiecewisePoints[i].Type == PiecewiseFunctionType.Exponential2PointFunction)
                     {
                         _functions.Add(PiecewisePoints[i].X, new Exponential2PointFunction((PiecewisePoints[i].X, PiecewisePoints[i].Y), (endpoint.x, endpoint.y),
                             Offset, PiecewisePoints[i].NoiseMin, PiecewisePoints[i].NoiseMax));

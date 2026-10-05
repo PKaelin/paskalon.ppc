@@ -25,9 +25,9 @@ namespace paskalON.Maths.UnitTest.Calculuses.Curves
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 10, 10));
             points.Add(new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 20, 40));
             PiecewiseFunction pf = new PiecewiseFunction(points);
-            Assert.AreEqual(0d, pf.CalculateOutputPrecision(-10));
-            Assert.AreEqual(0d, pf.CalculateOutputPrecision(-5));
-            Assert.AreEqual(0, pf.CalculateOutputPrecision(0));
+            Assert.AreEqual(10, pf.CalculateOutputPrecision(-10));
+            Assert.AreEqual(10, pf.CalculateOutputPrecision(-5));
+            Assert.AreEqual(10, pf.CalculateOutputPrecision(0));
         }
 
 
@@ -93,6 +93,34 @@ namespace paskalON.Maths.UnitTest.Calculuses.Curves
             }
 
             Assert.AreEqual(results.Count, results.Where((item, index) => (index == 0) || (index > 0 ? results[index - 1] <= item : false)).Count());
+        }
+
+
+        [TestMethod]
+        public void SingleExponentialPointTest()
+        {
+            List<PiecewisePoint> points = new List<PiecewisePoint>
+            {
+                new PiecewisePoint(PiecewiseFunctionType.Exponential2PointFunction, 10, 100)
+            };
+            PiecewiseFunction pf = new PiecewiseFunction(points, 5);
+
+            Assert.AreEqual(105, pf.CalculateOutputPrecision(0));
+            Assert.AreEqual(105, pf.CalculateOutputPrecision(10));
+            Assert.AreEqual(105, pf.CalculateOutputPrecision(20));
+        }
+
+
+        [TestMethod]
+        public void DuplicateXDefinitionTest()
+        {
+            List<PiecewisePoint> points = new List<PiecewisePoint>
+            {
+                new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 10, 100),
+                new PiecewisePoint(PiecewiseFunctionType.LinearPointFunction, 10, 200)
+            };
+
+            Assert.ThrowsExactly<ArgumentException>(() => new PiecewiseFunction(points));
         }
 
     }

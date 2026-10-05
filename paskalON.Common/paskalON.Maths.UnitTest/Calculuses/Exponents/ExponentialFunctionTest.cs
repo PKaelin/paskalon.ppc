@@ -13,18 +13,14 @@ namespace paskalON.Maths.UnitTest.Calculuses.Exponents
         [TestMethod]
         public void FactorNegativeTest()
         {
-            Assert.ThrowsExactly<ArgumentException>(() => new ExponentialFunction(520, -5));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new ExponentialFunction(520, -5));
         }
 
 
         [TestMethod]
         public void Factor0Test()
         {
-            ExponentialFunction ef = new ExponentialFunction(520, 0);
-
-            Assert.AreEqual(0, ef.CalculateOutputPrecision(0));
-            Assert.AreEqual(0, ef.CalculateOutputPrecision(1));
-            Assert.AreEqual(0, ef.CalculateOutputPrecision(3));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new ExponentialFunction(520, 0));
         }
 
 

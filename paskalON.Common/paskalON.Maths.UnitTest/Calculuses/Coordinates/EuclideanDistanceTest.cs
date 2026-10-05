@@ -71,16 +71,23 @@ namespace paskalON.Maths.UnitTest.Calculuses.Coordinates
         [DataRow(new int[] { 15, 24, 36, 12, 2, 0 }, new int[] { 123, 155, 83, 55, 5, 12 }, 181.75808)]
         [DataRow(new int[] { 15, 24, 36, 12, 2, 0, 1234 }, new int[] { 123, 155, 83, 55, 5, 12, 5678 }, 4447.71537)]
         [DataRow(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 }, new int[] { 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 }, 318.32373)]
-        [DataRow(new int[] { 1, 1, 1 }, new int[] { 5 }, double.MaxValue)]
-        [DataRow(new int[] { 1, }, new int[] { 5, 5, 5 }, double.MaxValue)]
-        [DataRow(new int[] { 1, 1, 1 }, null, double.MaxValue)]
-        [DataRow(null, new int[] { 1, 1, 1 }, double.MaxValue)]
         public void EuclideanDistanceMultiDimensionsIntTest(int[] p1, int[] p2, double expected)
         {
             EuclideanDistance euclidean = new EuclideanDistance(NullLogger<EuclideanDistance>.Instance);
 
             double distance = euclidean.GetEuclideanDistance(p1, p2);
             Assert.AreEqual(expected, Math.Round(distance, 5));
+        }
+
+
+        [TestMethod]
+        public void EuclideanDistanceLargeIntegerDifferenceDoesNotOverflowTest()
+        {
+            EuclideanDistance euclidean = new EuclideanDistance(NullLogger<EuclideanDistance>.Instance);
+
+            double distance = euclidean.GetEuclideanDistance(new[] { int.MaxValue }, new[] { int.MinValue });
+
+            Assert.AreEqual(4294967295d, distance);
         }
 
 

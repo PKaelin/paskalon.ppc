@@ -45,6 +45,26 @@ namespace paskalON.Maths.UnitTest.Calculuses.Logarithmics
 
 
         [TestMethod]
+        public void LogarithmicScaledShiftedFunctionZeroInputIncludesOffsetTest()
+        {
+            LogarithmicScaledShiftedFunction lf = new LogarithmicScaledShiftedFunction(2, 4, 3);
+
+            double output = lf.CalculateOutputPrecision(0);
+
+            Assert.AreEqual(5, output);
+        }
+
+
+        [TestMethod]
+        public void LogarithmicScaledShiftedFunctionNegativeInputThrowsTest()
+        {
+            LogarithmicScaledShiftedFunction lf = new LogarithmicScaledShiftedFunction(2, 4, 0, 0, 0);
+
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => lf.CalculateOutputPrecision(-1));
+        }
+
+
+        [TestMethod]
         [DataRow(2, 802)]
         [DataRow(3, 2563)]
         [DataRow(5, 4782)]

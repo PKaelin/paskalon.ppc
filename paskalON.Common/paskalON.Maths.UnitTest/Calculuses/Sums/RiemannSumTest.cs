@@ -15,32 +15,32 @@ namespace paskalON.Maths.UnitTest.Calculuses.Sums
         private const double UniformValueWeight = 3.0 / 15.0;
 
         // The bounds of the interval which will be used in these tests.
-        private static readonly DateTime IntervalStart = DateTime.Parse("2017-04-01T04:00:00Z");
-        private static readonly DateTime IntervalEnd = DateTime.Parse("2017-04-01T04:15:00Z");
+        private static readonly DateTimeOffset IntervalStart = DateTimeOffset.Parse("2017-04-01T04:00:00Z");
+        private static readonly DateTimeOffset IntervalEnd = DateTimeOffset.Parse("2017-04-01T04:15:00Z");
         private static readonly double IntervalMinutes = (IntervalEnd - IntervalStart).TotalMinutes;
 
 
         // Create a time series with made up values. The granularity between the points will be uniform.
-        private static readonly ImmutableList<KeyValuePair<DateTime, double>> UniformTimeSeries = ImmutableList.Create<KeyValuePair<DateTime, double>>
+        private static readonly ImmutableList<KeyValuePair<DateTimeOffset, double>> UniformTimeSeries = ImmutableList.Create<KeyValuePair<DateTimeOffset, double>>
         (
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:00:00Z"), 2),
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:03:00Z"), 8),
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:06:00Z"), 3),
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:09:00Z"), 1),
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:12:00Z"), 4),
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:15:00Z"), 6)
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:00:00Z"), 2),
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:03:00Z"), 8),
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:06:00Z"), 3),
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:09:00Z"), 1),
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:12:00Z"), 4),
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:15:00Z"), 6)
         );
 
 
         // Create a time series with made up values. The granularity between the points will be non-uniform.
-        private static readonly ImmutableList<KeyValuePair<DateTime, double>> NonUniformTimeSeries = ImmutableList.Create<KeyValuePair<DateTime, double>>
+        private static readonly ImmutableList<KeyValuePair<DateTimeOffset, double>> NonUniformTimeSeries = ImmutableList.Create<KeyValuePair<DateTimeOffset, double>>
         (
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:01:00Z"), 2),
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:05:00Z"), 8),
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:06:00Z"), 3),
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:08:00Z"), 1),
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:13:00Z"), 4),
-            new KeyValuePair<DateTime, double>(DateTime.Parse("2017-04-01T04:14:00Z"), 6)
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:01:00Z"), 2),
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:05:00Z"), 8),
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:06:00Z"), 3),
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:08:00Z"), 1),
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:13:00Z"), 4),
+            new KeyValuePair<DateTimeOffset, double>(DateTimeOffset.Parse("2017-04-01T04:14:00Z"), 6)
         );
 
 
@@ -112,12 +112,61 @@ namespace paskalON.Maths.UnitTest.Calculuses.Sums
 
 
         [TestMethod]
+        public void RiemannSumIgnoresValuesOutsideIntervalTest()
+        {
+            List<KeyValuePair<DateTimeOffset, double>> values = new List<KeyValuePair<DateTimeOffset, double>>
+            {
+                new KeyValuePair<DateTimeOffset, double>(IntervalStart.AddMinutes(-5), 1000)
+            };
+            values.AddRange(UniformTimeSeries);
+            values.Add(new KeyValuePair<DateTimeOffset, double>(IntervalEnd.AddMinutes(5), 2000));
+
+            double? result = riemannSum.AverageTimeSeries(RiemannSumRules.RiemannLeft, values, IntervalStart, IntervalEnd);
+
+            Assert.AreEqual(ExpectedUniformLeftRiemannSum, result);
+        }
+
+
+        [TestMethod]
+        public void RiemannSumReturnsNullWhenAllValuesAreOutsideIntervalTest()
+        {
+            List<KeyValuePair<DateTimeOffset, double>> values = new List<KeyValuePair<DateTimeOffset, double>>
+            {
+                new KeyValuePair<DateTimeOffset, double>(IntervalStart.AddMinutes(-5), 1000),
+                new KeyValuePair<DateTimeOffset, double>(IntervalEnd.AddMinutes(5), 2000)
+            };
+
+            double? result = riemannSum.AverageTimeSeries(RiemannSumRules.RiemannLeft, values, IntervalStart, IntervalEnd);
+
+            Assert.IsNull(result);
+        }
+
+
+        [TestMethod]
+        public void RiemannSumEnumeratesDeferredValuesOnceTest()
+        {
+            IEnumerable<KeyValuePair<DateTimeOffset, double>> values = YieldValues();
+
+            double? result = riemannSum.AverageTimeSeries(RiemannSumRules.RiemannLeft, values, IntervalStart, IntervalEnd);
+
+            Assert.IsNotNull(result);
+        }
+
+
+        [TestMethod]
+        public void RiemannSumZeroIntervalThrowsTest()
+        {
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => riemannSum.AverageTimeSeries(RiemannSumRules.RiemannLeft, UniformTimeSeries, IntervalStart, IntervalStart));
+        }
+
+
+        [TestMethod]
         public void RiemannSumHandlesOneValue()
         {
             double expectedValue = 5;
-            List<KeyValuePair<DateTime, double>> singleValueTimeSeries = new List<KeyValuePair<DateTime, double>>()
+            List<KeyValuePair<DateTimeOffset, double>> singleValueTimeSeries = new List<KeyValuePair<DateTimeOffset, double>>()
             {
-                new KeyValuePair<DateTime, double>(IntervalStart, expectedValue)
+                new KeyValuePair<DateTimeOffset, double>(IntervalStart, expectedValue)
             };
 
             double? averageLeft = riemannSum.AverageTimeSeries(RiemannSumRules.RiemannLeft, singleValueTimeSeries, IntervalStart, IntervalEnd);
@@ -134,7 +183,7 @@ namespace paskalON.Maths.UnitTest.Calculuses.Sums
         public void RiemannSumHandlesZeroValue()
         {
             double? expectedValue = null;
-            List<KeyValuePair<DateTime, double>> singleValueTimeSeries = new List<KeyValuePair<DateTime, double>>();
+            List<KeyValuePair<DateTimeOffset, double>> singleValueTimeSeries = new List<KeyValuePair<DateTimeOffset, double>>();
 
             double? averageLeft = riemannSum.AverageTimeSeries(RiemannSumRules.RiemannLeft, singleValueTimeSeries, IntervalStart, IntervalEnd);
             double? averageRight = riemannSum.AverageTimeSeries(RiemannSumRules.RiemannRight, singleValueTimeSeries, IntervalStart, IntervalEnd);
@@ -143,6 +192,15 @@ namespace paskalON.Maths.UnitTest.Calculuses.Sums
             Assert.AreEqual(expectedValue, averageLeft);
             Assert.AreEqual(expectedValue, averageRight);
             Assert.AreEqual(expectedValue, averageTrapezoidal);
+        }
+
+
+        private static IEnumerable<KeyValuePair<DateTimeOffset, double>> YieldValues()
+        {
+            foreach (KeyValuePair<DateTimeOffset, double> value in UniformTimeSeries)
+            {
+                yield return value;
+            }
         }
     }
 }

@@ -17,12 +17,6 @@ namespace paskalON.Maths.Calculuses.Logarithmics
     public class LogarithmicScaledShiftedFunction : ICalculateOutputFunction
     {
         /// <summary>
-        /// Used for random noise.
-        /// </summary>
-        private Random _random = new Random();
-
-
-        /// <summary>
         /// Initial value, starting point.
         /// </summary>
         public double A { get; init; }
@@ -73,6 +67,8 @@ namespace paskalON.Maths.Calculuses.Logarithmics
         /// <param name="noiseMax">Maximum of noise range that gets applied.</param>
         public LogarithmicScaledShiftedFunction(double initialValue, double factor, double offset, double noiseMin, double noiseMax)
         {
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(noiseMin, noiseMax);
+
             A = initialValue;
             B = factor;
             NoiseMin = noiseMin;
@@ -94,8 +90,17 @@ namespace paskalON.Maths.Calculuses.Logarithmics
         {
             if (x == 0)
             {
-                return A;
+                double output = A + Offset;
+
+                if (NoiseMin == 0 && NoiseMax == 0)
+                {
+                    return output;
+                }
+
+                return output + Random.Shared.NextDoubleInRange(NoiseMin, NoiseMax);
             }
+
+            ArgumentOutOfRangeException.ThrowIfNegative(x);
 
             // Compute f(x) given X via logarithmic with a initial value and a factor
             if (NoiseMin == 0 && NoiseMax == 0)
@@ -103,7 +108,7 @@ namespace paskalON.Maths.Calculuses.Logarithmics
                 return A + (B * Math.Log10(x)) + Offset;
             }
 
-            return A + (B * Math.Log10(x)) + Offset + _random.NextDoubleInRange(NoiseMin, NoiseMax);
+            return A + (B * Math.Log10(x)) + Offset + Random.Shared.NextDoubleInRange(NoiseMin, NoiseMax);
         }
 
 

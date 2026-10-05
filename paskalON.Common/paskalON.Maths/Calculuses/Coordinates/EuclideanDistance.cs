@@ -98,7 +98,8 @@ namespace paskalON.Maths.Calculuses.Coordinates
             // Simple approach
             for (int i = 0; i < p1.Length; i++)
             {
-                sum += Math.Pow(p1[i] - p2[i], 2);
+                double difference = (double)p1[i] - p2[i];
+                sum += difference * difference;
             }
 
             return Math.Sqrt(sum);
@@ -119,6 +120,9 @@ namespace paskalON.Maths.Calculuses.Coordinates
             double distance;
             double closestDistance = double.MaxValue;
             int[]? closestVector = null;
+
+            ArgumentNullException.ThrowIfNull(p1);
+            ArgumentNullException.ThrowIfNull(pl);
 
             foreach (int[] vector in pl)
             {
@@ -150,14 +154,20 @@ namespace paskalON.Maths.Calculuses.Coordinates
         {
             double sum = 0;
 
+            // Do not throw exception here, just log it and return double.MinValue to indicate an error
             if (p1 == null || p2 == null)
             {
+                _logger.LogError("{MethodName} one or both of the parameters are null. P1: {P1s} - P2: {P2s}", nameof(GetEuclideanDistance),
+                    p1 == null ? "null" : string.Join(',', p1.Select(op1 => op1)), p2 == null ? "null" : string.Join(',', p2.Select(op2 => op2)));
+
                 return double.MinValue;
             }
 
+            // Do not throw exception here, just log it and return double.MinValue to indicate an error
             if (p1.Length != p2.Length)
             {
-                _logger.LogError("{MethodName} length of parameters are not equal. P1: {P1s} - P2: {P2s}", nameof(GetEuclideanDistance), string.Join(',', p1.Select(op1 => op1)), string.Join(',', p2.Select(op2 => op2)));
+                _logger.LogError("{MethodName} length of parameters are not equal. P1: {P1s} - P2: {P2s}", nameof(GetEuclideanDistance),
+                    string.Join(',', p1.Select(op1 => op1)), string.Join(',', p2.Select(op2 => op2)));
 
                 return double.MinValue;
             }
@@ -165,7 +175,8 @@ namespace paskalON.Maths.Calculuses.Coordinates
             // Simple approach
             for (int i = 0; i < p1.Length; i++)
             {
-                sum += Math.Pow(p1[i] - p2[i], 2);
+                double difference = (double)p1[i] - p2[i];
+                sum += difference * difference;
             }
 
             return sum;

@@ -2,6 +2,8 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Maths.Calculuses.Logarithmics;
+
 namespace paskalON.Maths.IntegrationTest.Calculuses.Logarithmics
 {
     [TestClass]

@@ -14,12 +14,6 @@ namespace paskalON.Maths.Calculuses.Exponents
     public class ExponentialFunction : ICalculateOutputFunction
     {
         /// <summary>
-        /// Used for random noise.
-        /// </summary>
-        private Random _random = new Random();
-
-
-        /// <summary>
         /// Initial value, starting point.
         /// </summary>
         public double A { get; init; }
@@ -71,10 +65,8 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// <param name="noiseMax">Maximum of noise range that gets applied</param>
         public ExponentialFunction(double initialValue, double factor, double offset, double noiseMin, double noiseMax)
         {
-            if (factor < 0)
-            {
-                throw new ArgumentException("B must be bigger than 0. b>1=growth. 0<b<1=decay.");
-            }
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(factor, 0);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(noiseMin, noiseMax);
 
             A = initialValue;
             B = factor;
@@ -85,7 +77,7 @@ namespace paskalON.Maths.Calculuses.Exponents
 
 
         /// <summary>
-        /// Calculates the output from the piecewise exponential curve
+        /// Calculates the output of the exponential function.
         /// </summary>
         /// <param name="x">X input</param>
         /// <returns>"f(x) Output (Y) from the calculated curve</returns>
@@ -107,18 +99,13 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// </remarks>
         public double CalculateOutput(double x)
         {
-            if (B == 0)
-            {
-                return 0;
-            }
-
             if (NoiseMin == 0 && NoiseMax == 0)
             {
                 return A * Math.Pow(B, x) + Offset;
             }
 
             // Compute f(x) given X via exponential interpolation with a initial value and a factor            
-            return A * Math.Pow(B, x) + Offset + _random.NextDoubleInRange(NoiseMin, NoiseMax);
+            return A * Math.Pow(B, x) + Offset + Random.Shared.NextDoubleInRange(NoiseMin, NoiseMax);
         }
 
 

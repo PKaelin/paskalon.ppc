@@ -24,7 +24,7 @@ namespace paskalON.Maths.UnitTest.Calculuses.Coordinates
         {
             List<LinearPoint> points = new List<LinearPoint> { new LinearPoint(10, 100) };
             LinearPointFunction lf = new LinearPointFunction(points);
-            Assert.AreEqual(0, lf.CalculateOutputPrecision(5));
+            Assert.AreEqual(100, lf.CalculateOutputPrecision(5));
             Assert.AreEqual(100, lf.CalculateOutputPrecision(15));
         }
 
@@ -34,7 +34,16 @@ namespace paskalON.Maths.UnitTest.Calculuses.Coordinates
         {
             List<LinearPoint> points = new List<LinearPoint> { new LinearPoint(10, 100), new LinearPoint(20, 200) };
             LinearPointFunction lf = new LinearPointFunction(points);
-            Assert.AreEqual(0, lf.CalculateOutputPrecision(5));
+            Assert.AreEqual(100, lf.CalculateOutputPrecision(5));
+        }
+
+
+        [TestMethod]
+        public void DuplicateXDefinitionTest()
+        {
+            List<LinearPoint> points = new List<LinearPoint> { new LinearPoint(10, 100), new LinearPoint(10, 200) };
+
+            Assert.ThrowsExactly<ArgumentException>(() => new LinearPointFunction(points));
         }
 
 
@@ -155,10 +164,8 @@ namespace paskalON.Maths.UnitTest.Calculuses.Coordinates
         public void TwoSameXTest()
         {
             List<LinearPoint> points = new List<LinearPoint> { new LinearPoint(10, 10), new LinearPoint(10, 20) };
-            LinearPointFunction lf = new LinearPointFunction(points);
-            Assert.AreEqual(0, lf.CalculateOutputPrecision(8));
-            Assert.AreEqual(10, lf.CalculateOutputPrecision(10));
-            Assert.AreEqual(20, lf.CalculateOutputPrecision(12));
+
+            Assert.ThrowsExactly<ArgumentException>(() => new LinearPointFunction(points));
         }
 
 

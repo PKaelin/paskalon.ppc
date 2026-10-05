@@ -14,39 +14,48 @@ namespace paskalON.Maths.Calculuses.Exponents
     public class Exponential2PointFunction : ICalculateOutputFunction
     {
         /// <summary>
-        /// Used for random noise
+        /// Initial value / vertical scaling.
         /// </summary>
-        private Random _random = new Random();
+        private readonly double _a;
+
+
+        /// <summary>
+        /// Base / growth factor
+        /// </summary>
+        /// <remarks>
+        /// Determines how quickly the function grows or decays.
+        /// </remarks>
+        private readonly double _b;
 
 
         /// <summary>
         /// Definition of exponential point1 X and Y.
         /// </summary>
-        public (double X, double Y) Point1 { get; init; }
+        public (double X, double Y) Point1 { get; }
 
 
         /// <summary>
         /// Definition of exponential point2 X and Y.
         /// </summary>
-        public (double X, double Y) Point2 { get; init; }
+        public (double X, double Y) Point2 { get; }
 
 
         /// <summary>
         /// Adds an offset to f(x).
         /// </summary>
-        public double Offset { get; init; } = 0;
+        public double Offset { get; } = 0;
 
 
         /// <summary>
         /// Minimum of noise range that gets applied.
         /// </summary>
-        public double NoiseMin { get; init; } = 0;
+        public double NoiseMin { get; } = 0;
 
 
         /// <summary>
         /// Maximum of noise range that gets applied.
         /// </summary>
-        public double NoiseMax { get; init; } = 0;
+        public double NoiseMax { get; } = 0;
 
 
         /// <summary>
@@ -71,6 +80,8 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// <param name="noiseMax">Maximum of noise range that gets applied.</param>
         public Exponential2PointFunction((double X, double Y) point1, (double X, double Y) point2, double offset, double noiseMin, double noiseMax)
         {
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(noiseMin, noiseMax);
+
             if (point1.X == point2.X)
             {
                 throw new ArgumentException("First and second point cannot have the same x-value");
@@ -91,6 +102,9 @@ namespace paskalON.Maths.Calculuses.Exponents
             Offset = offset;
             NoiseMin = noiseMin;
             NoiseMax = noiseMax;
+
+            _b = Math.Pow(Point1.Y / Point2.Y, Math.Pow(Point1.X - Point2.X, -1));
+            _a = Point1.Y / Math.Pow(_b, Point1.X);
         }
 
 
@@ -109,16 +123,12 @@ namespace paskalON.Maths.Calculuses.Exponents
         /// </remarks>
         public double CalculateOutput(double x)
         {
-            //Compute f(x) given X via exponential interpolation with two input points
-            double b = Math.Pow(Point1.Y / Point2.Y, Math.Pow(Point1.X - Point2.X, -1));
-            double a = Point1.Y / Math.Pow(b, Point1.X);
-
             if (NoiseMin == 0 && NoiseMax == 0)
             {
-                return a * Math.Pow(b, x) + Offset;
+                return _a * Math.Pow(_b, x) + Offset;
             }
 
-            return a * Math.Pow(b, x) + Offset + _random.NextDoubleInRange(NoiseMin, NoiseMax);
+            return _a * Math.Pow(_b, x) + Offset + Random.Shared.NextDoubleInRange(NoiseMin, NoiseMax);
         }
 
 

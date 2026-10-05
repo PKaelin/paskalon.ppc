@@ -37,7 +37,6 @@ namespace paskalON.Maths.Calculuses.Coordinates
         /// <returns>List of generated vectors</returns>
         public List<int[]> CreateMultidimensionalVector(int rows, int dimension, int min, int max)
         {
-            Random ran = new Random();
             List<int[]> vectors = new List<int[]>();
 
             for (int r = 0; r < rows; r++)
@@ -46,7 +45,7 @@ namespace paskalON.Maths.Calculuses.Coordinates
 
                 for (int d = 0; d < dimension; d++)
                 {
-                    vector.Add(ran.Next(min, max));
+                    vector.Add(Random.Shared.Next(min, max + 1));
                 }
 
                 vectors.Add(vector.ToArray());
@@ -68,8 +67,6 @@ namespace paskalON.Maths.Calculuses.Coordinates
         /// <param name="max">Maximum value for each dimension</param>
         public void CreateMultidimensionalVectorFile(string filename, int rows, int dimension, int min, int max)
         {
-            Random ran = new Random();
-
             using (StreamWriter sw = new StreamWriter(filename))
             {
                 for (int r = 0; r < rows; r++)
@@ -78,11 +75,11 @@ namespace paskalON.Maths.Calculuses.Coordinates
                     {
                         if (d == dimension - 1)
                         {
-                            sw.WriteLine(ran.Next(min, max));
+                            sw.WriteLine(Random.Shared.NextInt64(min, (long)max + 1));
                         }
                         else
                         {
-                            sw.Write($"{ran.Next(min, max)},");
+                            sw.Write($"{Random.Shared.NextInt64(min, (long)max + 1)},");
                         }
                     }
                 }

@@ -12,9 +12,9 @@ namespace paskalON.Maths.Randoms
     public class RandomWalker<T> where T : INumber<T>
     {
         /// <summary>
-        /// Random instance.
+        /// Synchronizes random-walk state transitions.
         /// </summary>
-        private readonly Random _random = new Random();
+        private readonly object _dataLock = new object();
 
 
         /// <summary>
@@ -25,25 +25,25 @@ namespace paskalON.Maths.Randoms
         /// <summary>
         /// Home value to walk around.
         /// </summary>
-        public T Home { get; init; }
+        public T Home { get; }
 
 
         /// <summary>
         /// Step size to walk up or down.
         /// </summary>
-        public T StepSize { get; init; }
+        public T StepSize { get; }
 
 
         /// <summary>
         /// Lower bound of the walk.
         /// </summary>
-        public T LowerBound { get; init; }
+        public T LowerBound { get; }
 
 
         /// <summary>
         /// Upper bound of the walk.
         /// </summary>
-        public T UpperBound { get; init; }
+        public T UpperBound { get; }
 
 
         /// <summary>
@@ -91,53 +91,56 @@ namespace paskalON.Maths.Randoms
         /// <returns>Next random walk value.</returns>
         public T Next()
         {
-            // Generate a random choice: 0 = Down, 1 = Stay at Home, 2 = Up
-            int choice = _random.Next(0, 3);
-
-            T newValue;
-
-            if (choice == 0)
+            lock (_dataLock)
             {
-                newValue = CurrentValue - StepSize;
-            }
-            else if (choice == 2)
-            {
-                newValue = CurrentValue + StepSize;
-            }
-            else
-            {
-                // Evaluate if we have strayed too far from home
-                T currentDistanceFromHome = T.Abs(CurrentValue - Home);
+                // Generate a random choice: 0 = Down, 1 = Move to home or closer to home, 2 = Up
+                int choice = Random.Shared.Next(0, 3);
 
-                if (currentDistanceFromHome > MaxDistance)
+                T newValue;
+
+                if (choice == 0)
                 {
-                    // Move closer to home instead of snapping
-                    if (CurrentValue > Home)
-                    {
-                        newValue = CurrentValue - StepSize;
-                    }
-                    else
-                    {
-                        newValue = CurrentValue + StepSize;
-                    }
+                    newValue = CurrentValue - StepSize;
+                }
+                else if (choice == 2)
+                {
+                    newValue = CurrentValue + StepSize;
                 }
                 else
                 {
-                    newValue = Home;
+                    // Evaluate if we have strayed too far from home
+                    T currentDistanceFromHome = T.Abs(CurrentValue - Home);
+
+                    if (currentDistanceFromHome > MaxDistance)
+                    {
+                        // Move closer to home instead of snapping
+                        if (CurrentValue > Home)
+                        {
+                            newValue = CurrentValue - StepSize;
+                        }
+                        else
+                        {
+                            newValue = CurrentValue + StepSize;
+                        }
+                    }
+                    else
+                    {
+                        newValue = Home;
+                    }
                 }
+
+                // Check if the type is any floating-point type (float, double, decimal) and round
+                if (typeof(T) == typeof(float) || typeof(T) == typeof(double) || typeof(T) == typeof(decimal))
+                {
+                    double rounded = Math.Round(Convert.ToDouble(newValue), _precision);
+                    newValue = (T)Convert.ChangeType(rounded, typeof(T));
+                }
+
+                // Clamp the final value within bounds
+                CurrentValue = T.Clamp(newValue, LowerBound, UpperBound);
+
+                return CurrentValue;
             }
-
-            // Check if the type is any floating-point type (float, double, decimal) and round
-            if (typeof(T) == typeof(float) || typeof(T) == typeof(double) || typeof(T) == typeof(decimal))
-            {
-                double rounded = Math.Round(Convert.ToDouble(newValue), _precision);
-                newValue = (T)Convert.ChangeType(rounded, typeof(T));
-            }
-
-            // Clamp the final value within bounds
-            CurrentValue = T.Clamp(newValue, LowerBound, UpperBound);
-
-            return CurrentValue;
         }
     }
 }

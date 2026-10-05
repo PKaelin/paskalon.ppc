@@ -25,21 +25,24 @@ namespace paskalON.Maths.Calculuses.Sums
         /// <remarks>
         /// integral({a}{b}) f(x) dx =~ sum({i=1}{n−1} * (x[i+1] − x[i]) f(x[i]​)
         /// </remarks>
-        public double? AverageTimeSeries(RiemannSumRules averagingRule, IEnumerable<KeyValuePair<DateTime, double>> rawValues,
-            DateTime intervalStart, DateTime intervalEnd)
+        public double? AverageTimeSeries(RiemannSumRules averagingRule, IEnumerable<KeyValuePair<DateTimeOffset, double>> rawValues,
+            DateTimeOffset intervalStart, DateTimeOffset intervalEnd)
         {
             // Compute the total length of this interval.
             TimeSpan intervalLength = intervalEnd - intervalStart;
-            int count = rawValues.Count();
+            ArgumentNullException.ThrowIfNull(rawValues);
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(intervalLength, TimeSpan.Zero);
+
+            List<KeyValuePair<DateTimeOffset, double>> values = rawValues
+                .Where(x => x.Key >= intervalStart && x.Key <= intervalEnd).OrderBy(x => x.Key).ToList();
+
+            int count = values.Count;
 
             // No valid data, return null.
             if (count == 0)
             {
                 return null;
             }
-
-            // If there are values, order by time ascending. Convert to a list for array accessing.
-            List<KeyValuePair<DateTime, double>> values = rawValues.OrderBy(x => x.Key).ToList();
 
             // Only one value, average of one value is... that value.
             if (count == 1)
@@ -145,7 +148,7 @@ namespace paskalON.Maths.Calculuses.Sums
         /// <returns>
         /// An aggregated value over a period in time (for a given interval).
         /// </returns>
-        private double ComputeRiemannRectangle(double value, DateTime subIntervalStart, DateTime subIntervalEnd, TimeSpan totalIntervalLength)
+        private double ComputeRiemannRectangle(double value, DateTimeOffset subIntervalStart, DateTimeOffset subIntervalEnd, TimeSpan totalIntervalLength)
         {
             TimeSpan subInterval = subIntervalEnd - subIntervalStart;
 
