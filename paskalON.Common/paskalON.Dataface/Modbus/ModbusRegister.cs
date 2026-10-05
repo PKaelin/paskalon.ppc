@@ -69,7 +69,7 @@ namespace paskalON.Dataface.Modbus
             ArgumentNullException.ThrowIfNull(setter);
             ArgumentOutOfRangeException.ThrowIfLessThan(offset, 0);
 
-            if (Registers.Any(r => r.Name == name) == true)
+            if (Registers.Any(r => r.Name.ToLower() == name.ToLower()) == true)
             {
                 throw new ArgumentException($"Register with name {name} is already registered");
             }

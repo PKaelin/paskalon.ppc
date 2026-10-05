@@ -38,7 +38,7 @@ namespace paskalON.Dataface.C37s
             ArgumentNullException.ThrowIfNull(instance);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
-            if (Registers.Any(r => r.Name == name) == true)
+            if (Registers.Any(r => r.Name.ToLower() == name.ToLower()) == true)
             {
                 throw new ArgumentException($"Register with name {name} is already registered");
             }
