@@ -58,9 +58,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
             if (StateActive != OperatingModeState.Disabled)

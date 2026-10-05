@@ -29,9 +29,7 @@ namespace paskalON.Telemetry.Factories
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>        
         public IMetricsPublisher Create()
         {
             IMetricsPublisher publisher = _services.GetRequiredService<IMetricsPublisher>();

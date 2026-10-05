@@ -30,21 +30,15 @@ namespace paskalON.Telemetry.Entries
         private readonly Action<TProperty> _updater;
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public object Instance { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public string Name { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int Interval
         {
             get;
@@ -52,21 +46,15 @@ namespace paskalON.Telemetry.Entries
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public MetricType MetricType { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public Instrument Instrument { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public TagList TagList { get; init; }
 
 
@@ -119,9 +107,7 @@ namespace paskalON.Telemetry.Entries
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void Update()
         {
             if (Instance is not TDevice typedDevice)

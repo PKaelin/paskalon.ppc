@@ -106,9 +106,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int DeviceId { get => _config.DeviceId; }
 
 
@@ -636,9 +634,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task ConnectAsync()
         {
             _logger.LogInformation("{Name} connect requested.", Name);
@@ -646,9 +642,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task DisconnectAsync()
         {
             _logger.LogInformation("{Name} disconnect requested.", Name);
@@ -656,18 +650,14 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async virtual Task CheckHealthAsync()
         {
             // TODO: Implement state check, data received check and com error update if necessary.
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         protected override void RegisterMetrics()
         {
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
@@ -726,9 +716,7 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         protected override void RegisterDataface()
         {
             PowerMeterMapC37Config? c37Config = _config.PowerMeterDeviceConfig.PowerMeterMapC37Config;
@@ -873,4 +861,4 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         }
 
     }
-}
+}

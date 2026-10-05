@@ -14,9 +14,7 @@ namespace paskalON.Devices.Dto.Meters.PowerMeters
     /// </remarks>
     public abstract record PmDefinitionBase : IDeviceDefinition
     {
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int DeviceId { get; init; }
 
 

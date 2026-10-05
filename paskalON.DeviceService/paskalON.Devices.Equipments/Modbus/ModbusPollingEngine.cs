@@ -58,9 +58,7 @@ namespace paskalON.Devices.Equipments.Modbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task ConnectAsync(CancellationToken cancellationToken)
         {
             if (_client.State != ModbusClientState.Connected)
@@ -70,9 +68,7 @@ namespace paskalON.Devices.Equipments.Modbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task PollAsync(int currentInterval, CancellationToken cancellationToken)
         {
             try
@@ -134,4 +130,4 @@ namespace paskalON.Devices.Equipments.Modbus
             }
         }
     }
-}
+}

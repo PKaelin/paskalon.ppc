@@ -14,9 +14,7 @@ namespace paskalON.Devices.Dto.PowerConversionSystems
     /// </remarks>
     public record PcsDetailDto : IDevice
     {
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public required int DeviceId { get; init; }
 
 

@@ -12,9 +12,7 @@ namespace paskalON.Devices.Dto.EnergyResources.Solars
     /// </remarks>
     public record PvDetailDto : IDevice
     {
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public required int DeviceId { get; init; }
 
 

@@ -65,9 +65,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
             if (StateActive != OperatingModeState.Disabled)

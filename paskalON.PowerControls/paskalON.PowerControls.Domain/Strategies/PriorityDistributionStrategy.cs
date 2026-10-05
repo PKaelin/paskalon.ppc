@@ -22,9 +22,7 @@ namespace paskalON.PowerControls.Domain.Strategies
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>        
         public void Distribute(ActivePower systemActivePower, ReactivePower systemReactivePower, IEnumerable<IDerUnitPowerControl> allUnits)
         {
             // Distribute the power to all units that are enabled and not in maintenance state

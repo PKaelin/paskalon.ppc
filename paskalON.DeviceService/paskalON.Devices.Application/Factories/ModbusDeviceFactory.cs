@@ -35,9 +35,7 @@ namespace paskalON.Devices.Application.Factories
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public (IModbusDataface Dataface, IModbusClient Client) Create(ModbusConfig config)
         {
             ArgumentNullException.ThrowIfNull(config);

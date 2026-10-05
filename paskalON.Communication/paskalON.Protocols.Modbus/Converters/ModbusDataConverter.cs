@@ -13,9 +13,7 @@ namespace paskalON.Protocols.Modbus.Converters
     /// </summary>
     public class ModbusDataConverter : IModbusDataConverter
     {
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public bool ConvertRawData(bool[] rawData, IModbusRegisterEntry register, ushort startAddress)
         {
             ArgumentNullException.ThrowIfNull(rawData);
@@ -28,9 +26,7 @@ namespace paskalON.Protocols.Modbus.Converters
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public object? ConvertRawData(ushort[] rawData, IModbusRegisterEntry register, ushort startAddress)
         {
             ArgumentNullException.ThrowIfNull(rawData);

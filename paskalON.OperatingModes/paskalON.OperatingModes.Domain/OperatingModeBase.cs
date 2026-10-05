@@ -105,15 +105,11 @@ namespace paskalON.OperatingModes.Domain
         private readonly OperatingModeBaseConfig _config;
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public string Name { get => _config.Name; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public bool IsEnabled
         {
             get;
@@ -121,15 +117,11 @@ namespace paskalON.OperatingModes.Domain
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public DateTimeOffset LastEnabled { get; protected set; } = DateTimeOffset.MinValue;
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>        
         public OperatingModeState State
         {
             get
@@ -199,9 +191,7 @@ namespace paskalON.OperatingModes.Domain
 
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ActivePower SetpointActivePower
         {
             get { lock (dataLock) { return field; } }
@@ -226,21 +216,15 @@ namespace paskalON.OperatingModes.Domain
         } = new ActivePower(0);
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ActivePower? AvailableActivePower { get => _map.AvailableActivePower.Invoke(); }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ActivePower TargetActivePower { get => _targetActivePower; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ReactivePower SetpointReactivePower
         {
             get { lock (dataLock) { return field; } }
@@ -265,39 +249,27 @@ namespace paskalON.OperatingModes.Domain
         } = new ReactivePower(0);
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ReactivePower? AvailableReactivePower { get => _map.AvailableReactivePower.Invoke(); }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ReactivePower TargetReactivePower { get => _targetReactivePower; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public IRampController RampControllerActive { get; protected set; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public IRampController RampControllerReactive { get; protected set; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICurveController? CurveController { get; protected set; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public SystemConfig SystemConfig { get; init; }
 
 
@@ -341,9 +313,7 @@ namespace paskalON.OperatingModes.Domain
         public abstract Task CalculateAsync(CancellationToken cancellationToken);
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual void Enable()
         {
             IsEnabled = true;
@@ -377,9 +347,7 @@ namespace paskalON.OperatingModes.Domain
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual void Disable()
         {
             IsEnabled = false;

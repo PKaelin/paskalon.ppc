@@ -106,9 +106,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         public List<GenericModbusEntryBase> GenericModbusEntries { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int DeviceId { get => _config.DeviceId; }
 
 
@@ -142,9 +140,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task ConnectAsync()
         {
             await _lifecycleLock.WaitAsync().ConfigureAwait(false);
@@ -161,9 +157,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task DisconnectAsync()
         {
             await _lifecycleLock.WaitAsync().ConfigureAwait(false);
@@ -180,27 +174,21 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task ResetLatchedAlarmsAsync()
         {
             _logger.LogInformation("{Name} reset latched alarms requested.", Name);
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async virtual Task CheckHealthAsync()
         {
             // TODO: Implement state check, data received check and com error update if necessary.
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         protected override void RegisterMetrics()
         {
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
@@ -224,9 +212,7 @@ namespace paskalON.Devices.Domain.GenericModbusDevices
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         protected override void RegisterDataface()
         {
             // Loop through Coils and DiscreteInputs.

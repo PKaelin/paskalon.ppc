@@ -36,9 +36,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// </summary>
         private readonly IModbusFactory _factory = new ModbusFactory();
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         private readonly IModbusDataStore _dataStore;
 
         /// <summary>
@@ -76,33 +74,23 @@ namespace paskalON.Protocols.Modbus.NModbus
         /// </summary>
         private readonly SemaphoreSlim _lifecycleLock = new SemaphoreSlim(1, 1);
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public event EventHandler<EventArgs>? OnCommunicationError;
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ModbusServerState State { get => _state; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public string ListenAddress { get; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int ListenPort { get; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public byte UnitId { get; }
 
 
@@ -258,18 +246,14 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public bool ConvertRawData(bool[] rawData, IModbusRegisterEntry register, ushort startAddress)
         {
             return _converter.ConvertRawData(rawData, register, startAddress);
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public object? ConvertRawData(ushort[] rawData, IModbusRegisterEntry register, ushort startAddress)
         {
             return _converter.ConvertRawData(rawData, register, startAddress);

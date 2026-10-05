@@ -12,7 +12,7 @@ namespace paskalON.Infrastructure.Repositories
         /// <summary>
         /// ILogger for handling application logging and diagnostics.
         /// </summary>
-        protected ILogger _logger;
+        protected readonly ILogger _logger;
 
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace paskalON.Infrastructure.Repositories
 
 
         /// <summary>
-        /// Constructor for <see cref="RepositoryBase"/>.
+        /// Constructor for <see cref="RepositoryBase{TContext}"/>.
         /// </summary>
         /// <param name="logger">Logger instance.</param>
         /// <param name="context">Database context.</param>
@@ -30,17 +30,6 @@ namespace paskalON.Infrastructure.Repositories
         {
             _logger = logger;
             Context = context;
-        }
-
-
-        /// <summary>
-        /// Disposes managed and unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Context.Dispose();
-            // Prevents finalization overhead since resources are already freed
-            GC.SuppressFinalize(this);
         }
     }
 }

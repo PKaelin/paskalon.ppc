@@ -77,9 +77,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override async Task ConnectAsync()
         {
             await _lifecycleLock.WaitAsync().ConfigureAwait(false);
@@ -113,9 +111,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override async Task DisconnectAsync()
         {
             await _lifecycleLock.WaitAsync().ConfigureAwait(false);
@@ -147,7 +143,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         }
 
 
-        /// <inheritdoc/>>
+        /// <inheritdoc/>
         public override async Task HeartbeatAsync(CancellationToken cancellationToken)
         {
             if (_client.State == ModbusClientState.Connected)
@@ -157,9 +153,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         protected override void RegisterDataface()
         {
             // State of charge and health

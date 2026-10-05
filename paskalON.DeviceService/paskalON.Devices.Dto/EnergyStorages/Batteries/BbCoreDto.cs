@@ -14,9 +14,7 @@ namespace paskalON.Devices.Dto.EnergyStorages.Batteries
     /// </remarks>
     public record BbCoreDto : IDevice
     {
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public required int DeviceId { get; init; }
 
 

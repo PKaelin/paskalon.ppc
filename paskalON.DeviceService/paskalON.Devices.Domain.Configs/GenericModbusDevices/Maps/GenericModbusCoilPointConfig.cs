@@ -16,9 +16,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// </remarks>
     public class GenericModbusCoilPointConfig : GenericModbusPointBaseConfig
     {
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override ModbusRegistryType ModbusRegistryType { get => ModbusRegistryType.Coil; }
 
     }

@@ -40,15 +40,11 @@ namespace paskalON.Devices.Dto
         protected object dataLock = new();
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int DeviceId { get => _definition.DeviceId; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public string Name { get => _definition.Name; }
 
 
@@ -148,4 +144,4 @@ namespace paskalON.Devices.Dto
             }
         }
     }
-}
+}

@@ -24,9 +24,7 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
         private readonly object _dataLock = new();
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public IReadOnlyDictionary<ModbusDataMemoryStoreKey, IModbusDataStore> Stores
         {
             get
@@ -39,9 +37,7 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public IModbusDataStore GetOrCreate(ModbusConfig config)
         {
             ArgumentNullException.ThrowIfNull(config);

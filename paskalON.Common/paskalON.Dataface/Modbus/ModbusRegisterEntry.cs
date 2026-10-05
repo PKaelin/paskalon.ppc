@@ -15,39 +15,27 @@ namespace paskalON.Dataface.Modbus
         private Action<TDevice, TProperty?> _setter { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public object Instance { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public string Name { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int Register { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public double Scale { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ModbusDataType DataType { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int Offset { get; init; }
 
 

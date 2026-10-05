@@ -38,9 +38,7 @@ namespace paskalON.ConstraintEngine.Domain
         private readonly ConstraintBaseMap _map;
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public string Name { get => _config.Name; }
 
 
@@ -62,9 +60,7 @@ namespace paskalON.ConstraintEngine.Domain
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public abstract void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower, bool shallLogViolations);
     }
 }

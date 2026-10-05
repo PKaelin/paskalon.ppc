@@ -41,33 +41,25 @@ namespace paskalON.Protocols.Modbus.Stores
         protected readonly ushort[] _inputRegisters;
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         /// <remarks>
         /// These are called Coils in the Modbus standard.
         /// </remarks>
         public IPointSource<bool> CoilDiscretes { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         /// <remarks>
         /// These are called DiscreteInputs in the Modbus standard.
         /// </remarks>
         public IPointSource<bool> CoilInputs { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public IPointSource<ushort> HoldingRegisters { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public IPointSource<ushort> InputRegisters { get; init; }
 
 

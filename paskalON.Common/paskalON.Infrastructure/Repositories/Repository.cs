@@ -37,7 +37,7 @@ namespace paskalON.Infrastructure.Repositories
 
 
         /// <summary>
-        /// Constructor of <see cref="Repository"/>.
+        /// Constructor of <see cref="Repository{TContext, TEntity}"/>.
         /// </summary>
         /// <param name="context">The database context.</param>
         public Repository(TContext context)
@@ -49,9 +49,7 @@ namespace paskalON.Infrastructure.Repositories
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         public async Task<Action<TEntity>> CreateAsync(TEntity entity)
         {
             entity.ChangedDate = DateTimeOffset.UtcNow;
@@ -61,9 +59,7 @@ namespace paskalON.Infrastructure.Repositories
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         public async Task<IEnumerable<TEntity>> GetAsync<TKey>(int skip, int take, Expression<Func<TEntity, TKey>> orderBy,
             bool descending = false, bool trackChanges = false)
         {
@@ -81,19 +77,15 @@ namespace paskalON.Infrastructure.Repositories
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         public async Task<TEntity> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id) ??
-                throw new ApplicationException($"Get {nameof(TEntity)} by id: {id} did not find any entity.");
+                throw new ApplicationException($"Get {typeof(TEntity).Name} by id: {id} did not find any entity.");
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>        
+        /// <inheritdoc/>
         public async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false)
         {
             IQueryable<TEntity> query = trackChanges ? _dbSet.Where(predicate) : _dbSet.AsNoTracking().Where(predicate);
@@ -102,9 +94,7 @@ namespace paskalON.Infrastructure.Repositories
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         public TEntity Update(TEntity entity)
         {
             entity.ChangedDate = DateTimeOffset.UtcNow;
@@ -116,31 +106,17 @@ namespace paskalON.Infrastructure.Repositories
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         public void Delete(TEntity entity)
         {
             _dbSet.Remove(entity);
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
-        }
-
-
-        /// <summary>
-        /// Disposes the instance.
-        /// </summary>
-        public void Dispose()
-        {
-            _context.Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }

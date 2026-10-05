@@ -58,30 +58,22 @@ namespace paskalON.PowerControls.Domain
         public IMetricsPublisher MetricsPublisher { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public bool IsActive { get => _config.IsActive; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public bool IsEnabled { get => _config.IsEnabled; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ActivePower TargetActivePower
         {
             get { lock (dataLock) { return _targetActivePower; } }
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ReactivePower TargetReactivePower
         {
             get { lock (dataLock) { return _targetReactivePower; } }
@@ -103,9 +95,7 @@ namespace paskalON.PowerControls.Domain
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public abstract void UpdatePower(ActivePower activePower, ReactivePower reactivePower);
 
 

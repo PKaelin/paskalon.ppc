@@ -66,9 +66,7 @@ namespace paskalON.Devices.Service.Publishers
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         /// <remarks>
         /// ExecuteAsync is called only after the application starts running (app.Run).
         /// </remarks>

@@ -54,21 +54,15 @@ namespace paskalON.OperatingModes.Domain
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ActivePower ErrorAdjustmentActive { get => _errorAdjustmentActive; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ReactivePower ErrorAdjustmentReactive { get => _errorAdjustmentReactive; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         protected override void RegisterMetrics()
         {
             base.RegisterMetrics();

@@ -51,9 +51,7 @@ namespace paskalON.Devices.Client.Registers
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void Add(TDevice device)
         {
             if (_devices.TryAdd(device.DeviceId, device) == false)
@@ -63,18 +61,14 @@ namespace paskalON.Devices.Client.Registers
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public bool TryGet(int deviceId, out TDevice? device)
         {
             return _devices.TryGetValue(deviceId, out device);
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void UpdateDefinition(TDefinition message)
         {
             if (_devices.TryGetValue(message.DeviceId, out var device) == false)
@@ -87,9 +81,7 @@ namespace paskalON.Devices.Client.Registers
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void UpdateCore(TCore message)
         {
             if (_devices.TryGetValue(message.DeviceId, out var device) == false)
@@ -102,9 +94,7 @@ namespace paskalON.Devices.Client.Registers
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void UpdateDetail(TDetail message)
         {
             if (_devices.TryGetValue(message.DeviceId, out var device) == false)

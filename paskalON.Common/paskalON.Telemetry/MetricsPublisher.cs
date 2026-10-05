@@ -21,9 +21,7 @@ namespace paskalON.Telemetry
         private readonly ILogger<MetricsPublisher> _logger;
 
 
-        /// <summary>
         /// <inheritdoc />
-        /// </summary>
         public bool IsEnabled { get; set; } = true;
 
 
@@ -55,9 +53,7 @@ namespace paskalON.Telemetry
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void Initialize(string measurement, IEnumerable<KeyValuePair<string, object?>> tags)
         {
             ArgumentNullException.ThrowIfNullOrWhiteSpace(measurement);
@@ -73,9 +69,7 @@ namespace paskalON.Telemetry
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void Register<TDevice, TProperty>(TDevice instance, string name, MetricType metricType, Func<TDevice, TProperty?> getter, int interval = 1) where TProperty : struct
         {
             ArgumentNullException.ThrowIfNull(instance);
@@ -120,9 +114,7 @@ namespace paskalON.Telemetry
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual void Publish(int currentInterval)
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(currentInterval);

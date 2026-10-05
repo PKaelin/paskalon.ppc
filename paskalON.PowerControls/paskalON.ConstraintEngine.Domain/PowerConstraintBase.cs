@@ -34,9 +34,7 @@ namespace paskalON.ConstraintEngine.Domain
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower, bool shallLogViolations = true)
         {
             if (_config.MaximumActivePowerWatt.HasValue && activePower.Watts > _config.MaximumActivePowerWatt)

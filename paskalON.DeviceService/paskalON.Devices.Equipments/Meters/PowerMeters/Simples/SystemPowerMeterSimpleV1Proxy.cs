@@ -33,9 +33,7 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override async Task ConnectAsync()
         {
             await _lifecycleLock.WaitAsync().ConfigureAwait(false);
@@ -57,9 +55,7 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override async Task DisconnectAsync()
         {
             await _lifecycleLock.WaitAsync().ConfigureAwait(false);

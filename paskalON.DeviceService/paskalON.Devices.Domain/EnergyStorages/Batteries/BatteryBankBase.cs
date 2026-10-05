@@ -124,9 +124,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         public bool IsInMaintenanceMode { get => BatteryStorageUnit.IsInMaintenanceMode; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int DeviceId { get => _config.DeviceId; }
 
 
@@ -578,9 +576,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         public abstract Task HeartbeatAsync(CancellationToken cancellationToken);
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task ConnectAsync()
         {
             _logger.LogInformation("{Name} connect requested.", Name);
@@ -588,9 +584,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task DisconnectAsync()
         {
             _logger.LogInformation("{Name} disconnect requested.", Name);
@@ -598,9 +592,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async virtual Task CheckHealthAsync()
         {
             // TODO: Implement state check, data received check and com error update if necessary.
@@ -708,9 +700,7 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         protected override void RegisterMetrics()
         {
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>

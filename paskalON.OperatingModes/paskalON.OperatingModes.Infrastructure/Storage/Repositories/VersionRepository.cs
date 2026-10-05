@@ -24,9 +24,7 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Repositories
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task<string> GetDatabaseVersionAsync()
         {
             History? history = null;

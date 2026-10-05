@@ -84,15 +84,11 @@ namespace paskalON.Protocols.Modbus.NModbus
         private volatile ModbusClientState _state = ModbusClientState.Disconnected;
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public event EventHandler<EventArgs>? OnCommunicationError;
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ModbusClientState State
         {
             get { return _state; }
@@ -100,21 +96,15 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public string ServerAddress { get => _clientConnection.ServerAddress; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int ServerPort { get => _clientConnection.ServerPort; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public byte UnitId { get; init; }
 
 
@@ -140,27 +130,21 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public bool ConvertRawData(bool[] rawData, IModbusRegisterEntry register, ushort startAddress)
         {
             return _converter.ConvertRawData(rawData, register, startAddress);
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public object? ConvertRawData(ushort[] rawData, IModbusRegisterEntry register, ushort startAddress)
         {
             return _converter.ConvertRawData(rawData, register, startAddress);
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
             await _lifecycleLock.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -248,9 +232,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task DisconnectAsync(CancellationToken cancellationToken = default)
         {
             await _lifecycleLock.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -279,9 +261,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public Task<bool[]?> ReadCoilsAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Read, startAddress, 3,
@@ -289,9 +269,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public Task<bool[]?> ReadDiscreteInputsAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Read, startAddress, 3,
@@ -299,9 +277,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public Task<ushort[]?> ReadHoldingRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Read, startAddress, 3,
@@ -309,9 +285,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public Task<ushort[]?> ReadInputRegistersAsync(ushort startAddress, ushort endAddress, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Read, startAddress, 3,
@@ -348,9 +322,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public Task WriteSingleRegisterAsync(ushort address, double value, ModbusDataType type, short priority = 3,
             double scale = 1, CancellationToken cancellationToken = default)
         {
@@ -359,9 +331,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public Task WriteSingleRegisterAsync(ushort address, ushort value, ModbusDataType type, short priority = 3,
             double scale = 1, CancellationToken cancellationToken = default)
         {
@@ -370,9 +340,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public Task WriteSingleRegisterAsync(ushort address, bool value, ModbusDataType type, short priority = 3,
             double scale = 1, CancellationToken cancellationToken = default)
         {
@@ -381,9 +349,7 @@ namespace paskalON.Protocols.Modbus.NModbus
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public Task WriteMultipleRegistersAsync(ushort address, ushort[] values, ModbusDataType type, short priority = 3, CancellationToken cancellationToken = default)
         {
             return _dispatcher.EnqueueAsync(ModbusOperation.Write, address, priority,

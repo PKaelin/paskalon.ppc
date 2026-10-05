@@ -69,9 +69,7 @@ namespace paskalON.ConstraintEngine.Domain
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower, bool shallLogViolations = true)
         {
             lock (_dataLock)

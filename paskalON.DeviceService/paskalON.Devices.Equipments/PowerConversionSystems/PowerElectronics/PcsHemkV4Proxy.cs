@@ -35,9 +35,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
             _client.OnCommunicationError += OnCommunicationError;
         }
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override async Task StartAsync()
         {
             await _lifecycleLock.WaitAsync().ConfigureAwait(false);
@@ -59,9 +57,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override async Task StopAsync()
         {
             await _lifecycleLock.WaitAsync().ConfigureAwait(false);
@@ -81,9 +77,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override async Task StandbyAsync(double? standbyActivePower = null)
         {
             if (_client.State == ModbusClientState.Connected)
@@ -100,9 +94,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         public override async Task SetActivePowerTargetAsync(double? value)
         {
             if (_client.State == ModbusClientState.Connected)
@@ -117,9 +109,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         public override async Task SetReactivePowerTargetAsync(double? value)
         {
             if (_client.State == ModbusClientState.Connected)
@@ -134,7 +124,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
         }
 
 
-        /// <inheritdoc/>>
+        /// <inheritdoc/>
         public override async Task HeartbeatAsync(CancellationToken cancellationToken)
         {
             if (_client.State == ModbusClientState.Connected)

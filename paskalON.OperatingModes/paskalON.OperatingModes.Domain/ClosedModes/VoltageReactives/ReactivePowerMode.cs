@@ -66,9 +66,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
             if (StateReactive != OperatingModeState.Disabled)

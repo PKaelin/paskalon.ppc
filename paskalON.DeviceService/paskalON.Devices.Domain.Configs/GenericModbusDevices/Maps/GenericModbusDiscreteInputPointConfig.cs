@@ -16,9 +16,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// </remarks>
     public class GenericModbusDiscreteInputPointConfig : GenericModbusPointBaseConfig
     {
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override ModbusRegistryType ModbusRegistryType { get => ModbusRegistryType.DiscreteInput; }
 
     }

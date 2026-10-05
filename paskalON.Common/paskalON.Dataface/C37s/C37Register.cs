@@ -15,9 +15,7 @@ namespace paskalON.Dataface.C37s
         private List<IC37RegisterEntry> _registers = new List<IC37RegisterEntry>();
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public string Name { get; init; }
 
 

@@ -48,9 +48,7 @@ namespace paskalON.OperatingModes.Domain.SafetyFunctions
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override Task CalculateAsync(CancellationToken cancellationToken = default)
         {
             // TODO: Implement

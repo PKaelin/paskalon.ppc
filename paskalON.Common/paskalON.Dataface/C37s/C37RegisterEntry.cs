@@ -15,21 +15,15 @@ namespace paskalON.Dataface.C37s
         private Action<TDevice, TProperty?> _setter { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public object Instance { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public string Name { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public C37SignalType SignalType { get; init; }
 
 
@@ -50,9 +44,7 @@ namespace paskalON.Dataface.C37s
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void Update(object value)
         {
             if (Instance is not TDevice typedDevice)

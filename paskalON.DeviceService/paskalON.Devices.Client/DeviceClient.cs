@@ -134,45 +134,31 @@ namespace paskalON.Devices.Client
         public DerDto Der { get; private set; } = new DerDto { Name = "Init" };
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<PcsDto> PowerConversionSystems { get => _pcsRegisters.Devices; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<BbDto> BatteryBanks { get => _bbRegisters.Devices; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<PvDto> SolarPanels { get => _pvRegisters.Devices; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<PmExternalDto> ExternalPowerMeters { get => _pmExternalRegisters.Devices; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<PmAuxiliaryDto> AuxiliaryPowerMeters { get => _pmAuxiliaryRegisters.Devices; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<PmSystemDto> SystemPowerMeters { get => _pmSystemRegisters.Devices; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<PmCircuitDto> CircuitPowerMeters { get => _pmCircuitRegisters.Devices; }
 
 

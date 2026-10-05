@@ -16,9 +16,7 @@ namespace paskalON.Devices.Domain.Configs.GenericModbusDevices.Maps
     /// </remarks>
     public class GenericModbusHoldingRegisterConfig : GenericModbusRegisterBaseConfig
     {
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override ModbusRegistryType ModbusRegistryType { get => ModbusRegistryType.HoldingRegister; }
 
     }

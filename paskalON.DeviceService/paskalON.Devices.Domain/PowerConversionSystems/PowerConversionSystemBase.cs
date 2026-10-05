@@ -135,9 +135,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public int DeviceId { get => _config.DeviceId; }
 
 
@@ -542,9 +540,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public abstract Task HeartbeatAsync(CancellationToken cancellationToken);
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task StartAsync()
         {
             _logger.LogInformation("{Name} start requested.", Name);
@@ -562,9 +558,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task StopAsync()
         {
             _logger.LogInformation("{Name} stop requested.", Name);
@@ -580,9 +574,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task StandbyAsync(double? standbyActivePower = null)
         {
             _logger.LogInformation("{Name} standby requested with standby active power: {StandbyActivePower}.", Name, standbyActivePower ?? StandbyActivePowerKiloWatts);
@@ -606,9 +598,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         /// <remarks>
         /// Actual write to the endpoint is executed in the equipments.
         /// </remarks>
@@ -633,9 +623,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         /// <param name="value">Reactive power value (VArs).</param>
         /// <remarks>
         /// Actual write to the endpoint is executed in the equipments.
@@ -661,9 +649,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async virtual Task CheckHealthAsync()
         {
             // TODO: Implement state check, data received check and com error update if necessary.

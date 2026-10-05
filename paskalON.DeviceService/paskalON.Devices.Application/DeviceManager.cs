@@ -116,21 +116,15 @@ namespace paskalON.Devices.Application
         protected Dictionary<int, CircuitPowerMeter> _circuitPowerMeters = new Dictionary<int, CircuitPowerMeter>();
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public Der Der { get; protected set; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<IMetricsPublisher> MetricsPublishers { get; protected set; } = new List<IMetricsPublisher>();
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<IModbusPollingEngine> ModbusPollingEngines { get; protected set; } = new List<IModbusPollingEngine>();
 
 
@@ -138,51 +132,35 @@ namespace paskalON.Devices.Application
         public ICollection<IDeviceHeartbeat> DeviceHeartbeats { get; protected set; } = new List<IDeviceHeartbeat>();
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<IC37TransmissionEngine> C37TransmissionEngines { get; protected set; } = new List<IC37TransmissionEngine>();
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<PowerConversionSystemBase> PowerConversionSystems { get => _powerConversionSystems.Values; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<BatteryBankBase> BatteryBanks { get => _batteryBanks.Values; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<SolarPanelBase> SolarPanels { get => _solarPanels.Values; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<ExternalPowerMeter> ExternalPowerMeters { get => _externalPowerMeters.Values; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<AuxiliaryPowerMeter> AuxiliaryPowerMeters { get => _auxiliaryPowerMeters.Values; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<SystemPowerMeter> SystemPowerMeters { get => _systemPowerMeters.Values; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public ICollection<CircuitPowerMeter> CircuitPowerMeters { get => _circuitPowerMeters.Values; }
 
 
@@ -214,9 +192,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public virtual async Task LoadDerAsync(IDerRepository repository)
         {
             ArgumentNullException.ThrowIfNull(repository);
@@ -299,7 +275,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <inheritdoc/>>
+        /// <inheritdoc/>
         public virtual void ConnectDevices()
         {
             _logger.LogInformation("Connect all device during startup");
@@ -316,9 +292,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task StartAllPcsAsync(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Start all Power Conversion Systems");
@@ -340,9 +314,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task StartPcsAsync(int deviceId)
         {
             _logger.LogInformation("Start Power Conversion System with Device ID {DeviceId}", deviceId);
@@ -364,9 +336,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task StopAllPcsAsync(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Stop all Power Conversion Systems");
@@ -388,9 +358,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task StopPcsAsync(int deviceId)
         {
             _logger.LogInformation("Stop Power Conversion System with Device ID {DeviceId}", deviceId);
@@ -412,9 +380,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task StandbyAllPcsAsync(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Standby all Power Conversion Systems");
@@ -436,9 +402,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task StandbyPcsAsync(int deviceId)
         {
             _logger.LogInformation("Standby Power Conversion System with {DeviceId}", deviceId);
@@ -460,9 +424,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task ConnectBatteryBankAsync(int deviceId)
         {
             _logger.LogInformation("Connect Battery Bank with {DeviceId}", deviceId);
@@ -484,9 +446,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task DisconnectBatteryBankAsync(int deviceId)
         {
             _logger.LogInformation("Disconnect Battery Bank with {DeviceId}", deviceId);
@@ -508,9 +468,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void PutIntoMaintenance(string unitName)
         {
             _logger.LogInformation("Put unit into maintenance. Unit name: {UnitName}", unitName);
@@ -526,9 +484,7 @@ namespace paskalON.Devices.Application
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task SetPcsPowerTarget(int deviceId, double activePowerWatt, double reactivePowerVar)
         {
             try

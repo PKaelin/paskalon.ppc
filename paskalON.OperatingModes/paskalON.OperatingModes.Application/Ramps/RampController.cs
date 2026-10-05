@@ -82,9 +82,7 @@ namespace paskalON.OperatingModes.Application.Ramps
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void Start(double startValue, double targetValue)
         {
             StartDate = _timeProvider.GetUtcNow();
@@ -95,18 +93,14 @@ namespace paskalON.OperatingModes.Application.Ramps
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public void Stop()
         {
             StartDate = DateTimeOffset.MinValue;
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public double Calculate()
         {
             lock (_rampBaseConfig)
@@ -133,18 +127,14 @@ namespace paskalON.OperatingModes.Application.Ramps
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public double CalculatePrecision(int precision = 3)
         {
             return Math.Round(Calculate(), precision);
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public IRampController ShallowCopy()
         {
             return (RampController)MemberwiseClone();

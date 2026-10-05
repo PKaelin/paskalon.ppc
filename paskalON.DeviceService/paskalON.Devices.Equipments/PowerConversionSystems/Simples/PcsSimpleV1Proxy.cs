@@ -45,9 +45,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
 
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override async Task StartAsync()
         {
             await _lifecycleLock.WaitAsync().ConfigureAwait(false);
@@ -81,9 +79,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override async Task StopAsync()
         {
             await _lifecycleLock.WaitAsync().ConfigureAwait(false);
@@ -117,9 +113,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public override async Task StandbyAsync(double? standbyActivePower = null)
         {
             if (_client.State == ModbusClientState.Connected)
@@ -158,9 +152,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         public override async Task SetActivePowerTargetAsync(double? value)
         {
             if (_client.State == ModbusClientState.Connected)
@@ -176,9 +168,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         public override async Task SetReactivePowerTargetAsync(double? value)
         {
             if (_client.State == ModbusClientState.Connected)
@@ -194,7 +184,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         }
 
 
-        /// <inheritdoc/>>
+        /// <inheritdoc/>
         public override async Task HeartbeatAsync(CancellationToken cancellationToken)
         {
             if (_client.State == ModbusClientState.Connected)
@@ -204,9 +194,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>
+        /// <inheritdoc/>
         protected override void RegisterDataface()
         {
             // Power

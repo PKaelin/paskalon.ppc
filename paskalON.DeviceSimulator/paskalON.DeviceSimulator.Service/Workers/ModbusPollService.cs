@@ -57,9 +57,7 @@ namespace paskalON.DeviceSimulator.Service.Workers
             _intervalMilliseconds = intervalMilliseconds;
         }
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         /// <remarks>
         /// ExecuteAsync is called only after the application starts running (app.Run).
         /// </remarks>

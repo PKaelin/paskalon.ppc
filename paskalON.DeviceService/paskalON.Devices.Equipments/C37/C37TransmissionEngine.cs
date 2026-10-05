@@ -74,9 +74,7 @@ namespace paskalON.Devices.Equipments.C37
         public ushort StreamId { get => _streamId; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public List<C37RegisterMapEntry> Mappings { get => _mappings.ToList(); }
 
 
@@ -104,9 +102,7 @@ namespace paskalON.Devices.Equipments.C37
         }
 
 
-        /// <summary>
-        /// <inheritdoc/>>
-        /// </summary>        
+        /// <inheritdoc/>
         public async Task StartStreaming(CancellationToken stoppingToken)
         {
             if (_client.State != C37ClientState.Connected)
@@ -276,4 +272,4 @@ namespace paskalON.Devices.Equipments.C37
             }
         }
     }
-}
+}

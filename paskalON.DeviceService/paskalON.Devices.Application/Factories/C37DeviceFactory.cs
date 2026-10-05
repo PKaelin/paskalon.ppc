@@ -49,9 +49,7 @@ namespace paskalON.Devices.Application.Factories
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public (IC37Dataface Dataface, IC37Client Client) Create(C37Config config)
         {
             ArgumentNullException.ThrowIfNull(config);

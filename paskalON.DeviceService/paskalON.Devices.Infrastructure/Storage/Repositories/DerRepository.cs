@@ -24,9 +24,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Repositories
         }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public async Task<DerConfig> GetDer(bool isActive = true)
         {
             List<DerConfig> ders = await Context.DerConfigs
