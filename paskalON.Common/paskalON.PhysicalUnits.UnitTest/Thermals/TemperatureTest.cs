@@ -13,6 +13,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
         public void TemperatureConstructorTest()
         {
             Temperature temperature = new Temperature(TemperatureUnit.Celsius, 12.345678901);
+
             Assert.AreEqual(12.34568, temperature.CelsiusPrecision);
         }
 
@@ -21,6 +22,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
         public void TemperatureCelciusToFahrenheitTest()
         {
             Temperature temperature = new Temperature(TemperatureUnit.Celsius, 12.3456);
+
             Assert.AreEqual(54.22208, temperature.FahrenheitPrecision);
         }
 
@@ -29,58 +31,77 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
         public void TemperatureFahrenheitToCelciusTest()
         {
             Temperature temperature = new Temperature(TemperatureUnit.Fahrenheit, 36.897);
+
             Assert.AreEqual(2.72056, temperature.CelsiusPrecision);
         }
 
 
         [TestMethod]
         [DataRow(12.34567, 12.34567, true)]
-        [DataRow(12.34567, 12.34567111, true)]
+        [DataRow(12.34567, 12.34567111, false)]
         [DataRow(12.34567, 12.34567890, false)]
         [DataRow(12.34567, 12.34544, false)]
         public void TemperatureEqualsTest(double temperature1, double temperature2, bool expected)
         {
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
+
             Assert.AreEqual(expected, rp1.Equals(rp2));
         }
 
 
         [TestMethod]
         [DataRow(12.34567, 12.34567, true)]
-        [DataRow(12.34567, 12.34567111, true)]
+        [DataRow(12.34567, 12.34567111, false)]
         [DataRow(12.34567, 12.34567890, false)]
         [DataRow(12.34567, 12.34544, false)]
         public void TemperatureEqualsObjectTest(double temperature1, double temperature2, bool expected)
         {
             object rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             object rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
+
             Assert.AreEqual(expected, rp1.Equals(rp2));
         }
 
 
         [TestMethod]
         [DataRow(12.34567, 12.34567, true)]
-        [DataRow(12.34567, 12.34567111, true)]
+        [DataRow(12.34567, 12.34567111, false)]
         [DataRow(12.34567, 12.34567890, false)]
         [DataRow(12.34567, 12.34544, false)]
         public void TemperatureEqualsOperatorTest(double temperature1, double temperature2, bool expected)
         {
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
+
             Assert.AreEqual(expected, rp1 == rp2);
         }
 
 
         [TestMethod]
+        [DataRow(12.34567, 12.34567, true)]
+        [DataRow(12.34567, 12.34567111, true)]
+        [DataRow(12.34567, 12.34567890, true)]
+        [DataRow(12.34567, 12.34544, false)]
+        public void TemperatureEqualsOperatorPrecisionTest(double temperature1, double temperature2, bool expected)
+        {
+            Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1, 3);
+            Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2, 3);
+
+            Assert.AreEqual(expected, rp1.CelsiusPrecision == rp2.CelsiusPrecision);
+        }
+
+
+        [TestMethod]
         [DataRow(12.34567, 12.34567, false)]
-        [DataRow(12.34567, 12.34567111, false)]
+        [DataRow(12.34567, 12.34567111, true)]
         [DataRow(12.34567, 12.34567890, true)]
         [DataRow(12.34567, 12.34544, true)]
         public void TemperatureNotEqualsOperatorTest(double temperature1, double temperature2, bool expected)
         {
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
+
             Assert.AreEqual(expected, rp1 != rp2);
         }
 
@@ -95,6 +116,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
             Temperature power = rp1 + rp2;
+
             Assert.AreEqual(expected, power.CelsiusPrecision);
         }
 
@@ -109,6 +131,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
             Temperature power = rp1 - rp2;
+
             Assert.AreEqual(expected, power.CelsiusPrecision);
         }
 
@@ -123,6 +146,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
             Temperature power = rp1 * rp2;
+
             Assert.AreEqual(expected, power.CelsiusPrecision);
         }
 
@@ -138,6 +162,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
             Temperature power = rp1 / rp2;
+
             Assert.AreEqual(expected, power.CelsiusPrecision);
         }
 
@@ -152,6 +177,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
         {
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
+
             Assert.AreEqual(expected, rp1 < rp2);
         }
 
@@ -167,6 +193,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
         {
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
+
             Assert.AreEqual(expected, rp1 <= rp2);
         }
 
@@ -181,6 +208,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
         {
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
+
             Assert.AreEqual(expected, rp1 > rp2);
         }
 
@@ -196,6 +224,7 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
         {
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
             Temperature rp2 = new Temperature(TemperatureUnit.Celsius, temperature2);
+
             Assert.AreEqual(expected, rp1 >= rp2);
         }
 
@@ -208,7 +237,8 @@ namespace paskalON.PhysicalUnits.UnitTest.Thermals
         public void TemperatureIsNaNOperatorTest(double temperature1, bool expected)
         {
             Temperature rp1 = new Temperature(TemperatureUnit.Celsius, temperature1);
-            Assert.AreEqual(expected, rp1.IsNaN());
+
+            Assert.AreEqual(expected, rp1.IsNaN);
         }
 
     }

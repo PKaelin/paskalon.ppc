@@ -44,10 +44,14 @@ namespace paskalON.PhysicalUnits.Thermals
         /// Temperature in celsius. If the temperature unit is set to celsius, it will return the value directly.
         /// Otherwise, it will convert the value from fahrenheit to celsius before returning it.
         /// </summary>
+        /// <remarks>
+        /// If the temperature unit is set to celsius, it will return the value directly.
+        /// Otherwise, it will convert the value from fahrenheit to celsius before returning it.
+        /// </remarks>
         public double Celsius
         {
             get => TemperatureUnit == TemperatureUnit.Celsius ? temperature : ToCelsius(temperature);
-            set => temperature = value;
+            set => temperature = TemperatureUnit == TemperatureUnit.Celsius ? value : ToFahrenheit(value);
         }
 
 
@@ -62,10 +66,14 @@ namespace paskalON.PhysicalUnits.Thermals
         /// Temperature in fahrenheit. If the temperature unit is set to fahrenheit, it will return the value directly. 
         /// Otherwise, it will convert the value from celsius to fahrenheit before returning it.
         /// </summary>
+        /// <remarks>
+        /// If the temperature unit is set to fahrenheit, it will return the value directly.
+        /// Otherwise, it will convert the value from celsius to fahrenheit before returning it.
+        /// </remarks>
         public double Fahrenheit
         {
             get => TemperatureUnit == TemperatureUnit.Fahrenheit ? temperature : ToFahrenheit(temperature);
-            set => temperature = value;
+            set => temperature = TemperatureUnit == TemperatureUnit.Fahrenheit ? value : ToCelsius(value);
         }
 
 
@@ -125,44 +133,67 @@ namespace paskalON.PhysicalUnits.Thermals
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
-        /// <returns>Integer hash code.</returns>
-        public override int GetHashCode() => temperature.GetHashCode();
+        /// <returns>Integer hash code based on the Celsius temperature.</returns>
+        public override int GetHashCode() => Celsius.GetHashCode();
 
 
         /// <summary>
-        /// Returns a value indicating whether this instance is equal.
+        /// Returns a value indicating whether this instance is equal to the specified object.
         /// </summary>
         /// <param name="obj">An object to compare with this instance.</param>
         /// <returns>
-        /// True if obj represents the same temperature value as this instance or otherwise false.
+        /// True if obj represents the same temperature value as this instance;
+        /// otherwise false.
         /// </returns>
-        public readonly override bool Equals(object? obj) => obj is Temperature other && Equals(other);
+        public override bool Equals(object? obj) => obj is Temperature other && Equals(other);
 
 
         /// <summary>
-        /// Returns a value indicating whether this instance is equal.
+        /// Returns a value indicating whether this instance is equal to the specified temperature.
         /// </summary>
         /// <param name="other">A Temperature to compare with this instance.</param>
-        /// True if obj represents the same temperature value as this instance or otherwise false.
-        public readonly bool Equals(Temperature other) => this == other;
+        /// <returns>
+        /// True if both temperatures represent the same exact physical temperature;
+        /// otherwise false.
+        /// </returns>
+        public bool Equals(Temperature other) => Celsius == other.Celsius;
+
+
+        /// <summary>
+        /// Determines whether this temperature is equal to another temperature
+        /// using the specified number of decimal places.
+        /// </summary>
+        /// <param name="other">The temperature to compare.</param>
+        /// <param name="precision">Number of decimal places used for the comparison.</param>
+        /// <returns>
+        /// True if both temperatures are equal after rounding to the specified precision;
+        /// otherwise false.
+        /// </returns>
+        public bool Equals(Temperature other, int precision) => Math.Round(Celsius, precision) == Math.Round(other.Celsius, precision);
 
 
         /// <summary>
         /// Indicates whether two <see cref="Temperature"/> instances are equal.
         /// </summary>
-        /// <param name="temp1">The first temperature value to compare.</param>
-        /// <param name="temp2">The second temperature value to compare.</param>
-        /// <returns>True if the values of temp1 and temp2 are equal or otherwise false.</returns>
-        public static bool operator ==(Temperature temp1, Temperature temp2) => Math.Round(temp1.Celsius, temp1.Precision) == Math.Round(temp2.Celsius, temp2.Precision);
+        /// <param name="temp1">The first temperature value.</param>
+        /// <param name="temp2">The second temperature value.</param>
+        /// <returns>
+        /// True if both temperatures represent the same exact physical temperature;
+        /// otherwise false.
+        /// </returns>
+        public static bool operator ==(Temperature temp1, Temperature temp2) => temp1.Equals(temp2);
 
 
         /// <summary>
         /// Indicates whether two <see cref="Temperature"/> instances are not equal.
         /// </summary>
-        /// <param name="temp1">The first temperature value to compare.</param>
-        /// <param name="temp2">The second temperature value to compare.</param>
-        /// <returns>True if the values of temp1 and temp2 are not  equal or otherwise false.</returns>
-        public static bool operator !=(Temperature temp1, Temperature temp2) => Math.Round(temp1.Celsius, temp1.Precision) != Math.Round(temp2.Celsius, temp2.Precision);
+        /// <param name="temp1">The first temperature value.</param>
+        /// <param name="temp2">The second temperature value.</param>
+        /// <returns>
+        /// True if the temperatures represent different exact physical temperatures;
+        /// otherwise false.
+        /// </returns>
+        public static bool operator !=(Temperature temp1, Temperature temp2) => temp1.Equals(temp2) == false;
 
 
         /// <summary>
@@ -180,7 +211,10 @@ namespace paskalON.PhysicalUnits.Thermals
         /// </summary>
         /// <param name="temp1">The first temperature value.</param>
         /// <param name="temp2">The second temperature value to subtract.</param>
-        /// <returns>Sum of the two <see cref="Temperature"./></returns>
+        /// <returns>Difference of the two <see cref="Temperature"./></returns>
+        /// <remarks>
+        /// The subtraction is done by subtracting the Celsius or Fahrenheit values of both instances, depending on the temperature unit of the first instance.
+        /// </remarks>
         public static Temperature operator -(Temperature temp1, Temperature temp2) =>
             new(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ? temp1.Celsius - temp2.Celsius : temp1.Fahrenheit - temp2.Fahrenheit);
 
@@ -191,6 +225,9 @@ namespace paskalON.PhysicalUnits.Thermals
         /// <param name="temp1">The first temperature value.</param>
         /// <param name="temp2">The second temperature value.</param>
         /// <returns>Sum of the two <see cref="Temperature"./></returns>
+        /// <remarks>
+        /// The multiplication is done by multiplying the Celsius or Fahrenheit values of both instances, depending on the temperature unit of the first instance.
+        /// </remarks>
         public static Temperature operator *(Temperature temp1, Temperature temp2) =>
             new(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ? temp1.Celsius * temp2.Celsius : temp1.Fahrenheit * temp2.Fahrenheit);
 
@@ -200,7 +237,11 @@ namespace paskalON.PhysicalUnits.Thermals
         /// </summary>
         /// <param name="temp1">The first temperature value.</param>
         /// <param name="temp2">The second temperature value to divide the first one with.</param>
-        /// <returns>Sum of the two <see cref="Temperature"./></returns>
+        /// <returns>Quotient of the two <see cref="Temperature"./></returns>
+        /// <remarks>
+        /// The division is done by dividing the Celsius or Fahrenheit values of both instances, depending on the temperature unit of the first instance.
+        /// If the second temperature value is zero, the result will be <see cref="double.NaN"/>.
+        /// </remarks>
         public static Temperature operator /(Temperature temp1, Temperature temp2) =>
             new(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ?
                 (temp2.Celsius != 0 ? temp1.Celsius / temp2.Celsius : double.NaN) :
@@ -284,10 +325,8 @@ namespace paskalON.PhysicalUnits.Thermals
         /// Checks whether <see cref="Temperature"/> is NaN.
         /// </summary>
         /// <returns>True if <see cref="Temperature"/> is NaN. Otherwise false.</returns>
-        public bool IsNaN()
-        {
-            return double.IsNaN(Celsius);
-        }
+        public bool IsNaN { get => double.IsNaN(Celsius); }
+
 
 
         /// <summary>
@@ -298,10 +337,10 @@ namespace paskalON.PhysicalUnits.Thermals
         {
             if (TemperatureUnit == TemperatureUnit.Fahrenheit)
             {
-                return $"{Fahrenheit.ToString(CultureInfo.CurrentCulture)} Fahrenheit";
+                return $"{Fahrenheit.ToString(CultureInfo.CurrentCulture)} °F";
             }
 
-            return $"{Celsius.ToString(CultureInfo.CurrentCulture)} Celsius";
+            return $"{Celsius.ToString(CultureInfo.CurrentCulture)} °C";
         }
     }
 }
