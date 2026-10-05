@@ -54,6 +54,7 @@ namespace paskalON.Infrastructure.Repositories
         /// </summary>
         public async Task<Action<TEntity>> CreateAsync(TEntity entity)
         {
+            entity.ChangedDate = DateTimeOffset.UtcNow;
             EntityEntry<TEntity> entry = await _dbSet.AddAsync(entity);
 
             return x => x.Id = entry.Entity.Id;

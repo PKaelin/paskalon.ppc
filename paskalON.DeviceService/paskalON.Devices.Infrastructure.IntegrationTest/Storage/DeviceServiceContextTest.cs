@@ -16,7 +16,7 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
     public class DeviceServiceContextTest : DatabaseTestBase
     {
         [TestMethod]
-        public async Task CreateDeviceServiceContext()
+        public async Task CreateDeviceServiceContextTest()
         {
             await using DeviceServiceContext context = CreateDbContext<DeviceServiceContext>();
             context.Database.EnsureDeleted();
@@ -27,11 +27,28 @@ namespace paskalON.Devices.Infrastructure.IntegrationTest.Storage
 
 
         [TestMethod]
-        public async Task CreateDeviceServiceMigrationContext()
+        public async Task CreateDeviceServiceMigrationContextTest()
         {
             await using DeviceServiceContext context = CreateDbContext<DeviceServiceContext>();
             context.Database.EnsureDeleted();
             await context.Database.MigrateAsync();
+        }
+
+
+        [TestMethod]
+        public async Task CreateDeviceServiceCaseInsensitiveTest()
+        {
+            await using DeviceServiceContext context = CreateDbContext<DeviceServiceContext>();
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.MigrateAsync();
+
+            DerConfig derUpper = new DerConfig { ChangedBy = "Test", Name = "DER1" };
+            DerConfig derLower = new DerConfig { ChangedBy = "Test", Name = "der1" };
+
+            context.DerConfigs.Add(derUpper);
+            context.DerConfigs.Add(derLower);
+
+            await Assert.ThrowsAsync<DbUpdateException>(async () => await context.SaveChangesAsync());
         }
 
 

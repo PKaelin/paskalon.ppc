@@ -16,7 +16,7 @@ namespace paskalON.Domains.Contracts
         /// <typeparam name="TProperty">The type of the property to register.</typeparam>
         /// <param name="name">The name of the property.</param>
         /// <param name="getter">A function to get the value of the property from an instance of T.</param>
-        /// /// <remarks>
+        /// <remarks>
         /// Syntax func: nameof(property/field), x => x.PropertyName/x.FieldName;
         /// </remarks>
         void Register<TProperty>(string name, Func<T, TProperty> getter);

@@ -24,6 +24,10 @@ namespace paskalON.Domains
         /// <summary>
         /// When the change happened.
         /// </summary>
-        public DateTimeOffset ChangedDate { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset ChangedDate
+        {
+            get => field;
+            set => field = value.ToUniversalTime();
+        } = DateTimeOffset.UtcNow;
     }
 }

@@ -21,10 +21,14 @@ namespace paskalON.Domains.Configurations
             // Tell EF Core to push all properties down to concrete tables.
             builder.UseTpcMappingStrategy();
 
-            builder.Property(x => x.Name)
-                .HasMaxLength(250)
-                .IsRequired();
-            builder.HasIndex(x => x.Name).IsUnique();
+            // Force the column type to citext
+            builder.Property(e => e.Name)
+                   .UseCollation("case_insensitive_collation")
+                   .HasMaxLength(250)
+                   .IsRequired();
+
+            builder.HasIndex(e => e.Name)
+                   .IsUnique();
         }
     }
 }

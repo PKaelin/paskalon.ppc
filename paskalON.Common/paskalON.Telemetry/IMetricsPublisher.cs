@@ -41,7 +41,7 @@ namespace paskalON.Telemetry
         /// <param name="metricType">Metric type <see cref="MetricType"/>.</param>
         /// <param name="getter">A function to get the value of the property from an instance of T.</param>
         /// <param name="interval">The interval at which to publish the property if publishing is required.</param>
-        /// /// <remarks>
+        /// <remarks>
         /// Syntax func: nameof(property/field), x => x.PropertyName/x.FieldName;
         /// </remarks>
         void Register<TDevice, TProperty>(TDevice instance, string name, MetricType metricType, Func<TDevice, TProperty?> getter, int interval = 1) where TProperty : struct;

@@ -37,6 +37,11 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         public double TestGetReactiveSetpoint() { return GetReactivePowerTargetSetpoint(); }
         public double TestApplyActiveLimits(double targetSetpoint) { return ApplyActiveLimits(targetSetpoint); }
         public double TestApplyReactiveLimits(double targetSetpoint) { return ApplyReactiveLimits(targetSetpoint); }
+
+        public override Task CalculateAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
     }
 
 

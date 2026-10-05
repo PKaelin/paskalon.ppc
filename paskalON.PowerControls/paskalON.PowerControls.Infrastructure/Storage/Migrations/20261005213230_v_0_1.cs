@@ -11,6 +11,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:CollationDefinition:case_insensitive_collation", "und-u-ks-level2,und-u-ks-level2,icu,False");
+
             migrationBuilder.CreateSequence(
                 name: "DomainBaseSequence");
 
@@ -37,7 +40,7 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
@@ -59,7 +62,7 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: true),
                     MaximumActivePowerWatt = table.Column<double>(type: "double precision", nullable: true),
                     MinimumActivePowerWatt = table.Column<double>(type: "double precision", nullable: true),
@@ -78,7 +81,7 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
@@ -102,7 +105,7 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: true),
                     MaximumActivePowerWattRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false),
                     MaximumReactivePowerVarsRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false)
@@ -149,7 +152,7 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: true),
                     DeratePerUnitStopped = table.Column<bool>(type: "boolean", nullable: false),
                     DeratePerUnitInMaintenance = table.Column<bool>(type: "boolean", nullable: false),
@@ -170,7 +173,7 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
@@ -190,7 +193,7 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: true),
                     MaximumActivePowerWattRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false),
                     MaximumReactivePowerVarsRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false)
@@ -199,6 +202,18 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                 {
                     table.PrimaryKey("PK_SystemRampConstraintConfig", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Configuration_Key",
+                table: "Configuration",
+                column: "Key",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DerUnitEnergyStoragePowerControlConfig_DerUnitName",
+                table: "DerUnitEnergyStoragePowerControlConfig",
+                column: "DerUnitName",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_DerUnitEnergyStoragePowerControlConfig_Name",
@@ -216,6 +231,12 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                 name: "IX_DerUnitPowerConstraintConfig_PowerControlBaseConfigId",
                 table: "DerUnitPowerConstraintConfig",
                 column: "PowerControlBaseConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DerUnitPowerControlConfig_DerUnitName",
+                table: "DerUnitPowerControlConfig",
+                column: "DerUnitName",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_DerUnitPowerControlConfig_Name",

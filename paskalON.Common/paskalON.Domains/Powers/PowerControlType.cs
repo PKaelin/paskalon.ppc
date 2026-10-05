@@ -11,8 +11,13 @@ namespace paskalON.Domains.Configs
     /// Same power control can be used by multiple systems like PowerConstraintConfig, DerUnitPowerConstraintConfig, etc.
     /// As they are flags they can be used like Bess|Solar to define that they can be used for both BESS and Solar systems.
     /// </remarks>
+    [Flags]
     public enum PowerControlType
     {
+        /// <summary>
+        /// No power control type defined: 0000000000
+        /// </summary>
+        None = 0x00,
         /// <summary>
         /// Battery energy storage type: 0000000001
         /// </summary>

@@ -95,6 +95,8 @@ namespace paskalON.OperatingModes.Infrastructure.Storage
         /// <param name="modelBuilder">Model builder instance <see cref="ModelBuilder"/>.</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Use a non-deterministic ICU collation to be case-insensitive text
+            modelBuilder.HasCollation("case_insensitive_collation", locale: "und-u-ks-level2", provider: "icu", deterministic: false);
             // Configure inheritance mapping in the model configurations (see: ConfigurationBaseConfiguration)
             // Table-per-Hierarchy (TPH), Table-per-Type (TPT), Table-per-Concrete-type (TPC)
             modelBuilder.Entity<History>().ToTable(t => t.ExcludeFromMigrations(true));

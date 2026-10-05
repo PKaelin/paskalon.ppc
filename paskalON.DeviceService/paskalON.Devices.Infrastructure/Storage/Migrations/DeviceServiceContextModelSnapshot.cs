@@ -17,6 +17,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("Npgsql:CollationDefinition:case_insensitive_collation", "und-u-ks-level2,und-u-ks-level2,icu,False")
                 .HasAnnotation("ProductVersion", "10.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -190,6 +191,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<int>("StartupDelayForDevices")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
                     b.ToTable("SystemConfig");
                 });
 
@@ -212,6 +216,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.HasIndex("Key")
+                        .IsUnique();
+
                     b.ToTable((string)null);
                 });
 
@@ -222,7 +229,8 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("character varying(250)");
+                        .HasColumnType("character varying(250)")
+                        .UseCollation("case_insensitive_collation");
 
                     b.HasIndex("Name")
                         .IsUnique();

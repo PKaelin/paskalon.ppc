@@ -14,6 +14,8 @@ namespace paskalON.Domains.Configurations
             // Tell EF Core to push all properties down to concrete tables
             builder.UseTpcMappingStrategy();
 
+            builder.HasIndex(x => x.Key).IsUnique();
+
             builder.Property(x => x.Key)
                 .HasMaxLength(250)
                 .IsRequired();

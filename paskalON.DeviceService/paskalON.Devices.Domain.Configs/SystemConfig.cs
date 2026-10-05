@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Domains;
+using paskalON.Domains.Configs;
 
 namespace paskalON.Devices.Domain.Configs
 {
@@ -36,6 +37,24 @@ namespace paskalON.Devices.Domain.Configs
         /// If this value is less than 100 milliseconds it will cause an exception.
         /// </summary>
         private const long MinimumHeartbeatIntervalMilliseconds = 100;
+
+
+        /// <summary>
+        /// Device service type.
+        /// </summary>
+        /// <remarks>
+        /// Though this is a flag this device service should be configured to only serve one type.
+        /// </remarks>
+        public required PowerControlType Type
+        {
+            get;
+            set
+            {
+                int v = (int)value;
+                if (Enum.IsDefined(typeof(PowerControlType), value) == false) throw new ArgumentException("Only one type per device service is allowed.");
+                field = value;
+            }
+        }
 
 
         /// <summary>

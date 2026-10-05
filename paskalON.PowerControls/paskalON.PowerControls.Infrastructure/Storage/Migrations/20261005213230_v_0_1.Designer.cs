@@ -12,7 +12,7 @@ using paskalON.PowerControls.Infrastructure.Storage;
 namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(PowerControlContext))]
-    [Migration("20260925190653_v_0_1")]
+    [Migration("20261005213230_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -20,6 +20,7 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("Npgsql:CollationDefinition:case_insensitive_collation", "und-u-ks-level2,und-u-ks-level2,icu,False")
                 .HasAnnotation("ProductVersion", "10.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -87,6 +88,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.HasIndex("Key")
+                        .IsUnique();
+
                     b.ToTable((string)null);
                 });
 
@@ -97,7 +101,8 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("character varying(250)");
+                        .HasColumnType("character varying(250)")
+                        .UseCollation("case_insensitive_collation");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -289,6 +294,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     b.Property<int>("DistributionStrategyType")
                         .HasColumnType("integer");
 
+                    b.HasIndex("DerUnitName")
+                        .IsUnique();
+
                     b.ToTable("DerUnitEnergyStoragePowerControlConfig");
                 });
 
@@ -309,6 +317,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 
                     b.Property<double?>("Weight")
                         .HasColumnType("double precision");
+
+                    b.HasIndex("DerUnitName")
+                        .IsUnique();
 
                     b.ToTable("DerUnitPowerControlConfig");
                 });

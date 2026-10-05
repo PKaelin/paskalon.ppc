@@ -12,6 +12,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:CollationDefinition:case_insensitive_collation", "und-u-ks-level2,und-u-ks-level2,icu,False");
+
             migrationBuilder.CreateSequence(
                 name: "DomainBaseSequence");
 
@@ -22,7 +25,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     ClassName = table.Column<string>(type: "text", nullable: false),
                     BatteryType = table.Column<int>(type: "integer", nullable: false),
                     NameplateCapacity = table.Column<double>(type: "double precision", nullable: false),
@@ -59,7 +62,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     ConnectionTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     DisconnectionTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     ConnectRetryCount = table.Column<int>(type: "integer", nullable: false),
@@ -94,7 +97,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false)
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation")
                 },
                 constraints: table =>
                 {
@@ -108,7 +111,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     DerUnitConfigId = table.Column<int>(type: "integer", nullable: false),
                     ModbusConfigId = table.Column<int>(type: "integer", nullable: true),
@@ -130,7 +133,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     SlaveHeartbeatRegister = table.Column<int>(type: "integer", nullable: true),
                     MasterHeartbeatRegister = table.Column<int>(type: "integer", nullable: true),
                     MasterHeartbeatPollingInterval = table.Column<int>(type: "integer", nullable: false)
@@ -147,7 +150,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     PollingFactorClass1 = table.Column<int>(type: "integer", nullable: false),
                     PollingFactorClass2 = table.Column<int>(type: "integer", nullable: false),
                     PollingFactorClass3 = table.Column<int>(type: "integer", nullable: false),
@@ -193,7 +196,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     ClassName = table.Column<string>(type: "text", nullable: false),
                     NameplateMaximumActivePower = table.Column<double>(type: "double precision", nullable: false),
                     NameplateMaximumReactivePower = table.Column<double>(type: "double precision", nullable: false),
@@ -216,7 +219,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     ApparentPower = table.Column<string>(type: "text", nullable: true),
                     CurrentA = table.Column<string>(type: "text", nullable: true),
                     CurrentB = table.Column<string>(type: "text", nullable: true),
@@ -254,7 +257,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     ClassName = table.Column<string>(type: "text", nullable: false),
                     MinimumVoltage = table.Column<double>(type: "double precision", nullable: false),
                     MaximumVoltage = table.Column<double>(type: "double precision", nullable: false),
@@ -273,6 +276,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
                     MetricsIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     PollingIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     DeviceIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
@@ -330,7 +334,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     C37ConnectionConfigId = table.Column<int>(type: "integer", nullable: false),
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
@@ -360,7 +364,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DerConfigId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -381,7 +385,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     GenericModbusMapConfigId = table.Column<int>(type: "integer", nullable: false),
                     ModbusDataType = table.Column<int>(type: "integer", nullable: false),
                     ModbusNumber = table.Column<int>(type: "integer", nullable: false),
@@ -407,7 +411,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     GenericModbusMapConfigId = table.Column<int>(type: "integer", nullable: false),
                     ClassName = table.Column<string>(type: "text", nullable: false)
                 },
@@ -429,7 +433,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     GenericModbusMapConfigId = table.Column<int>(type: "integer", nullable: false),
                     ModbusDataType = table.Column<int>(type: "integer", nullable: false),
                     ModbusNumber = table.Column<int>(type: "integer", nullable: false),
@@ -455,7 +459,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     GenericModbusMapConfigId = table.Column<int>(type: "integer", nullable: false),
                     ModbusDataType = table.Column<int>(type: "integer", nullable: false),
                     ModbusNumber = table.Column<int>(type: "integer", nullable: false),
@@ -483,7 +487,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     GenericModbusMapConfigId = table.Column<int>(type: "integer", nullable: false),
                     ModbusDataType = table.Column<int>(type: "integer", nullable: false),
                     ModbusNumber = table.Column<int>(type: "integer", nullable: false),
@@ -511,7 +515,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     ModbusConnectionConfigId = table.Column<int>(type: "integer", nullable: false),
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
@@ -536,7 +540,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     StartingHoldingRegister = table.Column<int>(type: "integer", nullable: false),
                     StartingInputRegister = table.Column<int>(type: "integer", nullable: false),
                     StartingDiscreteInput = table.Column<int>(type: "integer", nullable: false),
@@ -686,7 +690,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     DerUnitConfigId = table.Column<int>(type: "integer", nullable: false),
                     PowerConversionSystemDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
@@ -739,7 +743,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DerGroupConfigId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -760,7 +764,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     GenericModbusMapConfigId = table.Column<int>(type: "integer", nullable: true),
                     ClassName = table.Column<string>(type: "text", nullable: false),
                     GridConnectedId = table.Column<int>(type: "integer", nullable: true),
@@ -793,7 +797,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     ModbusConnectionConfigId = table.Column<int>(type: "integer", nullable: false),
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
@@ -836,7 +840,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     ModbusConnectionConfigId = table.Column<int>(type: "integer", nullable: false),
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
@@ -873,7 +877,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     GenericModbusMapConfigId = table.Column<int>(type: "integer", nullable: true),
                     ClassName = table.Column<string>(type: "text", nullable: false),
                     CircuitBreakerOperation = table.Column<int>(type: "integer", nullable: false),
@@ -978,7 +982,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     PowerMeterMapC37ConfigId = table.Column<int>(type: "integer", nullable: true),
                     PowerMeterMapModbusConfigId = table.Column<int>(type: "integer", nullable: true),
                     ClassName = table.Column<string>(type: "text", nullable: false),
@@ -1007,7 +1011,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DerCircuitConfigId = table.Column<int>(type: "integer", nullable: false),
                     InMaintenanceMode = table.Column<bool>(type: "boolean", nullable: false),
                     IncludeBatteryInOperations = table.Column<bool>(type: "boolean", nullable: false)
@@ -1030,7 +1034,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DerCircuitConfigId = table.Column<int>(type: "integer", nullable: false),
                     InMaintenanceMode = table.Column<bool>(type: "boolean", nullable: false),
                     SolarPanelConfigId = table.Column<int>(type: "integer", nullable: false)
@@ -1053,7 +1057,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     ModbusConnectionConfigId = table.Column<int>(type: "integer", nullable: false),
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
@@ -1096,7 +1100,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     ModbusConnectionConfigId = table.Column<int>(type: "integer", nullable: false),
                     Address = table.Column<string>(type: "text", nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
@@ -1139,7 +1143,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     PowerMeterDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     ModbusConfigId = table.Column<int>(type: "integer", nullable: true),
@@ -1182,7 +1186,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     PowerMeterDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     ModbusConfigId = table.Column<int>(type: "integer", nullable: true),
@@ -1225,7 +1229,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     PowerMeterDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     ModbusConfigId = table.Column<int>(type: "integer", nullable: true),
@@ -1268,7 +1272,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     PowerMeterDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
                     ModbusConfigId = table.Column<int>(type: "integer", nullable: true),
@@ -1311,7 +1315,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     DerUnitConfigId = table.Column<int>(type: "integer", nullable: false),
                     BatteryBankDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
@@ -1347,7 +1351,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     DeviceId = table.Column<int>(type: "integer", nullable: false),
                     DerUnitConfigId = table.Column<int>(type: "integer", nullable: false),
                     SolarPanelDeviceConfigId = table.Column<int>(type: "integer", nullable: false),
@@ -1500,6 +1504,12 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 column: "BatteryBankDeviceConfigId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BatteryBankDeviceCustomConfig_Key",
+                table: "BatteryBankDeviceCustomConfig",
+                column: "Key",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_C37Config_C37ConnectionConfigId",
                 table: "C37Config",
                 column: "C37ConnectionConfigId");
@@ -1642,6 +1652,12 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 name: "IX_CircuitPowerMeterConfig_RedundantPowerMeterConfigId",
                 table: "CircuitPowerMeterConfig",
                 column: "RedundantPowerMeterConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Configuration_Key",
+                table: "Configuration",
+                column: "Key",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_DerBatteryStorageUnitConfig_DerCircuitConfigId",
@@ -1923,6 +1939,12 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 name: "IX_PowerConversionSystemDeviceConfig_Name",
                 table: "PowerConversionSystemDeviceConfig",
                 column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PowerConversionSystemDeviceCustomConfig_Key",
+                table: "PowerConversionSystemDeviceCustomConfig",
+                column: "Key",
                 unique: true);
 
             migrationBuilder.CreateIndex(
