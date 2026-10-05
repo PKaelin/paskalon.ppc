@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Diagnostics.Metrics.Testing;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace paskalON.Telemetry.UnitTest
 {
@@ -50,7 +51,7 @@ namespace paskalON.Telemetry.UnitTest
         [TestMethod]
         public void PublishNothingInitializedTest()
         {
-            MetricsPublisher publisher = new MetricsPublisher();
+            MetricsPublisher publisher = new MetricsPublisher(NullLogger<MetricsPublisher>.Instance);
             MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
             Assert.ThrowsExactly<ApplicationException>(() => publisher.Publish(1));
         }
@@ -59,7 +60,7 @@ namespace paskalON.Telemetry.UnitTest
         [TestMethod]
         public void RegisterNothingInitializedTest()
         {
-            MetricsPublisher publisher = new MetricsPublisher();
+            MetricsPublisher publisher = new MetricsPublisher(NullLogger<MetricsPublisher>.Instance);
             MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
             Assert.ThrowsExactly<ApplicationException>(() => publisher.Register<MetricsPublisherHelper, int>(helper, "CounterValue", MetricType.Counter, x => x.CounterValue, 1));
         }
@@ -68,7 +69,7 @@ namespace paskalON.Telemetry.UnitTest
         [TestMethod]
         public void RegisterTwiceWithInitializedTest()
         {
-            MetricsPublisher publisher = new MetricsPublisher();
+            MetricsPublisher publisher = new MetricsPublisher(NullLogger<MetricsPublisher>.Instance);
             MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
             publisher.Initialize(nameof(MetricsPublisherHelper), _tags);
             publisher.Register<MetricsPublisherHelper, int>(helper, "CounterValue", MetricType.Counter, x => x.CounterValue, 1);
@@ -77,9 +78,20 @@ namespace paskalON.Telemetry.UnitTest
 
 
         [TestMethod]
+        public void RegisterTwiceWithInitializedCaseSensitiveTest()
+        {
+            MetricsPublisher publisher = new MetricsPublisher(NullLogger<MetricsPublisher>.Instance);
+            MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
+            publisher.Initialize(nameof(MetricsPublisherHelper), _tags);
+            publisher.Register<MetricsPublisherHelper, int>(helper, "CounterValue", MetricType.Counter, x => x.CounterValue, 1);
+            Assert.ThrowsExactly<ArgumentException>(() => publisher.Register<MetricsPublisherHelper, int>(helper, "countervalue", MetricType.Counter, x => x.CounterValue, 1));
+        }
+
+
+        [TestMethod]
         public void PublishAllIntervalOfOneTest()
         {
-            MetricsPublisher publisher = new MetricsPublisher();
+            MetricsPublisher publisher = new MetricsPublisher(NullLogger<MetricsPublisher>.Instance);
             MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
             string counterValueName = "countervalue";
             string gaugeValueName = "gaugevalue";
@@ -105,7 +117,7 @@ namespace paskalON.Telemetry.UnitTest
         [TestMethod]
         public void PublishAllIntervalOfOneAndTwoNullableTest()
         {
-            MetricsPublisher publisher = new MetricsPublisher();
+            MetricsPublisher publisher = new MetricsPublisher(NullLogger<MetricsPublisher>.Instance);
             MetricsPublisherHelperNullable helper = new MetricsPublisherHelperNullable(publisher) { CounterValue = 1, GaugeValue = null, UpDownValue = null };
             string counterValueName = "countervalue";
             string gaugeValueName = "gaugevalue";
@@ -133,7 +145,7 @@ namespace paskalON.Telemetry.UnitTest
         [TestMethod]
         public void PublishAllIntervalOneTwoThreeTest()
         {
-            MetricsPublisher publisher = new MetricsPublisher();
+            MetricsPublisher publisher = new MetricsPublisher(NullLogger<MetricsPublisher>.Instance);
             MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
             string counterValueName = "countervalue";
             string gaugeValueName = "gaugevalue";
@@ -176,7 +188,7 @@ namespace paskalON.Telemetry.UnitTest
         [TestMethod]
         public void PublishAllIntervalOfOneEnabledFalseTest()
         {
-            MetricsPublisher publisher = new MetricsPublisher();
+            MetricsPublisher publisher = new MetricsPublisher(NullLogger<MetricsPublisher>.Instance);
             MetricsPublisherHelper helper = new MetricsPublisherHelper(publisher) { CounterValue = 1, GaugeValue = 2, UpDownValue = 3 };
             string counterValueName = "countervalue";
             string gaugeValueName = "gaugevalue";

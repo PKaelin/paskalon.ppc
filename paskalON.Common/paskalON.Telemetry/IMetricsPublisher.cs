@@ -20,7 +20,7 @@ namespace paskalON.Telemetry
         /// <summary>
         /// The logical factory or container that groups related instruments.
         /// </summary>
-        public Meter? Meter { get; }
+        Meter? Meter { get; }
 
 
         /// <summary>

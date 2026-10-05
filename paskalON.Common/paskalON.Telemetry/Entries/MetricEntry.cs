@@ -80,6 +80,7 @@ namespace paskalON.Telemetry.Entries
         {
             ArgumentNullException.ThrowIfNull(instance);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            ArgumentNullException.ThrowIfNull(instrument);
             ArgumentNullException.ThrowIfNull(getter);
 
             Instance = instance;
@@ -92,18 +93,23 @@ namespace paskalON.Telemetry.Entries
 
             if (instrument is Counter<TProperty> counter)
             {
+                // The value you provide is cumulative (Add(1), Add(2) => Metrics = 3)
                 _updater = value => counter.Add(value, TagList);
             }
             else if (instrument is UpDownCounter<TProperty> up_down)
             {
+                // The value you provide is cumulative (Add(3), Add(-1) => Metrics = 2)
                 _updater = value => up_down.Add(value, TagList);
             }
             else if (instrument is Gauge<TProperty> gauge)
             {
+                // The value you provide is the current value (Record(1), Record(4) => Metrics = 4)
                 _updater = value => gauge.Record(value, TagList);
             }
             else if (instrument is Histogram<TProperty> histogram)
             {
+                // The value is used to track the statistical distribution of independent events by sorting every
+                // value you record into ranges (buckets) to calculate counts, sums, and percentiles.
                 _updater = value => histogram.Record(value, TagList);
             }
             else
