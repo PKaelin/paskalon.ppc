@@ -10,23 +10,33 @@ namespace paskalON.Dataface.Modbus
     public class ModbusRegister : IModbusRegister, IModbusDataface
     {
         /// <summary>
-        /// <inheritdoc/>
+        /// List of IModbusRegisterEntry registrations.
         /// </summary>
+        private List<IModbusRegisterEntry> _registers = new List<IModbusRegisterEntry>();
+
+
+        /// <summary>
+        /// List of Modbus polling ranges.
+        /// </summary>
+        private List<ModbusPollingRangeEntry> _pollingRanges = new List<ModbusPollingRangeEntry>();
+
+
+        /// <inheritdoc/>
         public string Name { get; init; }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// IModbusDataface implementation of Registers <see cref="IModbusDataface"/>.
-        /// </summary>
-        public List<IModbusRegisterEntry> Registers { get; } = new List<IModbusRegisterEntry>();
+        public IReadOnlyList<IModbusRegisterEntry> Registers
+        {
+            get => _registers.AsReadOnly();
+        }
 
 
-        /// <summary>
         /// <inheritdoc/>
-        /// IModbusDataface implementation of PollingRanges <see cref="IModbusDataface"/>.
-        /// </summary>
-        public List<ModbusPollingRangeEntry> PollingRanges { get; } = new List<ModbusPollingRangeEntry>();
+        public IReadOnlyList<ModbusPollingRangeEntry> PollingRanges
+        {
+            get => _pollingRanges.AsReadOnly();
+        }
 
 
         /// <summary>
@@ -35,6 +45,8 @@ namespace paskalON.Dataface.Modbus
         /// <param name="name">A name and good identifier of the data face.</param>
         public ModbusRegister(string name)
         {
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(name);
+
             Name = name;
         }
 
@@ -68,19 +80,20 @@ namespace paskalON.Dataface.Modbus
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
             ArgumentNullException.ThrowIfNull(setter);
             ArgumentOutOfRangeException.ThrowIfLessThan(offset, 0);
+            ArgumentOutOfRangeException.ThrowIfZero(scale);
 
-            if (Registers.Any(r => r.Name.ToLower() == name.ToLower()) == true)
+            if (_registers.Any(r => r.Name.ToLower() == name.ToLower()) == true)
             {
                 throw new ArgumentException($"Register with name {name} is already registered");
             }
 
-            if (Registers.Any(r => r.Register == register) == true)
+            if (_registers.Any(r => r.Register == register) == true)
             {
                 throw new ArgumentException($"Register with register {register} is already registered");
             }
 
 
-            Registers.Add(new ModbusRegisterEntry<TDevice, TProperty?>(instance, name, setter, register, scale, dataType, offset));
+            _registers.Add(new ModbusRegisterEntry<TDevice, TProperty?>(instance, name, setter, register, scale, dataType, offset));
         }
 
 
@@ -93,12 +106,12 @@ namespace paskalON.Dataface.Modbus
             ArgumentOutOfRangeException.ThrowIfLessThan(to, from);
             ArgumentOutOfRangeException.ThrowIfLessThan(interval, 0);
 
-            if (PollingRanges.Any(r => r.From == from) == true)
+            if (_pollingRanges.Any(r => r.From == from) == true)
             {
                 throw new ArgumentException($"Register range with from register {from} is already registered");
             }
 
-            PollingRanges.Add(new ModbusPollingRangeEntry(from, to, registryType, interval));
+            _pollingRanges.Add(new ModbusPollingRangeEntry(from, to, registryType, interval));
         }
     }
 }

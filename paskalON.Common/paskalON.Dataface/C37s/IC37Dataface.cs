@@ -12,6 +12,6 @@ namespace paskalON.Dataface.C37s
         /// <summary>
         /// List of IC37RegisterEntry registrations.
         /// </summary>
-        List<IC37RegisterEntry> Registers { get; }
+        IReadOnlyList<IC37RegisterEntry> Registers { get; }
     }
 }

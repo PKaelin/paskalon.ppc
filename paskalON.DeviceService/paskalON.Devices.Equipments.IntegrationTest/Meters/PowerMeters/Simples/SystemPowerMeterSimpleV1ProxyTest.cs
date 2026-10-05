@@ -4,7 +4,6 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using paskalON.Communication.Protocols.C37118.Types;
 using paskalON.Dataface.C37s;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;

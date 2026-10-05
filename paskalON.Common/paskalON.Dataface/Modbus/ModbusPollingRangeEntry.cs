@@ -46,7 +46,6 @@ namespace paskalON.Dataface.Modbus
         /// <param name="interval">The interval based on a polling definition.</param>
         public ModbusPollingRangeEntry(ushort from, ushort to, ModbusRegistryType registryType, int interval)
         {
-            ArgumentOutOfRangeException.ThrowIfLessThan(to, from);
             ArgumentOutOfRangeException.ThrowIfGreaterThan(from, to);
 
             From = from;

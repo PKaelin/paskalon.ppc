@@ -2,8 +2,8 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Communication.Protocols.C37118.Types;
 using paskalON.Communication.Protocols.Modbus.Configurations;
+using paskalON.Dataface.C37s;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;

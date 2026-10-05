@@ -12,12 +12,12 @@ namespace paskalON.Dataface.Modbus
         /// <summary>
         /// List of IModbusRegisterEntry registrations.
         /// </summary>
-        List<IModbusRegisterEntry> Registers { get; }
+        IReadOnlyList<IModbusRegisterEntry> Registers { get; }
 
 
         /// <summary>
         /// List of Modbus polling ranges.
         /// </summary>
-        List<ModbusPollingRangeEntry> PollingRanges { get; }
+        IReadOnlyList<ModbusPollingRangeEntry> PollingRanges { get; }
     }
 }

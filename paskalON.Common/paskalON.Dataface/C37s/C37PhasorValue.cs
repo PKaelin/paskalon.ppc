@@ -30,7 +30,7 @@ namespace paskalON.Dataface.C37s
         /// Constructor of <see cref="C37PhasorValue"/>.
         /// </summary>
         /// <param name="magnitude">Magnitude of the phasor.</param>
-        /// <param name="angle"Angle of the phasor.></param>
+        /// <param name="angle">Angle of the phasor.</param>
         public C37PhasorValue(float magnitude, float angle)
         {
             Magnitude = magnitude;

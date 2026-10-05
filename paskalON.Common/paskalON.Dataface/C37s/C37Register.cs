@@ -10,14 +10,22 @@ namespace paskalON.Dataface.C37s
     public class C37Register : IC37Register, IC37Dataface
     {
         /// <summary>
+        /// List of IC37RegisterEntry registrations.
+        /// </summary>
+        private List<IC37RegisterEntry> _registers = new List<IC37RegisterEntry>();
+
+
+        /// <summary>
         /// <inheritdoc/>
         /// </summary>
         public string Name { get; init; }
 
-        /// <summary>
-        /// IC37Dataface implementation of Registers <see cref="IC37Dataface"/>.
-        /// </summary>
-        public List<IC37RegisterEntry> Registers { get; } = new List<IC37RegisterEntry>();
+
+        /// <inheritdoc/>
+        public IReadOnlyList<IC37RegisterEntry> Registers
+        {
+            get => _registers.AsReadOnly();
+        }
 
 
         /// <summary>
@@ -26,6 +34,8 @@ namespace paskalON.Dataface.C37s
         /// <param name="name">A name and good identifier of the data face.</param>
         public C37Register(string name)
         {
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(name);
+
             Name = name;
         }
 
@@ -37,13 +47,14 @@ namespace paskalON.Dataface.C37s
         {
             ArgumentNullException.ThrowIfNull(instance);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            ArgumentNullException.ThrowIfNull(setter);
 
-            if (Registers.Any(r => r.Name.ToLower() == name.ToLower()) == true)
+            if (_registers.Any(r => r.Name.ToLower() == name.ToLower()) == true)
             {
                 throw new ArgumentException($"Register with name {name} is already registered");
             }
 
-            Registers.Add(new C37RegisterEntry<TDevice, TProperty>(instance, name, signalType, setter));
+            _registers.Add(new C37RegisterEntry<TDevice, TProperty>(instance, name, signalType, setter));
         }
 
 

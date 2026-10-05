@@ -2,7 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Communication.Protocols.C37118.Types;
+using paskalON.Dataface.C37s;
 using paskalON.Domains;
 using System.Net.Sockets;
 

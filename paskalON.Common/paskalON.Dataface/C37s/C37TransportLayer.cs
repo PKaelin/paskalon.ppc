@@ -2,7 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-namespace paskalON.Communication.Protocols.C37118.Types
+namespace paskalON.Dataface.C37s
 {
     /// <summary>
     /// Transport layer that dictates control logic for C37.118 communications.
