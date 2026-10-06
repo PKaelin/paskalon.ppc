@@ -104,7 +104,7 @@ namespace paskalON.Dataface.Modbus
         public void RegisterRange(ushort from, ushort to, ModbusRegistryType registryType, int interval)
         {
             ArgumentOutOfRangeException.ThrowIfLessThan(to, from);
-            ArgumentOutOfRangeException.ThrowIfLessThan(interval, 0);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(interval);
 
             if (_pollingRanges.Any(r => r.From == from) == true)
             {

@@ -61,6 +61,8 @@ namespace paskalON.Dataface.C37s
         /// </summary>
         public void Register<TDevice, TCom>(Action<TCom> com)
         {
+            ArgumentNullException.ThrowIfNull(com);
+
             if (this is not TCom typedCom)
             {
                 // At this point it should be IC37Register
