@@ -70,6 +70,7 @@ namespace paskalON.Telemetry.Entries
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
             ArgumentNullException.ThrowIfNull(instrument);
             ArgumentNullException.ThrowIfNull(getter);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(interval);
 
             Instance = instance;
             Name = name;

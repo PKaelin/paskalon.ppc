@@ -61,6 +61,7 @@ namespace paskalON.Messaging.Redis
                 return;
             }
 
+            // Callback errors should be handled by the caller, so we do not catch exceptions here.
             callback(channelMessage.Message.ToString());
         }
     }

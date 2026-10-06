@@ -35,6 +35,12 @@ namespace paskalON.Messaging.Redis
             ArgumentException.ThrowIfNullOrWhiteSpace(topic);
             ArgumentNullException.ThrowIfNull(json);
 
+            // Skip empty messages, since they cannot carry a valid json payload.
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return;
+            }
+
             ISubscriber subscriber = _redis.GetSubscriber();
 
             await subscriber.PublishAsync(RedisChannel.Literal(topic), json);

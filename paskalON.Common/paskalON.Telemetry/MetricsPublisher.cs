@@ -77,6 +77,7 @@ namespace paskalON.Telemetry
             ArgumentNullException.ThrowIfNull(instance);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
             ArgumentNullException.ThrowIfNull(getter);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(interval);
 
             if (Meter == null)
             {
