@@ -49,6 +49,8 @@ namespace paskalON.Telemetry
         /// <param name="logger">Logger for application logging and diagnostics.</param>
         public MetricsPublisher(ILogger<MetricsPublisher> logger)
         {
+            ArgumentNullException.ThrowIfNull(logger);
+
             _logger = logger;
         }
 
@@ -61,7 +63,7 @@ namespace paskalON.Telemetry
 
             if (Meter != null)
             {
-                throw new ApplicationException($"Metrics publisher has already been initialized. Measurement: {measurement}");
+                throw new InvalidOperationException($"Metrics publisher has already been initialized. Measurement: {measurement}");
             }
 
             Meter = new Meter(measurement);
@@ -151,6 +153,7 @@ namespace paskalON.Telemetry
             {
                 Meter.Dispose();
                 Meter = null;
+                _metrics.Clear();
             }
         }
     }
