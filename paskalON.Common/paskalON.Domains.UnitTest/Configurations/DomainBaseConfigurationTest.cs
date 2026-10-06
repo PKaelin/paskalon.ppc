@@ -15,7 +15,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureUsesTablePerConcreteTypeTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IEntityType? entityType = context.GetDesignTimeModel().FindEntityType(typeof(DomainBase));
 
@@ -28,7 +28,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureIdIsPrimaryKeyTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IEntityType? entityType = context.GetDesignTimeModel().FindEntityType(typeof(DomainBase));
 
@@ -46,7 +46,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [DataRow(typeof(TestNamedDomain))]
         public void ConfigureIdIsGeneratedFromSharedSequenceTest(Type concreteType)
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IModel model = context.GetDesignTimeModel();
             IProperty? idProperty = model.FindEntityType(concreteType)?.FindProperty(nameof(DomainBase.Id));
@@ -61,7 +61,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureChangedByIsRequiredWithMaxLengthTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IProperty? property = context.GetDesignTimeModel().FindEntityType(typeof(DomainBase))?.FindProperty(nameof(DomainBase.ChangedBy));
 
@@ -74,7 +74,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureChangedDateIsRequiredTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IProperty? property = context.GetDesignTimeModel().FindEntityType(typeof(DomainBase))?.FindProperty(nameof(DomainBase.ChangedDate));
 
@@ -90,7 +90,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [DataRow(typeof(TestNamedDomain))]
         public void ConfigureConcreteTypeOwnsTableWithBaseColumnsTest(Type concreteType)
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IEntityType? entityType = context.GetDesignTimeModel().FindEntityType(concreteType);
 
@@ -107,7 +107,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureConcreteTypesUseDistinctTablesTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IModel model = context.GetDesignTimeModel();
             string?[] tableNames =

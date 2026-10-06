@@ -208,7 +208,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="rp1">The first apparent power value to add to.</param>
         /// <param name="rp2">The second apparent power value to add to.</param>
         /// <returns>Sum of the two <see cref="ApparentPower"./></returns>
-        public static ApparentPower operator +(ApparentPower rp1, ApparentPower rp2) => new(rp1.VoltAmperes + rp2.VoltAmperes);
+        public static ApparentPower operator +(ApparentPower rp1, ApparentPower rp2) => new ApparentPower(rp1.VoltAmperes + rp2.VoltAmperes);
 
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="rp1">The first apparent power value.</param>
         /// <param name="rp2">The second apparent power value to subtract.</param>
         /// <returns>Sum of the two <see cref="ApparentPower"./></returns>
-        public static ApparentPower operator -(ApparentPower rp1, ApparentPower rp2) => new(rp1.VoltAmperes - rp2.VoltAmperes);
+        public static ApparentPower operator -(ApparentPower rp1, ApparentPower rp2) => new ApparentPower(rp1.VoltAmperes - rp2.VoltAmperes);
 
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="rp1">The first apparent power value.</param>
         /// <param name="rp2">The second apparent power value.</param>
         /// <returns>Sum of the two <see cref="ApparentPower"./></returns>
-        public static ApparentPower operator *(ApparentPower rp1, ApparentPower rp2) => new(rp1.VoltAmperes * rp2.VoltAmperes);
+        public static ApparentPower operator *(ApparentPower rp1, ApparentPower rp2) => new ApparentPower(rp1.VoltAmperes * rp2.VoltAmperes);
 
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="rp1">The first apparent power value.</param>
         /// <param name="rp2">The second apparent power value to divide the first one with.</param>
         /// <returns>Sum of the two <see cref="ApparentPower"./></returns>
-        public static ApparentPower operator /(ApparentPower rp1, ApparentPower rp2) => new(rp2.VoltAmperes != 0 ? rp1.VoltAmperes / rp2.VoltAmperes : double.NaN);
+        public static ApparentPower operator /(ApparentPower rp1, ApparentPower rp2) => new ApparentPower(rp2.VoltAmperes != 0 ? rp1.VoltAmperes / rp2.VoltAmperes : double.NaN);
 
 
         /// <summary>

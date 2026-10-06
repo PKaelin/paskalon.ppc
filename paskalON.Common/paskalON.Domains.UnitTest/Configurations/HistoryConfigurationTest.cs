@@ -14,7 +14,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureMigrationIdIsPrimaryKeyTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IKey? primaryKey = context.GetDesignTimeModel().FindEntityType(typeof(History))?.FindPrimaryKey();
 
@@ -28,7 +28,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureMapsToMigrationHistoryTableTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IEntityType? entityType = context.GetDesignTimeModel().FindEntityType(typeof(History));
 
@@ -41,7 +41,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureProductVersionIsRequiredTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IProperty? property = context.GetDesignTimeModel().FindEntityType(typeof(History))?.FindProperty(nameof(History.ProductVersion));
 

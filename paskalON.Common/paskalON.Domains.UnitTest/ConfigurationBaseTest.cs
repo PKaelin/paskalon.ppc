@@ -12,9 +12,9 @@ namespace paskalON.Domains.UnitTest
         [TestMethod]
         public void ConfigurationBaseHoldsKeyValueDescriptionTest()
         {
-            DateTimeOffset changedDate = new(2026, 4, 1, 10, 0, 0, TimeSpan.FromHours(2));
+            DateTimeOffset changedDate = new DateTimeOffset(2026, 4, 1, 10, 0, 0, TimeSpan.FromHours(2));
 
-            TestConfiguration configuration = new()
+            TestConfiguration configuration = new TestConfiguration()
             {
                 Id = 42,
                 ChangedBy = "admin",
@@ -37,7 +37,7 @@ namespace paskalON.Domains.UnitTest
         [TestMethod]
         public void ConfigurationBaseValueCanBeUpdatedTest()
         {
-            TestConfiguration configuration = new()
+            TestConfiguration configuration = new TestConfiguration()
             {
                 ChangedBy = "admin",
                 Key = "ArchiveUrl",
@@ -55,7 +55,7 @@ namespace paskalON.Domains.UnitTest
         [TestMethod]
         public void ConfigurationBaseIsDomainBaseTest()
         {
-            TestConfiguration configuration = new()
+            TestConfiguration configuration = new TestConfiguration()
             {
                 ChangedBy = "admin",
                 Key = "Key",

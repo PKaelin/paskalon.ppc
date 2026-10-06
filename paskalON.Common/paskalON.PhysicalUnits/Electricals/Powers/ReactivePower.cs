@@ -182,7 +182,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="rp1">The first reactive power value to add to.</param>
         /// <param name="rp2">The second reactive power value to add to.</param>
         /// <returns>Sum of the two <see cref="ReactivePower"./></returns>
-        public static ReactivePower operator +(ReactivePower rp1, ReactivePower rp2) => new(rp1.VoltAmperesReactive + rp2.VoltAmperesReactive);
+        public static ReactivePower operator +(ReactivePower rp1, ReactivePower rp2) => new ReactivePower(rp1.VoltAmperesReactive + rp2.VoltAmperesReactive);
 
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="rp1">The first reactive power value.</param>
         /// <param name="rp2">The second reactive power value to subtract.</param>
         /// <returns>Sum of the two <see cref="ReactivePower"./></returns>
-        public static ReactivePower operator -(ReactivePower rp1, ReactivePower rp2) => new(rp1.VoltAmperesReactive - rp2.VoltAmperesReactive);
+        public static ReactivePower operator -(ReactivePower rp1, ReactivePower rp2) => new ReactivePower(rp1.VoltAmperesReactive - rp2.VoltAmperesReactive);
 
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="rp1">The first reactive power value.</param>
         /// <param name="rp2">The second reactive power value.</param>
         /// <returns>Sum of the two <see cref="ReactivePower"./></returns>
-        public static ReactivePower operator *(ReactivePower rp1, ReactivePower rp2) => new(rp1.VoltAmperesReactive * rp2.VoltAmperesReactive);
+        public static ReactivePower operator *(ReactivePower rp1, ReactivePower rp2) => new ReactivePower(rp1.VoltAmperesReactive * rp2.VoltAmperesReactive);
 
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="rp1">The first reactive power value.</param>
         /// <param name="rp2">The second reactive power value to divide the first one with.</param>
         /// <returns>Sum of the two <see cref="ReactivePower"./></returns>
-        public static ReactivePower operator /(ReactivePower rp1, ReactivePower rp2) => new(rp2.VoltAmperesReactive != 0 ? rp1.VoltAmperesReactive / rp2.VoltAmperesReactive : double.NaN);
+        public static ReactivePower operator /(ReactivePower rp1, ReactivePower rp2) => new ReactivePower(rp2.VoltAmperesReactive != 0 ? rp1.VoltAmperesReactive / rp2.VoltAmperesReactive : double.NaN);
 
 
         /// <summary>

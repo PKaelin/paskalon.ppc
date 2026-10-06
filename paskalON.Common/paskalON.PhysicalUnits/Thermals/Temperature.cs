@@ -203,7 +203,7 @@ namespace paskalON.PhysicalUnits.Thermals
         /// <param name="temp2">The second temperature value to add to.</param>
         /// <returns>Sum of the two <see cref="Temperature"./></returns>
         public static Temperature operator +(Temperature temp1, Temperature temp2) =>
-            new(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ? temp1.Celsius + temp2.Celsius : temp1.Fahrenheit + temp2.Fahrenheit);
+            new Temperature(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ? temp1.Celsius + temp2.Celsius : temp1.Fahrenheit + temp2.Fahrenheit);
 
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace paskalON.PhysicalUnits.Thermals
         /// The subtraction is done by subtracting the Celsius or Fahrenheit values of both instances, depending on the temperature unit of the first instance.
         /// </remarks>
         public static Temperature operator -(Temperature temp1, Temperature temp2) =>
-            new(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ? temp1.Celsius - temp2.Celsius : temp1.Fahrenheit - temp2.Fahrenheit);
+            new Temperature(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ? temp1.Celsius - temp2.Celsius : temp1.Fahrenheit - temp2.Fahrenheit);
 
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace paskalON.PhysicalUnits.Thermals
         /// The multiplication is done by multiplying the Celsius or Fahrenheit values of both instances, depending on the temperature unit of the first instance.
         /// </remarks>
         public static Temperature operator *(Temperature temp1, Temperature temp2) =>
-            new(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ? temp1.Celsius * temp2.Celsius : temp1.Fahrenheit * temp2.Fahrenheit);
+            new Temperature(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ? temp1.Celsius * temp2.Celsius : temp1.Fahrenheit * temp2.Fahrenheit);
 
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace paskalON.PhysicalUnits.Thermals
         /// If the second temperature value is zero, the result will be <see cref="double.NaN"/>.
         /// </remarks>
         public static Temperature operator /(Temperature temp1, Temperature temp2) =>
-            new(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ?
+            new Temperature(temp1.TemperatureUnit, temp1.TemperatureUnit == TemperatureUnit.Celsius ?
                 (temp2.Celsius != 0 ? temp1.Celsius / temp2.Celsius : double.NaN) :
                 (temp2.Fahrenheit != 0 ? temp1.Fahrenheit / temp2.Fahrenheit : double.NaN));
 

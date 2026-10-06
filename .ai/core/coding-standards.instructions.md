@@ -31,6 +31,10 @@ Add the header below at the beginning of all code files that end with `.cs`. Do 
 
 ## Variables & Conditions
 - **Variable Declaration:** Never use the implicit `var` keyword for variables. Always use explicit types (e.g., `int x = 5;`, `string name = "";`).
+- **Variable Instantiation:** NEVER use target-typed 'new()' expressions. 
+    - ALWAYS explicitly state the type name when instantiating new objects. E.g. "TestDomain domain = new TestDomain()".
+    - Variable instantiation rule applies to all target-typed object creation expressions, including new(...) with constructor arguments, not only parameterless new(). 
+    - Always write the explicit type name after new.
 - **Variable and Property Naming:** Use PascalCase for public events and properties, camelCase for local variables, camelCase with underscore for private variables (e.g. _camelCase).
 - **Conditions:**
     - Do not write conditional statements and their return values on a single line.

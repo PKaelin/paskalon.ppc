@@ -148,7 +148,7 @@ namespace paskalON.Maths.Calculuses.Curves
 
                     if (PiecewisePoints[i].Type == PiecewiseFunctionType.LinearPointFunction)
                     {
-                        List<LinearPoint> points = new List<LinearPoint> { new(PiecewisePoints[i].X, PiecewisePoints[i].Y), new(endpoint.x, endpoint.y) };
+                        List<LinearPoint> points = new List<LinearPoint> { new LinearPoint(PiecewisePoints[i].X, PiecewisePoints[i].Y), new LinearPoint(endpoint.x, endpoint.y) };
                         _functions.Add(PiecewisePoints[i].X, new LinearPointFunction(points, Offset, PiecewisePoints[i].NoiseMin, PiecewisePoints[i].NoiseMax));
                     }
                     else if (PiecewisePoints[i].Type == PiecewiseFunctionType.Exponential2PointFunction)

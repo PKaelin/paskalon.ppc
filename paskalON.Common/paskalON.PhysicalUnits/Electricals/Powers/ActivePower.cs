@@ -183,7 +183,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="ap1">The first active power value to add to.</param>
         /// <param name="ap2">The second active power value to add to.</param>
         /// <returns>Sum of the two <see cref="ActivePower"./></returns>
-        public static ActivePower operator +(ActivePower ap1, ActivePower ap2) => new(ap1.Watts + ap2.Watts);
+        public static ActivePower operator +(ActivePower ap1, ActivePower ap2) => new ActivePower(ap1.Watts + ap2.Watts);
 
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="ap1">The first active power value.</param>
         /// <param name="ap2">The second active power value to subtract.</param>
         /// <returns>Sum of the two <see cref="ActivePower"./></returns>
-        public static ActivePower operator -(ActivePower ap1, ActivePower ap2) => new(ap1.Watts - ap2.Watts);
+        public static ActivePower operator -(ActivePower ap1, ActivePower ap2) => new ActivePower(ap1.Watts - ap2.Watts);
 
 
         /// <summary>
@@ -201,7 +201,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="ap1">The first active power value.</param>
         /// <param name="ap2">The second active power value.</param>
         /// <returns>Sum of the two <see cref="ActivePower"./></returns>
-        public static ActivePower operator *(ActivePower ap1, ActivePower ap2) => new(ap1.Watts * ap2.Watts);
+        public static ActivePower operator *(ActivePower ap1, ActivePower ap2) => new ActivePower(ap1.Watts * ap2.Watts);
 
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="ap1">The first active power value.</param>
         /// <param name="ap2">The second active power value to divide the first one with.</param>
         /// <returns>Sum of the two <see cref="ActivePower"./></returns>
-        public static ActivePower operator /(ActivePower ap1, ActivePower ap2) => new(ap2.Watts != 0 ? ap1.Watts / ap2.Watts : double.NaN);
+        public static ActivePower operator /(ActivePower ap1, ActivePower ap2) => new ActivePower(ap2.Watts != 0 ? ap1.Watts / ap2.Watts : double.NaN);
 
 
         /// <summary>

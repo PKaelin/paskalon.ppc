@@ -88,7 +88,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="cp1">The first complex power value to add to.</param>
         /// <param name="cp2">The second complex power value to add to.</param>
         /// <returns></returns>
-        public static ComplexPower operator +(ComplexPower cp1, ComplexPower cp2) => new()
+        public static ComplexPower operator +(ComplexPower cp1, ComplexPower cp2) => new ComplexPower()
         {
             ActivePower = cp1.ActivePower + cp2.ActivePower,
             ReactivePower = cp1.ReactivePower + cp2.ReactivePower,
@@ -101,7 +101,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="cp1">The first apparent power value.</param>
         /// <param name="cp2">The second apparent power value to subtract.</param>
         /// <returns>Sum of the two <see cref="ComplexPower"./></returns>
-        public static ComplexPower operator -(ComplexPower cp1, ComplexPower cp2) => new()
+        public static ComplexPower operator -(ComplexPower cp1, ComplexPower cp2) => new ComplexPower()
         {
             ActivePower = cp1.ActivePower - cp2.ActivePower,
             ReactivePower = cp1.ReactivePower - cp2.ReactivePower,

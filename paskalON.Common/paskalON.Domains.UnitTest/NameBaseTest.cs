@@ -13,9 +13,9 @@ namespace paskalON.Domains.UnitTest
         [TestMethod]
         public void NameBaseHoldsNameAndDomainValuesTest()
         {
-            DateTimeOffset changedDate = new(2026, 5, 20, 18, 45, 0, TimeSpan.FromHours(-4));
+            DateTimeOffset changedDate = new DateTimeOffset(2026, 5, 20, 18, 45, 0, TimeSpan.FromHours(-4));
 
-            TestNamedDomain domain = new()
+            TestNamedDomain domain = new TestNamedDomain()
             {
                 Id = 7,
                 ChangedBy = "commissioning-tool",

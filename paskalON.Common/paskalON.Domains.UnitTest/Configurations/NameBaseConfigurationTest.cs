@@ -14,7 +14,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureUsesTablePerConcreteTypeTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IEntityType? entityType = context.GetDesignTimeModel().FindEntityType(typeof(NameBase));
 
@@ -28,7 +28,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureNameIsRequiredWithMaxLengthTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IProperty? property = context.GetDesignTimeModel().FindEntityType(typeof(NameBase))?.FindProperty(nameof(NameBase.Name));
 
@@ -41,7 +41,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureNameUsesCaseInsensitiveCollationTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IProperty? property = context.GetDesignTimeModel().FindEntityType(typeof(NameBase))?.FindProperty(nameof(NameBase.Name));
 
@@ -53,7 +53,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureNameHasUniqueIndexTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IEntityType? entityType = context.GetDesignTimeModel().FindEntityType(typeof(TestNamedDomain));
 

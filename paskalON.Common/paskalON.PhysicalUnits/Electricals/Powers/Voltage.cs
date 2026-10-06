@@ -169,7 +169,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="v1">The first voltage value to add to.</param>
         /// <param name="v2">The second voltage value to add to.</param>
         /// <returns>Sum of the two <see cref="Voltage"./></returns>
-        public static Voltage operator +(Voltage v1, Voltage v2) => new(v1.Volts + v2.Volts);
+        public static Voltage operator +(Voltage v1, Voltage v2) => new Voltage(v1.Volts + v2.Volts);
 
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="v1">The first voltage value.</param>
         /// <param name="v2">The second voltage value to subtract.</param>
         /// <returns>Sum of the two <see cref="Voltage"./></returns>
-        public static Voltage operator -(Voltage v1, Voltage v2) => new(v1.Volts - v2.Volts);
+        public static Voltage operator -(Voltage v1, Voltage v2) => new Voltage(v1.Volts - v2.Volts);
 
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="v1">The first voltage value.</param>
         /// <param name="v2">The second voltage value.</param>
         /// <returns>Sum of the two <see cref="Voltage"./></returns>
-        public static Voltage operator *(Voltage v1, Voltage v2) => new(v1.Volts * v2.Volts);
+        public static Voltage operator *(Voltage v1, Voltage v2) => new Voltage(v1.Volts * v2.Volts);
 
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="v1">The first voltage value.</param>
         /// <param name="v2">The second voltage value to divide the first one with.</param>
         /// <returns>Sum of the two <see cref="Voltage"./></returns>
-        public static Voltage operator /(Voltage v1, Voltage v2) => new(v2.Volts != 0 ? v1.Volts / v2.Volts : double.NaN);
+        public static Voltage operator /(Voltage v1, Voltage v2) => new Voltage(v2.Volts != 0 ? v1.Volts / v2.Volts : double.NaN);
 
 
         /// <summary>

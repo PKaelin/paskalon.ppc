@@ -144,7 +144,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="a1">The first amperes value to add to.</param>
         /// <param name="a2">The second amperes value to add to.</param>
         /// <returns>Sum of the two <see cref="CurrentScalar"./></returns>
-        public static CurrentScalar operator +(CurrentScalar a1, CurrentScalar a2) => new(a1.Amperes + a2.Amperes);
+        public static CurrentScalar operator +(CurrentScalar a1, CurrentScalar a2) => new CurrentScalar(a1.Amperes + a2.Amperes);
 
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="a1">The first amperes value.</param>
         /// <param name="a2">The second amperes value to subtract.</param>
         /// <returns>Sum of the two <see cref="CurrentScalar"./></returns>
-        public static CurrentScalar operator -(CurrentScalar a1, CurrentScalar a2) => new(a1.Amperes - a2.Amperes);
+        public static CurrentScalar operator -(CurrentScalar a1, CurrentScalar a2) => new CurrentScalar(a1.Amperes - a2.Amperes);
 
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="a1">The first amperes value.</param>
         /// <param name="a2">The second amperes value.</param>
         /// <returns>Sum of the two <see cref="CurrentScalar"./></returns>
-        public static CurrentScalar operator *(CurrentScalar a1, CurrentScalar a2) => new(a1.Amperes * a2.Amperes);
+        public static CurrentScalar operator *(CurrentScalar a1, CurrentScalar a2) => new CurrentScalar(a1.Amperes * a2.Amperes);
 
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
         /// <param name="a1">The first amperes value.</param>
         /// <param name="a2">The second amperes value to divide the first one with.</param>
         /// <returns>Sum of the two <see cref="CurrentScalar"./></returns>
-        public static CurrentScalar operator /(CurrentScalar a1, CurrentScalar a2) => new(a2.Amperes != 0 ? a1.Amperes / a2.Amperes : double.NaN);
+        public static CurrentScalar operator /(CurrentScalar a1, CurrentScalar a2) => new CurrentScalar(a2.Amperes != 0 ? a1.Amperes / a2.Amperes : double.NaN);
 
 
         /// <summary>

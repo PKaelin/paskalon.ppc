@@ -14,7 +14,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureUsesTablePerConcreteTypeTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IEntityType? entityType = context.GetDesignTimeModel().FindEntityType(typeof(ConfigurationBase));
 
@@ -31,7 +31,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [DataRow(nameof(ConfigurationBase.Description), 800)]
         public void ConfigurePropertyIsRequiredWithMaxLengthTest(string propertyName, int expectedMaxLength)
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IProperty? property = context.GetDesignTimeModel().FindEntityType(typeof(ConfigurationBase))?.FindProperty(propertyName);
 
@@ -44,7 +44,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureKeyHasUniqueIndexTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IEntityType? entityType = context.GetDesignTimeModel().FindEntityType(typeof(TestConfiguration));
 
@@ -61,7 +61,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureValueAndDescriptionHaveNoIndexTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IEntityType? entityType = context.GetDesignTimeModel().FindEntityType(typeof(TestConfiguration));
 
@@ -78,7 +78,7 @@ namespace paskalON.Domains.UnitTest.Configurations
         [TestMethod]
         public void ConfigureConcreteTableContainsConfigurationColumnsTest()
         {
-            using TestDomainContext context = new();
+            using TestDomainContext context = new TestDomainContext();
 
             IEntityType? entityType = context.GetDesignTimeModel().FindEntityType(typeof(TestConfiguration));
 
