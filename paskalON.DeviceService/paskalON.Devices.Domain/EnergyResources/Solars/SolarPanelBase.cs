@@ -173,6 +173,7 @@ namespace paskalON.Devices.Domain.EnergyResources.Solars
             IDataface dataface) : base(logger, config, publisher, dataface)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(config.SolarPanelDeviceConfig);
             ArgumentNullException.ThrowIfNull(derSolarUnit);
             ArgumentNullException.ThrowIfNull(publisher);
 

@@ -20,7 +20,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// PollingIntervalMilliseconds = 1000, PollingFactorClass1 = 1 means every 1 second class 1 endpoints get polled.
         /// </example>
-        public int PollingFactorClass1 { get; set; } = 1;
+        public int PollingFactorClass1
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 1;
 
 
         /// <summary>
@@ -32,7 +36,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// PollingIntervalMilliseconds = 1000, PollingFactorClass2 = 3 means every 3 second class 2 endpoints get polled.
         /// </example>
-        public int PollingFactorClass2 { get; set; } = 3;
+        public int PollingFactorClass2
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 3;
 
 
         /// <summary>
@@ -44,7 +52,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// PollingIntervalMilliseconds = 1000, PollingFactorClass2 = 10 means every 10 second class 3 endpoints get polled.
         /// </example>
-        public int PollingFactorClass3 { get; set; } = 10;
+        public int PollingFactorClass3
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 10;
 
 
         /// <summary>
@@ -56,7 +68,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// PollingIntervalMilliseconds = 1000, PollingFactorClass2 = 30 means every 30 second class 4 endpoints get polled.
         /// </example>
-        public int PollingFactorClass4 { get; set; } = 30;
+        public int PollingFactorClass4
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 30;
 
 
         /// <summary>
@@ -68,7 +84,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// PollingIntervalMilliseconds = 1000, PollingFactorClass2 = 300 means every 300 second class 5 endpoints get polled.
         /// </example>
-        public int PollingFactorClass5 { get; set; } = 300;
+        public int PollingFactorClass5
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 300;
 
 
         /// <summary>
@@ -91,44 +111,72 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// Wait time for to client to be successfully connected before raising an error.
         /// </summary>
-        public int ConnectionTimeoutMilliseconds { get; set; } = 5000;
+        public int ConnectionTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 5000;
 
 
         /// <summary>
         /// Wait time for to client to be successfully disconnected before raising an error.
         /// </summary>
-        public int DisconnectionTimeoutMilliseconds { get; set; } = 10000;
+        public int DisconnectionTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 10000;
 
 
         /// <summary>
         /// How many times the client tries to reconnect or when negative (-1) then endless retry or 0 connects once.
         /// When this is negative this is equivalent with maintain connection.
         /// </summary>
-        public int ConnectRetryCount { get; set; } = 3;
+        public int ConnectRetryCount
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 3;
 
 
         /// <summary>
         /// How long to wait before retrying to connect in milliseconds.
         /// </summary>
-        public int ConnectRetryIntervalMilliseconds { get; set; } = 5000;
+        public int ConnectRetryIntervalMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 5000;
 
 
         /// <summary>
         /// Timeout for sending/reading a response in milliseconds or -1 when no timeout
         /// </summary>
-        public int OperationTimeoutMilliseconds { get; set; } = 30000;
+        public int OperationTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 30000;
 
 
         /// <summary>
         /// How many times the client tries to send a failed send
         /// </summary>
-        public int SendRetryCount { get; set; } = 1;
+        public int SendRetryCount
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 1;
 
 
         /// <summary>
         /// How long to wait before retrying to send in milliseconds.
         /// </summary>
-        public int SendRetryIntervalMilliseconds { get; set; } = 200;
+        public int SendRetryIntervalMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 200;
 
 
         /// <summary>

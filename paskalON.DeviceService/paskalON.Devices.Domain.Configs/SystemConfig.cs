@@ -14,7 +14,7 @@ namespace paskalON.Devices.Domain.Configs
     {
         /// <summary>
         /// Indicates the minimum valid metrics publishing interval value.
-        /// If this value is less than 100 milliseconds it will cause an exception.
+        /// If this value is less than 200 milliseconds it will cause an exception.
         /// </summary>
         private const long MinimumMetricsIntervalMilliseconds = 200;
 
@@ -100,7 +100,7 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
-        /// Device publishing interval in milliseconds.
+        /// Device heartbeat interval in milliseconds.
         /// </summary>
         /// <remarks>
         /// Used in combination with the DeviceFactorCore, DeviceFactorDetail to determine the publishing interval for each class.
@@ -122,7 +122,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// DeviceIntervalMilliseconds = 1000, DeviceFactorClassCore = 1 means every 1 second core data get published.
         /// </example>
-        public int DeviceFactorCore { get; set; } = 1;
+        public int DeviceFactorCore
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 1;
 
 
         /// <summary>
@@ -134,7 +138,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// DeviceIntervalMilliseconds = 1000, DeviceFactorClassDetail = 5 means every 5 second detail data get published.
         /// </example>
-        public int DeviceFactorDetail { get; set; } = 5;
+        public int DeviceFactorDetail
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 5;
 
 
         /// <summary>
@@ -224,6 +232,10 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// Startup delay so that the devices have some time to connect.
         /// </summary>
-        public int StartupDelayForDevices { get; set; } = 5000;
+        public int StartupDelayForDevices
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 5000;
     }
 }

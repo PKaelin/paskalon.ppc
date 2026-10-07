@@ -2,13 +2,14 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Communication.Protocols.C37118.Types;
+using paskalON.Dataface.C37s;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Infrastructure.Storage;
+using paskalON.Domains.Configs;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using System.Net.Sockets;
 
@@ -57,6 +58,7 @@ namespace paskalON.DemoSimple.Devices.Data
             SystemConfig systemConfig = new SystemConfig
             {
                 ChangedBy = ChangedBy,
+                Type = PowerControlType.Bess,
                 PollingIntervalMilliseconds = 1000,
                 MetricsIntervalMilliseconds = 5000,
                 DeviceIntervalMilliseconds = 1000,
@@ -249,16 +251,16 @@ namespace paskalON.DemoSimple.Devices.Data
                 RackCount = 5,
                 ModulesPerRackCount = 1,
                 InverterBusNumber = 1,
-                AbsoluteMinimumStateOfCharge = 0,
                 AbsoluteMaximumStateOfCharge = 100,
-                UsableMinimumStateOfCharge = 10,
+                AbsoluteMinimumStateOfCharge = 0,
                 UsableMaximumStateOfCharge = 90,
-                PreferredMinimumStateOfCharge = 20,
+                UsableMinimumStateOfCharge = 10,
                 PreferredMaximumStateOfCharge = 80,
+                PreferredMinimumStateOfCharge = 20,
                 AbsoluteMaximumTemperature = 60,
                 AbsoluteMinimumTemperature = 0,
-                PreferredMinimumTemperature = 15,
                 PreferredMaximumTemperature = 40,
+                PreferredMinimumTemperature = 15,
                 AbsoluteMaxChargeCurrentAmps = 1100,
                 AbsoluteMaxDischargeCurrentAmps = 1200,
                 MaximumDcVoltage = 700,

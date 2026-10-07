@@ -70,9 +70,9 @@ namespace paskalON.Devices.Domain.Configs.PowerConversionSystems
 
 
         /// <summary>
-        /// Configured minimum active power in kilowatts that the PCS should output when in standby mode.
+        /// Configured minimum active power in watts that the PCS should output when in standby mode.
         /// </summary>
-        public double StandbyActivePowerKiloWatts
+        public double StandbyActivePowerWatts
         {
             get;
             set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }

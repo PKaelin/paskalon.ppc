@@ -21,40 +21,84 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
         /// <summary>
         /// Minimum output voltage of the panel in volts.
         /// </summary>
+        /// <remarks>
+        /// Simple check but implies that initialised maximum is already bigger than minimum. If not, an exception is thrown.
+        /// </remarks>
         public double MinimumVoltage
         {
             get;
-            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value); field = value;
+
+                if (value > MaximumVoltage)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "MinimumVoltage cannot be greater than MaximumVoltage.");
+                }
+            }
         }
 
 
         /// <summary>
         /// Maximum output voltage of the panel in volts.
         /// </summary>
+        /// <remarks>
+        /// Simple check but implies that initialised minimum is already smaller than maximum. If not, an exception is thrown.
+        /// </remarks>
         public double MaximumVoltage
         {
             get;
-            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value); field = value;
+
+                if (value < MinimumVoltage)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "MaximumVoltage cannot be less than MinimumVoltage.");
+                }
+            }
         }
 
 
         /// <summary>
         /// Minimum output current of the panel in ampere.
         /// </summary>
+        /// <remarks>
+        /// Simple check but implies that initialised maximum is already bigger than minimum. If not, an exception is thrown.
+        /// </remarks>
         public double MinimumCurrent
         {
             get;
-            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value); field = value;
+
+                if (value > MaximumCurrent)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "MinimumCurrent cannot be greater than MaximumCurrent.");
+                }
+            }
         }
 
 
         /// <summary>
         /// Maximum output current of the panel in ampere.
         /// </summary>
+        /// <remarks>
+        /// Simple check but implies that initialised minimum is already smaller than maximum. If not, an exception is thrown.
+        /// </remarks>
         public double MaximumCurrent
         {
             get;
-            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value); field = value;
+
+                if (value < MinimumCurrent)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "MaximumCurrent cannot be less than MinimumCurrent.");
+                }
+            }
         }
     }
 }

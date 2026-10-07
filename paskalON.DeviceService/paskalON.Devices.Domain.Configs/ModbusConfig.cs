@@ -38,11 +38,10 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// Port.
         /// </summary>
-        public required int Port
-        {
-            get;
-            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
-        }
+        /// <remarks>
+        /// Min/Max value of ushort is 0/65535
+        /// </remarks>
+        public required ushort Port { get; set; }
 
 
         /// <summary>

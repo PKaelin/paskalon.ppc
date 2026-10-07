@@ -64,6 +64,27 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
 
 
         [TestMethod]
+        [DataRow(50.1, 50, 0, 20)]
+        [DataRow(10, 50, 20.1, 20)]
+        public void CreateWithMinimumGreaterThanMaximumTest(double minimumVoltage, double maximumVoltage, double minimumCurrent, double maximumCurrent)
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            Mock<IModbusDataface> dataface = new Mock<IModbusDataface>();
+
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new SolarPanelDeviceConfig
+            {
+                ChangedBy = "Test",
+                Name = "SolarPanelDeviceConfig",
+                ClassName = "ClassName",
+                MaximumVoltage = maximumVoltage,
+                MinimumVoltage = minimumVoltage,
+                MaximumCurrent = maximumCurrent,
+                MinimumCurrent = minimumCurrent
+            });
+        }
+
+
+        [TestMethod]
         public void RegisterDatafaceTest()
         {
             Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();

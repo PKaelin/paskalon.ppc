@@ -2,13 +2,14 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Communication.Protocols.C37118.Types;
+using paskalON.Dataface.C37s;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Infrastructure.Storage;
+using paskalON.Domains.Configs;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using System.Net.Sockets;
 
@@ -50,6 +51,7 @@ namespace paskalON.DemoSuperSimpleBattery.Devices.Data
             SystemConfig systemConfig = new SystemConfig
             {
                 ChangedBy = ChangedBy,
+                Type = PowerControlType.Bess,
                 PollingIntervalMilliseconds = 1000,
                 MetricsIntervalMilliseconds = 5000,
                 DeviceIntervalMilliseconds = 1000,

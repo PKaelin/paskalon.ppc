@@ -159,7 +159,7 @@ namespace paskalON.Devices.Application
                 MinimumDCVoltage = pcs.MinimumDCVoltage,
                 MaximumDCVoltage = pcs.MaximumDCVoltage,
                 ZeroOutputOnCommLoss = pcs.ZeroOutputOnCommLoss,
-                StandbyActivePowerKiloWatts = pcs.StandbyActivePowerKiloWatts
+                StandbyActivePowerWatts = pcs.StandbyActivePowerWatts
             };
         }
 

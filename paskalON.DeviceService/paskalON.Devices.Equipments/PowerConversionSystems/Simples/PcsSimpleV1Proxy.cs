@@ -130,8 +130,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                     else
                     {
                         // Use kilo watts instead of ModbusScale.Downscale1000
-                        await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, StandbyActivePowerKiloWatts,
-                            ModbusDataType.MbInt16, 2);
+                        await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, StandbyActivePowerWatts,
+                            ModbusDataType.MbInt16, 2, ModbusScale.Downscale1000);
                     }
 
                     await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, 0,

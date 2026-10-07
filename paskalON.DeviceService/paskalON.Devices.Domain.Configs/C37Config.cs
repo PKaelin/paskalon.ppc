@@ -31,18 +31,17 @@ namespace paskalON.Devices.Domain.Configs
         public required string Address
         {
             get;
-            set { ArgumentNullException.ThrowIfNullOrEmpty(value); field = value; }
+            set { ArgumentNullException.ThrowIfNullOrWhiteSpace(value); field = value; }
         }
 
 
         /// <summary>
         /// Port of the device.
         /// </summary>
-        public required ushort Port
-        {
-            get;
-            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
-        }
+        /// <remarks>
+        /// Min/Max value of ushort is 0/65535
+        /// </remarks>
+        public required ushort Port { get; set; }
 
 
         /// <summary>
@@ -82,19 +81,31 @@ namespace paskalON.Devices.Domain.Configs
         /// <summary>
         /// Timeout duration for receiving config frames in C37.118 stream.
         /// </summary>
-        public int ConfigFrameTimeoutMilliseconds { get; set; } = 2000;
+        public int ConfigFrameTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 2000;
 
 
         /// <summary>
         /// Timeout duration for receiving data frames in C37.118 stream.
         /// </summary>
-        public int DataFrameTimeoutMilliseconds { get; set; } = 500;
+        public int DataFrameTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 500;
 
 
         /// <summary>
         /// Number of times to reset <see cref="DataFrameTimeoutMilliseconds"/> before raising a comm error.
         /// </summary>
-        public ushort DataFrameRetryCount { get; set; } = 2;
+        public ushort DataFrameRetryCount
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 2;
 
 
         /// <summary>

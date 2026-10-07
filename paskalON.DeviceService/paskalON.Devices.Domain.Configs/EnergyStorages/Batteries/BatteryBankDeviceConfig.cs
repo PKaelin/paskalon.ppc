@@ -100,11 +100,15 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// as part of an annual recalibration process.
         /// Running at these extremes causes severe degradation.
         /// </remarks>
-        public double AbsoluteMinimumStateOfCharge { get; set; } = 0;
+        public double AbsoluteMinimumStateOfCharge
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 0;
 
 
         /// <summary>
-        /// A strict upper bound on how far the PPC is allowed to discharge the battery.
+        /// A strict upper bound on how far the PPC is allowed to charge the battery.
         /// Expressed as a percentage of actual capacity.
         /// </summary>
         /// <remarks>
@@ -118,7 +122,11 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// as part of an annual recalibration process.
         /// Running at these extremes causes severe degradation.
         /// </remarks>
-        public double AbsoluteMaximumStateOfCharge { get; set; } = 100;
+        public double AbsoluteMaximumStateOfCharge
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 100); field = value; }
+        } = 100;
 
 
         /// <summary>
@@ -128,7 +136,16 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// <remarks>
         /// Most often this is also the SOC Modbus endpoint.
         /// </remarks>
-        public double UsableMinimumStateOfCharge { get; set; } = 10;
+        public double UsableMinimumStateOfCharge
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, AbsoluteMinimumStateOfCharge);
+                field = value;
+            }
+        } = 10;
 
 
         /// <summary>
@@ -138,7 +155,16 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// <remarks>
         /// Most often this is also the SOC Modbus endpoint.
         /// </remarks>
-        public double UsableMaximumStateOfCharge { get; set; } = 90;
+        public double UsableMaximumStateOfCharge
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 100);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, AbsoluteMaximumStateOfCharge);
+                field = value;
+            }
+        } = 90;
 
 
         /// <summary>
@@ -149,7 +175,16 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// The ideal window for daily use and long-term storage to maximize longevity.
         /// The SOC that is shown to the user/system.
         /// </remarks>
-        public double PreferredMinimumStateOfCharge { get; set; } = 20;
+        public double PreferredMinimumStateOfCharge
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, UsableMinimumStateOfCharge);
+                field = value;
+            }
+        } = 20;
 
 
         /// <summary>
@@ -160,7 +195,16 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// The ideal window for daily use and long-term storage to maximize longevity.
         /// The SOC that is shown to the user/system.
         /// </remarks>
-        public double PreferredMaximumStateOfCharge { get; set; } = 80;
+        public double PreferredMaximumStateOfCharge
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 100);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, UsableMaximumStateOfCharge);
+                field = value;
+            }
+        } = 80;
 
 
         /// <summary>
@@ -187,7 +231,15 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// <remarks>
         /// Temperature is in Celsius.
         /// </remarks>
-        public double PreferredMinimumTemperature { get; set; }
+        public double PreferredMinimumTemperature
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, AbsoluteMinimumTemperature);
+                field = value;
+            }
+        }
 
 
         /// <summary>
@@ -196,7 +248,15 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// <remarks>
         /// Temperature is in Celsius.
         /// </remarks>
-        public double PreferredMaximumTemperature { get; set; }
+        public double PreferredMaximumTemperature
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, AbsoluteMaximumTemperature);
+                field = value;
+            }
+        }
 
 
         /// <summary>
@@ -206,7 +266,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
 
 
         /// <summary>
-        /// Expected minimum current (i.e. the absolute physical limit) the battery could produce.
+        /// Expected maximum current (i.e. the absolute physical limit) the battery could produce.
         /// </summary>
         public double AbsoluteMaxChargeCurrentAmps { get; set; }
 

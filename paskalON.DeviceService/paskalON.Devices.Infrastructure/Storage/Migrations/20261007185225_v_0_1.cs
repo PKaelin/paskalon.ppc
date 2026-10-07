@@ -205,7 +205,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     MinimumDCVoltage = table.Column<double>(type: "double precision", nullable: false),
                     MaximumDCVoltage = table.Column<double>(type: "double precision", nullable: false),
                     ZeroOutputOnCommLoss = table.Column<bool>(type: "boolean", nullable: false),
-                    StandbyActivePowerKiloWatts = table.Column<double>(type: "double precision", nullable: false)
+                    StandbyActivePowerWatts = table.Column<double>(type: "double precision", nullable: false)
                 },
                 constraints: table =>
                 {

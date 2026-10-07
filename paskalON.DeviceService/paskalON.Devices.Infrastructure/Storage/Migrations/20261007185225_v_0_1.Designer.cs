@@ -12,7 +12,7 @@ using paskalON.Devices.Infrastructure.Storage;
 namespace paskalON.Devices.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(DeviceServiceContext))]
-    [Migration("20261005211518_v_0_1")]
+    [Migration("20261007185225_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -1298,7 +1298,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<double>("NameplateMaximumReactivePower")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("StandbyActivePowerKiloWatts")
+                    b.Property<double>("StandbyActivePowerWatts")
                         .HasColumnType("double precision");
 
                     b.Property<bool>("ZeroOutputOnCommLoss")

@@ -35,7 +35,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// MetricsIntervalMilliseconds = 1000, MetricsFactorClass1 = 1 means every 1 second class 1 metrics get published.
         /// </example>
-        public int MetricsFactorClass1 { get; set; } = 1;
+        public int MetricsFactorClass1
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 1;
 
 
         /// <summary>
@@ -47,7 +51,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// MetricsIntervalMilliseconds = 1000, MetricsFactorClass2 = 5 means every 5 seconds class 2 metrics get published.
         /// </example>
-        public int MetricsFactorClass2 { get; set; } = 5;
+        public int MetricsFactorClass2
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 5;
 
 
         /// <summary>
@@ -59,7 +67,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// MetricsIntervalMilliseconds = 1000, MetricsFactorClass3 = 30 means every 30 seconds class 3 metrics get published.
         /// </example>
-        public int MetricsFactorClass3 { get; set; } = 30;
+        public int MetricsFactorClass3
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 30;
 
 
         /// <summary>
@@ -71,6 +83,10 @@ namespace paskalON.Devices.Domain.Configs
         /// <example>
         /// MetricsIntervalMilliseconds = 1000, MetricsFactorClass4 = 300 means every 5 minutes class 4 metrics get published.
         /// </example>
-        public int MetricsFactorClass4 { get; set; } = 300;
+        public int MetricsFactorClass4
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value); field = value; }
+        } = 300;
     }
 }

@@ -41,6 +41,16 @@ namespace paskalON.Devices.Equipments.UnitTest.EnergyResources.Solars.Simples
             // Device
             _solarConfig = new Mock<SolarPanelConfig>();
             _solarConfig.SetupGet(x => x.Name).Returns("SolarPanelConfig");
+            _solarConfig.Object.SolarPanelDeviceConfig = new SolarPanelDeviceConfig
+            {
+                ChangedBy = "Test",
+                Name = "Device SolarPanel 1",
+                ClassName = "SolarPanelSimpleV1Proxy",
+                MinimumVoltage = 0,
+                MaximumVoltage = 40.8,
+                MinimumCurrent = 0,
+                MaximumCurrent = 12.87
+            };
         }
 
 

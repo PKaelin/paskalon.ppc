@@ -105,14 +105,12 @@ namespace paskalON.Communication.Protocols.Modbus.Configurations
         /// </returns>
         public override bool Equals(object? obj)
         {
-            ModbusRegisterMapConfig? other = obj as ModbusRegisterMapConfig;
-
-            if (other == null)
+            if (obj is not ModbusRegisterMapConfig other)
             {
                 return false;
             }
 
-            return Name == other.Name;
+            return string.Equals(Name, other.Name, StringComparison.Ordinal);
         }
 
 
@@ -122,9 +120,15 @@ namespace paskalON.Communication.Protocols.Modbus.Configurations
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
+        /// <remarks>
+        /// Must use the same members as <see cref="Equals(object?)"/>, which compares only <see cref="Name"/>.
+        /// Do not change <see cref="Name"/> while the instance is stored in a hash-based collection.
+        /// </remarks>
         public override int GetHashCode()
         {
-            return new { PollingRange, Name }.GetHashCode();
+            return (Name is null)
+                ? 0
+                : StringComparer.Ordinal.GetHashCode(Name);
         }
 
     }

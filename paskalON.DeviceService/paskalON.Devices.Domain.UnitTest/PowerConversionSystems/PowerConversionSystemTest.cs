@@ -45,7 +45,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
             unitConfig.SetupGet(x => x.Name).Returns("DerBatteryStorageUnitConfig");
             _unit = new Mock<DerBatteryStorageUnit>(NullLogger.Instance, unitConfig.Object, circuit.Object);
             // Device
-            _deviceConfig = new PowerConversionSystemDeviceConfig { ChangedBy = "Test", Name = "PowerConversionSystemDeviceConfig", ClassName = "ClassName", StandbyActivePowerKiloWatts = 65 };
+            _deviceConfig = new PowerConversionSystemDeviceConfig { ChangedBy = "Test", Name = "PowerConversionSystemDeviceConfig", ClassName = "ClassName", StandbyActivePowerWatts = 65 };
             _pcsConfig = new PowerConversionSystemConfig
             {
                 ChangedBy = "Test",
@@ -143,7 +143,7 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Information);
             Assert.AreEqual(PcsState.EnteringStandby, pcs.State);
             Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("standby requested", StringComparison.OrdinalIgnoreCase)));
-            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains($"{_deviceConfig!.StandbyActivePowerKiloWatts}", StringComparison.OrdinalIgnoreCase)));
+            Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains($"{_deviceConfig!.StandbyActivePowerWatts}", StringComparison.OrdinalIgnoreCase)));
             Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("state changed", StringComparison.OrdinalIgnoreCase)));
         }
     }

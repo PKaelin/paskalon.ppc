@@ -198,7 +198,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// Configured minimum active power that the PCS should output when in standby mode.
         /// </summary>
-        public double StandbyActivePowerKiloWatts { get => _config.PowerConversionSystemDeviceConfig.StandbyActivePowerKiloWatts; }
+        public double StandbyActivePowerWatts { get => _config.PowerConversionSystemDeviceConfig.StandbyActivePowerWatts; }
 
 
         /// <summary>
@@ -577,13 +577,13 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <inheritdoc/>
         public virtual async Task StandbyAsync(double? standbyActivePower = null)
         {
-            _logger.LogInformation("{Name} standby requested with standby active power: {StandbyActivePower}.", Name, standbyActivePower ?? StandbyActivePowerKiloWatts);
+            _logger.LogInformation("{Name} standby requested with standby active power: {StandbyActivePower}.", Name, standbyActivePower ?? StandbyActivePowerWatts);
 
             lock (dataLock)
             {
-                if (StandbyActivePowerKiloWatts > 0)
+                if (StandbyActivePowerWatts > 0)
                 {
-                    _activePowerTarget = StandbyActivePowerKiloWatts * 1000;
+                    _activePowerTarget = StandbyActivePowerWatts;
                     _reactivePowerTarget = 0;
                 }
                 else
@@ -924,7 +924,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             MetricsPublisher.Register<PowerConversionSystemBase, int>(this, nameof(IsInMaintenanceMode), MetricType.Gauge, x => x.IsInMaintenanceMode ? 1 : 0, _config.MetricsFactorClass3);
             // MetricsFactorClass4
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(Frequency), MetricType.Gauge, x => x.Frequency, _config.MetricsFactorClass4);
-            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(StandbyActivePowerKiloWatts), MetricType.Gauge, x => x.StandbyActivePowerKiloWatts, _config.MetricsFactorClass4);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(StandbyActivePowerWatts), MetricType.Gauge, x => x.StandbyActivePowerWatts, _config.MetricsFactorClass4);
         }
 
 

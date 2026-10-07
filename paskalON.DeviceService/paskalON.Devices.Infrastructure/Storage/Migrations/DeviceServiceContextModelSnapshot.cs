@@ -1295,7 +1295,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<double>("NameplateMaximumReactivePower")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("StandbyActivePowerKiloWatts")
+                    b.Property<double>("StandbyActivePowerWatts")
                         .HasColumnType("double precision");
 
                     b.Property<bool>("ZeroOutputOnCommLoss")
