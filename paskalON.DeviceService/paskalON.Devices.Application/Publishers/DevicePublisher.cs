@@ -81,6 +81,8 @@ namespace paskalON.Devices.Application.Publishers
             ArgumentNullException.ThrowIfNull(publisher);
             ArgumentNullException.ThrowIfNull(topics);
             ArgumentNullException.ThrowIfNull(logger);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(coreInterval);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(detailInterval);
 
             _deviceManager = deviceManager;
             _mapper = mapper;

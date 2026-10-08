@@ -285,9 +285,9 @@ namespace paskalON.Devices.Client.UnitTest
         {
             SubscriberTopic topic = new SubscriberTopic();
 
-            topic.PowerConversionSystemTopic = new SubscriberTopicEntry("pcs/core", "pcs/detail", "pcs/definition");
-            topic.BatteryBankTopic = new SubscriberTopicEntry("bb/core", "bb/detail", "bb/definition");
-            topic.SolarPanelTopic = new SubscriberTopicEntry("pv/core", "pv/detail", "pv/definition");
+            topic.PowerConversionSystemTopic = new SubscriberTopicEntry("pcs:core", "pcs:detail", "pcs:definition");
+            topic.BatteryBankTopic = new SubscriberTopicEntry("bb:core", "bb:detail", "bb:definition");
+            topic.SolarPanelTopic = new SubscriberTopicEntry("pv:core", "pv:detail", "pv:definition");
 
             return topic;
         }

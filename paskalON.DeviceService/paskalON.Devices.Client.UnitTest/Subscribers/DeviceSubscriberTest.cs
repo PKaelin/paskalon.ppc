@@ -20,9 +20,9 @@ namespace paskalON.Devices.Client.UnitTest.Subscribers
     {
         private Mock<IMessageSubscriber> _messageSubscriberMock = null!;
         private Mock<IDeviceRegister<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>> _registerMock = null!;
-        private string _definitionTopic = "pcs/definition";
-        private string _coreTopic = "pcs/core";
-        private string _detailTopic = "pcs/detail";
+        private string _definitionTopic = "pcs:definition";
+        private string _coreTopic = "pcs:core";
+        private string _detailTopic = "pcs:detail";
 
 
         [TestInitialize]

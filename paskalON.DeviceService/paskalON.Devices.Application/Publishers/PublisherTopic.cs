@@ -60,6 +60,8 @@ namespace paskalON.Devices.Application.Publishers
         /// <returns></returns>
         public static PublisherTopic Create(SystemConfig config)
         {
+            ArgumentNullException.ThrowIfNull(config);
+
             PublisherTopic topic = new PublisherTopic();
 
             if (config.PublisherTopicPcsCore != null && config.PublisherTopicPcsDetail != null)
