@@ -29,12 +29,14 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
             get;
             set
             {
-                ArgumentOutOfRangeException.ThrowIfNegative(value); field = value;
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 if (value > MaximumVoltage)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), value, "MinimumVoltage cannot be greater than MaximumVoltage.");
                 }
+
+                field = value;
             }
         }
 
@@ -50,12 +52,14 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
             get;
             set
             {
-                ArgumentOutOfRangeException.ThrowIfNegative(value); field = value;
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 if (value < MinimumVoltage)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), value, "MaximumVoltage cannot be less than MinimumVoltage.");
                 }
+
+                field = value;
             }
         }
 
@@ -71,12 +75,14 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
             get;
             set
             {
-                ArgumentOutOfRangeException.ThrowIfNegative(value); field = value;
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 if (value > MaximumCurrent)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), value, "MinimumCurrent cannot be greater than MaximumCurrent.");
                 }
+
+                field = value;
             }
         }
 
@@ -92,12 +98,14 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
             get;
             set
             {
-                ArgumentOutOfRangeException.ThrowIfNegative(value); field = value;
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 if (value < MinimumCurrent)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), value, "MaximumCurrent cannot be less than MinimumCurrent.");
                 }
+
+                field = value;
             }
         }
     }

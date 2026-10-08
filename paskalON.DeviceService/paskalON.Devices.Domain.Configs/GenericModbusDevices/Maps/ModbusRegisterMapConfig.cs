@@ -78,7 +78,7 @@ namespace paskalON.Communication.Protocols.Modbus.Configurations
 
             foreach (int index in Indexes())
             {
-                if (!PollingIncludes(index))
+                if (PollingIncludes(index) == false)
                 {
                     throw new InvalidOperationException($"Invalid ModbusRegisterMap, Index {index} not covered by associated PollingRange elements");
                 }

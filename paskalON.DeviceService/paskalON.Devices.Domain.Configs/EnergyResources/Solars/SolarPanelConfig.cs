@@ -52,7 +52,11 @@ namespace paskalON.Devices.Domain.Configs.EnergyResources.Solars
         /// <summary>
         /// Number of solar panels.
         /// </summary>
-        public int NumberOfPanels { get; set; } = 0;
+        public int NumberOfPanels
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 0;
 
 
         /// <summary>

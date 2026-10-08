@@ -52,6 +52,7 @@ namespace paskalON.Devices.Domain.Configs
             {
                 int v = (int)value;
                 if (Enum.IsDefined(typeof(PowerControlType), value) == false) throw new ArgumentException("Only one type per device service is allowed.");
+                if (value == PowerControlType.None) throw new ArgumentException("PowerControlType.None is not allowed.");
                 field = value;
             }
         }

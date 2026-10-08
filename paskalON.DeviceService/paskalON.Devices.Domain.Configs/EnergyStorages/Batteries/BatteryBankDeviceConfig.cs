@@ -103,7 +103,12 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         public double AbsoluteMinimumStateOfCharge
         {
             get;
-            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, AbsoluteMaximumStateOfCharge);
+                field = value;
+            }
         } = 0;
 
 
@@ -125,7 +130,12 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         public double AbsoluteMaximumStateOfCharge
         {
             get;
-            set { ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 100); field = value; }
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 100);
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, AbsoluteMinimumStateOfCharge);
+                field = value;
+            }
         } = 100;
 
 
@@ -143,6 +153,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
             {
                 ArgumentOutOfRangeException.ThrowIfNegative(value);
                 ArgumentOutOfRangeException.ThrowIfLessThan(value, AbsoluteMinimumStateOfCharge);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, UsableMaximumStateOfCharge);
                 field = value;
             }
         } = 10;
@@ -162,6 +173,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
             {
                 ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 100);
                 ArgumentOutOfRangeException.ThrowIfGreaterThan(value, AbsoluteMaximumStateOfCharge);
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, UsableMinimumStateOfCharge);
                 field = value;
             }
         } = 90;
@@ -182,6 +194,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
             {
                 ArgumentOutOfRangeException.ThrowIfNegative(value);
                 ArgumentOutOfRangeException.ThrowIfLessThan(value, UsableMinimumStateOfCharge);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, PreferredMaximumStateOfCharge);
                 field = value;
             }
         } = 20;
@@ -202,6 +215,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
             {
                 ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 100);
                 ArgumentOutOfRangeException.ThrowIfGreaterThan(value, UsableMaximumStateOfCharge);
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, PreferredMinimumStateOfCharge);
                 field = value;
             }
         } = 80;
@@ -237,6 +251,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
             set
             {
                 ArgumentOutOfRangeException.ThrowIfLessThan(value, AbsoluteMinimumTemperature);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, PreferredMaximumTemperature);
                 field = value;
             }
         }
@@ -254,6 +269,7 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
             set
             {
                 ArgumentOutOfRangeException.ThrowIfGreaterThan(value, AbsoluteMaximumTemperature);
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, PreferredMinimumTemperature);
                 field = value;
             }
         }

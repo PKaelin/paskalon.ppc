@@ -31,7 +31,7 @@ namespace paskalON.Devices.Domain.Configs
         public required string Address
         {
             get;
-            set { ArgumentNullException.ThrowIfNullOrEmpty(value); field = value; }
+            set { ArgumentNullException.ThrowIfNullOrWhiteSpace(value); field = value; }
         }
 
 
@@ -41,7 +41,11 @@ namespace paskalON.Devices.Domain.Configs
         /// <remarks>
         /// Min/Max value of ushort is 0/65535
         /// </remarks>
-        public required ushort Port { get; set; }
+        public required ushort Port
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfZero(value); field = value; }
+        }
 
 
         /// <summary>
