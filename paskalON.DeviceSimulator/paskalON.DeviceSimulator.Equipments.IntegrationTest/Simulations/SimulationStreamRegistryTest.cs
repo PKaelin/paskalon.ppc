@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using paskalON.Communication.Protocols.C37118.Types;
 using paskalON.Dataface.C37s;
 using paskalON.Devices.Application.Factories;
 using paskalON.Devices.Domain.Configs;
