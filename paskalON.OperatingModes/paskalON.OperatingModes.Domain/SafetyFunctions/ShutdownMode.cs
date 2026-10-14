@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.SafetyFunctions;
 using paskalON.OperatingModes.Domain.Curves;
@@ -18,7 +19,7 @@ namespace paskalON.OperatingModes.Domain.SafetyFunctions
     /// Output Controlled: Active Power (P) and Reactive Power (Q)
     /// What Output Influences: Active Power and Reactive Power
     /// </summary>
-    public class ShutdownMode : OperatingOpenModeBase
+    public class ShutdownMode : OperatingOpenModeBase, IOverrideMode
     {
         /// <summary>
         /// Shutdown mode configuration.
@@ -49,7 +50,7 @@ namespace paskalON.OperatingModes.Domain.SafetyFunctions
 
 
         /// <inheritdoc/>
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
             // TODO: Implement
             throw new NotImplementedException();

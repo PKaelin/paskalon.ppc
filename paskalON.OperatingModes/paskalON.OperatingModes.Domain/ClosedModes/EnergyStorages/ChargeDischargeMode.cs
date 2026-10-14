@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.EnergyStorages;
 using paskalON.OperatingModes.Domain.Curves;
@@ -11,7 +12,7 @@ using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.EnergyStorages
 {
-    public class ChargeDischargeMode : OperatingClosedModeBase
+    public class ChargeDischargeMode : OperatingClosedModeBase, IBaseActiveMode
     {
         protected readonly ChargeDischargeModeConfig _config;
         protected readonly ChargeDischargeModeMap _map;
@@ -30,7 +31,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.EnergyStorages
         }
 
 
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
             throw new NotImplementedException();
         }

@@ -1,8 +1,9 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.EnergyResources;
 using paskalON.OperatingModes.Domain.Curves;
@@ -13,13 +14,16 @@ using paskalON.Telemetry;
 namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
 {
     /// <summary>
-    /// Mode: Maximum Power Point Tracking Mode (MPPT) 
+    /// Mode: Maximum Power Point Tracking Mode (MPPT)
     /// Purpose: Maximize energy yield by continuously adjusting the inverter's input electrical characteristics
-    /// Inputs: Active Power setpoint, Available Active Power
+    /// Inputs: Available Active Power
     /// Output Controlled: Active Power (P)
     /// What Output Influences: Active Power
     /// </summary>
-    public class MaximumPowerPointTrackingMode : OperatingOpenModeBase
+    /// <remarks>
+    /// The setpoint of this operating mode is the available active power, the supervisory setpoint is not used.
+    /// </remarks>
+    public class MaximumPowerPointTrackingMode : OperatingOpenModeBase, IBaseActiveMode
     {
         /// <summary>
         /// Maximum power point tracking mode configuration.
@@ -53,32 +57,19 @@ namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
 
             _config = config;
             _map = map;
-            StateActive = OperatingModeState.Disabled;
             RegisterMetrics();
         }
 
 
         /// <inheritdoc/>
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
-            if (StateActive != OperatingModeState.Disabled)
-            {
-                ActivePower? available = _map.AvailableActivePower?.Invoke();
-                double? target = CheckNewActiveTargetSetpoint(available);
+            ArgumentNullException.ThrowIfNull(signals);
 
-                if (target != null)
-                {
-                    // Apply configured limits if configured
-                    target = ApplyActiveLimits(target.Value);
-                    _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, target.Value);
-                    RampControllerActive.Start(TargetActivePower.Watts, target.Value);
-                }
+            ActivePower? available = _map.AvailableActivePower.Invoke();
+            signals.BaseActivePower = ActiveControl!.Calculate(available ?? new ActivePower(0), available);
 
-                _targetActivePower.Watts = RampControllerActive.Calculate();
-                CheckFinalActiveTarget();
-            }
-
-            return Task.CompletedTask;
+            return signals;
         }
     }
 }

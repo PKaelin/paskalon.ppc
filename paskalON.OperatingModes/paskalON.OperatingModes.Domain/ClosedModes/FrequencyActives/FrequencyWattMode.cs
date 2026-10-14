@@ -12,7 +12,7 @@ using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 {
-    public class FrequencyWattMode : OperatingClosedModeBase, IAdditiveMode, IStackable
+    public class FrequencyWattMode : OperatingClosedModeBase, IAdditiveActiveMode
     {
         protected readonly FrequencyWattModeConfig _config;
         protected readonly FrequencyWattModeMap _map;
@@ -30,7 +30,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
         }
 
 
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
             throw new NotImplementedException();
         }

@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Curves;
@@ -11,7 +12,7 @@ using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
 {
-    public class VoltageVarDroopMode : OperatingClosedModeBase
+    public class VoltageVarDroopMode : OperatingClosedModeBase, ILimitingReactiveMode
     {
         protected readonly VoltageVarDroopModeConfig _config;
         protected readonly VoltageVarDroopModeMap _map;
@@ -29,7 +30,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
         }
 
 
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
             throw new NotImplementedException();
         }

@@ -1,8 +1,9 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
@@ -17,7 +18,8 @@ namespace paskalON.OperatingModes.Domain
     /// How they work:
     /// The controller sends targets and assumes the action happens perfectly.
     /// Feedback:
-    /// None.It does not measure any actual output or adjust any changes.
+    /// None. It does not measure any actual output or adjust any changes.
+    /// The power control targets are written into the signals directly.
     /// </remarks>
     public abstract class OperatingOpenModeBase : OperatingModeBase, IOperatingOpenMode
     {

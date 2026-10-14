@@ -5,9 +5,11 @@
 using Microsoft.Extensions.Logging;
 using paskalON.Devices.Client;
 using paskalON.OperatingModes.Application.Factories;
+using paskalON.OperatingModes.Application.Overrides;
 using paskalON.OperatingModes.Application.Stacks;
 using paskalON.OperatingModes.Domain;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Overrides;
 using paskalON.OperatingModes.Domain.Systems;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
 using paskalON.Telemetry;
@@ -39,15 +41,15 @@ namespace paskalON.OperatingModes.Application
 
 
         /// <summary>
-        /// System operating mode control instance.
-        /// </summary>
-        private SystemOperatingModeControl? _systemOperatingModeControl;
-
-
-        /// <summary>
         /// Operating mode factory to create operating mode instances based on configurations.
         /// </summary>
         private readonly IOperatingModeFactory _operatingModeFactory;
+
+
+        /// <summary>
+        /// Operating mode map factory to create the input map of the system operating mode control.
+        /// </summary>
+        private readonly IOperatingModeMapFactory _operatingModeMapFactory;
 
 
         /// <summary>
@@ -64,24 +66,46 @@ namespace paskalON.OperatingModes.Application
         public IStackManager StackManager { get; } = new StackManager();
 
 
+        /// <inheritdoc/>
+        public IOverrideManager OverrideManager { get; } = new OverrideManager(new OperatingModeOverrides());
+
+
+        /// <inheritdoc/>
+        public ISystemOperatingModeControl? SystemOperatingModeControl { get; private set; }
+
+
+        /// <summary>
+        /// Constructor of <see cref="OperatingModeManager"/>.
+        /// </summary>
+        /// <param name="logger">Logger for handling logging and diagnostics.</param>
+        /// <param name="deviceClient">Device client to receive device DTOs.</param>
+        /// <param name="metricsPublisherFactory">Factory to create metrics publishers.</param>
+        /// <param name="timeProvider">The time provider.</param>
+        /// <param name="operatingModeFactory">Factory to create operating modes.</param>
+        /// <param name="operatingModeMapFactory">Factory to create operating mode maps.</param>
         public OperatingModeManager(ILogger<OperatingModeManager> logger, IDeviceClient deviceClient, IMetricsPublisherFactory metricsPublisherFactory,
-            TimeProvider timeProvider, IOperatingModeFactory operatingModeFactory)
+            TimeProvider timeProvider, IOperatingModeFactory operatingModeFactory, IOperatingModeMapFactory operatingModeMapFactory)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(deviceClient);
             ArgumentNullException.ThrowIfNull(metricsPublisherFactory);
             ArgumentNullException.ThrowIfNull(timeProvider);
             ArgumentNullException.ThrowIfNull(operatingModeFactory);
+            ArgumentNullException.ThrowIfNull(operatingModeMapFactory);
 
             _logger = logger;
             _deviceClient = deviceClient;
             _metricsPublisherFactory = metricsPublisherFactory;
             _operatingModeFactory = operatingModeFactory;
+            _operatingModeMapFactory = operatingModeMapFactory;
             _timeProvider = timeProvider;
         }
 
 
-
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The override slot exists before the operating modes are created, so that the plant-level map functions can exclude overridden DER units.
+        /// </remarks>
         public virtual async Task Initialize(IOperatingModeRepository repository, SystemConfig systemConfig)
         {
             ArgumentNullException.ThrowIfNull(repository);
@@ -89,21 +113,24 @@ namespace paskalON.OperatingModes.Application
 
             _logger.LogInformation("Initialize operating mode during startup");
             List<OperatingModeBaseConfig> operatingModeConfigs = await repository.GetAllOperatingModes();
-
-            List<OperatingModeBase> operatingModes = new List<OperatingModeBase>();
+            Dictionary<string, OperatingModeBase> operatingModes = new Dictionary<string, OperatingModeBase>(StringComparer.Ordinal);
 
             foreach (OperatingModeBaseConfig config in operatingModeConfigs)
             {
                 IMetricsPublisher operatingModeMetrics = _metricsPublisherFactory.Create();
-                OperatingModeBase operatingMode = _operatingModeFactory.Create(_logger, _timeProvider, operatingModeMetrics, systemConfig, config, _deviceClient.Der);
-                operatingModes.Add(operatingMode);
+                OperatingModeBase operatingMode = _operatingModeFactory.Create(_logger, _timeProvider, operatingModeMetrics, systemConfig, config,
+                    _deviceClient.Der, OverrideManager.Overrides);
+                operatingModes.Add(operatingMode.Name, operatingMode);
                 MetricsPublishers.Add(operatingModeMetrics);
             }
 
-            StackManager.InitializeStack(operatingModes.ToDictionary(operatingMode => operatingMode.Name, StringComparer.Ordinal));
+            StackManager.InitializeStack(operatingModes);
+            OverrideManager.InitializeOverrides(operatingModes);
             IMetricsPublisher systemModeMetrics = _metricsPublisherFactory.Create();
-            _systemOperatingModeControl = new SystemOperatingModeControl(_logger, operatingModes, systemModeMetrics);
+            SystemOperatingModeControl = new SystemOperatingModeControl(_logger, systemConfig, StackManager.Stack, OverrideManager.Overrides,
+                _operatingModeMapFactory.CreateSystemMap(_deviceClient.Der), systemModeMetrics);
             MetricsPublishers.Add(systemModeMetrics);
+            SystemOperatingModeControl.State = SystemState.Ready;
         }
     }
 }

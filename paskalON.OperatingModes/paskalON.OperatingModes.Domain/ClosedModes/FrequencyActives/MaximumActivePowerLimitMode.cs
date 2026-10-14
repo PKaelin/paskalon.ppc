@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Curves;
@@ -11,7 +12,7 @@ using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 {
-    public class MaximumActivePowerLimitMode : OperatingClosedModeBase
+    public class MaximumActivePowerLimitMode : OperatingClosedModeBase, ILimitingActiveMode
     {
         protected readonly MaximumActivePowerLimitModeConfig _config;
         protected readonly MaximumActivePowerLimitModeMap _map;
@@ -29,7 +30,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
         }
 
 
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
             throw new NotImplementedException();
         }

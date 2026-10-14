@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
@@ -8,7 +8,6 @@ using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
-using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
@@ -20,7 +19,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
     /// Output Controlled: Reactive Power (Q)
     /// What Output Influences: Reactive Power
     /// </summary>
-    public class ReactivePowerFixedMode : OperatingOpenModeBase, IExclusiveMode, IStackable
+    public class ReactivePowerFixedMode : OperatingOpenModeBase, IExclusiveReactiveMode
     {
         /// <summary>
         /// Reactive power fixed mode configuration.
@@ -29,7 +28,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
 
 
         /// <summary>
-        /// Active power fixed mode map.
+        /// Reactive power fixed mode map.
         /// </summary>
         protected readonly ReactivePowerFixedModeMap _map;
 
@@ -39,7 +38,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
         /// </summary>
         /// <param name="logger">Logger for handling logging and diagnostics.</param>
         /// <param name="timeProvider">The time provider (TimeProvider.System for prod, FakeTimeProvider for tests.</param>
-        /// <param name="publisher">The metrics publisher interface.</param>
+        /// <param name="publisher">The publisher interface.</param>
         /// <param name="systemConfig">The system configuration.</param>
         /// <param name="config">The operating mode configuration.</param>
         /// <param name="map">Input mapping class for signals.</param>
@@ -54,33 +53,18 @@ namespace paskalON.OperatingModes.Domain.OpenModes.VoltageReactives
 
             _config = config;
             _map = map;
-            StateReactive = OperatingModeState.Disabled;
             RegisterMetrics();
         }
 
 
         /// <inheritdoc/>
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
-            if (StateReactive != OperatingModeState.Disabled)
-            {
-                ReactivePower? available = _map.AvailableReactivePower?.Invoke();
-                double? targetSetpoint = CheckNewReactiveTargetSetpoint(available);
+            ArgumentNullException.ThrowIfNull(signals);
 
-                if (targetSetpoint != null)
-                {
-                    // Apply configured limits if configured
-                    targetSetpoint = ApplyReactiveLimits(targetSetpoint.Value);
+            signals.BaseReactivePower = ReactiveControl!.Calculate(signals.SetpointReactivePower, _map.AvailableReactivePower.Invoke());
 
-                    _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetSetpoint.Value);
-                    RampControllerReactive.Start(TargetReactivePower.VoltAmperesReactive, targetSetpoint.Value);
-                }
-
-                _targetReactivePower.VoltAmperesReactive = RampControllerReactive.Calculate();
-                CheckFinalReactiveTarget();
-            }
-
-            return Task.CompletedTask;
+            return signals;
         }
     }
-}
+}

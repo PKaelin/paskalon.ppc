@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
@@ -20,8 +20,18 @@ namespace paskalON.OperatingModes.Domain.OpenModes
     /// Output Controlled: Active Power (P) and or Reactive Power (Q)
     /// What Output Influences: Active Power and or Reactive Power
     /// </summary>
-    public class MaintenanceMode : OperatingOpenModeBase, IOperatingOpenMode, IExclusiveMode
+    /// <remarks>
+    /// The setpoints are set by an operator with <see cref="SetSetpoint"/> and not by the supervisory control.
+    /// The calculated targets are read by the system operating mode control from the power controls.
+    /// </remarks>
+    public class MaintenanceMode : OperatingOpenModeBase, IOverrideMode
     {
+        /// <summary>
+        /// Lock object for thread safe access to the operator setpoints.
+        /// </summary>
+        private readonly object _dataLock = new object();
+
+
         /// <summary>
         /// Maintenance mode configuration.
         /// </summary>
@@ -41,7 +51,27 @@ namespace paskalON.OperatingModes.Domain.OpenModes
         /// A DER unit in maintenance mode is no longer included under control of the power control.
         /// Nonetheless it's influence in the input/output of the plant has to be considered.
         /// </remarks>
-        public string TargetDerUnit { get => _config.DerUnitName; }
+        public string? TargetDerUnit { get => _config.DerUnitName; }
+
+
+        /// <summary>
+        /// Gets the active power setpoint set by the operator.
+        /// </summary>
+        public ActivePower SetpointActivePower
+        {
+            get { lock (_dataLock) { return field; } }
+            private set { lock (_dataLock) { field = value; } }
+        } = new ActivePower(0);
+
+
+        /// <summary>
+        /// Gets the reactive power setpoint set by the operator.
+        /// </summary>
+        public ReactivePower SetpointReactivePower
+        {
+            get { lock (_dataLock) { return field; } }
+            private set { lock (_dataLock) { field = value; } }
+        } = new ReactivePower(0);
 
 
         /// <summary>
@@ -64,55 +94,38 @@ namespace paskalON.OperatingModes.Domain.OpenModes
 
             _config = config;
             _map = map;
-            StateActive = OperatingModeState.Disabled;
-            StateReactive = OperatingModeState.Disabled;
             RegisterMetrics();
         }
 
 
-        /// <inheritdoc/>
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Sets the operator setpoints of the overridden unit.
+        /// </summary>
+        /// <param name="activePower">The active power setpoint.</param>
+        /// <param name="reactivePower">The reactive power setpoint.</param>
+        /// <exception cref="ArgumentOutOfRangeException">A setpoint is outside the nameplate.</exception>
+        public void SetSetpoint(ActivePower activePower, ReactivePower reactivePower)
         {
-            if (StateActive != OperatingModeState.Disabled)
-            {
-                // Calculate active power
-                ActivePower? availableActive = _map.AvailableActivePower?.Invoke();
-                double? targetActive = CheckNewActiveTargetSetpoint(availableActive);
+            ArgumentOutOfRangeException.ThrowIfLessThan(activePower.Watts, _systemConfig.NameplateMinimumActivePowerWatt);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(activePower.Watts, _systemConfig.NameplateMaximumActivePowerWatt);
+            ArgumentOutOfRangeException.ThrowIfLessThan(reactivePower.VoltAmperesReactive, _systemConfig.NameplateMinimumReactivePowerVars);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(reactivePower.VoltAmperesReactive, _systemConfig.NameplateMaximumReactivePowerVars);
 
-                if (targetActive != null)
-                {
-                    // Apply configured limits if configured
-                    targetActive = ApplyActiveLimits(targetActive.Value);
-                    _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, targetActive.Value);
-                    RampControllerActive.Start(TargetActivePower.Watts, targetActive.Value);
-                }
-
-                _targetActivePower.Watts = RampControllerActive.Calculate();
-                CheckFinalActiveTarget();
-            }
-
-            if (StateReactive != OperatingModeState.Disabled)
-            {
-                // Calculate reactive power
-                ReactivePower? availableReactive = _map.AvailableReactivePower?.Invoke();
-                double? targetReactive = CheckNewReactiveTargetSetpoint(availableReactive);
-
-                if (targetReactive != null)
-                {
-                    // Apply configured limits if configured
-                    targetReactive = ApplyReactiveLimits(targetReactive.Value);
-                    _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Reactive Target-Setpoint set to {ReactiveTargetSetpoint}", Name, targetReactive.Value);
-                    RampControllerReactive.Start(TargetReactivePower.VoltAmperesReactive, targetReactive.Value);
-                }
-
-                _targetReactivePower.VoltAmperesReactive = RampControllerReactive.Calculate();
-                CheckFinalReactiveTarget();
-            }
-
-            return Task.CompletedTask;
+            SetpointActivePower = activePower;
+            SetpointReactivePower = reactivePower;
+            _logger.LogInformation("{Name} setpoints changed to {SetpointActivePower} and {SetpointReactivePower}.", Name, activePower, reactivePower);
         }
 
 
+        /// <inheritdoc/>
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
+        {
+            ArgumentNullException.ThrowIfNull(signals);
 
+            ActiveControl!.Calculate(SetpointActivePower, _map.AvailableActivePower.Invoke());
+            ReactiveControl!.Calculate(SetpointReactivePower, _map.AvailableReactivePower.Invoke());
+
+            return signals;
+        }
     }
 }

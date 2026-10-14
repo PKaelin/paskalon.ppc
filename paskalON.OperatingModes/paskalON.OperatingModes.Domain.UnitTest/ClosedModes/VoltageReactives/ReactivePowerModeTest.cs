@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
@@ -6,421 +6,93 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives;
-using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives;
-using paskalON.OperatingModes.Domain.Configs.Ramps;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.UnitTest.ClosedModes.VoltageReactives
 {
+    /// <summary>
+    /// Tests <see cref="ReactivePowerMode"/>. The ramp and feedback behavior is tested in the control tests.
+    /// </summary>
     [TestClass]
     public class ReactivePowerModeTest
     {
+        /// <summary>
+        /// The operating mode under test.
+        /// </summary>
         private ReactivePowerMode? _mode;
+
+
+        /// <summary>
+        /// The operating mode map.
+        /// </summary>
         private ReactivePowerModeMap? _map;
-        private Mock<IRampController>? _rampReactive;
-        private SystemConfig? _systemConfig;
-        private ReactivePowerModeConfig? _config;
 
 
+        /// <summary>
+        /// Creates the operating mode with 4 MVar available power and a ramp that reaches -1 MVar.
+        /// </summary>
         [TestInitialize]
         public void Initialize()
         {
-            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-
-            _systemConfig = new SystemConfig
+            _map = new ReactivePowerModeMap
             {
-                ChangedBy = "Test",
-                Type = PowerControlType.Bess,
-                ReferenceFrequency = 50,
-                NameplateMinimumActivePowerWatt = double.MinValue,
-                NameplateMaximumActivePowerWatt = double.MaxValue,
-                NameplateMinimumReactivePowerVars = double.MinValue,
-                NameplateMaximumReactivePowerVars = double.MaxValue,
+                AvailableActivePower = () => new ActivePower(8000000),
+                AvailableReactivePower = () => new ReactivePower(-4000000),
+                ReactivePowerAtPoi = () => null
             };
-
-            _config = new ReactivePowerModeConfig
+            Mock<IRampController> rampController = OperatingModeTestData.CreateRampController();
+            rampController.Setup(controller => controller.Calculate()).Returns(-1000000);
+            ReactivePowerModeConfig config = new ReactivePowerModeConfig
             {
                 ChangedBy = "Test",
-                Name = "ReactivePowerModeConfig",
+                Name = "ReactivePowerMode",
                 IsActive = true,
                 Type = PowerControlType.Bess,
-                RampConfig = new Mock<RampBaseConfig>().Object,
-                ProportionalGain = 1.0,
-                DeadbandAvailable = 1000,
-                DeadbandSetpoint = 1000,
+                DeadbandSetpoint = OperatingModeTestData.Deadband,
+                DeadbandAvailable = OperatingModeTestData.Deadband,
+                DeadbandError = 5000,
+                ProportionalGain = 0.5,
+                RampConfig = OperatingModeTestData.CreateRampConfig()
             };
-
-            _map = new ReactivePowerModeMap { AvailableActivePower = () => null, AvailableReactivePower = () => null, ReactivePowerAtPoi = () => null };
-            Mock<IRampController> rampActive = new Mock<IRampController>();
-            _rampReactive = new Mock<IRampController>();
-            rampActive.Setup(x => x.ShallowCopy()).Returns(_rampReactive.Object);
-            _mode = new ReactivePowerMode(NullLogger.Instance, TimeProvider.System, publisher.Object, _systemConfig, _config, _map, rampActive.Object);
+            _mode = new ReactivePowerMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, OperatingModeTestData.CreateSystemConfig(),
+                config, _map, rampController.Object);
         }
 
 
+        /// <summary>
+        /// Confirms the mode is a base reactive mode with a reactive power feedback.
+        /// </summary>
         [TestMethod]
-        public void CreateOperatingModeTest()
+        public void ReactivePowerModeConstructorTest()
         {
-            Assert.IsNotNull(_mode!.RampControllerReactive);
-            Assert.IsFalse(_mode!.IsEnabled);
-            Assert.AreEqual(_config!.Name, _mode!.Name);
-            Assert.AreEqual(OperatingModeState.Disabled, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
+            Assert.AreEqual(OperatingModeClassification.BaseReactive, _mode!.Classification);
+            Assert.IsNull(_mode!.ActiveControl);
+            Assert.IsNotNull(_mode!.ReactiveControl);
+            Assert.IsNull(_mode!.ActiveFeedback);
+            Assert.AreEqual("ReactivePower", _mode!.ReactiveFeedback!.Quantity);
         }
 
 
+        /// <summary>
+        /// Confirms the corrected target is written into the base reactive power using the measurement at the POI from the map.
+        /// </summary>
+        /// <param name="measured">The measured reactive power at the POI in Vars.</param>
+        /// <param name="expectedBase">The expected base reactive power in Vars.</param>
         [TestMethod]
-        public void CalculateStateDisabledTest()
+        [DataRow(null, -1000000)]
+        [DataRow(-900000.0, -1050000)]
+        public void ReactivePowerModeCalculateWritesCorrectedBaseReactivePowerTest(double? measured, double expectedBase)
         {
-            _mode!.CalculateAsync();
+            _map!.ReactivePowerAtPoi = () => measured.HasValue ? new ReactivePower(measured.Value) : null;
+            _mode!.Activate();
 
-            Assert.AreEqual(OperatingModeState.Disabled, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
+            OperatingModeSignals signals = _mode!.Calculate(new OperatingModeSignals { SetpointActivePower = new ActivePower(0), SetpointReactivePower = new ReactivePower(-1000000) });
+
+            Assert.AreEqual(expectedBase, signals.BaseReactivePower.VoltAmperesReactive);
+            Assert.AreEqual(0, signals.BaseActivePower.Watts);
         }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledNoAvailableTest()
-        {
-            _mode!.Enable();
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.Enabling, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableNoSetpointTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(10000);
-            _mode!.Enable();
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.Enabling, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointBeforeEnabledTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(10000);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(10000);
-            _mode!.Enable();
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(10000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetActivePower.Watts);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 10000000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointBeforeEnabledNegativeTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(-1000);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(-10000);
-            _mode!.Enable();
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(-10000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, -1000000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointAfterEnabledTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(100);
-            _mode!.Enable();
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(101);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(101, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 100000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointAfterEnabledNegativeTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(-100);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(-101);
-            _mode!.Enable();
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(-101, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, -100000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointAfterEnabledAndDeadbandTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(100);
-            _mode!.Enable();
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(100);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(100, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointAfterEnabledAndDeadbandNegativeTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(-100);
-            _mode!.Enable();
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(-100);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(-100, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.VoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointRampUpReachedTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(100);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(101);
-            _mode!.Enable();
-            _rampReactive!.Setup(x => x.Calculate()).Returns(100000);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.Enabled, _mode!.State);
-            Assert.AreEqual(101, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(101, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 100000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledDisabledAvailableSetpointRampDownReachedTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(100);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(100);
-            _mode!.Enable();
-            _mode!.Disable();
-            _rampReactive!.Setup(x => x.Calculate()).Returns(10000);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.Disabled, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Exactly(2));
-            _rampReactive!.Verify(x => x.Start(0, 100000), Times.Once);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), 0), Times.Once);
-            _rampReactive!.Verify(x => x.Stop(), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableUpperLimitTest()
-        {
-            _config!.MaximumReactivePowerLimitVars = 500;
-
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(1000);
-            _mode!.Enable();
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(1000);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 500), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableLowerLimitTest()
-        {
-            _config!.MinimumReactivePowerLimitVars = -400;
-
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(-1000);
-            _mode!.Enable();
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(-1000);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            Assert.AreEqual(-1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, -400), Times.Once);
-        }
-
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointAvailableGettingBiggerTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(100);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(100);
-            _mode!.Enable();
-            _mode!.CalculateAsync();
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(500);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            Assert.AreEqual(100, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 100000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointErrorInDeadbandTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(1000);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(1000);
-            _config!.DeadbandError = 100000;
-            _mode!.Enable();
-            _rampReactive!.Setup(x => x.Calculate()).Returns(1000000);
-            _mode!.CalculateAsync();
-            _map!.ReactivePowerAtPoi = () => ReactivePower.FromKilo(950);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(1000, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(0, _mode!.ErrorAdjustmentReactive.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 1000000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointErrorOutsideDeadbandTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(1000);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(1000);
-            _config!.DeadbandError = 20000;
-            _mode!.Enable();
-            _rampReactive!.Setup(x => x.Calculate()).Returns(1000000);
-            _mode!.CalculateAsync();
-            _map!.ReactivePowerAtPoi = () => ReactivePower.FromKilo(950);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(1050, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(50, _mode!.ErrorAdjustmentReactive.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 1000000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointErrorOutsideDeadbandCalculateMultipleTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(1000);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(1000);
-            _config!.DeadbandError = 20000;
-            _mode!.Enable();
-            _rampReactive!.Setup(x => x.Calculate()).Returns(1000000);
-            _mode!.CalculateAsync();
-            _map!.ReactivePowerAtPoi = () => ReactivePower.FromKilo(950);
-            _mode!.CalculateAsync();
-            _mode!.CalculateAsync();
-            _mode!.CalculateAsync();
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(1050, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(50, _mode!.ErrorAdjustmentReactive.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 1000000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointErrorOutsideDeadbandCalculateMultipleChangePoiTest()
-        {
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(1000);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(1000);
-            _config!.DeadbandError = 20;
-            _mode!.Enable();
-            _rampReactive!.Setup(x => x.Calculate()).Returns(1000000);
-            _mode!.CalculateAsync();
-            _map!.ReactivePowerAtPoi = () => ReactivePower.FromKilo(950);
-            _mode!.CalculateAsync();
-            _mode!.CalculateAsync();
-            _map!.ReactivePowerAtPoi = () => ReactivePower.FromKilo(951);
-            _mode!.CalculateAsync();
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(1099, _mode!.TargetReactivePower.KiloVoltAmperesReactivePrecision);
-            Assert.AreEqual(99, _mode!.ErrorAdjustmentReactive.KiloVoltAmperesReactivePrecision);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 1000000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void CalculateModeEnabledAvailableSetpointRampGainTest()
-        {
-            _config!.ProportionalGain = 0.5;
-            _map!.AvailableReactivePower = () => ReactivePower.FromKilo(1000);
-            _mode!.SetpointReactivePower = ReactivePower.FromKilo(1000);
-            _mode!.Enable();
-            _rampReactive!.Setup(x => x.Calculate()).Returns(800000);
-            _mode!.CalculateAsync();
-            _map!.ReactivePowerAtPoi = () => ReactivePower.FromKilo(700);
-            _mode!.CalculateAsync();
-
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            Assert.AreEqual(1000, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(850, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 1000000), Times.Once);
-        }
-
-
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
@@ -8,7 +8,6 @@ using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
-using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
@@ -20,7 +19,7 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
     /// Output Controlled: Active Power (P)
     /// What Output Influences: Active Power
     /// </summary>
-    public class ActivePowerFixedMode : OperatingOpenModeBase, IExclusiveMode, IStackable
+    public class ActivePowerFixedMode : OperatingOpenModeBase, IExclusiveActiveMode
     {
         /// <summary>
         /// Active power fixed mode configuration.
@@ -54,32 +53,18 @@ namespace paskalON.OperatingModes.Domain.OpenModes.FrequencyActives
 
             _config = config;
             _map = map;
-            StateActive = OperatingModeState.Disabled;
             RegisterMetrics();
         }
 
 
         /// <inheritdoc/>
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
-            if (StateActive != OperatingModeState.Disabled)
-            {
-                ActivePower? available = _map.AvailableActivePower?.Invoke();
-                double? target = CheckNewActiveTargetSetpoint(available);
+            ArgumentNullException.ThrowIfNull(signals);
 
-                if (target != null)
-                {
-                    // Apply configured limits if configured
-                    target = ApplyActiveLimits(target.Value);
-                    _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, target.Value);
-                    RampControllerActive.Start(TargetActivePower.Watts, target.Value);
-                }
+            signals.BaseActivePower = ActiveControl!.Calculate(signals.SetpointActivePower, _map.AvailableActivePower.Invoke());
 
-                _targetActivePower.Watts = RampControllerActive.Calculate();
-                CheckFinalActiveTarget();
-            }
-
-            return Task.CompletedTask;
+            return signals;
         }
     }
-}
+}

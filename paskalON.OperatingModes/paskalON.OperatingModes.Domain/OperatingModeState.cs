@@ -27,16 +27,6 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Operating mode is at the expected set point(s) and is therefore fully enabled.
         /// </summary>
-        Enabled = 3,
-
-        /// <summary>
-        /// Operating mode is ramping towards a disabling state but is not fully disabled.
-        /// </summary>
-        RampingToDisabled = 4,
-
-        /// <summary>
-        /// Operating mode is disabling.
-        /// </summary>
-        Disabling = 5,
+        Enabled = 3
     }
 }

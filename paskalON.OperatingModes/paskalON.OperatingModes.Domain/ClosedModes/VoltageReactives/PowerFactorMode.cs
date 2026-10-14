@@ -12,7 +12,7 @@ using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
 {
-    public class PowerFactorMode : OperatingClosedModeBase, IExclusiveMode, IStackable
+    public class PowerFactorMode : OperatingClosedModeBase, IBaseReactiveMode
     {
         protected readonly PowerFactorModeConfig _config;
         protected readonly PowerFactorModeMap _map;
@@ -31,7 +31,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives
         }
 
 
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
             throw new NotImplementedException();
         }

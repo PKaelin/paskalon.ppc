@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
+using paskalON.OperatingModes.Domain.Controls;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -15,19 +16,13 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 {
     /// <summary>
     /// Mode: Active Power Mode
-    /// Purpose: Fixed Watt setpoint
+    /// Purpose: Watt setpoint
     /// Inputs: Active Power setpoint, Available Active Power, Measured Active Power at POI
     /// Output Controlled: Active Power (P)
     /// What Output Influences: Active Power, Grid frequency, Power Balance
     /// </summary>
-    public class ActivePowerMode : OperatingClosedModeBase, IAdditiveMode, IStackable
+    public class ActivePowerMode : OperatingClosedModeBase, IBaseActiveMode
     {
-        /// <summary>
-        /// Last active power at point of interconnection (POI).
-        /// </summary>
-        private double? _lastActivePowerAtPoi;
-
-
         /// <summary>
         /// Active power mode configuration.
         /// </summary>
@@ -60,53 +55,20 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 
             _config = config;
             _map = map;
-            StateActive = OperatingModeState.Disabled;
+            CreateActiveFeedback("ActivePower", () => _map.ActivePowerAtPoi.Invoke()?.Watts, new FeedbackSettings(config.ProportionalGain, config.DeadbandError));
             RegisterMetrics();
         }
 
 
         /// <inheritdoc/>
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
-            if (StateActive != OperatingModeState.Disabled)
-            {
-                ActivePower? available = _map.AvailableActivePower?.Invoke();
-                double? target = CheckNewActiveTargetSetpoint(available);
+            ArgumentNullException.ThrowIfNull(signals);
 
-                if (target != null)
-                {
-                    // Apply configured limits if configured
-                    target = ApplyActiveLimits(target.Value);
-                    _logger.LogInformation("Operating mode changed due setpoint or available change: {Name}. Active Target-Setpoint set to {ActiveTargetSetpoint}", Name, target.Value);
-                    RampControllerActive.Start(TargetActivePower.Watts, target.Value);
-                }
+            ActivePower target = ActiveControl!.Calculate(signals.SetpointActivePower, _map.AvailableActivePower.Invoke());
+            signals.BaseActivePower = ActiveFeedback!.Correct(target, target.Watts);
 
-                // Calculate the error between the current target and the measured feedback
-                double powerAtPoi = _map.ActivePowerAtPoi?.Invoke()?.Watts ?? 0;
-
-                // Don't try to fix minor noise. Set the error adjustment within this statement
-                if (Math.Abs(TargetActivePower.Watts - powerAtPoi) < _config.DeadbandError)
-                {
-                    _errorAdjustmentActive.Watts = 0;
-                }
-                else
-                {
-                    // Do not increase if last active power at POI is stuck somehow
-                    if (_lastActivePowerAtPoi.HasValue == false || _lastActivePowerAtPoi.Value != powerAtPoi)
-                    {
-                        // Apply proportional gain to the error to calculate the adjustment for the next iteration
-                        _errorAdjustmentActive.Watts = (TargetActivePower.Watts - powerAtPoi) * _config.ProportionalGain;
-                    }
-                }
-
-                // Set last active power
-                _lastActivePowerAtPoi = powerAtPoi;
-                // Include the error into the next iteration but don't exceed the configured limits
-                _targetActivePower.Watts = ApplyActiveLimits(RampControllerActive.Calculate() + _errorAdjustmentActive.Watts);
-                CheckFinalActiveTarget();
-            }
-
-            return Task.CompletedTask;
+            return signals;
         }
     }
 }

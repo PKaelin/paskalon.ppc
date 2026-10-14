@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageActives;
 using paskalON.OperatingModes.Domain.Curves;
@@ -11,7 +12,7 @@ using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageActives
 {
-    public class VoltageWattDroopMode : OperatingClosedModeBase
+    public class VoltageWattDroopMode : OperatingClosedModeBase, ILimitingActiveMode
     {
         protected readonly VoltageWattDroopModeConfig _config;
         protected readonly VoltageWattDroopModeMap _map;
@@ -29,7 +30,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.VoltageActives
         }
 
 
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
             throw new NotImplementedException();
         }

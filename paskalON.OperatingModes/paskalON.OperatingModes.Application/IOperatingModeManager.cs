@@ -2,8 +2,10 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.OperatingModes.Application.Overrides;
 using paskalON.OperatingModes.Application.Stacks;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Systems;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
 using paskalON.Telemetry;
 
@@ -24,6 +26,18 @@ namespace paskalON.OperatingModes.Application
         /// Gets the stack manager responsible for managing operating mode stack.
         /// </summary>
         IStackManager StackManager { get; }
+
+
+        /// <summary>
+        /// Gets the override manager responsible for managing the override slot.
+        /// </summary>
+        IOverrideManager OverrideManager { get; }
+
+
+        /// <summary>
+        /// Gets the system operating mode control or null if the manager is not initialized.
+        /// </summary>
+        ISystemOperatingModeControl? SystemOperatingModeControl { get; }
 
 
         /// <summary>

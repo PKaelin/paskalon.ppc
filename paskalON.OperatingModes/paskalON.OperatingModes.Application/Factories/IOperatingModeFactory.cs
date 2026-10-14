@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using paskalON.Devices.Dto.Ders;
 using paskalON.OperatingModes.Domain;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Overrides;
 using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Application.Factories
@@ -24,8 +25,9 @@ namespace paskalON.OperatingModes.Application.Factories
         /// <param name="systemConfig">The system configuration.</param>
         /// <param name="config">The operating mode base configuration.</param>
         /// <param name="der">The DER information.</param>
+        /// <param name="overrides">Lookup of overridden DER units that are excluded from the plant-level available power.</param>
         /// <returns>The created OperatingModeBase instance.</returns>
         OperatingModeBase Create(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig,
-            OperatingModeBaseConfig config, DerDto der);
+            OperatingModeBaseConfig config, DerDto der, IUnitOverrideLookup overrides);
     }
 }

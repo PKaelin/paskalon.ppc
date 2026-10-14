@@ -1,14 +1,13 @@
-﻿// Copyright 2026 Pascal Kaelin (Operating as paskalON)
+// Copyright 2026 Pascal Kaelin (Operating as paskalON)
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
-using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
-using paskalON.OperatingModes.Domain.Configs.Ramps;
-using paskalON.OperatingModes.Domain.Curves;
+using paskalON.OperatingModes.Domain.Controls;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
@@ -16,525 +15,277 @@ using paskalON.Telemetry;
 namespace paskalON.OperatingModes.Domain.UnitTest
 {
     /// <summary>
-    /// Test class to test hidden members.
+    /// Tests the axis composition, state and metrics of <see cref="OperatingModeBase"/>.
     /// </summary>
-    internal class OperatingModeTest : OperatingModeBase
-    {
-        public OperatingModeTest(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, OperatingModeBaseConfig config,
-            OperatingModeBaseMap map, IRampController rampController, ICurveController? curveController = null)
-            : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
-        {
-        }
-        public ActivePower ActivePowerTarget { set => _targetActivePower = value; }
-        public ReactivePower ReactivePowerTarget { set => _targetReactivePower = value; }
-        public OperatingModeState OmStateActive { set => StateActive = value; }
-        public OperatingModeState OmStateReactive { set => StateReactive = value; }
-        public ActivePower? LastAvailableActive { get => _lastAvailableActive; }
-        public ActivePower? LastSetpointActive { get => _lastSetpointActive; }
-        public ReactivePower? LastAvailableReactive { get => _lastAvailableReactive; }
-        public ReactivePower? LastSetpointReactive { get => _lastSetpointReactive; }
-        public double TestGetActiveSetpoint() { return GetActivePowerTargetSetpoint(); }
-        public double TestGetReactiveSetpoint() { return GetReactivePowerTargetSetpoint(); }
-        public double TestApplyActiveLimits(double targetSetpoint) { return ApplyActiveLimits(targetSetpoint); }
-        public double TestApplyReactiveLimits(double targetSetpoint) { return ApplyReactiveLimits(targetSetpoint); }
-
-        public override Task CalculateAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-    }
-
-
-    /// <summary>
-    /// Test class to test abstract base class.
-    /// </summary>
-    internal class OperatingModeConfigTest : OperatingModeBaseConfig
-    {
-    }
-
-
     [TestClass]
     public class OperatingModeBaseTest
     {
-        private OperatingModeTest? _mode;
-        private OperatingModeBaseMap? _map;
-        private Mock<IRampController>? _rampActive;
-        private Mock<IRampController>? _rampReactive;
-        private SystemConfig? _systemConfig;
-        private OperatingModeConfigTest? _config;
-
-
-        [TestInitialize]
-        public void Initialize()
+        /// <summary>
+        /// Confirms the constructor validates its arguments.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeBaseConstructorNullArgumentsThrowTest()
         {
-            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            ILogger logger = NullLogger.Instance;
+            TimeProvider timeProvider = TimeProvider.System;
+            IMetricsPublisher publisher = new Mock<IMetricsPublisher>().Object;
+            SystemConfig systemConfig = OperatingModeTestData.CreateSystemConfig();
+            OperatingModeBaseConfig config = OperatingModeTestData.CreateConfig("Mode");
+            OperatingModeBaseMap map = OperatingModeTestData.CreateMap();
+            IRampController rampController = OperatingModeTestData.CreateRampController().Object;
 
-            _systemConfig = new SystemConfig
+            Assert.ThrowsExactly<ArgumentNullException>(() => new NullCheckTestMode(null!, timeProvider, publisher, systemConfig, config, map, rampController));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new NullCheckTestMode(logger, null!, publisher, systemConfig, config, map, rampController));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new NullCheckTestMode(logger, timeProvider, null!, systemConfig, config, map, rampController));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new NullCheckTestMode(logger, timeProvider, publisher, null!, config, map, rampController));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new NullCheckTestMode(logger, timeProvider, publisher, systemConfig, null!, map, rampController));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new NullCheckTestMode(logger, timeProvider, publisher, systemConfig, config, null!, rampController));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new NullCheckTestMode(logger, timeProvider, publisher, systemConfig, config, map, null!));
+        }
+
+
+        /// <summary>
+        /// Confirms the power controls are created from the classification.
+        /// </summary>
+        /// <param name="modeKind">The kind of test operating mode.</param>
+        /// <param name="expectedClassification">The expected classification.</param>
+        /// <param name="expectedActive">Whether an active power control is expected.</param>
+        /// <param name="expectedReactive">Whether a reactive power control is expected.</param>
+        [TestMethod]
+        [DataRow("Plain", OperatingModeClassification.None, false, false)]
+        [DataRow("BaseActive", OperatingModeClassification.BaseActive, true, false)]
+        [DataRow("BaseReactive", OperatingModeClassification.BaseReactive, false, true)]
+        [DataRow("Override", OperatingModeClassification.Override, true, true)]
+        public void OperatingModeBaseConstructorCreatesPowerControlsTest(string modeKind, OperatingModeClassification expectedClassification, bool expectedActive, bool expectedReactive)
+        {
+            TestOperatingModeBase operatingMode = CreateMode(modeKind, new Mock<IMetricsPublisher>().Object, OperatingModeTestData.CreateRampController().Object);
+
+            Assert.AreEqual("Mode", operatingMode.Name);
+            Assert.AreEqual(expectedClassification, operatingMode.Classification);
+            Assert.AreEqual(expectedActive, operatingMode.ActiveControl is not null);
+            Assert.AreEqual(expectedReactive, operatingMode.ReactiveControl is not null);
+            Assert.AreEqual(OperatingModeState.Disabled, operatingMode.State);
+            Assert.IsFalse(operatingMode.IsActivated);
+            Assert.AreEqual(DateTimeOffset.MinValue, operatingMode.LastActivated);
+        }
+
+
+        /// <summary>
+        /// Confirms the ramp controller is only copied when both power axes exist.
+        /// </summary>
+        /// <param name="modeKind">The kind of test operating mode.</param>
+        /// <param name="expectedShallowCopies">The expected number of ramp controller copies.</param>
+        [TestMethod]
+        [DataRow("BaseActive", 0)]
+        [DataRow("BaseReactive", 0)]
+        [DataRow("Override", 1)]
+        public void OperatingModeBaseConstructorRampControllerPerAxisTest(string modeKind, int expectedShallowCopies)
+        {
+            Mock<IRampController> rampController = OperatingModeTestData.CreateRampController();
+
+            TestOperatingModeBase operatingMode = CreateMode(modeKind, new Mock<IMetricsPublisher>().Object, rampController.Object);
+
+            IRampController? firstRampController = operatingMode.ActiveControl?.RampController ?? operatingMode.ReactiveControl?.RampController;
+            Assert.AreSame(rampController.Object, firstRampController);
+            rampController.Verify(controller => controller.ShallowCopy(), Times.Exactly(expectedShallowCopies));
+
+            if (operatingMode.ActiveControl is not null && operatingMode.ReactiveControl is not null)
             {
-                ChangedBy = "Test",
-                Type = PowerControlType.Bess,
-                ReferenceFrequency = 50,
-                NameplateMinimumActivePowerWatt = double.MinValue,
-                NameplateMaximumActivePowerWatt = double.MaxValue,
-                NameplateMinimumReactivePowerVars = double.MinValue,
-                NameplateMaximumReactivePowerVars = double.MaxValue,
-            };
+                Assert.AreNotSame(operatingMode.ActiveControl.RampController, operatingMode.ReactiveControl.RampController);
+            }
+        }
 
-            _config = new OperatingModeConfigTest
+
+        /// <summary>
+        /// Confirms activating sets the enabling state and the time stamp.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeBaseActivateSetsEnablingAndLastActivatedTest()
+        {
+            FakeTimeProvider timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 10, 12, 8, 0, 0, TimeSpan.Zero));
+            TestBaseActiveMode operatingMode = new TestBaseActiveMode("Mode", timeProvider: timeProvider);
+
+            operatingMode.Activate();
+
+            Assert.IsTrue(operatingMode.IsActivated);
+            Assert.AreEqual(timeProvider.GetUtcNow(), operatingMode.LastActivated);
+            Assert.AreEqual(OperatingModeState.Enabling, operatingMode.State);
+            Assert.AreEqual(OperatingModeState.Enabling, operatingMode.ActiveControl!.State);
+        }
+
+
+        /// <summary>
+        /// Confirms a stack mode establishes its target immediately and an override mode ramps from its current target.
+        /// </summary>
+        /// <param name="modeKind">The kind of test operating mode.</param>
+        /// <param name="expectedRampStarts">The expected number of ramp starts.</param>
+        [TestMethod]
+        [DataRow("BaseActive", 0)]
+        [DataRow("Override", 1)]
+        public void OperatingModeBaseActivateStartPolicyTest(string modeKind, int expectedRampStarts)
+        {
+            Mock<IRampController> rampController = OperatingModeTestData.CreateRampController();
+            TestOperatingModeBase operatingMode = CreateMode(modeKind, new Mock<IMetricsPublisher>().Object, rampController.Object);
+            // TestBaseActiveMode -> IBaseActiveMode -> IStackableMode = PowerControlStart.AtTargetSetpoint
+            operatingMode.Activate();
+            operatingMode.ActiveControl!.Calculate(new ActivePower(1000000), new ActivePower(8000000));
+
+            rampController.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Exactly(expectedRampStarts));
+        }
+
+
+        /// <summary>
+        /// Confirms deactivating disables all power axes immediately.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeBaseDeactivateDisablesImmediatelyTest()
+        {
+            TestOverrideMode operatingMode = new TestOverrideMode("Mode", "Unit1");
+            operatingMode.Activate();
+
+            // System operating mode control transitions the applied target
+            operatingMode.Deactivate();
+
+            Assert.IsFalse(operatingMode.IsActivated);
+            Assert.AreEqual(OperatingModeState.Disabled, operatingMode.State);
+            Assert.AreEqual(OperatingModeState.Disabled, operatingMode.ActiveControl!.State);
+            Assert.AreEqual(OperatingModeState.Disabled, operatingMode.ReactiveControl!.State);
+        }
+
+
+
+        /// <summary>
+        /// Confirms only the metrics of the existing power axis and the contribution are registered.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeBaseRegisterMetricsOnlyExistingAxisTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            TestBaseActiveMode operatingMode = new TestBaseActiveMode("Mode", publisher.Object);
+
+            operatingMode.RegisterMetricsForTest();
+
+            publisher.Verify(p => p.Initialize("OperatingMode", It.Is<IEnumerable<KeyValuePair<string, object?>>>(tags =>
+                tags.Any(tag => tag.Key == "Name" && (string?)tag.Value == "Mode") &&
+                tags.Any(tag => tag.Key == "Classification" && (string?)tag.Value == "BaseActive"))), Times.Once);
+            VerifyAxisMetric(publisher, "ActivePowerTarget", Times.Once());
+            VerifyAxisMetric(publisher, "ActivePowerSetpoint", Times.Once());
+            VerifyAxisMetric(publisher, "ActivePowerTargetSetpoint", Times.Once());
+            VerifyAxisMetric(publisher, "ActivePowerAvailable", Times.Once());
+            VerifyModeMetric(publisher, "ActivePowerContribution", Times.Once());
+            VerifyModeMetric(publisher, "ReactivePowerContribution", Times.Never());
+            publisher.Verify(p => p.Register(It.IsAny<PowerControl<ReactivePower>>(), It.IsAny<string>(), It.IsAny<MetricType>(),
+                It.IsAny<Func<PowerControl<ReactivePower>, double?>>(), It.IsAny<int>()), Times.Never);
+        }
+
+
+        /// <summary>
+        /// Confirms override modes are tagged with their DER unit and have no contribution metrics.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeBaseRegisterMetricsOverrideTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            TestOverrideMode operatingMode = new TestOverrideMode("Mode", "Unit1", publisher.Object);
+
+            operatingMode.RegisterMetricsForTest();
+
+            publisher.Verify(p => p.Initialize("OperatingMode", It.Is<IEnumerable<KeyValuePair<string, object?>>>(tags =>
+                tags.Any(tag => tag.Key == "DerUnit" && (string?)tag.Value == "Unit1"))), Times.Once);
+            VerifyAxisMetric(publisher, "ActivePowerTarget", Times.Once());
+            VerifyModeMetric(publisher, "ActivePowerContribution", Times.Never());
+            VerifyModeMetric(publisher, "ReactivePowerContribution", Times.Never());
+        }
+
+
+        /// <summary>
+        /// Confirms limiting modes register the is limiting metric.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeBaseRegisterMetricsLimitingTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            TestLimitingActiveMode operatingMode = new TestLimitingActiveMode("Mode", publisher.Object);
+
+            operatingMode.RegisterMetricsForTest();
+
+            publisher.Verify(p => p.Register(It.IsAny<OperatingModeBase>(), "ActivePowerIsLimiting", MetricType.Gauge,
+                It.IsAny<Func<OperatingModeBase, int?>>(), It.IsAny<int>()), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Creates a test operating mode of the specified kind.
+        /// </summary>
+        /// <param name="modeKind">The kind of test operating mode.</param>
+        /// <param name="publisher">The metrics publisher.</param>
+        /// <param name="rampController">The ramp controller.</param>
+        /// <returns>The test operating mode.</returns>
+        private TestOperatingModeBase CreateMode(string modeKind, IMetricsPublisher publisher, IRampController rampController)
+        {
+            return modeKind switch
             {
-                ChangedBy = "Test",
-                Name = "ActivePowerFixedModeConfig",
-                IsActive = true,
-                Type = PowerControlType.Bess,
-                RampConfig = new Mock<RampBaseConfig>().Object,
+                "BaseActive" => new TestBaseActiveMode("Mode", publisher, rampController),
+                "BaseReactive" => new TestBaseReactiveMode("Mode", publisher, rampController),
+                "Override" => new TestOverrideMode("Mode", "Unit1", publisher, rampController),
+                _ => new TestPlainMode("Mode", publisher, rampController),
             };
-
-            _map = new OperatingModeBaseMap { AvailableActivePower = () => null, AvailableReactivePower = () => null };
-            _rampActive = new Mock<IRampController>();
-            _rampReactive = new Mock<IRampController>();
-            _rampActive.Setup(x => x.ShallowCopy()).Returns(_rampReactive.Object);
-            _mode = new OperatingModeTest(NullLogger.Instance, TimeProvider.System, publisher.Object, _systemConfig, _config, _map, _rampActive.Object);
         }
 
 
-        [TestMethod]
-        public void CreateWithNullLoggerTest()
+        /// <summary>
+        /// Verifies the registration of an active power axis metric.
+        /// </summary>
+        /// <param name="publisher">The mocked publisher.</param>
+        /// <param name="name">The metric name.</param>
+        /// <param name="times">The expected number of registrations.</param>
+        private void VerifyAxisMetric(Mock<IMetricsPublisher> publisher, string name, Times times)
         {
-            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            Mock<IRampController> ramp = new Mock<IRampController>();
-            Mock<ICurveController> curve = new Mock<ICurveController>();
-            Mock<OperatingModeBaseConfig> config = new Mock<OperatingModeBaseConfig>();
-            Mock<OperatingModeBaseMap> map = new Mock<OperatingModeBaseMap>();
-            Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
-            Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(null!, TimeProvider.System, publisher.Object, systemConfig.Object,
-                config.Object, map.Object, ramp.Object, curve.Object));
+            publisher.Verify(p => p.Register(It.IsAny<PowerControl<ActivePower>>(), name, MetricType.Gauge,
+                It.IsAny<Func<PowerControl<ActivePower>, double?>>(), It.IsAny<int>()), times);
         }
 
 
-        [TestMethod]
-        public void CreateWithNullSystemConfigTest()
+        /// <summary>
+        /// Verifies the registration of an operating mode metric.
+        /// </summary>
+        /// <param name="publisher">The mocked publisher.</param>
+        /// <param name="name">The metric name.</param>
+        /// <param name="times">The expected number of registrations.</param>
+        private void VerifyModeMetric(Mock<IMetricsPublisher> publisher, string name, Times times)
         {
-            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            Mock<IRampController> ramp = new Mock<IRampController>();
-            Mock<ICurveController> curve = new Mock<ICurveController>();
-            Mock<OperatingModeBaseConfig> config = new Mock<OperatingModeBaseConfig>();
-            Mock<OperatingModeBaseMap> map = new Mock<OperatingModeBaseMap>();
-            Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(NullLogger.Instance, TimeProvider.System, publisher.Object,
-                null!, config.Object, map.Object, ramp.Object, curve.Object));
+            publisher.Verify(p => p.Register(It.IsAny<OperatingModeBase>(), name, MetricType.Gauge,
+                It.IsAny<Func<OperatingModeBase, double?>>(), It.IsAny<int>()), times);
         }
 
 
-        [TestMethod]
-        public void CreateWithNullModeConfigTest()
+        /// <summary>
+        /// Test operating mode exposing the full base constructor.
+        /// </summary>
+        private sealed class NullCheckTestMode : OperatingModeBase
         {
-            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            Mock<IRampController> ramp = new Mock<IRampController>();
-            Mock<ICurveController> curve = new Mock<ICurveController>();
-            Mock<OperatingModeBaseMap> map = new Mock<OperatingModeBaseMap>();
-            Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
-            Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(NullLogger.Instance, TimeProvider.System, publisher.Object,
-                systemConfig.Object, null!, map.Object, ramp.Object, curve.Object));
-        }
-
-
-        [TestMethod]
-        public void CreateWithNullRampControllerTest()
-        {
-            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            Mock<ICurveController> curve = new Mock<ICurveController>();
-            Mock<OperatingModeBaseConfig> config = new Mock<OperatingModeBaseConfig>();
-            Mock<OperatingModeBaseMap> map = new Mock<OperatingModeBaseMap>();
-            Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
-            Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(NullLogger.Instance, TimeProvider.System, publisher.Object,
-                systemConfig.Object, config.Object, map.Object, null!, curve.Object));
-        }
-
-
-        [TestMethod]
-        public void CreateWithNullMapControllerTest()
-        {
-            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
-            Mock<IRampController> ramp = new Mock<IRampController>();
-            Mock<ICurveController> curve = new Mock<ICurveController>();
-            Mock<OperatingModeBaseConfig> config = new Mock<OperatingModeBaseConfig>();
-            Mock<SystemConfig> systemConfig = new Mock<SystemConfig>();
-            Assert.ThrowsExactly<ArgumentNullException>(() => new OperatingModeTest(NullLogger.Instance, TimeProvider.System, publisher.Object,
-                systemConfig.Object, config.Object, null!, ramp.Object, curve.Object));
-        }
-
-
-
-        [TestMethod]
-        public void SetActivePowerSetpointBiggerThanNameplateTest()
-        {
-            _systemConfig!.NameplateMaximumActivePowerWatt = 100;
-            Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointActivePower = ActivePower.FromKilo(200));
-        }
-
-
-        [TestMethod]
-        public void SetActivePowerSetpointSmallerThanNameplateTest()
-        {
-            _systemConfig!.NameplateMinimumActivePowerWatt = -100;
-            Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointActivePower = ActivePower.FromKilo(-200));
-        }
-
-
-        [TestMethod]
-        public void SetReactivePowerSetpointBiggerThanNameplateTest()
-        {
-            _systemConfig!.NameplateMaximumReactivePowerVars = 100;
-            Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointReactivePower = ReactivePower.FromKilo(200));
-        }
-
-
-        [TestMethod]
-        public void SetReactivePowerSetpointSmallerThanNameplateTest()
-        {
-            _systemConfig!.NameplateMinimumReactivePowerVars = -100;
-            Assert.ThrowsExactly<InvalidOperationException>(() => _mode!.SetpointReactivePower = ReactivePower.FromKilo(-200));
-        }
-
-
-        [TestMethod]
-        public void GetActiveSetpointNoAvailableNoSetpointTest()
-        {
-            double setpoint = _mode!.TestGetActiveSetpoint();
-
-            Assert.AreEqual(0, setpoint);
-            Assert.IsNull(_mode!.LastAvailableActive);
-            Assert.IsNull(_mode!.LastSetpointActive);
-        }
-
-
-        [TestMethod]
-        public void GetActiveSetpointAvailableButNoSetpointTest()
-        {
-            _map!.AvailableActivePower = () => new ActivePower(10000);
-            double setpoint = _mode!.TestGetActiveSetpoint();
-
-            Assert.AreEqual(0, setpoint);
-            Assert.IsNotNull(_mode!.LastAvailableActive);
-            Assert.IsNotNull(_mode!.LastSetpointActive);
-        }
-
-
-        [TestMethod]
-        public void GetActiveSetpointNoAvailableButSetpointTest()
-        {
-            _map!.AvailableActivePower = () => null;
-            _mode!.SetpointActivePower = new ActivePower(10000);
-            double setpoint = _mode!.TestGetActiveSetpoint();
-
-            Assert.AreEqual(0, setpoint);
-            Assert.IsNull(_mode!.LastAvailableActive);
-            Assert.IsNull(_mode!.LastSetpointActive);
-        }
-
-
-        [TestMethod]
-        public void GetActiveSetpointZeroAvailableButSetpointTest()
-        {
-            _map!.AvailableActivePower = () => new ActivePower(0);
-            _mode!.SetpointActivePower = new ActivePower(10000);
-            double setpoint = _mode!.TestGetActiveSetpoint();
-
-            Assert.AreEqual(0, setpoint);
-            Assert.IsNotNull(_mode!.LastAvailableActive);
-            Assert.IsNotNull(_mode!.LastSetpointActive);
-        }
-
-
-        [TestMethod]
-        public void GetActiveSetpointSmallerAvailableBiggerSetpointTest()
-        {
-            _map!.AvailableActivePower = () => new ActivePower(10000);
-            _mode!.SetpointActivePower = new ActivePower(20000);
-            double setpoint = _mode!.TestGetActiveSetpoint();
-
-            Assert.AreEqual(10000, setpoint);
-            Assert.IsNotNull(_mode!.LastAvailableActive);
-            Assert.IsNotNull(_mode!.LastSetpointActive);
-        }
-
-
-        [TestMethod]
-        public void GetActiveSetpointBiggerAvailableSmallerSetpointTest()
-        {
-            _map!.AvailableActivePower = () => new ActivePower(100000);
-            _mode!.SetpointActivePower = new ActivePower(50000);
-            double setpoint = _mode!.TestGetActiveSetpoint();
-
-            Assert.AreEqual(50000, setpoint);
-            Assert.IsNotNull(_mode!.LastAvailableActive);
-            Assert.IsNotNull(_mode!.LastSetpointActive);
-        }
-
-
-        [TestMethod]
-        public void GetReactiveSetpointNoAvailableNoSetpointTest()
-        {
-            double setpoint = _mode!.TestGetReactiveSetpoint();
-
-            Assert.AreEqual(0, setpoint);
-            Assert.IsNull(_mode!.LastAvailableReactive);
-            Assert.IsNull(_mode!.LastSetpointReactive);
-        }
-
-
-        [TestMethod]
-        public void GetReactiveSetpointAvailableButNoSetpointTest()
-        {
-            _map!.AvailableReactivePower = () => new ReactivePower(10000);
-            double setpoint = _mode!.TestGetReactiveSetpoint();
-
-            Assert.AreEqual(0, setpoint);
-            Assert.IsNotNull(_mode!.LastAvailableReactive);
-            Assert.IsNotNull(_mode!.LastSetpointReactive);
-        }
-
-
-        [TestMethod]
-        public void GetReactiveSetpointNoAvailableButSetpointTest()
-        {
-            _map!.AvailableReactivePower = () => null;
-            _mode!.SetpointReactivePower = new ReactivePower(10000);
-            double setpoint = _mode!.TestGetReactiveSetpoint();
-
-            Assert.AreEqual(0, setpoint);
-            Assert.IsNull(_mode!.LastAvailableReactive);
-            Assert.IsNull(_mode!.LastSetpointReactive);
-        }
-
-
-        [TestMethod]
-        public void GetReactiveSetpointZeroAvailableButSetpointTest()
-        {
-            _map!.AvailableReactivePower = () => new ReactivePower(0);
-            _mode!.SetpointReactivePower = new ReactivePower(10000);
-            double setpoint = _mode!.TestGetReactiveSetpoint();
-
-            Assert.AreEqual(0, setpoint);
-            Assert.IsNotNull(_mode!.LastAvailableReactive);
-            Assert.IsNotNull(_mode!.LastSetpointReactive);
-        }
-
-
-        [TestMethod]
-        public void GetReactiveSetpointSmallerAvailableBiggerSetpointTest()
-        {
-            _map!.AvailableReactivePower = () => new ReactivePower(10000);
-            _mode!.SetpointReactivePower = new ReactivePower(20000);
-            double setpoint = _mode!.TestGetReactiveSetpoint();
-
-            Assert.AreEqual(10000, setpoint);
-            Assert.IsNotNull(_mode!.LastAvailableReactive);
-            Assert.IsNotNull(_mode!.LastSetpointReactive);
-        }
-
-
-        [TestMethod]
-        public void GetReactiveSetpointBiggerAvailableSmallerSetpointTest()
-        {
-            _map!.AvailableReactivePower = () => new ReactivePower(100000);
-            _mode!.SetpointReactivePower = new ReactivePower(50000);
-            double setpoint = _mode!.TestGetReactiveSetpoint();
-
-            Assert.AreEqual(50000, setpoint);
-            Assert.IsNotNull(_mode!.LastAvailableReactive);
-            Assert.IsNotNull(_mode!.LastSetpointReactive);
-        }
-
-
-        [TestMethod]
-        public void EnableDisableWhenCheckIsEnabledTest()
-        {
-            _mode!.Enable();
-
-            Assert.IsTrue(_mode!.IsEnabled);
-
-            _mode!.Disable();
-
-            Assert.IsFalse(_mode!.IsEnabled);
-        }
-
-
-        [TestMethod]
-        public void EnableWhenAlreadyEnabledTest()
-        {
-            _map!.AvailableReactivePower = () => new ReactivePower(100000);
-            _mode!.SetpointReactivePower = new ReactivePower(50000);
-            _mode!.OmStateActive = OperatingModeState.Enabled;
-            _mode!.OmStateReactive = OperatingModeState.Enabled;
-            _mode!.Enable();
-
-            // As supposed to RampingToEnabled
-            Assert.AreEqual(OperatingModeState.Enabled, _mode!.StateActive);
-            Assert.AreEqual(OperatingModeState.Enabled, _mode!.StateReactive);
-            Assert.AreEqual(OperatingModeState.Enabled, _mode!.State);
-        }
-
-
-        [TestMethod]
-        public void EnableWhenAvailable0Setpoint0Test()
-        {
-            _mode!.OmStateReactive = OperatingModeState.Disabled;
-            _map!.AvailableReactivePower = () => new ReactivePower(0);
-            _mode!.SetpointReactivePower = new ReactivePower(0);
-            _mode!.Enable();
-
-            // Operating mode is enabling but not ramping yet.
-            Assert.AreEqual(OperatingModeState.Enabling, _mode!.State);
-        }
-
-
-        [TestMethod]
-        public void EnableWhenAvailable10Setpoint10ActiveTest()
-        {
-            _mode!.OmStateActive = OperatingModeState.Disabled;
-            _map!.AvailableActivePower = () => new ActivePower(20000);
-            _mode!.SetpointActivePower = new ActivePower(20000);
-            _mode!.Enable();
-
-            // Operating mode is enabling but not ramping yet.
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            _rampActive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampActive!.Verify(x => x.Start(0, 20000), Times.Once);
-        }
-
-
-        [TestMethod]
-        public void EnableWhenAvailable10Setpoint10ReactiveTest()
-        {
-            _mode!.OmStateReactive = OperatingModeState.Disabled;
-            _map!.AvailableReactivePower = () => new ReactivePower(10000);
-            _mode!.SetpointReactivePower = new ReactivePower(10000);
-            _mode!.Enable();
-
-            // Operating mode is enabling but not ramping yet.
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            _rampReactive!.Verify(x => x.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
-            _rampReactive!.Verify(x => x.Start(0, 10000), Times.Once);
-        }
-
-
-
-        [TestMethod]
-        public void DisableWhenAlreadyDisabledTest()
-        {
-            _map!.AvailableReactivePower = () => new ReactivePower(100000);
-            _mode!.SetpointReactivePower = new ReactivePower(50000);
-            _mode!.OmStateActive = OperatingModeState.Disabled;
-            _mode!.OmStateReactive = OperatingModeState.Disabled;
-            _mode!.Disable();
-
-            // As supposed to RampingToDisabled
-            Assert.AreEqual(OperatingModeState.Disabled, _mode!.StateActive);
-            Assert.AreEqual(OperatingModeState.Disabled, _mode!.StateReactive);
-            Assert.AreEqual(OperatingModeState.Disabled, _mode!.State);
-        }
-
-
-        [TestMethod]
-        public void DisableTest()
-        {
-            _map!.AvailableReactivePower = () => new ReactivePower(100000);
-            _mode!.SetpointReactivePower = new ReactivePower(50000);
-            _mode!.ReactivePowerTarget = new ReactivePower(10000);
-
-            _map!.AvailableActivePower = () => new ActivePower(100000);
-            _mode!.SetpointActivePower = new ActivePower(50000);
-            _mode!.ActivePowerTarget = new ActivePower(20000);
-
-            _mode!.OmStateActive = OperatingModeState.Enabled;
-            _mode!.OmStateReactive = OperatingModeState.Enabled;
-            _mode!.Disable();
-
-            Assert.AreEqual(OperatingModeState.RampingToDisabled, _mode!.StateActive);
-            Assert.AreEqual(OperatingModeState.RampingToDisabled, _mode!.StateReactive);
-            Assert.AreEqual(OperatingModeState.RampingToDisabled, _mode!.State);
-            Assert.AreEqual(0, _mode!.SetpointActivePower.KiloWatts);
-            Assert.AreEqual(0, _mode!.SetpointReactivePower.KiloVoltAmperesReactive);
-            Assert.AreEqual(20, _mode!.TargetActivePower.KiloWatts);
-            Assert.AreEqual(10, _mode!.TargetReactivePower.KiloVoltAmperesReactive);
-        }
-
-
-        [TestMethod]
-        public void ApplyActiveLimitsUpperOperatingModeLimitsTest()
-        {
-            _systemConfig!.NameplateMaximumActivePowerWatt = 10;
-            _config!.MaximumActivePowerLimitWatt = 5;
-
-            Assert.AreEqual(5, _mode!.TestApplyActiveLimits(20));
-        }
-
-
-        [TestMethod]
-        public void ApplyActiveLimitsUpperNameplateLimitsTest()
-        {
-            _systemConfig!.NameplateMaximumActivePowerWatt = 10;
-            _config!.MaximumActivePowerLimitWatt = null;
-
-            Assert.AreEqual(10, _mode!.TestApplyActiveLimits(20));
-        }
-
-
-        [TestMethod]
-        public void ApplyActiveLimitsLowerOperatingModeLimitsTest()
-        {
-            _systemConfig!.NameplateMinimumActivePowerWatt = -10;
-            _config!.MinimumActivePowerLimitWatt = -5;
-
-            Assert.AreEqual(-5, _mode!.TestApplyActiveLimits(-20));
-        }
-
-        [TestMethod]
-        public void ApplyActiveLimitsLowerNameplateLimitsTest()
-        {
-            _systemConfig!.NameplateMinimumActivePowerWatt = -10;
-            _config!.MinimumActivePowerLimitWatt = null;
-
-            Assert.AreEqual(-10, _mode!.TestApplyActiveLimits(-20));
-        }
-
-
-        [TestMethod]
-        public void ApplyReactiveLimitsUpperOperatingModeLimitsTest()
-        {
-            _systemConfig!.NameplateMaximumReactivePowerVars = 10;
-            _config!.MaximumReactivePowerLimitVars = 5;
-
-            Assert.AreEqual(5, _mode!.TestApplyReactiveLimits(20));
-        }
-
-
-        [TestMethod]
-        public void ApplyReactiveLimitsUpperNameplateLimitsTest()
-        {
-            _systemConfig!.NameplateMaximumReactivePowerVars = 10;
-            _config!.MaximumReactivePowerLimitVars = null;
-
-            Assert.AreEqual(10, _mode!.TestApplyReactiveLimits(20));
-        }
-
-
-        [TestMethod]
-        public void ApplyReactiveLimitsLowerOperatingModeLimitsTest()
-        {
-            _systemConfig!.NameplateMinimumReactivePowerVars = -10;
-            _config!.MinimumReactivePowerLimitVars = -5;
-
-            Assert.AreEqual(-5, _mode!.TestApplyReactiveLimits(-20));
-        }
-
-        [TestMethod]
-        public void ApplyReactiveLimitsLowerNameplateLimitsTest()
-        {
-            _systemConfig!.NameplateMinimumReactivePowerVars = -10;
-            _config!.MinimumReactivePowerLimitVars = null;
-
-            Assert.AreEqual(-10, _mode!.TestApplyReactiveLimits(-20));
+            /// <summary>
+            /// Constructor of <see cref="NullCheckTestMode"/>.
+            /// </summary>
+            /// <param name="logger">The logger.</param>
+            /// <param name="timeProvider">The time provider.</param>
+            /// <param name="publisher">The metrics publisher.</param>
+            /// <param name="systemConfig">The system configuration.</param>
+            /// <param name="config">The operating mode configuration.</param>
+            /// <param name="map">The operating mode map.</param>
+            /// <param name="rampController">The ramp controller.</param>
+            public NullCheckTestMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, OperatingModeBaseConfig config,
+                OperatingModeBaseMap map, IRampController rampController)
+                : base(logger, timeProvider, publisher, systemConfig, config, map, rampController)
+            {
+            }
+
+
+            /// <inheritdoc/>
+            public override OperatingModeSignals Calculate(OperatingModeSignals signals)
+            {
+                return signals;
+            }
         }
     }
 }

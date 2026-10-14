@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes;
 using paskalON.OperatingModes.Domain.Curves;
@@ -11,7 +12,7 @@ using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.ClosedModes
 {
-    public class MaintenanceSocMode : OperatingClosedModeBase
+    public class MaintenanceSocMode : OperatingClosedModeBase, IOverrideMode
     {
         protected readonly MaintenanceSocModeConfig _config;
         protected readonly MaintenanceSocModeMap _map;
@@ -30,7 +31,7 @@ namespace paskalON.OperatingModes.Domain.ClosedModes
         }
 
 
-        public override Task CalculateAsync(CancellationToken cancellationToken = default)
+        public override OperatingModeSignals Calculate(OperatingModeSignals signals)
         {
             throw new NotImplementedException();
         }

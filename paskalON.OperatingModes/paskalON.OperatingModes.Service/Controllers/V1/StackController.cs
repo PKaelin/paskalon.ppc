@@ -82,5 +82,19 @@ namespace paskalON.OperatingModes.Service.Controllers.V1
 
             return Ok();
         }
+
+
+        /// <summary>
+        /// Replaces an operating mode of the stack with another operating mode at the same priority in one atomic change.
+        /// </summary>
+        /// <param name="request">The request containing the replaced and the replacing operating mode names.</param>
+        /// <returns>An IActionResult indicating the result of the operation.</returns>
+        [HttpPost]
+        public IActionResult ReplaceOperatingMode(ReplaceOperatingModeStackRequest request)
+        {
+            _manager.StackManager.ReplaceOperatingMode(request.PredecessorName, request.OperatingModeName);
+
+            return Ok();
+        }
     }
 }
