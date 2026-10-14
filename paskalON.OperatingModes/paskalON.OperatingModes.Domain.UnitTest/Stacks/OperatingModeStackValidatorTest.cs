@@ -56,6 +56,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Stacks
         [DataRow("LimitingWithoutBase", new Type[] { typeof(ILimitingReactiveMode) })]
         [DataRow("AdditiveBeforeBase", new Type[] { typeof(IAdditiveActiveMode), typeof(IBaseActiveMode) })]
         [DataRow("AdditiveAfterLimiting", new Type[] { typeof(IBaseActiveMode), typeof(ILimitingActiveMode), typeof(IAdditiveActiveMode) })]
+        [DataRow("ReactiveAdditiveAfterLimiting", new Type[] { typeof(IBaseReactiveMode), typeof(ILimitingReactiveMode), typeof(IAdditiveReactiveMode) })]
         [DataRow("TwoExclusiveActive", new Type[] { typeof(IExclusiveActiveMode), typeof(IExclusiveActiveMode) })]
         [DataRow("ExclusiveWithBase", new Type[] { typeof(IExclusiveActiveMode), typeof(IBaseActiveMode) })]
         [DataRow("ExclusiveWithLimiting", new Type[] { typeof(IExclusiveReactiveMode), typeof(ILimitingReactiveMode) })]
@@ -86,6 +87,38 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Stacks
         public void OperatingModeStackValidatorNullTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() => OperatingModeStackValidator.Validate(null!));
+        }
+
+
+        /// <summary>
+        /// Confirms one mode cannot have multiple active-power classifications.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeStackValidatorMultipleActiveClassificationsTest()
+        {
+            Mock<IBaseActiveMode> mock = new Mock<IBaseActiveMode>();
+            mock.As<IAdditiveActiveMode>();
+            mock.As<IOperatingMode>().Setup(mode => mode.Name).Returns("Mode");
+
+            IReadOnlyList<IStackableMode> modes = new IStackableMode[] { mock.Object };
+
+            Assert.ThrowsExactly<InvalidOperationException>(() => OperatingModeStackValidator.Validate(modes));
+        }
+
+
+        /// <summary>
+        /// Confirms one mode cannot have multiple reactive-power classifications.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeStackValidatorMultipleReactiveClassificationsTest()
+        {
+            Mock<IBaseReactiveMode> mock = new Mock<IBaseReactiveMode>();
+            mock.As<IAdditiveReactiveMode>();
+            mock.As<IOperatingMode>().Setup(mode => mode.Name).Returns("Mode");
+
+            IReadOnlyList<IStackableMode> modes = new IStackableMode[] { mock.Object };
+
+            Assert.ThrowsExactly<InvalidOperationException>(() => OperatingModeStackValidator.Validate(modes));
         }
 
 

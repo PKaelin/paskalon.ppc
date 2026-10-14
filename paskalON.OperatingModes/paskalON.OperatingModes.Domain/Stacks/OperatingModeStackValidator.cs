@@ -12,7 +12,7 @@ namespace paskalON.OperatingModes.Domain.Stacks
     public static class OperatingModeStackValidator
     {
         /// <summary>
-        /// Validates the classification cardinality and ordering rules of the operating modes.
+        /// Validates the name, classification and ordering rules of the operating modes.
         /// </summary>
         /// <param name="modes">The operating modes ordered by ascending priority.</param>
         /// <exception cref="InvalidOperationException">The operating modes violate a classification rule.</exception>
@@ -26,6 +26,7 @@ namespace paskalON.OperatingModes.Domain.Stacks
             }
 
             ValidateUnique(modes);
+            ValidateClassification(modes);
 
             // Check exclusive active modes
             int exclusiveActive = modes.OfType<IExclusiveActiveMode>().Count();
@@ -86,6 +87,40 @@ namespace paskalON.OperatingModes.Domain.Stacks
             }
 
             ValidateOrdering(modes);
+        }
+
+
+        /// <summary>
+        /// Validates that each operating mode has at most one "classification" per power axis.
+        /// </summary>
+        /// <param name="modes">The operating modes.</param>
+        /// <remarks>
+        /// A mode cannot be both an exclusive and a base mode or both an additive and a limiting mode for the same power axis (active or reactive).
+        /// </remarks>
+        private static void ValidateClassification(IReadOnlyList<IStackableMode> modes)
+        {
+            foreach (IStackableMode mode in modes)
+            {
+                int activeClassifications = (mode is IExclusiveActiveMode ? 1 : 0) +
+                    (mode is IBaseActiveMode ? 1 : 0) +
+                    (mode is IAdditiveActiveMode ? 1 : 0) +
+                    (mode is ILimitingActiveMode ? 1 : 0);
+
+                if (activeClassifications > 1)
+                {
+                    throw new InvalidOperationException($"Operating mode '{mode.Name}' has multiple active-power classifications.");
+                }
+
+                int reactiveClassifications = (mode is IExclusiveReactiveMode ? 1 : 0) +
+                    (mode is IBaseReactiveMode ? 1 : 0) +
+                    (mode is IAdditiveReactiveMode ? 1 : 0) +
+                    (mode is ILimitingReactiveMode ? 1 : 0);
+
+                if (reactiveClassifications > 1)
+                {
+                    throw new InvalidOperationException($"Operating mode '{mode.Name}' has multiple reactive-power classifications.");
+                }
+            }
         }
 
 
