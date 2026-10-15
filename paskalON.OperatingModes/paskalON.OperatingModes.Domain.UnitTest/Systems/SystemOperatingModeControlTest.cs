@@ -421,6 +421,55 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
 
 
         /// <summary>
+        /// Confirms a setpoint change while the segment of the mode is running is merged into that segment from the current applied target.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlSetpointChangeWhileRampingMergesSegmentTest()
+        {
+            Mock<IRampController> transitionRamp = CreateTransitionRamp(-5000000);
+            TestBaseActiveMode baseMode = CreateBaseActiveMode("ActivePowerFixedMode", null, transitionRamp);
+            _stack!.Add(baseMode, 1);
+            _control!.UpdateSetpoints(new ActivePower(8000000), new ReactivePower(0));
+            _control!.Calculate(CancellationToken.None);
+            _control!.Calculate(CancellationToken.None);
+            double appliedBeforeChange = _control!.SetpointActivePowerActual.Watts;
+            _control!.UpdateSetpoints(new ActivePower(6000000), new ReactivePower(0));
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(3000000, appliedBeforeChange);
+            Assert.AreEqual(6000000, _control!.ActivePowerObjective.Watts);
+            Assert.AreEqual(3000000, _control!.SetpointActivePowerActual.Watts);
+            Assert.HasCount(1, _control!.ActivePowerTransition.Segments);
+            Assert.AreEqual(TransitionKind.TargetChanged, _control!.ActivePowerTransition.Kind);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, baseMode.State);
+            transitionRamp.Verify(controller => controller.Start(-8000000, 0), Times.Once);
+            transitionRamp.Verify(controller => controller.Start(-3000000, 0), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms a setpoint change in steady state transitions with the ramp of the mode while the objective follows immediately.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlSetpointChangeSteadyStateTransitionsTest()
+        {
+            Mock<IRampController> transitionRamp = new Mock<IRampController>();
+            _stack!.Add(CreateBaseActiveMode("ActivePowerFixedMode", null, transitionRamp), 1);
+            _control!.UpdateSetpoints(new ActivePower(5000000), new ReactivePower(0));
+            CalculateSettled();
+            _control!.UpdateSetpoints(new ActivePower(2000000), new ReactivePower(0));
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(2000000, _control!.ActivePowerObjective.Watts);
+            Assert.AreEqual(5000000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(TransitionKind.TargetChanged, _control!.ActivePowerTransition.Kind);
+            transitionRamp.Verify(controller => controller.Start(3000000, 0), Times.Once);
+        }
+
+
+        /// <summary>
         /// Confirms two operating modes removed in the same cycle transition with one segment and their own ramp each.
         /// </summary>
         [TestMethod]
@@ -726,16 +775,17 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
         /// Creates a base active mode that writes the target of its power control into the base active power.
         /// </summary>
         /// <param name="name">The name of the operating mode.</param>
-        /// <param name="setpoint">The setpoint of the operating mode in Watts.</param>
+        /// <param name="setpoint">The setpoint of the operating mode in Watts or null for the supervisory setpoint.</param>
         /// <param name="transitionRamp">The transition ramp or null for a ramp returning zero.</param>
         /// <param name="available">The available power source or null for 8 MW.</param>
         /// <returns>The base active mode.</returns>
-        private TestBaseActiveMode CreateBaseActiveMode(string name, double setpoint, Mock<IRampController>? transitionRamp = null, Func<ActivePower?>? available = null)
+        private TestBaseActiveMode CreateBaseActiveMode(string name, double? setpoint, Mock<IRampController>? transitionRamp = null, Func<ActivePower?>? available = null)
         {
             TestBaseActiveMode operatingMode = new TestBaseActiveMode(name, rampController: CreateModeRamp(transitionRamp));
             operatingMode.CalculateAction = signals =>
             {
-                signals.BaseActivePower = operatingMode.ActiveControl!.Calculate(new ActivePower(setpoint), available is null ? new ActivePower(8000000) : available.Invoke());
+                ActivePower modeSetpoint = setpoint.HasValue ? new ActivePower(setpoint.Value) : signals.SetpointActivePower;
+                signals.BaseActivePower = operatingMode.ActiveControl!.Calculate(modeSetpoint, available is null ? new ActivePower(8000000) : available.Invoke());
 
                 return signals;
             };

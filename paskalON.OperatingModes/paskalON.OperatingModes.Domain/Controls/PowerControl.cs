@@ -16,9 +16,11 @@ namespace paskalON.OperatingModes.Domain.Controls
     /// Definitions:
     /// Setpoint -> Value the operating mode aims for (supervisory setpoint, operator setpoint or available power depending on the operating mode).
     /// TargetSetpoint -> Setpoint reduced to the available power and limited by the configured limits. It is the end point of the ramp.
-    /// Target -> Ramped value that is the output of this power axis.
-    /// The ramp covers setpoint and available power changes during operation. Transitions caused by adding, replacing or
-    /// removing stack operating modes are handled by the system operating mode control.
+    /// Target -> Output of this power axis.
+    /// Stack operating modes (<see cref="PowerControlStart.AtTargetSetpoint"/>) set the target to the target setpoint immediately
+    /// and report the change with <see cref="HasTargetSetpointChanged"/>. The system operating mode control transitions the
+    /// applied target with the ramp of the operating mode, so there is only one ramp layer.
+    /// Override operating modes (<see cref="PowerControlStart.RampFromCurrentTarget"/>) ramp the target with the ramp controller.
     /// </remarks>
     /// <typeparam name="TPower">The power type of the axis.</typeparam>
     public sealed class PowerControl<TPower> where TPower : struct
@@ -129,6 +131,16 @@ namespace paskalON.OperatingModes.Domain.Controls
         /// Gets whether the system operating mode control transitions the applied target because of this power axis.
         /// </summary>
         public bool IsTransitioning { get; private set; }
+
+
+        /// <summary>
+        /// Gets whether the target setpoint of an established target changed in the last calculation (setpoint or available power change).
+        /// </summary>
+        /// <remarks>
+        /// Only set for <see cref="PowerControlStart.AtTargetSetpoint"/>. The system operating mode control transitions the step with
+        /// the ramp of the operating mode.
+        /// </remarks>
+        internal bool HasTargetSetpointChanged { get; private set; }
 
 
         /// <summary>
@@ -291,6 +303,7 @@ namespace paskalON.OperatingModes.Domain.Controls
 
             lock (_dataLock)
             {
+                HasTargetSetpointChanged = false;
                 _available = availableValue;
 
                 if (ControlState == OperatingModeState.Enabling)
@@ -371,7 +384,7 @@ namespace paskalON.OperatingModes.Domain.Controls
 
 
         /// <summary>
-        /// Restarts the ramp if the setpoint or available power changed outside their deadbands and the target setpoint changed.
+        /// Follows the target setpoint if the setpoint or available power changed outside their deadbands and the target setpoint changed.
         /// </summary>
         /// <param name="setpoint">The setpoint.</param>
         /// <param name="available">The available power.</param>
@@ -401,7 +414,20 @@ namespace paskalON.OperatingModes.Domain.Controls
                 return;
             }
 
-            StartRampTo(targetSetpoint);
+            if (_start == PowerControlStart.RampFromCurrentTarget)
+            {
+                StartRampTo(targetSetpoint);
+
+                return;
+            }
+
+            // Stack operating mode: the system operating mode control transitions the step with the ramp of the operating mode
+            RampController.Stop();
+            _targetSetpoint = targetSetpoint;
+            _target = targetSetpoint;
+            HasTargetSetpointChanged = true;
+            ControlState = OperatingModeState.Enabled;
+            _logger.LogInformation("{Name} {Axis} power changed target setpoint to {TargetSetpoint}.", _operatingModeName, Axis, targetSetpoint);
         }
 
 

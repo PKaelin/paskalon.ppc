@@ -91,6 +91,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
         [DataRow("MaximumPowerPointTracking", typeof(MaximumPowerPointTrackingModeMap))]
         [DataRow("ActivePower", typeof(ActivePowerModeMap))]
         [DataRow("ReactivePower", typeof(ReactivePowerModeMap))]
+        [DataRow("MaximumActivePowerLimit", typeof(MaximumActivePowerLimitModeMap))]
         public void OperatingModeMapFactoryCreateMapTypeTest(string configKind, Type expectedMapType)
         {
             OperatingModeBaseMap? map = _factory.Create(CreateConfig(configKind), _der!, _overrides!);
@@ -198,12 +199,14 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
         {
             ActivePowerModeMap activeMap = (ActivePowerModeMap)_factory.Create(CreateConfig("ActivePower"), _der!, _overrides!)!;
             ReactivePowerModeMap reactiveMap = (ReactivePowerModeMap)_factory.Create(CreateConfig("ReactivePower"), _der!, _overrides!)!;
+            MaximumActivePowerLimitModeMap limitMap = (MaximumActivePowerLimitModeMap)_factory.Create(CreateConfig("MaximumActivePowerLimit"), _der!, _overrides!)!;
 
             ActivePower? activePowerAtPoi = activeMap.ActivePowerAtPoi.Invoke();
             ReactivePower? reactivePowerAtPoi = reactiveMap.ReactivePowerAtPoi.Invoke();
 
             Assert.AreEqual(6000000, activePowerAtPoi!.Value.Watts);
             Assert.AreEqual(500000, reactivePowerAtPoi!.Value.VoltAmperesReactive);
+            Assert.AreEqual(6000000, limitMap.ActivePowerAtPoi.Invoke()!.Value.Watts);
         }
 
 
@@ -251,6 +254,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
                 "MaximumPowerPointTracking" => new MaximumPowerPointTrackingModeConfig { ChangedBy = "Test", Name = "MaximumPowerPointTrackingMode", IsActive = true, Type = PowerControlType.Bess, RampConfig = ApplicationTestData.CreateRampConfig() },
                 "ActivePower" => new ActivePowerModeConfig { ChangedBy = "Test", Name = "ActivePowerMode", IsActive = true, Type = PowerControlType.Bess, RampConfig = ApplicationTestData.CreateRampConfig() },
                 "ReactivePower" => new ReactivePowerModeConfig { ChangedBy = "Test", Name = "ReactivePowerMode", IsActive = true, Type = PowerControlType.Bess, RampConfig = ApplicationTestData.CreateRampConfig() },
+                "MaximumActivePowerLimit" => new MaximumActivePowerLimitModeConfig { ChangedBy = "Test", Name = "MaximumActivePowerLimitMode", IsActive = true, Type = PowerControlType.Bess, MaximumActivePowerLimitWatts = 5000000, RampConfig = ApplicationTestData.CreateRampConfig() },
                 _ => new ShutdownModeConfig { ChangedBy = "Test", Name = "ShutdownMode", IsActive = true, Type = PowerControlType.Bess, RampConfig = ApplicationTestData.CreateRampConfig() },
             };
         }

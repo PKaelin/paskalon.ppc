@@ -22,6 +22,9 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
     /// <summary>
     /// This test class implements basic integration tests for the ActivePowerFixedMode.
     /// </summary>
+    /// <remarks>
+    /// ActivePowerFixedMode is an exclusive mode and cannot be combined with additive or limiting modes.
+    /// </remarks>
     [TestClass]
     public sealed class SystemControlActivePowerFixedModeBasicTest
     {
@@ -29,6 +32,12 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
         /// Fake time provider to advance the ramps.
         /// </summary>
         private FakeTimeProvider _timeProvider = null!;
+
+
+        /// <summary>
+        /// Holds the system configuration instance for internal use.   
+        /// </summary>
+        private SystemConfig _systemConfig = null!;
 
 
         /// <summary>
@@ -63,7 +72,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
         {
             _timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 10, 15, 8, 0, 0, TimeSpan.Zero));
 
-            SystemConfig systemConfig = new SystemConfig
+            _systemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
                 Type = PowerControlType.Bess,
@@ -90,25 +99,24 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
 
             ActivePowerFixedModeMap fixedMap = new ActivePowerFixedModeMap { AvailableActivePower = () => ActivePower.FromMega(10), AvailableReactivePower = () => null };
 
-            _activePowerFixedMode = new ActivePowerFixedMode(NullLogger.Instance, _timeProvider, new Mock<IMetricsPublisher>().Object, systemConfig, fixedConfig, fixedMap,
+            _activePowerFixedMode = new ActivePowerFixedMode(NullLogger.Instance, _timeProvider, new Mock<IMetricsPublisher>().Object, _systemConfig, fixedConfig, fixedMap,
                 new RampController(NullLogger.Instance, _timeProvider, fixedConfig.RampConfig));
 
             _stack = new OperatingModeStack();
             _overrides = new OperatingModeOverrides();
 
             SystemOperatingModeControlMap systemMap = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => null, ReactivePowerAtPoi = () => null };
-            _control = new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stack, _overrides, systemMap, new Mock<IMetricsPublisher>().Object);
+            _control = new SystemOperatingModeControl(NullLogger.Instance, _systemConfig, _stack, _overrides, systemMap, new Mock<IMetricsPublisher>().Object);
         }
-
 
 
         /// <summary>
         /// Modes used: ActivePowerFixedMode
-        /// Secenario Step1: Activate mode, set SetPoint to maximum nameplate, wait for the ramp to complete, check that the SetPoint and State are reached.
-        /// Secenario Step2: Set SetPoint to 0, wait for the ramp to complete, check that the SetPoint and State are reached.
+        /// Scenario Step1: Activate mode, set SetPoint to maximum nameplate, wait for the ramp to complete, check that the SetPoint and State are reached.
+        /// Scenario Step2: Set SetPoint to 0, wait for the ramp to complete, check that the SetPoint and State are reached.
         /// </summary>
         [TestMethod]
-        public void ActivePowerFixedModeRampUpDownTest()
+        public void ActivePowerFixedModeNewSetpointToZeroMegaWattWhenRampedTest()
         {
             // Step 1
             _stack.Add(_activePowerFixedMode, 1);       // Stack only commits and records. The control doesnt know about it yet
@@ -146,13 +154,13 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
             _control.UpdateSetpoints(ActivePower.FromMega(0), new ReactivePower(0));
             _control.Calculate(CancellationToken.None);
             Assert.AreEqual(0, _control.SetpointActivePower.MegaWatts);
-            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(0, _control.ActivePowerObjective.MegaWatts);
             Assert.AreEqual(10, _control.SetpointActivePowerActual.MegaWatts);
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _activePowerFixedMode.State);
 
             _timeProvider.Advance(TimeSpan.FromSeconds(5));
             _control.Calculate(CancellationToken.None);
-            Assert.AreEqual(5, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(0, _control.ActivePowerObjective.MegaWatts);
             Assert.AreEqual(5, _control.SetpointActivePowerActual.MegaWatts);
             Assert.AreEqual(OperatingModeState.RampingToEnabled, _activePowerFixedMode.State);
 
@@ -166,8 +174,111 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
 
         /// <summary>
         /// Modes used: ActivePowerFixedMode
-        /// Secenario Step1: Activate mode, set SetPoint to maximum nameplate, wait for the ramp to complete, check that the SetPoint and State are reached.
-        /// Secenario Step2: Deactivate mode, wait for the ramp to complete, check that the SetPoint and State are reached.
+        /// Scenario Step1: Activate mode, set SetPoint to maximum nameplate, wait for the ramp to complete, check that the SetPoint and State are reached.
+        /// Scenario Step2: Set SetPoint to 3, wait for the ramp to complete, check that the SetPoint and State are reached.
+        /// </summary>
+        [TestMethod]
+        public void ActivePowerFixedModeNewSetpointTo3MegaWattWhenRampedTest()
+        {
+            // Step 1
+            _stack.Add(_activePowerFixedMode, 1);       // Stack only commits and records. The control doesnt know about it yet
+            _control.UpdateSetpoints(ActivePower.FromMega(10), new ReactivePower(0));
+
+            _control.Calculate(CancellationToken.None); // Control takes the change (TakeCycle) and activates the mode
+            Assert.AreEqual(10, _control.SetpointActivePower.MegaWatts);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(0, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _activePowerFixedMode.State);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(1));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(1, _control.SetpointActivePowerActual.MegaWatts);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(4));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(5, _control.SetpointActivePowerActual.MegaWatts);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(4));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(9, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _activePowerFixedMode.State);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(1));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(10, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.Enabled, _activePowerFixedMode.State);
+
+            // Step 2
+            _control.UpdateSetpoints(ActivePower.FromMega(3), new ReactivePower(0));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(3, _control.SetpointActivePower.MegaWatts);
+            Assert.AreEqual(3, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(10, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _activePowerFixedMode.State);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(5));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(3, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(5, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _activePowerFixedMode.State);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(5));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(3, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(3, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.Enabled, _activePowerFixedMode.State);
+        }
+
+
+        /// <summary>
+        /// Modes used: ActivePowerFixedMode
+        /// Scenario Step1: Activate mode, set SetPoint to maximum nameplate, wait for the ramp to be in the middle
+        /// Scenario Step2: Set SetPoint to less than old setpoint, wait for the ramp to complete, check that the SetPoint and State are reached.
+        /// </summary>
+        [TestMethod]
+        public void ActivePowerFixedModeNewSetpointWhenRampingTest()
+        {
+            // Step 1
+            _stack.Add(_activePowerFixedMode, 1);       // Stack only commits and records. The control doesnt know about it yet
+            _control.UpdateSetpoints(ActivePower.FromMega(10), new ReactivePower(0));
+
+            _control.Calculate(CancellationToken.None); // Control takes the change (TakeCycle) and activates the mode
+            Assert.AreEqual(10, _control.SetpointActivePower.MegaWatts);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(0, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _activePowerFixedMode.State);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(5));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(5, _control.SetpointActivePowerActual.MegaWatts);
+
+            // Step 2
+            _control.UpdateSetpoints(ActivePower.FromMega(7), new ReactivePower(0));
+            _control.Calculate(CancellationToken.None);
+            _timeProvider.Advance(TimeSpan.FromSeconds(1));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(7, _control.SetpointActivePower.MegaWatts);
+            Assert.AreEqual(7, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(6, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _activePowerFixedMode.State);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(1));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(7, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(7, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.Enabled, _activePowerFixedMode.State);
+        }
+
+
+        /// <summary>
+        /// Modes used: ActivePowerFixedMode
+        /// Scenario Step1: Activate mode, set SetPoint to maximum nameplate, wait for the ramp to complete, check that the SetPoint and State are reached.
+        /// Scenario Step2: Deactivate mode, wait for the ramp to complete, check that the SetPoint and State are reached.
         /// </summary>
         [TestMethod]
         public void ActivePowerFixedRemoveModeWhenRampedTest()
@@ -223,8 +334,8 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
 
         /// <summary>
         /// Modes used: ActivePowerFixedMode
-        /// Secenario Step1: Activate mode, set SetPoint to maximum nameplate, wait for the ramp to be in the middle
-        /// Secenario Step2: Deactivate mode, wait for the ramp to complete, check that the SetPoint and State are reached.
+        /// Scenario Step1: Activate mode, set SetPoint to maximum nameplate, wait for the ramp to be in the middle
+        /// Scenario Step2: Deactivate mode, wait for the ramp to complete, check that the SetPoint and State are reached.
         /// </summary>
         [TestMethod]
         public void ActivePowerFixedRemoveModeWhenRampingTest()

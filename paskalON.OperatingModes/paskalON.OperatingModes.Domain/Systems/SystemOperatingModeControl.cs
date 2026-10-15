@@ -24,7 +24,8 @@ namespace paskalON.OperatingModes.Domain.Systems
     /// 2. Apply the lifecycle of the changes: activate added and deactivate removed or replaced operating modes.
     /// 3. Calculate the override modes, their targets are published as <see cref="OverrideSetpoints"/>.
     /// 4. Recalculate the entire stack in priority order. The final signals are the objectives of the power axes.
-    /// 5. Start a bumpless transition per affected power axis with one segment per changed operating mode. Each segment ramps the
+    /// 5. Start a bumpless transition per affected power axis with one segment per changed operating mode. A changed operating
+    ///    mode is an added, removed or replaced operating mode or a stack operating mode whose target setpoint changed. Each segment ramps the
     ///    step of its operating mode with its own ramp. The applied target stays continuous: the origin is the current applied
     ///    target, without a previous cycle the measured power at the POI (or zero). Without a base or exclusive mode the
     ///    objective of the axis is zero.
@@ -484,6 +485,17 @@ namespace paskalON.OperatingModes.Domain.Systems
             if (operatingMode is OperatingModeBase operatingModeBase)
             {
                 operatingModeBase.SetContribution(signals.FinalActivePower - activeBefore, signals.FinalReactivePower - reactiveBefore);
+            }
+
+            // A stack operating mode follows its target setpoint immediately, the step is transitioned with its ramp (one ramp layer)
+            if (operatingMode.ActiveControl?.HasTargetSetpointChanged == true)
+            {
+                changes.Add(new AxisChange(PowerAxis.Active, operatingMode, TransitionKind.TargetChanged, activeContributionBefore));
+            }
+
+            if (operatingMode.ReactiveControl?.HasTargetSetpointChanged == true)
+            {
+                changes.Add(new AxisChange(PowerAxis.Reactive, operatingMode, TransitionKind.TargetChanged, reactiveContributionBefore));
             }
 
             // An operating mode waiting for available power establishes its target later, that is a change of the axis as well

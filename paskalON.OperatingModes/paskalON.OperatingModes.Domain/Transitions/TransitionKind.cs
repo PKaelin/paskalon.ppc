@@ -33,5 +33,10 @@ namespace paskalON.OperatingModes.Domain.Transitions
         /// An operating mode was removed while running.
         /// </summary>
         ModeRemoved = 4,
+
+        /// <summary>
+        /// The target setpoint of an operating mode changed while running (setpoint or available power change).
+        /// </summary>
+        TargetChanged = 5,
     }
 }

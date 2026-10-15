@@ -130,11 +130,13 @@ filled with the device data by the `OperatingModeMapFactory`.
 ### Power control definitions
 - Setpoint: Value the operating mode aims for (supervisory setpoint, operator setpoint or available power).
 - TargetSetpoint: Setpoint reduced to the magnitude of the available power and limited by the configured limits. End point of the ramp.
-- Target: Ramped value, the output of the power axis.
+- Target: Output of the power axis.
 
-The ramp restarts when the setpoint or the available power changes outside its deadband and the target setpoint changes.
-This ramp covers normal operation. Transitions caused by adding, replacing or removing operating modes are handled by the
-`SystemOperatingModeControl` (see [Transitions](#transitions)).
+There is one ramp layer for stack operating modes: their power control sets the target to the target setpoint immediately,
+also when the setpoint or the available power changes outside its deadband. The `SystemOperatingModeControl` transitions
+the applied target with the ramp of the operating mode (see [Transitions](#transitions)), so `ActivePowerObjective` shows
+the new target immediately and `SetpointActivePowerActual` ramps. Override operating modes ramp their target in the power
+control because their targets are applied directly to a DER unit.
 
 
 ## Selection and lifecycle
@@ -201,6 +203,7 @@ ramp of that operating mode:
 | `ModeAdded` | Operating mode added while running | Current applied target | Added mode |
 | `ModeReplacement` | Base / exclusive mode replaced | Current applied target (base portion `BaseActivePower` / `BaseReactivePower` plus unchanged contributions) | Replacing mode |
 | `ModeRemoved` | Operating mode removed while running | Current applied target | Removed mode |
+| `TargetChanged` | Target setpoint of a stack operating mode changed (setpoint or available power) | Current applied target | Changed mode (merged into its running segment) |
 
 | Classification | Added while running | Removed while running |
 |----------------|---------------------|-----------------------|

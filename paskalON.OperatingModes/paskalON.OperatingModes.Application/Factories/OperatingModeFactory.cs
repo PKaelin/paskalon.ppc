@@ -84,6 +84,10 @@ namespace paskalON.OperatingModes.Application.Factories
                 case ActivePowerModeConfig activePowerConfig:
                     return new ActivePowerMode(logger, timeProvider, publisher, systemConfig, activePowerConfig, GetMap<ActivePowerModeMap>(map), rampController, curveController);
 
+                case MaximumActivePowerLimitModeConfig maximumActivePowerLimitConfig:
+                    return new MaximumActivePowerLimitMode(logger, timeProvider, publisher, systemConfig, maximumActivePowerLimitConfig, GetMap<MaximumActivePowerLimitModeMap>(map),
+                        rampController, curveController);
+
                 case ReactivePowerModeConfig reactivePowerConfig:
                     return new ReactivePowerMode(logger, timeProvider, publisher, systemConfig, reactivePowerConfig, GetMap<ReactivePowerModeMap>(map), rampController, curveController);
 

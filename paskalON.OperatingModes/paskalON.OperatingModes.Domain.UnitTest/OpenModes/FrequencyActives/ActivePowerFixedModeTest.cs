@@ -105,20 +105,23 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
 
 
         /// <summary>
-        /// Confirms a supervisory setpoint change after the target is established ramps the base active power.
+        /// Confirms a supervisory setpoint change after the target is established is written into the base active power immediately.
         /// </summary>
+        /// <remarks>
+        /// The step is transitioned by the system operating mode control with the ramp of the operating mode (one ramp layer).
+        /// </remarks>
         [TestMethod]
-        public void ActivePowerFixedModeCalculateSetpointChangeRampsTest()
+        public void ActivePowerFixedModeCalculateSetpointChangeFollowsImmediatelyTest()
         {
             _mode!.Activate();
             _mode!.Calculate(CreateSignals(1000000));
-            _rampController!.Setup(controller => controller.Calculate()).Returns(1500000);
 
             OperatingModeSignals signals = _mode!.Calculate(CreateSignals(3000000));
 
-            Assert.AreEqual(1500000, signals.BaseActivePower.Watts);
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, _mode!.State);
-            _rampController!.Verify(controller => controller.Start(1000000, 3000000), Times.Once);
+            Assert.AreEqual(3000000, signals.BaseActivePower.Watts);
+            Assert.AreEqual(OperatingModeState.Enabled, _mode!.State);
+            Assert.IsTrue(_mode!.ActiveControl!.HasTargetSetpointChanged);
+            _rampController!.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
         }
 
 

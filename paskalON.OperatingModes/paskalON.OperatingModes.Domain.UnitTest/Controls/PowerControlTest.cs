@@ -208,26 +208,74 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Controls
 
 
         /// <summary>
-        /// Confirms a setpoint change outside the deadband ramps from the current target in both directions.
+        /// Confirms a stack mode follows a setpoint change outside the deadband immediately in both directions and reports the change.
+        /// </summary>
+        /// <remarks>
+        /// The step is transitioned by the system operating mode control with the ramp of the operating mode (one ramp layer).
+        /// </remarks>
+        /// <param name="newSetpoint">The new setpoint in Watts.</param>
+        [TestMethod]
+        [DataRow(1500000)]
+        [DataRow(500000)]
+        [DataRow(-1000000)]
+        public void PowerControlCalculateSetpointChangeAtTargetSetpointFollowsImmediatelyTest(double newSetpoint)
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            PowerControl<ActivePower> control = CreateControl(rampController);
+            control.Activate(PowerControlStart.AtTargetSetpoint);
+            control.Calculate(new ActivePower(1000000), new ActivePower(8000000));
+
+            ActivePower target = control.Calculate(new ActivePower(newSetpoint), new ActivePower(8000000 * Math.Sign(newSetpoint)));
+
+            Assert.AreEqual(OperatingModeState.Enabled, control.State);
+            Assert.AreEqual(newSetpoint, target.Watts);
+            Assert.AreEqual(newSetpoint, control.TargetSetpoint.Watts);
+            Assert.IsTrue(control.HasTargetSetpointChanged);
+            rampController.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
+        }
+
+
+        /// <summary>
+        /// Confirms an override mode ramps a setpoint change outside the deadband from the current target in both directions.
         /// </summary>
         /// <param name="newSetpoint">The new setpoint in Watts.</param>
         [TestMethod]
         [DataRow(1500000)]
         [DataRow(500000)]
         [DataRow(-1000000)]
-        public void PowerControlCalculateSetpointChangeOutsideDeadbandRestartsRampTest(double newSetpoint)
+        public void PowerControlCalculateSetpointChangeRampFromCurrentTargetRampsTest(double newSetpoint)
         {
             Mock<IRampController> rampController = new Mock<IRampController>();
             rampController.Setup(controller => controller.Calculate()).Returns(1000000);
             PowerControl<ActivePower> control = CreateControl(rampController);
-            control.Activate(PowerControlStart.AtTargetSetpoint);
+            control.Activate(PowerControlStart.RampFromCurrentTarget);
             control.Calculate(new ActivePower(1000000), new ActivePower(8000000));
 
             control.Calculate(new ActivePower(newSetpoint), new ActivePower(8000000 * Math.Sign(newSetpoint)));
 
             Assert.AreEqual(OperatingModeState.RampingToEnabled, control.State);
             Assert.AreEqual(newSetpoint, control.TargetSetpoint.Watts);
+            Assert.IsFalse(control.HasTargetSetpointChanged);
             rampController.Verify(controller => controller.Start(1000000, newSetpoint), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms the target setpoint change is only reported in the calculation it happened.
+        /// </summary>
+        [TestMethod]
+        public void PowerControlCalculateTargetSetpointChangeReportedOnceTest()
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            PowerControl<ActivePower> control = CreateControl(rampController);
+            control.Activate(PowerControlStart.AtTargetSetpoint);
+            control.Calculate(new ActivePower(1000000), new ActivePower(8000000));
+            control.Calculate(new ActivePower(2000000), new ActivePower(8000000));
+
+            control.Calculate(new ActivePower(2000000), new ActivePower(8000000));
+
+            Assert.IsFalse(control.HasTargetSetpointChanged);
+            Assert.AreEqual(2000000, control.Target.Watts);
         }
 
 
@@ -270,22 +318,22 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Controls
 
 
         /// <summary>
-        /// Confirms available power dropping below the setpoint ramps towards the available power.
+        /// Confirms a stack mode follows available power dropping below the setpoint immediately and reports the change.
         /// </summary>
         [TestMethod]
-        public void PowerControlCalculateAvailableDropsBelowSetpointRestartsRampTest()
+        public void PowerControlCalculateAvailableDropsBelowSetpointFollowsImmediatelyTest()
         {
             Mock<IRampController> rampController = new Mock<IRampController>();
-            rampController.Setup(controller => controller.Calculate()).Returns(1000000);
             PowerControl<ActivePower> control = CreateControl(rampController);
             control.Activate(PowerControlStart.AtTargetSetpoint);
             control.Calculate(new ActivePower(1000000), new ActivePower(8000000));
 
-            control.Calculate(new ActivePower(1000000), new ActivePower(600000));
+            ActivePower target = control.Calculate(new ActivePower(1000000), new ActivePower(600000));
 
-            Assert.AreEqual(OperatingModeState.RampingToEnabled, control.State);
-            Assert.AreEqual(600000, control.TargetSetpoint.Watts);
-            rampController.Verify(controller => controller.Start(1000000, 600000), Times.Once);
+            Assert.AreEqual(OperatingModeState.Enabled, control.State);
+            Assert.AreEqual(600000, target.Watts);
+            Assert.IsTrue(control.HasTargetSetpointChanged);
+            rampController.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
         }
 
 

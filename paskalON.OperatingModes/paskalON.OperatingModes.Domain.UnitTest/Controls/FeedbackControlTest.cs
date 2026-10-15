@@ -3,7 +3,9 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using paskalON.OperatingModes.Domain.Controls;
+using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.PhysicalUnits.Electricals.Powers;
 
 namespace paskalON.OperatingModes.Domain.UnitTest.Controls
@@ -228,6 +230,155 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Controls
 
             Assert.AreEqual(0, feedback.ErrorAdjustment.Watts);
             Assert.AreEqual(0, feedback.Error);
+        }
+
+
+        /// <summary>
+        /// Confirms the ramp-limited integral correction requires a ramp controller.
+        /// </summary>
+        [TestMethod]
+        public void FeedbackControlConstructorIntegralWithoutRampThrowsTest()
+        {
+            FeedbackSettings settings = new FeedbackSettings(0, DeadbandError) { Correction = FeedbackCorrection.RampLimitedIntegral };
+
+            Assert.ThrowsExactly<ArgumentNullException>(() => new FeedbackControl<ActivePower>(NullLogger.Instance, "Mode", "ActivePower", () => null, settings,
+                OperatingModeTestData.CreateActiveLimits(), PowerConverters.Active));
+        }
+
+
+        /// <summary>
+        /// Confirms the integral correction ramps to the full error without a gain.
+        /// </summary>
+        [TestMethod]
+        public void FeedbackControlCorrectIntegralRampsToFullErrorTest()
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            rampController.Setup(controller => controller.Calculate()).Returns(100000);
+            FeedbackControl<ActivePower> feedback = CreateIntegralFeedback(() => 4800000, rampController);
+
+            ActivePower corrected = feedback.Correct(new ActivePower(5000000), 5000000);
+
+            Assert.AreEqual(200000, feedback.Error);
+            Assert.AreEqual(100000, feedback.ErrorAdjustment.Watts);
+            Assert.AreEqual(5100000, corrected.Watts);
+            rampController.Verify(controller => controller.Start(0, 200000), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms a new error is not accumulated while the previous correction is not reached.
+        /// </summary>
+        [TestMethod]
+        public void FeedbackControlCorrectIntegralWaitsForCorrectionTest()
+        {
+            double measured = 4800000;
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            rampController.Setup(controller => controller.Calculate()).Returns(100000);
+            FeedbackControl<ActivePower> feedback = CreateIntegralFeedback(() => measured, rampController);
+            feedback.Correct(new ActivePower(5000000), 5000000);
+            measured = 4900000;
+            rampController.Setup(controller => controller.Calculate()).Returns(150000);
+
+            ActivePower corrected = feedback.Correct(new ActivePower(5000000), 5000000);
+
+            Assert.AreEqual(5150000, corrected.Watts);
+            rampController.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms a new error is accumulated onto the reached correction once the measurement changed.
+        /// </summary>
+        [TestMethod]
+        public void FeedbackControlCorrectIntegralAccumulatesAfterCorrectionReachedTest()
+        {
+            double measured = 4800000;
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            rampController.Setup(controller => controller.Calculate()).Returns(200000);
+            FeedbackControl<ActivePower> feedback = CreateIntegralFeedback(() => measured, rampController);
+            feedback.Correct(new ActivePower(5000000), 5000000);
+            measured = 4950000;
+
+            feedback.Correct(new ActivePower(5000000), 5000000);
+
+            rampController.Verify(controller => controller.Start(0, 200000), Times.Once);
+            rampController.Verify(controller => controller.Start(200000, 250000), Times.Once);
+            rampController.Verify(controller => controller.Stop(), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms the reached correction is held while the measurement is stuck or the error is inside the deadband.
+        /// </summary>
+        /// <param name="secondMeasured">The measured active power of the second calculation in Watts.</param>
+        [TestMethod]
+        [DataRow(4800000.0)]
+        [DataRow(4997000.0)]
+        public void FeedbackControlCorrectIntegralHoldsCorrectionTest(double secondMeasured)
+        {
+            double measured = 4800000;
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            rampController.Setup(controller => controller.Calculate()).Returns(200000);
+            FeedbackControl<ActivePower> feedback = CreateIntegralFeedback(() => measured, rampController);
+            feedback.Correct(new ActivePower(5000000), 5000000);
+            measured = secondMeasured;
+
+            ActivePower corrected = feedback.Correct(new ActivePower(5000000), 5000000);
+
+            Assert.AreEqual(200000, feedback.ErrorAdjustment.Watts);
+            Assert.AreEqual(5200000, corrected.Watts);
+            rampController.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms the integral correction target is limited so that the corrected value stays within the limits.
+        /// </summary>
+        [TestMethod]
+        public void FeedbackControlCorrectIntegralLimitsCorrectionTargetTest()
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            PowerControlLimits limits = new PowerControlLimits(-10000000, 5100000, OperatingModeTestData.Deadband, OperatingModeTestData.Deadband);
+            FeedbackSettings settings = new FeedbackSettings(0, DeadbandError) { Correction = FeedbackCorrection.RampLimitedIntegral };
+            FeedbackControl<ActivePower> feedback = new FeedbackControl<ActivePower>(NullLogger.Instance, "Mode", "ActivePower", () => 4500000, settings, limits,
+                PowerConverters.Active, rampController.Object);
+
+            feedback.Correct(new ActivePower(5000000), 5000000);
+
+            rampController.Verify(controller => controller.Start(0, 100000), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms reset stops the integral correction.
+        /// </summary>
+        [TestMethod]
+        public void FeedbackControlResetStopsIntegralCorrectionTest()
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            rampController.Setup(controller => controller.Calculate()).Returns(100000);
+            FeedbackControl<ActivePower> feedback = CreateIntegralFeedback(() => 4800000, rampController);
+            feedback.Correct(new ActivePower(5000000), 5000000);
+
+            feedback.Reset();
+
+            Assert.AreEqual(0, feedback.ErrorAdjustment.Watts);
+            rampController.Verify(controller => controller.Stop(), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Creates an active power feedback control with ramp-limited integral correction.
+        /// </summary>
+        /// <param name="measuredSource">The measured source.</param>
+        /// <param name="rampController">The mocked ramp controller.</param>
+        /// <returns>The feedback control.</returns>
+        private FeedbackControl<ActivePower> CreateIntegralFeedback(Func<double?> measuredSource, Mock<IRampController> rampController)
+        {
+            FeedbackSettings settings = new FeedbackSettings(0, DeadbandError) { Correction = FeedbackCorrection.RampLimitedIntegral };
+
+            return new FeedbackControl<ActivePower>(NullLogger.Instance, "Mode", "ActivePower", measuredSource, settings, OperatingModeTestData.CreateActiveLimits(),
+                PowerConverters.Active, rampController.Object);
         }
 
 

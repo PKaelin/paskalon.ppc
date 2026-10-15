@@ -75,6 +75,14 @@ namespace paskalON.OperatingModes.Application.Factories
                         ActivePowerAtPoi = () => GetSystemActivePower(der)
                     };
 
+                case MaximumActivePowerLimitModeConfig:
+                    return new MaximumActivePowerLimitModeMap
+                    {
+                        AvailableActivePower = () => GetAvailableActivePower(GetDispatchableUnits(der, overrides)),
+                        AvailableReactivePower = () => GetAvailableReactivePower(GetDispatchableUnits(der, overrides)),
+                        ActivePowerAtPoi = () => GetSystemActivePower(der)
+                    };
+
                 case ReactivePowerModeConfig:
                     return new ReactivePowerModeMap
                     {

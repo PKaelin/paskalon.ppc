@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Domain.Controls
@@ -19,6 +20,12 @@ namespace paskalON.OperatingModes.Domain.Controls
     /// <typeparam name="TPower">The power type of the axis.</typeparam>
     public sealed class FeedbackControl<TPower> where TPower : struct
     {
+        /// <summary>
+        /// Corrections closer than this value in the base unit to the correction target are reached.
+        /// </summary>
+        private const double CorrectionTolerance = 3;
+
+
         /// <summary>
         /// Lock object for thread safety between the calculation and reset.
         /// </summary>
@@ -71,6 +78,18 @@ namespace paskalON.OperatingModes.Domain.Controls
         /// Corrected value in base unit.
         /// </summary>
         private double _corrected;
+
+
+        /// <summary>
+        /// Ramp controller moving the error adjustment for <see cref="FeedbackCorrection.RampLimitedIntegral"/>, otherwise null.
+        /// </summary>
+        private readonly IRampController? _rampController;
+
+
+        /// <summary>
+        /// Error adjustment the ramp moves to for <see cref="FeedbackCorrection.RampLimitedIntegral"/> in base unit.
+        /// </summary>
+        private double _correctionTarget;
 
 
         /// <summary>
@@ -132,8 +151,9 @@ namespace paskalON.OperatingModes.Domain.Controls
         /// <param name="settings">The feedback settings.</param>
         /// <param name="limits">The limits used to limit the corrected value.</param>
         /// <param name="converter">The power converter of this power axis.</param>
+        /// <param name="rampController">Own ramp controller of the operating mode, required for <see cref="FeedbackCorrection.RampLimitedIntegral"/>.</param>
         public FeedbackControl(ILogger logger, string operatingModeName, string quantity, Func<double?> measuredSource, FeedbackSettings settings,
-            PowerControlLimits limits, PowerConverter<TPower> converter)
+            PowerControlLimits limits, PowerConverter<TPower> converter, IRampController? rampController = null)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentException.ThrowIfNullOrWhiteSpace(operatingModeName);
@@ -143,11 +163,17 @@ namespace paskalON.OperatingModes.Domain.Controls
             ArgumentNullException.ThrowIfNull(limits);
             ArgumentNullException.ThrowIfNull(converter);
 
+            if (settings.Correction == FeedbackCorrection.RampLimitedIntegral)
+            {
+                ArgumentNullException.ThrowIfNull(rampController);
+            }
+
             _logger = logger;
             _operatingModeName = operatingModeName;
             _measuredSource = measuredSource;
             _limits = limits;
             _converter = converter;
+            _rampController = rampController;
             Quantity = quantity;
             Settings = settings;
         }
@@ -179,19 +205,27 @@ namespace paskalON.OperatingModes.Domain.Controls
                 {
                     Error = 0;
                     _errorAdjustment = 0;
+                    _correctionTarget = 0;
+                    _rampController?.Stop();
                     _lastMeasured = null;
                 }
                 else
                 {
                     Error = reference - measured.Value;
 
+                    bool isMeasurementChanged = _lastMeasured.HasValue is false || _lastMeasured.Value != measured.Value;
+
+                    if (Settings.Correction == FeedbackCorrection.RampLimitedIntegral)
+                    {
+                        CorrectRampLimitedIntegral(_converter.ToValue(target), isMeasurementChanged);
+                    }
                     // Don't try to fix minor noise
-                    if (Math.Abs(Error) < Settings.DeadbandError)
+                    else if (Math.Abs(Error) < Settings.DeadbandError)
                     {
                         _errorAdjustment = 0;
                     }
                     // Do not change the adjustment if the measurement is stuck somehow
-                    else if (_lastMeasured.HasValue is false || _lastMeasured.Value != measured.Value)
+                    else if (isMeasurementChanged)
                     {
                         _errorAdjustment = Error * Settings.ProportionalGain;
                     }
@@ -214,10 +248,49 @@ namespace paskalON.OperatingModes.Domain.Controls
             lock (_dataLock)
             {
                 _errorAdjustment = 0;
+                _correctionTarget = 0;
+                _rampController?.Stop();
                 _lastMeasured = null;
                 Error = 0;
 
                 _logger.LogDebug("{Name} {Axis} feedback {Quantity} reset.", _operatingModeName, Axis, Quantity);
+            }
+        }
+
+
+        /// <summary>
+        /// Calculates the error adjustment of the ramp-limited integral correction.
+        /// </summary>
+        /// <remarks>
+        /// Once the previous correction is reached and the measurement changed, an error outside the deadband is accumulated into
+        /// the correction target (previous correction + error). The error adjustment moves to the correction target with the ramp.
+        /// Waiting for the previous correction and a new measurement avoids accumulating the same error twice.
+        /// </remarks>
+        /// <param name="target">The target of the power axis in base unit.</param>
+        /// <param name="isMeasurementChanged">Whether the measurement changed since the last calculation.</param>
+        private void CorrectRampLimitedIntegral(double target, bool isMeasurementChanged)
+        {
+            bool isCorrectionReached = Math.Abs(_errorAdjustment - _correctionTarget) < CorrectionTolerance;
+
+            if (isCorrectionReached && isMeasurementChanged && Math.Abs(Error) >= Settings.DeadbandError)
+            {
+                // The correction target is limited so that the corrected value stays within the limits
+                _correctionTarget = _limits.Clamp(target + _errorAdjustment + Error) - target;
+                _rampController!.Start(_errorAdjustment, _correctionTarget);
+                isCorrectionReached = Math.Abs(_errorAdjustment - _correctionTarget) < CorrectionTolerance;
+            }
+
+            if (isCorrectionReached)
+            {
+                return;
+            }
+
+            _errorAdjustment = _rampController!.Calculate();
+
+            if (Math.Abs(_errorAdjustment - _correctionTarget) < CorrectionTolerance)
+            {
+                _errorAdjustment = _correctionTarget;
+                _rampController.Stop();
             }
         }
 
