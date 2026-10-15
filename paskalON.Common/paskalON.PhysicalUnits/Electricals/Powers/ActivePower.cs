@@ -135,6 +135,17 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
 
 
         /// <summary>
+        /// Create new active power from kilo watt input.
+        /// </summary>
+        /// <param name="megaWatts">Mega watt.</param>
+        /// <returns>ActivePower instance with watts from megawatts.</returns>
+        public static ActivePower FromMega(double megaWatts)
+        {
+            return new ActivePower(megaWatts * WattsPerMegawatt);
+        }
+
+
+        /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>Integer hash code.</returns>

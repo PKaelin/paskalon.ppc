@@ -263,5 +263,23 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             Assert.AreEqual(expected, Math.Sign(result));
         }
 
+
+        [TestMethod]
+        public void ReactivePowerFromKiloTest()
+        {
+            ReactivePower reactivePower = ReactivePower.FromKilo(12.34567);
+
+            Assert.AreEqual(12345.67, reactivePower.VoltAmperesReactive);
+        }
+
+
+        [TestMethod]
+        public void ReactivePowerFromMegaTest()
+        {
+            ReactivePower reactivePower = ReactivePower.FromMega(12.34567);
+
+            Assert.AreEqual(12345670, reactivePower.VoltAmperesReactive);
+        }
+
     }
 }

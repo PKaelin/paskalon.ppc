@@ -134,6 +134,18 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
 
 
         /// <summary>
+        /// Create new reactive power from mega var input.
+        /// </summary>
+        /// <param name="megaVarReactive">Mega var.</param>
+        /// <returns>ReactivePower instance with vars from mega vars.</returns>
+        public static ReactivePower FromMega(double megaVarReactive)
+        {
+            return new ReactivePower(megaVarReactive * VoltAmpsPerMegavoltAmps);
+        }
+
+
+
+        /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>Integer hash code.</returns>

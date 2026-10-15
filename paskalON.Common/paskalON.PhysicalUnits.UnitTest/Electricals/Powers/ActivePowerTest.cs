@@ -263,5 +263,22 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             Assert.AreEqual(expected, Math.Sign(result));
         }
 
+
+        [TestMethod]
+        public void ActivePowerFromKiloTest()
+        {
+            ActivePower activePower = ActivePower.FromKilo(12.34567);
+
+            Assert.AreEqual(12345.67, activePower.Watts);
+        }
+
+
+        [TestMethod]
+        public void ActivePowerFromMegaTest()
+        {
+            ActivePower activePower = ActivePower.FromMega(12.34567);
+
+            Assert.AreEqual(12345670, activePower.Watts);
+        }
     }
 }

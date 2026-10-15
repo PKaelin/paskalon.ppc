@@ -277,5 +277,23 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
             Assert.AreEqual(expected, Math.Sign(result));
         }
 
+
+        [TestMethod]
+        public void ApparentPowerFromKiloTest()
+        {
+            ApparentPower apparentPower = ApparentPower.FromKilo(12.34567);
+
+            Assert.AreEqual(12345.67, apparentPower.VoltAmperes);
+        }
+
+
+        [TestMethod]
+        public void ApparentPowerFromMegaTest()
+        {
+            ApparentPower apparentPower = ApparentPower.FromMega(12.34567);
+
+            Assert.AreEqual(12345670, apparentPower.VoltAmperes);
+        }
+
     }
 }

@@ -134,6 +134,17 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
 
 
         /// <summary>
+        /// Create new apparent power from mega va input.
+        /// </summary>
+        /// <param name="megaVoltageAmpere">Mega voltage amperes.</param>
+        /// <returns>ApparentPower instance with va from mega vas.</returns>
+        public static ApparentPower FromMega(double megaVoltageAmpere)
+        {
+            return new ApparentPower(megaVoltageAmpere * VoltAmpsPerMegavoltAmps);
+        }
+
+
+        /// <summary>
         /// Constructor for <see cref="ApparentPower"/> that calculates apparent power from active and reactive power.
         /// </summary>
         /// <param name="activePower">The active power component.</param>
