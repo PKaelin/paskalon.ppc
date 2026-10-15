@@ -97,6 +97,11 @@ namespace paskalON.OperatingModes.Domain
                     return OperatingModeState.RampingToEnabled;
                 }
 
+                if (Matches(active, reactive, OperatingModeState.RampingToDisabled))
+                {
+                    return OperatingModeState.RampingToDisabled;
+                }
+
                 return OperatingModeState.Disabled;
             }
         }

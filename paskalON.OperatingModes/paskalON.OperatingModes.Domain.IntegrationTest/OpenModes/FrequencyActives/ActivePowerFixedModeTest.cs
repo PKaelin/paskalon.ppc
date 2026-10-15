@@ -174,7 +174,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
 
             Assert.AreEqual(3000000, halfActual, Tolerance);
             Assert.AreEqual(TransitionKind.ModeRemoved, halfKind);
-            Assert.AreEqual(OperatingModeState.Disabled, halfState);
+            Assert.AreEqual(OperatingModeState.RampingToDisabled, halfState);
             Assert.AreEqual(0, _control!.SetpointActivePowerActual.Watts, Tolerance);
             Assert.AreEqual(OperatingModeState.Disabled, _mode!.State);
             Assert.AreEqual(TransitionKind.None, _control!.ActivePowerTransition.Kind);

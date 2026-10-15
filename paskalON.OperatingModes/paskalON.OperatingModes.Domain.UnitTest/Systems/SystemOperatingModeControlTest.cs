@@ -208,10 +208,35 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             bool isActivatedBeforeCycle = baseMode.IsActivated;
 
             _control!.Calculate(CancellationToken.None);
+            OperatingModeState stateWhileTransitioning = baseMode.State;
+            _control!.Calculate(CancellationToken.None);
 
             Assert.IsFalse(isActivatedBeforeCycle);
             Assert.IsTrue(baseMode.IsActivated);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, stateWhileTransitioning);
             Assert.AreEqual(OperatingModeState.Enabled, baseMode.State);
+        }
+
+
+        /// <summary>
+        /// Confirms the state of a mode is ramping to enabled while its transition segment runs and enabled once it finished.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlStateFollowsTransitionSegmentTest()
+        {
+            Mock<IRampController> transitionRamp = CreateTransitionRamp(-2000000);
+            TestBaseActiveMode baseMode = CreateBaseActiveMode("ActivePowerMode", 5000000, transitionRamp);
+            _stack!.Add(baseMode, 1);
+            _control!.Calculate(CancellationToken.None);
+            _control!.Calculate(CancellationToken.None);
+            OperatingModeState stateWhileRamping = baseMode.State;
+            transitionRamp.Setup(controller => controller.Calculate()).Returns(0);
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, stateWhileRamping);
+            Assert.AreEqual(OperatingModeState.Enabled, baseMode.State);
+            Assert.IsFalse(baseMode.ActiveControl!.IsTransitioning);
         }
 
 
@@ -364,10 +389,34 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             CalculateSettled();
 
             Assert.IsFalse(baseMode.IsActivated);
+            Assert.AreEqual(OperatingModeState.RampingToDisabled, baseMode.State);
             Assert.AreEqual(TransitionKind.ModeRemoved, _control!.ActivePowerTransition.Kind);
             Assert.AreEqual(0, _control!.ActivePowerObjective.Watts);
             Assert.AreEqual(3000000, _control!.SetpointActivePowerActual.Watts);
             transitionRamp.Verify(controller => controller.Start(5000000, 0), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms a removed mode is ramping to disabled while its contribution ramps to zero and disabled once its segment finished.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlRemovedModeStateFollowsTransitionSegmentTest()
+        {
+            Mock<IRampController> transitionRamp = new Mock<IRampController>();
+            TestBaseActiveMode baseMode = CreateBaseActiveMode("ActivePowerMode", 5000000, transitionRamp);
+            _stack!.Add(baseMode, 1);
+            CalculateSettled();
+            _stack!.Remove(baseMode);
+            _control!.Calculate(CancellationToken.None);
+            OperatingModeState stateAtRemoval = baseMode.State;
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(OperatingModeState.RampingToDisabled, stateAtRemoval);
+            Assert.AreEqual(OperatingModeState.Disabled, baseMode.State);
+            Assert.IsFalse(baseMode.ActiveControl!.IsTransitioning);
+            Assert.IsEmpty(_control!.ActivePowerTransition.Segments);
         }
 
 
@@ -500,7 +549,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
 
             _control!.Calculate(CancellationToken.None);
 
-            Assert.AreEqual(OperatingModeState.Enabled, baseMode.State);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, baseMode.State);
             Assert.AreEqual(TransitionKind.InitialActivation, _control!.ActivePowerTransition.Kind);
             transitionRamp.Verify(controller => controller.Start(-5000000, 0), Times.Once);
         }

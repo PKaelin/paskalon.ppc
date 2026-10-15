@@ -96,17 +96,56 @@ namespace paskalON.OperatingModes.Domain.Controls
 
 
         /// <summary>
-        /// Gets the state of this power axis.
+        /// Gets the state of this power axis including the transition of the system operating mode control.
         /// </summary>
+        /// <remarks>
+        /// While the system operating mode control transitions the applied target because of this operating mode, an enabled
+        /// power axis is <see cref="OperatingModeState.RampingToEnabled"/> until the applied target reached its target and a
+        /// deactivated (removed) power axis is <see cref="OperatingModeState.RampingToDisabled"/> until its contribution is
+        /// ramped to zero.
+        /// </remarks>
         public OperatingModeState State
         {
+            get
+            {
+                OperatingModeState controlState = ControlState;
+
+                if (IsTransitioning is false)
+                {
+                    return controlState;
+                }
+
+                return controlState switch
+                {
+                    OperatingModeState.Enabled => OperatingModeState.RampingToEnabled,
+                    OperatingModeState.Disabled => OperatingModeState.RampingToDisabled,
+                    _ => controlState
+                };
+            }
+        }
+
+
+        /// <summary>
+        /// Gets whether the system operating mode control transitions the applied target because of this power axis.
+        /// </summary>
+        public bool IsTransitioning { get; private set; }
+
+
+        /// <summary>
+        /// Gets or sets the state of this power axis without the transition of the system operating mode control.
+        /// </summary>
+        /// <remarks>
+        /// Used by the ramp and activation logic of this power control.
+        /// </remarks>
+        private OperatingModeState ControlState
+        {
             get;
-            private set
+            set
             {
                 if (value != field)
                 {
-                    _logger.LogInformation("{Name} {Axis} power state changed to: {State}", _operatingModeName, Axis, value);
                     field = value;
+                    _logger.LogInformation("{Name} {Axis} power control state changed to: {State}", _operatingModeName, Axis, value);
                 }
             }
         } = OperatingModeState.Disabled;
@@ -181,7 +220,7 @@ namespace paskalON.OperatingModes.Domain.Controls
         {
             lock (_dataLock)
             {
-                if (State == OperatingModeState.Enabling || State == OperatingModeState.RampingToEnabled || State == OperatingModeState.Enabled)
+                if (ControlState == OperatingModeState.Enabling || ControlState == OperatingModeState.RampingToEnabled || ControlState == OperatingModeState.Enabled)
                 {
                     return;
                 }
@@ -189,7 +228,7 @@ namespace paskalON.OperatingModes.Domain.Controls
                 _start = start;
                 _lastSetpoint = null;
                 _lastAvailable = null;
-                State = OperatingModeState.Enabling;
+                ControlState = OperatingModeState.Enabling;
             }
         }
 
@@ -204,7 +243,7 @@ namespace paskalON.OperatingModes.Domain.Controls
         {
             lock (_dataLock)
             {
-                if (State == OperatingModeState.Disabled)
+                if (ControlState == OperatingModeState.Disabled)
                 {
                     return;
                 }
@@ -215,8 +254,27 @@ namespace paskalON.OperatingModes.Domain.Controls
                 _target = 0;
                 _lastSetpoint = null;
                 _lastAvailable = null;
-                State = OperatingModeState.Disabled;
+                ControlState = OperatingModeState.Disabled;
             }
+        }
+
+
+        /// <summary>
+        /// Sets whether the system operating mode control transitions the applied target because of this power axis.
+        /// </summary>
+        /// <remarks>
+        /// Called by the system operating mode control after every calculation cycle.
+        /// </remarks>
+        /// <param name="isTransitioning">True while a transition segment of this operating mode is running on this power axis.</param>
+        internal void SetTransitioning(bool isTransitioning)
+        {
+            if (IsTransitioning == isTransitioning)
+            {
+                return;
+            }
+
+            IsTransitioning = isTransitioning;
+            _logger.LogInformation("{Name} {Axis} power state changed to: {State}", _operatingModeName, Axis, State);
         }
 
 
@@ -235,18 +293,18 @@ namespace paskalON.OperatingModes.Domain.Controls
             {
                 _available = availableValue;
 
-                if (State == OperatingModeState.Enabling)
+                if (ControlState == OperatingModeState.Enabling)
                 {
                     _setpoint = setpointValue;
                     EstablishTarget(setpointValue, availableValue);
                 }
-                else if (State == OperatingModeState.RampingToEnabled || State == OperatingModeState.Enabled)
+                else if (ControlState == OperatingModeState.RampingToEnabled || ControlState == OperatingModeState.Enabled)
                 {
                     _setpoint = setpointValue;
                     RestartRampOnChange(setpointValue, availableValue);
                 }
 
-                if (State == OperatingModeState.RampingToEnabled)
+                if (ControlState == OperatingModeState.RampingToEnabled)
                 {
                     _target = RampController.Calculate();
                     CheckFinalTarget();
@@ -305,7 +363,7 @@ namespace paskalON.OperatingModes.Domain.Controls
 
             _targetSetpoint = targetSetpoint;
             _target = targetSetpoint;
-            State = OperatingModeState.Enabled;
+            ControlState = OperatingModeState.Enabled;
 
             _logger.LogInformation("{Name} {Axis} power established target setpoint {TargetSetpoint}.", _operatingModeName, Axis, targetSetpoint);
         }
@@ -355,7 +413,7 @@ namespace paskalON.OperatingModes.Domain.Controls
         {
             _targetSetpoint = targetSetpoint;
             RampController.Start(_target, targetSetpoint);
-            State = OperatingModeState.RampingToEnabled;
+            ControlState = OperatingModeState.RampingToEnabled;
 
             _logger.LogInformation("{Name} {Axis} power ramps from {Target} to target setpoint {TargetSetpoint}.", _operatingModeName, Axis, _target, targetSetpoint);
         }
@@ -366,10 +424,10 @@ namespace paskalON.OperatingModes.Domain.Controls
         /// </summary>
         private void CheckFinalTarget()
         {
-            if (State == OperatingModeState.RampingToEnabled && Math.Abs(_target - _targetSetpoint) <= Limits.DeadbandSetpoint)
+            if (ControlState == OperatingModeState.RampingToEnabled && Math.Abs(_target - _targetSetpoint) <= Limits.DeadbandSetpoint)
             {
                 _target = _targetSetpoint;
-                State = OperatingModeState.Enabled;
+                ControlState = OperatingModeState.Enabled;
                 RampController.Stop();
 
                 _logger.LogDebug("{Name} {Axis} power reached target setpoint: {TargetSetpoint}", _operatingModeName, Axis, _targetSetpoint);

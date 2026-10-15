@@ -27,6 +27,14 @@ namespace paskalON.OperatingModes.Domain
         /// <summary>
         /// Operating mode is at the expected set point(s) and is therefore fully enabled.
         /// </summary>
-        Enabled = 3
+        Enabled = 3,
+
+        /// <summary>
+        /// Operating mode is removed and no longer activated, but its contribution is still ramping to zero.
+        /// </summary>
+        /// <remarks>
+        /// Set while the transition segment of the removed operating mode is running in the system operating mode control.
+        /// </remarks>
+        RampingToDisabled = 4
     }
 }

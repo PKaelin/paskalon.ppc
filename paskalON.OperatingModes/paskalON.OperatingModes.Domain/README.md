@@ -208,6 +208,10 @@ ramp of that operating mode:
 | Additive | Transition from zero correction to the target including the delta | Transition to the target without the delta |
 | Limiting | Transition to the limited target | Transition to the target without the limit, remaining constraints still apply |
 
+The state of an operating mode follows its segment: an added or replacing operating mode is `RampingToEnabled` until the
+applied target reached its target, a removed operating mode is `RampingToDisabled` until its contribution is ramped to
+zero, then `Enabled` or `Disabled`.
+
 An operating mode waiting for available power starts its segment once it established its target. Mandatory constraints
 (nameplate and plant-wide overrides) are never delayed by a transition: a constraint in the direction of the running
 offset scales the segments down, otherwise the segments are cancelled. A plant-wide override cancels the segments.

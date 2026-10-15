@@ -81,6 +81,12 @@ namespace paskalON.OperatingModes.Domain.Systems
 
 
         /// <summary>
+        /// Operating modes whose transition state is tracked, keyed by name. Removed operating modes stay until their segments finished.
+        /// </summary>
+        private readonly Dictionary<string, IOperatingMode> _transitionModes = new Dictionary<string, IOperatingMode>(StringComparer.Ordinal);
+
+
+        /// <summary>
         /// Whether a calculation cycle has completed and the applied targets are valid transition origins.
         /// </summary>
         private bool _hasAppliedTargets;
@@ -313,6 +319,7 @@ namespace paskalON.OperatingModes.Domain.Systems
                 IOverrideMode? plantOverride = overrides.OperatingModes.FirstOrDefault(overrideMode => overrideMode.TargetDerUnit is null);
                 double activeApplied = ResolveAxis(PowerAxis.Active, signals.FinalActivePower.Watts, changes, plantOverride?.ActiveControl?.Target.Watts);
                 double reactiveApplied = ResolveAxis(PowerAxis.Reactive, signals.FinalReactivePower.VoltAmperesReactive, changes, plantOverride?.ReactiveControl?.Target.VoltAmperesReactive);
+                UpdateTransitionStates(stack.OperatingModes, changes);
 
                 lock (_dataLock)
                 {
@@ -542,6 +549,39 @@ namespace paskalON.OperatingModes.Domain.Systems
             }
 
             return constrained;
+        }
+
+
+        /// <summary>
+        /// Tells the operating modes whether a transition segment caused by them is running, so that an enabled operating mode
+        /// shows <see cref="OperatingModeState.RampingToEnabled"/> until the applied target reached its target and a removed
+        /// operating mode shows <see cref="OperatingModeState.RampingToDisabled"/> until its contribution is ramped to zero.
+        /// </summary>
+        /// <param name="stackModes">The selected operating modes of the current cycle.</param>
+        /// <param name="changes">The power axis changes of the current cycle.</param>
+        private void UpdateTransitionStates(IReadOnlyList<IStackableMode> stackModes, List<AxisChange> changes)
+        {
+            foreach (IOperatingMode operatingMode in stackModes.Concat(changes.Select(change => change.OperatingMode)))
+            {
+                _transitionModes[operatingMode.Name] = operatingMode;
+            }
+
+            HashSet<string> activeSegments = ActivePowerTransition.Segments.Select(segment => segment.OperatingModeName).ToHashSet(StringComparer.Ordinal);
+            HashSet<string> reactiveSegments = ReactivePowerTransition.Segments.Select(segment => segment.OperatingModeName).ToHashSet(StringComparer.Ordinal);
+
+            foreach (IOperatingMode operatingMode in _transitionModes.Values.ToArray())
+            {
+                bool isActiveTransitioning = activeSegments.Contains(operatingMode.Name);
+                bool isReactiveTransitioning = reactiveSegments.Contains(operatingMode.Name);
+                operatingMode.ActiveControl?.SetTransitioning(isActiveTransitioning);
+                operatingMode.ReactiveControl?.SetTransitioning(isReactiveTransitioning);
+
+                // Removed operating modes are no longer tracked once their segments finished
+                if (isActiveTransitioning is false && isReactiveTransitioning is false && operatingMode.IsActivated is false)
+                {
+                    _transitionModes.Remove(operatingMode.Name);
+                }
+            }
         }
 
 
