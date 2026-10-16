@@ -77,33 +77,7 @@ namespace paskalON.OperatingModes.Domain
         /// <inheritdoc/>
         public OperatingModeState State
         {
-            get
-            {
-                OperatingModeState? active = ActiveControl?.State;
-                OperatingModeState? reactive = ReactiveControl?.State;
-
-                if (Matches(active, reactive, OperatingModeState.Enabled))
-                {
-                    return OperatingModeState.Enabled;
-                }
-
-                if (Matches(active, reactive, OperatingModeState.Enabling))
-                {
-                    return OperatingModeState.Enabling;
-                }
-
-                if (Matches(active, reactive, OperatingModeState.RampingToEnabled))
-                {
-                    return OperatingModeState.RampingToEnabled;
-                }
-
-                if (Matches(active, reactive, OperatingModeState.RampingToDisabled))
-                {
-                    return OperatingModeState.RampingToDisabled;
-                }
-
-                return OperatingModeState.Disabled;
-            }
+            get => CombineStates(ActiveControl?.State, ReactiveControl?.State);
         }
 
 
@@ -290,17 +264,43 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
-        /// Matches the active and reactive operating state to a common state.
+        /// Combines the states of the active and reactive power axes to the state of the operating mode.
         /// </summary>
-        /// <param name="active">The active operating state or null if the axis does not exist.</param>
-        /// <param name="reactive">The reactive operating state or null if the axis does not exist.</param>
-        /// <param name="state">The operating state to match.</param>
-        /// <returns>True if the states match the common state.</returns>
-        private bool Matches(OperatingModeState? active, OperatingModeState? reactive, OperatingModeState state)
+        /// <remarks>
+        /// Both power axes are activated and deactivated together but can settle at different times, e.g. a shutdown ramps the
+        /// active power while the reactive power is already at its target. If one power axis is enabling, ramping to enabled or
+        /// enabled the operating mode is on the enabled side and reports the least settled of these states. Otherwise it reports
+        /// <see cref="OperatingModeState.RampingToDisabled"/> while one power axis is ramping to disabled, else
+        /// <see cref="OperatingModeState.Disabled"/>.
+        /// </remarks>
+        /// <param name="active">The active power axis state or null if the axis does not exist.</param>
+        /// <param name="reactive">The reactive power axis state or null if the axis does not exist.</param>
+        /// <returns>The state of the operating mode.</returns>
+        internal static OperatingModeState CombineStates(OperatingModeState? active, OperatingModeState? reactive)
         {
-            return (active == state && reactive == state) ||
-                   (active == state && (reactive == null || reactive == OperatingModeState.Disabled)) ||
-                   (reactive == state && (active == null || active == OperatingModeState.Disabled));
+            OperatingModeState[] states = new OperatingModeState?[] { active, reactive }.OfType<OperatingModeState>().ToArray();
+
+            if (states.Contains(OperatingModeState.Enabling))
+            {
+                return OperatingModeState.Enabling;
+            }
+
+            if (states.Contains(OperatingModeState.RampingToEnabled))
+            {
+                return OperatingModeState.RampingToEnabled;
+            }
+
+            if (states.Contains(OperatingModeState.Enabled))
+            {
+                return OperatingModeState.Enabled;
+            }
+
+            if (states.Contains(OperatingModeState.RampingToDisabled))
+            {
+                return OperatingModeState.RampingToDisabled;
+            }
+
+            return OperatingModeState.Disabled;
         }
     }
 }

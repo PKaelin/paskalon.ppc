@@ -130,6 +130,10 @@ namespace paskalON.OperatingModes.Domain.Controls
         /// <summary>
         /// Gets whether the system operating mode control transitions the applied target because of this power axis.
         /// </summary>
+        /// <remarks>
+        /// IsTransitioning lets a mode's State show that the plant hasn't reached the mode's target yet.
+        /// The mode's own power control can't know this, because for stack modes the ramping happens in SystemOperatingModeControl, not in the mode.
+        /// </remarks>
         public bool IsTransitioning { get; private set; }
 
 

@@ -153,6 +153,33 @@ namespace paskalON.OperatingModes.Domain.UnitTest
         }
 
 
+        /// <summary>
+        /// Confirms the combination of the power axis states to the state of the operating mode.
+        /// </summary>
+        /// <param name="active">The active power axis state or null if the axis does not exist.</param>
+        /// <param name="reactive">The reactive power axis state or null if the axis does not exist.</param>
+        /// <param name="expected">The expected state of the operating mode.</param>
+        [TestMethod]
+        [DataRow(null, null, OperatingModeState.Disabled)]
+        [DataRow(OperatingModeState.Enabled, null, OperatingModeState.Enabled)]
+        [DataRow(null, OperatingModeState.RampingToEnabled, OperatingModeState.RampingToEnabled)]
+        [DataRow(OperatingModeState.Enabled, OperatingModeState.Enabled, OperatingModeState.Enabled)]
+        [DataRow(OperatingModeState.Enabled, OperatingModeState.Disabled, OperatingModeState.Enabled)]
+        [DataRow(OperatingModeState.RampingToEnabled, OperatingModeState.Enabled, OperatingModeState.RampingToEnabled)]
+        [DataRow(OperatingModeState.Enabled, OperatingModeState.RampingToEnabled, OperatingModeState.RampingToEnabled)]
+        [DataRow(OperatingModeState.Enabling, OperatingModeState.Enabled, OperatingModeState.Enabling)]
+        [DataRow(OperatingModeState.RampingToEnabled, OperatingModeState.Enabling, OperatingModeState.Enabling)]
+        [DataRow(OperatingModeState.RampingToDisabled, OperatingModeState.Disabled, OperatingModeState.RampingToDisabled)]
+        [DataRow(OperatingModeState.RampingToDisabled, OperatingModeState.RampingToDisabled, OperatingModeState.RampingToDisabled)]
+        [DataRow(OperatingModeState.Disabled, OperatingModeState.Disabled, OperatingModeState.Disabled)]
+        public void OperatingModeBaseCombineStatesTest(OperatingModeState? active, OperatingModeState? reactive, OperatingModeState expected)
+        {
+            OperatingModeState state = OperatingModeBase.CombineStates(active, reactive);
+
+            Assert.AreEqual(expected, state);
+        }
+
+
 
         /// <summary>
         /// Confirms only the metrics of the existing power axis and the contribution are registered.

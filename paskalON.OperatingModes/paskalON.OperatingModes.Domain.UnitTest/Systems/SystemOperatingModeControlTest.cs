@@ -685,6 +685,10 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             Assert.AreEqual(2500000, _control!.SetpointActivePowerActual.Watts);
             Assert.AreEqual(5000000, _control!.ActivePowerObjective.Watts);
             Assert.IsFalse(shutdown.IsShutdownCompleted);
+            // Active power ramps while the reactive power is already at its target
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, shutdown.ActiveControl!.State);
+            Assert.AreEqual(OperatingModeState.Enabled, shutdown.ReactiveControl!.State);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, shutdown.State);
             shutdownRamp.Verify(controller => controller.Start(5000000, 0), Times.Once);
         }
 
