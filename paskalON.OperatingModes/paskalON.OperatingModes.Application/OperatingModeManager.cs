@@ -106,10 +106,11 @@ namespace paskalON.OperatingModes.Application
         /// <remarks>
         /// The override slot exists before the operating modes are created, so that the plant-level map functions can exclude overridden DER units.
         /// </remarks>
-        public virtual async Task Initialize(IOperatingModeRepository repository, SystemConfig systemConfig)
+        public virtual async Task Initialize(IOperatingModeRepository repository, SystemConfig systemConfig, ISetpointsPublisher setpointsPublisher)
         {
             ArgumentNullException.ThrowIfNull(repository);
             ArgumentNullException.ThrowIfNull(systemConfig);
+            ArgumentNullException.ThrowIfNull(setpointsPublisher);
 
             _logger.LogInformation("Initialize operating mode during startup");
             List<OperatingModeBaseConfig> operatingModeConfigs = await repository.GetAllOperatingModes();
@@ -128,7 +129,7 @@ namespace paskalON.OperatingModes.Application
             OverrideManager.InitializeOverrides(operatingModes);
             IMetricsPublisher systemModeMetrics = _metricsPublisherFactory.Create();
             SystemOperatingModeControl = new SystemOperatingModeControl(_logger, systemConfig, StackManager.Stack, OverrideManager.Overrides,
-                _operatingModeMapFactory.CreateSystemMap(_deviceClient.Der), systemModeMetrics);
+                _operatingModeMapFactory.CreateSystemMap(_deviceClient.Der), systemModeMetrics, setpointsPublisher);
             MetricsPublishers.Add(systemModeMetrics);
             SystemOperatingModeControl.State = SystemState.Ready;
         }

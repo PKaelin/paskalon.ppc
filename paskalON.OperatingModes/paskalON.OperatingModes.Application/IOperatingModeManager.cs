@@ -45,7 +45,8 @@ namespace paskalON.OperatingModes.Application
         /// </summary>
         /// <param name="repository">The operating mode repository to initialize the manager with.</param>
         /// <param name="systemConfig">The system configuration shared by all operating modes.</param>
+        /// <param name="setpointsPublisher">Publisher of the applied setpoints of the system operating mode control.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        Task Initialize(IOperatingModeRepository repository, SystemConfig systemConfig);
+        Task Initialize(IOperatingModeRepository repository, SystemConfig systemConfig, ISetpointsPublisher setpointsPublisher);
     }
 }

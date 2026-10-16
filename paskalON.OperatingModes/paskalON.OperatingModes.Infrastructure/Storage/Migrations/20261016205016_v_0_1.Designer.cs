@@ -12,7 +12,7 @@ using paskalON.OperatingModes.Infrastructure.Storage;
 namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(OperatingModeContext))]
-    [Migration("20261016052236_v_0_1")]
+    [Migration("20261016205016_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -168,6 +168,12 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
 
                     b.Property<double>("NameplateMinimumVoltage")
                         .HasColumnType("double precision");
+
+                    b.Property<string>("PublisherTopicCurrentDerUnitSetpoint")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicCurrentSetpoint")
+                        .HasColumnType("text");
 
                     b.Property<double>("ReferenceFrequency")
                         .HasColumnType("double precision");

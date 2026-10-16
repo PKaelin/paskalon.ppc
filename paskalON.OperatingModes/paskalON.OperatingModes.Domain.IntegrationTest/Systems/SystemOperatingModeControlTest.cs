@@ -121,7 +121,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
                 { _maximumPowerPointTrackingMode.Name, _maximumPowerPointTrackingMode }
             });
             SystemOperatingModeControlMap systemMap = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => _activePowerAtPoi, ReactivePowerAtPoi = () => null };
-            _control = new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stackManager.Stack, new OperatingModeOverrides(), systemMap, new Mock<IMetricsPublisher>().Object);
+            _control = new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stackManager.Stack, new OperatingModeOverrides(), systemMap, new Mock<IMetricsPublisher>().Object, new Mock<ISetpointsPublisher>().Object);
             _control.UpdateSetpoints(new ActivePower(6000000), new ReactivePower(0));
         }
 

@@ -641,6 +641,8 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     SubscriberTopicCircuitPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
                     SubscriberTopicSystemPowerMeterCore = table.Column<string>(type: "text", nullable: true),
                     SubscriberTopicSystemPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicCurrentSetpoint = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicCurrentDerUnitSetpoint = table.Column<string>(type: "text", nullable: true),
                     StartupDelay = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>

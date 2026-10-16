@@ -88,7 +88,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.VoltageReacti
             _stackManager = new StackManager();
             _stackManager.InitializeStack(new Dictionary<string, OperatingModeBase> { { _mode.Name, _mode } });
             SystemOperatingModeControlMap systemMap = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => null, ReactivePowerAtPoi = () => null };
-            _control = new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stackManager.Stack, new OperatingModeOverrides(), systemMap, new Mock<IMetricsPublisher>().Object);
+            _control = new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stackManager.Stack, new OperatingModeOverrides(), systemMap, new Mock<IMetricsPublisher>().Object, new Mock<ISetpointsPublisher>().Object);
         }
 
 

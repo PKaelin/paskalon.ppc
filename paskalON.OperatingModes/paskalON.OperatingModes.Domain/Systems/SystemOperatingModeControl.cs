@@ -76,6 +76,12 @@ namespace paskalON.OperatingModes.Domain.Systems
 
 
         /// <summary>
+        /// Publisher of the applied setpoints that the power control distributes over the system.
+        /// </summary>
+        private readonly ISetpointsPublisher _setpointsPublisher;
+
+
+        /// <summary>
         /// Transition kind of operating modes that are activated but have not established their target yet.
         /// </summary>
         private readonly Dictionary<IOperatingMode, TransitionKind> _pendingActivations = new Dictionary<IOperatingMode, TransitionKind>();
@@ -245,8 +251,9 @@ namespace paskalON.OperatingModes.Domain.Systems
         /// <param name="overrides">The override slot with the active override modes.</param>
         /// <param name="map">Input mapping class for the measured power at the POI.</param>
         /// <param name="publisher">The metrics publisher.</param>
+        /// <param name="setpointsPublisher">Publisher of the applied setpoints that the power control distributes over the system.</param>
         public SystemOperatingModeControl(ILogger logger, SystemConfig systemConfig, OperatingModeStack stack, OperatingModeOverrides overrides,
-            SystemOperatingModeControlMap map, IMetricsPublisher publisher)
+            SystemOperatingModeControlMap map, IMetricsPublisher publisher, ISetpointsPublisher setpointsPublisher)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(systemConfig);
@@ -254,6 +261,7 @@ namespace paskalON.OperatingModes.Domain.Systems
             ArgumentNullException.ThrowIfNull(overrides);
             ArgumentNullException.ThrowIfNull(map);
             ArgumentNullException.ThrowIfNull(publisher);
+            ArgumentNullException.ThrowIfNull(setpointsPublisher);
 
             _logger = logger;
             _systemConfig = systemConfig;
@@ -261,6 +269,7 @@ namespace paskalON.OperatingModes.Domain.Systems
             _overrides = overrides;
             _map = map;
             _publisher = publisher;
+            _setpointsPublisher = setpointsPublisher;
             RegisterMetrics();
         }
 
@@ -321,13 +330,18 @@ namespace paskalON.OperatingModes.Domain.Systems
                 double activeApplied = ResolveAxis(PowerAxis.Active, signals.FinalActivePower.Watts, changes, plantOverride?.ActiveControl?.Target.Watts);
                 double reactiveApplied = ResolveAxis(PowerAxis.Reactive, signals.FinalReactivePower.VoltAmperesReactive, changes, plantOverride?.ReactiveControl?.Target.VoltAmperesReactive);
                 UpdateTransitionStates(stack.OperatingModes, changes);
+                ActivePower setpointActivePowerActual = new ActivePower(activeApplied);
+                ReactivePower setpointReactivePowerActual = new ReactivePower(reactiveApplied);
+                bool isSetpointChanged;
 
                 lock (_dataLock)
                 {
+                    // The first calculated setpoints are always published
+                    isSetpointChanged = (_hasAppliedTargets is false) || (SetpointActivePowerActual != setpointActivePowerActual) || (SetpointReactivePowerActual != setpointReactivePowerActual);
                     ActivePowerObjective = signals.FinalActivePower;
                     ReactivePowerObjective = signals.FinalReactivePower;
-                    SetpointActivePowerActual = new ActivePower(activeApplied);
-                    SetpointReactivePowerActual = new ReactivePower(reactiveApplied);
+                    SetpointActivePowerActual = setpointActivePowerActual;
+                    SetpointReactivePowerActual = setpointReactivePowerActual;
                     BaseActivePower = signals.BaseActivePower;
                     BaseReactivePower = signals.BaseReactivePower;
                     AdditiveActivePowerDelta = signals.AdditiveActivePowerDelta;
@@ -337,6 +351,11 @@ namespace paskalON.OperatingModes.Domain.Systems
                     OverrideSetpoints = overrideSetpoints;
                     _hasAppliedTargets = true;
                     State = SystemState.Running;
+                }
+
+                if (isSetpointChanged == true)
+                {
+                    PublishSetpoints(setpointActivePowerActual, setpointReactivePowerActual);
                 }
             }
             catch (OperationCanceledException)
@@ -348,6 +367,27 @@ namespace paskalON.OperatingModes.Domain.Systems
                 // Hold the actual setpoints of the last cycle
                 _logger.LogError(ex, "System operating mode control calculation failed. Actual setpoints are held.");
                 State = SystemState.Faulted;
+            }
+        }
+
+
+        /// <summary>
+        /// Publishes the applied setpoints that the power control distributes over the system.
+        /// </summary>
+        /// <remarks>
+        /// A failing publisher does not fault the calculation, the applied setpoints are already committed.
+        /// </remarks>
+        /// <param name="setpointActivePower">The applied active power setpoint.</param>
+        /// <param name="setpointReactivePower">The applied reactive power setpoint.</param>
+        private void PublishSetpoints(ActivePower setpointActivePower, ReactivePower setpointReactivePower)
+        {
+            try
+            {
+                _setpointsPublisher.Publish(setpointActivePower, setpointReactivePower);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Publishing the setpoints {SetpointActivePower} and {SetpointReactivePower} failed.", setpointActivePower, setpointReactivePower);
             }
         }
 

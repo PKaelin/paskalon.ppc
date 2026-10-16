@@ -55,6 +55,12 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
 
 
         /// <summary>
+        /// The mocked publisher of the applied setpoints.
+        /// </summary>
+        private Mock<ISetpointsPublisher>? _setpointsPublisher;
+
+
+        /// <summary>
         /// Creates the system operating mode control with an empty stack and override slot.
         /// </summary>
         [TestInitialize]
@@ -63,8 +69,10 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             _stack = new OperatingModeStack();
             _overrides = new OperatingModeOverrides();
             _activePowerAtPoi = null;
+            _setpointsPublisher = new Mock<ISetpointsPublisher>();
             SystemOperatingModeControlMap map = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => _activePowerAtPoi, ReactivePowerAtPoi = () => null };
-            _control = new SystemOperatingModeControl(NullLogger.Instance, OperatingModeTestData.CreateSystemConfig(), _stack, _overrides, map, new Mock<IMetricsPublisher>().Object);
+            _control = new SystemOperatingModeControl(NullLogger.Instance, OperatingModeTestData.CreateSystemConfig(), _stack, _overrides, map, new Mock<IMetricsPublisher>().Object,
+                _setpointsPublisher.Object);
         }
 
 
@@ -78,7 +86,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             SystemOperatingModeControlMap map = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => null, ReactivePowerAtPoi = () => null };
             IMetricsPublisher publisher = new Mock<IMetricsPublisher>().Object;
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(null!, systemConfig, _stack!, _overrides!, map, publisher));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(null!, systemConfig, _stack!, _overrides!, map, publisher, new Mock<ISetpointsPublisher>().Object));
         }
 
 
@@ -91,7 +99,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             SystemOperatingModeControlMap map = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => null, ReactivePowerAtPoi = () => null };
             IMetricsPublisher publisher = new Mock<IMetricsPublisher>().Object;
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, null!, _stack!, _overrides!, map, publisher));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, null!, _stack!, _overrides!, map, publisher, new Mock<ISetpointsPublisher>().Object));
         }
 
 
@@ -105,7 +113,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             SystemOperatingModeControlMap map = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => null, ReactivePowerAtPoi = () => null };
             IMetricsPublisher publisher = new Mock<IMetricsPublisher>().Object;
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, systemConfig, null!, _overrides!, map, publisher));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, systemConfig, null!, _overrides!, map, publisher, new Mock<ISetpointsPublisher>().Object));
         }
 
 
@@ -119,7 +127,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             SystemOperatingModeControlMap map = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => null, ReactivePowerAtPoi = () => null };
             IMetricsPublisher publisher = new Mock<IMetricsPublisher>().Object;
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stack!, null!, map, publisher));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stack!, null!, map, publisher, new Mock<ISetpointsPublisher>().Object));
         }
 
 
@@ -132,7 +140,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             SystemConfig systemConfig = OperatingModeTestData.CreateSystemConfig();
             IMetricsPublisher publisher = new Mock<IMetricsPublisher>().Object;
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stack!, _overrides!, null!, publisher));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stack!, _overrides!, null!, publisher, new Mock<ISetpointsPublisher>().Object));
         }
 
 
@@ -146,7 +154,75 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             SystemOperatingModeControlMap map = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => null, ReactivePowerAtPoi = () => null };
             IMetricsPublisher publisher = new Mock<IMetricsPublisher>().Object;
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stack!, _overrides!, map, null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stack!, _overrides!, map, null!, new Mock<ISetpointsPublisher>().Object));
+        }
+
+
+        /// <summary>
+        /// Confirms the constructor validates its arguments.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlConstructorNullSetpointsPublisherTest()
+        {
+            SystemConfig systemConfig = OperatingModeTestData.CreateSystemConfig();
+            SystemOperatingModeControlMap map = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => null, ReactivePowerAtPoi = () => null };
+            IMetricsPublisher publisher = new Mock<IMetricsPublisher>().Object;
+
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stack!, _overrides!, map, publisher, null!));
+        }
+
+
+        /// <summary>
+        /// Confirms the first applied setpoints and every change of them are published, unchanged setpoints are not published again.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculatePublishesChangedSetpointsTest()
+        {
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", 5000000), 1);
+
+            // Cycle 1 starts the transition at 0 W, cycle 2 finishes it at 5 MW, cycle 3 holds 5 MW
+            CalculateSettled();
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(5000000, _control!.SetpointActivePowerActual.Watts);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 0), It.Is<ReactivePower>(power => power.VoltAmperesReactive == 0)), Times.Once);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 5000000), It.Is<ReactivePower>(power => power.VoltAmperesReactive == 0)), Times.Once);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Exactly(2));
+        }
+
+
+        /// <summary>
+        /// Confirms the held setpoints of a failed calculation are not published again.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateFaultedDoesNotPublishTest()
+        {
+            TestBaseActiveMode baseActive = CreateBaseActiveMode("ActivePowerMode", 5000000);
+            _stack!.Add(baseActive, 1);
+            CalculateSettled();
+            baseActive.CalculateAction = signals => throw new InvalidOperationException("Measurement failed.");
+            _setpointsPublisher!.Invocations.Clear();
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(SystemState.Faulted, _control!.State);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+        }
+
+
+        /// <summary>
+        /// Confirms a failing setpoints publisher does not fault the calculation.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculatePublisherThrowsKeepsRunningTest()
+        {
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", 5000000), 1);
+            _setpointsPublisher!.Setup(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>())).Throws(new InvalidOperationException("Broker not reachable."));
+
+            CalculateSettled();
+
+            Assert.AreEqual(SystemState.Running, _control!.State);
+            Assert.AreEqual(5000000, _control!.SetpointActivePowerActual.Watts);
         }
 
 

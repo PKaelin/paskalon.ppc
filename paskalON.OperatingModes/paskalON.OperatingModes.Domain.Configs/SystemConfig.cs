@@ -250,6 +250,18 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
+        /// Publisher topic for current system setpoints used for the message publisher.
+        /// </summary>
+        public string? PublisherTopicCurrentSetpoint { get; set; }
+
+
+        /// <summary>
+        /// Publisher topic for current DER unit setpoints used for the message publisher.
+        /// </summary>
+        public string? PublisherTopicCurrentDerUnitSetpoint { get; set; }
+
+
+        /// <summary>
         /// Startup delay so that the operating mode is properly initialized.
         /// </summary>
         public int StartupDelay { get; set; } = 5000;

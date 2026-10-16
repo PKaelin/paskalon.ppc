@@ -10,6 +10,7 @@ using paskalON.Messaging;
 using paskalON.Messaging.Redis;
 using paskalON.OperatingModes.Application;
 using paskalON.OperatingModes.Application.Factories;
+using paskalON.OperatingModes.Application.Publishers;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Infrastructure.Storage;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
@@ -79,6 +80,7 @@ try
     ConfigurationOptions msgOptions = ConfigurationOptions.Parse(msgConnectionString);
     msgOptions.AbortOnConnectFail = false;
     builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(msgOptions));
+    builder.Services.AddSingleton<IMessagePublisher, RedisMessagePublisher>();
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
     builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
     builder.Services.AddSingleton<MetricsPublisherService>();
@@ -123,9 +125,14 @@ try
         SubscriberTopic topics = GetSubscriberTopic(config);
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
         await deviceClient.Initialize(topics);
+        // Create setpoints publisher with the configured topics
+        PublisherTopic publisherTopic = PublisherTopic.Create(config);
+        ILogger<SetpointsPublisher> setpointsPublisherLogger = app.Services.GetRequiredService<ILogger<SetpointsPublisher>>();
+        IMessagePublisher messagePublisher = app.Services.GetRequiredService<IMessagePublisher>();
+        SetpointsPublisher setpointsPublisher = new SetpointsPublisher(setpointsPublisherLogger, messagePublisher, publisherTopic);
         // Load and initialize manager
         IOperatingModeRepository repository = scope.ServiceProvider.GetRequiredService<IOperatingModeRepository>();
-        await manager.Initialize(repository, config);
+        await manager.Initialize(repository, config, setpointsPublisher);
 
         if (startPublisher == true)
         {

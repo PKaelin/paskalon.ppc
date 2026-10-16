@@ -99,7 +99,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
             _overrides = new OperatingModeOverrides();
 
             SystemOperatingModeControlMap systemMap = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => null, ReactivePowerAtPoi = () => null };
-            _control = new SystemOperatingModeControl(NullLogger.Instance, _systemConfig, _stack, _overrides, systemMap, new Mock<IMetricsPublisher>().Object);
+            _control = new SystemOperatingModeControl(NullLogger.Instance, _systemConfig, _stack, _overrides, systemMap, new Mock<IMetricsPublisher>().Object, new Mock<ISetpointsPublisher>().Object);
         }
 
 
