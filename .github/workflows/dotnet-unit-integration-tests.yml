@@ -128,6 +128,13 @@ jobs:
       - name: Generate coverage report
         shell: bash
         run: |
+          reports="${{ inputs.service-path }}/**/TestResults/**/coverage.cobertura.xml"
+
+          if ! find "${{ inputs.service-path }}" -type f -name "coverage.cobertura.xml" -path "*/TestResults/*" -print -quit | grep -q .; then
+            echo "No coverage files found. Skipping coverage report generation."
+            exit 0
+          fi
+
           reportgenerator \
             -reports:"${{ inputs.service-path }}/**/TestResults/**/coverage.cobertura.xml" \
             -targetdir:"${{ inputs.service-path }}/TestResults/CoverageReport" \
