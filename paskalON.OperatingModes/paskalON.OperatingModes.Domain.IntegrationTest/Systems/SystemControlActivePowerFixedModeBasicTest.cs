@@ -434,5 +434,51 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
             Assert.AreEqual(0, _control.SetpointActivePowerActual.MegaWatts);
             Assert.AreEqual(OperatingModeState.Enabled, shutdownMode.State);
         }
+
+
+        /// <summary>
+        /// Modes used: ActivePowerFixedMode & ShutdownMode
+        /// Scenario Step1: Activate mode, set SetPoint to maximum nameplate, wait for the ramp to be in the middle.
+        /// Scenario Step2: Add override mode, wait for the ramp to complete, check that the SetPoint and State are reached.
+        /// </summary>
+        [TestMethod]
+        public void ActivePowerFixedOverrideModeAddedWhenRampingTest()
+        {
+            // Step 1
+            _stack.Add(_activePowerFixedMode, 1);       // Stack only commits and records. The control doesnt know about it yet
+            _control.UpdateSetpoints(ActivePower.FromMega(10), new ReactivePower(0));
+
+            _control.Calculate(CancellationToken.None); // Control takes the change (TakeCycle) and activates the mode
+            Assert.AreEqual(10, _control.SetpointActivePower.MegaWatts);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(0, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, _activePowerFixedMode.State);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(5));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(5, _control.SetpointActivePowerActual.MegaWatts);
+
+            // Step 2
+            ShutdownMode shutdownMode = DomainTestData.CreateShutdownMode(_timeProvider);
+            _overrides.Add(shutdownMode);               // Stack only commits and records. The control doesnt know about it yet
+            _control.Calculate(CancellationToken.None); // Control takes the change (TakeCycle) and activates the mode
+            Assert.AreEqual(OperatingModeState.Enabled, _activePowerFixedMode.State);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(5, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, shutdownMode.State);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(1));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(1, _control.SetpointActivePowerActual.MegaWatts);
+
+            _timeProvider.Advance(TimeSpan.FromSeconds(1));
+            _control.Calculate(CancellationToken.None);
+            Assert.AreEqual(10, _control.ActivePowerObjective.MegaWatts);
+            Assert.AreEqual(0, _control.SetpointActivePowerActual.MegaWatts);
+            Assert.AreEqual(OperatingModeState.Enabled, shutdownMode.State);
+        }
+
     }
 }
