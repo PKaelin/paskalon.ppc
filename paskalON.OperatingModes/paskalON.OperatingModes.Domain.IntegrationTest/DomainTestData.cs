@@ -30,8 +30,8 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest
                 ReferenceFrequency = 50,
                 NameplateMinimumActivePowerWatt = -10000000,
                 NameplateMaximumActivePowerWatt = 10000000,
-                NameplateMinimumReactivePowerVars = -5000000,
-                NameplateMaximumReactivePowerVars = 5000000,
+                NameplateMinimumReactivePowerVars = -10000000,
+                NameplateMaximumReactivePowerVars = 10000000,
             };
         }
 
