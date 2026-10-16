@@ -136,7 +136,11 @@ There is one ramp layer for stack operating modes: their power control sets the 
 also when the setpoint or the available power changes outside its deadband. The `SystemOperatingModeControl` transitions
 the applied target with the ramp of the operating mode (see [Transitions](#transitions)), so `ActivePowerObjective` shows
 the new target immediately and `SetpointActivePowerActual` ramps. Override operating modes ramp their target in the power
-control because their targets are applied directly to a DER unit.
+control because their targets are applied directly to a DER unit. When a plant-wide override (no target DER unit) is
+activated, the `SystemOperatingModeControl` seeds its power controls with the current applied targets (`SetStartTarget`),
+so its ramp starts where the plant is, e.g. the `ShutdownMode` ramps the applied active and reactive power to the configured
+`ShutdownTargetActivePowerWatts` and `ShutdownTargetReactivePowerVars` (zero by default) and
+reports `IsShutdownCompleted` once both axes reached their targets.
 
 
 ## Selection and lifecycle

@@ -16,6 +16,7 @@ using paskalON.OperatingModes.Domain.Configs.OpenModes;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.EnergyResources;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives;
+using paskalON.OperatingModes.Domain.Configs.SafetyFunctions;
 using paskalON.OperatingModes.Domain.Curves;
 using paskalON.OperatingModes.Domain.OpenModes;
 using paskalON.OperatingModes.Domain.OpenModes.EnergyResources;
@@ -23,6 +24,7 @@ using paskalON.OperatingModes.Domain.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.OpenModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Overrides;
 using paskalON.OperatingModes.Domain.Ramps;
+using paskalON.OperatingModes.Domain.SafetyFunctions;
 using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Application.Factories
@@ -83,6 +85,9 @@ namespace paskalON.OperatingModes.Application.Factories
 
                 case ActivePowerModeConfig activePowerConfig:
                     return new ActivePowerMode(logger, timeProvider, publisher, systemConfig, activePowerConfig, GetMap<ActivePowerModeMap>(map), rampController, curveController);
+
+                case ShutdownModeConfig shutdownConfig:
+                    return new ShutdownMode(logger, timeProvider, publisher, systemConfig, shutdownConfig, GetMap<OperatingModeBaseMap>(map), rampController, curveController);
 
                 case MaximumActivePowerLimitModeConfig maximumActivePowerLimitConfig:
                     return new MaximumActivePowerLimitMode(logger, timeProvider, publisher, systemConfig, maximumActivePowerLimitConfig, GetMap<MaximumActivePowerLimitModeMap>(map),

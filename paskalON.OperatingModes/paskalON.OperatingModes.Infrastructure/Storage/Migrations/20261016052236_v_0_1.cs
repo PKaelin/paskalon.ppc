@@ -178,6 +178,36 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EmergencyShutdownModeConfig",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
+                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    TimeoutSeconds = table.Column<int>(type: "integer", nullable: false),
+                    RampConfigId = table.Column<int>(type: "integer", nullable: false),
+                    CurveConfigId = table.Column<int>(type: "integer", nullable: true),
+                    DeadbandSetpoint = table.Column<double>(type: "double precision", nullable: false),
+                    DeadbandAvailable = table.Column<double>(type: "double precision", nullable: false),
+                    MaximumActivePowerLimitWatt = table.Column<double>(type: "double precision", nullable: true),
+                    MinimumActivePowerLimitWatt = table.Column<double>(type: "double precision", nullable: true),
+                    MaximumReactivePowerLimitVars = table.Column<double>(type: "double precision", nullable: true),
+                    MinimumReactivePowerLimitVars = table.Column<double>(type: "double precision", nullable: true),
+                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
+                    MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass4 = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmergencyShutdownModeConfig", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FrequencyDroopModeConfig",
                 columns: table => new
                 {
@@ -547,6 +577,38 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ShutdownModeConfig",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
+                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    TimeoutSeconds = table.Column<int>(type: "integer", nullable: false),
+                    RampConfigId = table.Column<int>(type: "integer", nullable: false),
+                    CurveConfigId = table.Column<int>(type: "integer", nullable: true),
+                    DeadbandSetpoint = table.Column<double>(type: "double precision", nullable: false),
+                    DeadbandAvailable = table.Column<double>(type: "double precision", nullable: false),
+                    MaximumActivePowerLimitWatt = table.Column<double>(type: "double precision", nullable: true),
+                    MinimumActivePowerLimitWatt = table.Column<double>(type: "double precision", nullable: true),
+                    MaximumReactivePowerLimitVars = table.Column<double>(type: "double precision", nullable: true),
+                    MinimumReactivePowerLimitVars = table.Column<double>(type: "double precision", nullable: true),
+                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
+                    MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass4 = table.Column<int>(type: "integer", nullable: false),
+                    ShutdownTargetActivePowerWatts = table.Column<double>(type: "double precision", nullable: false),
+                    ShutdownTargetReactivePowerVars = table.Column<double>(type: "double precision", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShutdownModeConfig", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SystemConfig",
                 columns: table => new
                 {
@@ -793,6 +855,22 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 column: "CurveBaseConfigId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_EmergencyShutdownModeConfig_CurveConfigId",
+                table: "EmergencyShutdownModeConfig",
+                column: "CurveConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmergencyShutdownModeConfig_Name",
+                table: "EmergencyShutdownModeConfig",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmergencyShutdownModeConfig_RampConfigId",
+                table: "EmergencyShutdownModeConfig",
+                column: "RampConfigId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_FrequencyDroopModeConfig_CurveConfigId",
                 table: "FrequencyDroopModeConfig",
                 column: "CurveConfigId");
@@ -943,6 +1021,22 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 column: "RampConfigId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ShutdownModeConfig_CurveConfigId",
+                table: "ShutdownModeConfig",
+                column: "CurveConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShutdownModeConfig_Name",
+                table: "ShutdownModeConfig",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShutdownModeConfig_RampConfigId",
+                table: "ShutdownModeConfig",
+                column: "RampConfigId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_VoltageModeConfig_CurveConfigId",
                 table: "VoltageModeConfig",
                 column: "CurveConfigId");
@@ -1025,6 +1119,9 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 name: "CurvePointConfig");
 
             migrationBuilder.DropTable(
+                name: "EmergencyShutdownModeConfig");
+
+            migrationBuilder.DropTable(
                 name: "FrequencyDroopModeConfig");
 
             migrationBuilder.DropTable(
@@ -1065,6 +1162,9 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
 
             migrationBuilder.DropTable(
                 name: "ReactivePowerModeConfig");
+
+            migrationBuilder.DropTable(
+                name: "ShutdownModeConfig");
 
             migrationBuilder.DropTable(
                 name: "SystemConfig");

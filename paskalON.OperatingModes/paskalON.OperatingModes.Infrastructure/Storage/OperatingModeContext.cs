@@ -17,6 +17,7 @@ using paskalON.OperatingModes.Domain.Configs.OpenModes.EnergyResources;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
+using paskalON.OperatingModes.Domain.Configs.SafetyFunctions;
 
 namespace paskalON.OperatingModes.Infrastructure.Storage
 {
@@ -66,6 +67,10 @@ namespace paskalON.OperatingModes.Infrastructure.Storage
         public DbSet<ActivePowerFixedModeConfig> ActivePowerFixedModeConfigs { get; set; }
         // Operating open modes Voltage Reactives
         public DbSet<ReactivePowerFixedModeConfig> ReactivePowerFixedModeConfigs { get; set; }
+
+        // Operating modes safety functions
+        public DbSet<ShutdownModeConfig> ShutdownModeConfigs { get; set; }
+        public DbSet<EmergencyShutdownModeConfig> EmergencyShutdownModeConfigs { get; set; }
 
 
         /// <summary>

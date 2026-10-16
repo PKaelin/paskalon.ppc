@@ -246,6 +246,29 @@ namespace paskalON.OperatingModes.Domain.Controls
 
 
         /// <summary>
+        /// Sets the target the ramp starts from after the activation, e.g. the current applied target for a plant-wide override.
+        /// </summary>
+        /// <remarks>
+        /// Only effective while the power axis is enabling, i.e. after <see cref="Activate"/> and before the target is established.
+        /// </remarks>
+        /// <param name="startTarget">The target the ramp starts from.</param>
+        internal void SetStartTarget(TPower startTarget)
+        {
+            lock (_dataLock)
+            {
+                if (ControlState != OperatingModeState.Enabling)
+                {
+                    return;
+                }
+
+                _target = _converter.ToValue(startTarget);
+
+                _logger.LogInformation("{Name} {Axis} power starts from target {Target}.", _operatingModeName, Axis, _target);
+            }
+        }
+
+
+        /// <summary>
         /// Deactivates the power axis immediately and resets the target to zero.
         /// </summary>
         /// <remarks>

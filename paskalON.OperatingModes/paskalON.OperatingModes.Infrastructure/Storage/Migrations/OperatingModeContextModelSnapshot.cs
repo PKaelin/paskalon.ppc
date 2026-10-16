@@ -578,6 +578,26 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     b.ToTable("ReactivePowerFixedModeConfig");
                 });
 
+            modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.SafetyFunctions.EmergencyShutdownModeConfig", b =>
+                {
+                    b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
+
+                    b.ToTable("EmergencyShutdownModeConfig");
+                });
+
+            modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.SafetyFunctions.ShutdownModeConfig", b =>
+                {
+                    b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
+
+                    b.Property<double>("ShutdownTargetActivePowerWatts")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("ShutdownTargetReactivePowerVars")
+                        .HasColumnType("double precision");
+
+                    b.ToTable("ShutdownModeConfig");
+                });
+
             modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.Curves.CurvePointConfig", b =>
                 {
                     b.HasOne("paskalON.OperatingModes.Domain.Configs.Curves.CurveBaseConfig", "CurveBaseConfig")

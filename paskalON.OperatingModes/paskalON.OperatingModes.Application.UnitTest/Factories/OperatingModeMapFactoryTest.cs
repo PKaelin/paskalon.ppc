@@ -92,6 +92,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
         [DataRow("ActivePower", typeof(ActivePowerModeMap))]
         [DataRow("ReactivePower", typeof(ReactivePowerModeMap))]
         [DataRow("MaximumActivePowerLimit", typeof(MaximumActivePowerLimitModeMap))]
+        [DataRow("Shutdown", typeof(OperatingModeBaseMap))]
         public void OperatingModeMapFactoryCreateMapTypeTest(string configKind, Type expectedMapType)
         {
             OperatingModeBaseMap? map = _factory.Create(CreateConfig(configKind), _der!, _overrides!);
@@ -107,7 +108,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
         [TestMethod]
         public void OperatingModeMapFactoryCreateUnsupportedReturnsNullTest()
         {
-            OperatingModeBaseMap? map = _factory.Create(CreateConfig("Shutdown"), _der!, _overrides!);
+            OperatingModeBaseMap? map = _factory.Create(CreateConfig("EmergencyShutdown"), _der!, _overrides!);
 
             Assert.IsNull(map);
         }
@@ -255,7 +256,8 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
                 "ActivePower" => new ActivePowerModeConfig { ChangedBy = "Test", Name = "ActivePowerMode", IsActive = true, Type = PowerControlType.Bess, RampConfig = ApplicationTestData.CreateRampConfig() },
                 "ReactivePower" => new ReactivePowerModeConfig { ChangedBy = "Test", Name = "ReactivePowerMode", IsActive = true, Type = PowerControlType.Bess, RampConfig = ApplicationTestData.CreateRampConfig() },
                 "MaximumActivePowerLimit" => new MaximumActivePowerLimitModeConfig { ChangedBy = "Test", Name = "MaximumActivePowerLimitMode", IsActive = true, Type = PowerControlType.Bess, MaximumActivePowerLimitWatts = 5000000, RampConfig = ApplicationTestData.CreateRampConfig() },
-                _ => new ShutdownModeConfig { ChangedBy = "Test", Name = "ShutdownMode", IsActive = true, Type = PowerControlType.Bess, RampConfig = ApplicationTestData.CreateRampConfig() },
+                "Shutdown" => new ShutdownModeConfig { ChangedBy = "Test", Name = "ShutdownMode", IsActive = true, Type = PowerControlType.Bess, RampConfig = ApplicationTestData.CreateRampConfig() },
+                _ => new EmergencyShutdownModeConfig { ChangedBy = "Test", Name = "EmergencyShutdownMode", IsActive = true, Type = PowerControlType.Bess, RampConfig = ApplicationTestData.CreateRampConfig() },
             };
         }
 

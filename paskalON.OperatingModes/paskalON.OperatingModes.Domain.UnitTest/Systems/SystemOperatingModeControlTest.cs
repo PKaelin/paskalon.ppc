@@ -5,9 +5,12 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.OperatingModes.Domain.Abstractions;
+using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Configs.SafetyFunctions;
 using paskalON.OperatingModes.Domain.Overrides;
 using paskalON.OperatingModes.Domain.Ramps;
+using paskalON.OperatingModes.Domain.SafetyFunctions;
 using paskalON.OperatingModes.Domain.Stacks;
 using paskalON.OperatingModes.Domain.Systems;
 using paskalON.OperatingModes.Domain.Transitions;
@@ -649,6 +652,40 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             Assert.AreEqual(2000000, _control!.SetpointActivePowerActual.Watts);
             Assert.AreEqual(TransitionKind.ModeRemoved, _control!.ActivePowerTransition.Kind);
             transitionRamp.Verify(controller => controller.Start(-3000000, 0), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms a shutdown ramps the current applied active power target to zero and the applied target follows immediately.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlShutdownRampsAppliedTargetToZeroTest()
+        {
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", 5000000), 1);
+            Mock<IRampController> shutdownRamp = new Mock<IRampController>();
+            shutdownRamp.Setup(controller => controller.Calculate()).Returns(2500000);
+            shutdownRamp.Setup(controller => controller.ShallowCopy()).Returns(() => new Mock<IRampController>().Object);
+            ShutdownModeConfig config = new ShutdownModeConfig
+            {
+                ChangedBy = "Test",
+                Name = "ShutdownMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                DeadbandSetpoint = OperatingModeTestData.Deadband,
+                DeadbandAvailable = OperatingModeTestData.Deadband,
+                RampConfig = OperatingModeTestData.CreateRampConfig()
+            };
+            ShutdownMode shutdown = new ShutdownMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, OperatingModeTestData.CreateSystemConfig(),
+                config, OperatingModeTestData.CreateMap(), shutdownRamp.Object);
+            CalculateSettled();
+            _overrides!.Add(shutdown);
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(2500000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(5000000, _control!.ActivePowerObjective.Watts);
+            Assert.IsFalse(shutdown.IsShutdownCompleted);
+            shutdownRamp.Verify(controller => controller.Start(5000000, 0), Times.Once);
         }
 
 

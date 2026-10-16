@@ -71,15 +71,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
         public void Initialize()
         {
             _timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 10, 15, 8, 0, 0, TimeSpan.Zero));
-
-            _systemConfig = new SystemConfig
-            {
-                ChangedBy = "Test",
-                Type = PowerControlType.Bess,
-                ReferenceFrequency = 50,
-                NameplateMinimumActivePowerWatt = -10000000,
-                NameplateMaximumActivePowerWatt = 10000000,
-            };
+            _systemConfig = DomainTestData.CreateSystemConfig();
 
             ActivePowerFixedModeConfig fixedConfig = new ActivePowerFixedModeConfig
             {

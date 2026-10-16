@@ -12,7 +12,7 @@ using paskalON.OperatingModes.Infrastructure.Storage;
 namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(OperatingModeContext))]
-    [Migration("20261005213601_v_0_1")]
+    [Migration("20261016052236_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -579,6 +579,26 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
 
                     b.ToTable("ReactivePowerFixedModeConfig");
+                });
+
+            modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.SafetyFunctions.EmergencyShutdownModeConfig", b =>
+                {
+                    b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
+
+                    b.ToTable("EmergencyShutdownModeConfig");
+                });
+
+            modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.SafetyFunctions.ShutdownModeConfig", b =>
+                {
+                    b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
+
+                    b.Property<double>("ShutdownTargetActivePowerWatts")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("ShutdownTargetReactivePowerVars")
+                        .HasColumnType("double precision");
+
+                    b.ToTable("ShutdownModeConfig");
                 });
 
             modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.Curves.CurvePointConfig", b =>

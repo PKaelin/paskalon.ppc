@@ -368,6 +368,13 @@ namespace paskalON.OperatingModes.Domain.Systems
                 {
                     Activate(change.OperatingMode);
 
+                    // A plant-wide override takes over from the current applied targets, e.g. a shutdown ramps them to zero
+                    if (change.OperatingMode.TargetDerUnit is null)
+                    {
+                        change.OperatingMode.ActiveControl?.SetStartTarget(new ActivePower(GetTransitionOrigin(PowerAxis.Active)));
+                        change.OperatingMode.ReactiveControl?.SetStartTarget(new ReactivePower(GetTransitionOrigin(PowerAxis.Reactive)));
+                    }
+
                     continue;
                 }
 

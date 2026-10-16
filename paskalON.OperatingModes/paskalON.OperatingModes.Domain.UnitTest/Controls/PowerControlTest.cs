@@ -418,6 +418,43 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Controls
 
 
         /// <summary>
+        /// Confirms the ramp starts from the start target set after the activation, e.g. the applied target for a shutdown.
+        /// </summary>
+        [TestMethod]
+        public void PowerControlSetStartTargetRampsFromStartTargetTest()
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            rampController.Setup(controller => controller.Calculate()).Returns(2500000);
+            PowerControl<ActivePower> control = CreateControl(rampController);
+            control.Activate(PowerControlStart.RampFromCurrentTarget);
+            control.SetStartTarget(new ActivePower(5000000));
+
+            ActivePower target = control.Calculate(new ActivePower(0), new ActivePower(0));
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, control.State);
+            Assert.AreEqual(2500000, target.Watts);
+            rampController.Verify(controller => controller.Start(5000000, 0), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms the start target is ignored once the target is established.
+        /// </summary>
+        [TestMethod]
+        public void PowerControlSetStartTargetIgnoredWhenEstablishedTest()
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            PowerControl<ActivePower> control = CreateControl(rampController);
+            control.Activate(PowerControlStart.AtTargetSetpoint);
+            control.Calculate(new ActivePower(1000000), new ActivePower(8000000));
+
+            control.SetStartTarget(new ActivePower(5000000));
+
+            Assert.AreEqual(1000000, control.Target.Watts);
+        }
+
+
+        /// <summary>
         /// Creates a deactivated active power control.
         /// </summary>
         /// <param name="rampController">The mocked ramp controller.</param>

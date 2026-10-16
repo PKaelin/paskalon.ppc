@@ -15,6 +15,7 @@ using paskalON.OperatingModes.Domain.Configs.OpenModes;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.EnergyResources;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives;
+using paskalON.OperatingModes.Domain.Configs.SafetyFunctions;
 using paskalON.OperatingModes.Domain.OpenModes;
 using paskalON.OperatingModes.Domain.OpenModes.EnergyResources;
 using paskalON.OperatingModes.Domain.OpenModes.FrequencyActives;
@@ -73,6 +74,13 @@ namespace paskalON.OperatingModes.Application.Factories
                         AvailableActivePower = () => GetAvailableActivePower(GetDispatchableUnits(der, overrides)),
                         AvailableReactivePower = () => GetAvailableReactivePower(GetDispatchableUnits(der, overrides)),
                         ActivePowerAtPoi = () => GetSystemActivePower(der)
+                    };
+
+                case ShutdownModeConfig:
+                    return new OperatingModeBaseMap
+                    {
+                        AvailableActivePower = () => GetAvailableActivePower(GetDispatchableUnits(der, overrides)),
+                        AvailableReactivePower = () => GetAvailableReactivePower(GetDispatchableUnits(der, overrides))
                     };
 
                 case MaximumActivePowerLimitModeConfig:
