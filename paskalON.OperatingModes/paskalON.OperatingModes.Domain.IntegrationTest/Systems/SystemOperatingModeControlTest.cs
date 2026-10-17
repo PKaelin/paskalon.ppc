@@ -26,7 +26,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
     /// Integration tests of the transitions of <see cref="SystemOperatingModeControl"/> with real operating modes, ramp controllers and the stack manager.
     /// </summary>
     [TestClass]
-    public class SystemOperatingModeControlTest
+    public sealed class SystemOperatingModeControlTest
     {
         /// <summary>
         /// Tolerance for ramp values in Watts.

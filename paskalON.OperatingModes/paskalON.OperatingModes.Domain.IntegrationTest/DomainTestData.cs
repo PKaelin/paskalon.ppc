@@ -6,9 +6,12 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Application.Ramps;
+using paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
 using paskalON.OperatingModes.Domain.Configs.SafetyFunctions;
+using paskalON.OperatingModes.Domain.IntegrationTest.DummyModes;
 using paskalON.OperatingModes.Domain.SafetyFunctions;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
@@ -71,6 +74,82 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest
                 CreateSystemConfig(), overrideModeConfig, overrideMap, new RampController(NullLogger.Instance, timeProvider, overrideRamp));
 
             return overrideMode;
+        }
+
+
+        public static MaximumActivePowerLimitMode CreateActivePowerLimitingMode(TimeProvider timeProvider, double limitMegaWatts, Func<ActivePower?> activePowerAtPoiProvider)
+        {
+            RampRateConfig limitingRamp = new RampRateConfig
+            {
+                ChangedBy = "Test",
+                RampUpRatePerSecond = ActivePower.FromMega(1).Watts,
+                RampDownRatePerSecond = ActivePower.FromMega(1).Watts
+            };
+
+            MaximumActivePowerLimitModeConfig limitConfig = new MaximumActivePowerLimitModeConfig
+            {
+                ChangedBy = "Test",
+                Name = "MaximumActivePowerLimitMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                MaximumActivePowerLimitWatts = ActivePower.FromMega(limitMegaWatts).Watts,
+                RampConfig = limitingRamp
+            };
+
+            MaximumActivePowerLimitModeMap limitingMap = new MaximumActivePowerLimitModeMap
+            {
+                AvailableActivePower = () => ActivePower.FromMega(10),
+                AvailableReactivePower = () => null,
+                ActivePowerAtPoi = activePowerAtPoiProvider
+            };
+
+            MaximumActivePowerLimitMode limitMode = new MaximumActivePowerLimitMode(
+                NullLogger.Instance,
+                timeProvider,
+                new Mock<IMetricsPublisher>().Object,
+                CreateSystemConfig(),
+                limitConfig,
+                limitingMap,
+                new RampController(NullLogger.Instance, timeProvider, limitingRamp));
+
+            return limitMode;
+        }
+
+
+        /// <summary>
+        /// Creates a dummy additive active mode with a 500 kW per second ramp and 10 MW available active power.
+        /// </summary>
+        /// <param name="timeProvider">The time provider to use for the dummy additive active mode.</param>
+        /// <param name="deltaMegaWatts">The active power delta in MW added to the base active power.</param>
+        /// <returns>The created dummy additive active mode.</returns>
+        public static DummyAdditiveActiveMode CreateDummyAdditiveActiveMode(TimeProvider timeProvider, double deltaMegaWatts)
+        {
+            RampRateConfig additiveRamp = new RampRateConfig
+            {
+                ChangedBy = "Test",
+                RampUpRatePerSecond = ActivePower.FromKilo(500).Watts,
+                RampDownRatePerSecond = ActivePower.FromKilo(500).Watts
+            };
+
+            DummyAdditiveActiveModeConfig additiveConfig = new DummyAdditiveActiveModeConfig
+            {
+                ChangedBy = "Test",
+                Name = "DummyAdditiveActiveMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                DeadbandSetpoint = 1000,
+                DeadbandAvailable = 1000,
+                RampConfig = additiveRamp
+            };
+
+            OperatingModeBaseMap additiveMap = new OperatingModeBaseMap
+            {
+                AvailableActivePower = () => ActivePower.FromMega(10),
+                AvailableReactivePower = () => null
+            };
+
+            return new DummyAdditiveActiveMode(NullLogger.Instance, timeProvider, new Mock<IMetricsPublisher>().Object, CreateSystemConfig(), additiveConfig,
+                additiveMap, new RampController(NullLogger.Instance, timeProvider, additiveRamp), ActivePower.FromMega(deltaMegaWatts));
         }
     }
 }

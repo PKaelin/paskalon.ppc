@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="paskalON.OperatingModes.Domain.UnitTest" />
+    <InternalsVisibleTo Include="paskalON.OperatingModes.Domain.IntegrationTest" />
   </ItemGroup>
 
   <ItemGroup>
