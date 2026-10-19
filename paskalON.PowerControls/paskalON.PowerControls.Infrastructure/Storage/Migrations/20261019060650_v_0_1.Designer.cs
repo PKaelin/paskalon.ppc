@@ -12,7 +12,7 @@ using paskalON.PowerControls.Infrastructure.Storage;
 namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(PowerControlContext))]
-    [Migration("20261005213230_v_0_1")]
+    [Migration("20261019060650_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -139,6 +139,12 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("SubscriberTopicCircuitPowerMeterDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicCurrentDerUnitSetpoint")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicCurrentSetpoint")
                         .HasColumnType("text");
 
                     b.Property<string>("SubscriberTopicExternalPowerMeterCore")

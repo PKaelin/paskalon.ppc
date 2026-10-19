@@ -55,6 +55,18 @@ namespace paskalON.PowerControls.Domain.Configs
 
 
         /// <summary>
+        /// Subscriber topic for current system setpoints used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicCurrentSetpoint { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for DER unit setpoints used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicCurrentDerUnitSetpoint { get; set; }
+
+
+        /// <summary>
         /// Subscriber topic for power conversion system core used for the message subscriber.
         /// </summary>
         public string? SubscriberTopicPcsCore { get; set; }

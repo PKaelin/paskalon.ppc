@@ -138,6 +138,12 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     b.Property<string>("SubscriberTopicCircuitPowerMeterDetail")
                         .HasColumnType("text");
 
+                    b.Property<string>("SubscriberTopicCurrentDerUnitSetpoint")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicCurrentSetpoint")
+                        .HasColumnType("text");
+
                     b.Property<string>("SubscriberTopicExternalPowerMeterCore")
                         .HasColumnType("text");
 

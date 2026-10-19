@@ -14,12 +14,14 @@ using paskalON.Messaging;
 using paskalON.Messaging.Redis;
 using paskalON.PowerControls.Application;
 using paskalON.PowerControls.Application.Publishers;
+using paskalON.PowerControls.Application.Subscribers;
 using paskalON.PowerControls.Domain.Configs;
 using paskalON.PowerControls.Domain.Ders;
 using paskalON.PowerControls.Domain.Systems;
 using paskalON.PowerControls.Infrastructure.Storage;
 using paskalON.PowerControls.Infrastructure.Storage.Repositories;
 using paskalON.PowerControls.Service.Publishers;
+using paskalON.PowerControls.Service.Subscribers;
 using paskalON.Telemetry;
 using paskalON.Telemetry.Factories;
 using StackExchange.Redis;
@@ -86,6 +88,9 @@ try
     msgOptions.AbortOnConnectFail = false;
     builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(msgOptions));
     builder.Services.AddSingleton<IMessagePublisher, RedisMessagePublisher>();
+    builder.Services.AddSingleton<IMessageSubscriber, RedisMessageSubscriber>();
+    builder.Services.AddSingleton<IPowerSetpointSubscriber, PowerSetpointSubscriber>();
+    builder.Services.AddHostedService<PowerSetpointSubscriberService>();
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
     builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
     builder.Services.AddSingleton<MetricsPublisherService>();
@@ -97,7 +102,6 @@ try
         Timeout = TimeSpan.FromSeconds(10)
     });
     builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(sp.GetRequiredKeyedService<HttpClient>(nameof(DeviceServer))));
-    builder.Services.AddSingleton<IMessageSubscriber, RedisMessageSubscriber>();
     builder.Services.AddSingleton<IDeviceClient, DeviceClient>();
     builder.Services.AddSingleton(TimeProvider.System);
     builder.Services.AddSingleton(new DerUnitTargetPublisherOptions());
@@ -168,6 +172,11 @@ try
     {
         IRepository<PowerControlContext, SystemConfig> repository = scope.ServiceProvider.GetRequiredService<IRepository<PowerControlContext, SystemConfig>>();
         SystemConfig config = (await repository.GetAsync(0, 1, o => o.Id)).Single();
+
+        // Subscribe to the setpoint targets, they are applied once the application starts running
+        IPowerSetpointSubscriber powerSetpointSubscriber = app.Services.GetRequiredService<IPowerSetpointSubscriber>();
+        powerSetpointSubscriber.Subscribe(config.SubscriberTopicCurrentSetpoint);
+
         // Load and initialize device client
         SubscriberTopic topics = GetSubscriberTopic(config);
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
