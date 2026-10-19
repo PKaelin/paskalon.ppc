@@ -46,6 +46,8 @@ namespace paskalON.DemoSuperSimpleBattery.PowerControls.Data
                 Type = PowerControlType.Bess,
                 MetricsIntervalMilliseconds = 5000,
                 PublisherTopicPowerTarget = "ppc:pc:targets",
+                SubscriberTopicCurrentSetpoint = "ppc:om:setpoints",
+                SubscriberTopicCurrentDerUnitSetpoint = "ppc:om:setpoints:unit",
                 SubscriberTopicPcsCore = "ppc:device:pcs:core",
                 SubscriberTopicPcsDetail = "ppc:device:pcs:detail",
                 SubscriberTopicBatteryBankCore = "ppc:device:bb:core",
