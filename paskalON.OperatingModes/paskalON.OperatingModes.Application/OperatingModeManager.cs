@@ -12,6 +12,7 @@ using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Overrides;
 using paskalON.OperatingModes.Domain.Systems;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
+using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
 using paskalON.Telemetry.Factories;
 
@@ -71,7 +72,7 @@ namespace paskalON.OperatingModes.Application
 
 
         /// <inheritdoc/>
-        public ISystemOperatingModeControl? SystemOperatingModeControl { get; private set; }
+        public ISystemOperatingModeControl SystemOperatingModeControl { get; private set; } = null!;
 
 
         /// <summary>
@@ -132,6 +133,13 @@ namespace paskalON.OperatingModes.Application
                 _operatingModeMapFactory.CreateSystemMap(_deviceClient.Der), systemModeMetrics, setpointsPublisher);
             MetricsPublishers.Add(systemModeMetrics);
             SystemOperatingModeControl.State = SystemState.Ready;
+        }
+
+
+        /// <inheritdoc/>
+        public async Task SetSystemPowerSetpoints(ActivePower activePower, ReactivePower reactivePower)
+        {
+            SystemOperatingModeControl.UpdateSetpoints(activePower, reactivePower);
         }
     }
 }

@@ -7,6 +7,7 @@ using paskalON.OperatingModes.Application.Stacks;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Systems;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
+using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
 
 namespace paskalON.OperatingModes.Application
@@ -48,5 +49,14 @@ namespace paskalON.OperatingModes.Application
         /// <param name="setpointsPublisher">Publisher of the applied setpoints of the system operating mode control.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         Task Initialize(IOperatingModeRepository repository, SystemConfig systemConfig, ISetpointsPublisher setpointsPublisher);
+
+
+        /// <summary>
+        /// Updates the active and reactive power for the operating modes.
+        /// </summary>
+        /// <param name="activePower">The active power to set.</param>
+        /// <param name="reactivePower">The reactive power to set.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        Task SetSystemPowerSetpoints(ActivePower activePower, ReactivePower reactivePower);
     }
 }
