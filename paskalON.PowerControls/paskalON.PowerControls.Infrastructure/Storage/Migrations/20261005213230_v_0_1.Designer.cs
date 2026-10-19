@@ -117,6 +117,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     b.Property<int>("MetricsIntervalMilliseconds")
                         .HasColumnType("integer");
 
+                    b.Property<string>("PublisherTopicPowerTarget")
+                        .HasColumnType("text");
+
                     b.Property<int>("StartupDelayForDevices")
                         .HasColumnType("integer");
 

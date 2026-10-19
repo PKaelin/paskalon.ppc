@@ -4,15 +4,18 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.Devices.Client;
+using paskalON.Messaging;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.PowerControls.Domain.Ders;
+using paskalON.PowerControls.Dto.Powers;
+using System.Text.Json;
 using System.Threading.Channels;
 
-namespace paskalON.PowerControls.Application.Dispatchers
+namespace paskalON.PowerControls.Application.Publishers
 {
     /// <summary>
-    /// Delivers the power targets of a single DER unit to the device service.
-    /// The worker is notified about new targets and always sends the latest targets of the unit,
+    /// Delivers the power targets of a single DER unit by publishing them as <see cref="CurrentTargetsDto"/> to a message broker.
+    /// The worker is notified about new targets and always publishes the latest targets of the unit,
     /// so targets that arrive while the unit is starting are merged into one delivery.
     /// A failed delivery is retried until it succeeds or a newer notification replaces it.
     /// </summary>
@@ -37,9 +40,21 @@ namespace paskalON.PowerControls.Application.Dispatchers
 
 
         /// <summary>
+        /// Interface for publishing to message brokers.
+        /// </summary>
+        private readonly IMessagePublisher _messagePublisher;
+
+
+        /// <summary>
+        /// Topic to publish the power targets to.
+        /// </summary>
+        private readonly string _topic;
+
+
+        /// <summary>
         /// Timing options for starting, polling and retrying.
         /// </summary>
-        private readonly DerUnitTargetDispatcherOptions _options;
+        private readonly DerUnitTargetPublisherOptions _options;
 
 
         /// <summary>
@@ -65,20 +80,26 @@ namespace paskalON.PowerControls.Application.Dispatchers
         /// <param name="logger">Logger for application logging and diagnostics.</param>
         /// <param name="unit">DER unit whose targets are delivered.</param>
         /// <param name="deviceServer">Device server to send commands to the device service.</param>
+        /// <param name="messagePublisher">Interface for publishing to message brokers.</param>
+        /// <param name="topic">Topic to publish the power targets to.</param>
         /// <param name="options">Timing options for starting, polling and retrying.</param>
         /// <param name="timeProvider">Time provider for delays and timeouts.</param>
-        public DerUnitTargetWorker(ILogger logger, IDerUnitPowerControl unit, IDeviceServer deviceServer,
-            DerUnitTargetDispatcherOptions options, TimeProvider timeProvider)
+        public DerUnitTargetWorker(ILogger logger, IDerUnitPowerControl unit, IDeviceServer deviceServer, IMessagePublisher messagePublisher,
+            string topic, DerUnitTargetPublisherOptions options, TimeProvider timeProvider)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(unit);
             ArgumentNullException.ThrowIfNull(deviceServer);
+            ArgumentNullException.ThrowIfNull(messagePublisher);
+            ArgumentException.ThrowIfNullOrWhiteSpace(topic);
             ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(timeProvider);
 
             _logger = logger;
             _unit = unit;
             _deviceServer = deviceServer;
+            _messagePublisher = messagePublisher;
+            _topic = topic;
             _options = options;
             _timeProvider = timeProvider;
         }
@@ -134,7 +155,7 @@ namespace paskalON.PowerControls.Application.Dispatchers
 
         /// <summary>
         /// Delivers the latest targets of the unit. A stopped or standby unit is started first
-        /// and the targets are sent once it reached the started state. Units in maintenance are skipped.
+        /// and the targets are published once it reached the started state. Units in maintenance are skipped.
         /// </summary>
         /// <param name="cancellationToken">Token to cancel the delivery.</param>
         /// <returns>True if the delivery is completed, false if it failed and has to be retried.</returns>
@@ -146,7 +167,7 @@ namespace paskalON.PowerControls.Application.Dispatchers
 
                 if (state is DerState.Maintenance)
                 {
-                    _logger.LogWarning("PCS {PcsDeviceId} is in maintenance, targets are not sent", _unit.PcsDeviceId);
+                    _logger.LogWarning("PCS {PcsDeviceId} is in maintenance, targets are not published", _unit.PcsDeviceId);
 
                     return true;
                 }
@@ -163,16 +184,23 @@ namespace paskalON.PowerControls.Application.Dispatchers
 
                 ActivePower activePower = _unit.TargetActivePower;
                 ReactivePower reactivePower = _unit.TargetReactivePower;
-                await _deviceServer.SetPcsPowerTarget(_unit.PcsDeviceId, activePower.Watts, reactivePower.VoltAmperesReactive, cancellationToken);
+                CurrentTargetsDto dto = new CurrentTargetsDto
+                {
+                    DeviceId = _unit.PcsDeviceId,
+                    ActivePowerWatt = activePower.Watts,
+                    ReactivePowerVar = reactivePower.VoltAmperesReactive
+                };
+                string json = JsonSerializer.Serialize(dto);
+                await _messagePublisher.PublishAsync(_topic, json);
 
-                _logger.LogDebug("Sent targets to PCS {PcsDeviceId}. Active Power {ActivePower}, Reactive Power {ReactivePower}",
-                    _unit.PcsDeviceId, activePower.Watts, reactivePower.VoltAmperesReactive);
+                _logger.LogDebug("Published targets of PCS {PcsDeviceId} to topic {Topic}. Active Power {ActivePower}, Reactive Power {ReactivePower}",
+                    _unit.PcsDeviceId, _topic, activePower.Watts, reactivePower.VoltAmperesReactive);
 
                 return true;
             }
             catch (Exception ex) when (cancellationToken.IsCancellationRequested is false)
             {
-                _logger.LogError(ex, "Sending targets to PCS {PcsDeviceId} failed", _unit.PcsDeviceId);
+                _logger.LogError(ex, "Publishing targets of PCS {PcsDeviceId} to topic {Topic} failed", _unit.PcsDeviceId, _topic);
 
                 return false;
             }

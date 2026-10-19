@@ -13,7 +13,7 @@ using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
 using paskalON.PowerControls.Application;
-using paskalON.PowerControls.Application.Dispatchers;
+using paskalON.PowerControls.Application.Publishers;
 using paskalON.PowerControls.Domain.Configs;
 using paskalON.PowerControls.Domain.Ders;
 using paskalON.PowerControls.Domain.Systems;
@@ -85,6 +85,7 @@ try
     ConfigurationOptions msgOptions = ConfigurationOptions.Parse(msgConnectionString);
     msgOptions.AbortOnConnectFail = false;
     builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(msgOptions));
+    builder.Services.AddSingleton<IMessagePublisher, RedisMessagePublisher>();
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
     builder.Services.AddTransient<IMetricsPublisher, MetricsPublisher>();
     builder.Services.AddSingleton<MetricsPublisherService>();
@@ -99,8 +100,8 @@ try
     builder.Services.AddSingleton<IMessageSubscriber, RedisMessageSubscriber>();
     builder.Services.AddSingleton<IDeviceClient, DeviceClient>();
     builder.Services.AddSingleton(TimeProvider.System);
-    builder.Services.AddSingleton(new DerUnitTargetDispatcherOptions());
-    builder.Services.AddSingleton<IDerUnitTargetDispatcher, DerUnitTargetDispatcher>();
+    builder.Services.AddSingleton(new DerUnitTargetPublisherOptions());
+    builder.Services.AddSingleton<IDerUnitTargetPublisher, DerUnitTargetPublisher>();
 
     builder.Services.AddSingleton<IPowerControlManager, PowerControlManager>();
 
@@ -171,6 +172,9 @@ try
         SubscriberTopic topics = GetSubscriberTopic(config);
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
         await deviceClient.Initialize(topics);
+        // Initialize target publisher with the configured topics, before the manager registers the DER units
+        IDerUnitTargetPublisher targetPublisher = app.Services.GetRequiredService<IDerUnitTargetPublisher>();
+        targetPublisher.Initialize(PublisherTopic.Create(config));
         // Load and initialize manager
         IPowerControlRepository powerControlRepository = scope.ServiceProvider.GetRequiredService<IPowerControlRepository>();
         await manager.Initialize(powerControlRepository);

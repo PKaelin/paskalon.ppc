@@ -6,19 +6,23 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
 using Moq;
 using paskalON.Devices.Client;
+using paskalON.Messaging;
 using paskalON.PhysicalUnits.Electricals.Powers;
-using paskalON.PowerControls.Application.Dispatchers;
+using paskalON.PowerControls.Application.Publishers;
 using paskalON.PowerControls.Domain.Ders;
+using paskalON.PowerControls.Dto.Powers;
+using System.Text.Json;
 
-namespace paskalON.PowerControls.Application.UnitTest.Dispatchers
+namespace paskalON.PowerControls.Application.UnitTest.Publishers
 {
     [TestClass]
     public sealed class DerUnitTargetWorkerTest
     {
         private const int PcsDeviceId = 7;
+        private const string PowerTargetTopic = "ppc:pc:targets";
         private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(10);
 
-        private readonly DerUnitTargetDispatcherOptions _options = new DerUnitTargetDispatcherOptions
+        private readonly DerUnitTargetPublisherOptions _options = new DerUnitTargetPublisherOptions
         {
             StartTimeout = TimeSpan.FromSeconds(30),
             StatePollInterval = TimeSpan.FromMilliseconds(500),
@@ -27,6 +31,7 @@ namespace paskalON.PowerControls.Application.UnitTest.Dispatchers
 
         private Mock<IDerUnitPowerControl> _unit = null!;
         private Mock<IDeviceServer> _deviceServer = null!;
+        private Mock<IMessagePublisher> _messagePublisher = null!;
         private FakeTimeProvider _timeProvider = null!;
 
 
@@ -38,28 +43,56 @@ namespace paskalON.PowerControls.Application.UnitTest.Dispatchers
             _unit.SetupGet(u => u.TargetActivePower).Returns(new ActivePower(25000));
             _unit.SetupGet(u => u.TargetReactivePower).Returns(new ReactivePower(-4000));
             _deviceServer = new Mock<IDeviceServer>();
+            _messagePublisher = new Mock<IMessagePublisher>();
+            _messagePublisher.Setup(p => p.PublishAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
             _timeProvider = new FakeTimeProvider();
         }
 
 
         [TestMethod]
-        public async Task DeliverStartedUnitSendsTargetsWithoutStartTest()
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        public void DerUnitTargetWorkerInvalidTopicTest(string? topic)
         {
+            Assert.Throws<ArgumentException>(() => new DerUnitTargetWorker(NullLogger.Instance, _unit.Object, _deviceServer.Object,
+                _messagePublisher.Object, topic!, _options, _timeProvider));
+        }
+
+
+        [TestMethod]
+        public void DerUnitTargetWorkerNullMessagePublisherTest()
+        {
+            Assert.ThrowsExactly<ArgumentNullException>(() => new DerUnitTargetWorker(NullLogger.Instance, _unit.Object, _deviceServer.Object,
+                null!, PowerTargetTopic, _options, _timeProvider));
+        }
+
+
+        [TestMethod]
+        public async Task DeliverStartedUnitPublishesTargetsWithoutStartTest()
+        {
+            string? publishedJson = null;
             _unit.SetupGet(u => u.State).Returns(DerState.Started);
+            _messagePublisher.Setup(p => p.PublishAsync(PowerTargetTopic, It.IsAny<string>()))
+                .Callback<string, string>((topic, json) => publishedJson = json)
+                .Returns(Task.CompletedTask);
             DerUnitTargetWorker worker = CreateWorker();
 
             bool isDelivered = await worker.DeliverAsync(CancellationToken.None);
 
             Assert.IsTrue(isDelivered);
             _deviceServer.Verify(s => s.StartPcs(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
-            _deviceServer.Verify(s => s.SetPcsPowerTarget(PcsDeviceId, 25000, -4000, It.IsAny<CancellationToken>()), Times.Once);
+            _messagePublisher.Verify(p => p.PublishAsync(PowerTargetTopic, It.IsAny<string>()), Times.Once);
+            Assert.IsNotNull(publishedJson);
+            CurrentTargetsDto? dto = JsonSerializer.Deserialize<CurrentTargetsDto>(publishedJson);
+            Assert.AreEqual(new CurrentTargetsDto { DeviceId = PcsDeviceId, ActivePowerWatt = 25000, ReactivePowerVar = -4000 }, dto);
         }
 
 
         [TestMethod]
         [DataRow(DerState.Stopped)]
         [DataRow(DerState.Standby)]
-        public async Task DeliverNotStartedUnitStartsAndSendsTargetsWhenStartedTest(DerState initialState)
+        public async Task DeliverNotStartedUnitStartsAndPublishesTargetsWhenStartedTest(DerState initialState)
         {
             _unit.SetupSequence(u => u.State)
                 .Returns(initialState)
@@ -68,13 +101,13 @@ namespace paskalON.PowerControls.Application.UnitTest.Dispatchers
             DerUnitTargetWorker worker = CreateWorker();
 
             Task<bool> delivery = worker.DeliverAsync(CancellationToken.None);
-            _deviceServer.Verify(s => s.SetPcsPowerTarget(It.IsAny<int>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Never);
+            _messagePublisher.Verify(p => p.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             _timeProvider.Advance(_options.StatePollInterval);
             bool isDelivered = await delivery.WaitAsync(TestTimeout);
 
             Assert.IsTrue(isDelivered);
             _deviceServer.Verify(s => s.StartPcs(PcsDeviceId, It.IsAny<CancellationToken>()), Times.Once);
-            _deviceServer.Verify(s => s.SetPcsPowerTarget(PcsDeviceId, 25000, -4000, It.IsAny<CancellationToken>()), Times.Once);
+            _messagePublisher.Verify(p => p.PublishAsync(PowerTargetTopic, It.IsAny<string>()), Times.Once);
         }
 
 
@@ -88,14 +121,14 @@ namespace paskalON.PowerControls.Application.UnitTest.Dispatchers
 
             Assert.IsTrue(isDelivered);
             _deviceServer.Verify(s => s.StartPcs(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
-            _deviceServer.Verify(s => s.SetPcsPowerTarget(It.IsAny<int>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Never);
+            _messagePublisher.Verify(p => p.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
 
         [TestMethod]
-        public async Task DeliverStartTimeoutReturnsFalseWithoutSendingTargetsTest()
+        public async Task DeliverStartTimeoutReturnsFalseWithoutPublishingTargetsTest()
         {
-            DerUnitTargetDispatcherOptions options = new DerUnitTargetDispatcherOptions
+            DerUnitTargetPublisherOptions options = new DerUnitTargetPublisherOptions
             {
                 StartTimeout = TimeSpan.FromSeconds(30),
                 StatePollInterval = TimeSpan.FromSeconds(30)
@@ -110,16 +143,16 @@ namespace paskalON.PowerControls.Application.UnitTest.Dispatchers
 
             Assert.IsFalse(isDelivered);
             _deviceServer.Verify(s => s.StartPcs(PcsDeviceId, It.IsAny<CancellationToken>()), Times.Once);
-            _deviceServer.Verify(s => s.SetPcsPowerTarget(It.IsAny<int>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Never);
+            _messagePublisher.Verify(p => p.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
 
         [TestMethod]
-        public async Task DeliverDeviceServerFailureReturnsFalseTest()
+        public async Task DeliverMessagePublisherFailureReturnsFalseTest()
         {
             _unit.SetupGet(u => u.State).Returns(DerState.Started);
-            _deviceServer.Setup(s => s.SetPcsPowerTarget(PcsDeviceId, 25000, -4000, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new HttpRequestException("Device service unavailable"));
+            _messagePublisher.Setup(p => p.PublishAsync(PowerTargetTopic, It.IsAny<string>()))
+                .ThrowsAsync(new InvalidOperationException("Message broker unavailable"));
             DerUnitTargetWorker worker = CreateWorker();
 
             bool isDelivered = await worker.DeliverAsync(CancellationToken.None);
@@ -148,8 +181,8 @@ namespace paskalON.PowerControls.Application.UnitTest.Dispatchers
             using CancellationTokenSource cancellation = new CancellationTokenSource();
             TaskCompletionSource retried = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             _unit.SetupGet(u => u.State).Returns(DerState.Started);
-            _deviceServer.SetupSequence(s => s.SetPcsPowerTarget(PcsDeviceId, 25000, -4000, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new HttpRequestException("Device service unavailable"))
+            _messagePublisher.SetupSequence(p => p.PublishAsync(PowerTargetTopic, It.IsAny<string>()))
+                .ThrowsAsync(new InvalidOperationException("Message broker unavailable"))
                 .Returns(() =>
                 {
                     retried.TrySetResult();
@@ -165,7 +198,7 @@ namespace paskalON.PowerControls.Application.UnitTest.Dispatchers
             await cancellation.CancelAsync();
             await run.WaitAsync(TestTimeout);
 
-            _deviceServer.Verify(s => s.SetPcsPowerTarget(PcsDeviceId, 25000, -4000, It.IsAny<CancellationToken>()), Times.Exactly(2));
+            _messagePublisher.Verify(p => p.PublishAsync(PowerTargetTopic, It.IsAny<string>()), Times.Exactly(2));
         }
 
 
@@ -180,13 +213,14 @@ namespace paskalON.PowerControls.Application.UnitTest.Dispatchers
             await run.WaitAsync(TestTimeout);
 
             Assert.IsTrue(run.IsCompletedSuccessfully);
-            _deviceServer.Verify(s => s.SetPcsPowerTarget(It.IsAny<int>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Never);
+            _messagePublisher.Verify(p => p.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
 
-        private DerUnitTargetWorker CreateWorker(DerUnitTargetDispatcherOptions? options = null)
+        private DerUnitTargetWorker CreateWorker(DerUnitTargetPublisherOptions? options = null)
         {
-            return new DerUnitTargetWorker(NullLogger.Instance, _unit.Object, _deviceServer.Object, options ?? _options, _timeProvider);
+            return new DerUnitTargetWorker(NullLogger.Instance, _unit.Object, _deviceServer.Object, _messagePublisher.Object, PowerTargetTopic,
+                options ?? _options, _timeProvider);
         }
     }
 }

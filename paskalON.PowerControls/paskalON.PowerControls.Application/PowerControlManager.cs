@@ -15,7 +15,7 @@ using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.PhysicalUnits.Electricals.Powers;
-using paskalON.PowerControls.Application.Dispatchers;
+using paskalON.PowerControls.Application.Publishers;
 using paskalON.PowerControls.Domain.Configs.Ders;
 using paskalON.PowerControls.Domain.Configs.Systems;
 using paskalON.PowerControls.Domain.Ders;
@@ -52,9 +52,9 @@ namespace paskalON.PowerControls.Application
 
 
         /// <summary>
-        /// Dispatcher to deliver the DER unit power targets to the device service.
+        /// Publisher to publish the DER unit power targets to the message broker.
         /// </summary>
-        private readonly IDerUnitTargetDispatcher _targetDispatcher;
+        private readonly IDerUnitTargetPublisher _targetPublisher;
 
 
         /// <summary>
@@ -138,19 +138,19 @@ namespace paskalON.PowerControls.Application
         /// <param name="logger">The logger instance.</param>
         /// <param name="deviceClient">The device client instance.</param>
         /// <param name="metricsPublisherFactory">The metrics publisher factory instance.</param>
-        /// <param name="targetDispatcher">The dispatcher to deliver the DER unit power targets to the device service.</param>
+        /// <param name="targetPublisher">The publisher to publish the DER unit power targets to the message broker.</param>
         public PowerControlManager(ILogger<PowerControlManager> logger, IDeviceClient deviceClient, IMetricsPublisherFactory metricsPublisherFactory,
-            IDerUnitTargetDispatcher targetDispatcher)
+            IDerUnitTargetPublisher targetPublisher)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(deviceClient);
             ArgumentNullException.ThrowIfNull(metricsPublisherFactory);
-            ArgumentNullException.ThrowIfNull(targetDispatcher);
+            ArgumentNullException.ThrowIfNull(targetPublisher);
 
             _logger = logger;
             _deviceClient = deviceClient;
             _metricsPublisherFactory = metricsPublisherFactory;
-            _targetDispatcher = targetDispatcher;
+            _targetPublisher = targetPublisher;
         }
 
 
@@ -183,7 +183,7 @@ namespace paskalON.PowerControls.Application
             IMetricsPublisher systemPublisher = _metricsPublisherFactory.Create();
             SystemPowerControl systemPowerControl = new SystemPowerControl(_logger, systemConfig, CreateSystemMap(), systemPublisher,
                 CreateSystemConstraints(systemConfig.Constraints), units, CreateDistributionProfile());
-            RegisterTargetDispatching(units);
+            RegisterTargetPublishing(units);
 
             lock (_dataLock)
             {
@@ -205,21 +205,21 @@ namespace paskalON.PowerControls.Application
 
 
         /// <summary>
-        /// Register all DER units with a power conversion system (PCS) at the target dispatcher,
-        /// so that their power targets are delivered to the device service.
+        /// Register all DER units with a power conversion system (PCS) at the target publisher,
+        /// so that their power targets are published to the message broker.
         /// </summary>
         /// <param name="units">The DER unit power controls to register.</param>
-        private void RegisterTargetDispatching(IEnumerable<IDerUnitPowerControl> units)
+        private void RegisterTargetPublishing(IEnumerable<IDerUnitPowerControl> units)
         {
             foreach (IDerUnitPowerControl unit in units)
             {
                 if (unit.PcsDeviceId > 0)
                 {
-                    _targetDispatcher.Register(unit);
+                    _targetPublisher.Register(unit);
                 }
                 else
                 {
-                    _logger.LogWarning("DER unit has no power conversion system, targets will not be sent to the device service");
+                    _logger.LogWarning("DER unit has no power conversion system, targets will not be published");
                 }
             }
         }

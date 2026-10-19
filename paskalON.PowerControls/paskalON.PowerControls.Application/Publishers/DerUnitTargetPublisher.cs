@@ -4,20 +4,25 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.Devices.Client;
+using paskalON.Messaging;
 using paskalON.PowerControls.Domain.Ders;
 
-namespace paskalON.PowerControls.Application.Dispatchers
+namespace paskalON.PowerControls.Application.Publishers
 {
     /// <summary>
-    /// Dispatches the power targets of DER units to the device service.
+    /// Publishes the power targets of DER units to a message broker.
     /// Each registered unit gets its own worker, so a unit that is starting does not delay the other units.
     /// </summary>
-    public sealed class DerUnitTargetDispatcher : IDerUnitTargetDispatcher
+    /// <remarks>
+    /// Units are started through the device service, while their power targets are published to the configured power target topic.
+    /// If no power target topic is configured, units are not registered and their targets are not published.
+    /// </remarks>
+    public sealed class DerUnitTargetPublisher : IDerUnitTargetPublisher
     {
         /// <summary>
         /// Logger for application logging and diagnostics.
         /// </summary>
-        private readonly ILogger<DerUnitTargetDispatcher> _logger;
+        private readonly ILogger<DerUnitTargetPublisher> _logger;
 
 
         /// <summary>
@@ -27,9 +32,15 @@ namespace paskalON.PowerControls.Application.Dispatchers
 
 
         /// <summary>
+        /// Interface for publishing to message brokers.
+        /// </summary>
+        private readonly IMessagePublisher _messagePublisher;
+
+
+        /// <summary>
         /// Timing options for starting, polling and retrying.
         /// </summary>
-        private readonly DerUnitTargetDispatcherOptions _options;
+        private readonly DerUnitTargetPublisherOptions _options;
 
 
         /// <summary>
@@ -47,7 +58,7 @@ namespace paskalON.PowerControls.Application.Dispatchers
         /// <summary>
         /// Lock object for synchronizing access to shared data.
         /// </summary>
-        private readonly object _dataLock = new();
+        private readonly object _dataLock = new object();
 
 
         /// <summary>
@@ -57,17 +68,25 @@ namespace paskalON.PowerControls.Application.Dispatchers
 
 
         /// <summary>
-        /// Constructor of <see cref="DerUnitTargetDispatcher"/>.
+        /// Message publisher topics, set by <see cref="Initialize(PublisherTopic)"/>.
+        /// </summary>
+        private PublisherTopic? _topics;
+
+
+        /// <summary>
+        /// Constructor of <see cref="DerUnitTargetPublisher"/>.
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>
         /// <param name="deviceServer">Device server to send commands to the device service.</param>
+        /// <param name="messagePublisher">Interface for publishing to message brokers.</param>
         /// <param name="options">Timing options for starting, polling and retrying.</param>
         /// <param name="timeProvider">Time provider for delays and timeouts.</param>
-        public DerUnitTargetDispatcher(ILogger<DerUnitTargetDispatcher> logger, IDeviceServer deviceServer,
-            DerUnitTargetDispatcherOptions options, TimeProvider timeProvider)
+        public DerUnitTargetPublisher(ILogger<DerUnitTargetPublisher> logger, IDeviceServer deviceServer, IMessagePublisher messagePublisher,
+            DerUnitTargetPublisherOptions options, TimeProvider timeProvider)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(deviceServer);
+            ArgumentNullException.ThrowIfNull(messagePublisher);
             ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(timeProvider);
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(options.StartTimeout, TimeSpan.Zero);
@@ -76,8 +95,26 @@ namespace paskalON.PowerControls.Application.Dispatchers
 
             _logger = logger;
             _deviceServer = deviceServer;
+            _messagePublisher = messagePublisher;
             _options = options;
             _timeProvider = timeProvider;
+        }
+
+
+        /// <inheritdoc/>
+        public void Initialize(PublisherTopic topics)
+        {
+            ArgumentNullException.ThrowIfNull(topics);
+
+            lock (_dataLock)
+            {
+                _topics = topics;
+            }
+
+            if (string.IsNullOrWhiteSpace(topics.PowerTargetTopic))
+            {
+                _logger.LogWarning("No power target topic is configured, power targets of DER units will not be published");
+            }
         }
 
 
@@ -87,22 +124,35 @@ namespace paskalON.PowerControls.Application.Dispatchers
             ArgumentNullException.ThrowIfNull(unit);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(unit.PcsDeviceId);
 
-            // Create a worker for the unit and start it in a separate task.
-            DerUnitTargetWorker worker = new DerUnitTargetWorker(_logger, unit, _deviceServer, _options, _timeProvider);
-
             lock (_dataLock)
             {
+                if (_topics is null)
+                {
+                    throw new InvalidOperationException($"{nameof(DerUnitTargetPublisher)} must be initialized before a DER unit is registered");
+                }
+
+                string? topic = _topics.PowerTargetTopic;
+
+                if (string.IsNullOrWhiteSpace(topic))
+                {
+                    _logger.LogWarning("DER unit with PCS {PcsDeviceId} is not registered, because no power target topic is configured", unit.PcsDeviceId);
+
+                    return;
+                }
+
                 if (_workers.ContainsKey(unit.PcsDeviceId))
                 {
                     throw new InvalidOperationException($"A DER unit with PCS device id {unit.PcsDeviceId} is already registered");
                 }
 
+                // Create a worker for the unit and start it in a separate task.
+                DerUnitTargetWorker worker = new DerUnitTargetWorker(_logger, unit, _deviceServer, _messagePublisher, topic, _options, _timeProvider);
                 _workers.Add(unit.PcsDeviceId, (worker, worker.RunAsync(_cancellation.Token)));
+                // Link the unit's TargetPowerChanged event to the worker's Notify method, so that the worker is notified when the target power changes.
+                unit.TargetPowerChanged += (sender, args) => worker.Notify();
             }
 
-            // Link the unit's TargetPowerChanged event to the worker's Notify method, so that the worker is notified when the target power changes.
-            unit.TargetPowerChanged += (sender, args) => worker.Notify();
-            _logger.LogInformation("Registered DER unit with PCS {PcsDeviceId} for target dispatching", unit.PcsDeviceId);
+            _logger.LogInformation("Registered DER unit with PCS {PcsDeviceId} for target publishing", unit.PcsDeviceId);
         }
 
 

@@ -29,6 +29,7 @@
   <Project Path="paskalON.PowerControls.Application/paskalON.PowerControls.Application.csproj" Id="915de4ba-7b20-4080-92a3-20490e15cb99" />
   <Project Path="paskalON.PowerControls.Domain.Configs/paskalON.PowerControls.Domain.Configs.csproj" />
   <Project Path="paskalON.PowerControls.Domain/paskalON.PowerControls.Domain.csproj" />
+  <Project Path="paskalON.PowerControls.Dto/paskalON.PowerControls.Dto.csproj" Id="760ef51a-8e01-4737-8272-0bebce1cfa16" />
   <Project Path="paskalON.PowerControls.Infrastructure/paskalON.PowerControls.Infrastructure.csproj" Id="e4a0de33-33d8-4b3e-ac71-c75b9c5f10ab" />
   <Project Path="paskalON.PowerControls.Service.Dto/paskalON.PowerControls.Service.Dto.csproj" />
   <Project Path="paskalON.PowerControls.Service/paskalON.PowerControls.Service.csproj" Id="c40a34ed-8e03-4865-b6ea-f9a1186096a4" />

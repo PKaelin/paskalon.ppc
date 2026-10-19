@@ -2,12 +2,12 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-namespace paskalON.PowerControls.Application.Dispatchers
+namespace paskalON.PowerControls.Application.Publishers
 {
     /// <summary>
-    /// Timing options of the <see cref="DerUnitTargetDispatcher"/>.
+    /// Timing options of the <see cref="DerUnitTargetPublisher"/>.
     /// </summary>
-    public class DerUnitTargetDispatcherOptions
+    public class DerUnitTargetPublisherOptions
     {
         /// <summary>
         /// Maximum time to wait for a DER unit to reach the started state after a start command was sent.
