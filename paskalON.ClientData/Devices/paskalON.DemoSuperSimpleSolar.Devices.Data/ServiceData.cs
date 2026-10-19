@@ -59,6 +59,7 @@ namespace paskalON.DemoSuperSimpleSolar.Devices.Data
                 DeviceHeartbeatIntervalMilliseconds = 1000,
                 DeviceFactorCore = 1,
                 DeviceFactorDetail = 5,
+                SubscriberTopicPowerTarget = "ppc:pc:targets",
                 PublisherTopicPcsCore = "ppc:device:pcs:core",
                 PublisherTopicPcsDetail = "ppc:device:pcs:detail",
                 PublisherTopicSolarPanelCore = "ppc:device:pv:core",
