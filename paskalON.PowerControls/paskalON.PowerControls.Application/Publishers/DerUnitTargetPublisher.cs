@@ -150,6 +150,8 @@ namespace paskalON.PowerControls.Application.Publishers
                 _workers.Add(unit.PcsDeviceId, (worker, worker.RunAsync(_cancellation.Token)));
                 // Link the unit's TargetPowerChanged event to the worker's Notify method, so that the worker is notified when the target power changes.
                 unit.TargetPowerChanged += (sender, args) => worker.Notify();
+                // The same worker delivers the maintenance target, so all targets of a PCS are published in order by one worker.
+                unit.MaintenanceTargetChanged += (sender, args) => worker.Notify();
             }
 
             _logger.LogInformation("Registered DER unit with PCS {PcsDeviceId} for target publishing", unit.PcsDeviceId);

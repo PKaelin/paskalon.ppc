@@ -18,7 +18,7 @@ namespace paskalON.PowerControls.Domain.Ders
     public class DerUnitPowerEnergyStorageControl : PowerControlBase, IDerUnitPowerControl
     {
         /// <summary>
-        /// DER unit energy storagepower control configuration.
+        /// DER unit energy storage power control configuration.
         /// </summary>
         private readonly DerUnitEnergyStoragePowerControlConfig _config;
 
@@ -113,6 +113,34 @@ namespace paskalON.PowerControls.Domain.Ders
         public ReactivePower MinimumReactivePower { get; init; }
 
 
+        /// <inheritdoc/>
+        public ActivePower MaintenanceTargetActivePower
+        {
+            get { lock (dataLock) { return field; } }
+            private set { lock (dataLock) { field = value; } }
+        }
+
+
+        /// <inheritdoc/>
+        public ReactivePower MaintenanceTargetReactivePower
+        {
+            get { lock (dataLock) { return field; } }
+            private set { lock (dataLock) { field = value; } }
+        }
+
+
+        /// <inheritdoc/>
+        public bool IsMaintenanceTargetSet
+        {
+            get { lock (dataLock) { return field; } }
+            private set { lock (dataLock) { field = value; } }
+        }
+
+
+        /// <inheritdoc/>
+        public event EventHandler? MaintenanceTargetChanged;
+
+
         /// <summary>
         /// Constructor of <see cref="DerUnitPowerEnergyStorageControl"/>.
         /// </summary>
@@ -157,6 +185,9 @@ namespace paskalON.PowerControls.Domain.Ders
         /// <inheritdoc/>
         public override void UpdatePower(ActivePower activePower, ReactivePower reactivePower)
         {
+            // A target from the system distribution means the unit is not in maintenance anymore
+            IsMaintenanceTargetSet = false;
+
             if (IsEnabled == true)
             {
                 foreach (IDerUnitConstraint constraint in Constraints)
@@ -166,6 +197,21 @@ namespace paskalON.PowerControls.Domain.Ders
 
                 SetTargetPower(activePower, reactivePower);
             }
+        }
+
+
+        /// <inheritdoc/>
+        public void SetMaintenanceTarget(ActivePower activePower, ReactivePower reactivePower)
+        {
+            lock (dataLock)
+            {
+                MaintenanceTargetActivePower = activePower;
+                MaintenanceTargetReactivePower = reactivePower;
+                IsMaintenanceTargetSet = true;
+            }
+
+            // Raise outside of the lock so subscribers can read the target without deadlocking.
+            MaintenanceTargetChanged?.Invoke(this, EventArgs.Empty);
         }
 
 

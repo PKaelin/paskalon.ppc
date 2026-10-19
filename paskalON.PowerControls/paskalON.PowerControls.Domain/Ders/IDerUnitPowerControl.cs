@@ -77,5 +77,50 @@ namespace paskalON.PowerControls.Domain.Ders
         /// Minimum reactive power.
         /// </summary>
         ReactivePower MinimumReactivePower { get; }
+
+
+        /// <summary>
+        /// Active power target set while the unit is in maintenance. Only valid if <see cref="IsMaintenanceTargetSet"/> is true.
+        /// </summary>
+        /// <remarks>
+        /// Kept separate from the system targets, so the targets of the system distribution and of the maintenance never mix.
+        /// </remarks>
+        ActivePower MaintenanceTargetActivePower { get; }
+
+
+        /// <summary>
+        /// Reactive power target set while the unit is in maintenance. Only valid if <see cref="IsMaintenanceTargetSet"/> is true.
+        /// </summary>
+        /// <remarks>
+        /// Kept separate from the system targets, so the targets of the system distribution and of the maintenance never mix.
+        /// </remarks>
+        ReactivePower MaintenanceTargetReactivePower { get; }
+
+
+        /// <summary>
+        /// True if a maintenance target is set.
+        /// </summary>
+        /// <remarks>
+        /// It is reset as soon as the unit receives a target from the system distribution again.
+        /// </remarks>
+        bool IsMaintenanceTargetSet { get; }
+
+
+        /// <summary>
+        /// Raised when the maintenance target changed.
+        /// </summary>
+        event EventHandler? MaintenanceTargetChanged;
+
+
+        /// <summary>
+        /// Sets the maintenance target. The caller is responsible to apply the unit constraints before.
+        /// </summary>
+        /// <param name="activePower">
+        /// The constrained active power target.
+        /// </param>
+        /// <param name="reactivePower">
+        /// The constrained reactive power target.
+        /// </param>
+        void SetMaintenanceTarget(ActivePower activePower, ReactivePower reactivePower);
     }
 }

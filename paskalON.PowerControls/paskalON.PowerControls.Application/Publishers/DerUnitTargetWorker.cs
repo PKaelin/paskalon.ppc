@@ -155,7 +155,9 @@ namespace paskalON.PowerControls.Application.Publishers
 
         /// <summary>
         /// Delivers the latest targets of the unit. A stopped or standby unit is started first
-        /// and the targets are published once it reached the started state. Units in maintenance are skipped.
+        /// and the targets are published once it reached the started state.
+        /// For a unit in maintenance only its maintenance target is published and the unit is never started,
+        /// so the targets of the system distribution and of the maintenance are kept separate.
         /// </summary>
         /// <param name="cancellationToken">Token to cancel the delivery.</param>
         /// <returns>True if the delivery is completed, false if it failed and has to be retried.</returns>
@@ -167,7 +169,14 @@ namespace paskalON.PowerControls.Application.Publishers
 
                 if (state is DerState.Maintenance)
                 {
-                    _logger.LogWarning("PCS {PcsDeviceId} is in maintenance, targets are not published", _unit.PcsDeviceId);
+                    if (_unit.IsMaintenanceTargetSet is false)
+                    {
+                        _logger.LogWarning("PCS {PcsDeviceId} is in maintenance without maintenance target, targets are not published", _unit.PcsDeviceId);
+
+                        return true;
+                    }
+
+                    await PublishAsync(_unit.MaintenanceTargetActivePower, _unit.MaintenanceTargetReactivePower);
 
                     return true;
                 }
@@ -182,19 +191,7 @@ namespace paskalON.PowerControls.Application.Publishers
                     }
                 }
 
-                ActivePower activePower = _unit.TargetActivePower;
-                ReactivePower reactivePower = _unit.TargetReactivePower;
-                CurrentTargetsDto dto = new CurrentTargetsDto
-                {
-                    DeviceId = _unit.PcsDeviceId,
-                    ActivePowerWatt = activePower.Watts,
-                    ReactivePowerVar = reactivePower.VoltAmperesReactive
-                };
-                string json = JsonSerializer.Serialize(dto);
-                await _messagePublisher.PublishAsync(_topic, json);
-
-                _logger.LogDebug("Published targets of PCS {PcsDeviceId} to topic {Topic}. Active Power {ActivePower}, Reactive Power {ReactivePower}",
-                    _unit.PcsDeviceId, _topic, activePower.Watts, reactivePower.VoltAmperesReactive);
+                await PublishAsync(_unit.TargetActivePower, _unit.TargetReactivePower);
 
                 return true;
             }
@@ -204,6 +201,28 @@ namespace paskalON.PowerControls.Application.Publishers
 
                 return false;
             }
+        }
+
+
+        /// <summary>
+        /// Publishes the targets as <see cref="CurrentTargetsDto"/> for the PCS of the unit.
+        /// </summary>
+        /// <param name="activePower">The active power target to publish.</param>
+        /// <param name="reactivePower">The reactive power target to publish.</param>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous publish operation.</returns>
+        private async Task PublishAsync(ActivePower activePower, ReactivePower reactivePower)
+        {
+            CurrentTargetsDto dto = new CurrentTargetsDto
+            {
+                DeviceId = _unit.PcsDeviceId,
+                ActivePowerWatt = activePower.Watts,
+                ReactivePowerVar = reactivePower.VoltAmperesReactive
+            };
+            string json = JsonSerializer.Serialize(dto);
+            await _messagePublisher.PublishAsync(_topic, json);
+
+            _logger.LogDebug("Published targets of PCS {PcsDeviceId} to topic {Topic}. Active Power {ActivePower}, Reactive Power {ReactivePower}",
+                _unit.PcsDeviceId, _topic, activePower.Watts, reactivePower.VoltAmperesReactive);
         }
 
 

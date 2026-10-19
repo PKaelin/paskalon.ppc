@@ -178,6 +178,29 @@ namespace paskalON.PowerControls.Application.UnitTest.Publishers
 
 
         [TestMethod]
+        public async Task RegisterMaintenanceTargetChangePublishesMaintenanceTargetWithoutStartTest()
+        {
+            TaskCompletionSource<string> published = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _messagePublisher.Setup(p => p.PublishAsync(PowerTargetTopic, It.IsAny<string>()))
+                .Callback<string, string>((topic, json) => published.TrySetResult(json))
+                .Returns(Task.CompletedTask);
+            Mock<IDerUnitPowerControl> unit = CreateUnit(6, DerState.Maintenance);
+            unit.SetupGet(u => u.IsMaintenanceTargetSet).Returns(true);
+            unit.SetupGet(u => u.MaintenanceTargetActivePower).Returns(new ActivePower(-20000));
+            unit.SetupGet(u => u.MaintenanceTargetReactivePower).Returns(new ReactivePower(1500));
+            await using DerUnitTargetPublisher publisher = CreateInitializedPublisher();
+            publisher.Register(unit.Object);
+
+            unit.Raise(u => u.MaintenanceTargetChanged += null, unit.Object, EventArgs.Empty);
+            string json = await published.Task.WaitAsync(TestTimeout);
+
+            CurrentTargetsDto? dto = JsonSerializer.Deserialize<CurrentTargetsDto>(json);
+            Assert.AreEqual(new CurrentTargetsDto { DeviceId = 6, ActivePowerWatt = -20000, ReactivePowerVar = 1500 }, dto);
+            _deviceServer.Verify(s => s.StartPcs(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+
+        [TestMethod]
         [DataRow(null)]
         [DataRow("")]
         [DataRow(" ")]

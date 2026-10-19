@@ -64,6 +64,31 @@ namespace paskalON.PowerControls.Service.WebApi.Controllers.V1
 
 
         /// <summary>
+        /// Sets the power setpoint for the DER unit (has to be in maintenance).
+        /// </summary>
+        /// <param name="request">The request containing the DER unit name and the active and reactive power setpoints.</param>
+        /// <returns>Ok, NotFound if the DER unit does not exist or Conflict if the DER unit power control is disabled or the DER unit is not in maintenance.</returns>
+        [HttpPost]
+        public async Task<IActionResult> SetDerUnitPowerSetpoints(SetDerUnitPowerSetpointRequest request)
+        {
+            try
+            {
+                await _manager.SetDerUnitPowerTarget(request.DerUnitName, new ActivePower(request.ActivePowerWatt), new ReactivePower(request.ReactivePowerVar));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+
+            return Ok();
+        }
+
+
+        /// <summary>
         /// Starts a specific power conversion system (PCS) identified by the provided device ID.
         /// </summary>
         /// <param name="deviceId">The ID of the device to start.</param>

@@ -176,7 +176,6 @@ namespace paskalON.PowerControls.Domain.Systems
                     systemReactivePowerDerated = reactivePower.VoltAmperesReactive / unitCount * (unitCount - toDerate);
                 }
 
-                _logger.LogInformation("Update system power control. Active Power {ActivePower}, Reactive Power {ReactivePower}", activePower.Watts, reactivePower.KiloVoltAmperesReactive);
                 // Set the received setpoints
                 SetpointActivePower = new ActivePower(activePower.Watts);
                 SetpointReactivePower = new ReactivePower(reactivePower.VoltAmperesReactive);
@@ -196,6 +195,8 @@ namespace paskalON.PowerControls.Domain.Systems
 
                 // Set the target power to the actual targets
                 SetTargetPower(constrainedActivePower, constrainedReactivePower);
+                _logger.LogInformation("Update system power control. Active Power {ActivePower}, Reactive Power {ReactivePower}",
+                    constrainedActivePower.Watts, constrainedReactivePower.KiloVoltAmperesReactive);
 
                 // Distribute to all units that can have different distribution strategies
                 // The distribution strategies filter unit per configured distribution strategy
@@ -205,6 +206,59 @@ namespace paskalON.PowerControls.Domain.Systems
                 DistributeProportional();
                 // DistributeWaterFilling();
             }
+        }
+
+
+        /// <summary>
+        /// Updates the power of a single DER unit that is in maintenance. The unit constraints are applied
+        /// and the constrained values are set as maintenance target of the unit.
+        /// </summary>
+        /// <remarks>
+        /// Units in maintenance are excluded from the system distribution, so their maintenance target is not overwritten by the system setpoints.
+        /// </remarks>
+        /// <param name="unitName">
+        /// Name of the DER unit.
+        /// </param>
+        /// <param name="activePower">
+        /// The active power setpoint for the unit.
+        /// </param>
+        /// <param name="reactivePower">
+        /// The reactive power setpoint for the unit.
+        /// </param>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when no DER unit with the given name exists.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the DER unit power control is disabled or the DER unit is not in maintenance.
+        /// </exception>
+        public void UpdateDerUnitPower(string unitName, ActivePower activePower, ReactivePower reactivePower)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(unitName);
+
+            IDerUnitPowerControl unit = _units.SingleOrDefault(u => u.DerUnitName == unitName)
+                ?? throw new KeyNotFoundException($"DER unit {unitName} does not exist");
+
+            if (unit.IsEnabled is false)
+            {
+                throw new InvalidOperationException($"DER unit {unitName} power control is disabled, power setpoints are not accepted");
+            }
+
+            if (unit.State is not DerState.Maintenance)
+            {
+                throw new InvalidOperationException($"DER unit {unitName} is not in maintenance, power setpoints are only accepted in maintenance");
+            }
+
+            ActivePower constrainedActivePower = activePower;
+            ReactivePower constrainedReactivePower = reactivePower;
+
+            foreach (IDerUnitConstraint constraint in unit.Constraints)
+            {
+                constraint.ApplyConstraints(ref constrainedActivePower, ref constrainedReactivePower);
+            }
+
+            unit.SetMaintenanceTarget(constrainedActivePower, constrainedReactivePower);
+            _logger.LogInformation("Update DER unit {UnitName} power in maintenance. Active Power {ActivePower}, Reactive Power {ReactivePower}",
+                unitName, constrainedActivePower.Watts, constrainedReactivePower.VoltAmperesReactive);
         }
 
 

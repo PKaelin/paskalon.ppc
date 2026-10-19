@@ -12,7 +12,8 @@ using System.Threading.Channels;
 namespace paskalON.PowerControls.Application.Subscribers
 {
     /// <summary>
-    /// Receives the power setpoints as <see cref="CurrentSetpointsDto"/> from a message broker and applies them to the devices.
+    /// Receives the system power setpoints as <see cref="CurrentSetpointsDto"/> and the DER unit power setpoints
+    /// as <see cref="CurrentDerUnitSetpointsDto"/> from a message broker and applies them to the power control.
     /// </summary>
     /// <remarks>
     /// Received messages are queued and applied by a single reader, so the setpoints are applied in the order they were received
@@ -32,7 +33,6 @@ namespace paskalON.PowerControls.Application.Subscribers
         private readonly IPowerControlManager _powerControlManager;
 
 
-
         /// <summary>
         /// Interface for subscribing to message brokers.
         /// </summary>
@@ -40,12 +40,12 @@ namespace paskalON.PowerControls.Application.Subscribers
 
 
         /// <summary>
-        /// Queue of received power setpoints to apply.
+        /// Queue of received power setpoints to apply, either <see cref="CurrentSetpointsDto"/> or <see cref="CurrentDerUnitSetpointsDto"/>.
         /// </summary>
         /// <remarks>
         /// Thread-safe FIFO (First-In, First-Out) queue.
         /// </remarks>
-        private readonly Channel<CurrentSetpointsDto> _setpoints = Channel.CreateBounded<CurrentSetpointsDto>(new BoundedChannelOptions(1000)
+        private readonly Channel<object> _setpoints = Channel.CreateBounded<object>(new BoundedChannelOptions(1000)
         {
             SingleReader = true,
         });
@@ -79,10 +79,24 @@ namespace paskalON.PowerControls.Application.Subscribers
                 return;
             }
 
-            _messageSubscriber.Subscribe(topic, UpdatePowerSetpoints);
+            _messageSubscriber.Subscribe(topic, Enqueue<CurrentSetpointsDto>);
             _logger.LogInformation("Subscribed to power setpoints on topic {Topic}", topic);
         }
 
+
+        /// <inheritdoc/>
+        public void SubscribeDerUnit(string? topic)
+        {
+            if (string.IsNullOrWhiteSpace(topic))
+            {
+                _logger.LogWarning("No DER unit power setpoint topic is configured, DER unit power setpoints are not received from the message broker");
+
+                return;
+            }
+
+            _messageSubscriber.Subscribe(topic, Enqueue<CurrentDerUnitSetpointsDto>);
+            _logger.LogInformation("Subscribed to DER unit power setpoints on topic {Topic}", topic);
+        }
 
 
         /// <inheritdoc/>
@@ -90,8 +104,8 @@ namespace paskalON.PowerControls.Application.Subscribers
         {
             try
             {
-                // Reads from the channel and applies the power setpoints to the devices in the order they were received.
-                await foreach (CurrentSetpointsDto setpoint in _setpoints.Reader.ReadAllAsync(cancellationToken))
+                // Reads from the channel and applies the power setpoints in the order they were received.
+                await foreach (object setpoint in _setpoints.Reader.ReadAllAsync(cancellationToken))
                 {
                     await ApplyAsync(setpoint);
                 }
@@ -104,17 +118,26 @@ namespace paskalON.PowerControls.Application.Subscribers
 
 
         /// <summary>
-        /// Applies the power setpoints to the power conversion system. A failure is logged, so the following setpoints are still applied.
+        /// Applies the power setpoints to the power control. A failure is logged, so the following setpoints are still applied.
         /// </summary>
         /// <param name="setpoint">The power setpoints to apply.</param>
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
-        private async Task ApplyAsync(CurrentSetpointsDto setpoint)
+        private async Task ApplyAsync(object setpoint)
         {
             try
             {
-                ActivePower activePower = new ActivePower(setpoint.SetpointActivePowerWatts);
-                ReactivePower reactivePower = new ReactivePower(setpoint.SetpointReactivePowerVars);
-                await _powerControlManager.SetSystemPowerTarget(activePower, reactivePower);
+                switch (setpoint)
+                {
+                    case CurrentSetpointsDto system:
+                        await _powerControlManager.SetSystemPowerTarget(new ActivePower(system.SetpointActivePowerWatts),
+                            new ReactivePower(system.SetpointReactivePowerVars));
+                        break;
+
+                    case CurrentDerUnitSetpointsDto unit:
+                        await _powerControlManager.SetDerUnitPowerTarget(unit.DerUnitName, new ActivePower(unit.SetpointActivePowerWatts),
+                            new ReactivePower(unit.SetpointReactivePowerVars));
+                        break;
+                }
             }
             catch (Exception ex)
             {
@@ -123,20 +146,20 @@ namespace paskalON.PowerControls.Application.Subscribers
         }
 
 
-
         /// <summary>
         /// Handles a received power setpoints message and queues it to be applied.
         /// </summary>
+        /// <typeparam name="T">The DTO type of the power setpoints message.</typeparam>
         /// <param name="json">The json message with the power setpoints.</param>
-        private void UpdatePowerSetpoints(string json)
+        private void Enqueue<T>(string json) where T : class
         {
             try
             {
-                CurrentSetpointsDto? setpoint = JsonSerializer.Deserialize<CurrentSetpointsDto>(json);
+                T? setpoint = JsonSerializer.Deserialize<T>(json);
 
                 if (setpoint is null)
                 {
-                    _logger.LogWarning("Received an empty power setpoint message");
+                    _logger.LogWarning("Received an empty {Type} message", typeof(T).Name);
 
                     return;
                 }
@@ -146,9 +169,8 @@ namespace paskalON.PowerControls.Application.Subscribers
             }
             catch (JsonException ex)
             {
-                _logger.LogError(ex, "Received an invalid power setpoint message");
+                _logger.LogError(ex, "Received an invalid {Type} message", typeof(T).Name);
             }
         }
-
     }
 }

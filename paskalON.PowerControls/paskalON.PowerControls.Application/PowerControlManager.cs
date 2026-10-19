@@ -133,7 +133,7 @@ namespace paskalON.PowerControls.Application
 
 
         /// <summary>
-        /// Constructo of <see cref="PowerControlManager"/>.
+        /// Constructor of <see cref="PowerControlManager"/>.
         /// </summary>
         /// <param name="logger">The logger instance.</param>
         /// <param name="deviceClient">The device client instance.</param>
@@ -201,6 +201,13 @@ namespace paskalON.PowerControls.Application
         public async Task SetSystemPowerTarget(ActivePower activePower, ReactivePower reactivePower)
         {
             _systemPowerControl?.UpdatePower(activePower, reactivePower);
+        }
+
+
+        /// <inheritdoc/>
+        public async Task SetDerUnitPowerTarget(string derUnitName, ActivePower activePower, ReactivePower reactivePower)
+        {
+            _systemPowerControl?.UpdateDerUnitPower(derUnitName, activePower, reactivePower);
         }
 
 

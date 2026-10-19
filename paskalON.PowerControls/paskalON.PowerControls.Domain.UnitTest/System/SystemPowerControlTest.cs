@@ -5,7 +5,9 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using paskalON.ConstraintEngine.Domain;
+using paskalON.ConstraintEngine.Domain.Configs.Ders;
 using paskalON.ConstraintEngine.Domain.Configs.Systems;
+using paskalON.ConstraintEngine.Domain.Ders;
 using paskalON.ConstraintEngine.Domain.Systems;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.PowerControls.Domain.Configs.Strategies;
@@ -361,6 +363,115 @@ namespace paskalON.PowerControls.Domain.UnitTest.System
             Assert.AreEqual(2000, system.SetpointReactivePower.VoltAmperesReactive);
             Assert.AreEqual(5000, system.SetpointActivePowerActual.Watts);
             Assert.AreEqual(2000, system.SetpointReactivePowerActual.VoltAmperesReactive);
+        }
+
+
+        [TestMethod]
+        public void UpdateDerUnitPowerUnknownUnitThrowsTest()
+        {
+            Mock<IDerUnitPowerControl> unit = CreateNamedUnit("BESS-Unit 1", DerState.Maintenance);
+            SystemPowerControl control = CreateSystemPowerControl(units: [unit.Object]);
+
+            Assert.ThrowsExactly<KeyNotFoundException>(() => control.UpdateDerUnitPower("BESS-Unit 9", new ActivePower(1000), new ReactivePower(0)));
+
+            unit.Verify(u => u.SetMaintenanceTarget(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+        }
+
+
+        [TestMethod]
+        [DataRow(DerState.Started)]
+        [DataRow(DerState.Stopped)]
+        [DataRow(DerState.Standby)]
+        public void UpdateDerUnitPowerUnitNotInMaintenanceThrowsTest(DerState state)
+        {
+            Mock<IDerUnitPowerControl> unit = CreateNamedUnit("BESS-Unit 1", state);
+            SystemPowerControl control = CreateSystemPowerControl(units: [unit.Object]);
+
+            Assert.ThrowsExactly<InvalidOperationException>(() => control.UpdateDerUnitPower("BESS-Unit 1", new ActivePower(1000), new ReactivePower(0)));
+
+            unit.Verify(u => u.SetMaintenanceTarget(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+        }
+
+
+        [TestMethod]
+        public void UpdateDerUnitPowerDisabledUnitThrowsTest()
+        {
+            Mock<IDerUnitPowerControl> unit = CreateNamedUnit("BESS-Unit 1", DerState.Maintenance, isEnabled: false);
+            SystemPowerControl control = CreateSystemPowerControl(units: [unit.Object]);
+
+            Assert.ThrowsExactly<InvalidOperationException>(() => control.UpdateDerUnitPower("BESS-Unit 1", new ActivePower(1000), new ReactivePower(0)));
+
+            unit.Verify(u => u.SetMaintenanceTarget(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+        }
+
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        public void UpdateDerUnitPowerInvalidUnitNameThrowsTest(string? unitName)
+        {
+            SystemPowerControl control = CreateSystemPowerControl(units: [CreateNamedUnit("BESS-Unit 1", DerState.Maintenance).Object]);
+
+            Assert.Throws<ArgumentException>(() => control.UpdateDerUnitPower(unitName!, new ActivePower(1000), new ReactivePower(0)));
+        }
+
+
+        [TestMethod]
+        [DataRow(80000, -20000, 50000, -10000)]
+        [DataRow(-80000, 20000, -50000, 10000)]
+        [DataRow(25000, 4000, 25000, 4000)]
+        public void UpdateDerUnitPowerAppliesUnitConstraintsAndSetsMaintenanceTargetTest(double activePowerWatt, double reactivePowerVar,
+            double expectedActivePowerWatt, double expectedReactivePowerVar)
+        {
+            DerUnitPowerConstraintConfig constraintConfig = new DerUnitPowerConstraintConfig
+            {
+                ChangedBy = "Test",
+                Name = "PowerLimits",
+                MaximumActivePowerWatt = 50000,
+                MinimumActivePowerWatt = -50000,
+                MaximumReactivePowerVars = 10000,
+                MinimumReactivePowerVars = -10000
+            };
+            DerUnitPowerConstraint constraint = new DerUnitPowerConstraint(_logger.Object, constraintConfig, new DerUnitPowerConstraintMap());
+            Mock<IDerUnitPowerControl> maintenanceUnit = CreateNamedUnit("BESS-Unit 1", DerState.Maintenance, [constraint]);
+            Mock<IDerUnitPowerControl> systemUnit = CreateNamedUnit("BESS-Unit 2", DerState.Started);
+            SystemPowerControl control = CreateSystemPowerControl(units: [maintenanceUnit.Object, systemUnit.Object]);
+
+            control.UpdateDerUnitPower("BESS-Unit 1", new ActivePower(activePowerWatt), new ReactivePower(reactivePowerVar));
+
+            maintenanceUnit.Verify(u => u.SetMaintenanceTarget(new ActivePower(expectedActivePowerWatt), new ReactivePower(expectedReactivePowerVar)), Times.Once);
+            maintenanceUnit.Verify(u => u.UpdatePower(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+            systemUnit.Verify(u => u.SetMaintenanceTarget(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+            systemUnit.Verify(u => u.UpdatePower(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+        }
+
+
+        [TestMethod]
+        public void UpdateDerUnitPowerDoesNotChangeSystemSetpointsTest()
+        {
+            SystemPowerControl control = CreateSystemPowerControl(units: [CreateNamedUnit("BESS-Unit 1", DerState.Maintenance).Object]);
+            control.UpdatePower(new ActivePower(100000), new ReactivePower(20000));
+
+            control.UpdateDerUnitPower("BESS-Unit 1", new ActivePower(5000), new ReactivePower(1000));
+
+            Assert.AreEqual(new ActivePower(100000), control.SetpointActivePower);
+            Assert.AreEqual(new ReactivePower(20000), control.SetpointReactivePower);
+        }
+
+
+        private static Mock<IDerUnitPowerControl> CreateNamedUnit(string unitName, DerState state, IEnumerable<IDerUnitConstraint>? constraints = null,
+            bool isEnabled = true)
+        {
+            Mock<IDerUnitPowerControl> unit = new Mock<IDerUnitPowerControl>();
+
+            unit.SetupGet(x => x.DerUnitName).Returns(unitName);
+            unit.SetupGet(x => x.State).Returns(state);
+            unit.SetupGet(x => x.IsEnabled).Returns(isEnabled);
+            unit.SetupGet(x => x.Constraints).Returns(constraints ?? new List<IDerUnitConstraint>());
+            unit.SetupGet(x => x.DistributionStrategyType).Returns(DistributionStrategyType.Equal);
+
+            return unit;
         }
 
 

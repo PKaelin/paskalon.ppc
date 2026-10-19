@@ -176,6 +176,7 @@ try
         // Subscribe to the setpoint targets, they are applied once the application starts running
         IPowerSetpointSubscriber powerSetpointSubscriber = app.Services.GetRequiredService<IPowerSetpointSubscriber>();
         powerSetpointSubscriber.Subscribe(config.SubscriberTopicCurrentSetpoint);
+        powerSetpointSubscriber.SubscribeDerUnit(config.SubscriberTopicCurrentDerUnitSetpoint);
 
         // Load and initialize device client
         SubscriberTopic topics = GetSubscriberTopic(config);

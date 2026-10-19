@@ -126,6 +126,52 @@ namespace paskalON.PowerControls.Application.UnitTest.Publishers
 
 
         [TestMethod]
+        public async Task DeliverUnitInMaintenancePublishesMaintenanceTargetWithoutStartTest()
+        {
+            string? publishedJson = null;
+            _unit.SetupGet(u => u.State).Returns(DerState.Maintenance);
+            _unit.SetupGet(u => u.IsMaintenanceTargetSet).Returns(true);
+            _unit.SetupGet(u => u.MaintenanceTargetActivePower).Returns(new ActivePower(-15000));
+            _unit.SetupGet(u => u.MaintenanceTargetReactivePower).Returns(new ReactivePower(2000));
+            _messagePublisher.Setup(p => p.PublishAsync(PowerTargetTopic, It.IsAny<string>()))
+                .Callback<string, string>((topic, json) => publishedJson = json)
+                .Returns(Task.CompletedTask);
+            DerUnitTargetWorker worker = CreateWorker();
+
+            bool isDelivered = await worker.DeliverAsync(CancellationToken.None);
+
+            Assert.IsTrue(isDelivered);
+            _deviceServer.Verify(s => s.StartPcs(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            _messagePublisher.Verify(p => p.PublishAsync(PowerTargetTopic, It.IsAny<string>()), Times.Once);
+            Assert.IsNotNull(publishedJson);
+            CurrentTargetsDto? dto = JsonSerializer.Deserialize<CurrentTargetsDto>(publishedJson);
+            Assert.AreEqual(new CurrentTargetsDto { DeviceId = PcsDeviceId, ActivePowerWatt = -15000, ReactivePowerVar = 2000 }, dto);
+        }
+
+
+        [TestMethod]
+        public async Task DeliverStartedUnitIgnoresMaintenanceTargetTest()
+        {
+            string? publishedJson = null;
+            _unit.SetupGet(u => u.State).Returns(DerState.Started);
+            _unit.SetupGet(u => u.IsMaintenanceTargetSet).Returns(true);
+            _unit.SetupGet(u => u.MaintenanceTargetActivePower).Returns(new ActivePower(-15000));
+            _unit.SetupGet(u => u.MaintenanceTargetReactivePower).Returns(new ReactivePower(2000));
+            _messagePublisher.Setup(p => p.PublishAsync(PowerTargetTopic, It.IsAny<string>()))
+                .Callback<string, string>((topic, json) => publishedJson = json)
+                .Returns(Task.CompletedTask);
+            DerUnitTargetWorker worker = CreateWorker();
+
+            bool isDelivered = await worker.DeliverAsync(CancellationToken.None);
+
+            Assert.IsTrue(isDelivered);
+            Assert.IsNotNull(publishedJson);
+            CurrentTargetsDto? dto = JsonSerializer.Deserialize<CurrentTargetsDto>(publishedJson);
+            Assert.AreEqual(new CurrentTargetsDto { DeviceId = PcsDeviceId, ActivePowerWatt = 25000, ReactivePowerVar = -4000 }, dto);
+        }
+
+
+        [TestMethod]
         public async Task DeliverStartTimeoutReturnsFalseWithoutPublishingTargetsTest()
         {
             DerUnitTargetPublisherOptions options = new DerUnitTargetPublisherOptions

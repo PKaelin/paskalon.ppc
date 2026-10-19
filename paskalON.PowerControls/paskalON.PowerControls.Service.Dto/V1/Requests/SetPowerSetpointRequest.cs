@@ -7,17 +7,17 @@ namespace paskalON.PowerControls.Service.Dto.V1.Requests
     /// <summary>
     /// Set power setpoint DTO request.
     /// </summary>
-    public class SetPowerSetpointRequest
+    public record SetPowerSetpointRequest
     {
         /// <summary>
         /// Active power setpoint in watts to set for the system.
         /// </summary>
-        public double ActivePowerWatt { get; set; }
+        public required double ActivePowerWatt { get; set; }
 
 
         /// <summary>
         /// Reactive power setpoint in var to set for the system.
         /// </summary>
-        public double ReactivePowerVar { get; set; }
+        public required double ReactivePowerVar { get; set; }
     }
 }

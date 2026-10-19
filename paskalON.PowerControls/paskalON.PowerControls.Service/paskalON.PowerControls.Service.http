@@ -16,6 +16,17 @@ Content-Type: application/json
 
 ###
 
+POST {{paskalON.PowerControls.Service_HostAddress}}/api/v1/system/setderunitpowersetpoints
+Content-Type: application/json
+
+{
+    "DerUnitName": "BMS-Unit 1",
+    "ActivePowerWatt": 100000,
+    "ReactivePowerVar": 20000
+}
+
+###
+
 POST {{paskalON.PowerControls.Service_HostAddress}}/api/v1/system/startallpcs
 
 ###

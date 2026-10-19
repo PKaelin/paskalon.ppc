@@ -68,5 +68,17 @@ namespace paskalON.PowerControls.Application
         /// <param name="reactivePower">The reactive power target.</param>
         /// <returns>Task.</returns>
         Task SetSystemPowerTarget(ActivePower activePower, ReactivePower reactivePower);
+
+
+        /// <summary>
+        /// Sets the power target of a DER unit that is in maintenance.
+        /// </summary>
+        /// <param name="derUnitName">DER unit name.</param>
+        /// <param name="activePower">The active power target.</param>
+        /// <param name="reactivePower">The reactive power target.</param>
+        /// <returns>Task.</returns>
+        /// <exception cref="KeyNotFoundException">Thrown when no DER unit with the given name exists.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the DER unit power control is disabled or the DER unit is not in maintenance.</exception>
+        Task SetDerUnitPowerTarget(string derUnitName, ActivePower activePower, ReactivePower reactivePower);
     }
 }

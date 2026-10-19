@@ -18,21 +18,27 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
     public sealed class PowerSetpointSubscriberTest
     {
         private const string SetpointTopic = "ppc:om:setpoints";
+        private const string DerUnitSetpointTopic = "ppc:om:setpoints:unit";
+        private const string DerUnitName = "BESS-Unit 1";
         private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(10);
 
         private Mock<IPowerControlManager> _powerControlManager = null!;
         private Mock<IMessageSubscriber> _messageSubscriber = null!;
         private Action<string>? _callback;
+        private Action<string>? _derUnitCallback;
 
 
         [TestInitialize]
         public void Initialize()
         {
             _callback = null;
+            _derUnitCallback = null;
             _powerControlManager = new Mock<IPowerControlManager>();
             _messageSubscriber = new Mock<IMessageSubscriber>();
             _messageSubscriber.Setup(s => s.Subscribe(SetpointTopic, It.IsAny<Action<string>>()))
                 .Callback<string, Action<string>>((topic, callback) => _callback = callback);
+            _messageSubscriber.Setup(s => s.Subscribe(DerUnitSetpointTopic, It.IsAny<Action<string>>()))
+                .Callback<string, Action<string>>((topic, callback) => _derUnitCallback = callback);
         }
 
 
@@ -198,6 +204,122 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
             await run.WaitAsync(TestTimeout);
 
             Assert.IsTrue(run.IsCompletedSuccessfully);
+        }
+
+
+        [TestMethod]
+        public void SubscribeDerUnitRegistersOnTopicTest()
+        {
+            PowerSetpointSubscriber subscriber = CreateSubscriber();
+
+            subscriber.SubscribeDerUnit(DerUnitSetpointTopic);
+
+            _messageSubscriber.Verify(s => s.Subscribe(DerUnitSetpointTopic, It.IsAny<Action<string>>()), Times.Once);
+            Assert.IsNotNull(_derUnitCallback);
+        }
+
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        public void SubscribeDerUnitWithoutTopicLogsWarningTest(string? topic)
+        {
+            FakeLogger<PowerSetpointSubscriber> logger = new FakeLogger<PowerSetpointSubscriber>();
+            PowerSetpointSubscriber subscriber = new PowerSetpointSubscriber(logger, _powerControlManager.Object, _messageSubscriber.Object);
+
+            subscriber.SubscribeDerUnit(topic);
+
+            Assert.AreEqual(LogLevel.Warning, logger.LatestRecord.Level);
+            _messageSubscriber.Verify(s => s.Subscribe(It.IsAny<string>(), It.IsAny<Action<string>>()), Times.Never);
+        }
+
+
+        [TestMethod]
+        public async Task RunAppliesReceivedDerUnitSetpointsTest()
+        {
+            using CancellationTokenSource cancellation = new CancellationTokenSource();
+            TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            _powerControlManager.Setup(m => m.SetDerUnitPowerTarget(DerUnitName, new ActivePower(-30000), new ReactivePower(5000)))
+                .Callback(() => completed.TrySetResult())
+                .Returns(Task.CompletedTask);
+            CurrentDerUnitSetpointsDto setpoint = new CurrentDerUnitSetpointsDto
+            {
+                DerUnitName = DerUnitName,
+                SetpointActivePowerWatts = -30000,
+                SetpointReactivePowerVars = 5000
+            };
+            PowerSetpointSubscriber subscriber = CreateSubscriber();
+            subscriber.SubscribeDerUnit(DerUnitSetpointTopic);
+            Task run = subscriber.RunAsync(cancellation.Token);
+
+            _derUnitCallback!(JsonSerializer.Serialize(setpoint));
+            await completed.Task.WaitAsync(TestTimeout);
+            await cancellation.CancelAsync();
+            await run.WaitAsync(TestTimeout);
+
+            _powerControlManager.Verify(m => m.SetDerUnitPowerTarget(DerUnitName, new ActivePower(-30000), new ReactivePower(5000)), Times.Once);
+            _powerControlManager.Verify(m => m.SetSystemPowerTarget(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+        }
+
+
+        [TestMethod]
+        public async Task RunAppliesSystemAndDerUnitSetpointsInOrderTest()
+        {
+            using CancellationTokenSource cancellation = new CancellationTokenSource();
+            List<string> applied = new List<string>();
+            TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            _powerControlManager.Setup(m => m.SetSystemPowerTarget(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()))
+                .Callback(() => applied.Add("System"))
+                .Returns(Task.CompletedTask);
+            _powerControlManager.Setup(m => m.SetDerUnitPowerTarget(It.IsAny<string>(), It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()))
+                .Callback<string, ActivePower, ReactivePower>((name, activePower, reactivePower) =>
+                {
+                    applied.Add(name);
+
+                    if (applied.Count == 3)
+                    {
+                        completed.TrySetResult();
+                    }
+                })
+                .Returns(Task.CompletedTask);
+            PowerSetpointSubscriber subscriber = CreateSubscriber();
+            subscriber.Subscribe(SetpointTopic);
+            subscriber.SubscribeDerUnit(DerUnitSetpointTopic);
+            Task run = subscriber.RunAsync(cancellation.Token);
+
+            _derUnitCallback!(JsonSerializer.Serialize(new CurrentDerUnitSetpointsDto { DerUnitName = "BESS-Unit 1", SetpointActivePowerWatts = 1000, SetpointReactivePowerVars = 0 }));
+            _callback!(JsonSerializer.Serialize(new CurrentSetpointsDto { SetpointActivePowerWatts = 100000, SetpointReactivePowerVars = 20000 }));
+            _derUnitCallback!(JsonSerializer.Serialize(new CurrentDerUnitSetpointsDto { DerUnitName = "BESS-Unit 2", SetpointActivePowerWatts = 2000, SetpointReactivePowerVars = 0 }));
+            await completed.Task.WaitAsync(TestTimeout);
+            await cancellation.CancelAsync();
+            await run.WaitAsync(TestTimeout);
+
+            CollectionAssert.AreEqual(new List<string> { "BESS-Unit 1", "System", "BESS-Unit 2" }, applied);
+        }
+
+
+        [TestMethod]
+        public async Task RunRejectedDerUnitSetpointContinuesWithNextSetpointsTest()
+        {
+            using CancellationTokenSource cancellation = new CancellationTokenSource();
+            TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            _powerControlManager.Setup(m => m.SetDerUnitPowerTarget("BESS-Unit 9", It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()))
+                .ThrowsAsync(new KeyNotFoundException("DER unit BESS-Unit 9 does not exist"));
+            _powerControlManager.Setup(m => m.SetDerUnitPowerTarget(DerUnitName, new ActivePower(12000), new ReactivePower(3000)))
+                .Callback(() => completed.TrySetResult())
+                .Returns(Task.CompletedTask);
+            PowerSetpointSubscriber subscriber = CreateSubscriber();
+            subscriber.SubscribeDerUnit(DerUnitSetpointTopic);
+            Task run = subscriber.RunAsync(cancellation.Token);
+
+            _derUnitCallback!(JsonSerializer.Serialize(new CurrentDerUnitSetpointsDto { DerUnitName = "BESS-Unit 9", SetpointActivePowerWatts = 1000, SetpointReactivePowerVars = 0 }));
+            _derUnitCallback!(JsonSerializer.Serialize(new CurrentDerUnitSetpointsDto { DerUnitName = DerUnitName, SetpointActivePowerWatts = 12000, SetpointReactivePowerVars = 3000 }));
+            await completed.Task.WaitAsync(TestTimeout);
+            await cancellation.CancelAsync();
+            await run.WaitAsync(TestTimeout);
+
+            _powerControlManager.Verify(m => m.SetDerUnitPowerTarget(It.IsAny<string>(), It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Exactly(2));
         }
 
 
