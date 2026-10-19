@@ -194,6 +194,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Property<int>("StartupDelayForDevices")
                         .HasColumnType("integer");
 
+                    b.Property<string>("SubscriberTopicPowerTarget")
+                        .HasColumnType("text");
+
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 

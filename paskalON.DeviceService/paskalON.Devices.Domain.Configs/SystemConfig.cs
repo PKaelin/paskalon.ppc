@@ -147,6 +147,12 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
+        /// Subscriber topic for the power targets of the power conversion systems used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicPowerTarget { get; set; }
+
+
+        /// <summary>
         /// Publisher topic for power conversion system core used for the message publisher.
         /// </summary>
         public string? PublisherTopicPcsCore { get; set; }

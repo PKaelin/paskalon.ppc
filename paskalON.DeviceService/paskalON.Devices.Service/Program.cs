@@ -10,10 +10,12 @@ using OpenTelemetry.Trace;
 using paskalON.Devices.Application;
 using paskalON.Devices.Application.Factories;
 using paskalON.Devices.Application.Publishers;
+using paskalON.Devices.Application.Subscribers;
 using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Infrastructure.Storage;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.Devices.Service.Publishers;
+using paskalON.Devices.Service.Subscribers;
 using paskalON.Devices.Service.Workers;
 using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
@@ -80,6 +82,9 @@ try
     msgOptions.AbortOnConnectFail = false;
     builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(msgOptions));
     builder.Services.AddSingleton<IMessagePublisher, RedisMessagePublisher>();
+    builder.Services.AddSingleton<IMessageSubscriber, RedisMessageSubscriber>();
+    builder.Services.AddSingleton<IPowerTargetSubscriber, PowerTargetSubscriber>();
+    builder.Services.AddHostedService<PowerTargetSubscriberService>();
     builder.Services.AddSingleton<IModbusDeviceFactory, ModbusDeviceFactory>();
     builder.Services.AddSingleton<IC37DeviceFactory, C37DeviceFactory>();
     builder.Services.AddSingleton<IMetricsPublisherFactory, MetricsPublisherFactory>();
@@ -171,6 +176,10 @@ try
         // Load system configuration
         IRepository<DeviceServiceContext, SystemConfig> repository = scope.ServiceProvider.GetRequiredService<IRepository<DeviceServiceContext, SystemConfig>>();
         SystemConfig config = (await repository.GetAsync(0, 1, o => o.Id)).Single();
+
+        // Subscribe to the power targets, they are applied once the application starts running
+        IPowerTargetSubscriber powerTargetSubscriber = app.Services.GetRequiredService<IPowerTargetSubscriber>();
+        powerTargetSubscriber.Subscribe(config.SubscriberTopicPowerTarget);
 
         if (startWorker == true)
         {
