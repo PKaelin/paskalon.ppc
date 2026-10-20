@@ -45,7 +45,7 @@ namespace paskalON.DemoSimple.Devices.Data
         {
             await CreateCore(context);
             DerConfig derConfig = await CreateStructureAndDevicesAsync(context, createSimulatorData);
-            await CreateMetersAsync(context, derConfig);
+            await CreateMetersAsync(context, derConfig, createSimulatorData);
         }
 
 
@@ -436,8 +436,9 @@ namespace paskalON.DemoSimple.Devices.Data
         /// </summary>
         /// <param name="context">Database context.</param>
         /// <param name="derConfig">DerConfig root object.</param>
+        /// <param name="createSimulatorData">Flag whether to create the device simulator data.</param>
         /// <returns></returns>
-        private static async Task CreateMetersAsync(IDeviceServiceContext context, DerConfig derConfig)
+        private static async Task CreateMetersAsync(IDeviceServiceContext context, DerConfig derConfig, bool createSimulatorData)
         {
             PowerMeterMapC37Config powerMeterMap = new PowerMeterMapC37Config
             {
@@ -483,6 +484,11 @@ namespace paskalON.DemoSimple.Devices.Data
                 PowerMeterMapC37Config = powerMeterMap,
             };
             context.PowerMeterDeviceConfigs.Add(systemPowerMeterDevice);
+
+            if (createSimulatorData == true)
+            {
+                ServiceSimulatorData.CreatePowerMeterDeviceSim(context, systemPowerMeterDevice);
+            }
 
             C37ConnectionConfig c37ConnectionConfig = new C37ConnectionConfig
             {
