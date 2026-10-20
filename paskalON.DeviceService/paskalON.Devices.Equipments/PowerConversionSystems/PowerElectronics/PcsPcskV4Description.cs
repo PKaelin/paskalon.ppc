@@ -86,6 +86,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
         /// </summary>
         public enum Register
         {
+            //Heartbeat
+            Heartbeat = 40000,
             //Control
             PControlMode = 40551,
             QControlMode = 40552,

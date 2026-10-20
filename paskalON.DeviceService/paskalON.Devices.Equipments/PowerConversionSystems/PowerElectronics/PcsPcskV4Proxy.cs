@@ -8,7 +8,6 @@ using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.PowerConversionSystems;
-using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
 using paskalON.Protocols.Modbus;
 using paskalON.Telemetry;
 
@@ -50,7 +49,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
                 }
 
                 await base.StartAsync();
-                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 1, ModbusDataType.MbInt16);
+                await _client.WriteSingleRegisterAsync((ushort)PcsPcskV4Description.Register.SelectorState, 1, ModbusDataType.MbInt16);
             }
             finally
             {
@@ -69,7 +68,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
                 if (_client.State == ModbusClientState.Connected)
                 {
                     await base.StopAsync();
-                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 0, ModbusDataType.MbInt16);
+                    await _client.WriteSingleRegisterAsync((ushort)PcsPcskV4Description.Register.SelectorState, 0, ModbusDataType.MbInt16);
                 }
             }
             finally
@@ -88,10 +87,10 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
 
                 if (standbyActivePower != null)
                 {
-                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, (double)standbyActivePower, ModbusDataType.MbInt16);
+                    await _client.WriteSingleRegisterAsync((ushort)PcsPcskV4Description.Register.PReference, (double)standbyActivePower, ModbusDataType.MbInt16);
                 }
 
-                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, 3, ModbusDataType.MbInt16);
+                await _client.WriteSingleRegisterAsync((ushort)PcsPcskV4Description.Register.SelectorState, 3, ModbusDataType.MbInt16);
             }
         }
 
@@ -105,7 +104,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
 
                 if (ActivePowerTarget.HasValue)
                 {
-                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.PReference, ActivePowerTarget.Value.KiloWatts, ModbusDataType.MbInt16);
+                    await _client.WriteSingleRegisterAsync((ushort)PcsPcskV4Description.Register.PReference, ActivePowerTarget.Value.KiloWatts, ModbusDataType.MbInt16);
                 }
             }
         }
@@ -120,7 +119,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
 
                 if (ReactivePowerTarget.HasValue)
                 {
-                    await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.QReference, ReactivePowerTarget.Value.KiloVoltAmperesReactive, ModbusDataType.MbInt16);
+                    await _client.WriteSingleRegisterAsync((ushort)PcsPcskV4Description.Register.QReference, ReactivePowerTarget.Value.KiloVoltAmperesReactive, ModbusDataType.MbInt16);
                 }
             }
         }
@@ -131,7 +130,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
         {
             if (_client.State == ModbusClientState.Connected)
             {
-                await _client.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.Heartbeat, ControllerToDeviceHeartbeat, ModbusDataType.MbInt16);
+                await _client.WriteSingleRegisterAsync((ushort)PcsPcskV4Description.Register.Heartbeat, ControllerToDeviceHeartbeat, ModbusDataType.MbInt16);
             }
         }
 
