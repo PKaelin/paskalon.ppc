@@ -9,6 +9,12 @@ namespace paskalON.Devices.Domain.Configs.Meters.PowerMeters
     public class PowerMeterDeviceConfig : NameBase
     {
         /// <summary>
+        /// Child relationship to a list of custom configurations.
+        /// </summary>
+        public ICollection<PowerMeterDeviceCustomConfig> Customs { get; set; } = new List<PowerMeterDeviceCustomConfig>();
+
+
+        /// <summary>
         /// Relationship to PowerMeterMapC37ConfigId.
         /// </summary>
         public int? PowerMeterMapC37ConfigId { get; set; }

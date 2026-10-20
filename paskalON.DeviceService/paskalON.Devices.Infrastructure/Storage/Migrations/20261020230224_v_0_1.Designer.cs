@@ -12,7 +12,7 @@ using paskalON.Devices.Infrastructure.Storage;
 namespace paskalON.Devices.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(DeviceServiceContext))]
-    [Migration("20261007185225_v_0_1")]
+    [Migration("20261020230224_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -261,6 +261,18 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.HasIndex("BatteryBankDeviceConfigId");
 
                     b.ToTable("BatteryBankDeviceCustomConfig");
+                });
+
+            modelBuilder.Entity("paskalON.Devices.Domain.Configs.Meters.PowerMeters.PowerMeterDeviceCustomConfig", b =>
+                {
+                    b.HasBaseType("paskalON.Domains.ConfigurationBase");
+
+                    b.Property<int>("PowerMeterDeviceConfigId")
+                        .HasColumnType("integer");
+
+                    b.HasIndex("PowerMeterDeviceConfigId");
+
+                    b.ToTable("PowerMeterDeviceCustomConfig");
                 });
 
             modelBuilder.Entity("paskalON.Devices.Domain.Configs.PowerConversionSystems.PowerConversionSystemDeviceCustomConfig", b =>
@@ -1527,6 +1539,17 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Navigation("BatteryBankDeviceConfig");
                 });
 
+            modelBuilder.Entity("paskalON.Devices.Domain.Configs.Meters.PowerMeters.PowerMeterDeviceCustomConfig", b =>
+                {
+                    b.HasOne("paskalON.Devices.Domain.Configs.Meters.PowerMeters.PowerMeterDeviceConfig", "PowerMeterDeviceConfig")
+                        .WithMany("Customs")
+                        .HasForeignKey("PowerMeterDeviceConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PowerMeterDeviceConfig");
+                });
+
             modelBuilder.Entity("paskalON.Devices.Domain.Configs.PowerConversionSystems.PowerConversionSystemDeviceCustomConfig", b =>
                 {
                     b.HasOne("paskalON.Devices.Domain.Configs.PowerConversionSystems.PowerConversionSystemDeviceConfig", "PowerConversionSystemDeviceConfig")
@@ -2198,6 +2221,11 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     b.Navigation("HoldingRegisters");
 
                     b.Navigation("InputRegisters");
+                });
+
+            modelBuilder.Entity("paskalON.Devices.Domain.Configs.Meters.PowerMeters.PowerMeterDeviceConfig", b =>
+                {
+                    b.Navigation("Customs");
                 });
 
             modelBuilder.Entity("paskalON.Devices.Domain.Configs.Meters.PowerMeters.PowerMeterMapModbusConfig", b =>

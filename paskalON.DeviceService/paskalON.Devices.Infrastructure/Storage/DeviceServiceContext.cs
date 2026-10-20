@@ -54,6 +54,7 @@ namespace paskalON.Devices.Infrastructure.Storage
         public DbSet<CircuitBreakerDeviceConfig> CircuitBreakerDeviceConfigs { get; set; }
         public DbSet<AutomaticTransferSwitchDeviceConfig> AutomaticTransferSwitchDeviceConfigs { get; set; }
         public DbSet<PowerMeterDeviceConfig> PowerMeterDeviceConfigs { get; set; }
+        public DbSet<PowerMeterDeviceCustomConfig> PowerMeterDeviceCustomConfigs { get; set; }
 
 
         // Configurations DbSet        

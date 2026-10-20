@@ -284,7 +284,7 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     DeviceFactorCore = table.Column<int>(type: "integer", nullable: false),
                     DeviceFactorDetail = table.Column<int>(type: "integer", nullable: false),
                     SubscriberTopicPowerTarget = table.Column<string>(type: "text", nullable: true),
-                    PublisherTopicPcsCore =table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicPcsCore = table.Column<string>(type: "text", nullable: true),
                     PublisherTopicPcsDetail = table.Column<string>(type: "text", nullable: true),
                     PublisherTopicBatteryBankCore = table.Column<string>(type: "text", nullable: true),
                     PublisherTopicBatteryBankDetail = table.Column<string>(type: "text", nullable: true),
@@ -1267,6 +1267,29 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PowerMeterDeviceCustomConfig",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
+                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Key = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Value = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Description = table.Column<string>(type: "character varying(800)", maxLength: 800, nullable: false),
+                    PowerMeterDeviceConfigId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PowerMeterDeviceCustomConfig", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PowerMeterDeviceCustomConfig_PowerMeterDeviceConfig_PowerMe~",
+                        column: x => x.PowerMeterDeviceConfigId,
+                        principalTable: "PowerMeterDeviceConfig",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SystemPowerMeterConfig",
                 columns: table => new
                 {
@@ -1970,6 +1993,17 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 column: "PowerMeterMapModbusConfigId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PowerMeterDeviceCustomConfig_Key",
+                table: "PowerMeterDeviceCustomConfig",
+                column: "Key",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PowerMeterDeviceCustomConfig_PowerMeterDeviceConfigId",
+                table: "PowerMeterDeviceCustomConfig",
+                column: "PowerMeterDeviceConfigId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PowerMeterMapC37Config_Name",
                 table: "PowerMeterMapC37Config",
                 column: "Name",
@@ -2211,6 +2245,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
 
             migrationBuilder.DropTable(
                 name: "PowerConversionSystemDeviceCustomConfig");
+
+            migrationBuilder.DropTable(
+                name: "PowerMeterDeviceCustomConfig");
 
             migrationBuilder.DropTable(
                 name: "SolarPanelConfig");

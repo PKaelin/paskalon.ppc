@@ -30,6 +30,11 @@ namespace paskalON.Devices.Infrastructure.Storage.Configurations.Meters
                 .IsRequired(false);
 
             builder.Property(x => x.ClassName).IsRequired();
+
+            builder.HasMany(x => x.Customs)
+                .WithOne(x => x.PowerMeterDeviceConfig)
+                .HasForeignKey(x => x.PowerMeterDeviceConfigId)
+                .IsRequired();
         }
     }
 }
