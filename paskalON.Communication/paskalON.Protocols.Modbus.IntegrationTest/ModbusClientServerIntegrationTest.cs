@@ -52,6 +52,80 @@ namespace paskalON.Protocols.Modbus.IntegrationTest
         }
 
 
+        [TestMethod]
+        public async Task ModbusClientServerStoppedServerDoesNotAnswerConnectedClientTest()
+        {
+            int port = GetUnusedPort();
+            ModbusDataMemoryStore store = new ModbusDataMemoryStore(32, 32, 32, 32);
+            store.HoldingRegisters.WritePoints(2, new ushort[] { 7 });
+            await using NModbusServer server = new NModbusServer(NullLogger<NModbusServer>.Instance, store, "127.0.0.1", port, 1);
+            await using NModbusClient client = new NModbusClient(NullLogger<NModbusClient>.Instance, CreateConfiguration(port), 1);
+            await server.StartAsync();
+            await client.ConnectAsync();
+            ushort[]? beforeStop = await client.ReadHoldingRegistersAsync(2, 2);
+
+            try
+            {
+                await server.StopAsync();
+                Exception? stoppedError = await CaptureExceptionAsync(() => client.ReadHoldingRegistersAsync(2, 2));
+
+                Assert.IsNotNull(beforeStop);
+                Assert.AreEqual((ushort)7, beforeStop[0]);
+                Assert.IsNotNull(stoppedError);
+                Assert.AreEqual(ModbusServerState.Stopped, server.State);
+            }
+            finally
+            {
+                await client.DisconnectAsync();
+                await server.StopAsync();
+            }
+        }
+
+
+        [TestMethod]
+        public async Task ModbusClientServerRestartedServerAnswersAgainTest()
+        {
+            int port = GetUnusedPort();
+            ModbusDataMemoryStore store = new ModbusDataMemoryStore(32, 32, 32, 32);
+            store.HoldingRegisters.WritePoints(2, new ushort[] { 9 });
+            await using NModbusServer server = new NModbusServer(NullLogger<NModbusServer>.Instance, store, "127.0.0.1", port, 1);
+            await using NModbusClient client = new NModbusClient(NullLogger<NModbusClient>.Instance, CreateConfiguration(port), 1);
+            await server.StartAsync();
+            await server.StopAsync();
+            await server.StartAsync();
+
+            try
+            {
+                await client.ConnectAsync();
+                ushort[]? afterRestart = await client.ReadHoldingRegistersAsync(2, 2);
+
+                Assert.IsNotNull(afterRestart);
+                Assert.AreEqual((ushort)9, afterRestart[0]);
+                Assert.AreEqual(ModbusServerState.Listening, server.State);
+            }
+            finally
+            {
+                await client.DisconnectAsync();
+                await server.StopAsync();
+            }
+        }
+
+
+        private static async Task<Exception?> CaptureExceptionAsync(Func<Task> action)
+        {
+            try
+            {
+                await action();
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
+
+            return null;
+        }
+
+
         private static ClientConnectionConfig CreateConfiguration(int port)
         {
             return new ClientConnectionConfig

@@ -183,7 +183,7 @@ namespace paskalON.Protocols.Modbus.NModbus
 
 
         /// <summary>
-        /// Stops the server, cancelling any active listen loop and closing the TCP listener.
+        /// Stops the server, cancelling any active listen loop, closing the TCP listener and all connected clients.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>        
         public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -213,6 +213,8 @@ namespace paskalON.Protocols.Modbus.NModbus
                 }
 
                 _listener?.Stop();
+                // Disposing the slave network closes the connections of the already connected clients
+                _network?.Dispose();
                 _listener = null;
                 _network = null;
                 _listenCts = null;
