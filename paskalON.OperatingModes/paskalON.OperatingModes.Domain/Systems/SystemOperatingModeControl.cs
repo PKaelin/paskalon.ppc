@@ -337,7 +337,7 @@ namespace paskalON.OperatingModes.Domain.Systems
                 lock (_dataLock)
                 {
                     // The first calculated setpoints are always published
-                    isSetpointChanged = SetpointActivePowerActual != setpointActivePowerActual || SetpointReactivePowerActual != setpointReactivePowerActual;
+                    isSetpointChanged = (_hasAppliedTargets is false) || (SetpointActivePowerActual != setpointActivePowerActual) || (SetpointReactivePowerActual != setpointReactivePowerActual);
                     ActivePowerObjective = signals.FinalActivePower;
                     ReactivePowerObjective = signals.FinalReactivePower;
                     SetpointActivePowerActual = setpointActivePowerActual;

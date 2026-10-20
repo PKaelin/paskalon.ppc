@@ -113,9 +113,11 @@ namespace paskalON.OperatingModes.Application.Ramps
                 if (((_rampBaseConfig is RampRateConfig) || (_rampBaseConfig is RampRatePercentageConfig) ||
                     (_rampBaseConfig is RampTimeConfig) || (_rampBaseConfig is RampTimeConstantConfig)) && (_rampFunction != null))
                 {
-                    // Long to double conversion. Double can hold 5.7 x 10^308.
+                    // The ramp functions use the elapsed ticks since the start date. Absolute ticks would lose precision in the
+                    // long to double conversion (about 128 ticks), so that the ramp would miss its values by some watts.
                     // Delay the ramp by the configured RampTimeSeconds
-                    CurrentValue = _rampFunction.CalculateOutput(_timeProvider.GetUtcNow().Ticks - TimeSpan.FromSeconds(_rampBaseConfig.RampTimeSeconds).Ticks);
+                    long elapsedTicks = (_timeProvider.GetUtcNow() - StartDate).Ticks;
+                    CurrentValue = _rampFunction.CalculateOutput(elapsedTicks - TimeSpan.FromSeconds(_rampBaseConfig.RampTimeSeconds).Ticks);
                 }
                 else
                 {
@@ -149,32 +151,20 @@ namespace paskalON.OperatingModes.Application.Ramps
         {
             lock (_rampBaseConfig)
             {
-                if (_rampBaseConfig is RampRateConfig)
+                if (_rampBaseConfig is RampRateConfig rampRateConfig)
                 {
                     List<LinearPoint> linearPoints = new List<LinearPoint>();
-                    linearPoints.Add(new LinearPoint(StartDate.UtcTicks, StartValue));
-                    double rampStepValue = StartValue;
-                    int steps = 1;
+                    linearPoints.Add(new LinearPoint(0, StartValue));
 
-                    if (StartValue <= TargetValue)
+                    if (StartValue != TargetValue)
                     {
-                        while (rampStepValue < TargetValue)
-                        {
-                            rampStepValue += ((RampRateConfig)_rampBaseConfig).RampUpRatePerSecond;
-                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
-                        }
+                        double rampRatePerSecond = StartValue < TargetValue ? rampRateConfig.RampUpRatePerSecond : rampRateConfig.RampDownRatePerSecond;
+                        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rampRatePerSecond);
 
-                        linearPoints.Last().Y = TargetValue;
-                    }
-                    else
-                    {
-                        while (rampStepValue > TargetValue)
-                        {
-                            rampStepValue -= ((RampRateConfig)_rampBaseConfig).RampDownRatePerSecond;
-                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
-                        }
-
-                        linearPoints.Last().Y = TargetValue;
+                        // The target is reached at the exact time of the ramp rate, also if the difference is not a multiple of the ramp rate.
+                        // The ticks are not rounded so that the slope is exactly the ramp rate.
+                        double rampTicks = Math.Abs(TargetValue - StartValue) / rampRatePerSecond * TimeSpan.TicksPerSecond;
+                        linearPoints.Add(new LinearPoint(rampTicks, TargetValue));
                     }
 
                     _rampFunction = new LinearPointFunction(linearPoints);
@@ -184,7 +174,7 @@ namespace paskalON.OperatingModes.Application.Ramps
                     /// Current: 0, Target: 60, RampUpRatePercentPerSecond: 50 = Every second a new target 0s=0, 1s=30, 2s=45, 3s=67.5
 
                     List<LinearPoint> linearPoints = new List<LinearPoint>();
-                    linearPoints.Add(new LinearPoint(StartDate.UtcTicks, StartValue));
+                    linearPoints.Add(new LinearPoint(0, StartValue));
                     int precision = ((RampRatePercentageConfig)_rampBaseConfig).RampRatePrecision;
                     int steps = 1;
 
@@ -192,12 +182,12 @@ namespace paskalON.OperatingModes.Application.Ramps
                     {
                         double rampRate = ((RampRatePercentageConfig)_rampBaseConfig).RampUpRatePercentPerSecond;
                         double rampStepValue = TargetValue / 100 * rampRate;
-                        linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
+                        linearPoints.Add(new LinearPoint(TimeSpan.FromSeconds(steps++).Ticks, rampStepValue));
 
                         while (Math.Round(rampStepValue, precision) < TargetValue)
                         {
                             rampStepValue = rampStepValue + (rampStepValue / 100 * rampRate);
-                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
+                            linearPoints.Add(new LinearPoint(TimeSpan.FromSeconds(steps++).Ticks, rampStepValue));
                         }
 
                         linearPoints.Last().Y = TargetValue;
@@ -206,12 +196,12 @@ namespace paskalON.OperatingModes.Application.Ramps
                     {
                         double rampRate = ((RampRatePercentageConfig)_rampBaseConfig).RampDownRatePercentPerSecond;
                         double rampStepValue = StartValue / 100 * rampRate;
-                        linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
+                        linearPoints.Add(new LinearPoint(TimeSpan.FromSeconds(steps++).Ticks, rampStepValue));
 
                         while (Math.Round(rampStepValue, precision) > TargetValue)
                         {
                             rampStepValue = rampStepValue - (rampStepValue / 100 * rampRate);
-                            linearPoints.Add(new LinearPoint(StartDate.AddSeconds(steps++).UtcTicks, rampStepValue));
+                            linearPoints.Add(new LinearPoint(TimeSpan.FromSeconds(steps++).Ticks, rampStepValue));
                         }
 
                         linearPoints.Last().Y = TargetValue;
@@ -222,15 +212,15 @@ namespace paskalON.OperatingModes.Application.Ramps
                 else if (_rampBaseConfig is RampTimeConfig)
                 {
                     List<LinearPoint> linearPoints = new List<LinearPoint>();
-                    linearPoints.Add(new LinearPoint(StartDate.UtcTicks, StartValue));
+                    linearPoints.Add(new LinearPoint(0, StartValue));
 
                     if (StartValue <= TargetValue)
                     {
-                        linearPoints.Add(new LinearPoint(StartDate.AddSeconds(((RampTimeConfig)_rampBaseConfig).RampUpTimeSeconds).UtcTicks, TargetValue));
+                        linearPoints.Add(new LinearPoint(TimeSpan.FromSeconds(((RampTimeConfig)_rampBaseConfig).RampUpTimeSeconds).Ticks, TargetValue));
                     }
                     else
                     {
-                        linearPoints.Add(new LinearPoint(StartDate.AddSeconds(((RampTimeConfig)_rampBaseConfig).RampDownTimeSeconds).UtcTicks, TargetValue));
+                        linearPoints.Add(new LinearPoint(TimeSpan.FromSeconds(((RampTimeConfig)_rampBaseConfig).RampDownTimeSeconds).Ticks, TargetValue));
                     }
 
                     _rampFunction = new LinearPointFunction(linearPoints);
@@ -240,12 +230,12 @@ namespace paskalON.OperatingModes.Application.Ramps
                     if (StartValue <= TargetValue)
                     {
                         long period = TimeSpan.FromSeconds(((RampTimeConstantConfig)_rampBaseConfig).RampUpTimeConstantSeconds).Ticks;
-                        _rampFunction = new LogarithmicEasingFunction(StartValue, TargetValue, period, StartDate.UtcTicks, ((RampTimeConstantConfig)_rampBaseConfig).TuningValue);
+                        _rampFunction = new LogarithmicEasingFunction(StartValue, TargetValue, period, 0, ((RampTimeConstantConfig)_rampBaseConfig).TuningValue);
                     }
                     else
                     {
                         long period = TimeSpan.FromSeconds(((RampTimeConstantConfig)_rampBaseConfig).RampDownTimeConstantSeconds).Ticks;
-                        _rampFunction = new LogarithmicEasingFunction(StartValue, TargetValue, period, StartDate.UtcTicks, ((RampTimeConstantConfig)_rampBaseConfig).TuningValue);
+                        _rampFunction = new LogarithmicEasingFunction(StartValue, TargetValue, period, 0, ((RampTimeConstantConfig)_rampBaseConfig).TuningValue);
                     }
                 }
                 else

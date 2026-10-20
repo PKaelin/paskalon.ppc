@@ -162,7 +162,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <summary>
         /// Nameplate maximum reactive power rating.
         /// </summary>
-        public ReactivePower NameplateMaximumReactivePower { get => new ReactivePower(_config.PowerConversionSystemDeviceConfig.NameplateMaximumActivePower); }
+        public ReactivePower NameplateMaximumReactivePower { get => new ReactivePower(_config.PowerConversionSystemDeviceConfig.NameplateMaximumReactivePower); }
 
 
         /// <summary>

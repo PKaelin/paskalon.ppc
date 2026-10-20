@@ -367,6 +367,110 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Ramps
 
         [TestMethod]
         [DataRow(0, 0)]
+        [DataRow(1000, 60500)]
+        [DataRow(1500, 90750)]
+        [DataRow(1600, 96800)]
+        [DataRow(1653, 100000)]
+        [DataRow(2000, 100000)]
+        [DataRow(int.MaxValue, 100000)]
+        public void RampControllerRampRateCalculateRampUpPartialLastSecondTest(int timeSpan, double expectedValue)
+        {
+            RampRateConfig config = new RampRateConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampUpRatePerSecond = 60500,
+                RampDownRatePerSecond = 60500,
+            };
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            ramp.Start(0, 100000);
+
+            timeProvider.Advance(TimeSpan.FromMilliseconds(timeSpan));
+            double value = ramp.CalculatePrecision();
+
+            Assert.AreEqual(expectedValue, value);
+        }
+
+
+        [TestMethod]
+        [DataRow(0, 100)]
+        [DataRow(7000, -40)]
+        [DataRow(7250, -45)]
+        [DataRow(7500, -50)]
+        [DataRow(8000, -50)]
+        public void RampControllerRampRateCalculateRampDownPartialLastSecondTest(int timeSpan, double expectedValue)
+        {
+            RampRateConfig config = new RampRateConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampUpRatePerSecond = 10,
+                RampDownRatePerSecond = 20,
+            };
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            ramp.Start(100, -50);
+
+            timeProvider.Advance(TimeSpan.FromMilliseconds(timeSpan));
+            double value = ramp.CalculatePrecision();
+
+            Assert.AreEqual(expectedValue, value);
+        }
+
+
+        [TestMethod]
+        [DataRow(0)]
+        [DataRow(1000)]
+        public void RampControllerRampRateCalculateStartEqualsTargetTest(int timeSpan)
+        {
+            RampRateConfig config = new RampRateConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampUpRatePerSecond = 10,
+                RampDownRatePerSecond = 20,
+            };
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+            ramp.Start(50, 50);
+
+            timeProvider.Advance(TimeSpan.FromMilliseconds(timeSpan));
+            double value = ramp.CalculatePrecision();
+
+            Assert.AreEqual(50, value);
+        }
+
+
+        [TestMethod]
+        [DataRow(0, 10, 0, 20)]
+        [DataRow(-10, 10, 0, 20)]
+        [DataRow(20, 10, 10, 0)]
+        [DataRow(10, -10, 10, 0)]
+        public void RampControllerRampRateStartInvalidRateTest(double startValue, double targetValue, double rampUpRatePerSecond, double rampDownRatePerSecond)
+        {
+            RampRateConfig config = new RampRateConfig
+            {
+                Id = 1,
+                ChangedBy = "Test",
+                RampTimeSeconds = 0,
+                RampUpRatePerSecond = rampUpRatePerSecond,
+                RampDownRatePerSecond = rampDownRatePerSecond,
+            };
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            IRampController ramp = new RampController(NullLogger<RampController>.Instance, timeProvider, config);
+
+            Action start = () => ramp.Start(startValue, targetValue);
+
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(start);
+        }
+
+
+        [TestMethod]
+        [DataRow(0, 0)]
         [DataRow(1, 30)]
         [DataRow(2, 45)]
         [DataRow(3, 60)]

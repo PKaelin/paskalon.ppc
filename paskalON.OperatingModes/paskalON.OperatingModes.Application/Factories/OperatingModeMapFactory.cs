@@ -186,6 +186,7 @@ namespace paskalON.OperatingModes.Application.Factories
         /// <returns>The power conversion system cores without communication error.</returns>
         private static IEnumerable<PcsCoreDto> GetCores(IEnumerable<DerUnitDto> units)
         {
+            // Do not consider DER units that have no power conversion system or have a communication error.
             return units
                 .Select(unit => GetPowerConversionSystem(unit)?.Core)
                 .OfType<PcsCoreDto>()
@@ -200,7 +201,8 @@ namespace paskalON.OperatingModes.Application.Factories
         /// <returns>The total available active power or null if no DER unit reports it.</returns>
         private static ActivePower? GetAvailableActivePower(IEnumerable<DerUnitDto> units)
         {
-            List<double> values = GetCores(units)
+            IEnumerable<PcsCoreDto> cores = GetCores(units);
+            List<double> values = cores
                 .Where(core => core.ActiveAvailablePower.HasValue)
                 .Select(core => core.ActiveAvailablePower!.Value.Watts)
                 .ToList();

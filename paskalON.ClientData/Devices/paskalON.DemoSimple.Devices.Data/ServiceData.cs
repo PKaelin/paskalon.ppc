@@ -264,8 +264,8 @@ namespace paskalON.DemoSimple.Devices.Data
                 PreferredMinimumTemperature = 15,
                 AbsoluteMaxChargeCurrentAmps = 1100,
                 AbsoluteMaxDischargeCurrentAmps = 1200,
-                MaximumDcVoltage = 700,
-                MinimumDcVoltage = 1000,
+                MaximumDcVoltage = 1000,
+                MinimumDcVoltage = 700,
                 ZeroCapacityOnCommLoss = true
             };
             context.BatteryBankDeviceConfigs.Add(bbDevice);
