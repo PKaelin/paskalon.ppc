@@ -80,7 +80,13 @@ namespace paskalON.PowerControls.Domain
         }
 
 
-
+        /// <summary>
+        /// Constructor of <see cref="PowerControlBase"/>.
+        /// </summary>
+        /// <param name="logger">Logger for application logging and diagnostics.</param>
+        /// <param name="config">Power control base configuration.</param>
+        /// <param name="map">Power control base map.</param>
+        /// <param name="publisher">Metrics publisher for registering and publishing metrics.</param>
         public PowerControlBase(ILogger logger, PowerControlBaseConfig config, PowerControlBaseMap map, IMetricsPublisher publisher)
         {
             ArgumentNullException.ThrowIfNull(logger);

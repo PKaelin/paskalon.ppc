@@ -626,6 +626,7 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     NameplateMinimumActivePowerWatt = table.Column<double>(type: "double precision", nullable: false),
                     NameplateMaximumReactivePowerVars = table.Column<double>(type: "double precision", nullable: false),
                     NameplateMinimumReactivePowerVars = table.Column<double>(type: "double precision", nullable: false),
+                    OperatingModeCalculationIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     MetricsIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     SubscriberTopicPcsCore = table.Column<string>(type: "text", nullable: true),
                     SubscriberTopicPcsDetail = table.Column<string>(type: "text", nullable: true),

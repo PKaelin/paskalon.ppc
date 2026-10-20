@@ -337,7 +337,7 @@ namespace paskalON.OperatingModes.Domain.Systems
                 lock (_dataLock)
                 {
                     // The first calculated setpoints are always published
-                    isSetpointChanged = (_hasAppliedTargets is false) || (SetpointActivePowerActual != setpointActivePowerActual) || (SetpointReactivePowerActual != setpointReactivePowerActual);
+                    isSetpointChanged = SetpointActivePowerActual != setpointActivePowerActual || SetpointReactivePowerActual != setpointReactivePowerActual;
                     ActivePowerObjective = signals.FinalActivePower;
                     ReactivePowerObjective = signals.FinalReactivePower;
                     SetpointActivePowerActual = setpointActivePowerActual;
@@ -580,6 +580,7 @@ namespace paskalON.OperatingModes.Domain.Systems
 
             // The new segments cover the step against the offsets of the previous cycle, so running segments keep their own progress
             double previousOffset = transition.Offset;
+            // Call all segments of transition (ramp controller calculate)
             transition.Advance();
             List<TransitionRequest> requests = BuildTransitionRequests(axis, changes);
 

@@ -166,6 +166,9 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     b.Property<double>("NameplateMinimumVoltage")
                         .HasColumnType("double precision");
 
+                    b.Property<int>("OperatingModeCalculationIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PublisherTopicCurrentDerUnitSetpoint")
                         .HasColumnType("text");
 

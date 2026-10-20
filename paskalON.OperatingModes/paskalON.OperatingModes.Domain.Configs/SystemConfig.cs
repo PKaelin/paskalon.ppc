@@ -14,9 +14,16 @@ namespace paskalON.OperatingModes.Domain.Configs
     {
         /// <summary>
         /// Indicates the minimum valid metrics publishing interval value.
-        /// If this value is less than 100 milliseconds it will cause an exception.
+        /// If this value is less than this constant it will cause an exception.
         /// </summary>
         private const long MinimumMetricsIntervalMilliseconds = 200;
+
+
+        /// <summary>
+        /// Indicates the minimum interval, in milliseconds, between operating mode calculations.
+        /// If this value is less than this constant it will cause an exception.
+        /// </summary>
+        private const long MinimumOperatingModeCalculationIntervalMilliseconds = 200;
 
 
         /// <summary>
@@ -112,6 +119,9 @@ namespace paskalON.OperatingModes.Domain.Configs
         /// Systems maximum active power nameplate in watt.
         /// </summary>
         /// <remarks>
+        /// Maximum active power nameplate refers to the highest operating active power a system can continuously and safely operate.
+        /// Most equipment are designed to operate safely with an active power variation of +/- 10% from the rated nameplate.
+        /// </remarks>
         public double NameplateMaximumActivePowerWatt
         {
             get { return field; }
@@ -123,6 +133,9 @@ namespace paskalON.OperatingModes.Domain.Configs
         /// Systems minimum active power nameplate in Watt.
         /// </summary>
         /// <remarks>
+        /// Minimum active power nameplate refers to the lowest operating active power a system can continuously and safely operate.
+        /// Most equipment are designed to operate safely with an active power variation of +/- 10% from the rated nameplate.
+        /// </remarks>
         public double NameplateMinimumActivePowerWatt
         {
             get { return field; }
@@ -134,6 +147,9 @@ namespace paskalON.OperatingModes.Domain.Configs
         /// Systems maximum reactive power nameplate in vars.
         /// </summary>
         /// <remarks>
+        /// Maximum reactive power nameplate refers to the highest operating reactive power a system can continuously and safely operate.
+        /// Most equipment are designed to operate safely with a reactive power variation of +/- 10% from the rated nameplate.
+        /// </remarks>
         public double NameplateMaximumReactivePowerVars
         {
             get { return field; }
@@ -145,11 +161,25 @@ namespace paskalON.OperatingModes.Domain.Configs
         /// Systems minimum reactive power nameplate in vars.
         /// </summary>
         /// <remarks>
+        /// Minimum reactive power nameplate refers to the lowest operating reactive power a system can continuously and safely operate.
+        /// Most equipment are designed to operate safely with a reactive power variation of +/- 10% from the rated nameplate.
+        /// </remarks>
         public double NameplateMinimumReactivePowerVars
         {
             get { return field; }
             set { field = value; }
         }
+
+
+        /// <summary>
+        /// The interval, in milliseconds, between operating mode calculations.
+        /// </summary>
+        public int OperatingModeCalculationIntervalMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumOperatingModeCalculationIntervalMilliseconds); field = value; }
+        } = 1000;
+
 
         /// <summary>
         /// Metrics publishing interval in milliseconds.

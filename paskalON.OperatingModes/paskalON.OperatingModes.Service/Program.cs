@@ -15,6 +15,7 @@ using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Infrastructure.Storage;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
 using paskalON.OperatingModes.Service.Publishers;
+using paskalON.OperatingModes.Service.Workers;
 using paskalON.Telemetry;
 using paskalON.Telemetry.Factories;
 using StackExchange.Redis;
@@ -62,6 +63,12 @@ try
         throw new ApplicationException("START_PUBLISHERS is not configured as a boolean");
     }
 
+    string startWorkerString = Environment.GetEnvironmentVariable("START_WORKERS") ?? "true";
+    if (bool.TryParse(startWorkerString, out var startWorker) == false)
+    {
+        throw new ApplicationException("START_WORKERS is not configured as a boolean");
+    }
+
     Console.WriteLine("Create builder service.....");
     var builder = WebApplication.CreateBuilder(args);
 
@@ -98,12 +105,18 @@ try
     builder.Services.AddSingleton(TimeProvider.System);
     builder.Services.AddSingleton<IOperatingModeMapFactory, OperatingModeMapFactory>();
     builder.Services.AddSingleton<IOperatingModeFactory, OperatingModeFactory>();
+    builder.Services.AddSingleton<OperatingModeService>();
 
     builder.Services.AddSingleton<IOperatingModeManager, OperatingModeManager>();
 
     if (startPublisher == true)
     {
         builder.Services.AddHostedService<MetricsPublisherService>(provider => provider.GetRequiredService<MetricsPublisherService>());
+    }
+
+    if (startWorker == true)
+    {
+        builder.Services.AddHostedService<OperatingModeService>(provider => provider.GetRequiredService<OperatingModeService>());
     }
 
     Console.WriteLine("Building application.....");
@@ -138,6 +151,12 @@ try
         {
             MetricsPublisherService metricsPublisherService = app.Services.GetRequiredService<MetricsPublisherService>();
             metricsPublisherService.Initialize(manager.MetricsPublishers, config.MetricsIntervalMilliseconds, config.StartupDelay);
+        }
+
+        if (startWorker == true)
+        {
+            OperatingModeService operatingModeService = app.Services.GetRequiredService<OperatingModeService>();
+            operatingModeService.Initialize(config.OperatingModeCalculationIntervalMilliseconds);
         }
     }
 

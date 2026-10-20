@@ -43,6 +43,7 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
                 ChangedBy = ChangedBy,
                 Type = PowerControlType.Bess,
                 ReferenceFrequency = 60.0,
+                OperatingModeCalculationIntervalMilliseconds = 1000,
                 MetricsIntervalMilliseconds = 5000,
                 SubscriberTopicPcsCore = "ppc:device:pcs:core",
                 SubscriberTopicPcsDetail = "ppc:device:pcs:detail",
@@ -58,6 +59,12 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
                 SubscriberTopicSystemPowerMeterDetail = "ppc:device:pm:system:detail",
                 SubscriberTopicCircuitPowerMeterCore = "ppc:device:pm:circuit:core",
                 SubscriberTopicCircuitPowerMeterDetail = "ppc:device:pm:circuit:detail",
+                PublisherTopicCurrentSetpoint = "ppc:om:setpoints",
+                PublisherTopicCurrentDerUnitSetpoint = "ppc:om:setpoints:unit",
+                NameplateMaximumActivePowerWatt = 3630000,
+                NameplateMinimumActivePowerWatt = -3630000,
+                NameplateMaximumReactivePowerVars = 3630000,
+                NameplateMinimumReactivePowerVars = -3630000,
             };
             context.SystemConfigs.Add(systemConfig);
 
