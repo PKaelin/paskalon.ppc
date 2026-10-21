@@ -10,11 +10,7 @@
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
-    <None Include="docker-compose.yml" />
-    <None Include=".dockerignore" />
-    <None Include="secrets\database_connection" />
-    <None Include="secrets\messaging_connection" />
-    <None Include="secrets\db_user" />
-    <None Include="secrets\db_password" />
+      <None Include="docker-compose.yml" />
+      <None Include=".dockerignore" />
   </ItemGroup>
 </Project>
