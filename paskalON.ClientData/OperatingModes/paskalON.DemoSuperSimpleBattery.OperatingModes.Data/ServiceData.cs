@@ -127,7 +127,7 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
             MaintenanceModeConfig maintenanceModeConfig = new MaintenanceModeConfig
             {
                 ChangedBy = ChangedBy,
-                Name = "MaintenanceMode-BMS-Unit 1",
+                Name = "MaintenanceMode-BMS-Unit1",
                 DerUnitName = "BMS-Unit 1",
                 IsActive = true,
                 Type = PowerControlType.Bess,
