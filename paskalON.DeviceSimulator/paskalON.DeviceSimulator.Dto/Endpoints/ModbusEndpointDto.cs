@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Dataface.Modbus;
+using System.Text.Json.Serialization;
 
 namespace paskalON.DeviceSimulator.Dto.Endpoints
 {
@@ -26,6 +27,10 @@ namespace paskalON.DeviceSimulator.Dto.Endpoints
         /// <summary>
         /// Modbus data type of the endpoint.
         /// </summary>
+        /// <remarks>
+        /// Serialized as the enum name (e.g. MbInt16, MbFloatLe) instead of its number.
+        /// </remarks>
+        [JsonConverter(typeof(JsonStringEnumConverter<ModbusDataType>))]
         public required ModbusDataType DataType { get; init; }
 
 

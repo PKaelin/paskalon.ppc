@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Dataface.C37s;
+using System.Text.Json.Serialization;
 
 namespace paskalON.DeviceSimulator.Dto.Endpoints
 {
@@ -26,6 +27,10 @@ namespace paskalON.DeviceSimulator.Dto.Endpoints
         /// <summary>
         /// C37 data type of the endpoint.
         /// </summary>
+        /// <remarks>
+        /// Serialized as the enum name (e.g. Analog, Phasor) instead of its number.
+        /// </remarks>
+        [JsonConverter(typeof(JsonStringEnumConverter<C37SignalType>))]
         public required C37SignalType SignalType { get; init; }
 
 
