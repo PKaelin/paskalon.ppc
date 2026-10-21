@@ -15,7 +15,8 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
     /// The PCS starts stopped (Off) with 0 active and reactive power. When started it follows its setpoints limited
     /// by the available power of the connected battery banks and splits its active power across these battery banks
     /// in proportion to their usable capacity. An injected fault puts the PCS into the fault state (no power, AC breaker
-    /// open) until the controller writes the next start, stop or standby command.
+    /// open). Commands are rejected while the fault is active. After the fault is cleared the PCS stays in the fault state
+    /// until the controller writes the next start, stop or standby command.
     /// Vendor simulations only map the command and telemetry registers.
     /// </remarks>
     public abstract class PowerConversionSystemSimulationBase : ISimulatedDevice, IEventInjectable
@@ -144,6 +145,12 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
         }
 
 
+        /// <summary>
+        /// Flag whether a fault is active (fault register other than 0). An active fault rejects all commands.
+        /// </summary>
+        public bool IsFaultActive { get => (_events.Fault ?? 0) != 0; }
+
+
         /// <inheritdoc/>
         public bool HasWarningRegister { get => _events.WarningAddress.HasValue; }
 
@@ -226,8 +233,9 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
 
         /// <inheritdoc/>
         /// <remarks>
-        /// A fault bitmask other than 0 puts the PCS into the fault state. Clearing the fault bitmask only clears
-        /// the register, the PCS stays in the fault state until the next start, stop or standby command.
+        /// A fault bitmask other than 0 puts the PCS into the fault state. While the fault register is not 0, all start,
+        /// stop and standby commands are rejected. Clearing the fault bitmask only clears the register, the PCS stays in
+        /// the fault state until the next start, stop or standby command.
         /// </remarks>
         public void SetEvents(ushort? warning, ushort? fault, ushort? vendorEvent)
         {
@@ -250,9 +258,10 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
         {
             lock (_dataLock)
             {
+                // The command is always taken so that a command written while faulted is not applied later
                 PowerConversionSystemSimulationState? command = ReadCommand();
 
-                if (command.HasValue)
+                if (command.HasValue && IsFaultActive is false)
                 {
                     State = command.Value;
                 }

@@ -247,5 +247,27 @@ namespace paskalON.DeviceSimulator.Equipments.IntegrationTest.PowerConversionSys
             Assert.AreEqual((short)PcsSimpleV1Description.State.On, await ReadRegisterAsync(client, PcsSimpleV1Description.Register.CurrentState));
             Assert.AreEqual(0, await ReadRegisterAsync(client, PcsSimpleV1Description.Register.CurrentFault));
         }
+
+
+        [TestMethod]
+        public async Task PcsSimpleV1SimulationProxyStartWhileFaultActiveStaysFaultedTest()
+        {
+            SimulationStoreRegistry stores = new SimulationStoreRegistry();
+            SimulationModbusDeviceFactory factory = new SimulationModbusDeviceFactory(stores);
+            (IModbusDataface dataface, IModbusClient client) = factory.Create(_pcsModbusConfig!);
+            PcsSimpleV1Proxy device = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, _publisher.Object, dataface, client);
+            PcsSimpleV1Simulation simulation = new PcsSimpleV1Simulation(stores.GetOrCreate(_pcsModbusConfig!), device, new SimulatedGrid());
+            simulation.AttachBatteryBanks(new[] { await CreateConnectedBankAsync() });
+            simulation.SetEvents(null, 0b0000_0010, null);
+
+            await device.StartAsync();
+            await device.SetActivePowerTargetAsync(1500000);
+            await simulation.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+
+            Assert.AreEqual(PowerConversionSystemSimulationState.Fault, simulation.State);
+            Assert.AreEqual((short)PcsSimpleV1Description.State.Fault, await ReadRegisterAsync(client, PcsSimpleV1Description.Register.CurrentState));
+            Assert.AreEqual(0, await ReadRegisterAsync(client, PcsSimpleV1Description.Register.P));
+            Assert.AreEqual(0, await ReadRegisterAsync(client, PcsSimpleV1Description.Register.ACBreaker));
+        }
     }
 }

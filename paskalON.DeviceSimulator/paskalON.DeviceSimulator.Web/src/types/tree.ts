@@ -1,4 +1,4 @@
-import type { C37EndpointDto, ModbusEndpointDto } from './der';
+import type { C37EndpointDto, ModbusEndpointDto, SimulationDto } from './der';
 
 /** What a node represents. Used for the badge and the icon in the accordion header. */
 export type NodeKind =
@@ -43,6 +43,8 @@ export interface TreeNode {
     deviceId?: number;
     modbusEndpoints?: ModbusEndpointDto[];
     c37Endpoints?: C37EndpointDto[];
+    /** Simulation state - only set for simulated PCS and battery banks (reference into the DerDto). */
+    simulation?: SimulationDto;
     children: TreeNode[];
 }
 

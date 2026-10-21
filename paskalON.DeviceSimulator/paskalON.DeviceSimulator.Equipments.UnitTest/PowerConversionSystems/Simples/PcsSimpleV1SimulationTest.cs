@@ -221,6 +221,48 @@ namespace paskalON.DeviceSimulator.Equipments.UnitTest.PowerConversionSystems.Si
 
 
         [TestMethod]
+        [DataRow(PcsSimpleV1Description.State.On, DisplayName = "Start command is rejected while faulted")]
+        [DataRow(PcsSimpleV1Description.State.Standby, DisplayName = "Standby command is rejected while faulted")]
+        [DataRow(PcsSimpleV1Description.State.Off, DisplayName = "Stop command is rejected while faulted")]
+        public async Task TickAsyncCommandWhileFaultActiveIsRejectedTest(PcsSimpleV1Description.State command)
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            PcsSimpleV1Simulation pcs = new PcsSimpleV1Simulation(store, CreatePcsSettings(), new SimulatedGrid());
+            pcs.AttachBatteryBanks(new[] { await CreateConnectedBankAsync(11, 5000000, 2500000) });
+            WriteCommand(store, PcsSimpleV1Description.Register.SelectorState, (short)PcsSimpleV1Description.State.On);
+            WriteCommand(store, PcsSimpleV1Description.Register.PReference, 1000);
+            await pcs.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+            pcs.SetEvents(null, 0b0000_0100, null);
+
+            WriteCommand(store, PcsSimpleV1Description.Register.SelectorState, (short)command);
+            await pcs.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+
+            Assert.IsTrue(pcs.IsFaultActive);
+            Assert.AreEqual(PowerConversionSystemSimulationState.Fault, pcs.State);
+            Assert.AreEqual((short)PcsSimpleV1Description.State.Fault, ReadRegister(store, PcsSimpleV1Description.Register.CurrentState));
+            Assert.AreEqual(0, ReadRegister(store, PcsSimpleV1Description.Register.P));
+        }
+
+
+        [TestMethod]
+        public async Task TickAsyncCommandRejectedWhileFaultedIsNotAppliedAfterClearingTest()
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            PcsSimpleV1Simulation pcs = new PcsSimpleV1Simulation(store, CreatePcsSettings(), new SimulatedGrid());
+            pcs.AttachBatteryBanks(new[] { await CreateConnectedBankAsync(11, 5000000, 2500000) });
+            pcs.SetEvents(null, 1, null);
+            WriteCommand(store, PcsSimpleV1Description.Register.SelectorState, (short)PcsSimpleV1Description.State.On);
+            await pcs.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+
+            pcs.SetEvents(null, 0, null);
+            await pcs.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+
+            Assert.IsFalse(pcs.IsFaultActive);
+            Assert.AreEqual(PowerConversionSystemSimulationState.Fault, pcs.State);
+        }
+
+
+        [TestMethod]
         public async Task SlowDownPowerRampsActivePowerTest()
         {
             SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());

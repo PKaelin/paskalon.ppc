@@ -4,6 +4,7 @@ import AccordionSection from './AccordionSection.vue';
 import PropertyGrid from './PropertyGrid.vue';
 import ModbusEndpointGrid from './ModbusEndpointGrid.vue';
 import C37EndpointGrid from './C37EndpointGrid.vue';
+import SimulationPanel from './SimulationPanel.vue';
 import type { TreeNode } from '@/types/tree';
 
 /**
@@ -46,6 +47,12 @@ const counter = computed(() => {
                       :counter="counter"
                       :matched="matchedIds.has(node.id)">
         <PropertyGrid :rows="node.properties" />
+
+        <SimulationPanel v-if="node.simulation && (node.kind === 'pcs' || node.kind === 'batteryBank')"
+                         :simulation="node.simulation"
+                         :device-id="deviceId"
+                         :device-name="node.name"
+                         :is-power-conversion-system="node.kind === 'pcs'" />
 
         <ModbusEndpointGrid v-if="node.modbusEndpoints && node.modbusEndpoints.length > 0"
                             :endpoints="node.modbusEndpoints"

@@ -1,5 +1,5 @@
 import { config } from './config';
-import type { DerDto } from '@/types/der';
+import type { DerDto, SimulationDeviceTypeValue } from '@/types/der';
 
 export class ApiError extends Error {
     public readonly status: number;
@@ -157,6 +157,75 @@ export async function setExpanded(
             requestUrl
         );
     }
+}
+
+/**
+ * POSTs a JSON body to the simulation controller. The service answers 404 when the
+ * device does not exist and 400 when the request is not supported (e.g. a register the
+ * device does not have) - the text of the answer is part of the error message.
+ */
+async function postSimulation(action: string, body: unknown, what: string): Promise<void> {
+    const base = config().simulationEndpoint.replace(/\/+$/, '');
+    const requestUrl = url(`${base}/${action}`);
+
+    const response = await fetch(requestUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+        const detail = (await response.text()).trim();
+        const suffix = detail.length > 0 && detail.length < 300 ? `: ${detail}` : '.';
+
+        throw new ApiError(
+            `${what} failed with ${response.status} ${response.statusText}${suffix}`,
+            response.status,
+            requestUrl
+        );
+    }
+}
+
+/** Body of POST {apiBaseUrl}/v1/simulation/setevents. Null leaves a register unchanged. */
+export interface SetEventsRequest {
+    deviceType: SimulationDeviceTypeValue;
+    deviceId: number;
+    warning?: number | null;
+    fault?: number | null;
+    vendorEvent?: number | null;
+}
+
+/**
+ * Writes the warning, fault and vendor event bitmasks of a simulated PCS or battery bank.
+ * A PCS fault other than 0 puts the PCS into its fault state.
+ */
+export async function setEvents(request: SetEventsRequest): Promise<void> {
+    await postSimulation('setevents', request, 'Setting the events');
+}
+
+/** Body of POST {apiBaseUrl}/v1/simulation/setcommunication. */
+export interface SetCommunicationRequest {
+    deviceType: SimulationDeviceTypeValue;
+    deviceId: number;
+    isResponding: boolean;
+}
+
+/** Starts (true) or stops (false, communication loss) answering Modbus requests of a device. */
+export async function setCommunication(request: SetCommunicationRequest): Promise<void> {
+    await postSimulation('setcommunication', request, 'Changing the communication');
+}
+
+/** Body of POST {apiBaseUrl}/v1/simulation/slowdownpower. */
+export interface SlowDownPowerRequest {
+    deviceId: number;
+    /** Maximum change per second in percent of the nameplate. 0 = instant. */
+    slowActivePowerByPercent: number;
+    slowReactivePowerByPercent: number;
+}
+
+/** Slows down the active and reactive power response of a simulated PCS. */
+export async function slowDownPower(request: SlowDownPowerRequest): Promise<void> {
+    await postSimulation('slowdownpower', request, 'Slowing down the power');
 }
 
 /** Absolute URL of the SignalR hub (resolves a relative path against the current origin). */

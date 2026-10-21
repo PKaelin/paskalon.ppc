@@ -36,12 +36,47 @@ export interface C37EndpointDto {
     isReadOnly: boolean;
 }
 
+/**
+ * Device types of the simulator control API (SimulationDeviceType on the server).
+ * Device ids are only unique within one device type.
+ */
+export const SimulationDeviceType = {
+    PowerConversionSystem: 0,
+    BatteryBank: 1
+} as const;
+
+export type SimulationDeviceTypeValue = (typeof SimulationDeviceType)[keyof typeof SimulationDeviceType];
+
+/** Simulation state of a simulated PCS or battery bank. */
+export interface SimulationDto {
+    /** Serialized as number or string (JsonStringEnumConverter). */
+    deviceType: number | string;
+    /** Vendor independent state, e.g. Off, On, Standby, Fault, Disconnected, PreCharging, Connected. */
+    state: string;
+    /** False while a communication loss is simulated. */
+    isResponding: boolean;
+    hasWarningRegister: boolean;
+    hasFaultRegister: boolean;
+    hasVendorEventRegister: boolean;
+    /** 16 bit masks - null when the device has no such register. */
+    warning?: number | null;
+    fault?: number | null;
+    vendorEvent?: number | null;
+    /** PCS only: maximum power change per second in percent of the nameplate (0 = instant). */
+    slowActivePowerByPercent?: number | null;
+    slowReactivePowerByPercent?: number | null;
+    /** Battery bank only. */
+    usableStateOfCharge?: number | null;
+}
+
 export interface PcsDto extends IDevice {
     endpoints: ModbusEndpointDto[];
+    simulation?: SimulationDto | null;
 }
 
 export interface BbDto extends IDevice {
     endpoints: ModbusEndpointDto[];
+    simulation?: SimulationDto | null;
 }
 
 export interface PvDto extends IDevice {

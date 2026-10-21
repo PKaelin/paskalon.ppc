@@ -299,7 +299,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             if (Enum.IsDefined(typeof(PcsSimpleV1Description.WarningCode), warning) == false)
             {
                 _logger.LogError("{Name} Unknow warning code found: {Warning}", Name, warning);
-                WarningStates.Add("Unknown", true);
+                WarningStates["Unknown"] = true;
             }
             else
             {
@@ -325,7 +325,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             if (Enum.IsDefined(typeof(PcsSimpleV1Description.FaultCode), fault) == false)
             {
                 _logger.LogError("{Name} Unknow fault code found: {Fault}", Name, fault);
-                FaultStates.Add("Unknown", true);
+                FaultStates["Unknown"] = true;
             }
             else
             {
@@ -351,7 +351,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
             if (Enum.IsDefined(typeof(PcsSimpleV1Description.VendorEvents), vendorEvent) == false)
             {
                 _logger.LogError("{Name} Unknow vendor event found: {VendorEvent}", Name, vendorEvent);
-                VendorEvents.Add("Unknown", true);
+                VendorEvents["Unknown"] = true;
             }
             else
             {

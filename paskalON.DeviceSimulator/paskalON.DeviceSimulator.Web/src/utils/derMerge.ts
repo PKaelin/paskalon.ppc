@@ -6,7 +6,8 @@ import type {
     PmBaseDto,
     BbDto,
     PcsDto,
-    PvDto
+    PvDto,
+    SimulationDto
 } from '@/types/der';
 import { isBatteryUnit, isSolarUnit } from '@/types/der';
 
@@ -31,6 +32,8 @@ export interface DeviceUpdate {
     deviceId: number;
     name: string;
     endpoints: (ModbusEndpointDto | C37EndpointDto)[];
+    /** Simulation state of a simulated PCS or battery bank. */
+    simulation?: SimulationDto | null;
 }
 
 export function deviceKey(deviceId: number, name: string): string {
@@ -157,6 +160,7 @@ export function applyDeviceUpdate(der: DerDto, update: DeviceUpdate): boolean {
     }
 
     mergeEndpoints(target.endpoints, update.endpoints ?? []);
+    mergeSimulation(target, update.simulation);
     return true;
 }
 
@@ -189,6 +193,24 @@ export function applyUnitUpdate(der: DerDto, update: DerUnitDto): boolean {
 
 function mergeDevice(target: AnyDevice, source: AnyDevice): void {
     mergeEndpoints(target.endpoints, source.endpoints ?? []);
+    mergeSimulation(target, 'simulation' in source ? source.simulation : undefined);
+}
+
+/**
+ * Copies the simulation state IN PLACE so the tree node keeps its reference to the object.
+ */
+function mergeSimulation(target: AnyDevice, simulation: SimulationDto | null | undefined): void {
+    if (!simulation) {
+        return;
+    }
+
+    const own = target as PcsDto | BbDto;
+
+    if (own.simulation) {
+        Object.assign(own.simulation, simulation);
+    } else {
+        own.simulation = simulation;
+    }
 }
 
 function mergeDeviceList<T extends AnyDevice>(target: T[], source: T[]): void {

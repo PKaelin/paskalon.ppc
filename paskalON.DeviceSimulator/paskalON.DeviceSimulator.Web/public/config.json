@@ -9,5 +9,6 @@
   "enableWriteBack": false,
   "writeBackEndpoint": "/v1/der/setendpointvalue",
   "autoRefreshSeconds": 0,
-  "pascalCaseApi": false
+  "pascalCaseApi": false,
+  "simulationEndpoint": "/v1/simulation"
 }

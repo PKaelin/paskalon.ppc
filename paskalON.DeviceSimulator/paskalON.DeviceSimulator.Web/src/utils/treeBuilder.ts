@@ -49,6 +49,7 @@ function modbusDeviceNode(
         deviceId: device.deviceId,
         properties: deviceProperties(device),
         modbusEndpoints: device.endpoints ?? [],
+        simulation: 'simulation' in device ? (device.simulation ?? undefined) : undefined,
         children: []
     };
 }

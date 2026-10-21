@@ -17,6 +17,7 @@ CONFIG_FILE=/usr/share/nginx/html/config.json
 : "${APP_EXPANSION_SYNC_DEBOUNCE_MS:=250}"
 : "${APP_ENABLE_SIGNALR:=true}"
 : "${APP_SIGNALR_HUB_URL:=/hubs/der}"
+: "${APP_SIMULATION_ENDPOINT:=/v1/simulation}"
 
 cat > "$CONFIG_FILE" <<JSON
 {
@@ -30,7 +31,8 @@ cat > "$CONFIG_FILE" <<JSON
   "expansionSyncDebounceMs": ${APP_EXPANSION_SYNC_DEBOUNCE_MS},
   "enableSignalR": ${APP_ENABLE_SIGNALR},
   "signalRHubUrl": "${APP_SIGNALR_HUB_URL}",
-  "pascalCaseApi": ${APP_PASCAL_CASE_API}
+  "pascalCaseApi": ${APP_PASCAL_CASE_API},
+  "simulationEndpoint": "${APP_SIMULATION_ENDPOINT}"
 }
 JSON
 

@@ -72,6 +72,7 @@ docker compose -f docker-compose.yml -f docker-compose.mock.yml up --build   # o
 | `APP_WRITE_BACK_ENDPOINT` | `/v1/der/setendpointvalue` | Path of the write endpoint |
 | `APP_AUTO_REFRESH_SECONDS` | `0` | Periodic reload (0 = off) |
 | `APP_PASCAL_CASE_API` | `false` | Set to `true` if the service serializes PascalCase |
+| `APP_SIMULATION_ENDPOINT` | `/v1/simulation` | Path of the simulation control controller (events, communication loss, slow down) |
 
 These are written into `/usr/share/nginx/html/config.json` at container start, so one image can be
 re-pointed at another service **without a rebuild**. Outside Docker the same file lives in

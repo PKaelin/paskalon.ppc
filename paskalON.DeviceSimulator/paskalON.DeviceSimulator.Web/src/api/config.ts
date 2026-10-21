@@ -29,6 +29,8 @@ export interface AppConfig {
     signalRHubUrl: string;
     /** Set to true if the web service serializes PascalCase instead of camelCase. */
     pascalCaseApi?: boolean;
+    /** Relative path of the simulation control controller (setevents, setcommunication, slowdownpower). */
+    simulationEndpoint: string;
 }
 
 const defaultConfig: AppConfig = {
@@ -42,7 +44,8 @@ const defaultConfig: AppConfig = {
     expansionSyncDebounceMs: 250,
     enableSignalR: true,
     signalRHubUrl: '/hubs/der',
-    pascalCaseApi: false
+    pascalCaseApi: false,
+    simulationEndpoint: '/v1/simulation'
 };
 
 let current: AppConfig = defaultConfig;
