@@ -4,10 +4,13 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
+using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Configs.OpenModes;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Configs.Ramps;
+using paskalON.OperatingModes.Domain.Configs.SafetyFunctions;
 using paskalON.OperatingModes.Infrastructure.Storage;
 
 namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
@@ -27,6 +30,7 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
         public static async Task CreateAsync(IOperatingModeContext context)
         {
             await CreateCore(context);
+            await CreateSafetyFunctions(context);
             await CreateBasicOperatingModes(context);
         }
 
@@ -73,7 +77,39 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
 
 
         /// <summary>
-        /// Create basic constraints and power control configurations.
+        /// Create safety functions  configurations.
+        /// </summary>
+        /// <param name="context">Database context.</param>
+        /// <returns>Task</returns>
+        private static async Task CreateSafetyFunctions(IOperatingModeContext context)
+        {
+            RampRateConfig shutDownRampRateConfig = new RampRateConfig
+            {
+                ChangedBy = ChangedBy,
+                RampTimeSeconds = 0,
+                RampUpRatePerSecond = 90000,
+                RampDownRatePerSecond = 90000,
+            };
+            context.RampRateConfigs.Add(shutDownRampRateConfig);
+
+            ShutdownModeConfig shutdownMode = new ShutdownModeConfig
+            {
+                ChangedBy = ChangedBy,
+                Name = "ShutdownMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                RampConfig = shutDownRampRateConfig
+            };
+
+            context.ShutdownModeConfigs.Add(shutdownMode);
+
+            await context.SaveChangesAsync();
+        }
+
+
+
+        /// <summary>
+        /// Create basic operating modes configurations.
         /// </summary>
         /// <param name="context">Database context.</param>
         /// <returns>Task</returns>
@@ -91,7 +127,7 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
             MaintenanceModeConfig maintenanceModeConfig = new MaintenanceModeConfig
             {
                 ChangedBy = ChangedBy,
-                Name = "MaintenanceMode",
+                Name = "MaintenanceMode-BMS-Unit 1",
                 DerUnitName = "BMS-Unit 1",
                 IsActive = true,
                 Type = PowerControlType.Bess,
@@ -118,6 +154,27 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
                 RampConfig = rampRateConfig,
             };
             context.ReactivePowerFixedModeConfigs.Add(reactivePowerFixedModeConfig);
+
+
+            ActivePowerModeConfig activePowerModeConfig = new ActivePowerModeConfig
+            {
+                ChangedBy = ChangedBy,
+                Name = "ActivePowerMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                RampConfig = rampRateConfig,
+            };
+            context.ActivePowerModeConfigs.Add(activePowerModeConfig);
+
+            ReactivePowerModeConfig reactivePowerModeConfig = new ReactivePowerModeConfig
+            {
+                ChangedBy = ChangedBy,
+                Name = "ReactivePowerMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                RampConfig = rampRateConfig,
+            };
+            context.ReactivePowerModeConfigs.Add(reactivePowerModeConfig);
 
             await context.SaveChangesAsync();
         }
