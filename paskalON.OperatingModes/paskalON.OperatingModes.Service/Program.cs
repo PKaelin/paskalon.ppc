@@ -3,6 +3,10 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using paskalON.Devices.Client;
 using paskalON.Devices.Client.Subscribers;
 using paskalON.Infrastructure.Repositories;
@@ -118,6 +122,47 @@ try
     {
         builder.Services.AddHostedService<OperatingModeService>(provider => provider.GetRequiredService<OperatingModeService>());
     }
+
+    // Configure OpenTelemetry logging, metrics, & tracing with auto-start using the
+    // AddOpenTelemetry extension from OpenTelemetry.Extensions.Hosting.
+    builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r
+        .Clear()
+        .AddService(
+            serviceName: builder.Environment.ApplicationName,
+            serviceVersion: typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",
+            serviceInstanceId: Environment.MachineName))
+        .WithLogging(builder =>
+        {
+            builder.AddOtlpExporter((otlpOptions, logRecordExportProcessorOptions) =>
+            {
+                otlpOptions.Endpoint = new Uri(logEndpointString);
+                otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+            });
+        })
+        .WithMetrics(builder =>
+        {
+            builder.AddAspNetCoreInstrumentation();
+            builder.AddMeter("OperatingMode");
+
+            builder.AddOtlpExporter((otlpOptions, metricReaderOptions) =>
+            {
+                otlpOptions.Endpoint = new Uri(metricsEndpointString);
+                otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 5000;
+            });
+        })
+        .WithTracing(builder =>
+        {
+            builder.AddAspNetCoreInstrumentation();
+            builder.AddSource("PPC.OperatingModes");
+            builder.AddOtlpExporter((otlpOptions) =>
+            {
+                otlpOptions.Endpoint = new Uri(tracingEndpointString);
+                otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+            });
+        });
+    // TODO: Only publish telemetry when operating mode is enabled!
 
     Console.WriteLine("Building application.....");
     app = builder.Build();
