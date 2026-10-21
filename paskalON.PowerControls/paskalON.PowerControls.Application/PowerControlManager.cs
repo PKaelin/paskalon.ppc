@@ -331,7 +331,8 @@ namespace paskalON.PowerControls.Application
         {
             return new SystemPowerControlMap
             {
-                State = () => GetDerUnits().Any(u => GetPcs(u)?.Core?.State == PcsState.Started) ? SystemState.Started : SystemState.Stopped
+                State = () => GetDerUnits().Any(u => GetPcs(u)?.Core?.State == PcsState.Started && u.IsInMaintenanceMode == false)
+                    ? SystemState.Started : SystemState.Stopped
             };
         }
 

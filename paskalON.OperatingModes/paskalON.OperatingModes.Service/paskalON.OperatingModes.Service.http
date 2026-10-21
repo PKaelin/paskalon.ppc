@@ -39,12 +39,24 @@ Content-Type: application/json
 #------------------------------------------------------------------------------
 # System controller
 #------------------------------------------------------------------------------
+POST {{paskalON.OperatingModes.Service_HostAddress}}/api/v1/system/startallpcs
+
+###
+
+POST {{paskalON.OperatingModes.Service_HostAddress}}/api/v1/system/stopallpcs
+
+###
+
+POST {{paskalON.OperatingModes.Service_HostAddress}}/api/v1/system/standbyallpcs
+
+###
+
 POST {{paskalON.OperatingModes.Service_HostAddress}}/api/v1/system/setsetpoint
 Content-Type: application/json
 
 {
-    "activePowerWatts": 100000,
-    "reactivePowerVars": 50000
+    "activePowerWatts": 3000000,
+    "reactivePowerVars": 1000000
 }
 
 ###
