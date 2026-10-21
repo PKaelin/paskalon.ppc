@@ -3,129 +3,121 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Dataface.Modbus;
-using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
+using paskalON.DeviceSimulator.Equipments.Grids;
 using paskalON.DeviceSimulator.Equipments.Simulations;
-using paskalON.Maths.Randoms;
-using paskalON.Protocols.Modbus.Stores;
-using System.Diagnostics;
 
 namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples
 {
     /// <summary>
     /// Simulates the register behavior of a simple V1 PCS.
     /// </summary>
-    public sealed class PcsSimpleV1Simulation : ISimulatedDevice
+    /// <remarks>
+    /// Power registers are in kilowatts / kilovolt-amperes reactive.
+    /// </remarks>
+    public sealed class PcsSimpleV1Simulation : PowerConversionSystemSimulationBase
     {
-        // TODO: read from configuration
-        private readonly float _referenceFrequency = 60;
-
         /// <summary>
-        /// Random walker for frequency.
+        /// Constructor of <see cref="PcsSimpleV1Simulation"/>.
         /// </summary>
-        private readonly RandomWalker<float> _frequencyWalker;
-
-
-        /// <summary>
-        /// Random walker for Voltage.
-        /// </summary>
-        private readonly RandomWalker<float> _voltageWalker;
-
-
-        /// <summary>
-        /// Random walker for Current.
-        /// </summary>
-        private readonly RandomWalker<float> _currentWalker;
-
-
-
-        /// <summary>
-        /// Modbus data store for this device simulation.
-        /// </summary>
-        private readonly IModbusDataStore _store;
-
-
-        /// <summary>
-        /// Simulated device instance.
-        /// </summary>
-        private readonly PcsSimpleV1Proxy _device;
-
-
-        /// <summary>
-        /// Battery storage unit of the device instance.
-        /// </summary>
-        private readonly DerBatteryStorageUnit _unit;
-
-
-        /// <inheritdoc/>
-        public string Name { get => _device.Name; }
+        /// <param name="store">Backing Modbus store.</param>
+        /// <param name="device">Simulated device.</param>
+        /// <param name="grid">Shared simulated grid.</param>
+        public PcsSimpleV1Simulation(SimulationModbusDataStore store, PcsSimpleV1Proxy device, SimulatedGrid grid)
+            : this(store, PowerConversionSystemSimulationSettings.FromDevice(device), grid)
+        {
+        }
 
 
         /// <summary>
         /// Constructor of <see cref="PcsSimpleV1Simulation"/>.
         /// </summary>
         /// <param name="store">Backing Modbus store.</param>
-        /// <param name="device">Simulated device.</param>
-        public PcsSimpleV1Simulation(IModbusDataStore store, PcsSimpleV1Proxy device)
+        /// <param name="settings">Nameplate settings.</param>
+        /// <param name="grid">Shared simulated grid.</param>
+        public PcsSimpleV1Simulation(SimulationModbusDataStore store, PowerConversionSystemSimulationSettings settings, SimulatedGrid grid)
+            : base(store, settings, grid, (int)PcsSimpleV1Description.Register.CurrentWarning, (int)PcsSimpleV1Description.Register.CurrentFault,
+                  (int)PcsSimpleV1Description.Register.CurrentVendorEvent)
         {
-            ArgumentNullException.ThrowIfNull(store);
-            ArgumentNullException.ThrowIfNull(device);
-
-            _store = store;
-            _device = device;
-            _unit = (DerBatteryStorageUnit)device.DerUnit;
-            _frequencyWalker = new RandomWalker<float>(_referenceFrequency, 0.005f, _referenceFrequency - 0.03f, _referenceFrequency + 0.03f, 1);
-            _voltageWalker = new RandomWalker<float>(500, 1, 100, 900, 50);
-            _currentWalker = new RandomWalker<float>(100, 1, 10, 150, 50);
         }
 
 
         /// <inheritdoc/>
-        public Task TickAsync(TimeSpan elapsed, CancellationToken cancellationToken)
+        protected override PowerConversionSystemSimulationState? ReadCommand()
         {
-            ushort heartbeat = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.Heartbeat);
-            ushort selector = RegisterSimulation.Read(_store, (int)PcsSimpleV1Description.Register.SelectorState);
-            double reactiveTarget = RegisterSimulation.Read<double>(_store, (int)PcsSimpleV1Description.Register.QReference, ModbusDataType.MbInt16, ModbusScale.Upscale1000);
-            double activeTarget = RegisterSimulation.Read<double>(_store, (int)PcsSimpleV1Description.Register.PReference, ModbusDataType.MbInt16, ModbusScale.Upscale1000);
+            if (Store.TryTakeWrite((int)PcsSimpleV1Description.Register.SelectorState) is false)
+            {
+                return null;
+            }
 
-            ushort? currentState = null;
+            ushort selector = RegisterSimulation.Read(Store.Device, (int)PcsSimpleV1Description.Register.SelectorState);
 
             switch (selector)
             {
-                case 2: currentState = (ushort)PcsSimpleV1Description.State.Off; break;
-                case 3: currentState = (ushort)PcsSimpleV1Description.State.On; break;
-                case 6: currentState = (ushort)PcsSimpleV1Description.State.Standby; break;
+                case (ushort)PcsSimpleV1Description.State.On:
+                    return PowerConversionSystemSimulationState.On;
+                case (ushort)PcsSimpleV1Description.State.Off:
+                case (ushort)PcsSimpleV1Description.State.Stop:
+                    return PowerConversionSystemSimulationState.Off;
+                case (ushort)PcsSimpleV1Description.State.Standby:
+                    return PowerConversionSystemSimulationState.Standby;
+                default:
+                    return null;
             }
+        }
 
-            if (currentState != null)
+
+        /// <inheritdoc/>
+        protected override (double ActivePower, double ReactivePower) ReadSetpoints()
+        {
+            double active = RegisterSimulation.Read<double>(Store.Device, (int)PcsSimpleV1Description.Register.PReference,
+                ModbusDataType.MbInt16, ModbusScale.Upscale1000);
+            double reactive = RegisterSimulation.Read<double>(Store.Device, (int)PcsSimpleV1Description.Register.QReference,
+                ModbusDataType.MbInt16, ModbusScale.Upscale1000);
+
+            return (active, reactive);
+        }
+
+
+        /// <inheritdoc/>
+        protected override void WriteTelemetry(PowerConversionSystemSimulationTelemetry telemetry)
+        {
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.CurrentState, (ushort)GetState(telemetry.State));
+            // Power
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.P, telemetry.ActivePower, ModbusDataType.MbInt16, ModbusScale.Downscale1000);
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.Q, telemetry.ReactivePower, ModbusDataType.MbInt16, ModbusScale.Downscale1000);
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.PAvailable, telemetry.ActiveAvailablePower,
+                ModbusDataType.MbInt16, ModbusScale.Downscale1000);
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.QAvailable, telemetry.ReactiveAvailablePower,
+                ModbusDataType.MbInt16, ModbusScale.Downscale1000);
+            // Breakers and contactors
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.ACBreaker, (ushort)(telemetry.IsACBreakerClosed ? 1 : 0));
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.DcContactor, (ushort)(telemetry.IsDcContactorClosed ? 1 : 0));
+            // Frequency, current and voltage
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.Frequency, telemetry.Frequency, ModbusDataType.MbUint16, ModbusScale.Upscale100);
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.DCCurrent, telemetry.DcCurrent, ModbusDataType.MbInt16, ModbusScale.NoScale);
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.DCVoltage, telemetry.DcVoltage, ModbusDataType.MbInt16, ModbusScale.NoScale);
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.ACCurrent, telemetry.AcCurrent, ModbusDataType.MbInt16, ModbusScale.NoScale);
+            RegisterSimulation.Write(Store.Device, (int)PcsSimpleV1Description.Register.ACVoltage, telemetry.AcVoltage, ModbusDataType.MbInt16, ModbusScale.NoScale);
+        }
+
+
+        /// <summary>
+        /// Maps the simulated state to the device state.
+        /// </summary>
+        private static PcsSimpleV1Description.State GetState(PowerConversionSystemSimulationState state)
+        {
+            switch (state)
             {
-                RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.CurrentState, (ushort)currentState);
+                case PowerConversionSystemSimulationState.On:
+                    return PcsSimpleV1Description.State.On;
+                case PowerConversionSystemSimulationState.Standby:
+                    return PcsSimpleV1Description.State.Standby;
+                case PowerConversionSystemSimulationState.Fault:
+                    return PcsSimpleV1Description.State.Fault;
+                default:
+                    return PcsSimpleV1Description.State.Off;
             }
-
-            // Whatever the reference is also the actual output in a perfect system
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.P, activeTarget, ModbusDataType.MbInt16, ModbusScale.Downscale1000);
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.Q, reactiveTarget, ModbusDataType.MbInt16, ModbusScale.Downscale1000);
-            // For now we just set the nameplate
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.PAvailable, _device.NameplateMaximumActivePower.KiloWatts, ModbusDataType.MbInt16);
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.QAvailable, _device.NameplateMaximumReactivePower.KiloVoltAmperesReactive, ModbusDataType.MbInt16);
-            // Breakers and contactors are closed
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.ACBreaker, 1);
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.DcContactor, 1);
-            // Frequency
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.Frequency, _frequencyWalker.Next(), ModbusDataType.MbInt16, ModbusScale.Upscale1000);
-            // Electrical
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.DCCurrent, _currentWalker.Next(), ModbusDataType.MbInt16, ModbusScale.NoScale);
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.DCVoltage, _voltageWalker.Next(), ModbusDataType.MbInt16, ModbusScale.NoScale);
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.ACCurrent, _currentWalker.Next(), ModbusDataType.MbInt16, ModbusScale.NoScale);
-            RegisterSimulation.Write(_store, (int)PcsSimpleV1Description.Register.ACVoltage, _voltageWalker.Next(), ModbusDataType.MbInt16, ModbusScale.NoScale);
-
-            if (System.Diagnostics.Debugger.IsAttached == true)
-            {
-                Debug.WriteLine($"{DateTime.Now.ToString("HH:mm:ss")} - {Name} - Heartbeat: {heartbeat} " +
-                    $"Selector: {selector} ActiveTarget: {activeTarget} ReactiveTarget: {reactiveTarget}");
-            }
-
-            return Task.CompletedTask;
         }
     }
 }

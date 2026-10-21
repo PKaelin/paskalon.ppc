@@ -9,61 +9,67 @@ using paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples;
 using paskalON.Devices.Equipments.Meters.PowerMeters.Simples;
 using paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics;
 using paskalON.Devices.Equipments.PowerConversionSystems.Simples;
+using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries;
 using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries.Simples;
+using paskalON.DeviceSimulator.Equipments.Grids;
 using paskalON.DeviceSimulator.Equipments.Meters.PowerMeters.Simples;
+using paskalON.DeviceSimulator.Equipments.PowerConversionSystems;
 using paskalON.DeviceSimulator.Equipments.PowerConversionSystems.PowerElectronics;
 using paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Protocols.C37118.Simulations;
-using paskalON.Protocols.Modbus.Stores;
 
 namespace paskalON.DeviceSimulator.Application.Factories
 {
     /// <summary>
-    /// Creates simulator models for supported production PCS proxies.
+    /// Creates simulator models for supported production device proxies.
     /// </summary>
     public sealed class PowerConversionSystemSimulationModelFactory : ISimulationModelFactory
     {
         /// <inheritdoc/>
-        public ISimulatedDevice? Create(PowerConversionSystemBase device, IModbusDataStore store)
+        public PowerConversionSystemSimulationBase? Create(PowerConversionSystemBase device, SimulationModbusDataStore store, SimulatedGrid grid)
         {
             ArgumentNullException.ThrowIfNull(device);
             ArgumentNullException.ThrowIfNull(store);
+            ArgumentNullException.ThrowIfNull(grid);
 
             return device switch
             {
-                PcsSimpleV1Proxy => new PcsSimpleV1Simulation(store, (PcsSimpleV1Proxy)device),
-                PcsPcskV4Proxy => new PcsPcskV4Simulation(store, (PcsPcskV4Proxy)device),
-                PcsHemkV4Proxy => new PcsHemkV4Simulation(store, (PcsHemkV4Proxy)device),
+                PcsSimpleV1Proxy proxy => new PcsSimpleV1Simulation(store, proxy, grid),
+                PcsPcskV4Proxy proxy => new PcsPcskV4Simulation(store, proxy, grid),
+                PcsHemkV4Proxy proxy => new PcsHemkV4Simulation(store, proxy, grid),
                 _ => null
             };
         }
 
 
         /// <inheritdoc/>
-        public ISimulatedDevice? Create(BatteryBankBase device, IModbusDataStore store)
+        public BatteryBankSimulationBase? Create(BatteryBankBase device, SimulationModbusDataStore store, IReadOnlyDictionary<string, string> customs)
         {
             ArgumentNullException.ThrowIfNull(device);
             ArgumentNullException.ThrowIfNull(store);
+            ArgumentNullException.ThrowIfNull(customs);
 
             return device switch
             {
-                BbSimpleV1Proxy => new BbSimpleV1Simulation(store, (BbSimpleV1Proxy)device),
+                BbSimpleV1Proxy proxy => new BbSimpleV1Simulation(store, proxy, customs),
                 _ => null
             };
         }
 
 
         /// <inheritdoc/>
-        public ISimulatedDevice? Create(PowerMeterBase device, PmuDataSimulation stream, ICollection<PowerConversionSystemBase> powerConversionSystems)
+        public ISimulatedDevice? Create(PowerMeterBase device, PmuDataSimulation stream, IReadOnlyCollection<PowerConversionSystemSimulationBase> powerConversionSystems,
+            SimulatedGrid grid)
         {
             ArgumentNullException.ThrowIfNull(device);
             ArgumentNullException.ThrowIfNull(stream);
-
+            ArgumentNullException.ThrowIfNull(powerConversionSystems);
+            ArgumentNullException.ThrowIfNull(grid);
 
             return device switch
             {
-                SystemPowerMeterSimpleV1Proxy => new SystemPowerMeterSimpleV1Simulation(stream, (SystemPowerMeterSimpleV1Proxy)device, powerConversionSystems),
+                SystemPowerMeterSimpleV1Proxy proxy => new SystemPowerMeterSimpleV1Simulation(stream, proxy, powerConversionSystems, grid),
                 _ => null
             };
         }

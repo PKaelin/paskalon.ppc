@@ -12,6 +12,7 @@ using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples;
 using paskalON.DeviceSimulator.Application.Factories;
+using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries;
 using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries.Simples;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Protocols.Modbus;
@@ -118,6 +119,7 @@ namespace paskalON.DeviceSimulator.Equipments.IntegrationTest.EnergyStorages.Bat
         }
 
 
+
         [TestMethod]
         public void BbSimpleV1SimulationNullStoreTest()
         {
@@ -126,7 +128,7 @@ namespace paskalON.DeviceSimulator.Equipments.IntegrationTest.EnergyStorages.Bat
             (IModbusDataface dataface, IModbusClient client) = factory.Create(_bbModbusConfig!);
             BbSimpleV1Proxy device = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, _publisher.Object, dataface, client);
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new BbSimpleV1Simulation(null!, device));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new BbSimpleV1Simulation(null!, device, SimulationCustoms.Empty));
         }
 
 
@@ -134,10 +136,9 @@ namespace paskalON.DeviceSimulator.Equipments.IntegrationTest.EnergyStorages.Bat
         public void BbSimpleV1SimulationNullDeviceTest()
         {
             SimulationStoreRegistry stores = new SimulationStoreRegistry();
-            SimulationModbusDeviceFactory factory = new SimulationModbusDeviceFactory(stores);
-            (IModbusDataface dataface, IModbusClient client) = factory.Create(_bbModbusConfig!);
+            SimulationModbusDataStore store = stores.GetOrCreate(_bbModbusConfig!);
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new BbSimpleV1Simulation(((MemoryModbusClient)client).Store, null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new BbSimpleV1Simulation(store, (BbSimpleV1Proxy)null!, SimulationCustoms.Empty));
         }
 
 
@@ -148,41 +149,50 @@ namespace paskalON.DeviceSimulator.Equipments.IntegrationTest.EnergyStorages.Bat
             SimulationModbusDeviceFactory factory = new SimulationModbusDeviceFactory(stores);
             (IModbusDataface dataface, IModbusClient client) = factory.Create(_bbModbusConfig!);
             BbSimpleV1Proxy device = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, _publisher.Object, dataface, client);
+            Dictionary<string, string> customs = new Dictionary<string, string> { { BatteryBankSimulationSettings.PreChargeDelaySecondsKey, "3" } };
 
-            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(((MemoryModbusClient)client).Store, device);
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(stores.GetOrCreate(_bbModbusConfig!), device, customs);
 
-            Assert.IsNotNull(simulation);
             Assert.AreEqual(device.Name, simulation.Name);
+            Assert.AreEqual(device.DeviceId, simulation.DeviceId);
             Assert.AreEqual(87.5, simulation.UsableStateOfCharge);
             Assert.AreEqual(4000000, simulation.UsableCapacity);
+            Assert.AreEqual(TimeSpan.FromSeconds(3), simulation.Settings.PreChargeDelay);
+            Assert.AreEqual(BatteryBankSimulationState.Disconnected, simulation.State);
         }
 
 
         [TestMethod]
-        public async Task BbSimpleV1SimulationDeviceAllocatedPowerNullTest()
+        public async Task BbSimpleV1SimulationProxyConnectConnectsSimulationTest()
         {
             SimulationStoreRegistry stores = new SimulationStoreRegistry();
             SimulationModbusDeviceFactory factory = new SimulationModbusDeviceFactory(stores);
             (IModbusDataface dataface, IModbusClient client) = factory.Create(_bbModbusConfig!);
             BbSimpleV1Proxy device = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, _publisher.Object, dataface, client);
-            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(((MemoryModbusClient)client).Store, device);
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(stores.GetOrCreate(_bbModbusConfig!), device, SimulationCustoms.Empty);
 
+            await device.ConnectAsync();
             await simulation.TickAsync(TimeSpan.FromSeconds(1), CancellationToken.None);
+            ushort[]? state = await client.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.CurrentState,
+                (ushort)BbSimpleV1Description.Register.CurrentState);
 
-            Assert.AreEqual(87.5, simulation.UsableStateOfCharge);
-            Assert.AreEqual(4000000, simulation.UsableCapacity);
+            Assert.AreEqual(BatteryBankSimulationState.Connected, simulation.State);
+            Assert.IsNotNull(state);
+            Assert.AreEqual((ushort)BbSimpleV1Description.State.Connected, state[0]);
         }
 
 
         [TestMethod]
-        public async Task BbSimpleV1SimulationDeviceAllocatedPowerSameAsCapacityFor30MinTest()
+        public async Task BbSimpleV1SimulationAllocatedPowerSameAsCapacityFor30MinTest()
         {
             SimulationStoreRegistry stores = new SimulationStoreRegistry();
             SimulationModbusDeviceFactory factory = new SimulationModbusDeviceFactory(stores);
             (IModbusDataface dataface, IModbusClient client) = factory.Create(_bbModbusConfig!);
             BbSimpleV1Proxy device = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, _publisher.Object, dataface, client);
-            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(((MemoryModbusClient)client).Store, device);
-            device.AllocatedActivePowerValue = 4000000;
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(stores.GetOrCreate(_bbModbusConfig!), device, SimulationCustoms.Empty);
+            await device.ConnectAsync();
+            await simulation.TickAsync(TimeSpan.Zero, CancellationToken.None);
+            simulation.SetAllocatedActivePower(4000000);
 
             await simulation.TickAsync(TimeSpan.FromMinutes(30), CancellationToken.None);
 
@@ -192,16 +202,19 @@ namespace paskalON.DeviceSimulator.Equipments.IntegrationTest.EnergyStorages.Bat
 
 
         [TestMethod]
-        public async Task BbSimpleV1SimulationDeviceAllocatedPowerSameAsCapacityFor30MinThenHalfFor10MinTest()
+        public async Task BbSimpleV1SimulationAllocatedPowerSameAsCapacityFor30MinThenHalfFor10MinTest()
         {
             SimulationStoreRegistry stores = new SimulationStoreRegistry();
             SimulationModbusDeviceFactory factory = new SimulationModbusDeviceFactory(stores);
             (IModbusDataface dataface, IModbusClient client) = factory.Create(_bbModbusConfig!);
             BbSimpleV1Proxy device = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, _publisher.Object, dataface, client);
-            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(((MemoryModbusClient)client).Store, device);
-            device.AllocatedActivePowerValue = 4000000;
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(stores.GetOrCreate(_bbModbusConfig!), device, SimulationCustoms.Empty);
+            await device.ConnectAsync();
+            await simulation.TickAsync(TimeSpan.Zero, CancellationToken.None);
+            simulation.SetAllocatedActivePower(4000000);
             await simulation.TickAsync(TimeSpan.FromMinutes(30), CancellationToken.None);
-            device.AllocatedActivePowerValue = 2000000;
+            simulation.SetAllocatedActivePower(2000000);
+
             await simulation.TickAsync(TimeSpan.FromMinutes(10), CancellationToken.None);
 
             Assert.AreEqual(29.17, Math.Round(simulation.UsableStateOfCharge, 2));

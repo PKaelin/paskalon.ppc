@@ -10,35 +10,38 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
     /// <summary>
     /// Thread-safe registry of simulator Modbus stores (Modbus registers).
     /// </summary>
+    /// <remarks>
+    /// Every simulated device has its own IP:Port endpoint and therefore its own store.
+    /// </remarks>
     public class SimulationStoreRegistry : ISimulationStoreRegistry
     {
         /// <summary>
         /// Dictionary of Modbus data key and their stores.
         /// </summary>
-        private readonly Dictionary<ModbusDataMemoryStoreKey, IModbusDataStore> _stores = new();
+        private readonly Dictionary<ModbusDataMemoryStoreKey, SimulationModbusDataStore> _stores = new Dictionary<ModbusDataMemoryStoreKey, SimulationModbusDataStore>();
 
 
         /// <summary>
         /// Data lock object
         /// </summary>
-        private readonly object _dataLock = new();
+        private readonly object _dataLock = new object();
 
 
         /// <inheritdoc/>
-        public IReadOnlyDictionary<ModbusDataMemoryStoreKey, IModbusDataStore> Stores
+        public IReadOnlyDictionary<ModbusDataMemoryStoreKey, SimulationModbusDataStore> Stores
         {
             get
             {
                 lock (_dataLock)
                 {
-                    return new Dictionary<ModbusDataMemoryStoreKey, IModbusDataStore>(_stores);
+                    return new Dictionary<ModbusDataMemoryStoreKey, SimulationModbusDataStore>(_stores);
                 }
             }
         }
 
 
         /// <inheritdoc/>
-        public IModbusDataStore GetOrCreate(ModbusConfig config)
+        public SimulationModbusDataStore GetOrCreate(ModbusConfig config)
         {
             ArgumentNullException.ThrowIfNull(config);
 
@@ -51,15 +54,30 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
 
             lock (_dataLock)
             {
-                if (_stores.TryGetValue(key, out IModbusDataStore? store) == true)
+                if (_stores.TryGetValue(key, out SimulationModbusDataStore? store) == true)
                 {
                     return store;
                 }
 
-                store = new ModbusDataMemoryStore();
+                store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
                 _stores.Add(key, store);
 
                 return store;
+            }
+        }
+
+
+        /// <inheritdoc/>
+        public SimulationModbusDataStore Find(string address, int port)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(address);
+
+            lock (_dataLock)
+            {
+                return _stores.Where(entry => entry.Key.Address == address && entry.Key.Port == port)
+                    .Select(entry => entry.Value)
+                    .FirstOrDefault()
+                    ?? throw new InvalidOperationException($"No Modbus simulation store exists for endpoint '{address}:{port}'.");
             }
         }
     }

@@ -66,8 +66,8 @@ Content-Type: application/json
 
 {
   "DeviceId": 1,
-  "ActivePowerWatt": 100000,
-  "ReactivePowerVar": 20000
+  "ActivePowerWatt": 3500000,
+  "ReactivePowerVar": 1750000
 }
 
 ###

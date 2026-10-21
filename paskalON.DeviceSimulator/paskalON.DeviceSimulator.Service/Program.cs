@@ -8,8 +8,11 @@ using paskalON.Devices.Infrastructure.Storage;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
 using paskalON.DeviceSimulator.Application;
 using paskalON.DeviceSimulator.Application.Factories;
+using paskalON.DeviceSimulator.Application.Repositories;
+using paskalON.DeviceSimulator.Equipments.Grids;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.DeviceSimulator.Service.Publishers;
+using paskalON.DeviceSimulator.Service.WebApi.Hubs;
 using paskalON.DeviceSimulator.Service.Workers;
 using paskalON.Infrastructure.Repositories;
 using paskalON.Telemetry;
@@ -54,11 +57,13 @@ try
 
     // Add WebApi's
     builder.Services.AddControllers();
+    builder.Services.AddSignalR();
     builder.Services.AddOpenApi();
 
     // Add databases
     builder.Services.AddDbContext<DeviceServiceContext>(options => options.UseNpgsql(dbConnectionString));
     builder.Services.AddScoped<IDerRepository, DerRepository>();
+    builder.Services.AddScoped<ISimulationCustomRepository, SimulationCustomRepository>();
     builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
 
     // Add communications
@@ -67,6 +72,7 @@ try
     builder.Services.AddSingleton<ISimulationStoreRegistry, SimulationStoreRegistry>();
     builder.Services.AddSingleton<ISimulationStreamRegistry, SimulationStreamRegistry>();
     builder.Services.AddSingleton<SimulationDeviceRegistry>();
+    builder.Services.AddSingleton<SimulatedGrid>();
     builder.Services.AddSingleton<ISimulationModelFactory, PowerConversionSystemSimulationModelFactory>();
     builder.Services.AddSingleton<IModbusDeviceFactory, SimulationModbusDeviceFactory>();
     builder.Services.AddSingleton<IC37DeviceFactory, C37DeviceFactory>();
@@ -93,6 +99,8 @@ try
 
     using (IServiceScope scope = app.Services.CreateScope())
     {
+        ISimulationCustomRepository customRepository = scope.ServiceProvider.GetRequiredService<ISimulationCustomRepository>();
+        await deviceManager.LoadCustomConfigsAsync(customRepository);
         IDerRepository repository = scope.ServiceProvider.GetRequiredService<IDerRepository>();
         await deviceManager.LoadDerAsync(repository);
     }
@@ -118,6 +126,7 @@ try
 
     app.UseAuthorization();
     app.MapControllers();
+    app.MapHub<DerHub>(DerHub.Route);
     app.Run();
 }
 catch (Exception ex)

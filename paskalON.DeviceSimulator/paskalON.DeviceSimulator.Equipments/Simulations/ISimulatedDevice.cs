@@ -10,6 +10,15 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
     public interface ISimulatedDevice
     {
         /// <summary>
+        /// Device ID of the simulated device.
+        /// </summary>
+        /// <remarks>
+        /// The device ID is only unique within one device type (e.g. PCS or battery bank).
+        /// </remarks>
+        int DeviceId { get; }
+
+
+        /// <summary>
         /// Name of the simulated device.
         /// </summary>
         string Name { get; }

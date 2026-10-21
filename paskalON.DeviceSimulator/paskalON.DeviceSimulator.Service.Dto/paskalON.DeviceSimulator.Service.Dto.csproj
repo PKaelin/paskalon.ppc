@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\paskalON.DeviceSimulator.Dto\paskalON.DeviceSimulator.Dto.csproj" />
+  </ItemGroup>
+
 </Project>

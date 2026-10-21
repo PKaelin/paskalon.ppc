@@ -9,12 +9,16 @@ using paskalON.Devices.Domain.EnergyResources.Solars;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
+using paskalON.DeviceSimulator.Dto;
 using paskalON.DeviceSimulator.Dto.Ders;
 using paskalON.DeviceSimulator.Dto.Endpoints;
 using paskalON.DeviceSimulator.Dto.EnergyResources.Solars;
 using paskalON.DeviceSimulator.Dto.EnergyStorages.Batteries;
 using paskalON.DeviceSimulator.Dto.Meters.PowerMeters;
 using paskalON.DeviceSimulator.Dto.PowerConversionSystems;
+using paskalON.DeviceSimulator.Dto.Simulations;
+using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries;
+using paskalON.DeviceSimulator.Equipments.PowerConversionSystems;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 using paskalON.Protocols.C37118.Simulations;
 using paskalON.Protocols.Modbus.Stores;
@@ -40,17 +44,36 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
+        /// Registry of the simulated devices.
+        /// </summary>
+        private readonly SimulationDeviceRegistry _simulations;
+
+
+        /// <summary>
+        /// Gets whether the Modbus server of an endpoint (address, port) answers requests.
+        /// </summary>
+        private readonly Func<string, int, bool> _isResponding;
+
+
+        /// <summary>
         /// Constructor of <see cref="DeviceMapperSimulator"/>.
         /// </summary>
         /// <param name="stores">Simulation store registry.</param>
         /// <param name="streams">Simulation stream registry.</param>
-        public DeviceMapperSimulator(ISimulationStoreRegistry stores, ISimulationStreamRegistry streams)
+        /// <param name="simulations">Registry of the simulated devices.</param>
+        /// <param name="isResponding">Gets whether the Modbus server of an endpoint (address, port) answers requests.</param>
+        public DeviceMapperSimulator(ISimulationStoreRegistry stores, ISimulationStreamRegistry streams, SimulationDeviceRegistry simulations,
+            Func<string, int, bool> isResponding)
         {
             ArgumentNullException.ThrowIfNull(stores);
             ArgumentNullException.ThrowIfNull(streams);
+            ArgumentNullException.ThrowIfNull(simulations);
+            ArgumentNullException.ThrowIfNull(isResponding);
 
             _stores = stores;
             _streams = streams;
+            _simulations = simulations;
+            _isResponding = isResponding;
         }
 
 
@@ -72,6 +95,63 @@ namespace paskalON.DeviceSimulator.Application
             dto.DerGroups = der.DerGroups.Select(MapDerGroup).ToList();
 
             return dto;
+        }
+
+
+        /// <summary>
+        /// Maps the DER units with the given names (e.g. the units expanded in the UI).
+        /// </summary>
+        /// <param name="der">DER root object.</param>
+        /// <param name="unitNames">Names of the units to map.</param>
+        /// <returns>The mapped units including their devices.</returns>
+        public List<DerUnitDto> MapUnits(Der der, IReadOnlyCollection<string> unitNames)
+        {
+            ArgumentNullException.ThrowIfNull(der);
+            ArgumentNullException.ThrowIfNull(unitNames);
+
+            HashSet<string> names = new HashSet<string>(unitNames);
+
+            return der.DerGroups
+                .SelectMany(group => group.DerCircuits)
+                .SelectMany(circuit => circuit.DerUnits)
+                .Where(unit => names.Contains(unit.Name))
+                .Select(MapDerUnit)
+                .ToList();
+        }
+
+
+        /// <summary>
+        /// Maps the power meters with the given names (e.g. the meters expanded in the UI) to device updates.
+        /// </summary>
+        /// <param name="der">DER root object.</param>
+        /// <param name="deviceNames">Names of the devices to map. Names that are not a power meter are ignored.</param>
+        /// <returns>The mapped power meter updates.</returns>
+        /// <remarks>
+        /// PCS, battery banks and solar panels are part of a unit and therefore updated with <see cref="MapUnits"/>.
+        /// </remarks>
+        public List<DeviceUpdateDto> MapPowerMeterUpdates(Der der, IReadOnlyCollection<string> deviceNames)
+        {
+            ArgumentNullException.ThrowIfNull(der);
+            ArgumentNullException.ThrowIfNull(deviceNames);
+
+            HashSet<string> names = new HashSet<string>(deviceNames);
+            IEnumerable<PowerMeterBase> circuitMeters = der.DerGroups
+                .SelectMany(group => group.DerCircuits)
+                .Select(circuit => circuit.CircuitPowerMeter)
+                .OfType<PowerMeterBase>();
+
+            return der.SystemPowerMeters.Cast<PowerMeterBase>()
+                .Concat(der.AuxiliaryPowerMeters)
+                .Concat(der.ExternalPowerMeters)
+                .Concat(circuitMeters)
+                .Where(meter => names.Contains(meter.Name))
+                .Select(meter => new DeviceUpdateDto
+                {
+                    DeviceId = meter.DeviceId,
+                    Name = meter.Name,
+                    Endpoints = MapC37Endpoints(meter).Cast<object>().ToList()
+                })
+                .ToList();
         }
 
 
@@ -162,7 +242,15 @@ namespace paskalON.DeviceSimulator.Application
         {
             ArgumentNullException.ThrowIfNull(device);
 
-            return new PcsDto { DeviceId = device.DeviceId, Name = device.Name, Endpoints = MapModbusEndpoints(device) };
+            PowerConversionSystemSimulationBase? simulation = _simulations.Find<PowerConversionSystemSimulationBase>(device.DeviceId);
+
+            return new PcsDto
+            {
+                DeviceId = device.DeviceId,
+                Name = device.Name,
+                Endpoints = MapModbusEndpoints(device),
+                Simulation = simulation is null ? null : MapSimulation(simulation, device.TargetAddress, device.TargetPort)
+            };
         }
 
 
@@ -173,7 +261,52 @@ namespace paskalON.DeviceSimulator.Application
         {
             ArgumentNullException.ThrowIfNull(device);
 
-            return new BbDto { DeviceId = device.DeviceId, Name = device.Name, Endpoints = MapModbusEndpoints(device) };
+            BatteryBankSimulationBase? simulation = _simulations.Find<BatteryBankSimulationBase>(device.DeviceId);
+
+            return new BbDto
+            {
+                DeviceId = device.DeviceId,
+                Name = device.Name,
+                Endpoints = MapModbusEndpoints(device),
+                Simulation = simulation is null ? null : MapSimulation(simulation, device.TargetAddress, device.TargetPort)
+            };
+        }
+
+
+        /// <summary>
+        /// Maps the simulation state of a simulated PCS.
+        /// </summary>
+        /// <param name="simulation">Simulated PCS.</param>
+        /// <param name="address">Modbus endpoint address.</param>
+        /// <param name="port">Modbus endpoint port.</param>
+        /// <returns>The simulation DTO.</returns>
+        public SimulationDto MapSimulation(PowerConversionSystemSimulationBase simulation, string address, int port)
+        {
+            ArgumentNullException.ThrowIfNull(simulation);
+
+            return MapEvents(simulation, SimulationDeviceType.PowerConversionSystem, simulation.State.ToString(), address, port) with
+            {
+                SlowActivePowerByPercent = simulation.SlowActivePowerByPercent,
+                SlowReactivePowerByPercent = simulation.SlowReactivePowerByPercent
+            };
+        }
+
+
+        /// <summary>
+        /// Maps the simulation state of a simulated battery bank.
+        /// </summary>
+        /// <param name="simulation">Simulated battery bank.</param>
+        /// <param name="address">Modbus endpoint address.</param>
+        /// <param name="port">Modbus endpoint port.</param>
+        /// <returns>The simulation DTO.</returns>
+        public SimulationDto MapSimulation(BatteryBankSimulationBase simulation, string address, int port)
+        {
+            ArgumentNullException.ThrowIfNull(simulation);
+
+            return MapEvents(simulation, SimulationDeviceType.BatteryBank, simulation.State.ToString(), address, port) with
+            {
+                UsableStateOfCharge = Math.Round(simulation.UsableStateOfCharge, 3)
+            };
         }
 
 
@@ -229,6 +362,26 @@ namespace paskalON.DeviceSimulator.Application
             ArgumentNullException.ThrowIfNull(device);
 
             return new PmCircuitDto { DeviceId = device.DeviceId, Name = device.Name, Endpoints = MapC37Endpoints(device) };
+        }
+
+
+        /// <summary>
+        /// Maps the vendor independent simulation state and the event registers.
+        /// </summary>
+        private SimulationDto MapEvents(IEventInjectable simulation, SimulationDeviceType deviceType, string state, string address, int port)
+        {
+            return new SimulationDto
+            {
+                DeviceType = deviceType,
+                State = state,
+                IsResponding = _isResponding(address, port),
+                HasWarningRegister = simulation.HasWarningRegister,
+                HasFaultRegister = simulation.HasFaultRegister,
+                HasVendorEventRegister = simulation.HasVendorEventRegister,
+                Warning = simulation.Warning,
+                Fault = simulation.Fault,
+                VendorEvent = simulation.VendorEvent
+            };
         }
 
 

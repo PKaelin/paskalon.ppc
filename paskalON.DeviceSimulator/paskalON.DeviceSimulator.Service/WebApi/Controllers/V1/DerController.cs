@@ -47,7 +47,8 @@ namespace paskalON.DeviceSimulator.Service.WebApi.Controllers.V1
         [HttpGet]
         public async Task<ActionResult<DerDto>> GetDer()
         {
-            DeviceMapperSimulator mapper = new DeviceMapperSimulator(_deviceManager.StoreRegisters, _deviceManager.StreamRegisters);
+            DeviceMapperSimulator mapper = new DeviceMapperSimulator(_deviceManager.StoreRegisters, _deviceManager.StreamRegisters,
+                _deviceManager.SimulationDevices, _deviceManager.IsResponding);
             DerDto derDto = mapper.MapDer(_deviceManager.Der);
 
             return derDto;

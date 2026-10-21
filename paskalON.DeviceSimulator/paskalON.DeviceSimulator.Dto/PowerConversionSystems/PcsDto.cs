@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.DeviceSimulator.Dto.Endpoints;
+using paskalON.DeviceSimulator.Dto.Simulations;
 
 namespace paskalON.DeviceSimulator.Dto.PowerConversionSystems
 {
@@ -27,5 +28,11 @@ namespace paskalON.DeviceSimulator.Dto.PowerConversionSystems
         /// List of Modbus endpoints.
         /// </summary>
         public required List<ModbusEndpointDto> Endpoints { get; init; }
+
+
+        /// <summary>
+        /// Simulation state or null when the device type is not simulated.
+        /// </summary>
+        public SimulationDto? Simulation { get; init; }
     }
 }

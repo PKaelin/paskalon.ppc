@@ -2,12 +2,13 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.DeviceSimulator.Equipments.Grids;
 using paskalON.DeviceSimulator.Equipments.Simulations;
 
 namespace paskalON.DeviceSimulator.Service.Workers
 {
     /// <summary>
-    /// Advances all registered simulator models at a fixed interval.
+    /// Advances the simulated grid and all registered simulator models at a fixed interval.
     /// </summary>
     public sealed class SimulationWorker : BackgroundService
     {
@@ -15,6 +16,12 @@ namespace paskalON.DeviceSimulator.Service.Workers
         /// Simulation device registry.
         /// </summary>
         private readonly SimulationDeviceRegistry _devices;
+
+
+        /// <summary>
+        /// Shared simulated grid.
+        /// </summary>
+        private readonly SimulatedGrid _grid;
 
 
         /// <summary>
@@ -27,11 +34,14 @@ namespace paskalON.DeviceSimulator.Service.Workers
         /// Constructor of <see cref="SimulationWorker"/>.
         /// </summary>
         /// <param name="devices">Simulation device registry.</param>
-        public SimulationWorker(SimulationDeviceRegistry devices)
+        /// <param name="grid">Shared simulated grid.</param>
+        public SimulationWorker(SimulationDeviceRegistry devices, SimulatedGrid grid)
         {
             ArgumentNullException.ThrowIfNull(devices);
+            ArgumentNullException.ThrowIfNull(grid);
 
             _devices = devices;
+            _grid = grid;
         }
 
 
@@ -57,6 +67,8 @@ namespace paskalON.DeviceSimulator.Service.Workers
             {
                 while (await timer.WaitForNextTickAsync(stoppingToken))
                 {
+                    _grid.Tick();
+
                     foreach (ISimulatedDevice device in _devices.Devices)
                     {
                         await device.TickAsync(interval, stoppingToken);

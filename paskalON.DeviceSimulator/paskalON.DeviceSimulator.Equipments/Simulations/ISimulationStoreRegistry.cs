@@ -17,13 +17,23 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
         /// </summary>
         /// <param name="config">Modbus configuration.</param>
         /// <returns>The endpoint data store.</returns>
-        IModbusDataStore GetOrCreate(ModbusConfig config);
+        SimulationModbusDataStore GetOrCreate(ModbusConfig config);
+
+
+        /// <summary>
+        /// Finds the store of an endpoint.
+        /// </summary>
+        /// <param name="address">Endpoint address.</param>
+        /// <param name="port">Endpoint port.</param>
+        /// <returns>The endpoint data store.</returns>
+        /// <exception cref="InvalidOperationException">No store exists for the endpoint.</exception>
+        SimulationModbusDataStore Find(string address, int port);
 
 
         /// <summary>
         /// All registered endpoint stores.
         /// </summary>
         /// <returns>The registered stores.</returns>
-        IReadOnlyDictionary<ModbusDataMemoryStoreKey, IModbusDataStore> Stores { get; }
+        IReadOnlyDictionary<ModbusDataMemoryStoreKey, SimulationModbusDataStore> Stores { get; }
     }
 }

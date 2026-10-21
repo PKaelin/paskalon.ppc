@@ -5,8 +5,10 @@
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
+using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries;
+using paskalON.DeviceSimulator.Equipments.Grids;
+using paskalON.DeviceSimulator.Equipments.PowerConversionSystems;
 using paskalON.Protocols.C37118.Simulations;
-using paskalON.Protocols.Modbus.Stores;
 
 namespace paskalON.DeviceSimulator.Equipments.Simulations
 {
@@ -16,21 +18,23 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
     public interface ISimulationModelFactory
     {
         /// <summary>
-        /// Creates a simulation model when the device type is supported.
+        /// Creates a PCS simulation model when the device type is supported.
         /// </summary>
         /// <param name="device">Production device proxy.</param>
         /// <param name="store">Backing Modbus store.</param>
+        /// <param name="grid">Shared simulated grid.</param>
         /// <returns>A simulation model, or null when unsupported.</returns>
-        ISimulatedDevice? Create(PowerConversionSystemBase device, IModbusDataStore store);
+        PowerConversionSystemSimulationBase? Create(PowerConversionSystemBase device, SimulationModbusDataStore store, SimulatedGrid grid);
 
 
         /// <summary>
-        /// Creates a simulation model when the device type is supported.
+        /// Creates a battery bank simulation model when the device type is supported.
         /// </summary>
         /// <param name="device">Production device proxy.</param>
         /// <param name="store">Backing Modbus store.</param>
+        /// <param name="customs">Simulator custom configurations of the device.</param>
         /// <returns>A simulation model, or null when unsupported.</returns>
-        ISimulatedDevice? Create(BatteryBankBase device, IModbusDataStore store);
+        BatteryBankSimulationBase? Create(BatteryBankBase device, SimulationModbusDataStore store, IReadOnlyDictionary<string, string> customs);
 
 
         /// <summary>
@@ -38,7 +42,10 @@ namespace paskalON.DeviceSimulator.Equipments.Simulations
         /// </summary>
         /// <param name="device">Production power meter.</param>
         /// <param name="stream">Backing C37 stream.</param>
+        /// <param name="powerConversionSystems">All simulated power conversion systems.</param>
+        /// <param name="grid">Shared simulated grid.</param>
         /// <returns>A simulation model, or null when unsupported.</returns>
-        ISimulatedDevice? Create(PowerMeterBase device, PmuDataSimulation stream, ICollection<PowerConversionSystemBase> powerConversionSystems);
+        ISimulatedDevice? Create(PowerMeterBase device, PmuDataSimulation stream, IReadOnlyCollection<PowerConversionSystemSimulationBase> powerConversionSystems,
+            SimulatedGrid grid);
     }
 }

@@ -4,7 +4,7 @@
 //----------------------------------------‐------------------------------------
 namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
 {
-    internal class PcsHemkV4Description
+    public class PcsHemkV4Description
     {
         // TODO: Implement PcsHemkV4Description
 
