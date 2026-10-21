@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/InitialDevelopment/">
+    <Project Path="../paskalON.Common/paskalON.Messaging/paskalON.Messaging.csproj" />
+    <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Dto/paskalON.Devices.Dto.csproj" />
+    <Project Path="../paskalON.OperatingModes/paskalON.OperatingModes.Dto/paskalON.OperatingModes.Dto.csproj" />
+    <Project Path="../paskalON.PowerControls/paskalON.PowerControls.Dto/paskalON.PowerControls.Dto.csproj" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+  <Project Path="paskalON.Luna.Service/paskalON.Luna.Service.csproj" />
+</Solution>
