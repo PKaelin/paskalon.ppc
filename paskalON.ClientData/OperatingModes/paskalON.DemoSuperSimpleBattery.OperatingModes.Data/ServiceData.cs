@@ -32,6 +32,7 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
             await CreateCore(context);
             await CreateSafetyFunctions(context);
             await CreateBasicOperatingModes(context);
+            await CreateLimitingModes(context);
         }
 
 
@@ -175,6 +176,40 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
                 RampConfig = rampRateConfig,
             };
             context.ReactivePowerModeConfigs.Add(reactivePowerModeConfig);
+
+            await context.SaveChangesAsync();
+        }
+
+
+        /// <summary>
+        /// Create limiting operating modes configurations.
+        /// </summary>
+        /// <param name="context">Database context.</param>
+        /// <returns>Task</returns>
+        private static async Task CreateLimitingModes(IOperatingModeContext context)
+        {
+            RampRateConfig limitingRampRateConfig = new RampRateConfig
+            {
+                ChangedBy = ChangedBy,
+                RampTimeSeconds = 0,
+                RampUpRatePerSecond = 10000,
+                RampDownRatePerSecond = 10000,
+            };
+            context.RampRateConfigs.Add(limitingRampRateConfig);
+
+            MaximumActivePowerLimitModeConfig maximumActivePowerLimitModeConfig = new MaximumActivePowerLimitModeConfig
+            {
+                ChangedBy = ChangedBy,
+                Name = "MaximumActivePowerLimitMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                RampConfig = limitingRampRateConfig,
+                MaximumActivePowerLimitWatt = 3000000,
+                MinimumActivePowerLimitWatt = -3000000,
+                MaximumReactivePowerLimitVars = 3000000,
+                MinimumReactivePowerLimitVars = -3000000,
+            };
+            context.MaximumActivePowerLimitModeConfigs.Add(maximumActivePowerLimitModeConfig);
 
             await context.SaveChangesAsync();
         }
