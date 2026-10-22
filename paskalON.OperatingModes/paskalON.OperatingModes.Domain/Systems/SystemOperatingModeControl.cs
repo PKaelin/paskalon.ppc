@@ -285,6 +285,7 @@ namespace paskalON.OperatingModes.Domain.Systems
 
             lock (_dataLock)
             {
+                // Set the system wide supervisory setpoints
                 SetpointActivePower = activePower;
                 SetpointReactivePower = reactivePower;
             }
@@ -305,30 +306,40 @@ namespace paskalON.OperatingModes.Domain.Systems
             {
                 signals = new OperatingModeSignals
                 {
+                    // Copy the system wide supervisory setpoints into the OperatingModeSignals
+                    // Calculate goes through the stack in priority order. A mode that needs the setpoints read them from the OperatingModeSignals
                     SetpointActivePower = SetpointActivePower,
                     SetpointReactivePower = SetpointReactivePower
                 };
             }
 
+            // Consistent snapshot of the committed modes and their changes (add, remove, replace, move) since the last cycle
             OperatingModeCycle<IStackableMode> stack = _stack.TakeCycle();
             OperatingModeCycle<IOverrideMode> overrides = _overrides.TakeCycle();
 
             try
             {
                 List<AxisChange> changes = new List<AxisChange>();
+                // Activate "added" and deactivate "removed" modes and record which power axes changed
                 ApplyOverrideChanges(overrides.Changes, changes);
                 ApplyStackChanges(stack.Changes, changes);
+                // Calculates the override modes.
                 List<UnitOverrideSetpoint> overrideSetpoints = CalculateOverrides(overrides.OperatingModes, signals, cancellationToken);
 
+                // Calculates the stack operating modes in priority order
+                // Each operating mode reads the signals from the OperatingModeSignals and contributes to the final signals
                 foreach (IStackableMode operatingMode in stack.OperatingModes)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     CalculateOperatingMode(operatingMode, signals, changes);
                 }
 
+                // Get the system wide override mode that forces the applied targets. E.g. plant-wide shutdown
                 IOverrideMode? plantOverride = overrides.OperatingModes.FirstOrDefault(overrideMode => overrideMode.TargetDerUnit is null);
+                // Applied target = objective + ramped transition offsets, then forced by the plant-wide override and clamped to the nameplate
                 double activeApplied = ResolveAxis(PowerAxis.Active, signals.FinalActivePower.Watts, changes, plantOverride?.ActiveControl?.Target.Watts);
                 double reactiveApplied = ResolveAxis(PowerAxis.Reactive, signals.FinalReactivePower.VoltAmperesReactive, changes, plantOverride?.ReactiveControl?.Target.VoltAmperesReactive);
+                // Update the modes IsTransitioning state and remove the finished ones from the transition tracking
                 UpdateTransitionStates(stack.OperatingModes, changes);
                 ActivePower setpointActivePowerActual = new ActivePower(activeApplied);
                 ReactivePower setpointReactivePowerActual = new ReactivePower(reactiveApplied);
@@ -338,6 +349,7 @@ namespace paskalON.OperatingModes.Domain.Systems
                 {
                     // The first calculated setpoints are always published
                     isSetpointChanged = (_hasAppliedTargets is false) || (SetpointActivePowerActual != setpointActivePowerActual) || (SetpointReactivePowerActual != setpointReactivePowerActual);
+                    // Assign the current iteration values to the properties that are exposed to the outside world and telemetry
                     ActivePowerObjective = signals.FinalActivePower;
                     ReactivePowerObjective = signals.FinalReactivePower;
                     SetpointActivePowerActual = setpointActivePowerActual;
@@ -355,6 +367,7 @@ namespace paskalON.OperatingModes.Domain.Systems
 
                 if (isSetpointChanged == true)
                 {
+                    // Publishes the applied setpoints to the power control and other subscribers
                     PublishSetpoints(setpointActivePowerActual, setpointReactivePowerActual);
                 }
             }
