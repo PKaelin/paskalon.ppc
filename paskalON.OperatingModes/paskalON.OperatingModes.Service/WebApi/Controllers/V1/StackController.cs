@@ -4,6 +4,8 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.AspNetCore.Mvc;
 using paskalON.OperatingModes.Application;
+using paskalON.OperatingModes.Application.Stacks;
+using paskalON.OperatingModes.Dto.Stacks;
 using paskalON.OperatingModes.Service.Dto.V1.Requests;
 
 namespace paskalON.OperatingModes.Service.Controllers.V1
@@ -28,17 +30,52 @@ namespace paskalON.OperatingModes.Service.Controllers.V1
 
 
         /// <summary>
+        /// Factory that creates the stack DTOs of the operating modes.
+        /// </summary>
+        private readonly IOperatingModeStackDtoFactory _dtoFactory;
+
+
+        /// <summary>
         /// Constroctor of <see cref="StackController"/>.
         /// </summary>
         /// <param name="logger">The logger instance for logging information and errors.</param>
         /// <param name="manager">The operating mode manager instance for managing operating modes.</param>
-        public StackController(ILogger<StackController> logger, IOperatingModeManager manager)
+        /// <param name="dtoFactory">Factory that creates the stack DTOs of the operating modes.</param>
+        public StackController(ILogger<StackController> logger, IOperatingModeManager manager, IOperatingModeStackDtoFactory dtoFactory)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(manager);
+            ArgumentNullException.ThrowIfNull(dtoFactory);
 
             _logger = logger;
             _manager = manager;
+            _dtoFactory = dtoFactory;
+        }
+
+
+        /// <summary>
+        /// Gets all stackable operating modes that can be added to the stack.
+        /// </summary>
+        /// <returns>The stack DTOs of the available operating modes, specialized per operating mode or <see cref="OperatingModeStackDto"/> as default.</returns>
+        [HttpGet]
+        public ActionResult<IReadOnlyList<OperatingModeStackDto>> GetAvailableOperatingModes()
+        {
+            IReadOnlyList<OperatingModeStackDto> dtos = _dtoFactory.Create(_manager.StackManager.AvailableOperatingModes.OrderBy(m => m.Name));
+
+            return Ok(dtos);
+        }
+
+
+        /// <summary>
+        /// Gets the operating modes of the stack in ascending priority order.
+        /// </summary>
+        /// <returns>The stack DTOs of the active operating modes with their priorities, specialized per operating mode or <see cref="OperatingModeStackDto"/> as default.</returns>
+        [HttpGet]
+        public ActionResult<IReadOnlyList<OperatingModeStackDto>> GetActiveOperatingModes()
+        {
+            IReadOnlyList<OperatingModeStackDto> dtos = _dtoFactory.Create(_manager.StackManager.ActiveOperatingModeEntries);
+
+            return Ok(dtos);
         }
 
 

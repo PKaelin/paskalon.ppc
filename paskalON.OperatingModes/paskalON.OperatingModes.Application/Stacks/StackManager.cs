@@ -39,6 +39,10 @@ namespace paskalON.OperatingModes.Application.Stacks
 
 
         /// <inheritdoc/>
+        public IReadOnlyList<OperatingModeStackEntry> ActiveOperatingModeEntries { get => Stack.Entries; }
+
+
+        /// <inheritdoc/>
         public void InitializeStack(Dictionary<string, OperatingModeBase> operatingModes)
         {
             ArgumentNullException.ThrowIfNull(operatingModes);

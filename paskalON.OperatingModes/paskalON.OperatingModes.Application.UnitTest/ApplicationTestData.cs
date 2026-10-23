@@ -6,7 +6,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain;
+using paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
 using paskalON.OperatingModes.Domain.Configs.OpenModes;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.EnergyResources;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
@@ -115,6 +117,32 @@ namespace paskalON.OperatingModes.Application.UnitTest
             MaximumPowerPointTrackingModeMap map = new MaximumPowerPointTrackingModeMap { AvailableActivePower = () => new ActivePower(8000000), AvailableReactivePower = () => null };
 
             return new MaximumPowerPointTrackingMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, CreateSystemConfig(), config, map, CreateRampController());
+        }
+
+
+        /// <summary>
+        /// Creates a maximum active power limit mode limiting the active power to 6 MW.
+        /// </summary>
+        /// <returns>The maximum active power limit mode.</returns>
+        public static MaximumActivePowerLimitMode CreateMaximumActivePowerLimitMode()
+        {
+            MaximumActivePowerLimitModeConfig config = new MaximumActivePowerLimitModeConfig
+            {
+                ChangedBy = "Test",
+                Name = "MaximumActivePowerLimitMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                MaximumActivePowerLimitWatts = 6000000,
+                RampConfig = CreateRampConfig()
+            };
+            MaximumActivePowerLimitModeMap map = new MaximumActivePowerLimitModeMap
+            {
+                AvailableActivePower = () => new ActivePower(8000000),
+                AvailableReactivePower = () => null,
+                ActivePowerAtPoi = () => null
+            };
+
+            return new MaximumActivePowerLimitMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, CreateSystemConfig(), config, map, CreateRampController());
         }
 
 

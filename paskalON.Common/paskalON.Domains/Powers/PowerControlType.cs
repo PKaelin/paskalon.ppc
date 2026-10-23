@@ -17,30 +17,30 @@ namespace paskalON.Domains.Configs
         /// <summary>
         /// No power control type defined: 0000000000
         /// </summary>
-        None = 0x00,
+        None = 0,
         /// <summary>
         /// Battery energy storage type: 0000000001
         /// </summary>
-        Bess = 0x01,
+        Bess = 1 << 0,
         /// <summary>
         /// Solar energy type: 0000000010
         /// </summary>
-        Solar = 0x02,
+        Solar = 1 << 1,
         /// <summary>
         /// Wind energy type: 0000000100
         /// </summary>
-        Wind = 0x04,
+        Wind = 1 << 2,
         /// <summary>
         /// Nuclear energy type: 0000001000
         /// </summary>
-        Nuclear = 0x08,
+        Nuclear = 1 << 3,
         /// <summary>
         /// Hydro energy type: 0000010000
         /// </summary>
-        Hydro = 0x10,
+        Hydro = 1 << 4,
         /// <summary>
         /// Gas energy type: 0000100000
         /// </summary>
-        Gas = 0x20,
+        Gas = 1 << 5,
     }
 }

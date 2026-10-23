@@ -40,6 +40,18 @@ Content-Type: application/json
 ###
 
 
+GET {{paskalON.OperatingModes.Service_HostAddress}}/api/v1/stack/getavailableoperatingmodes
+Accept: application/json
+
+###
+
+GET {{paskalON.OperatingModes.Service_HostAddress}}/api/v1/stack/getactiveoperatingmodes
+Accept: application/json
+
+###
+
+
+
 #------------------------------------------------------------------------------
 # Override controller
 # Modes: ShutdownMode, MaintenanceMode-BMS-Unit1

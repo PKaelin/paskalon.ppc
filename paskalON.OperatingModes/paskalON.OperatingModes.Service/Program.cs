@@ -15,6 +15,7 @@ using paskalON.Messaging.Redis;
 using paskalON.OperatingModes.Application;
 using paskalON.OperatingModes.Application.Factories;
 using paskalON.OperatingModes.Application.Publishers;
+using paskalON.OperatingModes.Application.Stacks;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Infrastructure.Storage;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
@@ -112,6 +113,7 @@ try
     builder.Services.AddSingleton<OperatingModeService>();
 
     builder.Services.AddSingleton<IOperatingModeManager, OperatingModeManager>();
+    builder.Services.AddSingleton<IOperatingModeStackDtoFactory, OperatingModeStackDtoFactory>();
 
     if (startPublisher == true)
     {

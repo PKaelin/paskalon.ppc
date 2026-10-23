@@ -98,6 +98,29 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Stacks
 
 
         /// <summary>
+        /// Confirms the entries contain the shifted priorities of the operating modes ordered by ascending priority.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeStackEntriesContainPrioritiesTest()
+        {
+            OperatingModeStack stack = new OperatingModeStack();
+            IStackableMode firstMode = CreateOperatingMode("ModeA");
+            IStackableMode secondMode = CreateOperatingMode("ModeB");
+            IStackableMode insertedMode = CreateOperatingMode("ModeC");
+            stack.Add(firstMode, 1);
+            stack.Add(secondMode, 5);
+            stack.Add(insertedMode, 1);
+
+            IReadOnlyList<OperatingModeStackEntry> entries = stack.Entries;
+
+            Assert.HasCount(3, entries);
+            Assert.AreEqual(new OperatingModeStackEntry(1, insertedMode), entries[0]);
+            Assert.AreEqual(new OperatingModeStackEntry(2, firstMode), entries[1]);
+            Assert.AreEqual(new OperatingModeStackEntry(6, secondMode), entries[2]);
+        }
+
+
+        /// <summary>
         /// Rejects a second mode with the same name without changing the stack.
         /// </summary>
         [TestMethod]

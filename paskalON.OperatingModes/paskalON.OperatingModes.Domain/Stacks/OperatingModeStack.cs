@@ -59,6 +59,21 @@ namespace paskalON.OperatingModes.Domain.Stacks
 
 
         /// <summary>
+        /// Gets a snapshot of the selected operating modes with their priorities ordered by ascending priority.
+        /// </summary>
+        public IReadOnlyList<OperatingModeStackEntry> Entries
+        {
+            get
+            {
+                lock (_dataLock)
+                {
+                    return _operatingModesByPriority.Select(entry => new OperatingModeStackEntry(entry.Key, entry.Value)).ToArray();
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Gets a snapshot of the committed changes that are not yet applied by a calculation cycle.
         /// </summary>
         public IReadOnlyList<OperatingModeChange<IStackableMode>> PendingChanges

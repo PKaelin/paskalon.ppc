@@ -32,6 +32,12 @@ namespace paskalON.OperatingModes.Application.Stacks
 
 
         /// <summary>
+        /// Selected operating modes with their priorities ordered by ascending priority.
+        /// </summary>
+        IReadOnlyList<OperatingModeStackEntry> ActiveOperatingModeEntries { get; }
+
+
+        /// <summary>
         /// Initializes the stack manager with the configured operating modes. Only stackable operating modes are available for selection.
         /// </summary>
         /// <param name="operatingModes">A dictionary of configured operating modes keyed by their names.</param>
