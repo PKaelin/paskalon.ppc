@@ -3,6 +3,7 @@
     <Project Path="../paskalON.Common/paskalON.Messaging/paskalON.Messaging.csproj" />
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
     <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Client/paskalON.Devices.Client.csproj" />
     <Project Path="../paskalON.DeviceService/paskalON.Devices.Dto/paskalON.Devices.Dto.csproj" />
     <Project Path="../paskalON.OperatingModes/paskalON.OperatingModes.Dto/paskalON.OperatingModes.Dto.csproj" />
     <Project Path="../paskalON.PowerControls/paskalON.PowerControls.Dto/paskalON.PowerControls.Dto.csproj" />
@@ -10,5 +11,8 @@
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
+  <Project Path="paskalON.Luna.Application/paskalON.Luna.Application.csproj" Id="64a1399f-cb81-4c4f-b14d-5841acdb5243" />
+  <Project Path="paskalON.Luna.Domain.Configs/paskalON.Luna.Domain.Configs.csproj" Id="4eaa174e-0edc-4991-a14b-ffa676c84490" />
+  <Project Path="paskalON.Luna.Dto/paskalON.Luna.Dto.csproj" Id="31448601-7713-40b7-8d29-8c72267cb99d" />
   <Project Path="paskalON.Luna.Service/paskalON.Luna.Service.csproj" />
 </Solution>

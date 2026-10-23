@@ -1,0 +1,22 @@
+﻿<SystemConfig>
+    <!-- Operating mode subscriber topics -->
+    <SubscriberTopicCurrentSetpoint>ppc:om:setpoints</SubscriberTopicCurrentSetpoint>
+    <SubscriberTopicCurrentDerUnitSetpoint>ppc:om:setpoints:unit</SubscriberTopicCurrentDerUnitSetpoint>
+    <!-- Power control subscriber topics -->
+    <SubscriberTopicPowerTarget>ppc:pc:targets</SubscriberTopicPowerTarget>
+    <!-- Devices subscriber topics -->
+    <SubscriberTopicPcsCore>ppc:device:pcs:core</SubscriberTopicPcsCore>
+    <SubscriberTopicPcsDetail>ppc:device:pcs:detail</SubscriberTopicPcsDetail>
+    <SubscriberTopicBatteryBankCore>ppc:device:bb:core</SubscriberTopicBatteryBankCore>
+    <SubscriberTopicBatteryBankDetail>ppc:device:bb:detail</SubscriberTopicBatteryBankDetail>
+    <SubscriberTopicSolarPanelCore>ppc:device:pv:core</SubscriberTopicSolarPanelCore>
+    <SubscriberTopicSolarPanelDetail>ppc:device:pv:detail</SubscriberTopicSolarPanelDetail>
+    <SubscriberTopicExternalPowerMeterCore>ppc:device:pm:external:core</SubscriberTopicExternalPowerMeterCore>
+    <SubscriberTopicExternalPowerMeterDetail>ppc:device:pm:external:detail</SubscriberTopicExternalPowerMeterDetail>
+    <SubscriberTopicAuxiliaryPowerMeterCore>ppc:device:pm:auxiliary:core</SubscriberTopicAuxiliaryPowerMeterCore>
+    <SubscriberTopicAuxiliaryPowerMeterDetail>ppc:device:pm:auxiliary:detail</SubscriberTopicAuxiliaryPowerMeterDetail>
+    <SubscriberTopicSystemPowerMeterCore>ppc:device:pm:system:core</SubscriberTopicSystemPowerMeterCore>
+    <SubscriberTopicSystemPowerMeterDetail>ppc:device:pm:system:detail</SubscriberTopicSystemPowerMeterDetail>
+    <SubscriberTopicCircuitPowerMeterCore>ppc:device:pm:circuit:core</SubscriberTopicCircuitPowerMeterCore>
+    <SubscriberTopicCircuitPowerMeterDetail>ppc:device:pm:circuit:detail</SubscriberTopicCircuitPowerMeterDetail>
+</SystemConfig>

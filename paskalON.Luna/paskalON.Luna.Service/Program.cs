@@ -2,9 +2,14 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Devices.Client;
+using paskalON.Devices.Client.Subscribers;
+using paskalON.Luna.Application;
+using paskalON.Luna.Domain.Configs;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
 using StackExchange.Redis;
+using System.Xml.Serialization;
 
 WebApplication? app = null;
 Console.WriteLine("Starting service.....");
@@ -17,6 +22,15 @@ try
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(msgConnectionStringFile, "Cannot find the messaging secret file. MESSAGING_CONNECTION_FILE");
     string msgConnectionString = (await File.ReadAllTextAsync(msgConnectionStringFile)).Trim();
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(msgConnectionString, "Cannot find the messaging connection string definition");
+
+    // Get device service connection string
+    string? dsConnectionStringFile = Environment.GetEnvironmentVariable("DEVICESERVICE_CONNECTION_FILE");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsConnectionStringFile, "Cannot find the device service secret file. DEVICESERVICE_CONNECTION_FILE");
+    string dsConnectionString = (await File.ReadAllTextAsync(dsConnectionStringFile)).Trim();
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsConnectionString, "Cannot find the device service connection string definition");
+    // Get device service DER endpoint
+    string? dsEndpoint = Environment.GetEnvironmentVariable("DEVICE_SERVICE_ENDPOINT");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsEndpoint, "Cannot find the device service endpoint. DEVICE_SERVICE_ENDPOINT");
 
     // Get Logging, Metrics, Tracing endpoint strings
     string? logEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_LOGGING_ENDPOINT");
@@ -41,6 +55,18 @@ try
     builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(msgOptions));
     builder.Services.AddSingleton<IMessageSubscriber, RedisMessageSubscriber>();
 
+    // Long living HTTP client for the device service API
+    Uri dsBaseAddress = new Uri($"{dsConnectionString.TrimEnd('/')}/{dsEndpoint.Trim('/')}/");
+    builder.Services.AddKeyedSingleton(nameof(DeviceServer), (_, _) => new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
+    {
+        BaseAddress = dsBaseAddress,
+        Timeout = TimeSpan.FromSeconds(10)
+    });
+    builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(sp.GetRequiredKeyedService<HttpClient>(nameof(DeviceServer))));
+    builder.Services.AddSingleton<IDeviceClient, DeviceClient>();
+
+    builder.Services.AddSingleton<ILunaDeviceManager, LunaDeviceManager>();
+
     // Build application
     Console.WriteLine("Building application.....");
     app = builder.Build();
@@ -50,6 +76,11 @@ try
     lifetime.ApplicationStopped.Register(() => { app.Logger.LogInformation("Microservice Luna has stopping....."); });
     app.Logger.LogInformation("Application starts initializing services.....");
 
+    // Load system configuration
+    SystemConfig config = LoadSystemConfig("SystemConfig.xml");
+    SubscriberTopic topics = GetSubscriberTopic(config);
+    IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
+    await deviceClient.Initialize(topics);
 
     app.Logger.LogInformation("Application finished initializing services.....");
 
@@ -76,4 +107,73 @@ catch (Exception ex)
     }
 
     throw;
+}
+
+/// <summary>
+/// Get subscriber topic configuration object.
+/// </summary>
+static SubscriberTopic GetSubscriberTopic(SystemConfig config)
+{
+    SubscriberTopic topic = new SubscriberTopic();
+
+    if (config.SubscriberTopicPcsCore != null && config.SubscriberTopicPcsDetail != null)
+    {
+        topic.PowerConversionSystemTopic = new SubscriberTopicEntry(config.SubscriberTopicPcsCore, config.SubscriberTopicPcsDetail);
+    }
+
+    if (config.SubscriberTopicBatteryBankCore != null && config.SubscriberTopicBatteryBankDetail != null)
+    {
+        topic.BatteryBankTopic = new SubscriberTopicEntry(config.SubscriberTopicBatteryBankCore, config.SubscriberTopicBatteryBankDetail);
+    }
+
+    if (config.SubscriberTopicSolarPanelCore != null && config.SubscriberTopicSolarPanelDetail != null)
+    {
+        topic.SolarPanelTopic = new SubscriberTopicEntry(config.SubscriberTopicSolarPanelCore, config.SubscriberTopicSolarPanelDetail);
+    }
+
+    if (config.SubscriberTopicExternalPowerMeterCore != null && config.SubscriberTopicExternalPowerMeterDetail != null)
+    {
+        topic.ExternalPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicExternalPowerMeterCore, config.SubscriberTopicExternalPowerMeterDetail);
+    }
+
+    if (config.SubscriberTopicAuxiliaryPowerMeterCore != null && config.SubscriberTopicAuxiliaryPowerMeterDetail != null)
+    {
+        topic.AuxiliaryPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicAuxiliaryPowerMeterCore, config.SubscriberTopicAuxiliaryPowerMeterDetail);
+    }
+
+    if (config.SubscriberTopicSystemPowerMeterCore != null && config.SubscriberTopicSystemPowerMeterDetail != null)
+    {
+        topic.SystemPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicSystemPowerMeterCore, config.SubscriberTopicSystemPowerMeterDetail);
+    }
+
+    if (config.SubscriberTopicCircuitPowerMeterCore != null && config.SubscriberTopicCircuitPowerMeterDetail != null)
+    {
+        topic.CircuitPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicCircuitPowerMeterCore, config.SubscriberTopicCircuitPowerMeterDetail);
+    }
+    return topic;
+}
+
+
+/// <summary>
+/// Load system configuration from XML file.
+/// </summary>
+static SystemConfig LoadSystemConfig(string filePath)
+{
+    if (!File.Exists(filePath))
+    {
+        throw new FileNotFoundException($"System configuration file not found: {filePath}");
+    }
+
+    XmlSerializer serializer = new XmlSerializer(typeof(SystemConfig));
+    using FileStream fs = new FileStream(filePath, FileMode.Open);
+    {
+        SystemConfig? config = serializer.Deserialize(fs) as SystemConfig;
+
+        if (config == null)
+        {
+            throw new InvalidOperationException($"Failed to deserialize system configuration from file: {filePath}");
+        }
+
+        return config;
+    }
 }

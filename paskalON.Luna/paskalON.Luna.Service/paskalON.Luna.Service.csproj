@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -22,6 +22,15 @@
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Telemetry\paskalON.Telemetry.csproj" />
+    <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Client\paskalON.Devices.Client.csproj" />
+    <ProjectReference Include="..\paskalON.Luna.Application\paskalON.Luna.Application.csproj" />
+    <ProjectReference Include="..\paskalON.Luna.Domain.Configs\paskalON.Luna.Domain.Configs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="SystemConfig.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

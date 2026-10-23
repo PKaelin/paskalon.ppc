@@ -9,22 +9,23 @@ services:
     ports:
       - 45550:8080
     environment:
-      - DATABASE_CONNECTION_FILE=/run/secrets/database_connection
       - MESSAGING_CONNECTION_FILE=/run/secrets/messaging_connection
+      - DEVICESERVICE_CONNECTION_FILE=/run/secrets/deviceservice_connection
+      - DEVICE_SERVICE_ENDPOINT=/api/v1
       - TELEMETRY_LOGGING_ENDPOINT=http://collector:4317
       - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
       - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
     secrets:
-      - database_connection
       - messaging_connection
+      - deviceservice_connection
     networks:
       - ppc.network
 
 secrets:
-  database_connection:
-    file: ./secrets/database_connection
   messaging_connection:
     file: ./secrets/messaging_connection
+  deviceservice_connection:
+    file: ./secrets/deviceservice_connection
 
 networks:
   ppc.network:
