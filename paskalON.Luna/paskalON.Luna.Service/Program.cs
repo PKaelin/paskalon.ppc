@@ -8,6 +8,8 @@ using paskalON.Luna.Application;
 using paskalON.Luna.Domain.Configs;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
+using paskalON.OperatingModes.Client.Subscribers;
+using paskalON.PowerControls.Client.Subscribers;
 using StackExchange.Redis;
 using System.Xml.Serialization;
 
@@ -65,7 +67,20 @@ try
     builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(sp.GetRequiredKeyedService<HttpClient>(nameof(DeviceServer))));
     builder.Services.AddSingleton<IDeviceClient, DeviceClient>();
 
+    // Add managers
     builder.Services.AddSingleton<ILunaDeviceManager, LunaDeviceManager>();
+    // The managers are also the handlers of the received messages, so both interfaces resolve to the same instance
+    builder.Services.AddSingleton<LunaPowerControlManager>();
+    builder.Services.AddSingleton<ILunaPowerControlManager>(provider => provider.GetRequiredService<LunaPowerControlManager>());
+    builder.Services.AddSingleton<IPowerTargetHandler>(provider => provider.GetRequiredService<LunaPowerControlManager>());
+    builder.Services.AddSingleton<IPowerTargetSubscriber, PowerTargetSubscriber>();
+    builder.Services.AddHostedService<PowerTargetSubscriberService>();
+
+    builder.Services.AddSingleton<LunaOperatingModeManager>();
+    builder.Services.AddSingleton<ILunaOperatingModeManager>(provider => provider.GetRequiredService<LunaOperatingModeManager>());
+    builder.Services.AddSingleton<IPowerSetpointHandler>(provider => provider.GetRequiredService<LunaOperatingModeManager>());
+    builder.Services.AddSingleton<IPowerSetpointSubscriber, PowerSetpointSubscriber>();
+    builder.Services.AddHostedService<PowerSetpointSubscriberService>();
 
     // Build application
     Console.WriteLine("Building application.....");
@@ -81,6 +96,13 @@ try
     SubscriberTopic topics = GetSubscriberTopic(config);
     IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
     await deviceClient.Initialize(topics);
+
+    // Subscribe to the power targets and setpoints, they are handled once the application starts running
+    IPowerTargetSubscriber powerTargetSubscriber = app.Services.GetRequiredService<IPowerTargetSubscriber>();
+    powerTargetSubscriber.Subscribe(config.SubscriberTopicPowerTarget);
+    IPowerSetpointSubscriber powerSetpointSubscriber = app.Services.GetRequiredService<IPowerSetpointSubscriber>();
+    powerSetpointSubscriber.Subscribe(config.SubscriberTopicCurrentSetpoint);
+    powerSetpointSubscriber.SubscribeDerUnit(config.SubscriberTopicCurrentDerUnitSetpoint);
 
     app.Logger.LogInformation("Application finished initializing services.....");
 

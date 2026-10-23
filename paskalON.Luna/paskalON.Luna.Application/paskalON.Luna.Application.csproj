@@ -12,6 +12,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Client\paskalON.Devices.Client.csproj" />
+    <ProjectReference Include="..\..\paskalON.OperatingModes\paskalON.OperatingModes.Client\paskalON.OperatingModes.Client.csproj" />
+    <ProjectReference Include="..\..\paskalON.OperatingModes\paskalON.OperatingModes.Dto\paskalON.OperatingModes.Dto.csproj" />
+    <ProjectReference Include="..\..\paskalON.PowerControls\paskalON.PowerControls.Client\paskalON.PowerControls.Client.csproj" />
+    <ProjectReference Include="..\..\paskalON.PowerControls\paskalON.PowerControls.Dto\paskalON.PowerControls.Dto.csproj" />
   </ItemGroup>
 
 </Project>
