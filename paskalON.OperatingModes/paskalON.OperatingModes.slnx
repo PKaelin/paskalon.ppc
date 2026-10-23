@@ -17,6 +17,7 @@
   <Folder Name="/Tests/">
     <Project Path="paskalON.OperatingModes.Application.IntegrationTest/paskalON.OperatingModes.Application.IntegrationTest.csproj" Id="9d2373e3-4d10-4fda-bf47-d7a16f0853ce" />
     <Project Path="paskalON.OperatingModes.Application.UnitTest/paskalON.OperatingModes.Application.UnitTest.csproj" Id="0afb8daf-6b9d-40cf-ae9a-eb4b338bc273" />
+    <Project Path="paskalON.OperatingModes.Client.UnitTest/paskalON.OperatingModes.Client.UnitTest.csproj" />
     <Project Path="paskalON.OperatingModes.Domain.Configs.UnitTest/paskalON.OperatingModes.Domain.Configs.UnitTest.csproj" Id="96f4922f-58dc-43a5-9f98-b28693ee8fae" />
     <Project Path="paskalON.OperatingModes.Domain.IntegrationTest/paskalON.OperatingModes.Domain.IntegrationTest.csproj" Id="b26cda2d-60fe-4697-b6f2-32d558125864" />
     <Project Path="paskalON.OperatingModes.Domain.UnitTest/paskalON.OperatingModes.Domain.UnitTest.csproj" />
@@ -26,6 +27,7 @@
     <Build />
   </Project>
   <Project Path="paskalON.OperatingModes.Application/paskalON.OperatingModes.Application.csproj" Id="4d9a038d-be7e-42a9-ab47-baae8e975c27" />
+  <Project Path="paskalON.OperatingModes.Client/paskalON.OperatingModes.Client.csproj" />
   <Project Path="paskalON.OperatingModes.Domain.Configs/paskalON.OperatingModes.Domain.Configs.csproj" Id="c61f2d23-a0d7-405f-bab7-706d7e6910e3" />
   <Project Path="paskalON.OperatingModes.Domain/paskalON.OperatingModes.Domain.csproj" />
   <Project Path="paskalON.OperatingModes.Dto/paskalON.OperatingModes.Dto.csproj" Id="afbbea07-13bf-4906-a028-b241fceb813d" />

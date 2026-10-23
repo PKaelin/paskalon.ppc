@@ -9,6 +9,7 @@
     <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
     <Project Path="../paskalON.DeviceService/paskalON.Devices.Client/paskalON.Devices.Client.csproj" />
     <Project Path="../paskalON.DeviceService/paskalON.Devices.Dto/paskalON.Devices.Dto.csproj" />
+    <Project Path="../paskalON.OperatingModes/paskalON.OperatingModes.Client/paskalON.OperatingModes.Client.csproj" />
     <Project Path="../paskalON.OperatingModes/paskalON.OperatingModes.Dto/paskalON.OperatingModes.Dto.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">

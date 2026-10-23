@@ -2,12 +2,12 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.PowerControls.Application.Subscribers;
+using Microsoft.Extensions.Hosting;
 
-namespace paskalON.PowerControls.Service.Subscribers
+namespace paskalON.OperatingModes.Client.Subscribers
 {
     /// <summary>
-    /// Background service that applies the power setpoints received by the <see cref="IPowerSetpointSubscriber"/>.
+    /// Background service that handles the power setpoints received by the <see cref="IPowerSetpointSubscriber"/>.
     /// </summary>
     public class PowerSetpointSubscriberService : BackgroundService
     {
@@ -16,7 +16,6 @@ namespace paskalON.PowerControls.Service.Subscribers
         /// </summary>
         /// <remarks>Assigned during initialization and not modified thereafter.</remarks>
         private readonly IPowerSetpointSubscriber _powerSetpointSubscriber;
-
 
 
         /// <summary>

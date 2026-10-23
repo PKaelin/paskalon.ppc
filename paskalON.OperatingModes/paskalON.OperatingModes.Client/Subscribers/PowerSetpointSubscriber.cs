@@ -5,19 +5,18 @@
 using Microsoft.Extensions.Logging;
 using paskalON.Messaging;
 using paskalON.OperatingModes.Dto.Powers;
-using paskalON.PhysicalUnits.Electricals.Powers;
 using System.Text.Json;
 using System.Threading.Channels;
 
-namespace paskalON.PowerControls.Application.Subscribers
+namespace paskalON.OperatingModes.Client.Subscribers
 {
     /// <summary>
     /// Receives the system power setpoints as <see cref="CurrentSetpointsDto"/> and the DER unit power setpoints
-    /// as <see cref="CurrentDerUnitSetpointsDto"/> from a message broker and applies them to the power control.
+    /// as <see cref="CurrentDerUnitSetpointsDto"/> from a message broker and passes them to the <see cref="IPowerSetpointHandler"/>.
     /// </summary>
     /// <remarks>
-    /// Received messages are queued and applied by a single reader, so the setpoints are applied in the order they were received
-    /// and the message broker callback is not blocked by the device communication.
+    /// Received messages are queued and handled by a single reader, so the setpoints are handled in the order they were received
+    /// and the message broker callback is not blocked by the handler.
     /// </remarks>
     public sealed class PowerSetpointSubscriber : IPowerSetpointSubscriber
     {
@@ -28,9 +27,9 @@ namespace paskalON.PowerControls.Application.Subscribers
 
 
         /// <summary>
-        /// Power control manager to apply the setpoint to the control manager.
+        /// Handler of the received power setpoints.
         /// </summary>
-        private readonly IPowerControlManager _powerControlManager;
+        private readonly IPowerSetpointHandler _powerSetpointHandler;
 
 
         /// <summary>
@@ -40,7 +39,7 @@ namespace paskalON.PowerControls.Application.Subscribers
 
 
         /// <summary>
-        /// Queue of received power setpoints to apply, either <see cref="CurrentSetpointsDto"/> or <see cref="CurrentDerUnitSetpointsDto"/>.
+        /// Queue of received power setpoints to handle, either <see cref="CurrentSetpointsDto"/> or <see cref="CurrentDerUnitSetpointsDto"/>.
         /// </summary>
         /// <remarks>
         /// Thread-safe FIFO (First-In, First-Out) queue.
@@ -55,16 +54,16 @@ namespace paskalON.PowerControls.Application.Subscribers
         /// Constructor of <see cref="PowerSetpointSubscriber"/>.
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>
-        /// <param name="powerControlManager">Power control manager to apply the setpoint to the control manager.</param>
+        /// <param name="powerSetpointHandler">Handler of the received power setpoints.</param>
         /// <param name="messageSubscriber">Interface for subscribing to message brokers.</param>
-        public PowerSetpointSubscriber(ILogger<PowerSetpointSubscriber> logger, IPowerControlManager powerControlManager, IMessageSubscriber messageSubscriber)
+        public PowerSetpointSubscriber(ILogger<PowerSetpointSubscriber> logger, IPowerSetpointHandler powerSetpointHandler, IMessageSubscriber messageSubscriber)
         {
             ArgumentNullException.ThrowIfNull(logger);
-            ArgumentNullException.ThrowIfNull(powerControlManager);
+            ArgumentNullException.ThrowIfNull(powerSetpointHandler);
             ArgumentNullException.ThrowIfNull(messageSubscriber);
 
             _logger = logger;
-            _powerControlManager = powerControlManager;
+            _powerSetpointHandler = powerSetpointHandler;
             _messageSubscriber = messageSubscriber;
         }
 
@@ -104,50 +103,48 @@ namespace paskalON.PowerControls.Application.Subscribers
         {
             try
             {
-                // Reads from the channel and applies the power setpoints in the order they were received.
+                // Reads from the channel and handles the power setpoints in the order they were received.
                 await foreach (object setpoint in _setpoints.Reader.ReadAllAsync(cancellationToken))
                 {
-                    await ApplyAsync(setpoint);
+                    await HandleAsync(setpoint);
                 }
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                _logger.LogDebug("Applying power setpoints stopped");
+                _logger.LogDebug("Handling power setpoints stopped");
             }
         }
 
 
         /// <summary>
-        /// Applies the power setpoints to the power control. A failure is logged, so the following setpoints are still applied.
+        /// Passes the power setpoints to the handler. A failure is logged, so the following setpoints are still handled.
         /// </summary>
-        /// <param name="setpoint">The power setpoints to apply.</param>
+        /// <param name="setpoint">The power setpoints to handle.</param>
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
-        private async Task ApplyAsync(object setpoint)
+        private async Task HandleAsync(object setpoint)
         {
             try
             {
                 switch (setpoint)
                 {
                     case CurrentSetpointsDto system:
-                        await _powerControlManager.SetSystemPowerTarget(new ActivePower(system.SetpointActivePowerWatts),
-                            new ReactivePower(system.SetpointReactivePowerVars));
+                        await _powerSetpointHandler.HandleSetpointsAsync(system);
                         break;
 
                     case CurrentDerUnitSetpointsDto unit:
-                        await _powerControlManager.SetDerUnitPowerTarget(unit.DerUnitName, new ActivePower(unit.SetpointActivePowerWatts),
-                            new ReactivePower(unit.SetpointReactivePowerVars));
+                        await _powerSetpointHandler.HandleDerUnitSetpointsAsync(unit);
                         break;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Applying power setpoints failed");
+                _logger.LogError(ex, "Handling power setpoints failed");
             }
         }
 
 
         /// <summary>
-        /// Handles a received power setpoints message and queues it to be applied.
+        /// Handles a received power setpoints message and queues it to be handled.
         /// </summary>
         /// <typeparam name="T">The DTO type of the power setpoints message.</typeparam>
         /// <param name="json">The json message with the power setpoints.</param>
@@ -164,7 +161,7 @@ namespace paskalON.PowerControls.Application.Subscribers
                     return;
                 }
 
-                // Writes the received power setpoints to the channel to be applied by the channel (queue).
+                // Writes the received power setpoints to the channel (queue) to be handled by the single reader.
                 _setpoints.Writer.TryWrite(setpoint);
             }
             catch (JsonException ex)

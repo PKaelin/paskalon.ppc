@@ -2,10 +2,10 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-namespace paskalON.PowerControls.Application.Subscribers
+namespace paskalON.OperatingModes.Client.Subscribers
 {
     /// <summary>
-    /// Receives the power setpoints from a message broker and applies them to the power control.
+    /// Receives the power setpoints from a message broker and passes them to the <see cref="IPowerSetpointHandler"/>.
     /// </summary>
     public interface IPowerSetpointSubscriber
     {
@@ -24,7 +24,7 @@ namespace paskalON.PowerControls.Application.Subscribers
 
 
         /// <summary>
-        /// Applies the received power setpoints in the order they were received, until cancellation is requested.
+        /// Handles the received power setpoints in the order they were received, until cancellation is requested.
         /// </summary>
         /// <param name="cancellationToken">Token to stop processing.</param>
         /// <returns>Task that completes when processing has stopped.</returns>

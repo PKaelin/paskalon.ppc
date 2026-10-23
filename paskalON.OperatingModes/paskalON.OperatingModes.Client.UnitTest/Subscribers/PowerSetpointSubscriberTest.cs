@@ -7,12 +7,11 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using paskalON.Messaging;
+using paskalON.OperatingModes.Client.Subscribers;
 using paskalON.OperatingModes.Dto.Powers;
-using paskalON.PhysicalUnits.Electricals.Powers;
-using paskalON.PowerControls.Application.Subscribers;
 using System.Text.Json;
 
-namespace paskalON.PowerControls.Application.UnitTest.Subscribers
+namespace paskalON.OperatingModes.Client.UnitTest.Subscribers
 {
     [TestClass]
     public sealed class PowerSetpointSubscriberTest
@@ -22,7 +21,7 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
         private const string DerUnitName = "BESS-Unit 1";
         private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(10);
 
-        private Mock<IPowerControlManager> _powerControlManager = null!;
+        private Mock<IPowerSetpointHandler> _powerSetpointHandler = null!;
         private Mock<IMessageSubscriber> _messageSubscriber = null!;
         private Action<string>? _callback;
         private Action<string>? _derUnitCallback;
@@ -33,7 +32,7 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
         {
             _callback = null;
             _derUnitCallback = null;
-            _powerControlManager = new Mock<IPowerControlManager>();
+            _powerSetpointHandler = new Mock<IPowerSetpointHandler>();
             _messageSubscriber = new Mock<IMessageSubscriber>();
             _messageSubscriber.Setup(s => s.Subscribe(SetpointTopic, It.IsAny<Action<string>>()))
                 .Callback<string, Action<string>>((topic, callback) => _callback = callback);
@@ -45,12 +44,12 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
         [TestMethod]
         public void PowerSetpointSubscriberNullLoggerTest()
         {
-            Assert.ThrowsExactly<ArgumentNullException>(() => new PowerSetpointSubscriber(null!, _powerControlManager.Object, _messageSubscriber.Object));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PowerSetpointSubscriber(null!, _powerSetpointHandler.Object, _messageSubscriber.Object));
         }
 
 
         [TestMethod]
-        public void PowerSetpointSubscriberNullPowerControlManagerTest()
+        public void PowerSetpointSubscriberNullPowerSetpointHandlerTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() => new PowerSetpointSubscriber(NullLogger<PowerSetpointSubscriber>.Instance, null!,
                 _messageSubscriber.Object));
@@ -61,7 +60,7 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
         public void PowerSetpointSubscriberNullMessageSubscriberTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() => new PowerSetpointSubscriber(NullLogger<PowerSetpointSubscriber>.Instance,
-                _powerControlManager.Object, null!));
+                _powerSetpointHandler.Object, null!));
         }
 
 
@@ -81,7 +80,7 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
         public void SubscribeLogsInformationWithTopicTest()
         {
             FakeLogger<PowerSetpointSubscriber> logger = new FakeLogger<PowerSetpointSubscriber>();
-            PowerSetpointSubscriber subscriber = new PowerSetpointSubscriber(logger, _powerControlManager.Object, _messageSubscriber.Object);
+            PowerSetpointSubscriber subscriber = new PowerSetpointSubscriber(logger, _powerSetpointHandler.Object, _messageSubscriber.Object);
 
             subscriber.Subscribe(SetpointTopic);
 
@@ -97,7 +96,7 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
         public void SubscribeWithoutTopicLogsWarningTest(string? topic)
         {
             FakeLogger<PowerSetpointSubscriber> logger = new FakeLogger<PowerSetpointSubscriber>();
-            PowerSetpointSubscriber subscriber = new PowerSetpointSubscriber(logger, _powerControlManager.Object, _messageSubscriber.Object);
+            PowerSetpointSubscriber subscriber = new PowerSetpointSubscriber(logger, _powerSetpointHandler.Object, _messageSubscriber.Object);
 
             subscriber.Subscribe(topic);
 
@@ -107,17 +106,17 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
 
 
         [TestMethod]
-        public async Task RunAppliesReceivedSetpointsInOrderTest()
+        public async Task RunHandlesReceivedSetpointsInOrderTest()
         {
             using CancellationTokenSource cancellation = new CancellationTokenSource();
-            List<(ActivePower ActivePower, ReactivePower ReactivePower)> applied = new List<(ActivePower ActivePower, ReactivePower ReactivePower)>();
+            List<CurrentSetpointsDto> handled = new List<CurrentSetpointsDto>();
             TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _powerControlManager.Setup(m => m.SetSystemPowerTarget(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()))
-                .Callback<ActivePower, ReactivePower>((activePower, reactivePower) =>
+            _powerSetpointHandler.Setup(h => h.HandleSetpointsAsync(It.IsAny<CurrentSetpointsDto>()))
+                .Callback<CurrentSetpointsDto>(setpoints =>
                 {
-                    applied.Add((activePower, reactivePower));
+                    handled.Add(setpoints);
 
-                    if (applied.Count == 2)
+                    if (handled.Count == 2)
                     {
                         completed.TrySetResult();
                     }
@@ -136,22 +135,22 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
             await cancellation.CancelAsync();
             await run.WaitAsync(TestTimeout);
 
-            Assert.HasCount(2, applied);
-            Assert.AreEqual(new ActivePower(25000.5), applied[0].ActivePower);
-            Assert.AreEqual(new ReactivePower(-4000.25), applied[0].ReactivePower);
-            Assert.AreEqual(new ActivePower(-12000), applied[1].ActivePower);
-            Assert.AreEqual(new ReactivePower(3000), applied[1].ReactivePower);
+            Assert.HasCount(2, handled);
+            Assert.AreEqual(25000.5, handled[0].SetpointActivePowerWatts);
+            Assert.AreEqual(-4000.25, handled[0].SetpointReactivePowerVars);
+            Assert.AreEqual(-12000, handled[1].SetpointActivePowerWatts);
+            Assert.AreEqual(3000, handled[1].SetpointReactivePowerVars);
         }
 
 
         [TestMethod]
         [DataRow("not json")]
         [DataRow("null")]
-        public async Task RunSkipsInvalidMessageAndAppliesNextSetpointsTest(string invalidJson)
+        public async Task RunSkipsInvalidMessageAndHandlesNextSetpointsTest(string invalidJson)
         {
             using CancellationTokenSource cancellation = new CancellationTokenSource();
             TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _powerControlManager.Setup(m => m.SetSystemPowerTarget(new ActivePower(12000), new ReactivePower(3000)))
+            _powerSetpointHandler.Setup(h => h.HandleSetpointsAsync(It.Is<CurrentSetpointsDto>(s => s.SetpointActivePowerWatts == 12000)))
                 .Callback(() => completed.TrySetResult())
                 .Returns(Task.CompletedTask);
             PowerSetpointSubscriber subscriber = CreateSubscriber();
@@ -164,18 +163,18 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
             await cancellation.CancelAsync();
             await run.WaitAsync(TestTimeout);
 
-            _powerControlManager.Verify(m => m.SetSystemPowerTarget(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Once);
+            _powerSetpointHandler.Verify(h => h.HandleSetpointsAsync(It.IsAny<CurrentSetpointsDto>()), Times.Once);
         }
 
 
         [TestMethod]
-        public async Task RunFailedApplyContinuesWithNextSetpointsTest()
+        public async Task RunFailedHandlingContinuesWithNextSetpointsTest()
         {
             using CancellationTokenSource cancellation = new CancellationTokenSource();
             TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _powerControlManager.Setup(m => m.SetSystemPowerTarget(new ActivePower(1000), new ReactivePower(0)))
+            _powerSetpointHandler.Setup(h => h.HandleSetpointsAsync(It.Is<CurrentSetpointsDto>(s => s.SetpointActivePowerWatts == 1000)))
                 .ThrowsAsync(new InvalidOperationException("System power control is not initialized"));
-            _powerControlManager.Setup(m => m.SetSystemPowerTarget(new ActivePower(12000), new ReactivePower(3000)))
+            _powerSetpointHandler.Setup(h => h.HandleSetpointsAsync(It.Is<CurrentSetpointsDto>(s => s.SetpointActivePowerWatts == 12000)))
                 .Callback(() => completed.TrySetResult())
                 .Returns(Task.CompletedTask);
             PowerSetpointSubscriber subscriber = CreateSubscriber();
@@ -188,8 +187,7 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
             await cancellation.CancelAsync();
             await run.WaitAsync(TestTimeout);
 
-            _powerControlManager.Verify(m => m.SetSystemPowerTarget(new ActivePower(1000), new ReactivePower(0)), Times.Once);
-            _powerControlManager.Verify(m => m.SetSystemPowerTarget(new ActivePower(12000), new ReactivePower(3000)), Times.Once);
+            _powerSetpointHandler.Verify(h => h.HandleSetpointsAsync(It.IsAny<CurrentSetpointsDto>()), Times.Exactly(2));
         }
 
 
@@ -226,7 +224,7 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
         public void SubscribeDerUnitWithoutTopicLogsWarningTest(string? topic)
         {
             FakeLogger<PowerSetpointSubscriber> logger = new FakeLogger<PowerSetpointSubscriber>();
-            PowerSetpointSubscriber subscriber = new PowerSetpointSubscriber(logger, _powerControlManager.Object, _messageSubscriber.Object);
+            PowerSetpointSubscriber subscriber = new PowerSetpointSubscriber(logger, _powerSetpointHandler.Object, _messageSubscriber.Object);
 
             subscriber.SubscribeDerUnit(topic);
 
@@ -236,19 +234,19 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
 
 
         [TestMethod]
-        public async Task RunAppliesReceivedDerUnitSetpointsTest()
+        public async Task RunHandlesReceivedDerUnitSetpointsTest()
         {
             using CancellationTokenSource cancellation = new CancellationTokenSource();
             TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _powerControlManager.Setup(m => m.SetDerUnitPowerTarget(DerUnitName, new ActivePower(-30000), new ReactivePower(5000)))
-                .Callback(() => completed.TrySetResult())
-                .Returns(Task.CompletedTask);
             CurrentDerUnitSetpointsDto setpoint = new CurrentDerUnitSetpointsDto
             {
                 DerUnitName = DerUnitName,
                 SetpointActivePowerWatts = -30000,
                 SetpointReactivePowerVars = 5000
             };
+            _powerSetpointHandler.Setup(h => h.HandleDerUnitSetpointsAsync(setpoint))
+                .Callback(() => completed.TrySetResult())
+                .Returns(Task.CompletedTask);
             PowerSetpointSubscriber subscriber = CreateSubscriber();
             subscriber.SubscribeDerUnit(DerUnitSetpointTopic);
             Task run = subscriber.RunAsync(cancellation.Token);
@@ -258,26 +256,26 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
             await cancellation.CancelAsync();
             await run.WaitAsync(TestTimeout);
 
-            _powerControlManager.Verify(m => m.SetDerUnitPowerTarget(DerUnitName, new ActivePower(-30000), new ReactivePower(5000)), Times.Once);
-            _powerControlManager.Verify(m => m.SetSystemPowerTarget(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+            _powerSetpointHandler.Verify(h => h.HandleDerUnitSetpointsAsync(setpoint), Times.Once);
+            _powerSetpointHandler.Verify(h => h.HandleSetpointsAsync(It.IsAny<CurrentSetpointsDto>()), Times.Never);
         }
 
 
         [TestMethod]
-        public async Task RunAppliesSystemAndDerUnitSetpointsInOrderTest()
+        public async Task RunHandlesSystemAndDerUnitSetpointsInOrderTest()
         {
             using CancellationTokenSource cancellation = new CancellationTokenSource();
-            List<string> applied = new List<string>();
+            List<string> handled = new List<string>();
             TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _powerControlManager.Setup(m => m.SetSystemPowerTarget(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()))
-                .Callback(() => applied.Add("System"))
+            _powerSetpointHandler.Setup(h => h.HandleSetpointsAsync(It.IsAny<CurrentSetpointsDto>()))
+                .Callback(() => handled.Add("System"))
                 .Returns(Task.CompletedTask);
-            _powerControlManager.Setup(m => m.SetDerUnitPowerTarget(It.IsAny<string>(), It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()))
-                .Callback<string, ActivePower, ReactivePower>((name, activePower, reactivePower) =>
+            _powerSetpointHandler.Setup(h => h.HandleDerUnitSetpointsAsync(It.IsAny<CurrentDerUnitSetpointsDto>()))
+                .Callback<CurrentDerUnitSetpointsDto>(setpoints =>
                 {
-                    applied.Add(name);
+                    handled.Add(setpoints.DerUnitName);
 
-                    if (applied.Count == 3)
+                    if (handled.Count == 3)
                     {
                         completed.TrySetResult();
                     }
@@ -295,7 +293,7 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
             await cancellation.CancelAsync();
             await run.WaitAsync(TestTimeout);
 
-            CollectionAssert.AreEqual(new List<string> { "BESS-Unit 1", "System", "BESS-Unit 2" }, applied);
+            CollectionAssert.AreEqual(new List<string> { "BESS-Unit 1", "System", "BESS-Unit 2" }, handled);
         }
 
 
@@ -304,28 +302,30 @@ namespace paskalON.PowerControls.Application.UnitTest.Subscribers
         {
             using CancellationTokenSource cancellation = new CancellationTokenSource();
             TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _powerControlManager.Setup(m => m.SetDerUnitPowerTarget("BESS-Unit 9", It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()))
+            CurrentDerUnitSetpointsDto rejected = new CurrentDerUnitSetpointsDto { DerUnitName = "BESS-Unit 9", SetpointActivePowerWatts = 1000, SetpointReactivePowerVars = 0 };
+            CurrentDerUnitSetpointsDto valid = new CurrentDerUnitSetpointsDto { DerUnitName = DerUnitName, SetpointActivePowerWatts = 12000, SetpointReactivePowerVars = 3000 };
+            _powerSetpointHandler.Setup(h => h.HandleDerUnitSetpointsAsync(rejected))
                 .ThrowsAsync(new KeyNotFoundException("DER unit BESS-Unit 9 does not exist"));
-            _powerControlManager.Setup(m => m.SetDerUnitPowerTarget(DerUnitName, new ActivePower(12000), new ReactivePower(3000)))
+            _powerSetpointHandler.Setup(h => h.HandleDerUnitSetpointsAsync(valid))
                 .Callback(() => completed.TrySetResult())
                 .Returns(Task.CompletedTask);
             PowerSetpointSubscriber subscriber = CreateSubscriber();
             subscriber.SubscribeDerUnit(DerUnitSetpointTopic);
             Task run = subscriber.RunAsync(cancellation.Token);
 
-            _derUnitCallback!(JsonSerializer.Serialize(new CurrentDerUnitSetpointsDto { DerUnitName = "BESS-Unit 9", SetpointActivePowerWatts = 1000, SetpointReactivePowerVars = 0 }));
-            _derUnitCallback!(JsonSerializer.Serialize(new CurrentDerUnitSetpointsDto { DerUnitName = DerUnitName, SetpointActivePowerWatts = 12000, SetpointReactivePowerVars = 3000 }));
+            _derUnitCallback!(JsonSerializer.Serialize(rejected));
+            _derUnitCallback!(JsonSerializer.Serialize(valid));
             await completed.Task.WaitAsync(TestTimeout);
             await cancellation.CancelAsync();
             await run.WaitAsync(TestTimeout);
 
-            _powerControlManager.Verify(m => m.SetDerUnitPowerTarget(It.IsAny<string>(), It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Exactly(2));
+            _powerSetpointHandler.Verify(h => h.HandleDerUnitSetpointsAsync(It.IsAny<CurrentDerUnitSetpointsDto>()), Times.Exactly(2));
         }
 
 
         private PowerSetpointSubscriber CreateSubscriber()
         {
-            return new PowerSetpointSubscriber(NullLogger<PowerSetpointSubscriber>.Instance, _powerControlManager.Object, _messageSubscriber.Object);
+            return new PowerSetpointSubscriber(NullLogger<PowerSetpointSubscriber>.Instance, _powerSetpointHandler.Object, _messageSubscriber.Object);
         }
     }
 }
