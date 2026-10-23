@@ -2,17 +2,17 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Devices.Application.Subscribers;
+using Microsoft.Extensions.Hosting;
 
-namespace paskalON.Devices.Service.Subscribers
+namespace paskalON.PowerControls.Client.Subscribers
 {
     /// <summary>
-    /// Background service that applies the power targets received by the <see cref="IPowerTargetSubscriber"/>.
+    /// Background service that handles the power targets received by the <see cref="IPowerTargetSubscriber"/>.
     /// </summary>
     public class PowerTargetSubscriberService : BackgroundService
     {
         /// <summary>
-        /// Power target subscriber that receives and applies the power targets.
+        /// Power target subscriber that receives and handles the power targets.
         /// </summary>
         private readonly IPowerTargetSubscriber _powerTargetSubscriber;
 
@@ -20,7 +20,7 @@ namespace paskalON.Devices.Service.Subscribers
         /// <summary>
         /// Constructor of <see cref="PowerTargetSubscriberService"/>.
         /// </summary>
-        /// <param name="powerTargetSubscriber">Power target subscriber that receives and applies the power targets.</param>
+        /// <param name="powerTargetSubscriber">Power target subscriber that receives and handles the power targets.</param>
         public PowerTargetSubscriberService(IPowerTargetSubscriber powerTargetSubscriber)
         {
             ArgumentNullException.ThrowIfNull(powerTargetSubscriber);

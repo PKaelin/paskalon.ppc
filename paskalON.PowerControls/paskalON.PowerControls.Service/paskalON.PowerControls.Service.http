@@ -10,7 +10,7 @@ POST {{paskalON.PowerControls.Service_HostAddress}}/api/v1/system/setpowersetpoi
 Content-Type: application/json
 
 {
-    "ActivePowerWatt": 100000,
+    "ActivePowerWatt": 1100000,
     "ReactivePowerVar": 20000
 }
 

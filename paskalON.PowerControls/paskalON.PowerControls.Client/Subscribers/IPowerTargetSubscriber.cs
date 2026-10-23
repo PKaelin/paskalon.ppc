@@ -2,10 +2,10 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-namespace paskalON.Devices.Application.Subscribers
+namespace paskalON.PowerControls.Client.Subscribers
 {
     /// <summary>
-    /// Receives the power targets of the power conversion systems (PCS) from a message broker and applies them to the devices.
+    /// Receives the power targets of the power conversion systems (PCS) from a message broker and passes them to the <see cref="IPowerTargetHandler"/>.
     /// </summary>
     public interface IPowerTargetSubscriber
     {
@@ -17,7 +17,7 @@ namespace paskalON.Devices.Application.Subscribers
 
 
         /// <summary>
-        /// Applies the received power targets in the order they were received, until cancellation is requested.
+        /// Handles the received power targets in the order they were received, until cancellation is requested.
         /// </summary>
         /// <param name="cancellationToken">Token to stop processing.</param>
         /// <returns>Task that completes when processing has stopped.</returns>

@@ -6,12 +6,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
-using paskalON.Devices.Application.Subscribers;
 using paskalON.Messaging;
+using paskalON.PowerControls.Client.Subscribers;
 using paskalON.PowerControls.Dto.Powers;
 using System.Text.Json;
 
-namespace paskalON.Devices.Application.UnitTest.Subscribers
+namespace paskalON.PowerControls.Client.UnitTest.Subscribers
 {
     [TestClass]
     public sealed class PowerTargetSubscriberTest
@@ -19,7 +19,7 @@ namespace paskalON.Devices.Application.UnitTest.Subscribers
         private const string PowerTargetTopic = "ppc:pc:targets";
         private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(10);
 
-        private Mock<IDeviceManager> _deviceManager = null!;
+        private Mock<IPowerTargetHandler> _powerTargetHandler = null!;
         private Mock<IMessageSubscriber> _messageSubscriber = null!;
         private Action<string>? _callback;
 
@@ -28,7 +28,7 @@ namespace paskalON.Devices.Application.UnitTest.Subscribers
         public void Initialize()
         {
             _callback = null;
-            _deviceManager = new Mock<IDeviceManager>();
+            _powerTargetHandler = new Mock<IPowerTargetHandler>();
             _messageSubscriber = new Mock<IMessageSubscriber>();
             _messageSubscriber.Setup(s => s.Subscribe(PowerTargetTopic, It.IsAny<Action<string>>()))
                 .Callback<string, Action<string>>((topic, callback) => _callback = callback);
@@ -38,12 +38,12 @@ namespace paskalON.Devices.Application.UnitTest.Subscribers
         [TestMethod]
         public void PowerTargetSubscriberNullLoggerTest()
         {
-            Assert.ThrowsExactly<ArgumentNullException>(() => new PowerTargetSubscriber(null!, _deviceManager.Object, _messageSubscriber.Object));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PowerTargetSubscriber(null!, _powerTargetHandler.Object, _messageSubscriber.Object));
         }
 
 
         [TestMethod]
-        public void PowerTargetSubscriberNullDeviceManagerTest()
+        public void PowerTargetSubscriberNullPowerTargetHandlerTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() => new PowerTargetSubscriber(NullLogger<PowerTargetSubscriber>.Instance, null!,
                 _messageSubscriber.Object));
@@ -54,7 +54,7 @@ namespace paskalON.Devices.Application.UnitTest.Subscribers
         public void PowerTargetSubscriberNullMessageSubscriberTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() => new PowerTargetSubscriber(NullLogger<PowerTargetSubscriber>.Instance,
-                _deviceManager.Object, null!));
+                _powerTargetHandler.Object, null!));
         }
 
 
@@ -76,7 +76,7 @@ namespace paskalON.Devices.Application.UnitTest.Subscribers
         public void SubscribeWithoutTopicLogsWarningTest(string? topic)
         {
             FakeLogger<PowerTargetSubscriber> logger = new FakeLogger<PowerTargetSubscriber>();
-            PowerTargetSubscriber subscriber = new PowerTargetSubscriber(logger, _deviceManager.Object, _messageSubscriber.Object);
+            PowerTargetSubscriber subscriber = new PowerTargetSubscriber(logger, _powerTargetHandler.Object, _messageSubscriber.Object);
 
             subscriber.Subscribe(topic);
 
@@ -86,17 +86,17 @@ namespace paskalON.Devices.Application.UnitTest.Subscribers
 
 
         [TestMethod]
-        public async Task RunAppliesReceivedTargetsInOrderTest()
+        public async Task RunHandlesReceivedTargetsInOrderTest()
         {
             using CancellationTokenSource cancellation = new CancellationTokenSource();
-            List<CurrentTargetsDto> applied = new List<CurrentTargetsDto>();
+            List<CurrentTargetsDto> handled = new List<CurrentTargetsDto>();
             TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _deviceManager.Setup(m => m.SetPcsPowerTarget(It.IsAny<int>(), It.IsAny<double>(), It.IsAny<double>()))
-                .Callback<int, double, double>((deviceId, activePower, reactivePower) =>
+            _powerTargetHandler.Setup(h => h.HandleAsync(It.IsAny<CurrentTargetsDto>()))
+                .Callback<CurrentTargetsDto>(targets =>
                 {
-                    applied.Add(new CurrentTargetsDto { DeviceId = deviceId, ActivePowerWatt = activePower, ReactivePowerVar = reactivePower });
+                    handled.Add(targets);
 
-                    if (applied.Count == 2)
+                    if (handled.Count == 2)
                     {
                         completed.TrySetResult();
                     }
@@ -115,18 +115,19 @@ namespace paskalON.Devices.Application.UnitTest.Subscribers
             await cancellation.CancelAsync();
             await run.WaitAsync(TestTimeout);
 
-            CollectionAssert.AreEqual(new List<CurrentTargetsDto> { first, second }, applied);
+            CollectionAssert.AreEqual(new List<CurrentTargetsDto> { first, second }, handled);
         }
 
 
         [TestMethod]
         [DataRow("not json")]
         [DataRow("null")]
-        public async Task RunSkipsInvalidMessageAndAppliesNextTargetsTest(string invalidJson)
+        public async Task RunSkipsInvalidMessageAndHandlesNextTargetsTest(string invalidJson)
         {
             using CancellationTokenSource cancellation = new CancellationTokenSource();
             TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _deviceManager.Setup(m => m.SetPcsPowerTarget(5, 12000, 3000))
+            CurrentTargetsDto valid = new CurrentTargetsDto { DeviceId = 5, ActivePowerWatt = 12000, ReactivePowerVar = 3000 };
+            _powerTargetHandler.Setup(h => h.HandleAsync(valid))
                 .Callback(() => completed.TrySetResult())
                 .Returns(Task.CompletedTask);
             PowerTargetSubscriber subscriber = CreateSubscriber();
@@ -134,37 +135,39 @@ namespace paskalON.Devices.Application.UnitTest.Subscribers
             Task run = subscriber.RunAsync(cancellation.Token);
 
             _callback!(invalidJson);
-            _callback!(JsonSerializer.Serialize(new CurrentTargetsDto { DeviceId = 5, ActivePowerWatt = 12000, ReactivePowerVar = 3000 }));
+            _callback!(JsonSerializer.Serialize(valid));
             await completed.Task.WaitAsync(TestTimeout);
             await cancellation.CancelAsync();
             await run.WaitAsync(TestTimeout);
 
-            _deviceManager.Verify(m => m.SetPcsPowerTarget(It.IsAny<int>(), It.IsAny<double>(), It.IsAny<double>()), Times.Once);
+            _powerTargetHandler.Verify(h => h.HandleAsync(It.IsAny<CurrentTargetsDto>()), Times.Once);
         }
 
 
         [TestMethod]
-        public async Task RunFailedApplyContinuesWithNextTargetsTest()
+        public async Task RunFailedHandlingContinuesWithNextTargetsTest()
         {
             using CancellationTokenSource cancellation = new CancellationTokenSource();
             TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _deviceManager.Setup(m => m.SetPcsPowerTarget(99, 1000, 0))
+            CurrentTargetsDto failing = new CurrentTargetsDto { DeviceId = 99, ActivePowerWatt = 1000, ReactivePowerVar = 0 };
+            CurrentTargetsDto valid = new CurrentTargetsDto { DeviceId = 5, ActivePowerWatt = 12000, ReactivePowerVar = 3000 };
+            _powerTargetHandler.Setup(h => h.HandleAsync(failing))
                 .ThrowsAsync(new InvalidOperationException("Device Manager cannot find PCS with Device ID: 99"));
-            _deviceManager.Setup(m => m.SetPcsPowerTarget(5, 12000, 3000))
+            _powerTargetHandler.Setup(h => h.HandleAsync(valid))
                 .Callback(() => completed.TrySetResult())
                 .Returns(Task.CompletedTask);
             PowerTargetSubscriber subscriber = CreateSubscriber();
             subscriber.Subscribe(PowerTargetTopic);
             Task run = subscriber.RunAsync(cancellation.Token);
 
-            _callback!(JsonSerializer.Serialize(new CurrentTargetsDto { DeviceId = 99, ActivePowerWatt = 1000, ReactivePowerVar = 0 }));
-            _callback!(JsonSerializer.Serialize(new CurrentTargetsDto { DeviceId = 5, ActivePowerWatt = 12000, ReactivePowerVar = 3000 }));
+            _callback!(JsonSerializer.Serialize(failing));
+            _callback!(JsonSerializer.Serialize(valid));
             await completed.Task.WaitAsync(TestTimeout);
             await cancellation.CancelAsync();
             await run.WaitAsync(TestTimeout);
 
-            _deviceManager.Verify(m => m.SetPcsPowerTarget(99, 1000, 0), Times.Once);
-            _deviceManager.Verify(m => m.SetPcsPowerTarget(5, 12000, 3000), Times.Once);
+            _powerTargetHandler.Verify(h => h.HandleAsync(failing), Times.Once);
+            _powerTargetHandler.Verify(h => h.HandleAsync(valid), Times.Once);
         }
 
 
@@ -184,7 +187,7 @@ namespace paskalON.Devices.Application.UnitTest.Subscribers
 
         private PowerTargetSubscriber CreateSubscriber()
         {
-            return new PowerTargetSubscriber(NullLogger<PowerTargetSubscriber>.Instance, _deviceManager.Object, _messageSubscriber.Object);
+            return new PowerTargetSubscriber(NullLogger<PowerTargetSubscriber>.Instance, _powerTargetHandler.Object, _messageSubscriber.Object);
         }
     }
 }

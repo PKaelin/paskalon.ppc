@@ -3,10 +3,9 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Moq;
-using paskalON.Devices.Application.Subscribers;
-using paskalON.Devices.Service.Subscribers;
+using paskalON.PowerControls.Client.Subscribers;
 
-namespace paskalON.Devices.Service.UnitTest.Subscribers
+namespace paskalON.PowerControls.Client.UnitTest.Subscribers
 {
     [TestClass]
     public sealed class PowerTargetSubscriberServiceTest
