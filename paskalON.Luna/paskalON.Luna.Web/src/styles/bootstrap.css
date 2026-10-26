@@ -1,0 +1,933 @@
+/*
+ * Bootstrap 4 -> Bootstrap 5.3.8 migration
+ * Based on the supplied bootstrap.min.css.
+ *
+ * Bootstrap 5.3.8:
+ * https://getbootstrap.com/docs/5.3/
+ *
+ * The original stylesheet was a customized Bootstrap 4 build.
+ * This file uses the official Bootstrap 5.3.8 CSS as the framework and
+ * re-applies the original theme/customizations below.
+ */
+
+/* Bootstrap 5.3.8 */
+/* Bootstrap framework is resolved from the local npm package by Vite,
+   so the application also works without internet access (e.g. in the container).
+   Original line: @import url("https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"); */
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+
+/* ==========================================================================
+   ORIGINAL THEME
+   ========================================================================== */
+
+:root {
+    /* Original Bootstrap 4 palette */
+    --blue: #4c9be8;
+    --indigo: #6610f2;
+    --purple: #6f42c1;
+    --pink: #e83e8c;
+    --red: #d9534f;
+    --orange: #df6919;
+    --yellow: #ffc107;
+    --green: #5cb85c;
+    --teal: #20c997;
+    --cyan: #5bc0de;
+    --white: #fff;
+    --gray: #4e5d6c;
+    --gray-dark: #343a40;
+
+    /* Original theme colors */
+    --primary: #4e5d6c;
+    --secondary: #6496be;
+    --success: #5cb85c;
+    --info: #5bc0de;
+    --warning: #ffc107;
+    --danger: #d9534f;
+    --light: #abb6c2;
+    --dark: #20374c;
+
+    /* Bootstrap 5 theme variables */
+    --bs-primary: #4e5d6c;
+    --bs-primary-rgb: 78, 93, 108;
+    --bs-secondary: #6496be;
+    --bs-secondary-rgb: 100, 150, 190;
+    --bs-success: #5cb85c;
+    --bs-success-rgb: 92, 184, 92;
+    --bs-info: #5bc0de;
+    --bs-info-rgb: 91, 192, 222;
+    --bs-warning: #ffc107;
+    --bs-warning-rgb: 255, 193, 7;
+    --bs-danger: #d9534f;
+    --bs-danger-rgb: 217, 83, 79;
+    --bs-light: #abb6c2;
+    --bs-light-rgb: 171, 182, 194;
+    --bs-dark: #20374c;
+    --bs-dark-rgb: 32, 55, 76;
+
+    --bs-body-color: #ebebeb;
+    --bs-body-color-rgb: 235, 235, 235;
+    --bs-body-bg: #2b3e50;
+    --bs-body-bg-rgb: 43, 62, 80;
+
+    --bs-emphasis-color: #fff;
+    --bs-emphasis-color-rgb: 255, 255, 255;
+    --bs-secondary-color: rgba(235, 235, 235, .75);
+    --bs-secondary-color-rgb: 235, 235, 235;
+    --bs-tertiary-color: rgba(235, 235, 235, .5);
+    --bs-tertiary-color-rgb: 235, 235, 235;
+
+    --bs-link-color: #6496be;
+    --bs-link-color-rgb: 100, 150, 190;
+    --bs-link-hover-color: #bed3e4;
+    --bs-link-hover-color-rgb: 190, 211, 228;
+
+    /* Original stylesheet uses square controls/components. */
+    --bs-border-radius: 0;
+    --bs-border-radius-sm: 0;
+    --bs-border-radius-lg: 0;
+    --bs-border-radius-xl: 0;
+    --bs-border-radius-xxl: 0;
+    --bs-border-radius-pill: 0;
+
+    --bs-font-sans-serif: Lato, "Segoe UI", "Helvetica Neue", Arial, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+    --bs-body-font-family: var(--bs-font-sans-serif);
+    --bs-body-font-size: 1rem;
+    --bs-body-font-weight: 400;
+    --bs-body-line-height: 1.5;
+
+    /* Keep Bootstrap 4-like container widths from the original stylesheet. */
+    --bs-gutter-x: 30px;
+}
+
+
+/* ==========================================================================
+   REBOOT / BASE
+   ========================================================================== */
+
+html {
+    font-family: sans-serif;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Lato, "Segoe UI", "Helvetica Neue", Arial, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #ebebeb;
+    text-align: left;
+    background-color: #2b3e50;
+}
+
+a {
+    color: #6496be;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #bed3e4;
+    text-decoration: underline;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid rgba(0, 0, 0, .1);
+}
+
+code {
+    color: #ffffff;
+}
+
+pre {
+    color: inherit;
+}
+
+mark,
+.mark {
+    background-color: #fcf8e3;
+}
+
+blockquote {
+    color: #ebebeb;
+}
+
+.text-muted {
+    color: rgba(255, 255, 255, .4) !important;
+}
+
+
+/* ==========================================================================
+   TYPOGRAPHY
+   ========================================================================== */
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    color: #ebebeb;
+}
+
+.display-1,
+.display-2,
+.display-3,
+.display-4,
+.display-5,
+.display-6 {
+    color: #ebebeb;
+}
+
+
+/* ==========================================================================
+   CONTAINERS / GRID
+   Bootstrap 5 has changed the gutter implementation. These overrides keep
+   the original Bootstrap 4 15px side gutters and max widths.
+   ========================================================================== */
+
+.container,
+.container-fluid,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl,
+.container-xxl {
+    --bs-gutter-x: 30px;
+}
+
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+.btn {
+    border-radius: 0;
+}
+
+.btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #4e5d6c;
+    --bs-btn-border-color: #4e5d6c;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #43505d;
+    --bs-btn-hover-border-color: #3f4c58;
+    --bs-btn-focus-shadow-rgb: 103, 116, 129;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #3f4c58;
+    --bs-btn-active-border-color: #3b4752;
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #4e5d6c;
+    --bs-btn-disabled-border-color: #4e5d6c;
+}
+
+.btn-secondary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #6496be;
+    --bs-btn-border-color: #6496be;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #528ab6;
+    --bs-btn-hover-border-color: #4d83ad;
+    --bs-btn-focus-shadow-rgb: 120, 164, 199;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #4d83ad;
+    --bs-btn-active-border-color: #487ca4;
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #6496be;
+    --bs-btn-disabled-border-color: #6496be;
+}
+
+.btn-success {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #5cb85c;
+    --bs-btn-border-color: #5cb85c;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #4cae4c;
+    --bs-btn-hover-border-color: #47a447;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #47a447;
+    --bs-btn-active-border-color: #439a43;
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #5cb85c;
+    --bs-btn-disabled-border-color: #5cb85c;
+}
+
+.btn-info {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #5bc0de;
+    --bs-btn-border-color: #5bc0de;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #46b8da;
+    --bs-btn-hover-border-color: #40b5d8;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #40b5d8;
+    --bs-btn-active-border-color: #3aaed1;
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #5bc0de;
+    --bs-btn-disabled-border-color: #5bc0de;
+}
+
+.btn-warning {
+    --bs-btn-color: #212529;
+    --bs-btn-bg: #ffc107;
+    --bs-btn-border-color: #ffc107;
+    --bs-btn-hover-color: #212529;
+    --bs-btn-hover-bg: #edb100;
+    --bs-btn-hover-border-color: #e0a800;
+    --bs-btn-active-color: #212529;
+    --bs-btn-active-bg: #e0a800;
+    --bs-btn-active-border-color: #d39e00;
+    --bs-btn-disabled-color: #212529;
+    --bs-btn-disabled-bg: #ffc107;
+    --bs-btn-disabled-border-color: #ffc107;
+}
+
+.btn-danger {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #d9534f;
+    --bs-btn-border-color: #d9534f;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #d43f3a;
+    --bs-btn-hover-border-color: #d23732;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #d23732;
+    --bs-btn-active-border-color: #c9302c;
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #d9534f;
+    --bs-btn-disabled-border-color: #d9534f;
+}
+
+.btn-light {
+    --bs-btn-color: #212529;
+    --bs-btn-bg: #abb6c2;
+    --bs-btn-border-color: #abb6c2;
+    --bs-btn-hover-color: #212529;
+    --bs-btn-hover-bg: #9ca9b7;
+    --bs-btn-hover-border-color: #95a3b1;
+    --bs-btn-active-color: #212529;
+    --bs-btn-active-bg: #95a3b1;
+    --bs-btn-active-border-color: #8f9caa;
+}
+
+.btn-dark {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #20374c;
+    --bs-btn-border-color: #20374c;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #182a3a;
+    --bs-btn-hover-border-color: #162536;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #162536;
+    --bs-btn-active-border-color: #142130;
+}
+
+.btn-link {
+    --bs-btn-color: #6496be;
+    --bs-btn-hover-color: #bed3e4;
+}
+
+
+/* ==========================================================================
+   OUTLINE BUTTONS
+   ========================================================================== */
+
+.btn-outline-primary {
+    --bs-btn-color: #4e5d6c;
+    --bs-btn-border-color: #4e5d6c;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #4e5d6c;
+    --bs-btn-hover-border-color: #4e5d6c;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #4e5d6c;
+    --bs-btn-active-border-color: #4e5d6c;
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: #6496be;
+    --bs-btn-border-color: #6496be;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #6496be;
+    --bs-btn-hover-border-color: #6496be;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #6496be;
+    --bs-btn-active-border-color: #6496be;
+}
+
+.btn-outline-success {
+    --bs-btn-color: #5cb85c;
+    --bs-btn-border-color: #5cb85c;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #5cb85c;
+    --bs-btn-hover-border-color: #5cb85c;
+}
+
+.btn-outline-info {
+    --bs-btn-color: #5bc0de;
+    --bs-btn-border-color: #5bc0de;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #5bc0de;
+    --bs-btn-hover-border-color: #5bc0de;
+}
+
+.btn-outline-warning {
+    --bs-btn-color: #ffc107;
+    --bs-btn-border-color: #ffc107;
+    --bs-btn-hover-color: #212529;
+    --bs-btn-hover-bg: #ffc107;
+    --bs-btn-hover-border-color: #ffc107;
+}
+
+.btn-outline-danger {
+    --bs-btn-color: #d9534f;
+    --bs-btn-border-color: #d9534f;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #d9534f;
+    --bs-btn-hover-border-color: #d9534f;
+}
+
+.btn-outline-light {
+    --bs-btn-color: #abb6c2;
+    --bs-btn-border-color: #abb6c2;
+    --bs-btn-hover-color: #212529;
+    --bs-btn-hover-bg: #abb6c2;
+    --bs-btn-hover-border-color: #abb6c2;
+}
+
+.btn-outline-dark {
+    --bs-btn-color: #20374c;
+    --bs-btn-border-color: #20374c;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #20374c;
+    --bs-btn-hover-border-color: #20374c;
+}
+
+
+/* ==========================================================================
+   FORMS
+   ========================================================================== */
+
+.form-control,
+.form-select,
+.input-group-text {
+    border-radius: 0;
+}
+
+.form-control,
+.form-select {
+    color: #ebebeb;
+    background-color: #2b3e50;
+    border-color: rgba(255, 255, 255, .25);
+}
+
+.form-control:focus,
+.form-select:focus {
+    color: #ebebeb;
+    background-color: #2b3e50;
+    border-color: #6496be;
+    box-shadow: 0 0 0 .25rem rgba(100, 150, 190, .25);
+}
+
+.form-control::placeholder {
+    color: rgba(235, 235, 235, .5);
+}
+
+.form-control:disabled,
+.form-control[readonly],
+.form-select:disabled {
+    background-color: #20374c;
+}
+
+.input-group-text {
+    color: #ebebeb;
+    background-color: #4e5d6c;
+    border-color: rgba(255, 255, 255, .25);
+}
+
+.form-check-input {
+    border-radius: 0;
+    background-color: #2b3e50;
+    border-color: rgba(255, 255, 255, .35);
+}
+
+.form-check-input:checked {
+    background-color: #4e5d6c;
+    border-color: #4e5d6c;
+}
+
+.form-range::-webkit-slider-thumb {
+    background-color: #6496be;
+}
+
+.form-range::-moz-range-thumb {
+    background-color: #6496be;
+}
+
+.form-label {
+    color: #ebebeb;
+}
+
+
+/* Bootstrap 4 custom-select compatibility */
+.custom-select {
+    display: block;
+    width: 100%;
+    padding: .375rem 2.25rem .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #ebebeb;
+    background-color: #2b3e50;
+    border: 1px solid rgba(255, 255, 255, .25);
+    border-radius: 0;
+}
+
+
+/* ==========================================================================
+   TABLES
+   ========================================================================== */
+
+.table {
+    --bs-table-color: #fff;
+    --bs-table-bg: transparent;
+    --bs-table-border-color: rgba(0, 0, 0, .15);
+    color: #fff;
+}
+
+.table > :not(caption) > * > * {
+    color: #fff;
+}
+
+.table-hover > tbody > tr:hover > * {
+    --bs-table-accent-bg: #3d5871;
+    color: #fff;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    --bs-table-accent-bg: rgba(78, 93, 108, .05);
+}
+
+
+/* ==========================================================================
+   CARDS / LIST GROUPS
+   ========================================================================== */
+
+.card {
+    color: #ebebeb;
+    background-color: #2b3e50;
+    border-color: rgba(255, 255, 255, .15);
+    border-radius: 0;
+}
+
+.card-header,
+.card-footer {
+    background-color: #4e5d6c;
+    border-color: rgba(255, 255, 255, .15);
+}
+
+.list-group-item {
+    color: #ebebeb;
+    background-color: #2b3e50;
+    border-color: rgba(255, 255, 255, .15);
+}
+
+
+/* ==========================================================================
+   ALERTS
+   ========================================================================== */
+
+.alert {
+    border-radius: 0;
+}
+
+.alert-primary {
+    --bs-alert-color: #fff;
+    --bs-alert-bg: #4e5d6c;
+    --bs-alert-border-color: #687583;
+}
+
+.alert-secondary {
+    --bs-alert-color: #fff;
+    --bs-alert-bg: #6496be;
+    --bs-alert-border-color: #7aa5c8;
+}
+
+.alert-success {
+    --bs-alert-color: #fff;
+    --bs-alert-bg: #5cb85c;
+    --bs-alert-border-color: #70c470;
+}
+
+.alert-info {
+    --bs-alert-color: #fff;
+    --bs-alert-bg: #5bc0de;
+    --bs-alert-border-color: #70c7e2;
+}
+
+.alert-warning {
+    --bs-alert-color: #212529;
+    --bs-alert-bg: #ffc107;
+    --bs-alert-border-color: #ffca2c;
+}
+
+.alert-danger {
+    --bs-alert-color: #fff;
+    --bs-alert-bg: #d9534f;
+    --bs-alert-border-color: #de6d69;
+}
+
+.alert-light {
+    --bs-alert-color: #212529;
+    --bs-alert-bg: #abb6c2;
+    --bs-alert-border-color: #b9c3cd;
+}
+
+.alert-dark {
+    --bs-alert-color: #fff;
+    --bs-alert-bg: #20374c;
+    --bs-alert-border-color: #3b4f61;
+}
+
+
+/* ==========================================================================
+   BADGES
+   ========================================================================== */
+
+.badge {
+    border-radius: 0;
+}
+
+
+/* ==========================================================================
+   NAVIGATION / NAVBAR
+   ========================================================================== */
+
+.nav-link {
+    color: #6496be;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+    color: #bed3e4;
+}
+
+.nav-tabs {
+    border-bottom-color: rgba(255, 255, 255, .15);
+}
+
+.nav-tabs .nav-link {
+    border-radius: 0;
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+    color: #ebebeb;
+    background-color: #2b3e50;
+    border-color: rgba(255, 255, 255, .15) rgba(255, 255, 255, .15) #2b3e50;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #4e5d6c;
+}
+
+.navbar {
+    --bs-navbar-color: #ebebeb;
+    --bs-navbar-hover-color: #bed3e4;
+    --bs-navbar-disabled-color: rgba(235, 235, 235, .4);
+    --bs-navbar-active-color: #fff;
+    --bs-navbar-brand-color: #fff;
+    --bs-navbar-brand-hover-color: #bed3e4;
+    --bs-navbar-toggler-border-color: rgba(255, 255, 255, .15);
+}
+
+.navbar-dark {
+    --bs-navbar-color: #ebebeb;
+    --bs-navbar-hover-color: #bed3e4;
+    --bs-navbar-active-color: #fff;
+    --bs-navbar-brand-color: #fff;
+    --bs-navbar-brand-hover-color: #bed3e4;
+}
+
+.bg-primary { background-color: #4e5d6c !important; }
+.bg-secondary { background-color: #6496be !important; }
+.bg-success { background-color: #5cb85c !important; }
+.bg-info { background-color: #5bc0de !important; }
+.bg-warning { background-color: #ffc107 !important; }
+.bg-danger { background-color: #d9534f !important; }
+.bg-light { background-color: #abb6c2 !important; }
+.bg-dark { background-color: #20374c !important; }
+.bg-body { background-color: #2b3e50 !important; }
+
+
+/* ==========================================================================
+   DROPDOWNS
+   ========================================================================== */
+
+.dropdown-menu {
+    color: #ebebeb;
+    background-color: #2b3e50;
+    border-color: rgba(255, 255, 255, .15);
+    border-radius: 0;
+}
+
+.dropdown-item {
+    color: #ebebeb;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    color: #fff;
+    background-color: #4e5d6c;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+    color: #fff;
+    background-color: #6496be;
+}
+
+.dropdown-divider {
+    border-color: rgba(255, 255, 255, .15);
+}
+
+
+/* ==========================================================================
+   MODALS / OFFCANVAS
+   ========================================================================== */
+
+.modal-content {
+    color: #ebebeb;
+    background-color: #2b3e50;
+    border-color: rgba(255, 255, 255, .15);
+    border-radius: 0;
+}
+
+.modal-header,
+.modal-footer {
+    border-color: rgba(255, 255, 255, .15);
+}
+
+.offcanvas {
+    color: #ebebeb;
+    background-color: #2b3e50;
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+
+/* ==========================================================================
+   PAGINATION
+   ========================================================================== */
+
+.page-link {
+    color: #6496be;
+    background-color: #2b3e50;
+    border-color: rgba(255, 255, 255, .15);
+    border-radius: 0 !important;
+}
+
+.page-link:hover {
+    color: #bed3e4;
+    background-color: #4e5d6c;
+    border-color: rgba(255, 255, 255, .15);
+}
+
+.page-item.active .page-link {
+    color: #fff;
+    background-color: #4e5d6c;
+    border-color: #4e5d6c;
+}
+
+.page-item.disabled .page-link {
+    color: rgba(235, 235, 235, .4);
+    background-color: #20374c;
+    border-color: rgba(255, 255, 255, .1);
+}
+
+
+/* ==========================================================================
+   PROGRESS
+   ========================================================================== */
+
+.progress {
+    background-color: #20374c;
+    border-radius: 0;
+}
+
+.progress-bar {
+    background-color: #4e5d6c;
+}
+
+
+/* ==========================================================================
+   TOOLTIPS / POPOVERS
+   ========================================================================== */
+
+.tooltip .tooltip-inner {
+    color: #fff;
+    background-color: #20374c;
+    border-radius: 0;
+}
+
+.popover {
+    color: #ebebeb;
+    background-color: #2b3e50;
+    border-color: rgba(255, 255, 255, .15);
+    border-radius: 0;
+}
+
+.popover-header {
+    color: #fff;
+    background-color: #4e5d6c;
+    border-bottom-color: rgba(255, 255, 255, .15);
+    border-radius: 0;
+}
+
+.popover-body {
+    color: #ebebeb;
+}
+
+
+/* ==========================================================================
+   BREADCRUMB
+   ========================================================================== */
+
+.breadcrumb {
+    --bs-breadcrumb-bg: transparent;
+    --bs-breadcrumb-divider-color: rgba(235, 235, 235, .5);
+    --bs-breadcrumb-item-active-color: rgba(235, 235, 235, .5);
+}
+
+.breadcrumb-item a {
+    color: #6496be;
+}
+
+
+/* ==========================================================================
+   CLOSE / ACCESSIBILITY
+   ========================================================================== */
+
+/* Bootstrap 4 -> 5 rename: .sr-only -> .visually-hidden.
+   Keep .sr-only temporarily so existing markup continues to work. */
+.sr-only,
+.sr-only-focusable {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.close {
+    float: right;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 1px 0 #000;
+    opacity: .75;
+    background: transparent;
+    border: 0;
+}
+
+.close:hover {
+    color: #fff;
+    text-decoration: none;
+    opacity: 1;
+}
+
+
+/* ==========================================================================
+   BOOTSTRAP 4 UTILITY COMPATIBILITY
+   These aliases allow the existing HTML to keep working during migration.
+   New code should use the Bootstrap 5 names.
+   ========================================================================== */
+
+.font-weight-light { font-weight: 300 !important; }
+.font-weight-lighter { font-weight: lighter !important; }
+.font-weight-normal { font-weight: 400 !important; }
+.font-weight-bold { font-weight: 700 !important; }
+.font-weight-bolder { font-weight: bolder !important; }
+
+.font-italic { font-style: italic !important; }
+
+.text-left { text-align: left !important; }
+.text-right { text-align: right !important; }
+.text-center { text-align: center !important; }
+
+.float-left { float: left !important; }
+.float-right { float: right !important; }
+
+.ml-auto { margin-left: auto !important; }
+.mr-auto { margin-right: auto !important; }
+.pl-0 { padding-left: 0 !important; }
+.pr-0 { padding-right: 0 !important; }
+
+.ml-1 { margin-left: .25rem !important; }
+.ml-2 { margin-left: .5rem !important; }
+.ml-3 { margin-left: 1rem !important; }
+.ml-4 { margin-left: 1.5rem !important; }
+.ml-5 { margin-left: 3rem !important; }
+
+.mr-1 { margin-right: .25rem !important; }
+.mr-2 { margin-right: .5rem !important; }
+.mr-3 { margin-right: 1rem !important; }
+.mr-4 { margin-right: 1.5rem !important; }
+.mr-5 { margin-right: 3rem !important; }
+
+.pl-1 { padding-left: .25rem !important; }
+.pl-2 { padding-left: .5rem !important; }
+.pl-3 { padding-left: 1rem !important; }
+.pl-4 { padding-left: 1.5rem !important; }
+.pl-5 { padding-left: 3rem !important; }
+
+.pr-1 { padding-right: .25rem !important; }
+.pr-2 { padding-right: .5rem !important; }
+.pr-3 { padding-right: 1rem !important; }
+.pr-4 { padding-right: 1.5rem !important; }
+.pr-5 { padding-right: 3rem !important; }
+
+
+/* ==========================================================================
+   BOOTSTRAP 4 COMPONENT COMPATIBILITY
+   ========================================================================== */
+
+.input-group > .form-control:not(:first-child),
+.input-group > .form-select:not(:first-child),
+.input-group > .form-floating:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.input-group > .form-control:not(:last-child),
+.input-group > .form-select:not(:last-child),
+.input-group > .form-floating:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+
+/* ==========================================================================
+   BOOTSTRAP 5 DIRECTIONAL UTILITY MIGRATION NOTES
+   --------------------------------------------------------------------------
+   Bootstrap 4 -> 5:
+       ml-*       -> ms-*
+       mr-*       -> me-*
+       pl-*       -> ps-*
+       pr-*       -> pe-*
+       text-left  -> text-start
+       text-right -> text-end
+       float-left -> float-start
+       float-right -> float-end
+       font-weight-bold -> fw-bold
+       font-weight-normal -> fw-normal
+       sr-only -> visually-hidden
+
+   The old names above are intentionally retained as aliases for compatibility.
+   ========================================================================== */

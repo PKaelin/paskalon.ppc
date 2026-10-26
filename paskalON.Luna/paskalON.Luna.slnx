@@ -20,4 +20,8 @@
   <Project Path="paskalON.Luna.Domain.Configs/paskalON.Luna.Domain.Configs.csproj" Id="4eaa174e-0edc-4991-a14b-ffa676c84490" />
   <Project Path="paskalON.Luna.Dto/paskalON.Luna.Dto.csproj" Id="31448601-7713-40b7-8d29-8c72267cb99d" />
   <Project Path="paskalON.Luna.Service/paskalON.Luna.Service.csproj" />
+  <Project Path="paskalON.Luna.Web/paskalON.Luna.Web.esproj">
+    <Build />
+    <Deploy />
+  </Project>
 </Solution>

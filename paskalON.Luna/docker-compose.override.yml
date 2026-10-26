@@ -12,3 +12,18 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  paskalon.luna.web:
+    build:
+      target: dev
+    ports: !override
+      - 45552:5173
+    environment:
+      - VITE_USE_POLLING=true
+    volumes:
+      - ./paskalON.Luna.Web:/app
+      - paskalON.Luna.web.nodemodules:/app/node_modules
+
+volumes:
+  paskalON.Luna.web.nodemodules:
+    name: paskalON.Luna.web.nodemodules

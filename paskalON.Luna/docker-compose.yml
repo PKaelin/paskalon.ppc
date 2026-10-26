@@ -24,6 +24,25 @@ services:
     networks:
       - ppc.network
 
+
+  # Luna web application
+  paskalon.luna.web:
+    container_name: paskalon.luna.web
+    image: paskalon.luna.web:latest
+    restart: unless-stopped
+    build:
+      context: ./paskalON.Luna.Web
+      dockerfile: Dockerfile
+    depends_on:
+      - paskalon.luna.service
+    ports:
+      - 45552:8080
+    environment:
+      - LUNA_API_URL=http://paskalon.luna.service:8080
+      - APP_API_BASE_URL=/api
+    networks:
+      - ppc.network
+
 secrets:
   messaging_connection:
     file: ./secrets/messaging_connection

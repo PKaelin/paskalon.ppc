@@ -1,0 +1,161 @@
+/*
+ * Application specific styles.
+ *
+ * IMPORTANT: this file intentionally does NOT introduce new colours. Everything below
+ * is derived from the palette of the custom stylesheet (same as paskalON.DeviceSimulator.Web):
+ *   body      #2b3e50    primary #4e5d6c    secondary #6496be
+ *   dark      #20374c    text    #ebebeb
+ */
+
+
+/* ==========================================================================
+   LAYOUT - header and footer always visible, the content area scrolls
+   ========================================================================== */
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    padding-bottom: 0;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.app-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.app-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: auto;
+    padding: 1rem;
+}
+
+.content-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: .75rem;
+}
+
+.footer {
+    flex-shrink: 0;
+    padding: .5rem 0;
+    border-top: 1px solid rgba(255, 255, 255, .15) !important;
+    background-color: #20374c;
+    font-size: .875rem;
+}
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.navbar-brand img {
+    height: 32px;
+    width: auto;
+}
+
+.app-title {
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+
+/* ==========================================================================
+   SIDE TABS
+   ========================================================================== */
+
+.side-tabs {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    width: 10.5rem;
+    background-color: #20374c;
+    border-right: 1px solid rgba(255, 255, 255, .15);
+    transition: width .15s ease;
+    overflow: hidden;
+}
+
+.side-tabs.collapsed {
+    width: 2.75rem;
+}
+
+.side-tabs-list {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.side-tab {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    width: 100%;
+    padding: .375rem .875rem;
+    border: 0;
+    border-left: 3px solid transparent;
+    background: transparent;
+    color: rgba(235, 235, 235, .75);
+    font-size: .875rem;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.side-tab:hover {
+    background-color: #2b3e50;
+    color: #ebebeb;
+}
+
+.side-tab:focus-visible {
+    outline: 0;
+    box-shadow: inset 0 0 0 .2rem rgba(100, 150, 190, .25);
+}
+
+.side-tab.active {
+    background-color: #4e5d6c;
+    border-left-color: #6496be;
+    color: #fff;
+    font-weight: 700;
+}
+
+.side-tab .bi {
+    flex: 0 0 auto;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+/* The first tab pinned to the bottom pushes itself (and the following ones) down. */
+.side-tab-bottom {
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, .15);
+}
+
+.side-tabs-toggle {
+    justify-content: flex-end;
+    border-bottom: 1px solid rgba(255, 255, 255, .15);
+}
+
+.side-tabs.collapsed .side-tabs-toggle {
+    justify-content: flex-start;
+}
+
+.side-tabs.collapsed .side-tab-label {
+    display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .side-tabs {
+        transition: none;
+    }
+}

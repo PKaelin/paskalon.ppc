@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.1184077">
+  <PropertyGroup>
+    <!-- F5 in Visual Studio starts the Vite dev server (http://localhost:5173). -->
+    <StartupCommand>npm run dev</StartupCommand>
+    <BuildCommand>npm run build</BuildCommand>
+    <ProductionBuildCommand>npm run build</ProductionBuildCommand>
+    <CleanCommand></CleanCommand>
+    <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
+    <ShouldRunBuildScript>true</ShouldRunBuildScript>
+    <ShouldRunNpmInstall>true</ShouldRunNpmInstall>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="node_modules\**" />
+    <Content Remove="dist\**" />
+    <None Remove="node_modules\**" />
+  </ItemGroup>
+</Project>
