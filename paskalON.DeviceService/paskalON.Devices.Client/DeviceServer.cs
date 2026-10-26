@@ -49,6 +49,36 @@ namespace paskalON.Devices.Client
 
 
         /// <summary>
+        /// Relative path of the stop PCS endpoint.
+        /// </summary>
+        private const string StopPcsPath = "pcs/stop";
+
+
+        /// <summary>
+        /// Relative path of the standby PCS endpoint.
+        /// </summary>
+        private const string StandbyPcsPath = "pcs/standby";
+
+
+        /// <summary>
+        /// Relative path of the put into maintenance endpoint.
+        /// </summary>
+        private const string PutIntoMaintenancePath = "der/putintomaintenance";
+
+
+        /// <summary>
+        /// Relative path of the connect battery bank endpoint.
+        /// </summary>
+        private const string ConnectBatteryBankPath = "bb/connect";
+
+
+        /// <summary>
+        /// Relative path of the disconnect battery bank endpoint.
+        /// </summary>
+        private const string DisconnectBatteryBankPath = "bb/disconnect";
+
+
+        /// <summary>
         /// HTTP client with the base address of the device service API.
         /// </summary>
         private readonly HttpClient _client;
@@ -129,6 +159,58 @@ namespace paskalON.Devices.Client
             };
 
             using HttpResponseMessage response = await _client.PostAsJsonAsync(SetPcsPowerTargetPath, request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        /// <inheritdoc/>
+        public async Task StopPcs(int deviceId, CancellationToken cancellationToken = default)
+        {
+            StopPcsRequestDto request = new StopPcsRequestDto { DeviceId = deviceId };
+
+            using HttpResponseMessage response = await _client.PostAsJsonAsync(StopPcsPath, request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        /// <inheritdoc/>
+        public async Task StandbyPcs(int deviceId, CancellationToken cancellationToken = default)
+        {
+            StandbyPcsRequestDto request = new StandbyPcsRequestDto { DeviceId = deviceId };
+
+            using HttpResponseMessage response = await _client.PostAsJsonAsync(StandbyPcsPath, request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        /// <inheritdoc/>
+        public async Task PutIntoMaintenance(string unitName, CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(unitName);
+
+            PutIntoMaintenanceRequest request = new PutIntoMaintenanceRequest { UnitName = unitName };
+
+            using HttpResponseMessage response = await _client.PostAsJsonAsync(PutIntoMaintenancePath, request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        /// <inheritdoc/>
+        public async Task ConnectBatteryBank(int deviceId, CancellationToken cancellationToken = default)
+        {
+            ConnectBbRequest request = new ConnectBbRequest { DeviceId = deviceId };
+
+            using HttpResponseMessage response = await _client.PostAsJsonAsync(ConnectBatteryBankPath, request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        /// <inheritdoc/>
+        public async Task DisconnectBatteryBank(int deviceId, CancellationToken cancellationToken = default)
+        {
+            DisconnectBbRequest request = new DisconnectBbRequest { DeviceId = deviceId };
+
+            using HttpResponseMessage response = await _client.PostAsJsonAsync(DisconnectBatteryBankPath, request, cancellationToken);
             response.EnsureSuccessStatusCode();
         }
     }

@@ -66,6 +66,78 @@ namespace paskalON.Devices.Client.UnitTest
         }
 
 
+        /// <summary>
+        /// Confirms the device commands post the device identifier to their endpoints.
+        /// </summary>
+        /// <param name="command">The command to call.</param>
+        /// <param name="expectedPath">The expected relative path of the endpoint.</param>
+        [TestMethod]
+        [DataRow("StopPcs", "pcs/stop")]
+        [DataRow("StandbyPcs", "pcs/standby")]
+        [DataRow("ConnectBatteryBank", "bb/connect")]
+        [DataRow("DisconnectBatteryBank", "bb/disconnect")]
+        public async Task DeviceCommandPostsDeviceIdToEndpointTest(string command, string expectedPath)
+        {
+            using RecordingHttpMessageHandler handler = new RecordingHttpMessageHandler(HttpStatusCode.OK);
+            using HttpClient client = new HttpClient(handler) { BaseAddress = _baseAddress };
+            DeviceServer server = new DeviceServer(client);
+            Task request = command switch
+            {
+                "StopPcs" => server.StopPcs(7),
+                "StandbyPcs" => server.StandbyPcs(7),
+                "ConnectBatteryBank" => server.ConnectBatteryBank(7),
+                _ => server.DisconnectBatteryBank(7)
+            };
+
+            await request;
+
+            Assert.AreEqual(HttpMethod.Post, handler.Method);
+            Assert.AreEqual(new Uri($"{_baseAddress.AbsoluteUri}{expectedPath}"), handler.RequestUri);
+            StopPcsRequestDto? body = handler.ReadBody<StopPcsRequestDto>();
+            Assert.IsNotNull(body);
+            Assert.AreEqual(7, body.DeviceId);
+        }
+
+
+        /// <summary>
+        /// Confirms putting a DER unit into maintenance posts the unit name to the DER endpoint.
+        /// </summary>
+        [TestMethod]
+        public async Task PutIntoMaintenancePostsUnitNameToDerEndpointTest()
+        {
+            using RecordingHttpMessageHandler handler = new RecordingHttpMessageHandler(HttpStatusCode.OK);
+            using HttpClient client = new HttpClient(handler) { BaseAddress = _baseAddress };
+            DeviceServer server = new DeviceServer(client);
+
+            await server.PutIntoMaintenance("Bess1");
+
+            Assert.AreEqual(HttpMethod.Post, handler.Method);
+            Assert.AreEqual(new Uri($"{_baseAddress.AbsoluteUri}der/putintomaintenance"), handler.RequestUri);
+            PutIntoMaintenanceRequest? request = handler.ReadBody<PutIntoMaintenanceRequest>();
+            Assert.IsNotNull(request);
+            Assert.AreEqual("Bess1", request.UnitName);
+        }
+
+
+        /// <summary>
+        /// Confirms an invalid DER unit name is rejected before calling the device service.
+        /// </summary>
+        /// <param name="unitName">The invalid DER unit name.</param>
+        [TestMethod]
+        [DataRow("")]
+        [DataRow(" ")]
+        public async Task PutIntoMaintenanceInvalidUnitNameThrowsTest(string unitName)
+        {
+            using RecordingHttpMessageHandler handler = new RecordingHttpMessageHandler(HttpStatusCode.OK);
+            using HttpClient client = new HttpClient(handler) { BaseAddress = _baseAddress };
+            DeviceServer server = new DeviceServer(client);
+
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => server.PutIntoMaintenance(unitName));
+
+            Assert.IsNull(handler.Method);
+        }
+
+
         [TestMethod]
         [DataRow(HttpStatusCode.BadRequest)]
         [DataRow(HttpStatusCode.InternalServerError)]

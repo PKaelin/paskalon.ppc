@@ -5,10 +5,81 @@
 
 
 #------------------------------------------------------------------------------
-# DER Controller
+# Device Controller
+# Commands are forwarded to the device service
 #------------------------------------------------------------------------------
+@device.unitName = BMS-Unit 1
+@device.pcsDeviceId = 1
+@device.batteryBankDeviceId = 11
+
 GET {{paskalON.Luna.Service_HostAddress}}/api/v1/device/getder
 
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/putintomaintenance
+Content-Type: application/json
+
+{
+    "unitName": "{{device.unitName}}"
+}
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/startallpcs
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/startpcs
+Content-Type: application/json
+
+{
+    "deviceId": {{device.pcsDeviceId}}
+}
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/stopallpcs
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/stoppcs
+Content-Type: application/json
+
+{
+    "deviceId": {{device.pcsDeviceId}}
+}
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/standbyallpcs
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/standbypcs
+Content-Type: application/json
+
+{
+    "deviceId": {{device.pcsDeviceId}}
+}
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/connectbatterybank
+Content-Type: application/json
+
+{
+    "deviceId": {{device.batteryBankDeviceId}}
+}
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/disconnectbatterybank
+Content-Type: application/json
+
+{
+    "deviceId": {{device.batteryBankDeviceId}}
+}
 
 ###
 

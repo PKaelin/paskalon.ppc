@@ -61,5 +61,50 @@ namespace paskalON.Devices.Client
         /// <param name="cancellationToken">Token to cancel the request.</param>
         /// <returns>Task.</returns>
         Task SetPcsPowerTarget(int deviceId, double activePowerWatt, double reactivePowerVar, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Sends a stop command to a specific power conversion system (PCS).
+        /// </summary>
+        /// <param name="deviceId">Device identifier of the PCS to stop.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task StopPcs(int deviceId, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Sends a standby command to a specific power conversion system (PCS).
+        /// </summary>
+        /// <param name="deviceId">Device identifier of the PCS to put into standby.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task StandbyPcs(int deviceId, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Puts a DER unit into maintenance.
+        /// </summary>
+        /// <param name="unitName">Name of the DER unit to put into maintenance.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task PutIntoMaintenance(string unitName, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Sends a connect command to a specific battery bank (BB).
+        /// </summary>
+        /// <param name="deviceId">Device identifier of the battery bank to connect.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task ConnectBatteryBank(int deviceId, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Sends a disconnect command to a specific battery bank (BB).
+        /// </summary>
+        /// <param name="deviceId">Device identifier of the battery bank to disconnect.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task DisconnectBatteryBank(int deviceId, CancellationToken cancellationToken = default);
     }
 }
