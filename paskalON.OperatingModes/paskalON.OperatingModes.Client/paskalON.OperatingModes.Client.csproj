@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
     <ProjectReference Include="..\paskalON.OperatingModes.Dto\paskalON.OperatingModes.Dto.csproj" />
+    <ProjectReference Include="..\paskalON.OperatingModes.Service.Dto\paskalON.OperatingModes.Service.Dto.csproj" />
   </ItemGroup>
 
   <ItemGroup>

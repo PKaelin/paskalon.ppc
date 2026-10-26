@@ -8,6 +8,7 @@ using paskalON.Luna.Application;
 using paskalON.Luna.Domain.Configs;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
+using paskalON.OperatingModes.Client;
 using paskalON.OperatingModes.Client.Subscribers;
 using paskalON.PowerControls.Client.Subscribers;
 using StackExchange.Redis;
@@ -33,6 +34,15 @@ try
     // Get device service DER endpoint
     string? dsEndpoint = Environment.GetEnvironmentVariable("DEVICE_SERVICE_ENDPOINT");
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsEndpoint, "Cannot find the device service endpoint. DEVICE_SERVICE_ENDPOINT");
+
+    // Get operating mode service connection string
+    string? omConnectionStringFile = Environment.GetEnvironmentVariable("OPERATINGMODE_CONNECTION_FILE");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(omConnectionStringFile, "Cannot find the operating mode service secret file. OPERATINGMODE_CONNECTION_FILE");
+    string omConnectionString = (await File.ReadAllTextAsync(omConnectionStringFile)).Trim();
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(omConnectionString, "Cannot find the operating mode service connection string definition");
+    // Get operating mode service endpoint
+    string? omEndpoint = Environment.GetEnvironmentVariable("OPERATINGMODE_SERVICE_ENDPOINT");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(omEndpoint, "Cannot find the operating mode service endpoint. OPERATINGMODE_SERVICE_ENDPOINT");
 
     // Get Logging, Metrics, Tracing endpoint strings
     string? logEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_LOGGING_ENDPOINT");
@@ -66,6 +76,15 @@ try
     });
     builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(sp.GetRequiredKeyedService<HttpClient>(nameof(DeviceServer))));
     builder.Services.AddSingleton<IDeviceClient, DeviceClient>();
+
+    // Long living HTTP client for the operating mode service API
+    Uri omBaseAddress = new Uri($"{omConnectionString.TrimEnd('/')}/{omEndpoint.Trim('/')}/");
+    builder.Services.AddKeyedSingleton(nameof(OperatingModeServer), (_, _) => new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
+    {
+        BaseAddress = omBaseAddress,
+        Timeout = TimeSpan.FromSeconds(10)
+    });
+    builder.Services.AddSingleton<IOperatingModeServer>(sp => new OperatingModeServer(sp.GetRequiredKeyedService<HttpClient>(nameof(OperatingModeServer))));
 
     // Add managers
     builder.Services.AddSingleton<ILunaDeviceManager, LunaDeviceManager>();

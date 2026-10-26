@@ -11,3 +11,71 @@ GET {{paskalON.Luna.Service_HostAddress}}/api/v1/device/getder
 
 
 ###
+
+
+#------------------------------------------------------------------------------
+# Operating mode controller (forwarded to the operating mode service)
+# Modes: ActivePowerFixedMode, ReactivePowerFixedMode, ActivePowerMode,
+#        ReactivePowerMode
+#------------------------------------------------------------------------------
+@operatingMode.operatingModeName = ActivePowerFixedMode
+@operatingMode.replacingOperatingModeName = ActivePowerMode
+
+GET {{paskalON.Luna.Service_HostAddress}}/api/v1/operatingmode/getavailableoperatingmodes
+Accept: application/json
+
+###
+
+GET {{paskalON.Luna.Service_HostAddress}}/api/v1/operatingmode/getactiveoperatingmodes
+Accept: application/json
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/operatingmode/addoperatingmode
+Content-Type: application/json
+
+{
+    "operatingModeName": "{{operatingMode.operatingModeName}}",
+    "priority": 1
+}
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/operatingmode/moveoperatingmode
+Content-Type: application/json
+
+{
+    "operatingModeName": "{{operatingMode.operatingModeName}}",
+    "priority": 2
+}
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/operatingmode/replaceoperatingmode
+Content-Type: application/json
+
+{
+    "predecessorName": "{{operatingMode.operatingModeName}}",
+    "operatingModeName": "{{operatingMode.replacingOperatingModeName}}"
+}
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/operatingmode/removeoperatingmode
+Content-Type: application/json
+
+{
+    "operatingModeName": "{{operatingMode.operatingModeName}}"
+}
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/operatingmode/setsetpoint
+Content-Type: application/json
+
+{
+    "activePowerWatts": 3630000,
+    "reactivePowerVars": 1830000
+}
+
+###
