@@ -136,6 +136,32 @@ namespace paskalON.Luna.Service.WebApi.Controllers.V1
 
 
         /// <summary>
+        /// Activates an override operating mode, e.g. a shutdown or the maintenance of a DER unit.
+        /// </summary>
+        /// <param name="request">The request containing the name of the override operating mode.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>An IActionResult indicating the result of the operation.</returns>
+        [HttpPost]
+        public async Task<IActionResult> ActivateOverrideOperatingMode(ActivateOverrideRequest request, CancellationToken cancellationToken)
+        {
+            return await Forward(() => _operatingModeServer.ActivateOverrideOperatingMode(request, cancellationToken));
+        }
+
+
+        /// <summary>
+        /// Deactivates an override operating mode.
+        /// </summary>
+        /// <param name="request">The request containing the name of the override operating mode.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>An IActionResult indicating the result of the operation.</returns>
+        [HttpPost]
+        public async Task<IActionResult> DeactivateOverrideOperatingMode(DeactivateOverrideRequest request, CancellationToken cancellationToken)
+        {
+            return await Forward(() => _operatingModeServer.DeactivateOverrideOperatingMode(request, cancellationToken));
+        }
+
+
+        /// <summary>
         /// Forwards a request without result to the operating mode service.
         /// </summary>
         /// <param name="request">The request to the operating mode service.</param>

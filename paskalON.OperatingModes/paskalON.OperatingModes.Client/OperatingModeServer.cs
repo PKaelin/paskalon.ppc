@@ -56,6 +56,18 @@ namespace paskalON.OperatingModes.Client
 
 
         /// <summary>
+        /// Relative path of the activate override operating mode endpoint.
+        /// </summary>
+        private const string ActivateOverrideOperatingModePath = "override/activateoperatingmode";
+
+
+        /// <summary>
+        /// Relative path of the deactivate override operating mode endpoint.
+        /// </summary>
+        private const string DeactivateOverrideOperatingModePath = "override/deactivateoperatingmode";
+
+
+        /// <summary>
         /// HTTP client with the base address of the operating mode service API.
         /// </summary>
         private readonly HttpClient _client;
@@ -120,6 +132,20 @@ namespace paskalON.OperatingModes.Client
         public async Task SetSystemSetpoint(SetSystemSetpointRequest request, CancellationToken cancellationToken = default)
         {
             await Post(SetSystemSetpointPath, request, cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
+        public async Task ActivateOverrideOperatingMode(ActivateOverrideRequest request, CancellationToken cancellationToken = default)
+        {
+            await Post(ActivateOverrideOperatingModePath, request, cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
+        public async Task DeactivateOverrideOperatingMode(DeactivateOverrideRequest request, CancellationToken cancellationToken = default)
+        {
+            await Post(DeactivateOverrideOperatingModePath, request, cancellationToken);
         }
 
 

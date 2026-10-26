@@ -129,6 +129,28 @@ namespace paskalON.OperatingModes.Client.UnitTest
 
 
         /// <summary>
+        /// Confirms the override requests are posted as JSON with web defaults (camel case) to their endpoints.
+        /// </summary>
+        /// <param name="isActivated">True to activate, false to deactivate the override operating mode.</param>
+        /// <param name="expectedPath">The expected request path.</param>
+        [TestMethod]
+        [DataRow(true, "/api/v1/override/activateoperatingmode")]
+        [DataRow(false, "/api/v1/override/deactivateoperatingmode")]
+        public async Task OperatingModeServerOverrideRequestPostsToEndpointTest(bool isActivated, string expectedPath)
+        {
+            Task request = isActivated
+                ? _server.ActivateOverrideOperatingMode(new ActivateOverrideRequest { OperatingModeName = "ShutdownMode" })
+                : _server.DeactivateOverrideOperatingMode(new DeactivateOverrideRequest { OperatingModeName = "ShutdownMode" });
+
+            await request;
+
+            Assert.AreEqual(HttpMethod.Post, _handler.Request!.Method);
+            Assert.AreEqual(expectedPath, _handler.Request!.RequestUri!.AbsolutePath);
+            StringAssert.Contains(_handler.RequestContent, "\"operatingModeName\":\"ShutdownMode\"");
+        }
+
+
+        /// <summary>
         /// Confirms the system setpoint request is posted as JSON to the system endpoint.
         /// </summary>
         [TestMethod]

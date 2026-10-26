@@ -74,5 +74,23 @@ namespace paskalON.OperatingModes.Client
         /// <param name="cancellationToken">Token to cancel the request.</param>
         /// <returns>Task.</returns>
         Task SetSystemSetpoint(SetSystemSetpointRequest request, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Activates an override operating mode.
+        /// </summary>
+        /// <param name="request">The request containing the name of the override operating mode.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task ActivateOverrideOperatingMode(ActivateOverrideRequest request, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Deactivates an override operating mode.
+        /// </summary>
+        /// <param name="request">The request containing the name of the override operating mode.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task DeactivateOverrideOperatingMode(DeactivateOverrideRequest request, CancellationToken cancellationToken = default);
     }
 }

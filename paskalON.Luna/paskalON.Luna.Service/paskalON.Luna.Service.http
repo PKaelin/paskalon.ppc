@@ -150,3 +150,28 @@ Content-Type: application/json
 }
 
 ###
+
+
+#------------------------------------------------------------------------------
+# Operating mode controller - overrides (forwarded to the operating mode service)
+# Modes: ShutdownMode, MaintenanceMode-BMS-Unit1
+#------------------------------------------------------------------------------
+@operatingMode.overrideOperatingModeName = ShutdownMode
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/operatingmode/activateoverrideoperatingmode
+Content-Type: application/json
+
+{
+    "operatingModeName": "{{operatingMode.overrideOperatingModeName}}"
+}
+
+###
+
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/operatingmode/deactivateoverrideoperatingmode
+Content-Type: application/json
+
+{
+    "operatingModeName": "{{operatingMode.overrideOperatingModeName}}"
+}
+
+###
