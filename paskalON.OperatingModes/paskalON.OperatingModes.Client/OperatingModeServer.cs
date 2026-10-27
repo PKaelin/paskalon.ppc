@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.OperatingModes.Dto.Overrides;
+using paskalON.OperatingModes.Dto.Powers;
 using paskalON.OperatingModes.Dto.Stacks;
 using paskalON.OperatingModes.Service.Dto.V1.Requests;
 using System.Net.Http.Json;
@@ -54,6 +55,12 @@ namespace paskalON.OperatingModes.Client
         /// Relative path of the set system setpoint endpoint.
         /// </summary>
         private const string SetSystemSetpointPath = "system/setsetpoint";
+
+
+        /// <summary>
+        /// Relative path of the get system setpoint endpoint.
+        /// </summary>
+        private const string GetSystemSetpointPath = "system/getsetpoint";
 
 
         /// <summary>
@@ -132,6 +139,23 @@ namespace paskalON.OperatingModes.Client
         public async Task ReplaceOperatingMode(ReplaceOperatingModeStackRequest request, CancellationToken cancellationToken = default)
         {
             await Post(ReplaceOperatingModePath, request, cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
+        public async Task<SystemSetpointDto> GetSystemSetpoint(CancellationToken cancellationToken = default)
+        {
+            using HttpResponseMessage response = await _client.GetAsync(GetSystemSetpointPath, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            SystemSetpointDto? dto = await response.Content.ReadFromJsonAsync<SystemSetpointDto>(cancellationToken);
+
+            if (dto == null)
+            {
+                throw new InvalidOperationException("Operating mode server returned no system setpoint data transfer object");
+            }
+
+            return dto;
         }
 
 

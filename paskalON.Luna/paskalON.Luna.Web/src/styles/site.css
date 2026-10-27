@@ -189,3 +189,155 @@ body {
         transition: none;
     }
 }
+
+/* ==========================================================================
+   OPERATING MODES
+   The content is split in two halves. The setpoints sit above the active list on
+   the right, so the left top cell stays empty and both list headings line up.
+   The operating mode colours are specified by the product (not theme colours).
+   ========================================================================== */
+
+.om-layout {
+    display: grid;
+    /* Two columns of list width, centred in the content area with a gap between them. */
+    grid-template-columns: minmax(0, 28rem) minmax(0, 28rem);
+    justify-content: center;
+    grid-template-areas:
+        ".         setpoints"
+        "available active";
+    column-gap: 3rem;
+    row-gap: 1rem;
+    align-items: start;
+}
+
+.om-area-setpoints {
+    grid-area: setpoints;
+}
+
+.om-area-available {
+    grid-area: available;
+}
+
+.om-area-active {
+    grid-area: active;
+}
+
+@media (max-width: 991.98px) {
+
+    .om-layout {
+        grid-template-columns: minmax(0, 28rem);
+        grid-template-areas:
+            "setpoints"
+            "available"
+            "active";
+    }
+}
+
+.om-panel {
+    min-width: 0;
+}
+
+.om-heading {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: .5rem;
+}
+
+.om-label {
+    font-size: .8125rem;
+    margin-bottom: .125rem;
+}
+
+.om-hint {
+    font-size: .8125rem;
+    color: rgba(235, 235, 235, .75);
+    margin-bottom: .5rem;
+}
+
+.om-list {
+    /* Height of one item and the gap between two items - together one item slot. */
+    --om-item-height: 2.25rem;
+    --om-item-gap: .25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--om-item-gap);
+}
+
+/* The active operating modes sit in a box with the header colour. The negative margin equals the
+   padding, so the items keep the same position and width as the available operating modes and
+   both lists stay aligned row by row. Below the last item the box leaves room for 2.5 more items. */
+.om-list-active {
+    padding: .375rem .375rem calc(.375rem + 2.5 * (var(--om-item-height) + var(--om-item-gap)));
+    margin: -.375rem;
+    border-radius: .375rem;
+    background-color: var(--bs-primary, #4e5d6c);
+}
+
+.om-item {
+    position: relative;
+    min-height: var(--om-item-height);
+    padding: .875rem .625rem .3125rem;
+    border-radius: .25rem;
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: left;
+    overflow-wrap: anywhere;
+    background-color: #4e5d6c;
+    color: #ebebeb;
+}
+
+/* Category glyphs (B, E, +, -|) in the top left corner. */
+.om-item-badges {
+    position: absolute;
+    top: .1875rem;
+    left: .375rem;
+    display: flex;
+    gap: .1875rem;
+}
+
+.om-item-badge {
+    font-size: .625rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: .0625rem .1875rem;
+    border-radius: .125rem;
+    background-color: rgba(0, 0, 0, .25);
+    color: #fff;
+    cursor: help;
+}
+
+/* Available operating modes - light shades, dark text. */
+.om-item-available.om-axis-active {
+    background: #FFC857;
+    color: #212529;
+}
+
+.om-item-available.om-axis-reactive {
+    background: #B79CED;
+    color: #212529;
+}
+
+.om-item-available.om-axis-both {
+    background: linear-gradient(to right, #FFC857 50%, #B79CED 50%);
+    color: #212529;
+}
+
+/* Active operating modes - dark shades, light text. */
+.om-item-active.om-axis-active {
+    background: #B7791F;
+    color: #fff;
+}
+
+.om-item-active.om-axis-reactive {
+    background: #6C4AB6;
+    color: #fff;
+}
+
+.om-item-active.om-axis-both {
+    background: linear-gradient(to right, #B7791F 50%, #6C4AB6 50%);
+    color: #fff;
+}

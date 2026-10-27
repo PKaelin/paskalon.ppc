@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.OperatingModes.Dto.Overrides;
+using paskalON.OperatingModes.Dto.Powers;
 using paskalON.OperatingModes.Dto.Stacks;
 using paskalON.OperatingModes.Service.Dto.V1.Requests;
 using System.Net;
@@ -169,6 +170,23 @@ namespace paskalON.OperatingModes.Client.UnitTest
             Assert.AreEqual(HttpMethod.Post, _handler.Request!.Method);
             Assert.AreEqual(expectedPath, _handler.Request!.RequestUri!.AbsolutePath);
             StringAssert.Contains(_handler.RequestContent, "\"operatingModeName\":\"ShutdownMode\"");
+        }
+
+
+        /// <summary>
+        /// Confirms the system setpoint is requested from the system endpoint and deserialized.
+        /// </summary>
+        [TestMethod]
+        public async Task OperatingModeServerGetSystemSetpointDeserializesDtoTest()
+        {
+            SystemSetpointDto dto = new SystemSetpointDto { ActivePowerWatts = 5000000, ReactivePowerVars = -1000000 };
+            _handler.ResponseContent = JsonSerializer.Serialize(dto);
+
+            SystemSetpointDto result = await _server.GetSystemSetpoint();
+
+            Assert.AreEqual(HttpMethod.Get, _handler.Request!.Method);
+            Assert.AreEqual("/api/v1/system/getsetpoint", _handler.Request!.RequestUri!.AbsolutePath);
+            Assert.AreEqual(dto, result);
         }
 
 

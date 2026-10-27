@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.AspNetCore.Mvc;
 using paskalON.OperatingModes.Client;
+using paskalON.OperatingModes.Dto.Powers;
 using paskalON.OperatingModes.Dto.Stacks;
 using paskalON.OperatingModes.Service.Dto.V1.Requests;
 
@@ -119,6 +120,18 @@ namespace paskalON.Luna.Service.WebApi.Controllers.V1
         public async Task<IActionResult> ReplaceOperatingMode(ReplaceOperatingModeStackRequest request, CancellationToken cancellationToken)
         {
             return await Forward(() => _operatingModeServer.ReplaceOperatingMode(request, cancellationToken));
+        }
+
+
+        /// <summary>
+        /// Gets the supervisory setpoints of the system.
+        /// </summary>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>The supervisory setpoints of the system in watts and vars.</returns>
+        [HttpGet]
+        public async Task<ActionResult<SystemSetpointDto>> GetSetpoint(CancellationToken cancellationToken)
+        {
+            return await ForwardResult(() => _operatingModeServer.GetSystemSetpoint(cancellationToken));
         }
 
 

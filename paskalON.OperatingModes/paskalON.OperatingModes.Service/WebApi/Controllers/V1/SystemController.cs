@@ -5,6 +5,8 @@
 using Microsoft.AspNetCore.Mvc;
 using paskalON.Devices.Client;
 using paskalON.OperatingModes.Application;
+using paskalON.OperatingModes.Domain.Systems;
+using paskalON.OperatingModes.Dto.Powers;
 using paskalON.OperatingModes.Service.Dto.V1.Requests;
 using paskalON.PhysicalUnits.Electricals.Powers;
 
@@ -50,6 +52,30 @@ namespace paskalON.OperatingModes.Service.Controllers.V1
             _logger = logger;
             _manager = manager;
             _deviceServer = deviceServer;
+        }
+
+
+        /// <summary>
+        /// Gets the operator setpoints of the system.
+        /// </summary>
+        /// <returns>The operator setpoints, or 503 Service Unavailable while the operating modes are not initialized.</returns>
+        [HttpGet]
+        public ActionResult<SystemSetpointDto> GetSetpoint()
+        {
+            ISystemOperatingModeControl? control = _manager.SystemOperatingModeControl;
+
+            if (control is null)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable);
+            }
+
+            SystemSetpointDto dto = new SystemSetpointDto
+            {
+                ActivePowerWatts = control.SetpointActivePower.Watts,
+                ReactivePowerVars = control.SetpointReactivePower.VoltAmperesReactive
+            };
+
+            return Ok(dto);
         }
 
 

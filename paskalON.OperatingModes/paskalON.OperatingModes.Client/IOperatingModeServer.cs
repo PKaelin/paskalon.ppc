@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.OperatingModes.Dto.Overrides;
+using paskalON.OperatingModes.Dto.Powers;
 using paskalON.OperatingModes.Dto.Stacks;
 using paskalON.OperatingModes.Service.Dto.V1.Requests;
 
@@ -66,6 +67,14 @@ namespace paskalON.OperatingModes.Client
         /// <param name="cancellationToken">Token to cancel the request.</param>
         /// <returns>Task.</returns>
         Task ReplaceOperatingMode(ReplaceOperatingModeStackRequest request, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Gets the supervisory setpoints of the system.
+        /// </summary>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>The supervisory setpoints of the system.</returns>
+        Task<SystemSetpointDto> GetSystemSetpoint(CancellationToken cancellationToken = default);
 
 
         /// <summary>
