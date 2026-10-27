@@ -87,6 +87,18 @@ namespace paskalON.OperatingModes.Application.Stacks
         }
 
 
+        /// <inheritdoc/>
+        /// <exception cref="KeyNotFoundException">An operating mode is not configured or not stackable.</exception>
+        /// <exception cref="InvalidOperationException">The resulting stack is invalid.</exception>
+        public void SetOperatingModes(IReadOnlyList<string> operatingModeNames)
+        {
+            ArgumentNullException.ThrowIfNull(operatingModeNames);
+
+            List<IStackableMode> operatingModes = operatingModeNames.Select(GetAvailableOperatingMode).ToList();
+            Stack.Set(operatingModes);
+        }
+
+
         /// <summary>
         /// Gets an available operating mode by its name.
         /// </summary>

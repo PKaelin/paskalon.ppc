@@ -1,3 +1,6 @@
+/**
+ *  Central configuration file for projects using Vite as build tool and development server.
+ */
 import { fileURLToPath, URL } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';

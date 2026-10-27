@@ -133,5 +133,28 @@ namespace paskalON.OperatingModes.Service.Controllers.V1
 
             return Ok();
         }
+
+
+        /// <summary>
+        /// Sets the whole operating mode stack in one atomic change. Only the resulting stack is validated.
+        /// </summary>
+        /// <param name="request">The request containing the operating mode names in ascending priority order.</param>
+        /// <returns>Ok, or 400 Bad Request with the reason if the stack is invalid or contains an unknown operating mode.</returns>
+        [HttpPost]
+        public IActionResult SetOperatingModes(SetOperatingModeStackRequest request)
+        {
+            try
+            {
+                _manager.StackManager.SetOperatingModes(request.OperatingModeNames);
+
+                return Ok();
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or KeyNotFoundException)
+            {
+                _logger.LogWarning(ex, "Operating mode stack rejected.");
+
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest, title: "Invalid operating mode stack");
+            }
+        }
     }
 }

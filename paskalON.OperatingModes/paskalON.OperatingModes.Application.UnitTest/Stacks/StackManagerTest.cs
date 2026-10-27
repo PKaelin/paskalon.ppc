@@ -191,5 +191,40 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             Assert.ThrowsExactly<ArgumentNullException>(() => _stackManager!.ReplaceOperatingMode(null!, "ActivePowerFixedMode"));
             Assert.ThrowsExactly<ArgumentNullException>(() => _stackManager!.InitializeStack(null!));
         }
+
+
+        /// <summary>
+        /// Confirms setting the stack by names swaps the exclusive active mode for a base active mode as one replacement.
+        /// </summary>
+        [TestMethod]
+        public void StackManagerSetOperatingModesRecordsReplacementTest()
+        {
+            _stackManager!.AddOperatingMode("ActivePowerFixedMode", 1);
+            _stackManager!.AddOperatingMode("ReactivePowerFixedMode", 2);
+            _stackManager!.Stack.TakeCycle();
+
+            _stackManager!.SetOperatingModes(new[] { "MaximumPowerPointTrackingMode", "ReactivePowerFixedMode" });
+
+            CollectionAssert.AreEqual(new IStackableMode[] { _maximumPowerPointTrackingMode!, _reactivePowerFixedMode! }, _stackManager!.ActiveOperatingModes.ToArray());
+            Assert.HasCount(1, _stackManager!.Stack.PendingChanges);
+            Assert.AreEqual(OperatingModeChangeKind.Replaced, _stackManager!.Stack.PendingChanges[0].Kind);
+            Assert.AreSame(_activePowerFixedMode, _stackManager!.Stack.PendingChanges[0].Predecessor);
+        }
+
+
+        /// <summary>
+        /// Confirms override and unknown operating modes are rejected without changing the stack.
+        /// </summary>
+        /// <param name="operatingModeName">The name of the operating mode.</param>
+        [TestMethod]
+        [DataRow("MaintenanceBess1")]
+        [DataRow("Missing")]
+        public void StackManagerSetOperatingModesNotSelectableThrowsTest(string operatingModeName)
+        {
+            _stackManager!.AddOperatingMode("ActivePowerFixedMode", 1);
+
+            Assert.ThrowsExactly<KeyNotFoundException>(() => _stackManager!.SetOperatingModes(new[] { "ReactivePowerFixedMode", operatingModeName }));
+            CollectionAssert.AreEqual(new IStackableMode[] { _activePowerFixedMode! }, _stackManager!.ActiveOperatingModes.ToArray());
+        }
     }
 }

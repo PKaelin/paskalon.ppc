@@ -559,6 +559,147 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Stacks
 
 
         /// <summary>
+        /// Confirms setting the stack renumbers the priorities in the given order and records the removed and added modes.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeStackSetReplacesStackAndRecordsChangesTest()
+        {
+            OperatingModeStack stack = new OperatingModeStack();
+            IStackableMode baseMode = new TestBaseActiveMode("ActivePowerMode");
+            IStackableMode removedMode = new TestAdditiveActiveMode("FrequencyWattMode");
+            IStackableMode addedMode = new TestLimitingActiveMode("MaximumActivePowerLimitMode");
+            stack.Add(baseMode, 3);
+            stack.Add(removedMode, 7);
+            stack.TakeCycle();
+
+            stack.Set(new IStackableMode[] { baseMode, addedMode });
+
+            CollectionAssert.AreEqual(new[] { new OperatingModeStackEntry(1, baseMode), new OperatingModeStackEntry(2, addedMode) }, stack.Entries.ToArray());
+            IReadOnlyList<OperatingModeChange<IStackableMode>> changes = stack.PendingChanges;
+            Assert.HasCount(2, changes);
+            Assert.AreEqual(new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Removed, removedMode), changes[0]);
+            Assert.AreEqual(new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Added, addedMode), changes[1]);
+        }
+
+
+        /// <summary>
+        /// Confirms a base mode is swapped while its additive mode remains, which single changes cannot do without an invalid
+        /// intermediate stack, and the swap is recorded as replacement.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeStackSetSwapsBaseModeAsReplacementTest()
+        {
+            OperatingModeStack stack = new OperatingModeStack();
+            IStackableMode predecessor = new TestBaseActiveMode("ActivePowerMode");
+            IStackableMode additiveMode = new TestAdditiveActiveMode("FrequencyWattMode");
+            IStackableMode replacement = new TestBaseActiveMode("MaximumPowerPointTrackingMode");
+            stack.Add(predecessor, 1);
+            stack.Add(additiveMode, 2);
+            stack.TakeCycle();
+
+            stack.Set(new IStackableMode[] { replacement, additiveMode });
+
+            AssertModes(stack, replacement, additiveMode);
+            IReadOnlyList<OperatingModeChange<IStackableMode>> changes = stack.PendingChanges;
+            Assert.HasCount(1, changes);
+            Assert.AreEqual(new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Replaced, replacement, predecessor), changes[0]);
+        }
+
+
+        /// <summary>
+        /// Confirms a base mode of both power axes replaces the first base mode of a shared axis, the other base mode is removed.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeStackSetBothAxesModeReplacesOneBaseModeTest()
+        {
+            OperatingModeStack stack = new OperatingModeStack();
+            IStackableMode activeMode = new TestBaseActiveMode("ActivePowerMode");
+            IStackableMode reactiveMode = new TestBaseReactiveMode("ReactivePowerMode");
+            IStackableMode bothAxesMode = new TestBaseActiveReactiveMode("PowerFactorMode");
+            stack.Add(activeMode, 1);
+            stack.Add(reactiveMode, 2);
+            stack.TakeCycle();
+
+            stack.Set(new IStackableMode[] { bothAxesMode });
+
+            AssertModes(stack, bothAxesMode);
+            IReadOnlyList<OperatingModeChange<IStackableMode>> changes = stack.PendingChanges;
+            Assert.HasCount(2, changes);
+            Assert.AreEqual(new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Removed, reactiveMode), changes[0]);
+            Assert.AreEqual(new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Replaced, bothAxesMode, activeMode), changes[1]);
+        }
+
+
+        /// <summary>
+        /// Confirms setting an empty stack removes all operating modes and records a removal for each of them, so the next
+        /// calculation cycle ramps their contributions down to zero.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeStackSetEmptyRemovesAllModesTest()
+        {
+            OperatingModeStack stack = new OperatingModeStack();
+            IStackableMode activeMode = new TestBaseActiveMode("ActivePowerMode");
+            IStackableMode reactiveMode = new TestBaseReactiveMode("ReactivePowerMode");
+            IStackableMode additiveMode = new TestAdditiveActiveMode("FrequencyWattMode");
+            stack.Add(activeMode, 1);
+            stack.Add(reactiveMode, 2);
+            stack.Add(additiveMode, 3);
+            stack.TakeCycle();
+
+            stack.Set(Array.Empty<IStackableMode>());
+
+            Assert.IsEmpty(stack.OperatingModes);
+            CollectionAssert.AreEqual(new[]
+            {
+                new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Removed, activeMode),
+                new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Removed, reactiveMode),
+                new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Removed, additiveMode)
+            }, stack.PendingChanges.ToArray());
+        }
+
+
+        /// <summary>
+        /// Confirms a changed order only is committed without recording a change, like a move.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeStackSetChangedOrderDoesNotRecordChangeTest()
+        {
+            OperatingModeStack stack = new OperatingModeStack();
+            IStackableMode activeMode = new TestBaseActiveMode("ActivePowerMode");
+            IStackableMode reactiveMode = new TestBaseReactiveMode("ReactivePowerMode");
+            stack.Add(activeMode, 1);
+            stack.Add(reactiveMode, 2);
+            stack.TakeCycle();
+
+            stack.Set(new IStackableMode[] { reactiveMode, activeMode });
+
+            AssertModes(stack, reactiveMode, activeMode);
+            Assert.IsEmpty(stack.PendingChanges);
+        }
+
+
+        /// <summary>
+        /// Confirms an invalid stack is rejected without changing the stack or recording changes.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeStackSetInvalidStackThrowsAndPreservesStackTest()
+        {
+            OperatingModeStack stack = new OperatingModeStack();
+            IStackableMode baseMode = new TestBaseActiveMode("ActivePowerMode");
+            IStackableMode additiveMode = new TestAdditiveActiveMode("FrequencyWattMode");
+            stack.Add(baseMode, 1);
+            stack.TakeCycle();
+
+            Assert.ThrowsExactly<InvalidOperationException>(() => stack.Set(new IStackableMode[] { additiveMode, baseMode }));
+            Assert.ThrowsExactly<InvalidOperationException>(() => stack.Set(new IStackableMode[] { baseMode, baseMode }));
+            Assert.ThrowsExactly<ArgumentNullException>(() => stack.Set(new IStackableMode[] { baseMode, null! }));
+            Assert.ThrowsExactly<ArgumentNullException>(() => stack.Set(null!));
+            AssertModes(stack, baseMode);
+            Assert.IsEmpty(stack.PendingChanges);
+        }
+
+
+        /// <summary>
         /// Clear removes the selected modes and the pending changes.
         /// </summary>
         [TestMethod]

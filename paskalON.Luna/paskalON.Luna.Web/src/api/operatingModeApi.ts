@@ -24,10 +24,21 @@ async function request(action: string, init?: RequestInit): Promise<Response> {
     }
 
     if (!response.ok) {
-        throw new ApiError(`The Luna service answered with HTTP ${response.status}.`, response.status);
+        throw new ApiError(await readProblemDetail(response) ?? `The Luna service answered with HTTP ${response.status}.`, response.status);
     }
 
     return response;
+}
+
+/** The "detail" of a problem details response (e.g. why a stack was rejected), or null if there is none. */
+async function readProblemDetail(response: Response): Promise<string | null> {
+    try {
+        const problem = (await response.json()) as { detail?: unknown };
+
+        return typeof problem.detail === 'string' ? problem.detail : null;
+    } catch {
+        return null;
+    }
 }
 
 async function getJson<T>(action: string, signal?: AbortSignal): Promise<T> {
@@ -49,6 +60,18 @@ export function getActiveOperatingModes(signal?: AbortSignal): Promise<Operating
 /** GET /v1/operatingmode/getsetpoint - the supervisory setpoints of the system in watts and vars. */
 export function getSetpoint(signal?: AbortSignal): Promise<SystemSetpointDto> {
     return getJson<SystemSetpointDto>('getsetpoint', signal);
+}
+
+/**
+ * POST /v1/operatingmode/setoperatingmodes - sets the whole stack in one atomic change.
+ * A rejected stack throws an ApiError with the reason of the operating mode service.
+ */
+export async function setOperatingModes(operatingModeNames: string[]): Promise<void> {
+    await request('setoperatingmodes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operatingModeNames })
+    });
 }
 
 /** POST /v1/operatingmode/setsetpoint - sets the supervisory setpoints of the system in watts and vars. */

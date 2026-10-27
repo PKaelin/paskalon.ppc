@@ -73,5 +73,13 @@ namespace paskalON.OperatingModes.Application.Stacks
         /// <param name="predecessorName">The name of the operating mode to replace.</param>
         /// <param name="operatingModeName">The name of the replacing operating mode.</param>
         void ReplaceOperatingMode(string predecessorName, string operatingModeName);
+
+
+        /// <summary>
+        /// Sets the whole selected stack in one atomic change. Only the resulting stack is validated and the next calculation cycle
+        /// applies all changes at once.
+        /// </summary>
+        /// <param name="operatingModeNames">The names of the operating modes of the new stack in ascending priority order.</param>
+        void SetOperatingModes(IReadOnlyList<string> operatingModeNames);
     }
 }

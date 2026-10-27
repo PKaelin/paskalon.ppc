@@ -7,6 +7,7 @@ using paskalON.OperatingModes.Dto.Powers;
 using paskalON.OperatingModes.Dto.Stacks;
 using paskalON.OperatingModes.Service.Dto.V1.Requests;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace paskalON.OperatingModes.Client
 {
@@ -49,6 +50,12 @@ namespace paskalON.OperatingModes.Client
         /// Relative path of the replace operating mode endpoint.
         /// </summary>
         private const string ReplaceOperatingModePath = "stack/replaceoperatingmode";
+
+
+        /// <summary>
+        /// Relative path of the set operating modes endpoint.
+        /// </summary>
+        private const string SetOperatingModesPath = "stack/setoperatingmodes";
 
 
         /// <summary>
@@ -139,6 +146,39 @@ namespace paskalON.OperatingModes.Client
         public async Task ReplaceOperatingMode(ReplaceOperatingModeStackRequest request, CancellationToken cancellationToken = default)
         {
             await Post(ReplaceOperatingModePath, request, cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
+        public async Task SetOperatingModes(SetOperatingModeStackRequest request, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            using HttpResponseMessage response = await _client.PostAsJsonAsync(SetOperatingModesPath, request, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            // Pass on the reason of the rejection (problem details "detail") instead of the bare status code
+            string? reason = null;
+
+            try
+            {
+                using JsonDocument problem = JsonDocument.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
+
+                if (problem.RootElement.ValueKind == JsonValueKind.Object && problem.RootElement.TryGetProperty("detail", out JsonElement detail))
+                {
+                    reason = detail.GetString();
+                }
+            }
+            catch (JsonException)
+            {
+                // No problem details in the response - the status code is reported only.
+            }
+
+            throw new HttpRequestException(reason ?? $"The operating mode stack was rejected with status code {(int)response.StatusCode}.", null, response.StatusCode);
         }
 
 

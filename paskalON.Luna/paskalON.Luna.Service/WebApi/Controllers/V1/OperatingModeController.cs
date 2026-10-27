@@ -124,6 +124,30 @@ namespace paskalON.Luna.Service.WebApi.Controllers.V1
 
 
         /// <summary>
+        /// Sets the whole operating mode stack in one atomic change. The operating mode service validates the resulting stack only.
+        /// </summary>
+        /// <param name="request">The request containing the operating mode names in ascending priority order.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Ok, or the status code of the operating mode service with its reason as problem details if it rejected the stack.</returns>
+        [HttpPost]
+        public async Task<IActionResult> SetOperatingModes(SetOperatingModeStackRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _operatingModeServer.SetOperatingModes(request, cancellationToken);
+
+                return Ok();
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode.HasValue)
+            {
+                _logger.LogWarning(ex, "Operating mode service rejected the stack with status code {StatusCode}.", ex.StatusCode);
+
+                return Problem(detail: ex.Message, statusCode: (int)ex.StatusCode.Value, title: "Operating mode stack rejected");
+            }
+        }
+
+
+        /// <summary>
         /// Gets the supervisory setpoints of the system.
         /// </summary>
         /// <param name="cancellationToken">Token to cancel the request.</param>

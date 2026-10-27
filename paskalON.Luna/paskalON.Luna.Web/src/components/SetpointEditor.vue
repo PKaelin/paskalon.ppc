@@ -89,9 +89,10 @@ function focusActivePower(): void {
     input.setSelectionRange(input.value.length, input.value.length);
 }
 
-async function apply(): Promise<void> {
+/** Applies the entered setpoints. Returns true if the service accepted them. */
+async function apply(): Promise<boolean> {
     if (isValid.value === false) {
-        return;
+        return false;
     }
 
     const activePower = activePowerMegawatts.value;
@@ -108,13 +109,28 @@ async function apply(): Promise<void> {
             reactivePowerVars: fromMega(reactivePower)
         });
         notify(`Setpoints applied: ${formatLocaleNumber(activePower)} MW, ${formatLocaleNumber(reactivePower)} Mvar.`, 'success', 4000);
+
+        return true;
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         notify(`The setpoints could not be applied. ${message} Check that they are within the nameplate limits.`, 'danger', 0);
+
+        return false;
     } finally {
         applying.value = false;
     }
 }
+
+/** Sets both setpoints to 0 and applies them, e.g. after all operating modes were removed from the stack. */
+async function applyZero(): Promise<boolean> {
+    activePowerText.value = formatLocaleNumber(0);
+    reactivePowerText.value = formatLocaleNumber(0);
+
+    return apply();
+}
+
+// The operating mode stack applies the setpoints as its last step.
+defineExpose({ apply, applyZero, isValid });
 
 onMounted(load);
 

@@ -194,6 +194,46 @@ namespace paskalON.OperatingModes.Domain.Stacks
 
 
         /// <summary>
+        /// Sets the whole stack in one atomic change. The operating modes get the priorities 1 to n in the given order.
+        /// </summary>
+        /// <remarks>
+        /// Only the resulting stack is validated, so changes that would require an invalid intermediate stack with single
+        /// changes (e.g. swapping a base mode while its dependents remain) are possible. The changes are recorded together, so the
+        /// next calculation cycle applies them at once. A base or exclusive mode that is removed and an added base or exclusive
+        /// mode of the same power axis are recorded as replacement, so the replacing operating mode takes over from the
+        /// contribution of its predecessor. All other differences are recorded as removed or added operating modes.
+        /// </remarks>
+        /// <param name="operatingModes">The operating modes of the new stack in ascending priority order.</param>
+        /// <exception cref="ArgumentNullException">The operating modes or one of them is null.</exception>
+        /// <exception cref="InvalidOperationException">The resulting stack is invalid.</exception>
+        public void Set(IReadOnlyList<IStackableMode> operatingModes)
+        {
+            ArgumentNullException.ThrowIfNull(operatingModes);
+
+            foreach (IStackableMode operatingMode in operatingModes)
+            {
+                ArgumentNullException.ThrowIfNull(operatingMode, nameof(operatingModes));
+            }
+
+            lock (_dataLock)
+            {
+                // Validate the resulting stack before anything is changed
+                OperatingModeStackValidator.Validate(operatingModes);
+
+                List<(int Priority, IStackableMode OperatingMode)> candidate = operatingModes
+                    .Select((operatingMode, index) => (index + 1, operatingMode))
+                    .ToList();
+
+                List<OperatingModeChange<IStackableMode>> changes = CreateChanges(operatingModes);
+
+                // Only now commit the changes to the stack and record the pending changes
+                Commit(candidate);
+                _pendingChanges.AddRange(changes);
+            }
+        }
+
+
+        /// <summary>
         /// Removes an operating mode from the stack.
         /// </summary>
         /// <param name="operatingMode">The operating mode to remove.</param>
@@ -325,6 +365,58 @@ namespace paskalON.OperatingModes.Domain.Stacks
         /// Commits the candidate priorities to the stack.
         /// </summary>
         /// <param name="candidate">The validated candidate priorities.</param>
+        /// <summary>
+        /// Creates the changes from the current stack to the new stack.
+        /// </summary>
+        /// <param name="operatingModes">The operating modes of the new stack.</param>
+        /// <returns>The removed, replaced and added operating modes in this order. A changed order only is not recorded.</returns>
+        private List<OperatingModeChange<IStackableMode>> CreateChanges(IReadOnlyList<IStackableMode> operatingModes)
+        {
+            // Lock is on the calling method
+            HashSet<string> names = operatingModes.Select(operatingMode => operatingMode.Name).ToHashSet(StringComparer.Ordinal);
+            List<IStackableMode> removedModes = _operatingModesByPriority.Values.Where(operatingMode => names.Contains(operatingMode.Name) is false).ToList();
+            List<IStackableMode> addedModes = operatingModes.Where(operatingMode => _prioritiesByOperatingModeName.ContainsKey(operatingMode.Name) is false).ToList();
+            List<OperatingModeChange<IStackableMode>> replacements = new List<OperatingModeChange<IStackableMode>>();
+
+            // Pair each added base or exclusive mode with a removed base or exclusive mode of the same power axis
+            foreach (IStackableMode addedMode in addedModes.ToArray())
+            {
+                IStackableMode? predecessor = removedModes.FirstOrDefault(removedMode => IsReplacement(removedMode, addedMode));
+
+                if (predecessor is null)
+                {
+                    continue;
+                }
+
+                removedModes.Remove(predecessor);
+                addedModes.Remove(addedMode);
+                replacements.Add(new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Replaced, addedMode, predecessor));
+            }
+
+            List<OperatingModeChange<IStackableMode>> changes = new List<OperatingModeChange<IStackableMode>>();
+            changes.AddRange(removedModes.Select(operatingMode => new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Removed, operatingMode)));
+            changes.AddRange(replacements);
+            changes.AddRange(addedModes.Select(operatingMode => new OperatingModeChange<IStackableMode>(OperatingModeChangeKind.Added, operatingMode)));
+
+            return changes;
+        }
+
+
+        /// <summary>
+        /// Checks whether an operating mode replaces a predecessor, i.e. both are a base or exclusive mode of the same power axis.
+        /// </summary>
+        /// <param name="predecessor">The removed operating mode.</param>
+        /// <param name="operatingMode">The added operating mode.</param>
+        /// <returns>True if the operating mode replaces the predecessor.</returns>
+        private static bool IsReplacement(IStackableMode predecessor, IStackableMode operatingMode)
+        {
+            bool isActiveReplacement = (predecessor is IBaseActiveMode or IExclusiveActiveMode) && (operatingMode is IBaseActiveMode or IExclusiveActiveMode);
+            bool isReactiveReplacement = (predecessor is IBaseReactiveMode or IExclusiveReactiveMode) && (operatingMode is IBaseReactiveMode or IExclusiveReactiveMode);
+
+            return isActiveReplacement || isReactiveReplacement;
+        }
+
+
         private void Commit(List<(int Priority, IStackableMode OperatingMode)> candidate)
         {
             // Lock is on the calling method

@@ -276,9 +276,40 @@ body {
     background-color: var(--bs-primary, #4e5d6c);
 }
 
+/* An empty list stays a drop target of at least one item. */
+.om-list-empty {
+    min-height: var(--om-item-height);
+}
+
+.om-list-available.om-list-empty {
+    border: 1px dashed rgba(255, 255, 255, .25);
+    border-radius: .25rem;
+}
+
+/* Apply Changes / Discard Changes below the stack box (the box reaches .375rem below the list). */
+.om-stack-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-top: .875rem;
+}
+
+/* Drag and drop (SortableJS): the placeholder where the item will land and the item being dragged. */
+.om-item-ghost {
+    opacity: .35;
+    outline: 2px dashed #fff;
+    outline-offset: -2px;
+}
+
+.om-item-chosen {
+    cursor: grabbing;
+}
+
 .om-item {
     position: relative;
     min-height: var(--om-item-height);
+    cursor: grab;
+    user-select: none;
     padding: .875rem .625rem .3125rem;
     border-radius: .25rem;
     font-size: .875rem;

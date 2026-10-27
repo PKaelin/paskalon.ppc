@@ -70,6 +70,19 @@ namespace paskalON.OperatingModes.Client
 
 
         /// <summary>
+        /// Sets the whole operating mode stack in one atomic change.
+        /// </summary>
+        /// <remarks>
+        /// A rejected stack throws a <see cref="HttpRequestException"/> with the status code and the reason of the operating mode
+        /// service as message, e.g. "Only one exclusive active mode is allowed.".
+        /// </remarks>
+        /// <param name="request">The request containing the operating mode names in ascending priority order.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task SetOperatingModes(SetOperatingModeStackRequest request, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
         /// Gets the supervisory setpoints of the system.
         /// </summary>
         /// <param name="cancellationToken">Token to cancel the request.</param>
