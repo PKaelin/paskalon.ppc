@@ -331,7 +331,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
                 CalculateAction = signals => { signals.BaseReactivePower = signals.SetpointReactivePower; return signals; }
             };
             TestAdditiveActiveMode additiveActive = CreateAdditiveActiveMode("FrequencyWattMode", 1000000);
-            TestLimitingActiveMode limitingActive = CreateLimitingActiveMode("MaximumActivePowerLimitMode", 5500000);
+            TestLimitingActiveMode limitingActive = CreateLimitingActiveMode("ActivePowerLimitMode", 5500000);
             _stack!.Add(baseActive, 1);
             _stack!.Add(baseReactive, 2);
             _stack!.Add(additiveActive, 3);
@@ -440,7 +440,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
         {
             Mock<IRampController> transitionRamp = new Mock<IRampController>();
             _stack!.Add(CreateBaseActiveMode("ActivePowerMode", 5000000), 1);
-            _stack!.Add(CreateLimitingActiveMode("MaximumActivePowerLimitMode", 4000000), 2);
+            _stack!.Add(CreateLimitingActiveMode("ActivePowerLimitMode", 4000000), 2);
             CalculateSettled();
             _stack!.Replace("ActivePowerMode", CreateBaseActiveMode("MaximumPowerPointTrackingMode", 7000000, transitionRamp));
 
@@ -644,7 +644,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
         public void SystemOperatingModeControlLimitingTransitionTest(bool isAdded, double expectedOffset, double expectedObjective)
         {
             Mock<IRampController> transitionRamp = new Mock<IRampController>();
-            TestLimitingActiveMode limitingMode = CreateLimitingActiveMode("MaximumActivePowerLimitMode", 4000000, transitionRamp);
+            TestLimitingActiveMode limitingMode = CreateLimitingActiveMode("ActivePowerLimitMode", 4000000, transitionRamp);
             _stack!.Add(CreateBaseActiveMode("ActivePowerMode", 5000000), 1);
 
             if (isAdded is false)

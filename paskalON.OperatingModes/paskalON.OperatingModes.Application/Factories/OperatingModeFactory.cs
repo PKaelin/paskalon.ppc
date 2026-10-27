@@ -89,12 +89,16 @@ namespace paskalON.OperatingModes.Application.Factories
                 case ShutdownModeConfig shutdownConfig:
                     return new ShutdownMode(logger, timeProvider, publisher, systemConfig, shutdownConfig, GetMap<OperatingModeBaseMap>(map), rampController, curveController);
 
-                case MaximumActivePowerLimitModeConfig maximumActivePowerLimitConfig:
-                    return new MaximumActivePowerLimitMode(logger, timeProvider, publisher, systemConfig, maximumActivePowerLimitConfig, GetMap<MaximumActivePowerLimitModeMap>(map),
+                case ActivePowerLimitModeConfig activePowerLimitConfig:
+                    return new ActivePowerLimitMode(logger, timeProvider, publisher, systemConfig, activePowerLimitConfig, GetMap<ActivePowerLimitModeMap>(map),
                         rampController, curveController);
 
                 case ReactivePowerModeConfig reactivePowerConfig:
                     return new ReactivePowerMode(logger, timeProvider, publisher, systemConfig, reactivePowerConfig, GetMap<ReactivePowerModeMap>(map), rampController, curveController);
+
+                case ReactivePowerLimitModeConfig reactivePowerLimitConfig:
+                    return new ReactivePowerLimitMode(logger, timeProvider, publisher, systemConfig, reactivePowerLimitConfig, GetMap<ReactivePowerLimitModeMap>(map),
+                        rampController, curveController);
 
                 default:
                     throw new ArgumentException($"Operating mode configuration '{config.GetType().Name}' not implemented yet.");

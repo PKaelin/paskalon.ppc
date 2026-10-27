@@ -5,6 +5,7 @@
 using paskalON.OperatingModes.Domain;
 using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives;
+using paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Stacks;
 using paskalON.OperatingModes.Dto.Stacks;
 
@@ -14,7 +15,7 @@ namespace paskalON.OperatingModes.Application.Stacks
     /// Factory that creates the stack DTOs of the stackable operating modes.
     /// </summary>
     /// <remarks>
-    /// Specialized operating modes are matched first (e.g. <see cref="MaximumActivePowerLimitMode"/>), then the classification
+    /// Specialized operating modes are matched first (e.g. <see cref="ActivePowerLimitMode"/>), then the classification
     /// defaults (e.g. all limiting modes) and finally <see cref="OperatingModeStackDto"/> for all other stackable modes.
     /// A new DTO must also be registered as derived type on <see cref="OperatingModeStackDto"/> to be serialized with its properties.
     /// </remarks>
@@ -46,13 +47,24 @@ namespace paskalON.OperatingModes.Application.Stacks
             switch (operatingMode)
             {
                 // Specialized operating modes
-                case MaximumActivePowerLimitMode maximumActivePowerLimitMode:
+                case ActivePowerLimitMode activePowerLimitMode:
                     return new OperatingModeLimitingStackDto
                     {
                         OperatingModeName = operatingMode.Name,
                         Type = type,
                         Priority = priority,
-                        Limit = maximumActivePowerLimitMode.MaximumActivePower.Watts
+                        MaximumLimit = activePowerLimitMode.MaximumActivePower.Watts,
+                        MinimumLimit = activePowerLimitMode.MinimumActivePower.Watts
+                    };
+
+                case ReactivePowerLimitMode reactivePowerLimitMode:
+                    return new OperatingModeLimitingStackDto
+                    {
+                        OperatingModeName = operatingMode.Name,
+                        Type = type,
+                        Priority = priority,
+                        MaximumLimit = reactivePowerLimitMode.MaximumReactivePower.VoltAmperesReactive,
+                        MinimumLimit = reactivePowerLimitMode.MinimumReactivePower.VoltAmperesReactive
                     };
 
                 // Classification defaults
@@ -62,7 +74,7 @@ namespace paskalON.OperatingModes.Application.Stacks
                         OperatingModeName = operatingMode.Name,
                         Type = type,
                         Priority = priority,
-                        Limit = operatingMode.ActiveControl?.Target.Watts ?? 0
+                        MaximumLimit = operatingMode.ActiveControl?.Target.Watts ?? 0
                     };
 
                 case ILimitingReactiveMode:
@@ -71,7 +83,7 @@ namespace paskalON.OperatingModes.Application.Stacks
                         OperatingModeName = operatingMode.Name,
                         Type = type,
                         Priority = priority,
-                        Limit = operatingMode.ReactiveControl?.Target.VoltAmperesReactive ?? 0
+                        MaximumLimit = operatingMode.ReactiveControl?.Target.VoltAmperesReactive ?? 0
                     };
 
                 default:

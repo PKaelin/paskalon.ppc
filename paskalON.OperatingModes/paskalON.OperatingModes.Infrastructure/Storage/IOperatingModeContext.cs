@@ -49,7 +49,7 @@ namespace paskalON.OperatingModes.Infrastructure.Storage
         DbSet<ActivePowerModeConfig> ActivePowerModeConfigs { get; set; }
         DbSet<FrequencyDroopModeConfig> FrequencyDroopModeConfigs { get; set; }
         DbSet<FrequencyWattModeConfig> FrequencyWattModeConfigs { get; set; }
-        DbSet<MaximumActivePowerLimitModeConfig> MaximumActivePowerLimitModeConfigs { get; set; }
+        DbSet<ActivePowerLimitModeConfig> ActivePowerLimitModeConfigs { get; set; }
         // Operating closed modes Voltage Actives
         DbSet<VoltageWattDroopModeConfig> VoltageWattDroopModeConfigs { get; set; }
         // Operating closed modes Voltage Reactives
@@ -57,6 +57,7 @@ namespace paskalON.OperatingModes.Infrastructure.Storage
         DbSet<ReactivePowerModeConfig> ReactivePowerModeConfigs { get; set; }
         DbSet<VoltageModeConfig> VoltageModeConfigs { get; set; }
         DbSet<VoltageVarDroopModeConfig> VoltageVarDroopModeConfigs { get; set; }
+        DbSet<ReactivePowerLimitModeConfig> ReactivePowerLimitModeConfigs { get; set; }
 
         // Operating open modes
         DbSet<MaintenanceModeConfig> MaintenanceModeConfigs { get; set; }

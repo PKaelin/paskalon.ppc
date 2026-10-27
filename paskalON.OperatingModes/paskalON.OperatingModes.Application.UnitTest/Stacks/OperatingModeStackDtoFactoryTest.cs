@@ -45,19 +45,39 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
 
 
         /// <summary>
-        /// Confirms the maximum active power limit mode gets the limiting stack DTO with its configured limit.
+        /// Confirms the active power limit mode gets the limiting stack DTO with its configured limits.
         /// </summary>
         [TestMethod]
         public void OperatingModeStackDtoFactoryCreateLimitingDtoTest()
         {
-            IStackableMode operatingMode = ApplicationTestData.CreateMaximumActivePowerLimitMode();
+            IStackableMode operatingMode = ApplicationTestData.CreateActivePowerLimitMode();
 
             OperatingModeStackDto dto = _factory.Create(operatingMode);
 
             OperatingModeLimitingStackDto limitingDto = Assert.IsInstanceOfType<OperatingModeLimitingStackDto>(dto);
-            Assert.AreEqual("MaximumActivePowerLimitMode", limitingDto.OperatingModeName);
+            Assert.AreEqual("ActivePowerLimitMode", limitingDto.OperatingModeName);
             Assert.AreEqual(OperatingModeStackTypeDto.LimitingActive, limitingDto.Type);
-            Assert.AreEqual(6000000, limitingDto.Limit);
+            Assert.AreEqual(6000000, limitingDto.MaximumLimit);
+            Assert.AreEqual(-4000000, limitingDto.MinimumLimit);
+        }
+
+
+        /// <summary>
+        /// Confirms the reactive power limit mode gets the limiting stack DTO with its configured limits.
+        /// </summary>
+        [TestMethod]
+        public void OperatingModeStackDtoFactoryCreateReactiveLimitingDtoTest()
+        {
+            IStackableMode operatingMode = ApplicationTestData.CreateReactivePowerLimitMode();
+
+            OperatingModeStackDto dto = _factory.Create(operatingMode, 3);
+
+            OperatingModeLimitingStackDto limitingDto = Assert.IsInstanceOfType<OperatingModeLimitingStackDto>(dto);
+            Assert.AreEqual("ReactivePowerLimitMode", limitingDto.OperatingModeName);
+            Assert.AreEqual(OperatingModeStackTypeDto.LimitingReactive, limitingDto.Type);
+            Assert.AreEqual(3, limitingDto.Priority);
+            Assert.AreEqual(3000000, limitingDto.MaximumLimit);
+            Assert.AreEqual(-2000000, limitingDto.MinimumLimit);
         }
 
 
@@ -70,7 +90,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             IStackableMode[] operatingModes = new IStackableMode[]
             {
                 ApplicationTestData.CreateMaximumPowerPointTrackingMode(),
-                ApplicationTestData.CreateMaximumActivePowerLimitMode()
+                ApplicationTestData.CreateActivePowerLimitMode()
             };
 
             IReadOnlyList<OperatingModeStackDto> dtos = _factory.Create(operatingModes);
@@ -93,7 +113,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             OperatingModeStackEntry[] entries = new OperatingModeStackEntry[]
             {
                 new OperatingModeStackEntry(1, ApplicationTestData.CreateMaximumPowerPointTrackingMode()),
-                new OperatingModeStackEntry(2, ApplicationTestData.CreateMaximumActivePowerLimitMode())
+                new OperatingModeStackEntry(2, ApplicationTestData.CreateActivePowerLimitMode())
             };
 
             IReadOnlyList<OperatingModeStackDto> dtos = _factory.Create(entries);
@@ -103,7 +123,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             Assert.AreEqual(1, dtos[0].Priority);
             OperatingModeLimitingStackDto limitingDto = Assert.IsInstanceOfType<OperatingModeLimitingStackDto>(dtos[1]);
             Assert.AreEqual(2, limitingDto.Priority);
-            Assert.AreEqual(6000000, limitingDto.Limit);
+            Assert.AreEqual(6000000, limitingDto.MaximumLimit);
         }
 
 
@@ -116,7 +136,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             IStackableMode[] operatingModes = new IStackableMode[]
             {
                 ApplicationTestData.CreateMaximumPowerPointTrackingMode(),
-                ApplicationTestData.CreateMaximumActivePowerLimitMode()
+                ApplicationTestData.CreateActivePowerLimitMode()
             };
             IReadOnlyList<OperatingModeStackDto> dtos = _factory.Create(operatingModes);
 
@@ -127,7 +147,8 @@ namespace paskalON.OperatingModes.Application.UnitTest.Stacks
             Assert.IsNotNull(deserialized);
             Assert.AreEqual(typeof(OperatingModeStackDto), deserialized[0].GetType());
             OperatingModeLimitingStackDto limitingDto = Assert.IsInstanceOfType<OperatingModeLimitingStackDto>(deserialized[1]);
-            Assert.AreEqual(6000000, limitingDto.Limit);
+            Assert.AreEqual(6000000, limitingDto.MaximumLimit);
+            Assert.AreEqual(-4000000, limitingDto.MinimumLimit);
         }
 
 

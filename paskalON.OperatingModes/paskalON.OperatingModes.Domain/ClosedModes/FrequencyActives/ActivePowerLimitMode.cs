@@ -15,47 +15,65 @@ using paskalON.Telemetry;
 namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 {
     /// <summary>
-    /// Mode: Maximum Active Power Limit Mode
-    /// Purpose: Restricts the active power output to a cap
-    /// Inputs: Measured Active Power at POI, Maximum Active Power setpoint (configuration)
+    /// Mode: Active Power Limit Mode
+    /// Purpose: Restricts the active power output to a band between a minimum and a maximum
+    /// Inputs: Measured Active Power at POI, Minimum and Maximum Active Power limits (configuration)
     /// Output Controlled: Active Power (P)
     /// What Output Influences: Active Power
     /// </summary>
     /// <remarks>
-    /// The cap is the configured maximum active power limit, otherwise the nameplate. The limit is applied to the final active
-    /// power of the stack: <c>LimitedActivePower = min(FinalActivePower, limit)</c>.
-    /// While the limit is binding, a ramp-limited integral feedback corrects the limit with the measured active power at the POI,
-    /// so losses or auxiliary loads do not keep the POI below or push it above the cap. The correction is reset while the limit
-    /// is not binding.
+    /// The limits are the configured minimum and maximum active power limits, otherwise the nameplate. The limits are applied to the
+    /// final active power of the stack: <c>LimitedActivePower = clamp(FinalActivePower, minimum, maximum)</c>.
+    /// While a limit is binding, a ramp-limited integral feedback corrects the binding limit with the measured active power at the POI,
+    /// so losses or auxiliary loads do not keep the POI inside or push it outside the limits. The correction may move the limit up to the
+    /// nameplate. It is reset while no limit is binding and when the binding limit switches between minimum and maximum.
     /// </remarks>
-    public class MaximumActivePowerLimitMode : OperatingClosedModeBase, ILimitingActiveMode
+    public class ActivePowerLimitMode : OperatingClosedModeBase, ILimitingActiveMode
     {
         /// <summary>
-        /// Maximum active power limit mode configuration.
+        /// Active power limit mode configuration.
         /// </summary>
-        protected readonly MaximumActivePowerLimitModeConfig _config;
+        protected readonly ActivePowerLimitModeConfig _config;
 
 
         /// <summary>
-        /// Maximum active power limit mode map.
+        /// Active power limit mode map.
         /// </summary>
-        protected readonly MaximumActivePowerLimitModeMap _map;
+        protected readonly ActivePowerLimitModeMap _map;
 
 
         /// <summary>
-        /// Gets the configured cap or the nameplate if the cap is not configured.
+        /// Gets the configured maximum limit or the nameplate if the maximum limit is not configured.
         /// </summary>
-        public ActivePower MaximumActivePower { get => new ActivePower(_config.MaximumActivePowerLimitWatts ?? _systemConfig.NameplateMaximumActivePowerWatt); }
+        public ActivePower MaximumActivePower { get => new ActivePower(ActiveControl!.Limits.Maximum); }
 
 
         /// <summary>
-        /// Gets whether the limit was binding in the last calculation.
+        /// Gets the configured minimum limit or the nameplate if the minimum limit is not configured.
         /// </summary>
-        public bool IsLimiting { get; private set; }
+        public ActivePower MinimumActivePower { get => new ActivePower(ActiveControl!.Limits.Minimum); }
 
 
         /// <summary>
-        /// Constructor of <see cref="MaximumActivePowerLimitMode"/>.
+        /// Gets whether the maximum limit was binding in the last calculation.
+        /// </summary>
+        public bool IsLimitingMaximum { get; private set; }
+
+
+        /// <summary>
+        /// Gets whether the minimum limit was binding in the last calculation.
+        /// </summary>
+        public bool IsLimitingMinimum { get; private set; }
+
+
+        /// <summary>
+        /// Gets whether a limit was binding in the last calculation.
+        /// </summary>
+        public bool IsLimiting { get => IsLimitingMaximum || IsLimitingMinimum; }
+
+
+        /// <summary>
+        /// Constructor of <see cref="ActivePowerLimitMode"/>.
         /// </summary>
         /// <param name="logger">Logger for handling logging and diagnostics.</param>
         /// <param name="timeProvider">The time provider (TimeProvider.System for prod, FakeTimeProvider for tests.</param>
@@ -65,8 +83,8 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
         /// <param name="map">Input mapping class for signals.</param>
         /// <param name="rampController">The ramp controller interface.</param>
         /// <param name="curveController">The curve controller interface.</param>
-        public MaximumActivePowerLimitMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, MaximumActivePowerLimitModeConfig config,
-            MaximumActivePowerLimitModeMap map, IRampController rampController, ICurveController? curveController = null)
+        public ActivePowerLimitMode(ILogger logger, TimeProvider timeProvider, IMetricsPublisher publisher, SystemConfig systemConfig, ActivePowerLimitModeConfig config,
+            ActivePowerLimitModeMap map, IRampController rampController, ICurveController? curveController = null)
             : base(logger, timeProvider, publisher, systemConfig, config, map, rampController, curveController)
         {
             ArgumentNullException.ThrowIfNull(config);
@@ -75,7 +93,11 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
             _config = config;
             _map = map;
             FeedbackSettings settings = new FeedbackSettings(0, config.DeadbandError) { Correction = FeedbackCorrection.RampLimitedIntegral };
-            CreateActiveFeedback("ActivePower", () => _map.ActivePowerAtPoi.Invoke()?.Watts, settings, rampController.ShallowCopy());
+
+            // The corrected limit may compensate losses beyond the configured limits, only the nameplate restricts it
+            PowerControlLimits nameplate = new PowerControlLimits(systemConfig.NameplateMinimumActivePowerWatt, systemConfig.NameplateMaximumActivePowerWatt,
+                config.DeadbandSetpoint, config.DeadbandAvailable);
+            CreateActiveFeedback("ActivePower", () => _map.ActivePowerAtPoi.Invoke()?.Watts, settings, rampController.ShallowCopy(), nameplate);
             RegisterMetrics();
         }
 
@@ -85,24 +107,35 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
         {
             ArgumentNullException.ThrowIfNull(signals);
 
-            // The cap is the target of the power axis, a changed cap is transitioned by the system operating mode control
+            // The maximum is the target of the power axis, a changed maximum is transitioned by the system operating mode control
             ActivePower maximum = MaximumActivePower;
-            ActivePower limit = ActiveControl!.Calculate(maximum, maximum);
+            ActivePower maximumLimit = ActiveControl!.Calculate(maximum, maximum);
+            ActivePower minimumLimit = MinimumActivePower;
             ActivePower final = signals.FinalActivePower;
-            IsLimiting = final.Watts > limit.Watts;
-            ActivePower correctedLimit = limit;
+            bool wasLimitingMaximum = IsLimitingMaximum;
+            bool wasLimitingMinimum = IsLimitingMinimum;
+            IsLimitingMaximum = final.Watts > maximumLimit.Watts;
+            IsLimitingMinimum = final.Watts < minimumLimit.Watts;
+            bool isBindingLimitSwitched = (IsLimitingMaximum && wasLimitingMinimum) || (IsLimitingMinimum && wasLimitingMaximum);
 
-            // Correct the limit with the measurement only while it is binding, otherwise the correction would wind up
-            if (IsLimiting)
-            {
-                correctedLimit = ActiveFeedback!.Correct(limit, limit.Watts);
-            }
-            else if (ActiveFeedback!.ErrorAdjustment.Watts != 0)
+            // The correction belongs to the binding limit, otherwise it would wind up or be applied to the wrong limit
+            if ((IsLimiting is false || isBindingLimitSwitched) && ActiveFeedback!.ErrorAdjustment.Watts != 0)
             {
                 ActiveFeedback.Reset();
             }
 
-            signals.LimitedActivePower = new ActivePower(Math.Min(final.Watts, correctedLimit.Watts));
+            double limited = final.Watts;
+
+            if (IsLimitingMaximum)
+            {
+                limited = Math.Min(final.Watts, ActiveFeedback!.Correct(maximumLimit, maximumLimit.Watts).Watts);
+            }
+            else if (IsLimitingMinimum)
+            {
+                limited = Math.Max(final.Watts, ActiveFeedback!.Correct(minimumLimit, minimumLimit.Watts).Watts);
+            }
+
+            signals.LimitedActivePower = new ActivePower(limited);
 
             return signals;
         }
@@ -112,7 +145,8 @@ namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
         protected override void RegisterMetrics()
         {
             base.RegisterMetrics();
-            _metricsPublisher.Register<MaximumActivePowerLimitMode, double>(this, nameof(MaximumActivePower), MetricType.Gauge, x => x.MaximumActivePower.Watts, _config.MetricsFactorClass2);
+            _metricsPublisher.Register<ActivePowerLimitMode, double>(this, nameof(MaximumActivePower), MetricType.Gauge, x => x.MaximumActivePower.Watts, _config.MetricsFactorClass2);
+            _metricsPublisher.Register<ActivePowerLimitMode, double>(this, nameof(MinimumActivePower), MetricType.Gauge, x => x.MinimumActivePower.Watts, _config.MetricsFactorClass2);
         }
     }
 }

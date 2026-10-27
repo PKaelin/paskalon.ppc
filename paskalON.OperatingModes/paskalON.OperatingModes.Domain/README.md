@@ -62,6 +62,7 @@ OperatingModes
 | Voltage Droop Mode | Regulate voltage at POI by adjusting Reactive Power | Measured voltage at POI, voltage setpoint, droop/slope gain, Q capability | Reactive Power Q | Grid voltage at POI | - | Base Reactive |
 | Power Factor Mode | Maintain a target power factor at POI regardless of active power output | Measured P & Q at POI, PF setpoint | Reactive Power (Q) | Voltage (indirectly) compliance with PF requirements.  - | Base Reactive (reads P) |
 | Voltage Var Droop Mode | Curtail reactive power when voltage rises above a threshold | Measured voltage, volt-var curve/setpoints | Reactive Power (P) | Voltage at POI (limit overvoltage) |  - | Limiting Reactive |
+| Reactive Power Limit Mode | Restricts the reactive power output to a band between a minimum and a maximum | Measured Q at POI, Q Min and Q Max limits | Reactive Power (Q) | Reactive Power | - | Limiting Reactive |
 
 
 #### Frequency / Active Power (P) Control Modes
@@ -69,7 +70,7 @@ OperatingModes
 | Mode | Purpose | Inputs (for calculating output) | Output Controlled | What Output Influences | P Classification | Q Classification |
 |------|---------|---------------------------------|-------------------|------------------------|------------------|------------------|
 | Active Power Mode | Watt setpoint | Measured P at POI, P setpoint, feedback error |  Active Power (P) | Grid frequency, power balance | Base Active | - |
-| Maximum Active Power Limit Mode | Restricts the active power output to a cap | Measured P at POI, P Max setpoint |  Active Power (P) |  Active Power | Limiting Active | - |
+| Active Power Limit Mode | Restricts the active power output to a band between a minimum and a maximum | Measured P at POI, P Min and P Max limits |  Active Power (P) |  Active Power | Limiting Active | - |
 | Frequency Watt Mode | Automatically adjust active power in response to frequency deviations | Measured frequency, frequency reference value |  Active Power (P) | Grid frequency | Additive Active | - |
 | Frequency Droop Mode | Automatically adjust active power in response to frequency deviations | Measured frequency, frequency reference value, droop settings, available reserves |  Active Power (P) | Grid frequency | Additive Active | - |
 

@@ -48,6 +48,37 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ActivePowerLimitModeConfig",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
+                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    TimeoutSeconds = table.Column<int>(type: "integer", nullable: false),
+                    RampConfigId = table.Column<int>(type: "integer", nullable: false),
+                    CurveConfigId = table.Column<int>(type: "integer", nullable: true),
+                    DeadbandSetpoint = table.Column<double>(type: "double precision", nullable: false),
+                    DeadbandAvailable = table.Column<double>(type: "double precision", nullable: false),
+                    MaximumActivePowerLimitWatt = table.Column<double>(type: "double precision", nullable: true),
+                    MinimumActivePowerLimitWatt = table.Column<double>(type: "double precision", nullable: true),
+                    MaximumReactivePowerLimitVars = table.Column<double>(type: "double precision", nullable: true),
+                    MinimumReactivePowerLimitVars = table.Column<double>(type: "double precision", nullable: true),
+                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
+                    MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass4 = table.Column<int>(type: "integer", nullable: false),
+                    DeadbandError = table.Column<double>(type: "double precision", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActivePowerLimitModeConfig", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ActivePowerModeConfig",
                 columns: table => new
                 {
@@ -355,38 +386,6 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MaximumActivePowerLimitModeConfig",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
-                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
-                    TimeoutSeconds = table.Column<int>(type: "integer", nullable: false),
-                    RampConfigId = table.Column<int>(type: "integer", nullable: false),
-                    CurveConfigId = table.Column<int>(type: "integer", nullable: true),
-                    DeadbandSetpoint = table.Column<double>(type: "double precision", nullable: false),
-                    DeadbandAvailable = table.Column<double>(type: "double precision", nullable: false),
-                    MaximumActivePowerLimitWatt = table.Column<double>(type: "double precision", nullable: true),
-                    MinimumActivePowerLimitWatt = table.Column<double>(type: "double precision", nullable: true),
-                    MaximumReactivePowerLimitVars = table.Column<double>(type: "double precision", nullable: true),
-                    MinimumReactivePowerLimitVars = table.Column<double>(type: "double precision", nullable: true),
-                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
-                    MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
-                    MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
-                    MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
-                    MetricsFactorClass4 = table.Column<int>(type: "integer", nullable: false),
-                    MaximumActivePowerLimitWatts = table.Column<double>(type: "double precision", nullable: true),
-                    DeadbandError = table.Column<double>(type: "double precision", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MaximumActivePowerLimitModeConfig", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MaximumPowerPointTrackingModeConfig",
                 columns: table => new
                 {
@@ -542,6 +541,37 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ReactivePowerFixedModeConfig", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReactivePowerLimitModeConfig",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
+                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    TimeoutSeconds = table.Column<int>(type: "integer", nullable: false),
+                    RampConfigId = table.Column<int>(type: "integer", nullable: false),
+                    CurveConfigId = table.Column<int>(type: "integer", nullable: true),
+                    DeadbandSetpoint = table.Column<double>(type: "double precision", nullable: false),
+                    DeadbandAvailable = table.Column<double>(type: "double precision", nullable: false),
+                    MaximumActivePowerLimitWatt = table.Column<double>(type: "double precision", nullable: true),
+                    MinimumActivePowerLimitWatt = table.Column<double>(type: "double precision", nullable: true),
+                    MaximumReactivePowerLimitVars = table.Column<double>(type: "double precision", nullable: true),
+                    MinimumReactivePowerLimitVars = table.Column<double>(type: "double precision", nullable: true),
+                    MetricsIntervalMilliseconds = table.Column<long>(type: "bigint", nullable: false),
+                    MetricsFactorClass1 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass2 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass3 = table.Column<int>(type: "integer", nullable: false),
+                    MetricsFactorClass4 = table.Column<int>(type: "integer", nullable: false),
+                    DeadbandError = table.Column<double>(type: "double precision", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReactivePowerLimitModeConfig", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -799,6 +829,22 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 column: "RampConfigId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ActivePowerLimitModeConfig_CurveConfigId",
+                table: "ActivePowerLimitModeConfig",
+                column: "CurveConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivePowerLimitModeConfig_Name",
+                table: "ActivePowerLimitModeConfig",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivePowerLimitModeConfig_RampConfigId",
+                table: "ActivePowerLimitModeConfig",
+                column: "RampConfigId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ActivePowerModeConfig_CurveConfigId",
                 table: "ActivePowerModeConfig",
                 column: "CurveConfigId");
@@ -944,22 +990,6 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 column: "RampConfigId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MaximumActivePowerLimitModeConfig_CurveConfigId",
-                table: "MaximumActivePowerLimitModeConfig",
-                column: "CurveConfigId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MaximumActivePowerLimitModeConfig_Name",
-                table: "MaximumActivePowerLimitModeConfig",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MaximumActivePowerLimitModeConfig_RampConfigId",
-                table: "MaximumActivePowerLimitModeConfig",
-                column: "RampConfigId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_MaximumPowerPointTrackingModeConfig_CurveConfigId",
                 table: "MaximumPowerPointTrackingModeConfig",
                 column: "CurveConfigId");
@@ -1005,6 +1035,22 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_ReactivePowerFixedModeConfig_RampConfigId",
                 table: "ReactivePowerFixedModeConfig",
+                column: "RampConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReactivePowerLimitModeConfig_CurveConfigId",
+                table: "ReactivePowerLimitModeConfig",
+                column: "CurveConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReactivePowerLimitModeConfig_Name",
+                table: "ReactivePowerLimitModeConfig",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReactivePowerLimitModeConfig_RampConfigId",
+                table: "ReactivePowerLimitModeConfig",
                 column: "RampConfigId");
 
             migrationBuilder.CreateIndex(
@@ -1107,6 +1153,9 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 name: "ActivePowerFixedModeConfig");
 
             migrationBuilder.DropTable(
+                name: "ActivePowerLimitModeConfig");
+
+            migrationBuilder.DropTable(
                 name: "ActivePowerModeConfig");
 
             migrationBuilder.DropTable(
@@ -1140,9 +1189,6 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 name: "MaintenanceSocModeConfig");
 
             migrationBuilder.DropTable(
-                name: "MaximumActivePowerLimitModeConfig");
-
-            migrationBuilder.DropTable(
                 name: "MaximumPowerPointTrackingModeConfig");
 
             migrationBuilder.DropTable(
@@ -1162,6 +1208,9 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
 
             migrationBuilder.DropTable(
                 name: "ReactivePowerFixedModeConfig");
+
+            migrationBuilder.DropTable(
+                name: "ReactivePowerLimitModeConfig");
 
             migrationBuilder.DropTable(
                 name: "ReactivePowerModeConfig");

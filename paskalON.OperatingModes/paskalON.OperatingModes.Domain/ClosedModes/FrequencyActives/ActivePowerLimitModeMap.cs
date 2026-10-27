@@ -7,9 +7,9 @@ using paskalON.PhysicalUnits.Electricals.Powers;
 namespace paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives
 {
     /// <summary>
-    /// Input mapping class for maximum active power limit mode.
+    /// Input mapping class for active power limit mode.
     /// </summary>
-    public class MaximumActivePowerLimitModeMap : OperatingModeBaseMap
+    public class ActivePowerLimitModeMap : OperatingModeBaseMap
     {
         /// <summary>
         /// Active power at the POI map.

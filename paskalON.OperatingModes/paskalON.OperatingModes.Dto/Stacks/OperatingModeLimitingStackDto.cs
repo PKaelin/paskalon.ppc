@@ -10,8 +10,14 @@ namespace paskalON.OperatingModes.Dto.Stacks
     public record OperatingModeLimitingStackDto : OperatingModeStackDto
     {
         /// <summary>
-        /// The limit of the operating mode.
+        /// The maximum limit of the operating mode.
         /// </summary>
-        public double Limit { get; set; }
+        public double MaximumLimit { get; set; }
+
+
+        /// <summary>
+        /// The minimum limit of the operating mode or null if the operating mode has no minimum limit.
+        /// </summary>
+        public double? MinimumLimit { get; set; }
     }
 }

@@ -113,14 +113,14 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Transitions
             transition.Start(3000000, new[]
             {
                 CreateRequest("FrequencyWattMode", TransitionKind.ModeRemoved, 1000000, firstRamp, false),
-                CreateRequest("MaximumActivePowerLimitMode", TransitionKind.ModeRemoved, 2000000, secondRamp, false),
+                CreateRequest("ActivePowerLimitMode", TransitionKind.ModeRemoved, 2000000, secondRamp, false),
             });
 
             double offset = transition.Advance();
 
             // Still some (half) left
             Assert.AreEqual(500000, offset);
-            // MaximumActivePowerLimitMode is finished and removed, FrequencyWattMode is still running
+            // ActivePowerLimitMode is finished and removed, FrequencyWattMode is still running
             Assert.HasCount(1, transition.Segments);
             Assert.AreEqual("FrequencyWattMode", transition.Segments[0].OperatingModeName);
             firstRamp.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
@@ -140,14 +140,14 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Transitions
             {
                 CreateRequest("FrequencyWattMode", TransitionKind.ModeRemoved, 1000000, firstRamp, false),
                 // Last in the list gets the remainder, so it will be 3000000, not 2000000 as the transition start request says 4000000 - 1000000 = 3000000
-                CreateRequest("MaximumActivePowerLimitMode", TransitionKind.ModeRemoved, 2000000, secondRamp, false),
+                CreateRequest("ActivePowerLimitMode", TransitionKind.ModeRemoved, 2000000, secondRamp, false),
             });
 
             double offset = transition.Advance();
 
             // Still some (half) left
             Assert.AreEqual(500000, offset);
-            // MaximumActivePowerLimitMode is finished and removed, FrequencyWattMode is still running
+            // ActivePowerLimitMode is finished and removed, FrequencyWattMode is still running
             Assert.HasCount(1, transition.Segments);
             Assert.AreEqual("FrequencyWattMode", transition.Segments[0].OperatingModeName);
             firstRamp.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Once);
@@ -252,7 +252,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Transitions
             transition.Start(3000000, new[]
             {
                 CreateRequest("FrequencyWattMode", TransitionKind.ModeRemoved, 1000000, firstRamp, false),
-                CreateRequest("MaximumActivePowerLimitMode", TransitionKind.ModeRemoved, 2000000, secondRamp, false),
+                CreateRequest("ActivePowerLimitMode", TransitionKind.ModeRemoved, 2000000, secondRamp, false),
             });
 
             transition.Cancel();

@@ -24,8 +24,10 @@ export interface OperatingModeStackDto {
     type: number | string;
     /** Only set for active operating modes. */
     priority?: number | null;
-    /** Only set for limiting operating modes. */
-    limit?: number;
+    /** Only set for limiting operating modes, the maximum limit. */
+    maximumLimit?: number;
+    /** Only set for limiting operating modes with a minimum limit. */
+    minimumLimit?: number | null;
 }
 
 /** SystemSetpointDto - the supervisory setpoints in watts and vars. */

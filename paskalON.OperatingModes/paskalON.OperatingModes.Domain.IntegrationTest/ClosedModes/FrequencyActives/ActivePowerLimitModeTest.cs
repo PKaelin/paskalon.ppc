@@ -22,10 +22,10 @@ using paskalON.Telemetry;
 namespace paskalON.OperatingModes.Domain.IntegrationTest.ClosedModes.FrequencyActives
 {
     /// <summary>
-    /// Integration tests of <see cref="MaximumActivePowerLimitMode"/> with a base mode, real ramp controllers and the system operating mode control.
+    /// Integration tests of <see cref="ActivePowerLimitMode"/> with a base mode, real ramp controllers and the system operating mode control.
     /// </summary>
     [TestClass]
-    public class MaximumActivePowerLimitModeTest
+    public class ActivePowerLimitModeTest
     {
         /// <summary>
         /// Tolerance for power values in Watts.
@@ -54,7 +54,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.ClosedModes.FrequencyAc
         /// <summary>
         /// The limiting mode under test with a 6 MW cap.
         /// </summary>
-        private MaximumActivePowerLimitMode? _limitMode;
+        private ActivePowerLimitMode? _limitMode;
 
 
         /// <summary>
@@ -101,21 +101,21 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.ClosedModes.FrequencyAc
                 RampConfig = new RampRateConfig { ChangedBy = "Test", RampUpRatePerSecond = 1000000, RampDownRatePerSecond = 1000000 },
             };
 
-            MaximumActivePowerLimitModeConfig limitConfig = new MaximumActivePowerLimitModeConfig
+            ActivePowerLimitModeConfig limitConfig = new ActivePowerLimitModeConfig
             {
                 ChangedBy = "Test",
-                Name = "MaximumActivePowerLimitMode",
+                Name = "ActivePowerLimitMode",
                 IsActive = true,
                 Type = PowerControlType.Bess,
                 DeadbandSetpoint = 1000,
                 DeadbandAvailable = 1000,
                 DeadbandError = 10000,
-                MaximumActivePowerLimitWatts = 6000000,
+                MaximumActivePowerLimitWatt = 6000000,
                 RampConfig = new RampRateConfig { ChangedBy = "Test", RampUpRatePerSecond = 1000000, RampDownRatePerSecond = 1000000 },
             };
 
             MaximumPowerPointTrackingModeMap trackingMap = new MaximumPowerPointTrackingModeMap { AvailableActivePower = () => _availableActivePower, AvailableReactivePower = () => null };
-            MaximumActivePowerLimitModeMap limitMap = new MaximumActivePowerLimitModeMap
+            ActivePowerLimitModeMap limitMap = new ActivePowerLimitModeMap
             {
                 AvailableActivePower = () => _availableActivePower,
                 AvailableReactivePower = () => null,
@@ -124,7 +124,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.ClosedModes.FrequencyAc
 
             MaximumPowerPointTrackingMode trackingMode = new MaximumPowerPointTrackingMode(NullLogger.Instance, _timeProvider, new Mock<IMetricsPublisher>().Object, systemConfig,
                 trackingConfig, trackingMap, new RampController(NullLogger.Instance, _timeProvider, trackingConfig.RampConfig));
-            _limitMode = new MaximumActivePowerLimitMode(NullLogger.Instance, _timeProvider, new Mock<IMetricsPublisher>().Object, systemConfig, limitConfig, limitMap,
+            _limitMode = new ActivePowerLimitMode(NullLogger.Instance, _timeProvider, new Mock<IMetricsPublisher>().Object, systemConfig, limitConfig, limitMap,
                 new RampController(NullLogger.Instance, _timeProvider, limitConfig.RampConfig));
             _stack = new OperatingModeStack();
             _stack.Add(trackingMode, 1);
@@ -139,7 +139,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.ClosedModes.FrequencyAc
         /// Confirms the available power is limited to the cap and the binding limit is corrected with the measured power at the POI.
         /// </summary>
         [TestMethod]
-        public void MaximumActivePowerLimitModeCorrectsLossesAtPoiTest()
+        public void ActivePowerLimitModeCorrectsLossesAtPoiTest()
         {
             _control!.Calculate(CancellationToken.None);
             _timeProvider!.Advance(TimeSpan.FromSeconds(10));
@@ -162,7 +162,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.ClosedModes.FrequencyAc
         /// Confirms the correction is held once the POI reached the cap and reset when the limit is no longer binding.
         /// </summary>
         [TestMethod]
-        public void MaximumActivePowerLimitModeHoldsAndResetsCorrectionTest()
+        public void ActivePowerLimitModeHoldsAndResetsCorrectionTest()
         {
             _activePowerAtPoi = new ActivePower(5800000);
             _control!.Calculate(CancellationToken.None);

@@ -12,7 +12,7 @@ using paskalON.OperatingModes.Infrastructure.Storage;
 namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(OperatingModeContext))]
-    [Migration("20261020001114_v_0_1")]
+    [Migration("20261027163215_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -434,6 +434,16 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     b.ToTable("CoordinatedChargeDischargeModeConfig");
                 });
 
+            modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives.ActivePowerLimitModeConfig", b =>
+                {
+                    b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
+
+                    b.Property<double>("DeadbandError")
+                        .HasColumnType("double precision");
+
+                    b.ToTable("ActivePowerLimitModeConfig");
+                });
+
             modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives.ActivePowerModeConfig", b =>
                 {
                     b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
@@ -473,19 +483,6 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     b.ToTable("FrequencyWattModeConfig");
                 });
 
-            modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives.MaximumActivePowerLimitModeConfig", b =>
-                {
-                    b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
-
-                    b.Property<double>("DeadbandError")
-                        .HasColumnType("double precision");
-
-                    b.Property<double?>("MaximumActivePowerLimitWatts")
-                        .HasColumnType("double precision");
-
-                    b.ToTable("MaximumActivePowerLimitModeConfig");
-                });
-
             modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.ClosedModes.MaintenanceSocModeConfig", b =>
                 {
                     b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
@@ -523,6 +520,16 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                         .HasColumnType("real");
 
                     b.ToTable("PowerFactorModeConfig");
+                });
+
+            modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives.ReactivePowerLimitModeConfig", b =>
+                {
+                    b.HasBaseType("paskalON.OperatingModes.Domain.Configs.OperatingModeBaseConfig");
+
+                    b.Property<double>("DeadbandError")
+                        .HasColumnType("double precision");
+
+                    b.ToTable("ReactivePowerLimitModeConfig");
                 });
 
             modelBuilder.Entity("paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives.ReactivePowerModeConfig", b =>

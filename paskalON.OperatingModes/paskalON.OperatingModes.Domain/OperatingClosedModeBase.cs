@@ -75,12 +75,14 @@ namespace paskalON.OperatingModes.Domain
         /// <param name="measuredSource">Source of the measured value bound to the operating mode map.</param>
         /// <param name="settings">The feedback settings.</param>
         /// <param name="rampController">Own ramp controller, required for <see cref="FeedbackCorrection.RampLimitedIntegral"/>.</param>
+        /// <param name="limits">Limits of the corrected value, the limits of the active power control if null.</param>
         /// <returns>The created active power feedback control.</returns>
         /// <exception cref="InvalidOperationException">The operating mode has no active power classification.</exception>
-        protected FeedbackControl<ActivePower> CreateActiveFeedback(string quantity, Func<double?> measuredSource, FeedbackSettings settings, IRampController? rampController = null)
+        protected FeedbackControl<ActivePower> CreateActiveFeedback(string quantity, Func<double?> measuredSource, FeedbackSettings settings, IRampController? rampController = null,
+            PowerControlLimits? limits = null)
         {
             PowerControl<ActivePower> activeControl = ActiveControl ?? throw new InvalidOperationException($"{Name} has no active power classification.");
-            ActiveFeedback = new FeedbackControl<ActivePower>(_logger, Name, quantity, measuredSource, settings, activeControl.Limits, PowerConverters.Active, rampController);
+            ActiveFeedback = new FeedbackControl<ActivePower>(_logger, Name, quantity, measuredSource, settings, limits ?? activeControl.Limits, PowerConverters.Active, rampController);
 
             return ActiveFeedback;
         }
@@ -93,12 +95,14 @@ namespace paskalON.OperatingModes.Domain
         /// <param name="measuredSource">Source of the measured value bound to the operating mode map.</param>
         /// <param name="settings">The feedback settings.</param>
         /// <param name="rampController">Own ramp controller, required for <see cref="FeedbackCorrection.RampLimitedIntegral"/>.</param>
+        /// <param name="limits">Limits of the corrected value, the limits of the reactive power control if null.</param>
         /// <returns>The created reactive power feedback control.</returns>
         /// <exception cref="InvalidOperationException">The operating mode has no reactive power classification.</exception>
-        protected FeedbackControl<ReactivePower> CreateReactiveFeedback(string quantity, Func<double?> measuredSource, FeedbackSettings settings, IRampController? rampController = null)
+        protected FeedbackControl<ReactivePower> CreateReactiveFeedback(string quantity, Func<double?> measuredSource, FeedbackSettings settings, IRampController? rampController = null,
+            PowerControlLimits? limits = null)
         {
             PowerControl<ReactivePower> reactiveControl = ReactiveControl ?? throw new InvalidOperationException($"{Name} has no reactive power classification.");
-            ReactiveFeedback = new FeedbackControl<ReactivePower>(_logger, Name, quantity, measuredSource, settings, reactiveControl.Limits, PowerConverters.Reactive, rampController);
+            ReactiveFeedback = new FeedbackControl<ReactivePower>(_logger, Name, quantity, measuredSource, settings, limits ?? reactiveControl.Limits, PowerConverters.Reactive, rampController);
 
             return ReactiveFeedback;
         }

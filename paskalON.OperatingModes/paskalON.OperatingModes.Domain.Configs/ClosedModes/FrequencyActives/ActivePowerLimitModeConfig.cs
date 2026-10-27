@@ -5,16 +5,13 @@
 namespace paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives
 {
     /// <summary>
-    /// Maximum active power limit mode configuration.
+    /// Active power limit mode configuration.
     /// </summary>
-    public class MaximumActivePowerLimitModeConfig : OperatingClosedModeBaseConfig
+    /// <remarks>
+    /// The limits are <see cref="OperatingModeBaseConfig.MinimumActivePowerLimitWatt"/> and <see cref="OperatingModeBaseConfig.MaximumActivePowerLimitWatt"/>.
+    /// If a limit is not set the systems nameplate for active power is used.
+    /// </remarks>
+    public class ActivePowerLimitModeConfig : OperatingClosedModeBaseConfig
     {
-        /// <summary>
-        /// Maximum active power limit.
-        /// </summary>
-        /// <remarks>
-        /// If this value is not set the systems nameplate for active power is used.
-        /// </remarks>
-        public double? MaximumActivePowerLimitWatts { get; set; }
     }
 }

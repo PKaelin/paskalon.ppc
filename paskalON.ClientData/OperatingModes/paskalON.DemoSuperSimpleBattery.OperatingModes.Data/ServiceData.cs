@@ -197,19 +197,29 @@ namespace paskalON.DemoSuperSimpleBattery.OperatingModes.Data
             };
             context.RampRateConfigs.Add(limitingRampRateConfig);
 
-            MaximumActivePowerLimitModeConfig maximumActivePowerLimitModeConfig = new MaximumActivePowerLimitModeConfig
+            ActivePowerLimitModeConfig activePowerLimitModeConfig = new ActivePowerLimitModeConfig
             {
                 ChangedBy = ChangedBy,
-                Name = "MaximumActivePowerLimitMode",
+                Name = "ActivePowerLimitMode",
                 IsActive = true,
                 Type = PowerControlType.Bess,
                 RampConfig = limitingRampRateConfig,
                 MaximumActivePowerLimitWatt = 3000000,
                 MinimumActivePowerLimitWatt = -3000000,
-                MaximumReactivePowerLimitVars = 3000000,
-                MinimumReactivePowerLimitVars = -3000000,
             };
-            context.MaximumActivePowerLimitModeConfigs.Add(maximumActivePowerLimitModeConfig);
+            context.ActivePowerLimitModeConfigs.Add(activePowerLimitModeConfig);
+
+            ReactivePowerLimitModeConfig reactivePowerLimitModeConfig = new ReactivePowerLimitModeConfig
+            {
+                ChangedBy = ChangedBy,
+                Name = "ReactivePowerLimitMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                RampConfig = limitingRampRateConfig,
+                MaximumReactivePowerLimitVars = 2800000,
+                MinimumReactivePowerLimitVars = -2800000,
+            };
+            context.ReactivePowerLimitModeConfigs.Add(reactivePowerLimitModeConfig);
 
             await context.SaveChangesAsync();
         }

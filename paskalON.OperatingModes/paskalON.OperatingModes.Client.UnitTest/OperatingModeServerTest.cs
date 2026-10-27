@@ -84,7 +84,7 @@ namespace paskalON.OperatingModes.Client.UnitTest
             List<OperatingModeStackDto> dtos = new List<OperatingModeStackDto>
             {
                 new OperatingModeStackDto { OperatingModeName = "ActivePowerMode", Type = OperatingModeStackTypeDto.BaseActive, Priority = 1 },
-                new OperatingModeLimitingStackDto { OperatingModeName = "MaximumActivePowerLimitMode", Type = OperatingModeStackTypeDto.LimitingActive, Priority = 2, Limit = 6000000 }
+                new OperatingModeLimitingStackDto { OperatingModeName = "ActivePowerLimitMode", Type = OperatingModeStackTypeDto.LimitingActive, Priority = 2, MaximumLimit = 6000000 }
             };
             _handler.ResponseContent = JsonSerializer.Serialize(dtos);
 
@@ -97,7 +97,7 @@ namespace paskalON.OperatingModes.Client.UnitTest
             Assert.HasCount(2, result);
             Assert.AreEqual("ActivePowerMode", result[0].OperatingModeName);
             OperatingModeLimitingStackDto limitingDto = Assert.IsInstanceOfType<OperatingModeLimitingStackDto>(result[1]);
-            Assert.AreEqual(6000000, limitingDto.Limit);
+            Assert.AreEqual(6000000, limitingDto.MaximumLimit);
             Assert.AreEqual(2, limitingDto.Priority);
         }
 
@@ -170,6 +170,45 @@ namespace paskalON.OperatingModes.Client.UnitTest
             Assert.AreEqual(HttpMethod.Post, _handler.Request!.Method);
             Assert.AreEqual(expectedPath, _handler.Request!.RequestUri!.AbsolutePath);
             StringAssert.Contains(_handler.RequestContent, "\"operatingModeName\":\"ShutdownMode\"");
+        }
+
+
+        /// <summary>
+        /// Confirms the whole stack is posted as JSON with the operating mode names in priority order.
+        /// </summary>
+        [TestMethod]
+        public async Task OperatingModeServerSetOperatingModesPostsToEndpointTest()
+        {
+            SetOperatingModeStackRequest request = new SetOperatingModeStackRequest { OperatingModeNames = new List<string> { "ActivePowerMode", "FrequencyDroopMode" } };
+
+            await _server.SetOperatingModes(request);
+
+            using JsonDocument content = JsonDocument.Parse(_handler.RequestContent!);
+            Assert.AreEqual(HttpMethod.Post, _handler.Request!.Method);
+            Assert.AreEqual("/api/v1/stack/setoperatingmodes", _handler.Request!.RequestUri!.AbsolutePath);
+            CollectionAssert.AreEqual(new[] { "ActivePowerMode", "FrequencyDroopMode" },
+                content.RootElement.GetProperty("operatingModeNames").EnumerateArray().Select(name => name.GetString()).ToArray());
+        }
+
+
+        /// <summary>
+        /// Confirms a rejected stack throws with the status code and the reason of the problem details, or a generic message without them.
+        /// </summary>
+        /// <param name="responseContent">The content of the rejection.</param>
+        /// <param name="expectedMessage">The expected exception message.</param>
+        [TestMethod]
+        [DataRow("{\"title\":\"Invalid operating mode stack\",\"status\":400,\"detail\":\"Only one exclusive active mode is allowed.\"}", "Only one exclusive active mode is allowed.")]
+        [DataRow("", "The operating mode stack was rejected with status code 400.")]
+        public async Task OperatingModeServerSetOperatingModesRejectedThrowsWithReasonTest(string responseContent, string expectedMessage)
+        {
+            _handler.StatusCode = HttpStatusCode.BadRequest;
+            _handler.ResponseContent = responseContent;
+            SetOperatingModeStackRequest request = new SetOperatingModeStackRequest { OperatingModeNames = new List<string> { "ActivePowerFixedMode", "ChargeDischargeMode" } };
+
+            HttpRequestException exception = await Assert.ThrowsExactlyAsync<HttpRequestException>(() => _server.SetOperatingModes(request));
+
+            Assert.AreEqual(HttpStatusCode.BadRequest, exception.StatusCode);
+            Assert.AreEqual(expectedMessage, exception.Message);
         }
 
 

@@ -7,8 +7,10 @@ using Moq;
 using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain;
 using paskalON.OperatingModes.Domain.ClosedModes.FrequencyActives;
+using paskalON.OperatingModes.Domain.ClosedModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.ClosedModes.FrequencyActives;
+using paskalON.OperatingModes.Domain.Configs.ClosedModes.VoltageReactives;
 using paskalON.OperatingModes.Domain.Configs.OpenModes;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.EnergyResources;
 using paskalON.OperatingModes.Domain.Configs.OpenModes.FrequencyActives;
@@ -121,28 +123,56 @@ namespace paskalON.OperatingModes.Application.UnitTest
 
 
         /// <summary>
-        /// Creates a maximum active power limit mode limiting the active power to 6 MW.
+        /// Creates an active power limit mode limiting the active power between -4 MW and 6 MW.
         /// </summary>
-        /// <returns>The maximum active power limit mode.</returns>
-        public static MaximumActivePowerLimitMode CreateMaximumActivePowerLimitMode()
+        /// <returns>The active power limit mode.</returns>
+        public static ActivePowerLimitMode CreateActivePowerLimitMode()
         {
-            MaximumActivePowerLimitModeConfig config = new MaximumActivePowerLimitModeConfig
+            ActivePowerLimitModeConfig config = new ActivePowerLimitModeConfig
             {
                 ChangedBy = "Test",
-                Name = "MaximumActivePowerLimitMode",
+                Name = "ActivePowerLimitMode",
                 IsActive = true,
                 Type = PowerControlType.Bess,
-                MaximumActivePowerLimitWatts = 6000000,
+                MaximumActivePowerLimitWatt = 6000000,
+                MinimumActivePowerLimitWatt = -4000000,
                 RampConfig = CreateRampConfig()
             };
-            MaximumActivePowerLimitModeMap map = new MaximumActivePowerLimitModeMap
+            ActivePowerLimitModeMap map = new ActivePowerLimitModeMap
             {
                 AvailableActivePower = () => new ActivePower(8000000),
                 AvailableReactivePower = () => null,
                 ActivePowerAtPoi = () => null
             };
 
-            return new MaximumActivePowerLimitMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, CreateSystemConfig(), config, map, CreateRampController());
+            return new ActivePowerLimitMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, CreateSystemConfig(), config, map, CreateRampController());
+        }
+
+
+        /// <summary>
+        /// Creates a reactive power limit mode limiting the reactive power between -2 MVar and 3 MVar.
+        /// </summary>
+        /// <returns>The reactive power limit mode.</returns>
+        public static ReactivePowerLimitMode CreateReactivePowerLimitMode()
+        {
+            ReactivePowerLimitModeConfig config = new ReactivePowerLimitModeConfig
+            {
+                ChangedBy = "Test",
+                Name = "ReactivePowerLimitMode",
+                IsActive = true,
+                Type = PowerControlType.Bess,
+                MaximumReactivePowerLimitVars = 3000000,
+                MinimumReactivePowerLimitVars = -2000000,
+                RampConfig = CreateRampConfig()
+            };
+            ReactivePowerLimitModeMap map = new ReactivePowerLimitModeMap
+            {
+                AvailableActivePower = () => null,
+                AvailableReactivePower = () => new ReactivePower(4000000),
+                ReactivePowerAtPoi = () => null
+            };
+
+            return new ReactivePowerLimitMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, CreateSystemConfig(), config, map, CreateRampController());
         }
 
 

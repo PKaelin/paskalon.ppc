@@ -51,7 +51,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage.SampleD
         public ActivePowerModeConfig? ActivePowerModeConfig { get; set; }
         public FrequencyDroopModeConfig? FrequencyDroopModeConfig { get; set; }
         public FrequencyWattModeConfig? FrequencyWattModeConfig { get; set; }
-        public MaximumActivePowerLimitModeConfig? MaximumActivePowerLimitModeConfig { get; set; }
+        public ActivePowerLimitModeConfig? ActivePowerLimitModeConfig { get; set; }
         // Operating closed modes Voltage Actives
         public VoltageWattDroopModeConfig? VoltageWattDroopModeConfig { get; set; }
         // Operating closed modes Voltage Reactives
@@ -59,6 +59,7 @@ namespace paskalON.OperatingModes.Infrastructure.IntegrationTest.Storage.SampleD
         public ReactivePowerModeConfig? ReactivePowerModeConfig { get; set; }
         public VoltageModeConfig? VoltageModeConfig { get; set; }
         public VoltageVarDroopModeConfig? VoltageVarDroopModeConfig { get; set; }
+        public ReactivePowerLimitModeConfig? ReactivePowerLimitModeConfig { get; set; }
 
         // Operating open modes
         public MaintenanceModeConfig? MaintenanceModeConfig { get; set; }

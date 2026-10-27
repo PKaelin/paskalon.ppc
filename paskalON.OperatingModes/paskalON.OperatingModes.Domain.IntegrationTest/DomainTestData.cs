@@ -77,7 +77,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest
         }
 
 
-        public static MaximumActivePowerLimitMode CreateActivePowerLimitingMode(TimeProvider timeProvider, double limitMegaWatts, Func<ActivePower?> activePowerAtPoiProvider)
+        public static ActivePowerLimitMode CreateActivePowerLimitingMode(TimeProvider timeProvider, double limitMegaWatts, Func<ActivePower?> activePowerAtPoiProvider)
         {
             RampRateConfig limitingRamp = new RampRateConfig
             {
@@ -86,24 +86,24 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest
                 RampDownRatePerSecond = ActivePower.FromMega(1).Watts
             };
 
-            MaximumActivePowerLimitModeConfig limitConfig = new MaximumActivePowerLimitModeConfig
+            ActivePowerLimitModeConfig limitConfig = new ActivePowerLimitModeConfig
             {
                 ChangedBy = "Test",
-                Name = "MaximumActivePowerLimitMode",
+                Name = "ActivePowerLimitMode",
                 IsActive = true,
                 Type = PowerControlType.Bess,
-                MaximumActivePowerLimitWatts = ActivePower.FromMega(limitMegaWatts).Watts,
+                MaximumActivePowerLimitWatt = ActivePower.FromMega(limitMegaWatts).Watts,
                 RampConfig = limitingRamp
             };
 
-            MaximumActivePowerLimitModeMap limitingMap = new MaximumActivePowerLimitModeMap
+            ActivePowerLimitModeMap limitingMap = new ActivePowerLimitModeMap
             {
                 AvailableActivePower = () => ActivePower.FromMega(10),
                 AvailableReactivePower = () => null,
                 ActivePowerAtPoi = activePowerAtPoiProvider
             };
 
-            MaximumActivePowerLimitMode limitMode = new MaximumActivePowerLimitMode(
+            ActivePowerLimitMode limitMode = new ActivePowerLimitMode(
                 NullLogger.Instance,
                 timeProvider,
                 new Mock<IMetricsPublisher>().Object,
