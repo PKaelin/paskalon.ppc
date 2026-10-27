@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.OperatingModes.Dto.Overrides;
 using paskalON.OperatingModes.Dto.Stacks;
 using paskalON.OperatingModes.Service.Dto.V1.Requests;
 using System.Net.Http.Json;
@@ -53,6 +54,12 @@ namespace paskalON.OperatingModes.Client
         /// Relative path of the set system setpoint endpoint.
         /// </summary>
         private const string SetSystemSetpointPath = "system/setsetpoint";
+
+
+        /// <summary>
+        /// Relative path of the get active override operating modes endpoint.
+        /// </summary>
+        private const string GetActiveOverrideOperatingModesPath = "override/getactiveoperatingmodes";
 
 
         /// <summary>
@@ -132,6 +139,23 @@ namespace paskalON.OperatingModes.Client
         public async Task SetSystemSetpoint(SetSystemSetpointRequest request, CancellationToken cancellationToken = default)
         {
             await Post(SetSystemSetpointPath, request, cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
+        public async Task<IReadOnlyList<OperatingModeOverrideDto>> GetActiveOverrideOperatingModes(CancellationToken cancellationToken = default)
+        {
+            using HttpResponseMessage response = await _client.GetAsync(GetActiveOverrideOperatingModesPath, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            List<OperatingModeOverrideDto>? dtos = await response.Content.ReadFromJsonAsync<List<OperatingModeOverrideDto>>(cancellationToken);
+
+            if (dtos == null)
+            {
+                throw new InvalidOperationException("Operating mode server returned an empty list of operating mode override data transfer objects");
+            }
+
+            return dtos;
         }
 
 

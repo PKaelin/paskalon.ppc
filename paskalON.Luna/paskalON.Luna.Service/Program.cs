@@ -56,6 +56,11 @@ try
     Console.WriteLine("Building service.....");
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+    // Load system configuration
+    SystemConfig config = LoadSystemConfig("SystemConfig.xml");
+    string shutdownOperatingModeName = config.ShutdownOperatingModeName ?? string.Empty;
+    ArgumentException.ThrowIfNullOrWhiteSpace(shutdownOperatingModeName, "Cannot find the shutdown operating mode name. ShutdownOperatingModeName");
+
     // Add WebApi's
     builder.Services.AddControllers();
     builder.Services.AddOpenApi();
@@ -101,6 +106,12 @@ try
     builder.Services.AddSingleton<IPowerSetpointSubscriber, PowerSetpointSubscriber>();
     builder.Services.AddHostedService<PowerSetpointSubscriberService>();
 
+    builder.Services.AddSingleton<ILunaSystemManager>(sp => new LunaSystemManager(
+        sp.GetRequiredService<ILogger<LunaSystemManager>>(),
+        sp.GetRequiredService<IOperatingModeServer>(),
+        sp.GetRequiredService<IDeviceServer>(),
+        shutdownOperatingModeName));
+
     // Build application
     Console.WriteLine("Building application.....");
     app = builder.Build();
@@ -110,8 +121,7 @@ try
     lifetime.ApplicationStopped.Register(() => { app.Logger.LogInformation("Microservice Luna has stopping....."); });
     app.Logger.LogInformation("Application starts initializing services.....");
 
-    // Load system configuration
-    SystemConfig config = LoadSystemConfig("SystemConfig.xml");
+    // Initialize the device client with the subscriber topics of the system configuration
     SubscriberTopic topics = GetSubscriberTopic(config);
     IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
     await deviceClient.Initialize(topics);

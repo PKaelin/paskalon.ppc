@@ -19,4 +19,6 @@
     <SubscriberTopicSystemPowerMeterDetail>ppc:device:pm:system:detail</SubscriberTopicSystemPowerMeterDetail>
     <SubscriberTopicCircuitPowerMeterCore>ppc:device:pm:circuit:core</SubscriberTopicCircuitPowerMeterCore>
     <SubscriberTopicCircuitPowerMeterDetail>ppc:device:pm:circuit:detail</SubscriberTopicCircuitPowerMeterDetail>
+    <!-- Name of the shutdown override operating mode configured in the operating mode service -->
+    <ShutdownOperatingModeName>ShutdownMode</ShutdownOperatingModeName>
 </SystemConfig>

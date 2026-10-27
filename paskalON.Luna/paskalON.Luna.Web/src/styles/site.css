@@ -69,6 +69,36 @@ body {
     letter-spacing: .02em;
 }
 
+.system-command-toggle {
+    font-size: 1.25rem;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.system-command-toggle:hover,
+.system-command-toggle:focus-visible {
+    color: #fff !important;
+}
+
+/* ==========================================================================
+   NOTIFICATIONS - top right, below the header, above the content
+   ========================================================================== */
+
+.app-notices {
+    position: fixed;
+    top: 4.5rem;
+    right: 1rem;
+    z-index: 1080;
+    width: min(26rem, calc(100vw - 2rem));
+    font-size: .875rem;
+}
+
+.spinner-inline {
+    width: 1rem;
+    height: 1rem;
+    border-width: .15em;
+}
+
 /* ==========================================================================
    SIDE TABS
    ========================================================================== */

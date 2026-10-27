@@ -6,6 +6,9 @@ import './styles/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './styles/site.css';
 
+// Bootstrap JavaScript is only needed for the dropdown of the system command menu.
+import 'bootstrap/js/dist/dropdown';
+
 import App from './App.vue';
 import { loadConfig } from './api/config';
 

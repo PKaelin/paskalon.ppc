@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import SystemCommandMenu from './SystemCommandMenu.vue';
+
 /** Name of the application shown right after the logo. */
 const appTitle = 'Luna';
 </script>
@@ -11,6 +13,8 @@ const appTitle = 'Luna';
                     <img src="/images/paskalOn-logo.svg" alt="paskalON logo" />
                     <span class="app-title">{{ appTitle }}</span>
                 </a>
+
+                <SystemCommandMenu />
             </div>
         </nav>
     </header>

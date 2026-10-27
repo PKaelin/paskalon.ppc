@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.AspNetCore.Mvc;
 using paskalON.OperatingModes.Application;
+using paskalON.OperatingModes.Dto.Overrides;
 using paskalON.OperatingModes.Service.Dto.V1.Requests;
 using paskalON.PhysicalUnits.Electricals.Powers;
 
@@ -40,6 +41,21 @@ namespace paskalON.OperatingModes.Service.Controllers.V1
 
             _logger = logger;
             _manager = manager;
+        }
+
+
+        /// <summary>
+        /// Gets the active override modes.
+        /// </summary>
+        /// <returns>The DTOs of the active override modes.</returns>
+        [HttpGet]
+        public ActionResult<IReadOnlyList<OperatingModeOverrideDto>> GetActiveOperatingModes()
+        {
+            IReadOnlyList<OperatingModeOverrideDto> dtos = _manager.OverrideManager.ActiveOperatingModes
+                .Select(operatingMode => new OperatingModeOverrideDto { OperatingModeName = operatingMode.Name, TargetDerUnit = operatingMode.TargetDerUnit })
+                .ToArray();
+
+            return Ok(dtos);
         }
 
 

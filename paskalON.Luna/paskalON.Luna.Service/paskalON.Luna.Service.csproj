@@ -25,6 +25,7 @@
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Client\paskalON.Devices.Client.csproj" />
     <ProjectReference Include="..\paskalON.Luna.Application\paskalON.Luna.Application.csproj" />
     <ProjectReference Include="..\paskalON.Luna.Domain.Configs\paskalON.Luna.Domain.Configs.csproj" />
+    <ProjectReference Include="..\paskalON.Luna.Dto\paskalON.Luna.Dto.csproj" />
   </ItemGroup>
 
   <ItemGroup>

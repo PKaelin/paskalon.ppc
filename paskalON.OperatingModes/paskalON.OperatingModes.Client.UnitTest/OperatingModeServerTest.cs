@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.OperatingModes.Dto.Overrides;
 using paskalON.OperatingModes.Dto.Stacks;
 using paskalON.OperatingModes.Service.Dto.V1.Requests;
 using System.Net;
@@ -125,6 +126,27 @@ namespace paskalON.OperatingModes.Client.UnitTest
             Assert.AreEqual(HttpMethod.Post, _handler.Request!.Method);
             Assert.AreEqual(expectedPath, _handler.Request!.RequestUri!.AbsolutePath);
             StringAssert.Contains(_handler.RequestContent, "\"operatingModeName\":\"ActivePowerMode\"");
+        }
+
+
+        /// <summary>
+        /// Confirms the active override DTOs are requested from the override endpoint and deserialized.
+        /// </summary>
+        [TestMethod]
+        public async Task OperatingModeServerGetActiveOverrideOperatingModesDeserializesDtosTest()
+        {
+            List<OperatingModeOverrideDto> dtos = new List<OperatingModeOverrideDto>
+            {
+                new OperatingModeOverrideDto { OperatingModeName = "ShutdownMode", TargetDerUnit = null },
+                new OperatingModeOverrideDto { OperatingModeName = "MaintenanceModeUnit1", TargetDerUnit = "Unit1" }
+            };
+            _handler.ResponseContent = JsonSerializer.Serialize(dtos);
+
+            IReadOnlyList<OperatingModeOverrideDto> result = await _server.GetActiveOverrideOperatingModes();
+
+            Assert.AreEqual(HttpMethod.Get, _handler.Request!.Method);
+            Assert.AreEqual("/api/v1/override/getactiveoperatingmodes", _handler.Request!.RequestUri!.AbsolutePath);
+            CollectionAssert.AreEqual(dtos, result.ToList());
         }
 
 

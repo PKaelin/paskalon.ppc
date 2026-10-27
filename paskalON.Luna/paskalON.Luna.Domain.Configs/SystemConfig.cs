@@ -109,5 +109,11 @@ namespace paskalON.Luna.Domain.Configs
         /// Subscriber topic for system power meter detail used for the message subscriber.
         /// </summary>
         public string? SubscriberTopicSystemPowerMeterDetail { get; set; }
+
+
+        /// <summary>
+        /// Name of the shutdown override operating mode configured in the operating mode service.
+        /// </summary>
+        public string? ShutdownOperatingModeName { get; set; }
     }
 }

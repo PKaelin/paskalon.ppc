@@ -9,6 +9,9 @@ import SystemView from './views/SystemView.vue';
 import AlarmsView from './views/AlarmsView.vue';
 import SettingsView from './views/SettingsView.vue';
 import type { TabDefinition } from './types/tabs';
+import { createNotifications } from './composables/useNotifications';
+
+const { notices, dismiss } = createNotifications();
 
 /** The tabs of the side navigation. The first one is active at start up. */
 const tabs: TabDefinition[] = [
@@ -36,4 +39,16 @@ const activeTab = computed(() => tabs.find((tab) => tab.id === activeTabId.value
     </div>
 
     <AppFooter />
+
+    <!-- Notifications, e.g. the outcome of the system commands -->
+    <div class="app-notices" aria-live="polite">
+        <div v-for="notice in notices"
+             :key="notice.id"
+             class="alert alert-dismissible py-2 mb-2"
+             :class="`alert-${notice.kind}`"
+             role="status">
+            {{ notice.message }}
+            <button type="button" class="btn-close" aria-label="Close" @click="dismiss(notice.id)"></button>
+        </div>
+    </div>
 </template>
