@@ -2,11 +2,19 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
+using paskalON.Dataface;
+using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
+using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
+using paskalON.Devices.Domain.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.Ders;
+using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.Meters.PowerMeters.Concretes;
+using paskalON.Telemetry;
 
 namespace paskalON.Devices.Application.UnitTest
 {
@@ -151,6 +159,44 @@ namespace paskalON.Devices.Application.UnitTest
 
 
         [TestMethod]
+        public void DeviceMapperMapBatteryBankCoreStateOfChargeTest()
+        {
+            DerConfig derConfig = new DerConfig { ChangedBy = "Test", Name = "DER" };
+            Der der = new Der(NullLogger.Instance, derConfig);
+            DerGroupConfig groupConfig = new DerGroupConfig { ChangedBy = "Test", Name = "Group", DerConfig = derConfig };
+            DerGroup group = new DerGroup(NullLogger.Instance, groupConfig, der);
+            DerCircuitConfig circuitConfig = new DerCircuitConfig { ChangedBy = "Test", Name = "Circuit", DerGroupConfig = groupConfig };
+            DerCircuit circuit = new DerCircuit(NullLogger.Instance, circuitConfig, group);
+            Mock<DerBatteryStorageUnitConfig> unitConfig = new Mock<DerBatteryStorageUnitConfig>();
+            unitConfig.SetupGet(x => x.Name).Returns("BatteryUnit");
+            Mock<DerBatteryStorageUnit> unit = new Mock<DerBatteryStorageUnit>(NullLogger.Instance, unitConfig.Object, circuit);
+            BatteryBankConfig config = new BatteryBankConfig
+            {
+                ChangedBy = "Test",
+                IsActive = true,
+                DeviceId = 102,
+                Name = "BB-1",
+                BatteryBankDeviceConfig = new Mock<BatteryBankDeviceConfig>().Object,
+                ModbusConfig = new Mock<ModbusConfig>().Object,
+                DerUnitConfig = unitConfig.Object
+            };
+            BatteryBankTest batteryBank = new BatteryBankTest(NullLogger.Instance, config, unit.Object, new Mock<IMetricsPublisher>().Object, new Mock<IDataface>().Object)
+            {
+                StateOfCharge = 50.0,
+                UsableStateOfCharge = 62.5,
+                AbsoluteStateOfCharge = 55.0
+            };
+
+            BbCoreDto result = _mapper.MapBatteryBankCore(batteryBank);
+
+            Assert.AreEqual(config.DeviceId, result.DeviceId);
+            Assert.AreEqual(50.0, result.StateOfCharge);
+            Assert.AreEqual(62.5, result.UsableStateOfCharge);
+            Assert.AreEqual(55.0, result.AbsoluteStateOfCharge);
+        }
+
+
+        [TestMethod]
         public void DeviceMapperMapBatteryBankCoreNullTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() => _mapper.MapBatteryBankCore(null!));
@@ -238,6 +284,27 @@ namespace paskalON.Devices.Application.UnitTest
         public void DeviceMapperMapPowerMeterDetailNullTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() => _mapper.MapPowerMeterDetail<PmSystemDetailDto>(null!));
+        }
+
+
+        private class BatteryBankTest : BatteryBankBase
+        {
+            public BatteryBankTest(ILogger logger, BatteryBankConfig config, DerBatteryStorageUnit unit, IMetricsPublisher publisher, IDataface dataface)
+                : base(logger, config, unit, publisher, dataface)
+            {
+            }
+
+
+            protected override void RegisterDataface()
+            {
+            }
+
+
+            public override Task HeartbeatAsync(CancellationToken cancellationToken)
+            {
+                // Not required for unit tests.
+                return Task.CompletedTask;
+            }
         }
     }
 }

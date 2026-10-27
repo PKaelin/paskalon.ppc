@@ -35,16 +35,23 @@ namespace paskalON.Devices.Dto.EnergyStorages.Batteries
         /// </summary>
         public BatteryBankFlowDirection? BatteryBankFlowDirection { get; init; }
 
+
         /// <summary>
-        /// Usable state of charge as a percentage of the battery's capacity.        
+        /// Preferred state of charge as a percentage of the battery's capacity.
         /// </summary>
         public double? StateOfCharge { get; init; }
 
 
         /// <summary>
-        /// Actual state of charge as a percentage of the battery's actual capacity rather than its usable capacity.
+        /// Usable state of charge as a percentage of the battery's usable capacity.
         /// </summary>
-        public double? ActualStateOfCharge { get; init; }
+        public double? UsableStateOfCharge { get; init; }
+
+
+        /// <summary>
+        /// Absolute state of charge as a percentage of the battery's absolute capacity rather than its usable capacity.
+        /// </summary>
+        public double? AbsoluteStateOfCharge { get; init; }
 
 
         /// <summary>
