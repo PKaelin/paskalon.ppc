@@ -120,6 +120,9 @@ namespace paskalON.Luna.Service.Publishers
                     case DeviceSubscriptionType.PowerConversionSystem:
                         await client.PcsUpdated(subscription.DeviceId, _deviceManager.GetPcs(subscription.DeviceId));
                         break;
+                    case DeviceSubscriptionType.BatteryBank:
+                        await client.BatteryBankUpdated(subscription.DeviceId, _deviceManager.GetBatteryBank(subscription.DeviceId));
+                        break;
                     default:
                         _logger.LogWarning("Device subscription type {Type} is not supported.", subscription.Type);
                         break;

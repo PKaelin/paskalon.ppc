@@ -99,6 +99,18 @@ namespace paskalON.Luna.Service.WebApi.Hubs
 
 
         /// <summary>
+        /// Subscribes the caller to a battery bank, replacing its previous subscription.
+        /// </summary>
+        /// <param name="deviceId">Device ID of the battery bank.</param>
+        /// <returns>Task</returns>
+        public async Task SubscribeBatteryBank(int deviceId)
+        {
+            _subscriptions.Subscribe(Context.ConnectionId, new DeviceSubscription(DeviceSubscriptionType.BatteryBank, deviceId));
+            await Clients.Caller.BatteryBankUpdated(deviceId, _deviceManager.GetBatteryBank(deviceId));
+        }
+
+
+        /// <summary>
         /// Removes the subscription of the caller.
         /// </summary>
         public void Unsubscribe()

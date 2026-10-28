@@ -111,12 +111,60 @@ export interface PcsDto extends DeviceDto {
     detail: PcsDetailDto | null;
 }
 
+/** BatteryBankState (paskalON.Devices.Domain), by its numeric value. */
+export const BatteryBankStateNames: Record<number, string> = {
+    0: 'Unknown',
+    1: 'Disconnected',
+    2: 'Connecting',
+    3: 'Initializing',
+    4: 'Connected',
+    5: 'Standby',
+    6: 'Disconnecting',
+    7: 'SocProtection',
+    99: 'Fault'
+};
+
+/** BatteryBankFlowDirection (paskalON.Devices.Domain), by its numeric value. */
+export const BatteryBankFlowDirectionNames: Record<number, string> = {
+    0: 'Idle',
+    1: 'Charging',
+    2: 'Discharging'
+};
+
+/** BbCoreDto, the frequently updated values of a battery bank. State of charge in %, voltage in V, current in A. */
+export interface BbCoreDto {
+    /** BatteryBankState - a number, or the name if the service serializes enums as strings. */
+    state: number | string;
+    communicationError: boolean;
+    /** BatteryBankFlowDirection - a number, or the name if the service serializes enums as strings. */
+    batteryBankFlowDirection: number | string | null;
+    stateOfCharge: number | null;
+    totalDCVoltage: number | null;
+    totalDCCurrent: number | null;
+}
+
+/** BbDetailDto, the less frequently updated values of a battery bank. State of health in %, cell voltages in V, temperatures in °C. */
+export interface BbDetailDto {
+    isInMaintenanceMode: boolean;
+    stateOfHealth: number | null;
+    minimumCellVoltage: number | null;
+    maximumCellVoltage: number | null;
+    minimumRackTemperature: number | null;
+    maximumRackTemperature: number | null;
+}
+
+/** BbDto, a battery bank. Core and detail are null until the device service delivered them. */
+export interface BbDto extends DeviceDto {
+    core: BbCoreDto | null;
+    detail: BbDetailDto | null;
+}
+
 /** DerBatteryStorageUnitDto, unit type discriminator "battery". */
 export interface DerBatteryStorageUnitDto {
     unitType: 'battery';
     name: string;
     powerConversionSystem: PcsDto;
-    batteryBanks: DeviceDto[];
+    batteryBanks: BbDto[];
 }
 
 /** DerSolarUnitDto, unit type discriminator "solar". */

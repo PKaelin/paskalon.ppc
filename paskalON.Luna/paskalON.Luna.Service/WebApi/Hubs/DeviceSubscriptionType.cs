@@ -30,6 +30,12 @@ namespace paskalON.Luna.Service.WebApi.Hubs
         /// <summary>
         /// A power conversion system (PcsDto).
         /// </summary>
-        PowerConversionSystem
+        PowerConversionSystem,
+
+
+        /// <summary>
+        /// A battery bank (BbDto).
+        /// </summary>
+        BatteryBank
     }
 }

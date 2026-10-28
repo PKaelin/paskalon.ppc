@@ -114,6 +114,18 @@ namespace paskalON.Luna.Application
         }
 
 
+        /// <inheritdoc/>
+        public BbDto? GetBatteryBank(int deviceId)
+        {
+            return _deviceClient.Der.DerGroups
+                .SelectMany(group => group.DerCircuits)
+                .SelectMany(circuit => circuit.DerUnits)
+                .OfType<DerBatteryStorageUnitDto>()
+                .SelectMany(unit => unit.BatteryBanks)
+                .FirstOrDefault(batteryBank => batteryBank.DeviceId == deviceId);
+        }
+
+
         /// <summary>
         /// Gets the PCS of a DER unit.
         /// </summary>

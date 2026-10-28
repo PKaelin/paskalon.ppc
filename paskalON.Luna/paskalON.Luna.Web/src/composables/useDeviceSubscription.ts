@@ -5,7 +5,7 @@ import type { HubStatus } from './useSystemMeterSummary';
 import type { PowerMeterType } from '../types/der';
 
 /** The device DTO types the device hub publishes. */
-export type SubscribableDeviceType = PowerMeterType | 'PcsDto';
+export type SubscribableDeviceType = PowerMeterType | 'PcsDto' | 'BbDto';
 
 export interface DeviceSubscription<T> {
     status: Ref<HubStatus>;
@@ -20,14 +20,15 @@ const hubMethods: Record<SubscribableDeviceType, { subscribe: string; updated: s
     PmSystemDto: { subscribe: 'SubscribeSystemPowerMeter', updated: 'SystemPowerMeterUpdated' },
     PmAuxiliaryDto: { subscribe: 'SubscribeAuxiliaryPowerMeter', updated: 'AuxiliaryPowerMeterUpdated' },
     PmExternalDto: { subscribe: 'SubscribeExternalPowerMeter', updated: 'ExternalPowerMeterUpdated' },
-    PcsDto: { subscribe: 'SubscribePcs', updated: 'PcsUpdated' }
+    PcsDto: { subscribe: 'SubscribePcs', updated: 'PcsUpdated' },
+    BbDto: { subscribe: 'SubscribeBatteryBank', updated: 'BatteryBankUpdated' }
 };
 
 /**
  * Receives the values of one device from the device hub (Hub<IDeviceHubClient> on the server):
  *
- *   Subscribe{SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs}(deviceId)   <- on connect and when the device changes
- *   {SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs}Updated(deviceId, dto) -> on subscribe, then every 2 seconds
+ *   Subscribe{SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs|BatteryBank}(deviceId)   <- on connect and when the device changes
+ *   {SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs|BatteryBank}Updated(deviceId, dto) -> on subscribe, then every 2 seconds
  *
  * The hub is connected while the calling component is mounted, so the web service only publishes
  * the device while it is shown.

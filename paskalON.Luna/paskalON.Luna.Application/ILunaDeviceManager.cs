@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Dto.Ders;
+using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.Meters.PowerMeters;
 using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.Luna.Dto.Devices;
@@ -61,5 +62,13 @@ namespace paskalON.Luna.Application
         /// <param name="deviceId">The device ID of the PCS.</param>
         /// <returns>The PCS, or null if no DER unit of the DER configuration has a PCS with the device ID.</returns>
         PcsDto? GetPcs(int deviceId);
+
+
+        /// <summary>
+        /// Gets a battery bank of a battery storage unit of the DER configuration.
+        /// </summary>
+        /// <param name="deviceId">The device ID of the battery bank.</param>
+        /// <returns>The battery bank, or null if no battery storage unit of the DER configuration has a battery bank with the device ID.</returns>
+        BbDto? GetBatteryBank(int deviceId);
     }
 }

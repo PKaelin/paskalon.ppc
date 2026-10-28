@@ -291,6 +291,31 @@ namespace paskalON.Luna.Application.UnitTest
 
 
         /// <summary>
+        /// Confirms the battery bank of a battery storage unit with the device ID is returned, or null for an unknown device ID.
+        /// </summary>
+        /// <param name="deviceId">The device ID of the requested battery bank.</param>
+        /// <param name="isFound">True if the DER has a battery bank with the device ID.</param>
+        [TestMethod]
+        [DataRow(41, true)]
+        [DataRow(42, true)]
+        [DataRow(5, false)]
+        public void GetBatteryBankReturnsBatteryBankWithDeviceIdTest(int deviceId, bool isFound)
+        {
+            List<BbDto> batteryBanks = new List<BbDto>
+            {
+                CreateBatteryBank(41, false, 80),
+                CreateBatteryBank(42, true, null)
+            };
+            _deviceClient.Setup(client => client.Der).Returns(CreateDer(new List<PmSystemDto>(), batteryBanks));
+
+            BbDto? batteryBank = _manager.GetBatteryBank(deviceId);
+
+            Assert.AreEqual(isFound, batteryBank is not null);
+            Assert.AreSame(batteryBanks.FirstOrDefault(expected => expected.DeviceId == deviceId), batteryBank);
+        }
+
+
+        /// <summary>
         /// Creates a DER with the system power meters and one battery storage unit with the battery banks.
         /// </summary>
         /// <param name="systemMeters">The system power meters.</param>
