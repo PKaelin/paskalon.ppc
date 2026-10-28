@@ -9,6 +9,7 @@ using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.Meters.PowerMeters;
 using paskalON.Devices.Dto.Meters.PowerMeters.Concretes;
+using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.Luna.Dto.Devices;
 using paskalON.PhysicalUnits.Electricals.Powers;
 
@@ -98,6 +99,34 @@ namespace paskalON.Luna.Application
         public PmExternalDto? GetExternalPowerMeter(int deviceId)
         {
             return _deviceClient.Der.ExternalPowerMeters.FirstOrDefault(meter => meter.DeviceId == deviceId);
+        }
+
+
+        /// <inheritdoc/>
+        public PcsDto? GetPcs(int deviceId)
+        {
+            return _deviceClient.Der.DerGroups
+                .SelectMany(group => group.DerCircuits)
+                .SelectMany(circuit => circuit.DerUnits)
+                .Select(GetPowerConversionSystem)
+                .OfType<PcsDto>()
+                .FirstOrDefault(pcs => pcs.DeviceId == deviceId);
+        }
+
+
+        /// <summary>
+        /// Gets the PCS of a DER unit.
+        /// </summary>
+        /// <param name="unit">The DER unit.</param>
+        /// <returns>The PCS of a battery storage or solar unit, or null for any other DER unit.</returns>
+        private PcsDto? GetPowerConversionSystem(DerUnitDto unit)
+        {
+            return unit switch
+            {
+                DerBatteryStorageUnitDto batteryStorageUnit => batteryStorageUnit.PowerConversionSystem,
+                DerSolarUnitDto solarUnit => solarUnit.PowerConversionSystem,
+                _ => null
+            };
         }
 
 

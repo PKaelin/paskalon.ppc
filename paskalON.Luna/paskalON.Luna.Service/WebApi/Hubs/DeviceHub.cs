@@ -87,6 +87,18 @@ namespace paskalON.Luna.Service.WebApi.Hubs
 
 
         /// <summary>
+        /// Subscribes the caller to a power conversion system (PCS), replacing its previous subscription.
+        /// </summary>
+        /// <param name="deviceId">Device ID of the PCS.</param>
+        /// <returns>Task</returns>
+        public async Task SubscribePcs(int deviceId)
+        {
+            _subscriptions.Subscribe(Context.ConnectionId, new DeviceSubscription(DeviceSubscriptionType.PowerConversionSystem, deviceId));
+            await Clients.Caller.PcsUpdated(deviceId, _deviceManager.GetPcs(deviceId));
+        }
+
+
+        /// <summary>
         /// Removes the subscription of the caller.
         /// </summary>
         public void Unsubscribe()

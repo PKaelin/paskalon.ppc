@@ -3,11 +3,12 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Dto.Meters.PowerMeters;
+using paskalON.Devices.Dto.PowerConversionSystems;
 
 namespace paskalON.Luna.Service.WebApi.Hubs
 {
     /// <summary>
-    /// Messages the device hub sends to its clients (see usePowerMeter.ts of paskalON.Luna.Web).
+    /// Messages the device hub sends to its clients (see useDeviceSubscription.ts of paskalON.Luna.Web).
     /// </summary>
     public interface IDeviceHubClient
     {
@@ -36,5 +37,14 @@ namespace paskalON.Luna.Service.WebApi.Hubs
         /// <param name="powerMeter">The external power meter, or null if the DER configuration has no external power meter with the device ID.</param>
         /// <returns>Task</returns>
         Task ExternalPowerMeterUpdated(int deviceId, PmExternalDto? powerMeter);
+
+
+        /// <summary>
+        /// Current values of the subscribed power conversion system (PCS).
+        /// </summary>
+        /// <param name="deviceId">Device ID of the subscribed PCS.</param>
+        /// <param name="pcs">The PCS, or null if no DER unit of the DER configuration has a PCS with the device ID.</param>
+        /// <returns>Task</returns>
+        Task PcsUpdated(int deviceId, PcsDto? pcs);
     }
 }

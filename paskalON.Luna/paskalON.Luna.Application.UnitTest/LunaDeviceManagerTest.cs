@@ -266,6 +266,31 @@ namespace paskalON.Luna.Application.UnitTest
 
 
         /// <summary>
+        /// Confirms the PCS of a battery storage or solar unit with the device ID is returned, or null for an unknown device ID.
+        /// </summary>
+        /// <param name="deviceId">The device ID of the requested PCS.</param>
+        /// <param name="expectedName">The name of the expected PCS, null if no PCS has the device ID.</param>
+        [TestMethod]
+        [DataRow(31, "BatteryPcs31")]
+        [DataRow(32, "SolarPcs32")]
+        [DataRow(5, null)]
+        public void GetPcsReturnsPcsOfDerUnitWithDeviceIdTest(int deviceId, string? expectedName)
+        {
+            PcsDto batteryPcs = new PcsDto(new PcsDefinitionDto { DeviceId = 31, Name = "BatteryPcs31", TargetAddress = "localhost", TargetPort = 502 });
+            PcsDto solarPcs = new PcsDto(new PcsDefinitionDto { DeviceId = 32, Name = "SolarPcs32", TargetAddress = "localhost", TargetPort = 502 });
+            DerBatteryStorageUnitDto batteryUnit = new DerBatteryStorageUnitDto { Name = "BatteryUnit1", PowerConversionSystem = batteryPcs };
+            DerSolarUnitDto solarUnit = new DerSolarUnitDto { Name = "SolarUnit1", PowerConversionSystem = solarPcs };
+            DerCircuitDto circuit = new DerCircuitDto { Name = "Circuit1", DerUnits = new List<DerUnitDto> { batteryUnit, solarUnit } };
+            DerGroupDto group = new DerGroupDto { Name = "Group1", DerCircuits = new List<DerCircuitDto> { circuit } };
+            _deviceClient.Setup(client => client.Der).Returns(new DerDto { Name = "Der", DerGroups = new List<DerGroupDto> { group } });
+
+            PcsDto? pcs = _manager.GetPcs(deviceId);
+
+            Assert.AreEqual(expectedName, pcs?.Name);
+        }
+
+
+        /// <summary>
         /// Creates a DER with the system power meters and one battery storage unit with the battery banks.
         /// </summary>
         /// <param name="systemMeters">The system power meters.</param>

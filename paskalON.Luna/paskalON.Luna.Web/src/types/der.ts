@@ -65,11 +65,57 @@ export interface PowerMeterDto extends DeviceDto {
     detail: PmDetailDto | null;
 }
 
+/** PcsState (paskalON.Devices.Domain), by its numeric value. */
+export const PcsStateNames: Record<number, string> = {
+    0: 'Unknown',
+    1: 'Stopped',
+    2: 'Starting',
+    3: 'Started',
+    4: 'Stopping',
+    5: 'Sleeping',
+    6: 'EnteringStandby',
+    7: 'Standby',
+    8: 'ExitingStandby',
+    9: 'NightMode',
+    99: 'Fault'
+};
+
+/** PcsCoreDto, the frequently updated values of a power conversion system. Currents in A, voltages in V. */
+export interface PcsCoreDto {
+    /** PcsState - a number, or the name if the service serializes enums as strings. */
+    state: number | string;
+    communicationError: boolean;
+    activePower: ActivePowerDto | null;
+    activeAvailablePower: ActivePowerDto | null;
+    reactivePower: ReactivePowerDto | null;
+    reactiveAvailablePower: ReactivePowerDto | null;
+    dcCurrent: number | null;
+    dcVoltage: number | null;
+    acCurrent: number | null;
+    acVoltage: number | null;
+}
+
+/** PcsDetailDto, the less frequently updated values of a power conversion system. */
+export interface PcsDetailDto {
+    isInMaintenanceMode: boolean;
+    activePowerTarget: ActivePowerDto | null;
+    reactivePowerTarget: ReactivePowerDto | null;
+    isACBreakerClosed: boolean | null;
+    /** Closed state of each DC contactor, null if the PCS does not report it. */
+    isDcContactorClosed: boolean[] | null;
+}
+
+/** PcsDto, a power conversion system. Core and detail are null until the device service delivered them. */
+export interface PcsDto extends DeviceDto {
+    core: PcsCoreDto | null;
+    detail: PcsDetailDto | null;
+}
+
 /** DerBatteryStorageUnitDto, unit type discriminator "battery". */
 export interface DerBatteryStorageUnitDto {
     unitType: 'battery';
     name: string;
-    powerConversionSystem: DeviceDto;
+    powerConversionSystem: PcsDto;
     batteryBanks: DeviceDto[];
 }
 
@@ -77,7 +123,7 @@ export interface DerBatteryStorageUnitDto {
 export interface DerSolarUnitDto {
     unitType: 'solar';
     name: string;
-    powerConversionSystem: DeviceDto;
+    powerConversionSystem: PcsDto;
     solarPanels: DeviceDto[];
 }
 
