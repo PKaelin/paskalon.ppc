@@ -494,3 +494,161 @@ body {
     margin-left: -.5px;
     background-color: rgba(235, 235, 235, .6);
 }
+
+
+/* ==========================================================================
+   SYSTEM - object tree of the DER on the left, content of the selected object on the right
+   ========================================================================== */
+
+/* The tree width is set with the splitter (--sys-tree-width). It shrinks with the window so the
+   content area keeps at least 16rem, but never below 12rem. */
+.sys-layout {
+    display: grid;
+    grid-template-columns: minmax(12rem, min(var(--sys-tree-width, 20rem), calc(100% - 17rem))) 1rem minmax(0, 1fr);
+    height: 100%;
+    min-height: 0;
+}
+
+.sys-splitter {
+    position: relative;
+    cursor: col-resize;
+    touch-action: none;
+}
+
+/* The visible line in the middle of the grab area. */
+.sys-splitter::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(50% - 1px);
+    width: 2px;
+    border-radius: 1px;
+    background-color: rgba(255, 255, 255, .15);
+}
+
+.sys-splitter:hover::before,
+.sys-splitter:active::before {
+    background-color: #6496be;
+}
+
+.sys-splitter:focus-visible {
+    outline: none;
+}
+
+.sys-splitter:focus-visible::before {
+    left: calc(50% - 2px);
+    width: 4px;
+    background-color: #6496be;
+}
+
+@media (max-width: 767.98px) {
+
+    .sys-layout {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(12rem, 45%) auto;
+        gap: 1rem;
+    }
+
+    .sys-splitter {
+        display: none;
+    }
+}
+
+.sys-content {
+    min-width: 0;
+    overflow: auto;
+    padding: .75rem 1rem;
+    border-radius: .375rem;
+    background-color: rgba(var(--bs-primary-rgb, 78, 93, 108), .45);
+}
+
+.der-tree-panel {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    min-width: 0;
+    min-height: 0;
+}
+
+.der-tree-filter {
+    flex-shrink: 0;
+}
+
+.der-tree-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Only the tree scrolls, the filter stays visible. */
+.der-tree-root {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.der-tree-row {
+    --der-tree-level: 0;
+    display: flex;
+    align-items: center;
+    padding-left: calc(var(--der-tree-level) * 1rem);
+    border-radius: .25rem;
+}
+
+.der-tree-row:hover {
+    background-color: rgba(255, 255, 255, .08);
+}
+
+.der-tree-row.active {
+    background-color: var(--bs-primary, #4e5d6c);
+}
+
+.der-tree-toggle {
+    flex: 0 0 1.25rem;
+    width: 1.25rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: .75rem;
+    line-height: 1;
+}
+
+button.der-tree-toggle:disabled {
+    opacity: .5;
+}
+
+.der-tree-label {
+    display: flex;
+    align-items: center;
+    gap: .375rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: .25rem .375rem .25rem 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: .875rem;
+    text-align: left;
+}
+
+.der-tree-toggle:focus-visible,
+.der-tree-label:focus-visible {
+    outline: 2px solid #6496be;
+    outline-offset: -2px;
+    border-radius: .25rem;
+}
+
+.der-tree-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.der-tree-name mark {
+    padding: 0;
+    border-radius: .125rem;
+    background-color: #6496be;
+    color: inherit;
+}
