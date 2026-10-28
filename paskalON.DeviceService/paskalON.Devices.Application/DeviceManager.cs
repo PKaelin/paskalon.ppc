@@ -425,6 +425,37 @@ namespace paskalON.Devices.Application
 
 
         /// <inheritdoc/>
+        public async Task ConnectAllMetersAsync(CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Connect all Power Meters that are not connected");
+            cancellationToken.ThrowIfCancellationRequested();
+
+            IEnumerable<PowerMeterBase> meters = SystemPowerMeters.Cast<PowerMeterBase>()
+                .Concat(ExternalPowerMeters)
+                .Concat(AuxiliaryPowerMeters)
+                .Concat(CircuitPowerMeters)
+                .Where(m => m.State != PowerMeterState.Connected)
+                .ToList();
+            Task connectTask = Task.WhenAll(meters.Select(m => m.ConnectAsync()));
+
+            try
+            {
+                await connectTask;
+            }
+            catch (Exception) when (connectTask.Exception is not null)
+            {
+                // Handle exceptions thrown by one or more parallel tasks
+                foreach (Exception innerEx in connectTask.Exception.Flatten().InnerExceptions)
+                {
+                    _logger.LogError("Power meter failed to connect {Error}: ", innerEx.Message);
+                }
+
+                throw;
+            }
+        }
+
+
+        /// <inheritdoc/>
         public async Task ConnectBatteryBankAsync(int deviceId)
         {
             _logger.LogInformation("Connect Battery Bank with {DeviceId}", deviceId);

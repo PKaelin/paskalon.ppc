@@ -124,6 +124,12 @@ namespace paskalON.Devices.Application
 
 
         /// <summary>
+        /// Connects all power meters (System, External, Auxiliary, Circuit) that are not already connected.
+        /// </summary>
+        Task ConnectAllMetersAsync(CancellationToken cancellationToken = default);
+
+
+        /// <summary>
         /// Start specific PCS.
         /// </summary>
         /// <param name="deviceId">Device id the action is executed on.</param>

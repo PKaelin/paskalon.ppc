@@ -11,11 +11,14 @@ using paskalON.Dataface;
 using paskalON.Devices.Application.Factories;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
+using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
 using paskalON.Devices.Domain.Configs.PowerConversionSystems;
 using paskalON.Devices.Domain.Ders;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
+using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Infrastructure.Storage.Repositories;
+using paskalON.PhysicalUnits.Electricals.Powers;
 using paskalON.Telemetry;
 using paskalON.Telemetry.Factories;
 
@@ -31,6 +34,10 @@ namespace paskalON.Devices.Application.UnitTest
         private Mock<PowerConversionSystemBase>? _pcsMock;
         private Mock<BatteryBankBase>? _bbMock;
         private Mock<IServiceProvider> _servicesMock = new Mock<IServiceProvider>();
+        private Mock<SystemPowerMeter>? _systemMeterMock;
+        private Mock<ExternalPowerMeter>? _externalMeterMock;
+        private Mock<AuxiliaryPowerMeter>? _auxiliaryMeterMock;
+        private Mock<CircuitPowerMeter>? _circuitMeterMock;
 
 
         [TestInitialize]
@@ -295,6 +302,80 @@ namespace paskalON.Devices.Application.UnitTest
 
 
         [TestMethod]
+        [DataRow(PowerMeterState.Unknown, 1)]
+        [DataRow(PowerMeterState.Disconnected, 1)]
+        [DataRow(PowerMeterState.Connecting, 1)]
+        [DataRow(PowerMeterState.Connected, 0)]
+        [DataRow(PowerMeterState.Disconnecting, 1)]
+        public async Task DeviceManagerConnectAllMetersStateTest(PowerMeterState state, int expectedConnectCalls)
+        {
+            DeviceManagerTestClass manager = CreateDeviceManagerWithMeters();
+            _systemMeterMock!.Object.State = state;
+            _externalMeterMock!.Object.State = state;
+            _auxiliaryMeterMock!.Object.State = state;
+            _circuitMeterMock!.Object.State = state;
+
+            await manager.ConnectAllMetersAsync();
+
+            _systemMeterMock.Verify(x => x.ConnectAsync(), Times.Exactly(expectedConnectCalls));
+            _externalMeterMock.Verify(x => x.ConnectAsync(), Times.Exactly(expectedConnectCalls));
+            _auxiliaryMeterMock.Verify(x => x.ConnectAsync(), Times.Exactly(expectedConnectCalls));
+            _circuitMeterMock.Verify(x => x.ConnectAsync(), Times.Exactly(expectedConnectCalls));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerConnectAllMetersSkipsConnectedMetersTest()
+        {
+            DeviceManagerTestClass manager = CreateDeviceManagerWithMeters();
+            _systemMeterMock!.Object.State = PowerMeterState.Connected;
+            _externalMeterMock!.Object.State = PowerMeterState.Disconnected;
+            _auxiliaryMeterMock!.Object.State = PowerMeterState.Connected;
+            _circuitMeterMock!.Object.State = PowerMeterState.Disconnected;
+
+            await manager.ConnectAllMetersAsync();
+
+            _systemMeterMock.Verify(x => x.ConnectAsync(), Times.Never);
+            _externalMeterMock.Verify(x => x.ConnectAsync(), Times.Once);
+            _auxiliaryMeterMock.Verify(x => x.ConnectAsync(), Times.Never);
+            _circuitMeterMock.Verify(x => x.ConnectAsync(), Times.Once);
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerConnectAllMetersFailureTest()
+        {
+            DeviceManagerTestClass manager = CreateDeviceManagerWithMeters();
+            _externalMeterMock!.Setup(x => x.ConnectAsync()).ThrowsAsync(new InvalidOperationException("Connection refused"));
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await manager.ConnectAllMetersAsync());
+
+            _systemMeterMock!.Verify(x => x.ConnectAsync(), Times.Once);
+            _auxiliaryMeterMock!.Verify(x => x.ConnectAsync(), Times.Once);
+            _circuitMeterMock!.Verify(x => x.ConnectAsync(), Times.Once);
+            IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
+            Assert.HasCount(1, logs);
+            Assert.IsNotNull(logs.FirstOrDefault(l => l.Message.Contains("Connection refused", StringComparison.OrdinalIgnoreCase)));
+        }
+
+
+        [TestMethod]
+        public async Task DeviceManagerConnectAllMetersCancelledTest()
+        {
+            DeviceManagerTestClass manager = CreateDeviceManagerWithMeters();
+            using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            await cancellationTokenSource.CancelAsync();
+
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await manager.ConnectAllMetersAsync(cancellationTokenSource.Token));
+
+            _systemMeterMock!.Verify(x => x.ConnectAsync(), Times.Never);
+            _externalMeterMock!.Verify(x => x.ConnectAsync(), Times.Never);
+            _auxiliaryMeterMock!.Verify(x => x.ConnectAsync(), Times.Never);
+            _circuitMeterMock!.Verify(x => x.ConnectAsync(), Times.Never);
+        }
+
+
+        [TestMethod]
         public async Task DeviceManagerStartPcsMissingDeviceTest()
         {
             IDeviceManager manager = CreateDeviceManagerWithDomains();
@@ -512,6 +593,80 @@ namespace paskalON.Devices.Application.UnitTest
         }
 
 
+        private DeviceManagerTestClass CreateDeviceManagerWithMeters()
+        {
+            DeviceManagerTestClass deviceManager = new DeviceManagerTestClass(_logger, _servicesMock.Object,
+                _publisherFactory.Object, _deviceFactoryModbus.Object, _deviceFactoryC37.Object);
+            Mock<IMetricsPublisher> metricsPublisherMock = new Mock<IMetricsPublisher>();
+            Mock<IDataface> datafaceMock = new Mock<IDataface>();
+            DerConfig derConfig = new DerConfig { ChangedBy = "UnitTest", Name = "Test DER" };
+            DerGroupConfig groupConfig = new DerGroupConfig { ChangedBy = "UnitTest", Name = "Group 1", DerConfig = derConfig };
+            DerCircuitConfig circuitConfig = new DerCircuitConfig { ChangedBy = "UnitTest", Name = "Circuit 1", DerGroupConfig = groupConfig };
+            SystemPowerMeterConfig systemConfig = new SystemPowerMeterConfig
+            {
+                ChangedBy = "UnitTest",
+                IsActive = true,
+                DeviceId = 1,
+                Name = "PM-System-1",
+                PowerMeterDeviceConfig = CreatePowerMeterDeviceConfig(),
+                PowerFactorStandard = PowerFactorStandard.IEEE,
+                DerConfig = derConfig
+            };
+            ExternalPowerMeterConfig externalConfig = new ExternalPowerMeterConfig
+            {
+                ChangedBy = "UnitTest",
+                IsActive = true,
+                DeviceId = 2,
+                Name = "PM-External-1",
+                PowerMeterDeviceConfig = CreatePowerMeterDeviceConfig(),
+                PowerFactorStandard = PowerFactorStandard.IEEE,
+                DerConfig = derConfig
+            };
+            AuxiliaryPowerMeterConfig auxiliaryConfig = new AuxiliaryPowerMeterConfig
+            {
+                ChangedBy = "UnitTest",
+                IsActive = true,
+                DeviceId = 3,
+                Name = "PM-Auxiliary-1",
+                PowerMeterDeviceConfig = CreatePowerMeterDeviceConfig(),
+                PowerFactorStandard = PowerFactorStandard.IEEE,
+                DerConfig = derConfig
+            };
+            CircuitPowerMeterConfig circuitMeterConfig = new CircuitPowerMeterConfig
+            {
+                ChangedBy = "UnitTest",
+                IsActive = true,
+                DeviceId = 4,
+                Name = "PM-Circuit-1",
+                PowerMeterDeviceConfig = CreatePowerMeterDeviceConfig(),
+                PowerFactorStandard = PowerFactorStandard.IEEE,
+                DerCircuitConfig = circuitConfig
+            };
+            _systemMeterMock = new Mock<SystemPowerMeter>(NullLogger.Instance, systemConfig, metricsPublisherMock.Object, datafaceMock.Object);
+            _externalMeterMock = new Mock<ExternalPowerMeter>(NullLogger.Instance, externalConfig, metricsPublisherMock.Object, datafaceMock.Object);
+            _auxiliaryMeterMock = new Mock<AuxiliaryPowerMeter>(NullLogger.Instance, auxiliaryConfig, metricsPublisherMock.Object, datafaceMock.Object);
+            _circuitMeterMock = new Mock<CircuitPowerMeter>(NullLogger.Instance, circuitMeterConfig, metricsPublisherMock.Object, datafaceMock.Object);
+            // Add devices
+            deviceManager.AddSystemMeter(_systemMeterMock.Object);
+            deviceManager.AddExternalMeter(_externalMeterMock.Object);
+            deviceManager.AddAuxiliaryMeter(_auxiliaryMeterMock.Object);
+            deviceManager.AddCircuitMeter(_circuitMeterMock.Object);
+
+            return deviceManager;
+        }
+
+
+        private static PowerMeterDeviceConfig CreatePowerMeterDeviceConfig()
+        {
+            return new PowerMeterDeviceConfig
+            {
+                ChangedBy = "UnitTest",
+                Name = "PowerMeterDevice",
+                ClassName = "PowerMeterTest"
+            };
+        }
+
+
         class DeviceManagerTestClass : DeviceManager
         {
             public DeviceManagerTestClass(ILogger<DeviceManager> logger, IServiceProvider services,
@@ -528,6 +683,26 @@ namespace paskalON.Devices.Application.UnitTest
             public void AddBb(int deviceId, BatteryBankBase bb)
             {
                 _batteryBanks.Add(deviceId, bb);
+            }
+
+            public void AddSystemMeter(SystemPowerMeter meter)
+            {
+                _systemPowerMeters.Add(meter.DeviceId, meter);
+            }
+
+            public void AddExternalMeter(ExternalPowerMeter meter)
+            {
+                _externalPowerMeters.Add(meter.DeviceId, meter);
+            }
+
+            public void AddAuxiliaryMeter(AuxiliaryPowerMeter meter)
+            {
+                _auxiliaryPowerMeters.Add(meter.DeviceId, meter);
+            }
+
+            public void AddCircuitMeter(CircuitPowerMeter meter)
+            {
+                _circuitPowerMeters.Add(meter.DeviceId, meter);
             }
         }
     }

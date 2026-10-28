@@ -20,6 +20,13 @@ Content-Type: application/json
 ###
 
 #------------------------------------------------------------------------------
+# Power Meter Controller
+#------------------------------------------------------------------------------
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/powermeter/connectall
+
+###
+
+#------------------------------------------------------------------------------
 # PCS Controller
 #------------------------------------------------------------------------------
 POST {{paskalON.Devices.Service_HostAddress}}/api/v1/pcs/startall

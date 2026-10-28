@@ -824,6 +824,11 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <param name="state">The Power Meter state.</param>
         private void SetState(PowerMeterState state)
         {
+            if (state == PowerMeterState.Connected)
+            {
+                CommunicationError = false;
+            }
+
             _logger.LogInformation("{Name} - Power Meter state changed to: {State}", Name, State);
             StateChanged?.Invoke(this, new PowerMeterStateChangedEventArgs(state));
         }
@@ -837,11 +842,11 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         {
             if (state == true)
             {
-                _logger.LogError("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+                _logger.LogError("{Name} - CommunicationError state changed to: {CommunicationError}", Name, CommunicationError);
             }
             else
             {
-                _logger.LogInformation("{Name} - CommunicationError state changed to: {State}", Name, CommunicationError);
+                _logger.LogInformation("{Name} - CommunicationError state changed to: {CommunicationError}", Name, CommunicationError);
             }
 
             CommunicationErrorChanged?.Invoke(this, new CommunicationErrorChangedEventArgs(state));
