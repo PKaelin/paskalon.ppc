@@ -30,6 +30,7 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
 
             _client = client;
             _client.OnCommunicationError += OnCommunicationError;
+            _client.StateChanged += OnClientStateChanged;
         }
 
 
@@ -40,12 +41,17 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
 
             try
             {
+                await base.ConnectAsync();
+
                 if (_client.State != C37ClientState.Connected && _client.State != C37ClientState.Connecting)
                 {
                     await _client.StartStreamingAsync();
                 }
 
-                await base.ConnectAsync();
+                if (_client.State == C37ClientState.Connected)
+                {
+                    OnClientStateChanged(_client, new C37ClientStateChangedEventArgs(_client.State));
+                }
                 await _client.SendCommandAsync(C37CommandType.TurnOnTransmission);
             }
             finally
@@ -64,6 +70,8 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
             {
                 await base.DisconnectAsync();
                 await _client.SendCommandAsync(C37CommandType.TurnOffTransmission);
+                await _client.StopStreamingAsync();
+                OnClientStateChanged(_client, new C37ClientStateChangedEventArgs(_client.State));
             }
             finally
             {
@@ -85,11 +93,30 @@ namespace paskalON.Devices.Equipments.Meters.PowerMeters.Simples
 
 
         /// <summary>
+        /// Triggered when the C37 client state changes.
+        /// </summary>
+        /// <param name="sender">The C37 client.</param>
+        /// <param name="e">The state change event arguments.</param>
+        private void OnClientStateChanged(object? sender, C37ClientStateChangedEventArgs e)
+        {
+            if (e.State == C37ClientState.Connected)
+            {
+                State = PowerMeterState.Connected;
+            }
+            else if (e.State == C37ClientState.Disconnected)
+            {
+                State = PowerMeterState.Disconnected;
+            }
+        }
+
+
+        /// <summary>
         /// Dispose instance.
         /// </summary>
         public void Dispose()
         {
             _client.OnCommunicationError -= OnCommunicationError;
+            _client.StateChanged -= OnClientStateChanged;
         }
     }
 }

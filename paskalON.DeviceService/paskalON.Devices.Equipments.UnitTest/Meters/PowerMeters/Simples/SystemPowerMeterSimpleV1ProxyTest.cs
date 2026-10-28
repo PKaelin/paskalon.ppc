@@ -117,7 +117,26 @@ namespace paskalON.Devices.Equipments.UnitTest.Meters.PowerMeters.Simples
             await pm.DisconnectAsync();
 
             client.Verify(x => x.SendCommandAsync(It.IsAny<C37CommandType>()), Times.Once);
-            Assert.AreEqual(PowerMeterState.Disconnecting, pm.State);
+            client.Verify(x => x.StopStreamingAsync(It.IsAny<CancellationToken>()), Times.Once);
+            Assert.AreEqual(PowerMeterState.Disconnected, pm.State);
+        }
+
+
+        [TestMethod]
+        public void PowerMeterStateFollowsClientStateChangedTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            Mock<IC37Dataface> dataface = new Mock<IC37Dataface>();
+            Mock<IC37Client> client = new Mock<IC37Client>();
+            SystemPowerMeterSimpleV1Proxy pm = new SystemPowerMeterSimpleV1Proxy(NullLogger.Instance, _pmConfig!, publisher.Object, dataface.Object, client.Object);
+
+            client.Raise(x => x.StateChanged += null, client.Object, new C37ClientStateChangedEventArgs(C37ClientState.Connected));
+
+            Assert.AreEqual(PowerMeterState.Connected, pm.State);
+
+            client.Raise(x => x.StateChanged += null, client.Object, new C37ClientStateChangedEventArgs(C37ClientState.Disconnected));
+
+            Assert.AreEqual(PowerMeterState.Disconnected, pm.State);
         }
     }
 }

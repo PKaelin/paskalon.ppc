@@ -67,6 +67,10 @@ namespace paskalON.Protocols.C37118
 
 
         /// <inheritdoc/>
+        public event EventHandler<C37ClientStateChangedEventArgs>? StateChanged;
+
+
+        /// <inheritdoc/>
         public event EventHandler<C37DataFrameEventArgs>? DataFrameReceived;
 
 
@@ -364,7 +368,8 @@ namespace paskalON.Protocols.C37118
         /// <param name="state">Modbus client state.</param>
         private void SetState(C37ClientState state)
         {
-            _logger.LogInformation("C37 client {Endpoint} state changed to {State}", $"{ServerAddress}:{ServerPort}", State);
+            _logger.LogInformation("C37 client {Endpoint} state changed to {State}", $"{ServerAddress}:{ServerPort}", state);
+            StateChanged?.Invoke(this, new C37ClientStateChangedEventArgs(state));
         }
 
 

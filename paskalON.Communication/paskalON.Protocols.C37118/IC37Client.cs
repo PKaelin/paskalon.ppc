@@ -31,6 +31,12 @@ namespace paskalON.Protocols.C37118
 
 
         /// <summary>
+        /// Triggered when the client state changes.
+        /// </summary>
+        event EventHandler<C37ClientStateChangedEventArgs> StateChanged;
+
+
+        /// <summary>
         /// Client state.
         /// </summary>
         C37ClientState State { get; }
