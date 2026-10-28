@@ -5,6 +5,7 @@
   <Folder Name="/Tests/">
     <Project Path="paskalON.Dataface.UnitTest/paskalON.Dataface.UnitTest.csproj" Id="6157fc6e-c19d-47ba-9ab5-83d4ebcd637e" />
     <Project Path="paskalON.Domains.UnitTest/paskalON.Domains.UnitTest.csproj" />
+    <Project Path="paskalON.Hosting.UnitTest/paskalON.Hosting.UnitTest.csproj" />
     <Project Path="paskalON.Infrastructure.PostgreSql.IntegrationTest/paskalON.Infrastructure.PostgreSql.IntegrationTest.csproj" />
     <Project Path="paskalON.Maths.IntegrationTest/paskalON.Maths.IntegrationTest.csproj" />
     <Project Path="paskalON.Maths.UnitTest/paskalON.Maths.UnitTest.csproj" />
@@ -14,6 +15,7 @@
   </Folder>
   <Project Path="paskalON.Dataface/paskalON.Dataface.csproj" Id="0d59507d-03de-441a-af88-59f15348c1d9" />
   <Project Path="paskalON.Domains/paskalON.Domains.csproj" />
+  <Project Path="paskalON.Hosting/paskalON.Hosting.csproj" />
   <Project Path="paskalON.Infrastructure.PostgreSql/paskalON.Infrastructure.PostgreSql.csproj" Id="ab99dcb5-5811-44b6-9304-25bc6352b24b" />
   <Project Path="paskalON.Infrastructure/paskalON.Infrastructure.csproj" Id="c27de749-35c1-4733-8634-3ac790832162" />
   <Project Path="paskalON.Maths/paskalON.Maths.csproj" />
