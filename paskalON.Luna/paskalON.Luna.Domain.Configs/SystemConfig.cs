@@ -115,5 +115,29 @@ namespace paskalON.Luna.Domain.Configs
         /// Name of the shutdown override operating mode configured in the operating mode service.
         /// </summary>
         public string? ShutdownOperatingModeName { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets the system nameplate rating for maximum active power.
+        /// </summary>
+        public double MaximumActivePowerSystemNameplateWatts { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets the minimum active power at the system nameplate rating.
+        /// </summary>
+        public double MinimumActivePowerSystemNameplateWatts { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets the maximum reactive power specified on the system nameplate.
+        /// </summary>
+        public double MaximumReactivePowerSystemNameplateVars { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets the minimum reactive power at the system nameplate rating.
+        /// </summary>
+        public double MinimumReactivePowerSystemNameplateVars { get; set; }
     }
 }

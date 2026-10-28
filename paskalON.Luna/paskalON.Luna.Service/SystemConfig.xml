@@ -21,4 +21,9 @@
     <SubscriberTopicCircuitPowerMeterDetail>ppc:device:pm:circuit:detail</SubscriberTopicCircuitPowerMeterDetail>
     <!-- Name of the shutdown override operating mode configured in the operating mode service -->
     <ShutdownOperatingModeName>ShutdownMode</ShutdownOperatingModeName>
+    <!-- System nameplate ratings -->
+    <MaximumActivePowerSystemNameplateWatts>3630000</MaximumActivePowerSystemNameplateWatts>
+    <MinimumActivePowerSystemNameplateWatts>-3630000</MinimumActivePowerSystemNameplateWatts>
+    <MaximumReactivePowerSystemNameplateVars>3630000</MaximumReactivePowerSystemNameplateVars>
+    <MinimumReactivePowerSystemNameplateVars>-3630000</MinimumReactivePowerSystemNameplateVars>
 </SystemConfig>

@@ -2,10 +2,14 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using Microsoft.AspNetCore.SignalR;
 using paskalON.Devices.Client;
 using paskalON.Devices.Client.Subscribers;
 using paskalON.Luna.Application;
 using paskalON.Luna.Domain.Configs;
+using paskalON.Luna.Dto.Systems;
+using paskalON.Luna.Service.Publishers;
+using paskalON.Luna.Service.WebApi.Hubs;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
 using paskalON.OperatingModes.Client;
@@ -60,10 +64,13 @@ try
     SystemConfig config = LoadSystemConfig("SystemConfig.xml");
     string shutdownOperatingModeName = config.ShutdownOperatingModeName ?? string.Empty;
     ArgumentException.ThrowIfNullOrWhiteSpace(shutdownOperatingModeName, "Cannot find the shutdown operating mode name. ShutdownOperatingModeName");
+    SystemNameplateDto nameplate = GetSystemNameplate(config);
 
     // Add WebApi's
     builder.Services.AddControllers();
     builder.Services.AddOpenApi();
+    builder.Services.AddSignalR();
+    builder.Services.AddSingleton(nameplate);
 
     // Add communications
     // Do not abort when Redis is not reachable at startup, the multiplexer keeps retrying to connect in the background.
@@ -112,6 +119,15 @@ try
         sp.GetRequiredService<IDeviceServer>(),
         shutdownOperatingModeName));
 
+    // Push the system meter summary to the UI clients connected to the system hub
+    builder.Services.AddSingleton<HubConnectionCounter>();
+    builder.Services.AddHostedService(sp => new SystemMeterSummaryPublisher(
+        sp.GetRequiredService<ILogger<SystemMeterSummaryPublisher>>(),
+        sp.GetRequiredService<ILunaDeviceManager>(),
+        sp.GetRequiredService<IHubContext<SystemHub, ISystemClient>>(),
+        sp.GetRequiredService<HubConnectionCounter>(),
+        TimeSpan.FromSeconds(2)));
+
     // Build application
     Console.WriteLine("Building application.....");
     app = builder.Build();
@@ -142,6 +158,7 @@ try
 
     app.UseAuthorization();
     app.MapControllers();
+    app.MapHub<SystemHub>(SystemHub.Route);
     app.Logger.LogInformation("Application about to run.....");
     app.Run();
 }
@@ -202,6 +219,24 @@ static SubscriberTopic GetSubscriberTopic(SystemConfig config)
         topic.CircuitPowerMeterTopic = new SubscriberTopicEntry(config.SubscriberTopicCircuitPowerMeterCore, config.SubscriberTopicCircuitPowerMeterDetail);
     }
     return topic;
+}
+
+
+/// <summary>
+/// Get the system nameplate ratings of the system configuration.
+/// </summary>
+static SystemNameplateDto GetSystemNameplate(SystemConfig config)
+{
+    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(config.MaximumActivePowerSystemNameplateWatts, config.MinimumActivePowerSystemNameplateWatts);
+    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(config.MaximumReactivePowerSystemNameplateVars, config.MinimumReactivePowerSystemNameplateVars);
+
+    return new SystemNameplateDto
+    {
+        MaximumActivePowerWatts = config.MaximumActivePowerSystemNameplateWatts,
+        MinimumActivePowerWatts = config.MinimumActivePowerSystemNameplateWatts,
+        MaximumReactivePowerVars = config.MaximumReactivePowerSystemNameplateVars,
+        MinimumReactivePowerVars = config.MinimumReactivePowerSystemNameplateVars
+    };
 }
 
 

@@ -31,17 +31,37 @@ namespace paskalON.Luna.Service.WebApi.Controllers.V1
 
 
         /// <summary>
+        /// System nameplate ratings of the system configuration.
+        /// </summary>
+        private readonly SystemNameplateDto _nameplate;
+
+
+        /// <summary>
         /// Constructor of <see cref="SystemController"/>.
         /// </summary>
         /// <param name="logger">Logger for handling application logging and diagnostics.</param>
         /// <param name="systemManager">System manager executing the system commands.</param>
-        public SystemController(ILogger<SystemController> logger, ILunaSystemManager systemManager)
+        /// <param name="nameplate">System nameplate ratings of the system configuration.</param>
+        public SystemController(ILogger<SystemController> logger, ILunaSystemManager systemManager, SystemNameplateDto nameplate)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(systemManager);
+            ArgumentNullException.ThrowIfNull(nameplate);
 
             _logger = logger;
             _systemManager = systemManager;
+            _nameplate = nameplate;
+        }
+
+
+        /// <summary>
+        /// Gets the system nameplate ratings (minimum and maximum active and reactive power).
+        /// </summary>
+        /// <returns>The system nameplate ratings.</returns>
+        [HttpGet]
+        public ActionResult<SystemNameplateDto> GetNameplate()
+        {
+            return Ok(_nameplate);
         }
 
 

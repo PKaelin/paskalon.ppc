@@ -1,6 +1,9 @@
+<script setup lang="ts">
+import DashboardSystem from '../components/DashboardSystem.vue';
+</script>
+
 <template>
-    <section>
-        <h1 class="content-title">Dashboard</h1>
-        <p>Dashboard content</p>
-    </section>
+    <div class="dash-layout">
+        <DashboardSystem />
+    </div>
 </template>

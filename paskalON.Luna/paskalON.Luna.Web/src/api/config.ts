@@ -9,10 +9,13 @@
 export interface AppConfig {
     /** Base address of the Luna web service. Default: '/api' (reverse proxied). */
     apiBaseUrl: string;
+    /** Absolute or relative URL of the SignalR system hub. Default: '/hubs/system' (reverse proxied). */
+    systemHubUrl: string;
 }
 
 const defaultConfig: AppConfig = {
-    apiBaseUrl: '/api'
+    apiBaseUrl: '/api',
+    systemHubUrl: '/hubs/system'
 };
 
 let current: AppConfig = defaultConfig;

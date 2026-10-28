@@ -372,3 +372,125 @@ body {
     background: linear-gradient(to right, #B7791F 50%, #6C4AB6 50%);
     color: #fff;
 }
+
+/* ==========================================================================
+   DASHBOARD
+   ========================================================================== */
+
+.dash-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.dash-section-header {
+    display: flex;
+    align-items: baseline;
+    gap: .75rem;
+    margin-bottom: .5rem;
+}
+
+.dash-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.dash-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    font-size: .75rem;
+    color: rgba(235, 235, 235, .75);
+}
+
+.dash-status-dot {
+    width: .5rem;
+    height: .5rem;
+    border-radius: 50%;
+    background-color: #8a96a3;
+}
+
+.dash-status-connected .dash-status-dot {
+    background-color: #22C55E;
+}
+
+.dash-status-connecting .dash-status-dot,
+.dash-status-reconnecting .dash-status-dot {
+    background-color: #EAB308;
+}
+
+.dash-status-disconnected .dash-status-dot {
+    background-color: #EF4444;
+}
+
+.dash-hint {
+    font-size: .8125rem;
+    color: #f0ad4e;
+    margin-bottom: .5rem;
+}
+
+.dash-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: .75rem;
+}
+
+.metric-card {
+    min-width: 0;
+    padding: .625rem .75rem .75rem;
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: .375rem;
+    background-color: rgba(var(--bs-primary-rgb, 78, 93, 108), .45);
+}
+
+.metric-card-label,
+.metric-card-unit {
+    font-size: .8125rem;
+    color: rgba(235, 235, 235, .75);
+}
+
+.metric-card-value {
+    display: flex;
+    align-items: baseline;
+    gap: .375rem;
+    line-height: 1.2;
+}
+
+.metric-card-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.metric-card-caption {
+    min-height: 1.125rem;
+    font-size: .75rem;
+    line-height: 1.125rem;
+    color: rgba(235, 235, 235, .75);
+}
+
+.deviation-bar {
+    position: relative;
+    height: .5rem;
+    margin-top: .375rem;
+    border-radius: .25rem;
+    background-color: rgba(255, 255, 255, .12);
+    overflow: hidden;
+}
+
+.deviation-bar-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    transition: left .4s ease, width .4s ease, background-color .4s ease;
+}
+
+.deviation-bar-zero {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    margin-left: -.5px;
+    background-color: rgba(235, 235, 235, .6);
+}

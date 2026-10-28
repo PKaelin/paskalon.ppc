@@ -50,13 +50,21 @@ export default defineConfig({
                 target: lunaApiUrl,
                 changeOrigin: true,
                 secure: false
+            },
+            // SignalR hub - ws: true also forwards the WebSocket upgrade.
+            '/hubs': {
+                target: lunaApiUrl,
+                changeOrigin: true,
+                secure: false,
+                ws: true
             }
         }
     },
     preview: {
         port: 5173,
         proxy: {
-            '/api': { target: lunaApiUrl, changeOrigin: true, secure: false }
+            '/api': { target: lunaApiUrl, changeOrigin: true, secure: false },
+            '/hubs': { target: lunaApiUrl, changeOrigin: true, secure: false, ws: true }
         }
     },
     build: {

@@ -43,6 +43,7 @@ FROM nginx:1.27-alpine AS final
 # extra_hosts is set).
 ENV LUNA_API_URL=http://host.docker.internal:45550
 
+COPY docker/00-websocket.conf.template /etc/nginx/templates/00-websocket.conf.template
 COPY docker/nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY docker/40-app-config.sh /docker-entrypoint.d/40-app-config.sh
 RUN chmod +x /docker-entrypoint.d/40-app-config.sh

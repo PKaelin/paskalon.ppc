@@ -1,4 +1,5 @@
 import { config } from './config';
+import type { SystemNameplateDto } from '../types/system';
 
 /** The system commands of the Luna SystemController. */
 export type SystemCommand = 'SystemStartCommand' | 'SystemStopCommand' | 'ClearShutdownCommand';
@@ -34,6 +35,28 @@ export async function sendSystemCommand(command: SystemCommand): Promise<SystemC
     const message = body?.message ?? (response.ok ? 'Command sent.' : `The command failed (HTTP ${response.status}).`);
 
     return { ok: response.ok, message };
+}
+
+/** Gets the system nameplate ratings (GET /v1/system/getnameplate). Throws if the request fails. */
+export async function getNameplate(signal?: AbortSignal): Promise<SystemNameplateDto> {
+    const response = await fetch(`${config().apiBaseUrl}/v1/system/getnameplate`, { signal });
+
+    if (response.ok === false) {
+        throw new Error(`The system nameplate could not be loaded (HTTP ${response.status}).`);
+    }
+
+    return (await response.json()) as SystemNameplateDto;
+}
+
+/** Absolute URL of the system hub (resolves a relative path against the current origin). */
+export function systemHubUrl(): string {
+    const configured = config().systemHubUrl;
+
+    if (/^https?:\/\//i.test(configured)) {
+        return configured;
+    }
+
+    return new URL(configured, window.location.origin).toString();
 }
 
 async function readBody(response: Response): Promise<SystemCommandResponse | null> {
