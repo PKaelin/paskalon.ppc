@@ -74,6 +74,8 @@ namespace paskalON.Luna.Application
                 return SystemCommandResult.ShutdownActive;
             }
 
+            await _deviceServer.ConnectAllMeters(cancellationToken);
+            _logger.LogInformation("System connect command sent to all power meters.");
             await _deviceServer.StartAllPcs(cancellationToken);
             _logger.LogInformation("System start command sent to all PCS.");
 

@@ -28,6 +28,14 @@ namespace paskalON.Devices.Client
 
 
         /// <summary>
+        /// Sends a connect command to all power meters (System, External, Auxiliary, Circuit) that are not already connected.
+        /// </summary>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>Task.</returns>
+        Task ConnectAllMeters(CancellationToken cancellationToken = default);
+
+
+        /// <summary>
         /// Sends a start command to all power conversion systems (PCS) that are not in maintenance mode.
         /// </summary>
         /// <param name="cancellationToken">Token to cancel the request.</param>

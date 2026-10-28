@@ -79,6 +79,12 @@ namespace paskalON.Devices.Client
 
 
         /// <summary>
+        /// Relative path of the connect all power meters endpoint.
+        /// </summary>
+        private const string ConnectAllMetersPath = "powermeter/connectall";
+
+
+        /// <summary>
         /// HTTP client with the base address of the device service API.
         /// </summary>
         private readonly HttpClient _client;
@@ -120,6 +126,14 @@ namespace paskalON.Devices.Client
             StartPcsRequestDto request = new StartPcsRequestDto { DeviceId = deviceId };
 
             using HttpResponseMessage response = await _client.PostAsJsonAsync(StartPcsPath, request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        /// <inheritdoc/>
+        public async Task ConnectAllMeters(CancellationToken cancellationToken = default)
+        {
+            using HttpResponseMessage response = await _client.PostAsync(ConnectAllMetersPath, null, cancellationToken);
             response.EnsureSuccessStatusCode();
         }
 
