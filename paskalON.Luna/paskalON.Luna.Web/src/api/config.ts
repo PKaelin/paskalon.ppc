@@ -11,11 +11,14 @@ export interface AppConfig {
     apiBaseUrl: string;
     /** Absolute or relative URL of the SignalR system hub. Default: '/hubs/system' (reverse proxied). */
     systemHubUrl: string;
+    /** Absolute or relative URL of the SignalR device hub. Default: '/hubs/device' (reverse proxied). */
+    deviceHubUrl: string;
 }
 
 const defaultConfig: AppConfig = {
     apiBaseUrl: '/api',
-    systemHubUrl: '/hubs/system'
+    systemHubUrl: '/hubs/system',
+    deviceHubUrl: '/hubs/device'
 };
 
 let current: AppConfig = defaultConfig;
@@ -40,4 +43,13 @@ export async function loadConfig(): Promise<AppConfig> {
 
 export function config(): AppConfig {
     return current;
+}
+
+/** Absolute URL of a configured URL (resolves a relative path against the current origin). */
+export function absoluteUrl(configured: string): string {
+    if (/^https?:\/\//i.test(configured)) {
+        return configured;
+    }
+
+    return new URL(configured, window.location.origin).toString();
 }

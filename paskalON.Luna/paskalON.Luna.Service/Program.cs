@@ -132,6 +132,15 @@ try
         sp.GetRequiredService<HubConnectionCounter>(),
         TimeSpan.FromSeconds(2)));
 
+    // Push the values of the device shown in the system tab to the UI client that subscribed to it on the device hub
+    builder.Services.AddSingleton<DeviceSubscriptions>();
+    builder.Services.AddHostedService(sp => new DeviceSubscriptionPublisher(
+        sp.GetRequiredService<ILogger<DeviceSubscriptionPublisher>>(),
+        sp.GetRequiredService<ILunaDeviceManager>(),
+        sp.GetRequiredService<IHubContext<DeviceHub, IDeviceHubClient>>(),
+        sp.GetRequiredService<DeviceSubscriptions>(),
+        TimeSpan.FromSeconds(2)));
+
     // Build application
     Console.WriteLine("Building application.....");
     app = builder.Build();
@@ -164,6 +173,7 @@ try
     app.UseAuthorization();
     app.MapControllers();
     app.MapHub<SystemHub>(SystemHub.Route);
+    app.MapHub<DeviceHub>(DeviceHub.Route);
     app.Logger.LogInformation("Application about to run.....");
     app.Run();
 }

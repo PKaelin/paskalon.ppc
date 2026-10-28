@@ -8,6 +8,21 @@ export interface ReactivePowerDto {
     voltAmperesReactive: number;
 }
 
+/** Apparent power as serialized by the web service (paskalON.PhysicalUnits ApparentPower). */
+export interface ApparentPowerDto {
+    voltAmperes: number;
+}
+
+/** Energy as serialized by the web service (paskalON.PhysicalUnits Energy). */
+export interface EnergyDto {
+    wattHours: number;
+}
+
+/** Reactive energy as serialized by the web service (paskalON.PhysicalUnits ReactiveEnergy). */
+export interface ReactiveEnergyDto {
+    voltAmperesReactiveHours: number;
+}
+
 /** Summary of the system power meter pushed by the system hub (SystemMeterSummaryDto). */
 export interface SystemMeterSummaryDto {
     /** Positive: producing (exporting), negative: consuming (importing). */

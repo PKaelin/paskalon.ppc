@@ -652,3 +652,39 @@ button.der-tree-toggle:disabled {
     background-color: #6496be;
     color: inherit;
 }
+
+/* Names and values of the properties of a device in two columns, all left aligned. */
+.pm-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    column-gap: 3rem;
+    row-gap: .25rem;
+    align-items: start;
+}
+
+.pm-values {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 1.5rem;
+    row-gap: .25rem;
+    margin: 0;
+    font-size: .875rem;
+}
+
+.pm-values dt {
+    font-weight: 400;
+    color: rgba(235, 235, 235, .75);
+}
+
+.pm-values dd {
+    margin: 0;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* State and communication error stand apart from the measured values. */
+.pm-values .pm-values-first {
+    padding-bottom: .5rem;
+    margin-bottom: .25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .15);
+}

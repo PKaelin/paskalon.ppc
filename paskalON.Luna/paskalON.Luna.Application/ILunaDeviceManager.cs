@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Dto.Ders;
+using paskalON.Devices.Dto.Meters.PowerMeters;
 using paskalON.Luna.Dto.Devices;
 
 namespace paskalON.Luna.Application
@@ -27,5 +28,13 @@ namespace paskalON.Luna.Application
         /// or null if there is no such system power meter.
         /// </returns>
         SystemMeterSummaryDto? GetSystemMeterSummary();
+
+
+        /// <summary>
+        /// Gets a system power meter of the DER configuration.
+        /// </summary>
+        /// <param name="deviceId">The device ID of the system power meter.</param>
+        /// <returns>The system power meter, or null if the DER configuration has no system power meter with the device ID.</returns>
+        PmSystemDto? GetSystemPowerMeter(int deviceId);
     }
 }

@@ -176,6 +176,44 @@ namespace paskalON.Luna.Application.UnitTest
 
 
         /// <summary>
+        /// Confirms the system power meter with the device ID is returned.
+        /// </summary>
+        /// <param name="deviceId">The device ID of the requested system power meter.</param>
+        [TestMethod]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void GetSystemPowerMeterReturnsMeterWithDeviceIdTest(int deviceId)
+        {
+            List<PmSystemDto> meters = new List<PmSystemDto>
+            {
+                CreateSystemMeter(1, false, PowerMeterState.Connected, 1000000),
+                CreateSystemMeter(2, true, PowerMeterState.Disconnected, 2000000)
+            };
+            _deviceClient.Setup(client => client.Der).Returns(CreateDer(meters, new List<BbDto>()));
+
+            PmSystemDto? meter = _manager.GetSystemPowerMeter(deviceId);
+
+            Assert.IsNotNull(meter);
+            Assert.AreSame(meters[deviceId - 1], meter);
+        }
+
+
+        /// <summary>
+        /// Confirms null is returned when the DER has no system power meter with the device ID.
+        /// </summary>
+        [TestMethod]
+        public void GetSystemPowerMeterWithUnknownDeviceIdReturnsNullTest()
+        {
+            List<PmSystemDto> meters = new List<PmSystemDto> { CreateSystemMeter(1, false, PowerMeterState.Connected, 1000000) };
+            _deviceClient.Setup(client => client.Der).Returns(CreateDer(meters, new List<BbDto>()));
+
+            PmSystemDto? meter = _manager.GetSystemPowerMeter(5);
+
+            Assert.IsNull(meter);
+        }
+
+
+        /// <summary>
         /// Creates a DER with the system power meters and one battery storage unit with the battery banks.
         /// </summary>
         /// <param name="systemMeters">The system power meters.</param>

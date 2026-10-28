@@ -1,4 +1,4 @@
-import { config } from './config';
+import { absoluteUrl, config } from './config';
 import type { SystemNameplateDto } from '../types/system';
 
 /** The system commands of the Luna SystemController. */
@@ -50,13 +50,7 @@ export async function getNameplate(signal?: AbortSignal): Promise<SystemNameplat
 
 /** Absolute URL of the system hub (resolves a relative path against the current origin). */
 export function systemHubUrl(): string {
-    const configured = config().systemHubUrl;
-
-    if (/^https?:\/\//i.test(configured)) {
-        return configured;
-    }
-
-    return new URL(configured, window.location.origin).toString();
+    return absoluteUrl(config().systemHubUrl);
 }
 
 async function readBody(response: Response): Promise<SystemCommandResponse | null> {

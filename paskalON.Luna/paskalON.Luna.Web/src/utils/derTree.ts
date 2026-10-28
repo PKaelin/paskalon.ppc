@@ -20,6 +20,8 @@ export interface DerTreeNode {
     id: string;
     name: string;
     type: DerNodeType;
+    /** Device ID of the device nodes (power meters, PCS, battery banks and solar panels), undefined otherwise. */
+    deviceId?: number;
     children: DerTreeNode[];
 }
 
@@ -45,11 +47,15 @@ export const derNodeIcons: Record<DerNodeType, string> = {
 };
 
 function deviceNodes(prefix: string, devices: DeviceDto[] | null | undefined, type: DerNodeType): DerTreeNode[] {
-    return (devices ?? []).map((device, index) => ({ id: `${prefix}:${index}`, name: device.name, type, children: [] }));
+    return (devices ?? []).map((device, index) => deviceNode(`${prefix}:${index}`, device, type));
+}
+
+function deviceNode(id: string, device: DeviceDto, type: DerNodeType): DerTreeNode {
+    return { id, name: device.name, type, deviceId: device.deviceId, children: [] };
 }
 
 function unitNode(prefix: string, unit: DerUnitDto): DerTreeNode {
-    const pcs: DerTreeNode = { id: `${prefix}/pcs`, name: unit.powerConversionSystem.name, type: 'PcsDto', children: [] };
+    const pcs = deviceNode(`${prefix}/pcs`, unit.powerConversionSystem, 'PcsDto');
 
     if (unit.unitType === 'battery') {
         return { id: prefix, name: unit.name, type: 'DerBatteryStorageUnitDto', children: [pcs, ...deviceNodes(`${prefix}/bb`, unit.batteryBanks, 'BbDto')] };
@@ -62,7 +68,7 @@ function circuitNode(prefix: string, circuit: DerCircuitDto): DerTreeNode {
     const meter = circuit.circuitPowerMeter;
     const children: DerTreeNode[] = meter === null || meter === undefined
         ? []
-        : [{ id: `${prefix}/pm-circuit`, name: meter.name, type: 'PmCircuitDto', children: [] }];
+        : [deviceNode(`${prefix}/pm-circuit`, meter, 'PmCircuitDto')];
 
     (circuit.derUnits ?? []).forEach((unit, index) => children.push(unitNode(`${prefix}/unit:${index}`, unit)));
 

@@ -9,12 +9,14 @@ CONFIG_FILE=${1:-/usr/share/nginx/html/config.json}
 
 : "${APP_API_BASE_URL:=/api}"
 : "${APP_SYSTEM_HUB_URL:=/hubs/system}"
+: "${APP_DEVICE_HUB_URL:=/hubs/device}"
 
 cat > "$CONFIG_FILE" <<JSON
 {
   "apiBaseUrl": "${APP_API_BASE_URL}",
-  "systemHubUrl": "${APP_SYSTEM_HUB_URL}"
+  "systemHubUrl": "${APP_SYSTEM_HUB_URL}",
+  "deviceHubUrl": "${APP_DEVICE_HUB_URL}"
 }
 JSON
 
-echo "40-app-config.sh: wrote $CONFIG_FILE (api=${APP_API_BASE_URL}, hub=${APP_SYSTEM_HUB_URL}, upstream=${LUNA_API_URL:-unset})"
+echo "40-app-config.sh: wrote $CONFIG_FILE (api=${APP_API_BASE_URL}, hub=${APP_SYSTEM_HUB_URL}, device hub=${APP_DEVICE_HUB_URL}, upstream=${LUNA_API_URL:-unset})"

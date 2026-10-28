@@ -7,6 +7,7 @@ using paskalON.Devices.Client;
 using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
+using paskalON.Devices.Dto.Meters.PowerMeters;
 using paskalON.Devices.Dto.Meters.PowerMeters.Concretes;
 using paskalON.Luna.Dto.Devices;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -76,6 +77,13 @@ namespace paskalON.Luna.Application
                 PowerFactor = core.PowerFactor ?? 0,
                 Frequency = core.Frequency ?? 0
             };
+        }
+
+
+        /// <inheritdoc/>
+        public PmSystemDto? GetSystemPowerMeter(int deviceId)
+        {
+            return _deviceClient.Der.SystemPowerMeters.FirstOrDefault(meter => meter.DeviceId == deviceId);
         }
 
 
