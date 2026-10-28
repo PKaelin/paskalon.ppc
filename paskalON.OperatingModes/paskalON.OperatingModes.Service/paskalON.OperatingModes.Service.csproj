@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Hosting\paskalON.Hosting.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Telemetry\paskalON.Telemetry.csproj" />
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Client\paskalON.Devices.Client.csproj" />
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />

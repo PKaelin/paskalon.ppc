@@ -240,5 +240,6 @@ catch (Exception ex)
         app.Logger.LogError(ex.StackTrace);
     }
 
+    // Fail application
     throw;
 }

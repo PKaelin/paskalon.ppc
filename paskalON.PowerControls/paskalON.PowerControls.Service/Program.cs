@@ -9,6 +9,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using paskalON.Devices.Client;
 using paskalON.Devices.Client.Subscribers;
+using paskalON.Hosting;
 using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
@@ -67,6 +68,9 @@ try
     {
         throw new ApplicationException("START_PUBLISHERS is not configured as a boolean");
     }
+
+    // Get startup retry options for dependencies that are not yet available
+    StartupRetryOptions startupRetryOptions = StartupRetryOptions.FromEnvironment();
 
     // Create builder
     Console.WriteLine("Building service.....");
@@ -166,29 +170,32 @@ try
     lifetime.ApplicationStarted.Register(() => { app.Logger.LogInformation("Microservice Power Controls has started"); });
     lifetime.ApplicationStopping.Register(() => { app.Logger.LogInformation("Microservice Power Controls is stopping"); });
     app.Logger.LogInformation("Application starts initializing services.....");
+    StartupRetry startupRetry = new StartupRetry(app.Logger, TimeProvider.System, startupRetryOptions);
     // Create and load device manager
     IPowerControlManager manager = app.Services.GetRequiredService<IPowerControlManager>();
 
     using (IServiceScope scope = app.Services.CreateScope())
     {
+        // Retry while the database is not reachable
         IRepository<PowerControlContext, SystemConfig> repository = scope.ServiceProvider.GetRequiredService<IRepository<PowerControlContext, SystemConfig>>();
-        SystemConfig config = (await repository.GetAsync(0, 1, o => o.Id)).Single();
+        SystemConfig config = await startupRetry.ExecuteAsync("Load system configuration",
+            async () => (await repository.GetAsync(0, 1, o => o.Id)).Single(), DatabaseTransientExceptionFilter.IsTransient);
 
         // Subscribe to the setpoint targets, they are applied once the application starts running
         IPowerSetpointSubscriber powerSetpointSubscriber = app.Services.GetRequiredService<IPowerSetpointSubscriber>();
         powerSetpointSubscriber.Subscribe(config.SubscriberTopicCurrentSetpoint);
         powerSetpointSubscriber.SubscribeDerUnit(config.SubscriberTopicCurrentDerUnitSetpoint);
 
-        // Load and initialize device client
+        // Load and initialize device client, retry while the device service is not reachable
         SubscriberTopic topics = GetSubscriberTopic(config);
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
-        await deviceClient.Initialize(topics);
+        await startupRetry.ExecuteAsync("Initialize device client", () => deviceClient.Initialize(topics), HttpTransientExceptionFilter.IsTransient);
         // Initialize target publisher with the configured topics, before the manager registers the DER units
         IDerUnitTargetPublisher targetPublisher = app.Services.GetRequiredService<IDerUnitTargetPublisher>();
         targetPublisher.Initialize(PublisherTopic.Create(config));
-        // Load and initialize manager
+        // Load and initialize manager, retry while the database is not reachable
         IPowerControlRepository powerControlRepository = scope.ServiceProvider.GetRequiredService<IPowerControlRepository>();
-        await manager.Initialize(powerControlRepository);
+        await startupRetry.ExecuteAsync("Initialize power control manager", () => manager.Initialize(powerControlRepository), DatabaseTransientExceptionFilter.IsTransient);
 
         if (startPublisher == true)
         {
@@ -220,6 +227,7 @@ catch (Exception ex)
         app.Logger.LogError(ex.StackTrace);
     }
 
+    // Fail application
     throw;
 }
 

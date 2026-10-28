@@ -17,6 +17,8 @@ services:
       - TELEMETRY_LOGGING_ENDPOINT=http://collector:4317
       - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
       - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
+      - STARTUP_RETRY_COUNT=6
+      - STARTUP_RETRY_INTERVAL_SECONDS=15
     secrets:
       - messaging_connection
       - deviceservice_connection

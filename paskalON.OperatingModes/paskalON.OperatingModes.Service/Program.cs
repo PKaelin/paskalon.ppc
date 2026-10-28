@@ -9,6 +9,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using paskalON.Devices.Client;
 using paskalON.Devices.Client.Subscribers;
+using paskalON.Hosting;
 using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
 using paskalON.Messaging.Redis;
@@ -73,6 +74,9 @@ try
     {
         throw new ApplicationException("START_WORKERS is not configured as a boolean");
     }
+
+    // Get startup retry options for dependencies that are not yet available
+    StartupRetryOptions startupRetryOptions = StartupRetryOptions.FromEnvironment();
 
     Console.WriteLine("Create builder service.....");
     var builder = WebApplication.CreateBuilder(args);
@@ -174,25 +178,28 @@ try
     lifetime.ApplicationStarted.Register(() => { app.Logger.LogInformation("Microservice Operating Mode has started."); });
     lifetime.ApplicationStopping.Register(() => { app.Logger.LogInformation("Microservice Operating Mode is stopping."); });
     app.Logger.LogInformation("Application starts initializing services.....");
+    StartupRetry startupRetry = new StartupRetry(app.Logger, TimeProvider.System, startupRetryOptions);
     // Create and load device manager
     IOperatingModeManager manager = app.Services.GetRequiredService<IOperatingModeManager>();
 
     using (IServiceScope scope = app.Services.CreateScope())
     {
+        // Retry while the database is not reachable
         IRepository<OperatingModeContext, SystemConfig> systemConfigRepository = scope.ServiceProvider.GetRequiredService<IRepository<OperatingModeContext, SystemConfig>>();
-        SystemConfig config = (await systemConfigRepository.GetAsync(0, 1, o => o.Id)).Single();
-        // Load and initialize device client
+        SystemConfig config = await startupRetry.ExecuteAsync("Load system configuration",
+            async () => (await systemConfigRepository.GetAsync(0, 1, o => o.Id)).Single(), DatabaseTransientExceptionFilter.IsTransient);
+        // Load and initialize device client, retry while the device service is not reachable
         SubscriberTopic topics = GetSubscriberTopic(config);
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
-        await deviceClient.Initialize(topics);
+        await startupRetry.ExecuteAsync("Initialize device client", () => deviceClient.Initialize(topics), HttpTransientExceptionFilter.IsTransient);
         // Create setpoints publisher with the configured topics
         PublisherTopic publisherTopic = PublisherTopic.Create(config);
         ILogger<SetpointsPublisher> setpointsPublisherLogger = app.Services.GetRequiredService<ILogger<SetpointsPublisher>>();
         IMessagePublisher messagePublisher = app.Services.GetRequiredService<IMessagePublisher>();
         SetpointsPublisher setpointsPublisher = new SetpointsPublisher(setpointsPublisherLogger, messagePublisher, publisherTopic);
-        // Load and initialize manager
+        // Load and initialize manager, retry while the database is not reachable
         IOperatingModeRepository repository = scope.ServiceProvider.GetRequiredService<IOperatingModeRepository>();
-        await manager.Initialize(repository, config, setpointsPublisher);
+        await startupRetry.ExecuteAsync("Initialize operating mode manager", () => manager.Initialize(repository, config, setpointsPublisher), DatabaseTransientExceptionFilter.IsTransient);
 
         if (startPublisher == true)
         {
@@ -228,6 +235,9 @@ catch (Exception ex)
         app.Logger.LogError(errorMessage);
         app.Logger.LogError(ex.StackTrace);
     }
+
+    // Fail application
+    throw;
 }
 
 

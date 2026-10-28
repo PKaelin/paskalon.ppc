@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.SignalR;
 using paskalON.Devices.Client;
 using paskalON.Devices.Client.Subscribers;
+using paskalON.Hosting;
 using paskalON.Luna.Application;
 using paskalON.Luna.Domain.Configs;
 using paskalON.Luna.Dto.Systems;
@@ -55,6 +56,9 @@ try
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(metricsEndpointString, "Cannot find the metrics endpoint. TELEMETRY_METRICS_ENDPOINT");
     string? tracingEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_TRACING_ENDPOINT");
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(tracingEndpointString, "Cannot find the tracing endpoint. TELEMETRY_TRACING_ENDPOINT");
+
+    // Get startup retry options for dependencies that are not yet available
+    StartupRetryOptions startupRetryOptions = StartupRetryOptions.FromEnvironment();
 
     // Create builder
     Console.WriteLine("Building service.....");
@@ -136,11 +140,12 @@ try
     lifetime.ApplicationStarted.Register(() => { app.Logger.LogInformation("Microservice Luna has started....."); });
     lifetime.ApplicationStopped.Register(() => { app.Logger.LogInformation("Microservice Luna has stopping....."); });
     app.Logger.LogInformation("Application starts initializing services.....");
+    StartupRetry startupRetry = new StartupRetry(app.Logger, TimeProvider.System, startupRetryOptions);
 
-    // Initialize the device client with the subscriber topics of the system configuration
+    // Initialize the device client with the subscriber topics of the system configuration, retry while the device service is not reachable
     SubscriberTopic topics = GetSubscriberTopic(config);
     IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
-    await deviceClient.Initialize(topics);
+    await startupRetry.ExecuteAsync("Initialize device client", () => deviceClient.Initialize(topics), HttpTransientExceptionFilter.IsTransient);
 
     // Subscribe to the power targets and setpoints, they are handled once the application starts running
     IPowerTargetSubscriber powerTargetSubscriber = app.Services.GetRequiredService<IPowerTargetSubscriber>();
@@ -174,6 +179,7 @@ catch (Exception ex)
         app.Logger.LogError(ex.StackTrace);
     }
 
+    // Fail application
     throw;
 }
 

@@ -141,4 +141,7 @@ catch (Exception ex)
         app.Logger.LogError(error);
         app.Logger.LogError(ex.StackTrace);
     }
+
+    // Fail application
+    throw;
 }
