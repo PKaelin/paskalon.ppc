@@ -12,6 +12,18 @@ namespace paskalON.Luna.Service.WebApi.Hubs
         /// <summary>
         /// A system power meter (PmSystemDto).
         /// </summary>
-        SystemPowerMeter
+        SystemPowerMeter,
+
+
+        /// <summary>
+        /// An auxiliary power meter (PmAuxiliaryDto).
+        /// </summary>
+        AuxiliaryPowerMeter,
+
+
+        /// <summary>
+        /// An external power meter (PmExternalDto).
+        /// </summary>
+        ExternalPowerMeter
     }
 }

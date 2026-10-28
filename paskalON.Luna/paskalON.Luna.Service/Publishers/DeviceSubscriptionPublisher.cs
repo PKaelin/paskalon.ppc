@@ -111,6 +111,12 @@ namespace paskalON.Luna.Service.Publishers
                     case DeviceSubscriptionType.SystemPowerMeter:
                         await client.SystemPowerMeterUpdated(subscription.DeviceId, _deviceManager.GetSystemPowerMeter(subscription.DeviceId));
                         break;
+                    case DeviceSubscriptionType.AuxiliaryPowerMeter:
+                        await client.AuxiliaryPowerMeterUpdated(subscription.DeviceId, _deviceManager.GetAuxiliaryPowerMeter(subscription.DeviceId));
+                        break;
+                    case DeviceSubscriptionType.ExternalPowerMeter:
+                        await client.ExternalPowerMeterUpdated(subscription.DeviceId, _deviceManager.GetExternalPowerMeter(subscription.DeviceId));
+                        break;
                     default:
                         _logger.LogWarning("Device subscription type {Type} is not supported.", subscription.Type);
                         break;

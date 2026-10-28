@@ -214,6 +214,58 @@ namespace paskalON.Luna.Application.UnitTest
 
 
         /// <summary>
+        /// Confirms the auxiliary power meter with the device ID is returned, or null for an unknown device ID.
+        /// </summary>
+        /// <param name="deviceId">The device ID of the requested auxiliary power meter.</param>
+        /// <param name="isFound">True if the DER has an auxiliary power meter with the device ID.</param>
+        [TestMethod]
+        [DataRow(11, true)]
+        [DataRow(12, true)]
+        [DataRow(5, false)]
+        public void GetAuxiliaryPowerMeterReturnsMeterWithDeviceIdTest(int deviceId, bool isFound)
+        {
+            List<PmAuxiliaryDto> meters = new List<PmAuxiliaryDto>
+            {
+                new PmAuxiliaryDto(new PmAuxiliaryDefinitionDto { DeviceId = 11, Name = "AuxPm11", TargetAddress = "localhost", TargetPort = 502 }),
+                new PmAuxiliaryDto(new PmAuxiliaryDefinitionDto { DeviceId = 12, Name = "AuxPm12", TargetAddress = "localhost", TargetPort = 502 })
+            };
+            DerDto der = CreateDer(new List<PmSystemDto>(), new List<BbDto>()) with { AuxiliaryPowerMeters = meters };
+            _deviceClient.Setup(client => client.Der).Returns(der);
+
+            PmAuxiliaryDto? meter = _manager.GetAuxiliaryPowerMeter(deviceId);
+
+            Assert.AreEqual(isFound, meter is not null);
+            Assert.AreSame(meters.FirstOrDefault(expected => expected.DeviceId == deviceId), meter);
+        }
+
+
+        /// <summary>
+        /// Confirms the external power meter with the device ID is returned, or null for an unknown device ID.
+        /// </summary>
+        /// <param name="deviceId">The device ID of the requested external power meter.</param>
+        /// <param name="isFound">True if the DER has an external power meter with the device ID.</param>
+        [TestMethod]
+        [DataRow(21, true)]
+        [DataRow(22, true)]
+        [DataRow(5, false)]
+        public void GetExternalPowerMeterReturnsMeterWithDeviceIdTest(int deviceId, bool isFound)
+        {
+            List<PmExternalDto> meters = new List<PmExternalDto>
+            {
+                new PmExternalDto(new PmExternalDefinitionDto { DeviceId = 21, Name = "ExtPm21", TargetAddress = "localhost", TargetPort = 502 }),
+                new PmExternalDto(new PmExternalDefinitionDto { DeviceId = 22, Name = "ExtPm22", TargetAddress = "localhost", TargetPort = 502 })
+            };
+            DerDto der = CreateDer(new List<PmSystemDto>(), new List<BbDto>()) with { ExternalPowerMeters = meters };
+            _deviceClient.Setup(client => client.Der).Returns(der);
+
+            PmExternalDto? meter = _manager.GetExternalPowerMeter(deviceId);
+
+            Assert.AreEqual(isFound, meter is not null);
+            Assert.AreSame(meters.FirstOrDefault(expected => expected.DeviceId == deviceId), meter);
+        }
+
+
+        /// <summary>
         /// Creates a DER with the system power meters and one battery storage unit with the battery banks.
         /// </summary>
         /// <param name="systemMeters">The system power meters.</param>

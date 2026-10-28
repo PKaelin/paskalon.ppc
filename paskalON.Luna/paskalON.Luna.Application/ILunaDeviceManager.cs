@@ -36,5 +36,21 @@ namespace paskalON.Luna.Application
         /// <param name="deviceId">The device ID of the system power meter.</param>
         /// <returns>The system power meter, or null if the DER configuration has no system power meter with the device ID.</returns>
         PmSystemDto? GetSystemPowerMeter(int deviceId);
+
+
+        /// <summary>
+        /// Gets an auxiliary power meter of the DER configuration.
+        /// </summary>
+        /// <param name="deviceId">The device ID of the auxiliary power meter.</param>
+        /// <returns>The auxiliary power meter, or null if the DER configuration has no auxiliary power meter with the device ID.</returns>
+        PmAuxiliaryDto? GetAuxiliaryPowerMeter(int deviceId);
+
+
+        /// <summary>
+        /// Gets an external power meter of the DER configuration.
+        /// </summary>
+        /// <param name="deviceId">The device ID of the external power meter.</param>
+        /// <returns>The external power meter, or null if the DER configuration has no external power meter with the device ID.</returns>
+        PmExternalDto? GetExternalPowerMeter(int deviceId);
     }
 }

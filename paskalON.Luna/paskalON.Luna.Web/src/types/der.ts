@@ -51,8 +51,16 @@ export interface PmDetailDto {
     reactiveEnergyReceived: ReactiveEnergyDto | null;
 }
 
-/** PmSystemDto, a system power meter. Core and detail are null until the device service delivered them. */
-export interface PmSystemDto extends DeviceDto {
+/** The power meter DTO types, all with a PmCoreBase core and a PmDetailBase detail. */
+export type PowerMeterType = 'PmSystemDto' | 'PmAuxiliaryDto' | 'PmExternalDto';
+
+/** True if the type is a power meter DTO type. */
+export function isPowerMeterType(type: string): type is PowerMeterType {
+    return type === 'PmSystemDto' || type === 'PmAuxiliaryDto' || type === 'PmExternalDto';
+}
+
+/** PmSystemDto, PmAuxiliaryDto or PmExternalDto. Core and detail are null until the device service delivered them. */
+export interface PowerMeterDto extends DeviceDto {
     core: PmCoreDto | null;
     detail: PmDetailDto | null;
 }
@@ -94,7 +102,7 @@ export interface DerGroupDto {
 export interface DerDto {
     name: string;
     derGroups: DerGroupDto[];
-    systemPowerMeters: PmSystemDto[];
-    auxiliaryPowerMeters: DeviceDto[];
-    externalPowerMeters: DeviceDto[];
+    systemPowerMeters: PowerMeterDto[];
+    auxiliaryPowerMeters: PowerMeterDto[];
+    externalPowerMeters: PowerMeterDto[];
 }

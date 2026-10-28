@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue';
-import { useSystemPowerMeter } from '../composables/useSystemPowerMeter';
+import { usePowerMeter } from '../composables/usePowerMeter';
 import type { HubStatus } from '../composables/useSystemMeterSummary';
-import { PowerMeterStateNames } from '../types/der';
+import { PowerMeterStateNames, type PowerMeterType } from '../types/der';
 
 /** A name and the formatted value of a property. */
 interface PropertyRow {
@@ -18,11 +18,13 @@ const Kilo = 1_000;
 const NoValue = 'None';
 
 const props = defineProps<{
-    /** Device ID of the system power meter. */
+    /** Type of the power meter (system, auxiliary or external). */
+    meterType: PowerMeterType;
+    /** Device ID of the power meter. */
     deviceId: number;
 }>();
 
-const { status, powerMeter, received } = useSystemPowerMeter(toRef(() => props.deviceId));
+const { status, powerMeter, received } = usePowerMeter(toRef(() => props.meterType), toRef(() => props.deviceId));
 
 const formatter = new Intl.NumberFormat(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 
@@ -102,7 +104,7 @@ const hint = computed(() => {
     }
 
     if (received.value && powerMeter.value === null) {
-        return 'The system power meter is no longer in the DER configuration.';
+        return 'The power meter is no longer in the DER configuration.';
     }
 
     return null;

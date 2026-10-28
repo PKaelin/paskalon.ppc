@@ -63,6 +63,30 @@ namespace paskalON.Luna.Service.WebApi.Hubs
 
 
         /// <summary>
+        /// Subscribes the caller to an auxiliary power meter, replacing its previous subscription.
+        /// </summary>
+        /// <param name="deviceId">Device ID of the auxiliary power meter.</param>
+        /// <returns>Task</returns>
+        public async Task SubscribeAuxiliaryPowerMeter(int deviceId)
+        {
+            _subscriptions.Subscribe(Context.ConnectionId, new DeviceSubscription(DeviceSubscriptionType.AuxiliaryPowerMeter, deviceId));
+            await Clients.Caller.AuxiliaryPowerMeterUpdated(deviceId, _deviceManager.GetAuxiliaryPowerMeter(deviceId));
+        }
+
+
+        /// <summary>
+        /// Subscribes the caller to an external power meter, replacing its previous subscription.
+        /// </summary>
+        /// <param name="deviceId">Device ID of the external power meter.</param>
+        /// <returns>Task</returns>
+        public async Task SubscribeExternalPowerMeter(int deviceId)
+        {
+            _subscriptions.Subscribe(Context.ConnectionId, new DeviceSubscription(DeviceSubscriptionType.ExternalPowerMeter, deviceId));
+            await Clients.Caller.ExternalPowerMeterUpdated(deviceId, _deviceManager.GetExternalPowerMeter(deviceId));
+        }
+
+
+        /// <summary>
         /// Removes the subscription of the caller.
         /// </summary>
         public void Unsubscribe()

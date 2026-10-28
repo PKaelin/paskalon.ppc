@@ -97,7 +97,7 @@ namespace paskalON.Luna.Application.UnitTest
             SystemCommandResult result = await _manager.StartAsync();
 
             Assert.AreEqual(expectedResult, result);
-            _deviceServer.Verify(server => server.ConnectAllMetersAsync(It.IsAny<CancellationToken>()), Times.Exactly(expectedStartCalls));
+            _deviceServer.Verify(server => server.ConnectAllMeters(It.IsAny<CancellationToken>()), Times.Exactly(expectedStartCalls));
             _deviceServer.Verify(server => server.StartAllPcs(It.IsAny<CancellationToken>()), Times.Exactly(expectedStartCalls));
         }
 

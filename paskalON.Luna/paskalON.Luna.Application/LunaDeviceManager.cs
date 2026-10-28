@@ -87,6 +87,20 @@ namespace paskalON.Luna.Application
         }
 
 
+        /// <inheritdoc/>
+        public PmAuxiliaryDto? GetAuxiliaryPowerMeter(int deviceId)
+        {
+            return _deviceClient.Der.AuxiliaryPowerMeters.FirstOrDefault(meter => meter.DeviceId == deviceId);
+        }
+
+
+        /// <inheritdoc/>
+        public PmExternalDto? GetExternalPowerMeter(int deviceId)
+        {
+            return _deviceClient.Der.ExternalPowerMeters.FirstOrDefault(meter => meter.DeviceId == deviceId);
+        }
+
+
         /// <summary>
         /// Averages the state of charge of all battery banks that have no communication error and a state of charge.
         /// </summary>
