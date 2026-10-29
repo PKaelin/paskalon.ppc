@@ -107,6 +107,11 @@ MetricsPublisher.Register<Device, double>(this, nameof(Power), MetricType.Gauge,
 ![Metrics Publisher Design](./Docs/Metrics%20Publisher%20Design.drawio.svg)
 
 
+## Failover 
+[See: FAILOVER.md](./FAILOVER.md)
+
+![Failover](./Docs/Failover.drawio.svg)
+
 ---
 
 *Please note the Monorepo for a small early development.*  
