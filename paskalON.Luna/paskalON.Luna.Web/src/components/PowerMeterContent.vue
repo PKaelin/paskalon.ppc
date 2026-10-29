@@ -3,7 +3,7 @@ import { computed, toRef } from 'vue';
 import DeviceSummary from './DeviceSummary.vue';
 import { useDeviceSubscription } from '../composables/useDeviceSubscription';
 import { PowerMeterStateNames, type PowerMeterDto, type PowerMeterType } from '../types/der';
-import { formatBoolean, formatEnum, formatQuantity, Kilo, Mega, type PropertyRow } from '../utils/deviceValues';
+import { communicationErrorRow, formatEnum, formatQuantity, Kilo, Mega, type PropertyRow } from '../utils/deviceValues';
 
 const props = defineProps<{
     /** Type of the power meter (system, auxiliary or external). */
@@ -32,7 +32,7 @@ const leftRows = computed<PropertyRow[]>(() => [
 ]);
 
 const rightRows = computed<PropertyRow[]>(() => [
-    { name: 'Communication Error', value: formatBoolean(core.value?.communicationError) },
+    communicationErrorRow(core.value?.communicationError),
     { name: 'Active Power A', value: formatQuantity(detail.value?.activePowerA?.watts, Mega, 'MW') },
     { name: 'Active Power B', value: formatQuantity(detail.value?.activePowerB?.watts, Mega, 'MW') },
     { name: 'Active Power C', value: formatQuantity(detail.value?.activePowerC?.watts, Mega, 'MW') },

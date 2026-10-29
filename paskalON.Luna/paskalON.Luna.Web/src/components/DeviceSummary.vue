@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { HubStatus } from '../composables/useSystemMeterSummary';
-import type { PropertyRow } from '../utils/deviceValues';
+import type { PropertyRow, ValueIndicator } from '../utils/deviceValues';
 
 const props = defineProps<{
     status: HubStatus;
@@ -35,6 +35,11 @@ const hint = computed(() => {
 });
 
 const columns = computed(() => [props.leftRows, props.rightRows]);
+
+const indicators: Record<ValueIndicator, { icon: string; label: string }> = {
+    ok: { icon: 'bi-check-square-fill value-indicator-ok', label: 'OK' },
+    fault: { icon: 'bi-x-square-fill value-indicator-fault', label: 'Not OK' }
+};
 </script>
 
 <template>
@@ -59,7 +64,11 @@ const columns = computed(() => [props.leftRows, props.rightRows]);
             <dl v-for="(rows, column) in columns" :key="column" class="pm-values">
                 <template v-for="(row, index) in rows" :key="row.name">
                     <dt :class="{ 'pm-values-first': index === 0 }">{{ row.name }}</dt>
-                    <dd :class="{ 'pm-values-first': index === 0 }">{{ row.value }}</dd>
+                    <dd :class="{ 'pm-values-first': index === 0 }">
+                        {{ row.value }}
+                        <i v-if="row.indicator" class="bi value-indicator" :class="indicators[row.indicator].icon"
+                           role="img" :aria-label="indicators[row.indicator].label" :title="indicators[row.indicator].label"></i>
+                    </dd>
                 </template>
             </dl>
         </div>

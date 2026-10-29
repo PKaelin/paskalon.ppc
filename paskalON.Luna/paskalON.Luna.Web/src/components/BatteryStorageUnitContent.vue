@@ -4,7 +4,7 @@ import BatteryStorageUnitControls from './BatteryStorageUnitControls.vue';
 import DeviceSummary from './DeviceSummary.vue';
 import { useDeviceSubscription } from '../composables/useDeviceSubscription';
 import type { DerBatteryStorageUnitDto } from '../types/der';
-import { formatBoolean, formatQuantity, Mega, type PropertyRow } from '../utils/deviceValues';
+import { communicationErrorRow, formatBoolean, formatQuantity, Mega, type PropertyRow } from '../utils/deviceValues';
 
 const props = defineProps<{
     /** Name of the battery storage unit (DER units have no device ID). */
@@ -20,7 +20,7 @@ const leftRows = computed<PropertyRow[]>(() => [
 ]);
 
 const rightRows = computed<PropertyRow[]>(() => [
-    { name: 'Communication Error', value: formatBoolean(device.value?.communicationError) }
+    communicationErrorRow(device.value?.communicationError)
 ]);
 </script>
 

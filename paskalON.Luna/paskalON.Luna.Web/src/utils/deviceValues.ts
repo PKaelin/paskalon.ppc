@@ -2,10 +2,15 @@
  * Formatting of the property values of a device in the system tab.
  */
 
+/** Icon next to a value that tells at a glance whether it is all right ('ok') or not ('fault'). */
+export type ValueIndicator = 'ok' | 'fault';
+
 /** A name and the formatted value of a property. */
 export interface PropertyRow {
     name: string;
     value: string;
+    /** Optional icon next to the value. */
+    indicator?: ValueIndicator;
 }
 
 export const Mega = 1_000_000;
@@ -45,4 +50,15 @@ export function formatEnum(value: number | string | null | undefined, names: Rec
     }
 
     return typeof value === 'string' ? value : names[value] ?? String(value);
+}
+
+/** Row of the communication error, with a 'fault' icon if there is a communication error and an 'ok' icon if not. */
+export function communicationErrorRow(value: boolean | null | undefined): PropertyRow {
+    const row: PropertyRow = { name: 'Communication Error', value: formatBoolean(value) };
+
+    if (value === null || value === undefined) {
+        return row;
+    }
+
+    return { ...row, indicator: value ? 'fault' : 'ok' };
 }

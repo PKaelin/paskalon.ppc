@@ -689,6 +689,19 @@ button.der-tree-toggle:disabled {
     border-bottom: 1px solid rgba(255, 255, 255, .15);
 }
 
+/* Icon next to a value: green tick if all right, red X if not. */
+.value-indicator {
+    margin-left: .375rem;
+}
+
+.value-indicator-ok {
+    color: var(--bs-success, #5cb85c);
+}
+
+.value-indicator-fault {
+    color: var(--bs-danger, #d9534f);
+}
+
 /* Controls of a DER unit: one row of controls spaced out evenly, wrapping on narrow screens. */
 .unit-controls-section {
     margin-bottom: 1.5rem;

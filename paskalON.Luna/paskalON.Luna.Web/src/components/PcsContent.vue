@@ -3,7 +3,7 @@ import { computed, toRef } from 'vue';
 import DeviceSummary from './DeviceSummary.vue';
 import { useDeviceSubscription } from '../composables/useDeviceSubscription';
 import { PcsStateNames, type PcsDto } from '../types/der';
-import { formatBoolean, formatEnum, formatQuantity, Kilo, Mega, NoValue, type PropertyRow } from '../utils/deviceValues';
+import { communicationErrorRow, formatBoolean, formatEnum, formatQuantity, Kilo, Mega, NoValue, type PropertyRow } from '../utils/deviceValues';
 
 const props = defineProps<{
     /** Device ID of the power conversion system. */
@@ -42,7 +42,7 @@ const leftRows = computed<PropertyRow[]>(() => [
 ]);
 
 const rightRows = computed<PropertyRow[]>(() => [
-    { name: 'Communication Error', value: formatBoolean(core.value?.communicationError) },
+    communicationErrorRow(core.value?.communicationError),
     { name: 'Is In Maintenance Mode', value: formatBoolean(detail.value?.isInMaintenanceMode) },
     { name: 'Is AC Breaker Closed', value: formatBoolean(detail.value?.isACBreakerClosed) },
     ...dcContactorRows.value

@@ -3,7 +3,7 @@ import { computed, toRef } from 'vue';
 import DeviceSummary from './DeviceSummary.vue';
 import { useDeviceSubscription } from '../composables/useDeviceSubscription';
 import { BatteryBankFlowDirectionNames, BatteryBankStateNames, type BbDto } from '../types/der';
-import { formatBoolean, formatEnum, formatQuantity, Kilo, type PropertyRow } from '../utils/deviceValues';
+import { communicationErrorRow, formatBoolean, formatEnum, formatQuantity, Kilo, type PropertyRow } from '../utils/deviceValues';
 
 const props = defineProps<{
     /** Device ID of the battery bank. */
@@ -25,7 +25,7 @@ const leftRows = computed<PropertyRow[]>(() => [
 ]);
 
 const rightRows = computed<PropertyRow[]>(() => [
-    { name: 'Communication Error', value: formatBoolean(core.value?.communicationError) },
+    communicationErrorRow(core.value?.communicationError),
     { name: 'Is In Maintenance Mode', value: formatBoolean(detail.value?.isInMaintenanceMode) },
     { name: 'State Of Health', value: formatQuantity(detail.value?.stateOfHealth, 1, '%') },
     { name: 'Minimum Cell Voltage', value: formatQuantity(detail.value?.minimumCellVoltage, 1, 'V') },
