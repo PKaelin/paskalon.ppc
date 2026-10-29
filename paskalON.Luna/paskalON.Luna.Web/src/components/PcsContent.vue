@@ -29,10 +29,10 @@ const dcContactorRows = computed<PropertyRow[]>(() => {
 
 const leftRows = computed<PropertyRow[]>(() => [
     { name: 'State', value: formatEnum(core.value?.state, PcsStateNames) },
-    { name: 'Active Power Target', value: formatQuantity(detail.value?.activePowerTarget?.watts, Mega, 'MW') },
+    { name: 'Active Power Target', value: formatQuantity(core.value?.activePowerTarget?.watts, Mega, 'MW') },
     { name: 'Active Power', value: formatQuantity(core.value?.activePower?.watts, Mega, 'MW') },
     { name: 'Available Active Power', value: formatQuantity(core.value?.activeAvailablePower?.watts, Mega, 'MW') },
-    { name: 'Reactive Power Target', value: formatQuantity(detail.value?.reactivePowerTarget?.voltAmperesReactive, Mega, 'MVAr') },
+    { name: 'Reactive Power Target', value: formatQuantity(core.value?.reactivePowerTarget?.voltAmperesReactive, Mega, 'MVAr') },
     { name: 'Reactive Power', value: formatQuantity(core.value?.reactivePower?.voltAmperesReactive, Mega, 'MVAr') },
     { name: 'Available Reactive Power', value: formatQuantity(core.value?.reactiveAvailablePower?.voltAmperesReactive, Mega, 'MVAr') },
     { name: 'DC Current', value: formatQuantity(core.value?.dcCurrent, Kilo, 'kA') },

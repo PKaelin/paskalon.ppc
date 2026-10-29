@@ -201,7 +201,9 @@ namespace paskalON.Devices.Client.UnitTest.Subscribers
             PcsCoreDto message = new PcsCoreDto
             {
                 DeviceId = 1,
+                ActivePowerTarget = new ActivePower(10),
                 ActivePower = new ActivePower(11),
+                ReactivePowerTarget = new ReactivePower(9),
                 ReactivePower = new ReactivePower(12),
                 ACCurrent = 13,
                 ACVoltage = 14,
@@ -257,8 +259,7 @@ namespace paskalON.Devices.Client.UnitTest.Subscribers
             PcsDetailDto message = new PcsDetailDto
             {
                 DeviceId = 1,
-                ActivePowerTarget = new ActivePower(11),
-                ReactivePowerTarget = new ReactivePower(12),
+                IsInMaintenanceMode = true,
                 IsACBreakerClosed = false,
                 IsDcContactorClosed = new bool[] { true },
             };

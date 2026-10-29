@@ -85,8 +85,10 @@ export interface PcsCoreDto {
     /** PcsState - a number, or the name if the service serializes enums as strings. */
     state: number | string;
     communicationError: boolean;
+    activePowerTarget: ActivePowerDto | null;
     activePower: ActivePowerDto | null;
     activeAvailablePower: ActivePowerDto | null;
+    reactivePowerTarget: ReactivePowerDto | null;
     reactivePower: ReactivePowerDto | null;
     reactiveAvailablePower: ReactivePowerDto | null;
     dcCurrent: number | null;
@@ -98,8 +100,6 @@ export interface PcsCoreDto {
 /** PcsDetailDto, the less frequently updated values of a power conversion system. */
 export interface PcsDetailDto {
     isInMaintenanceMode: boolean;
-    activePowerTarget: ActivePowerDto | null;
-    reactivePowerTarget: ReactivePowerDto | null;
     isACBreakerClosed: boolean | null;
     /** Closed state of each DC contactor, null if the PCS does not report it. */
     isDcContactorClosed: boolean[] | null;

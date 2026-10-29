@@ -33,6 +33,12 @@ namespace paskalON.Devices.Dto.PowerConversionSystems
 
 
         /// <summary>
+        /// Current active power target in Watts
+        /// </summary>
+        public ActivePower? ActivePowerTarget { get; init; }
+
+
+        /// <summary>
         /// Current active power output in Watts
         /// </summary>
         public ActivePower? ActivePower { get; init; }
@@ -42,6 +48,12 @@ namespace paskalON.Devices.Dto.PowerConversionSystems
         /// Current active available power output in Watts
         /// </summary>
         public ActivePower? ActiveAvailablePower { get; init; }
+
+
+        /// <summary>
+        /// Current reactive power target in Vars
+        /// </summary>
+        public ReactivePower? ReactivePowerTarget { get; init; }
 
 
         /// <summary>

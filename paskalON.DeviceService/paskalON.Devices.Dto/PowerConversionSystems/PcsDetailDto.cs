@@ -2,8 +2,6 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.PhysicalUnits.Electricals.Powers;
-
 namespace paskalON.Devices.Dto.PowerConversionSystems
 {
     /// <summary>
@@ -22,18 +20,6 @@ namespace paskalON.Devices.Dto.PowerConversionSystems
         /// Flag whether this instance is in maintenance mode this is when the DER Unit is in maintenance mode.
         /// </summary>
         public bool IsInMaintenanceMode { get; init; }
-
-
-        /// <summary>
-        /// Current active power target in Watts
-        /// </summary>
-        public ActivePower? ActivePowerTarget { get; init; }
-
-
-        /// <summary>
-        /// Current reactive power target in Vars
-        /// </summary>
-        public ReactivePower? ReactivePowerTarget { get; init; }
 
 
         /// <summary>

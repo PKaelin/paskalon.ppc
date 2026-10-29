@@ -117,12 +117,16 @@ namespace paskalON.Devices.Client.UnitTest.Registers
             PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test", TargetAddress = "localhost", TargetPort = 111 });
             register.Add(device);
 
-            PcsCoreDto update = new PcsCoreDto { DeviceId = 1, State = PcsState.Starting };
+            ActivePower activePower = new ActivePower(11);
+            ReactivePower reactivePower = new ReactivePower(22);
+            PcsCoreDto update = new PcsCoreDto { DeviceId = 1, State = PcsState.Starting, ActivePowerTarget = activePower, ReactivePowerTarget = reactivePower };
             register.UpdateCore(update);
 
             Assert.HasCount(1, register.Devices.Where(d => d.DeviceId == device.DeviceId));
             Assert.IsNotNull(register.Devices.Where(d => d.DeviceId == device.DeviceId).First().Core);
             Assert.AreEqual(update.State, register.Devices.Where(d => d.DeviceId == device.DeviceId).First().Core!.State);
+            Assert.AreEqual(activePower, register.Devices.Where(d => d.DeviceId == device.DeviceId).First().Core!.ActivePowerTarget);
+            Assert.AreEqual(reactivePower, register.Devices.Where(d => d.DeviceId == device.DeviceId).First().Core!.ReactivePowerTarget);
         }
 
 
@@ -135,15 +139,13 @@ namespace paskalON.Devices.Client.UnitTest.Registers
             PcsDto device = new PcsDto(new PcsDefinitionDto { DeviceId = 1, Name = "Test", TargetAddress = "localhost", TargetPort = 111 });
             register.Add(device);
 
-            ActivePower activePower = new ActivePower(11);
-            ReactivePower reactivePower = new ReactivePower(22);
-            PcsDetailDto update = new PcsDetailDto { DeviceId = 1, ActivePowerTarget = activePower, ReactivePowerTarget = reactivePower };
+            PcsDetailDto update = new PcsDetailDto { DeviceId = 1, IsInMaintenanceMode = true, IsACBreakerClosed = true };
             register.UpdateDetail(update);
 
             Assert.HasCount(1, register.Devices.Where(d => d.DeviceId == device.DeviceId));
             Assert.IsNotNull(register.Devices.Where(d => d.DeviceId == device.DeviceId).First().Detail);
-            Assert.AreEqual(activePower, register.Devices.Where(d => d.DeviceId == device.DeviceId).First().Detail!.ActivePowerTarget);
-            Assert.AreEqual(reactivePower, register.Devices.Where(d => d.DeviceId == device.DeviceId).First().Detail!.ReactivePowerTarget);
+            Assert.IsTrue(register.Devices.Where(d => d.DeviceId == device.DeviceId).First().Detail!.IsInMaintenanceMode);
+            Assert.IsTrue(register.Devices.Where(d => d.DeviceId == device.DeviceId).First().Detail!.IsACBreakerClosed);
         }
     }
 }
