@@ -4,29 +4,14 @@
 ## !!!This repo is under initial development!!!
 This project is not yet an actual power plant controller.  
 
----
----
-## You can find a sneak peek of the implementation here
-- Implemented metrics publisher [See](#metrics-publisher)
-- Implemented dataface [See](./paskalON.DeviceService/README.md#dataface)
-
-- Readme device service: [See](./paskalON.DeviceService/README.md)
-  - Implemented device service domain: [See](./paskalON.DeviceService/paskalON.Devices.Domain/README.md)
-  - Implemented device service config: [See](./paskalON.DeviceService/paskalON.Devices.Domain.Configs/README.md)
-
-- Readme operating mode: [See](./paskalON.OperatingModes/README.md)
-  - Implemented operating mode domain open loop [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#open-mode-open-loop-control)
-  - Implemented operating mode closed loop Active Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#frequency--active-power-p-control-modes)
-  - Implemented operating mode closed loop Reactive Power [See](./paskalON.OperatingModes/paskalON.OperatingModes.Domain/README.md#voltage--active-power-p-control-modes)
-
-## Not implemented for sure
-- Full Generic Modbus Support
-- Just a simple power control and constraint engine (not even an engine) 
----
----
 
 ## Core Power Control Overview
 ![test](./Docs/Core%20Power%20Control%20Controller%20Overview.drawio.svg)
+
+
+## Network and Deployment Architecture Overview
+![Network and Deployment Architecture Overview](./Docs/Network%20and%20Deployment%20Architecture%20Overview.svg)
+*Overview does not show platform and infrastructure services*
 
 
 ## Core Power Control Components
@@ -125,6 +110,7 @@ MetricsPublisher.Register<Device, double>(this, nameof(Power), MetricType.Gauge,
 ---
 
 *Please note the Monorepo for a small early development.*  
+*Also note that all the solutions contain a folder initial develpment which one day will be replaced with nuget packages.*
 *Use Multirepo if you have multiple independent teams or for better separation.*
 
 ---
