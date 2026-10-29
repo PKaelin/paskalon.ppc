@@ -7,14 +7,20 @@ using System.ComponentModel.DataAnnotations;
 namespace paskalON.Devices.Service.Dto.V1.Requests
 {
     /// <summary>
-    /// Put into maintenance DTO request.
+    /// Set maintenance DTO request.
     /// </summary>
-    public class PutIntoMaintenanceRequest
+    public class SetMaintenanceRequest
     {
         /// <summary>
-        /// Unit name of the unit to put into maintenance.
+        /// Unit name of the unit to set the maintenance mode for.
         /// </summary>
         [Required(AllowEmptyStrings = false)]
         public string UnitName { get; set; } = default!;
+
+
+        /// <summary>
+        /// True to put the unit into maintenance, false to take it out of maintenance.
+        /// </summary>
+        public bool IntoMaintenance { get; set; }
     }
 }

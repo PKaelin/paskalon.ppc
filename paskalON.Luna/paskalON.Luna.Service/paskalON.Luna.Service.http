@@ -17,11 +17,12 @@ GET {{paskalON.Luna.Service_HostAddress}}/api/v1/device/getder
 
 ###
 
-POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/putintomaintenance
+POST {{paskalON.Luna.Service_HostAddress}}/api/v1/device/setmaintenance
 Content-Type: application/json
 
 {
-    "unitName": "{{device.unitName}}"
+    "unitName": "{{device.unitName}}",
+    "intoMaintenance": true
 }
 
 ###

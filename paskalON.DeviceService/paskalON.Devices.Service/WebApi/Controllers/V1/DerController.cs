@@ -55,14 +55,14 @@ namespace paskalON.Devices.Service.WebApi.Controllers.V1
 
 
         /// <summary>
-        /// Puts the DER unit into maintenance mode.
+        /// Puts the DER unit into or out of maintenance mode.
         /// </summary>
-        /// <param name="request">Put into maintenance request.</param>
+        /// <param name="request">Set maintenance request.</param>
         /// <returns>Task</returns>
         [HttpPost]
-        public async Task<IActionResult> PutIntoMaintenance(PutIntoMaintenanceRequest request)
+        public async Task<IActionResult> SetMaintenance(SetMaintenanceRequest request)
         {
-            _deviceManager.PutIntoMaintenance(request.UnitName);
+            _deviceManager.SetMaintenance(request.UnitName, request.IntoMaintenance);
 
             return Ok();
         }

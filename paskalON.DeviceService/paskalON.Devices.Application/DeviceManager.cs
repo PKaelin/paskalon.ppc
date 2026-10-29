@@ -500,9 +500,9 @@ namespace paskalON.Devices.Application
 
 
         /// <inheritdoc/>
-        public void PutIntoMaintenance(string unitName)
+        public void SetMaintenance(string unitName, bool intoMaintenance)
         {
-            _logger.LogInformation("Put unit into maintenance. Unit name: {UnitName}", unitName);
+            _logger.LogInformation("Put unit into maintenance. Unit name: {UnitName}, into maintenance: {IntoMaintenance}", unitName, intoMaintenance);
             DerUnit? unit = Der.DerGroups.SelectMany(g => g.DerCircuits).SelectMany(c => c.DerUnits).FirstOrDefault(u => u.Name == unitName);
 
             if (unit == null)
@@ -511,7 +511,7 @@ namespace paskalON.Devices.Application
                 throw new InvalidOperationException($"Device Manager cannot find Unit with name: {unitName}");
             }
 
-            unit.IsInMaintenanceMode = true;
+            unit.IsInMaintenanceMode = intoMaintenance;
         }
 
 

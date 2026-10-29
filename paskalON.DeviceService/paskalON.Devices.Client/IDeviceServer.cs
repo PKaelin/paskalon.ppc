@@ -90,12 +90,13 @@ namespace paskalON.Devices.Client
 
 
         /// <summary>
-        /// Puts a DER unit into maintenance.
+        /// Puts a DER unit into or out of maintenance.
         /// </summary>
-        /// <param name="unitName">Name of the DER unit to put into maintenance.</param>
+        /// <param name="unitName">Name of the DER unit to put into or out of maintenance.</param>
+        /// <param name="intoMaintenance">True to put the unit into maintenance, false to take it out of maintenance.</param>
         /// <param name="cancellationToken">Token to cancel the request.</param>
         /// <returns>Task.</returns>
-        Task PutIntoMaintenance(string unitName, CancellationToken cancellationToken = default);
+        Task SetMaintenance(string unitName, bool intoMaintenance, CancellationToken cancellationToken = default);
 
 
         /// <summary>

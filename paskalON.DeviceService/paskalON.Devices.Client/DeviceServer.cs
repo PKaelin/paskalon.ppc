@@ -63,7 +63,7 @@ namespace paskalON.Devices.Client
         /// <summary>
         /// Relative path of the put into maintenance endpoint.
         /// </summary>
-        private const string PutIntoMaintenancePath = "der/putintomaintenance";
+        private const string SetMaintenancePath = "der/setmaintenance";
 
 
         /// <summary>
@@ -198,13 +198,13 @@ namespace paskalON.Devices.Client
 
 
         /// <inheritdoc/>
-        public async Task PutIntoMaintenance(string unitName, CancellationToken cancellationToken = default)
+        public async Task SetMaintenance(string unitName, bool intoMaintenance, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(unitName);
 
-            PutIntoMaintenanceRequest request = new PutIntoMaintenanceRequest { UnitName = unitName };
+            SetMaintenanceRequest request = new SetMaintenanceRequest { UnitName = unitName, IntoMaintenance = intoMaintenance };
 
-            using HttpResponseMessage response = await _client.PostAsJsonAsync(PutIntoMaintenancePath, request, cancellationToken);
+            using HttpResponseMessage response = await _client.PostAsJsonAsync(SetMaintenancePath, request, cancellationToken);
             response.EnsureSuccessStatusCode();
         }
 

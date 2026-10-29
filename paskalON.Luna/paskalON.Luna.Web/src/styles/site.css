@@ -688,3 +688,42 @@ button.der-tree-toggle:disabled {
     margin-bottom: .25rem;
     border-bottom: 1px solid rgba(255, 255, 255, .15);
 }
+
+/* Controls of a DER unit: one row of controls spaced out evenly, wrapping on narrow screens. */
+.unit-controls-section {
+    margin-bottom: 1.5rem;
+}
+
+.unit-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.unit-control {
+    display: flex;
+    flex: 1 1 10rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .375rem;
+    padding: .75rem 1rem;
+    border-radius: .375rem;
+    background-color: rgba(var(--bs-primary-rgb, 78, 93, 108), .45);
+}
+
+.unit-control-label {
+    font-size: .8125rem;
+    color: rgba(235, 235, 235, .75);
+}
+
+.unit-control-value {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.action-dialog-actions {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}

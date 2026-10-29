@@ -165,10 +165,11 @@ namespace paskalON.Devices.Application
 
 
         /// <summary>
-        /// Puts a specific DER Unit into maintenance.
+        /// Puts a specific DER Unit into or out of maintenance.
         /// </summary>
         /// <param name="unitName">DER unit name the action is executed on.</param>
-        void PutIntoMaintenance(string unitName);
+        /// <param name="intoMaintenance">True to put the unit into maintenance, false to take it out of maintenance.</param>
+        void SetMaintenance(string unitName, bool intoMaintenance);
 
 
         /// <summary>

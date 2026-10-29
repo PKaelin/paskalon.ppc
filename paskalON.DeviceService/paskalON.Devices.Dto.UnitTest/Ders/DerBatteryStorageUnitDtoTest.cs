@@ -2,6 +2,8 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Devices.Domain.EnergyStorages.Batteries;
+using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.PowerConversionSystems;
@@ -96,6 +98,125 @@ namespace paskalON.Devices.Dto.UnitTest.Ders
 
             Assert.IsNull(availableActivePower);
             Assert.IsNull(availableReactivePower);
+        }
+
+
+        /// <summary>
+        /// Confirms the maintenance mode is taken from the PCS detail, which overrides the configured value.
+        /// </summary>
+        /// <param name="configured">The configured maintenance mode of the unit.</param>
+        /// <param name="pcsDetail">The maintenance mode of the PCS detail.</param>
+        [TestMethod]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        public void IsInMaintenanceModeIsTakenFromPcsDetailTest(bool configured, bool pcsDetail)
+        {
+            PcsDto pcs = CreatePcs(1);
+            pcs.UpdateDetail(new PcsDetailDto { DeviceId = 1, IsInMaintenanceMode = pcsDetail });
+            DerBatteryStorageUnitDto unit = CreateUnit(pcs, new List<BbDto>()) with { IsInMaintenanceMode = configured };
+
+            bool isInMaintenanceMode = unit.IsInMaintenanceMode;
+
+            Assert.AreEqual(pcsDetail, isInMaintenanceMode);
+        }
+
+
+        /// <summary>
+        /// Confirms the configured maintenance mode applies while the PCS has no detail.
+        /// </summary>
+        /// <param name="configured">The configured maintenance mode of the unit.</param>
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void IsInMaintenanceModeWithoutPcsDetailIsConfiguredValueTest(bool configured)
+        {
+            DerBatteryStorageUnitDto unit = CreateUnit(CreatePcs(1), new List<BbDto>()) with { IsInMaintenanceMode = configured };
+
+            bool isInMaintenanceMode = unit.IsInMaintenanceMode;
+
+            Assert.AreEqual(configured, isInMaintenanceMode);
+        }
+
+
+        /// <summary>
+        /// Confirms the PCS state is the state of the PCS core, null without core data.
+        /// </summary>
+        /// <param name="state">The state of the PCS core, null for a PCS without core data.</param>
+        [TestMethod]
+        [DataRow(PcsState.Started)]
+        [DataRow(PcsState.Standby)]
+        [DataRow(null)]
+        public void PcsStateIsTakenFromPcsCoreTest(PcsState? state)
+        {
+            PcsDto pcs = CreatePcs(1);
+
+            if (state is not null)
+            {
+                pcs.UpdateCore(new PcsCoreDto { DeviceId = 1, State = state.Value });
+            }
+
+            DerBatteryStorageUnitDto unit = CreateUnit(pcs, new List<BbDto>());
+
+            PcsState? pcsState = unit.PcsState;
+
+            Assert.AreEqual(state, pcsState);
+        }
+
+
+        /// <summary>
+        /// Confirms the combined state of the battery banks. Null stands for a battery bank without core data.
+        /// </summary>
+        /// <param name="states">The states of the battery banks.</param>
+        /// <param name="expected">The expected combined state.</param>
+        [TestMethod]
+        [DataRow(new object?[] { }, BatteryStorageUnitBatteryBankState.UnknownCombination)]
+        [DataRow(new object?[] { BatteryBankState.Standby }, BatteryStorageUnitBatteryBankState.Standby)]
+        [DataRow(new object?[] { BatteryBankState.Fault }, BatteryStorageUnitBatteryBankState.Fault)]
+        [DataRow(new object?[] { null }, BatteryStorageUnitBatteryBankState.Unknown)]
+        [DataRow(new object?[] { BatteryBankState.Connected, BatteryBankState.Connected }, BatteryStorageUnitBatteryBankState.Connected)]
+        [DataRow(new object?[] { BatteryBankState.Connected, BatteryBankState.Fault }, BatteryStorageUnitBatteryBankState.PartiallyConnected)]
+        [DataRow(new object?[] { BatteryBankState.Connected, BatteryBankState.Connected, null }, BatteryStorageUnitBatteryBankState.PartiallyConnected)]
+        [DataRow(new object?[] { BatteryBankState.Disconnected, BatteryBankState.Disconnected }, BatteryStorageUnitBatteryBankState.Disconnected)]
+        [DataRow(new object?[] { BatteryBankState.Disconnected, BatteryBankState.Connecting }, BatteryStorageUnitBatteryBankState.UnknownCombination)]
+        [DataRow(new object?[] { BatteryBankState.Disconnected, null }, BatteryStorageUnitBatteryBankState.UnknownCombination)]
+        public void BatteryBankStateCombinesBatteryBankStatesTest(object?[] states, BatteryStorageUnitBatteryBankState expected)
+        {
+            List<BbDto> batteryBanks = new List<BbDto>();
+
+            for (int index = 0; index < states.Length; index++)
+            {
+                BbDto batteryBank = CreateBatteryBank(index + 2);
+
+                if (states[index] is BatteryBankState state)
+                {
+                    batteryBank.UpdateCore(new BbCoreDto { DeviceId = index + 2, State = state });
+                }
+
+                batteryBanks.Add(batteryBank);
+            }
+
+            DerBatteryStorageUnitDto unit = CreateUnit(CreatePcs(1), batteryBanks);
+
+            BatteryStorageUnitBatteryBankState batteryBankState = unit.BatteryBankState;
+
+            Assert.AreEqual(expected, batteryBankState);
+        }
+
+
+        /// <summary>
+        /// Confirms every battery bank state has a combined state with the same name and number, so a single battery bank keeps its state.
+        /// </summary>
+        [TestMethod]
+        public void BatteryBankStateHasAllBatteryBankStatesTest()
+        {
+            BatteryBankState[] states = Enum.GetValues<BatteryBankState>();
+
+            List<string> mismatches = states
+                .Where(state => ((BatteryStorageUnitBatteryBankState)state).ToString() != state.ToString())
+                .Select(state => state.ToString())
+                .ToList();
+
+            Assert.IsEmpty(mismatches);
         }
 
 

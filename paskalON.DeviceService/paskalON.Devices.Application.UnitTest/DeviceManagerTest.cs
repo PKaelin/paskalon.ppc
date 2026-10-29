@@ -516,11 +516,11 @@ namespace paskalON.Devices.Application.UnitTest
 
 
         [TestMethod]
-        public async Task DeviceManagerPutIntoMaintenanceMissingUnitTest()
+        public async Task DeviceManagerSetMaintenanceMissingUnitTest()
         {
             IDeviceManager manager = CreateDeviceManagerWithDomains();
 
-            Assert.ThrowsExactly<InvalidOperationException>(() => manager.PutIntoMaintenance("Missing unit"));
+            Assert.ThrowsExactly<InvalidOperationException>(() => manager.SetMaintenance("Missing unit", true));
 
             IEnumerable<FakeLogRecord> logs = _logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Error);
             Assert.HasCount(1, logs);

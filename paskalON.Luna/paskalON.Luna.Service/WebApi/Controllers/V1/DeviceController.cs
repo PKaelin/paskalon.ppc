@@ -62,15 +62,15 @@ namespace paskalON.Luna.Service.WebApi.Controllers.V1
 
 
         /// <summary>
-        /// Puts a DER unit into maintenance.
+        /// Puts a DER unit into or out of maintenance.
         /// </summary>
-        /// <param name="request">The request containing the name of the DER unit.</param>
+        /// <param name="request">The request containing the name of the DER unit and whether it goes into maintenance.</param>
         /// <param name="cancellationToken">Token to cancel the request.</param>
         /// <returns>An IActionResult indicating the result of the operation.</returns>
         [HttpPost]
-        public async Task<IActionResult> PutIntoMaintenance(PutIntoMaintenanceRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> SetMaintenance(SetMaintenanceRequest request, CancellationToken cancellationToken)
         {
-            return await Forward(() => _deviceServer.PutIntoMaintenance(request.UnitName, cancellationToken));
+            return await Forward(() => _deviceServer.SetMaintenance(request.UnitName, request.IntoMaintenance, cancellationToken));
         }
 
 

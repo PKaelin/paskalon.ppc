@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue';
+import BatteryStorageUnitControls from './BatteryStorageUnitControls.vue';
 import DeviceSummary from './DeviceSummary.vue';
 import { useDeviceSubscription } from '../composables/useDeviceSubscription';
 import type { DerBatteryStorageUnitDto } from '../types/der';
@@ -24,5 +25,6 @@ const rightRows = computed<PropertyRow[]>(() => [
 </script>
 
 <template>
+    <BatteryStorageUnitControls :unit-name="unitName" :unit="device" />
     <DeviceSummary :status="status" :received="received" :found="device !== null" :left-rows="leftRows" :right-rows="rightRows" />
 </template>

@@ -100,22 +100,26 @@ namespace paskalON.Devices.Client.UnitTest
 
 
         /// <summary>
-        /// Confirms putting a DER unit into maintenance posts the unit name to the DER endpoint.
+        /// Confirms putting a DER unit into or out of maintenance posts the unit name and the flag to the DER endpoint.
         /// </summary>
+        /// <param name="intoMaintenance">True to put the unit into maintenance, false to take it out of maintenance.</param>
         [TestMethod]
-        public async Task PutIntoMaintenancePostsUnitNameToDerEndpointTest()
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task SetMaintenancePostsUnitNameToDerEndpointTest(bool intoMaintenance)
         {
             using RecordingHttpMessageHandler handler = new RecordingHttpMessageHandler(HttpStatusCode.OK);
             using HttpClient client = new HttpClient(handler) { BaseAddress = _baseAddress };
             DeviceServer server = new DeviceServer(client);
 
-            await server.PutIntoMaintenance("Bess1");
+            await server.SetMaintenance("Bess1", intoMaintenance);
 
             Assert.AreEqual(HttpMethod.Post, handler.Method);
-            Assert.AreEqual(new Uri($"{_baseAddress.AbsoluteUri}der/putintomaintenance"), handler.RequestUri);
-            PutIntoMaintenanceRequest? request = handler.ReadBody<PutIntoMaintenanceRequest>();
+            Assert.AreEqual(new Uri($"{_baseAddress.AbsoluteUri}der/setmaintenance"), handler.RequestUri);
+            SetMaintenanceRequest? request = handler.ReadBody<SetMaintenanceRequest>();
             Assert.IsNotNull(request);
             Assert.AreEqual("Bess1", request.UnitName);
+            Assert.AreEqual(intoMaintenance, request.IntoMaintenance);
         }
 
 
@@ -126,13 +130,13 @@ namespace paskalON.Devices.Client.UnitTest
         [TestMethod]
         [DataRow("")]
         [DataRow(" ")]
-        public async Task PutIntoMaintenanceInvalidUnitNameThrowsTest(string unitName)
+        public async Task SetMaintenanceInvalidUnitNameThrowsTest(string unitName)
         {
             using RecordingHttpMessageHandler handler = new RecordingHttpMessageHandler(HttpStatusCode.OK);
             using HttpClient client = new HttpClient(handler) { BaseAddress = _baseAddress };
             DeviceServer server = new DeviceServer(client);
 
-            await Assert.ThrowsExactlyAsync<ArgumentException>(() => server.PutIntoMaintenance(unitName));
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => server.SetMaintenance(unitName, true));
 
             Assert.IsNull(handler.Method);
         }

@@ -10,11 +10,12 @@ GET {{paskalON.Devices.Service_HostAddress}}/api/v1/der/getder
 
 ###
 
-POST {{paskalON.Devices.Service_HostAddress}}/api/v1/der/putintomaintenance
+POST {{paskalON.Devices.Service_HostAddress}}/api/v1/der/setmaintenance
 Content-Type: application/json
 
 {
-  "UnitName": "BMS-Unit 1"
+  "UnitName": "BMS-Unit 1",
+  "IntoMaintenance": true
 }
 
 ###

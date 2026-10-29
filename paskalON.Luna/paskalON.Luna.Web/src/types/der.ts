@@ -172,7 +172,18 @@ export interface DerBatteryStorageUnitDto {
     availableActivePower: ActivePowerDto | null;
     /** The reactive available power of the PCS. */
     availableReactivePower: ReactivePowerDto | null;
+    /** PcsState of the PCS core, null until the PCS delivered core data. */
+    pcsState: number | string | null;
+    /** BatteryStorageUnitBatteryBankState, the combined state of the battery banks. */
+    batteryBankState: number | string;
 }
+
+/** BatteryStorageUnitBatteryBankState (paskalON.Devices.Dto), by its numeric value. */
+export const BatteryStorageUnitBatteryBankStateNames: Record<number, string> = {
+    ...BatteryBankStateNames,
+    100: 'PartiallyConnected',
+    101: 'UnknownCombination'
+};
 
 /** DerSolarUnitDto, unit type discriminator "solar". */
 export interface DerSolarUnitDto {

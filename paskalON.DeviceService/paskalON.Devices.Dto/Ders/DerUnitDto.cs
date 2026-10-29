@@ -26,6 +26,6 @@ namespace paskalON.Devices.Dto.Ders
         /// <remarks>
         /// Single devices dont get set into maintenance mode. The unit does.
         /// </remarks>
-        public bool IsInMaintenanceMode { get; init; }
+        public virtual bool IsInMaintenanceMode { get; init; }
     }
 }
