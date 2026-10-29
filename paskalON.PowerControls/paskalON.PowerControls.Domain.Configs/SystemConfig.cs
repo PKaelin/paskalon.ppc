@@ -17,6 +17,13 @@ namespace paskalON.PowerControls.Domain.Configs
 
 
         /// <summary>
+        /// Indicates the minimum interval, in milliseconds, between two heartbeats.
+        /// If this value is less than this constant it will cause an exception.
+        /// </summary>
+        private const long MinimumDependencyHeartbeatIntervalMilliseconds = 100;
+
+
+        /// <summary>
         /// Power control type.
         /// </summary>
         /// <remarks>
@@ -49,9 +56,28 @@ namespace paskalON.PowerControls.Domain.Configs
 
 
         /// <summary>
+        /// The interval, in milliseconds, between two heartbeats of this service.
+        /// </summary>
+        /// <remarks>
+        /// The operating mode detects a power control loss by the missing heartbeats.
+        /// </remarks>
+        public int DependencyHeartbeatIntervalMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyHeartbeatIntervalMilliseconds); field = value; }
+        } = 500;
+
+
+        /// <summary>
         /// Publisher topic for power targets.
         /// </summary>
         public string? PublisherTopicPowerTarget { get; set; }
+
+
+        /// <summary>
+        /// Publisher topic for the heartbeat of this service used for the message publisher.
+        /// </summary>
+        public string? PublisherTopicHeartbeat { get; set; }
 
 
         /// <summary>

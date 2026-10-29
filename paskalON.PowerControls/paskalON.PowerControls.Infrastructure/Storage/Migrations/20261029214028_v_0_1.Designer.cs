@@ -12,7 +12,7 @@ using paskalON.PowerControls.Infrastructure.Storage;
 namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(PowerControlContext))]
-    [Migration("20261019060650_v_0_1")]
+    [Migration("20261029214028_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -114,8 +114,14 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
 
+                    b.Property<int>("DependencyHeartbeatIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<int>("MetricsIntervalMilliseconds")
                         .HasColumnType("integer");
+
+                    b.Property<string>("PublisherTopicHeartbeat")
+                        .HasColumnType("text");
 
                     b.Property<string>("PublisherTopicPowerTarget")
                         .HasColumnType("text");

@@ -658,6 +658,12 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     NameplateMinimumReactivePowerVars = table.Column<double>(type: "double precision", nullable: false),
                     OperatingModeCalculationIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     MetricsIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    DependencyHeartbeatIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    RedisLossTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    PowerControlLossTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    DeviceServiceLossTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    ResumeSettleMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    SetpointRepublishIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     SubscriberTopicPcsCore = table.Column<string>(type: "text", nullable: true),
                     SubscriberTopicPcsDetail = table.Column<string>(type: "text", nullable: true),
                     SubscriberTopicBatteryBankCore = table.Column<string>(type: "text", nullable: true),
@@ -674,6 +680,8 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     SubscriberTopicSystemPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
                     PublisherTopicCurrentSetpoint = table.Column<string>(type: "text", nullable: true),
                     PublisherTopicCurrentDerUnitSetpoint = table.Column<string>(type: "text", nullable: true),
+                    PublisherTopicHeartbeat = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicPowerControlHeartbeat = table.Column<string>(type: "text", nullable: true),
                     StartupDelay = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>

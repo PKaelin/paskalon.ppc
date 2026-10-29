@@ -27,6 +27,30 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
+        /// Indicates the minimum interval, in milliseconds, between two heartbeats.
+        /// If this value is less than this constant it will cause an exception.
+        /// </summary>
+        private const long MinimumDependencyHeartbeatIntervalMilliseconds = 100;
+
+
+        /// <summary>
+        /// Indicates the minimum time, in milliseconds, after which a dependency is lost.
+        /// If this value is less than this constant it will cause an exception.
+        /// </summary>
+        /// <remarks>
+        /// Must be longer than the primary secondary failover (500 ms), so that a failover does not cause a loss.
+        /// </remarks>
+        private const long MinimumDependencyLossTimeoutMilliseconds = 1000;
+
+
+        /// <summary>
+        /// Indicates the minimum interval, in milliseconds, between two republished setpoints.
+        /// If this value is less than this constant it will cause an exception.
+        /// </summary>
+        private const long MinimumSetpointRepublishIntervalMilliseconds = 200;
+
+
+        /// <summary>
         /// Operating mode type.
         /// </summary>
         /// <remarks>
@@ -196,6 +220,78 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
+        /// The interval, in milliseconds, between two heartbeats of this service.
+        /// </summary>
+        public int DependencyHeartbeatIntervalMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyHeartbeatIntervalMilliseconds); field = value; }
+        } = 500;
+
+
+        /// <summary>
+        /// The time, in milliseconds, the message broker (Redis) must be disconnected after which it is lost.
+        /// </summary>
+        /// <remarks>
+        /// While a dependency is lost the operating mode control holds the last setpoint.
+        /// </remarks>
+        public int RedisLossTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyLossTimeoutMilliseconds); field = value; }
+        } = 1500;
+
+
+        /// <summary>
+        /// The time, in milliseconds, without a power control heartbeat after which the power control is lost.
+        /// </summary>
+        /// <remarks>
+        /// Must be a multiple of the power control heartbeat interval. While a dependency is lost the operating mode control holds the last setpoint.
+        /// </remarks>
+        public int PowerControlLossTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyLossTimeoutMilliseconds); field = value; }
+        } = 1500;
+
+
+        /// <summary>
+        /// The time, in milliseconds, without device data after which the device service is lost.
+        /// </summary>
+        /// <remarks>
+        /// Must be a multiple of the device publishing interval of the device service. While a dependency is lost the operating mode control holds the last setpoint.
+        /// </remarks>
+        public int DeviceServiceLossTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyLossTimeoutMilliseconds); field = value; }
+        } = 3000;
+
+
+        /// <summary>
+        /// The time, in milliseconds, all dependencies must be available after a loss before the operating mode control resumes.
+        /// </summary>
+        public int ResumeSettleMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfNegative(value); field = value; }
+        } = 2000;
+
+
+        /// <summary>
+        /// The interval, in milliseconds, in which the current setpoints are republished even if they did not change.
+        /// </summary>
+        /// <remarks>
+        /// Ensures that a restarted subscriber, e.g. the power control, receives the current setpoints.
+        /// </remarks>
+        public int SetpointRepublishIntervalMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumSetpointRepublishIntervalMilliseconds); field = value; }
+        } = 1000;
+
+
+        /// <summary>
         /// Subscriber topic for power conversion system core used for the message subscriber.
         /// </summary>
         public string? SubscriberTopicPcsCore { get; set; }
@@ -289,6 +385,18 @@ namespace paskalON.OperatingModes.Domain.Configs
         /// Publisher topic for current DER unit setpoints used for the message publisher.
         /// </summary>
         public string? PublisherTopicCurrentDerUnitSetpoint { get; set; }
+
+
+        /// <summary>
+        /// Publisher topic for the heartbeat of this service used for the message publisher.
+        /// </summary>
+        public string? PublisherTopicHeartbeat { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for the power control heartbeat used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicPowerControlHeartbeat { get; set; }
 
 
         /// <summary>

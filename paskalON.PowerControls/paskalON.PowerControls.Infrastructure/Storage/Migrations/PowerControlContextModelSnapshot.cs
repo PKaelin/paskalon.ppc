@@ -111,8 +111,14 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
 
+                    b.Property<int>("DependencyHeartbeatIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<int>("MetricsIntervalMilliseconds")
                         .HasColumnType("integer");
+
+                    b.Property<string>("PublisherTopicHeartbeat")
+                        .HasColumnType("text");
 
                     b.Property<string>("PublisherTopicPowerTarget")
                         .HasColumnType("text");

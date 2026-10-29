@@ -12,7 +12,7 @@ using paskalON.OperatingModes.Infrastructure.Storage;
 namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(OperatingModeContext))]
-    [Migration("20261027163215_v_0_1")]
+    [Migration("20261029213954_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -142,6 +142,12 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
 
+                    b.Property<int>("DependencyHeartbeatIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DeviceServiceLossTimeoutMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<int>("MetricsIntervalMilliseconds")
                         .HasColumnType("integer");
 
@@ -172,17 +178,32 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     b.Property<int>("OperatingModeCalculationIntervalMilliseconds")
                         .HasColumnType("integer");
 
+                    b.Property<int>("PowerControlLossTimeoutMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PublisherTopicCurrentDerUnitSetpoint")
                         .HasColumnType("text");
 
                     b.Property<string>("PublisherTopicCurrentSetpoint")
                         .HasColumnType("text");
 
+                    b.Property<string>("PublisherTopicHeartbeat")
+                        .HasColumnType("text");
+
+                    b.Property<int>("RedisLossTimeoutMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<double>("ReferenceFrequency")
                         .HasColumnType("double precision");
 
                     b.Property<double>("ReferenceVoltage")
                         .HasColumnType("double precision");
+
+                    b.Property<int>("ResumeSettleMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SetpointRepublishIntervalMilliseconds")
+                        .HasColumnType("integer");
 
                     b.Property<int>("StartupDelay")
                         .HasColumnType("integer");
@@ -215,6 +236,9 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("SubscriberTopicPcsDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicPowerControlHeartbeat")
                         .HasColumnType("text");
 
                     b.Property<string>("SubscriberTopicSolarPanelCore")
