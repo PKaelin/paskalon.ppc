@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.Meters.PowerMeters;
 using paskalON.Devices.Dto.PowerConversionSystems;
@@ -56,5 +57,14 @@ namespace paskalON.Luna.Service.WebApi.Hubs
         /// <param name="batteryBank">The battery bank, or null if no battery storage unit of the DER configuration has a battery bank with the device ID.</param>
         /// <returns>Task</returns>
         Task BatteryBankUpdated(int deviceId, BbDto? batteryBank);
+
+
+        /// <summary>
+        /// Current values of the subscribed battery storage unit.
+        /// </summary>
+        /// <param name="unitName">Name of the subscribed battery storage unit.</param>
+        /// <param name="unit">The battery storage unit, or null if the DER configuration has no battery storage unit with the name.</param>
+        /// <returns>Task</returns>
+        Task BatteryStorageUnitUpdated(string unitName, DerBatteryStorageUnitDto? unit);
     }
 }

@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.PowerConversionSystems;
+using paskalON.PhysicalUnits.Electricals.Powers;
 
 namespace paskalON.Devices.Dto.Ders
 {
@@ -29,5 +30,29 @@ namespace paskalON.Devices.Dto.Ders
         /// Default this to true; almost all BatteryStorageUnits will want to behave this way.
         /// </summary>
         public bool IncludeBatteryInOperations { get; init; }
+
+
+        /// <summary>
+        /// Value indicating whether the PCS or any battery bank of this battery storage unit has a communication error.
+        /// </summary>
+        /// <remarks>
+        /// A device without core data yet is not counted as communication error.
+        /// </remarks>
+        public bool CommunicationError
+        {
+            get => PowerConversionSystem.Core?.CommunicationError == true || BatteryBanks.Any(batteryBank => batteryBank.Core?.CommunicationError == true);
+        }
+
+
+        /// <summary>
+        /// Available active power of this battery storage unit, the active available power of its PCS.
+        /// </summary>
+        public ActivePower? AvailableActivePower { get => PowerConversionSystem.Core?.ActiveAvailablePower; }
+
+
+        /// <summary>
+        /// Available reactive power of this battery storage unit, the reactive available power of its PCS.
+        /// </summary>
+        public ReactivePower? AvailableReactivePower { get => PowerConversionSystem.Core?.ReactiveAvailablePower; }
     }
 }

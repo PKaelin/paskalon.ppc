@@ -316,6 +316,29 @@ namespace paskalON.Luna.Application.UnitTest
 
 
         /// <summary>
+        /// Confirms the battery storage unit with the name is returned, or null for an unknown name or a solar unit.
+        /// </summary>
+        /// <param name="unitName">The name of the requested battery storage unit.</param>
+        /// <param name="isFound">True if the DER has a battery storage unit with the name.</param>
+        [TestMethod]
+        [DataRow("Unit1", true)]
+        [DataRow("SolarUnit1", false)]
+        [DataRow("UnknownUnit", false)]
+        public void GetBatteryStorageUnitReturnsUnitWithNameTest(string unitName, bool isFound)
+        {
+            DerDto der = CreateDer(new List<PmSystemDto>(), new List<BbDto> { CreateBatteryBank(41, false, 80) });
+            PcsDto solarPcs = new PcsDto(new PcsDefinitionDto { DeviceId = 32, Name = "SolarPcs32", TargetAddress = "localhost", TargetPort = 502 });
+            der.DerGroups[0].DerCircuits[0].DerUnits.Add(new DerSolarUnitDto { Name = "SolarUnit1", PowerConversionSystem = solarPcs });
+            _deviceClient.Setup(client => client.Der).Returns(der);
+
+            DerBatteryStorageUnitDto? unit = _manager.GetBatteryStorageUnit(unitName);
+
+            Assert.AreEqual(isFound, unit is not null);
+            Assert.AreEqual(isFound ? unitName : null, unit?.Name);
+        }
+
+
+        /// <summary>
         /// Creates a DER with the system power meters and one battery storage unit with the battery banks.
         /// </summary>
         /// <param name="systemMeters">The system power meters.</param>

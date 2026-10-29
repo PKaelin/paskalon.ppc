@@ -163,8 +163,15 @@ export interface BbDto extends DeviceDto {
 export interface DerBatteryStorageUnitDto {
     unitType: 'battery';
     name: string;
+    isInMaintenanceMode: boolean;
     powerConversionSystem: PcsDto;
     batteryBanks: BbDto[];
+    /** True if the PCS or any battery bank has a communication error. */
+    communicationError: boolean;
+    /** The active available power of the PCS. */
+    availableActivePower: ActivePowerDto | null;
+    /** The reactive available power of the PCS. */
+    availableReactivePower: ReactivePowerDto | null;
 }
 
 /** DerSolarUnitDto, unit type discriminator "solar". */

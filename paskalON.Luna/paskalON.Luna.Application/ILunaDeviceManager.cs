@@ -70,5 +70,13 @@ namespace paskalON.Luna.Application
         /// <param name="deviceId">The device ID of the battery bank.</param>
         /// <returns>The battery bank, or null if no battery storage unit of the DER configuration has a battery bank with the device ID.</returns>
         BbDto? GetBatteryBank(int deviceId);
+
+
+        /// <summary>
+        /// Gets a battery storage unit of the DER configuration.
+        /// </summary>
+        /// <param name="unitName">The name of the battery storage unit.</param>
+        /// <returns>The battery storage unit, or null if the DER configuration has no battery storage unit with the name.</returns>
+        DerBatteryStorageUnitDto? GetBatteryStorageUnit(string unitName);
     }
 }

@@ -36,6 +36,12 @@ namespace paskalON.Luna.Service.WebApi.Hubs
         /// <summary>
         /// A battery bank (BbDto).
         /// </summary>
-        BatteryBank
+        BatteryBank,
+
+
+        /// <summary>
+        /// A battery storage unit (DerBatteryStorageUnitDto), identified by its unit name.
+        /// </summary>
+        BatteryStorageUnit
     }
 }

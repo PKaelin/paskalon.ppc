@@ -126,6 +126,19 @@ namespace paskalON.Luna.Application
         }
 
 
+        /// <inheritdoc/>
+        public DerBatteryStorageUnitDto? GetBatteryStorageUnit(string unitName)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(unitName);
+
+            return _deviceClient.Der.DerGroups
+                .SelectMany(group => group.DerCircuits)
+                .SelectMany(circuit => circuit.DerUnits)
+                .OfType<DerBatteryStorageUnitDto>()
+                .FirstOrDefault(unit => unit.Name == unitName);
+        }
+
+
         /// <summary>
         /// Gets the PCS of a DER unit.
         /// </summary>

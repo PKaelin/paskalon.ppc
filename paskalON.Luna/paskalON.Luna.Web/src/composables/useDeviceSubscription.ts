@@ -5,7 +5,7 @@ import type { HubStatus } from './useSystemMeterSummary';
 import type { PowerMeterType } from '../types/der';
 
 /** The device DTO types the device hub publishes. */
-export type SubscribableDeviceType = PowerMeterType | 'PcsDto' | 'BbDto';
+export type SubscribableDeviceType = PowerMeterType | 'PcsDto' | 'BbDto' | 'DerBatteryStorageUnitDto';
 
 export interface DeviceSubscription<T> {
     status: Ref<HubStatus>;
@@ -21,19 +21,21 @@ const hubMethods: Record<SubscribableDeviceType, { subscribe: string; updated: s
     PmAuxiliaryDto: { subscribe: 'SubscribeAuxiliaryPowerMeter', updated: 'AuxiliaryPowerMeterUpdated' },
     PmExternalDto: { subscribe: 'SubscribeExternalPowerMeter', updated: 'ExternalPowerMeterUpdated' },
     PcsDto: { subscribe: 'SubscribePcs', updated: 'PcsUpdated' },
-    BbDto: { subscribe: 'SubscribeBatteryBank', updated: 'BatteryBankUpdated' }
+    BbDto: { subscribe: 'SubscribeBatteryBank', updated: 'BatteryBankUpdated' },
+    DerBatteryStorageUnitDto: { subscribe: 'SubscribeBatteryStorageUnit', updated: 'BatteryStorageUnitUpdated' }
 };
 
 /**
  * Receives the values of one device from the device hub (Hub<IDeviceHubClient> on the server):
  *
- *   Subscribe{SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs|BatteryBank}(deviceId)   <- on connect and when the device changes
- *   {SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs|BatteryBank}Updated(deviceId, dto) -> on subscribe, then every 2 seconds
+ *   Subscribe{SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs|BatteryBank|BatteryStorageUnit}(id)   <- on connect and when the device changes
+ *   {SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs|BatteryBank|BatteryStorageUnit}Updated(id, dto) -> on subscribe, then every 2 seconds
  *
+ * The id is the device ID of a device, or the name of a DER unit (DER units have no device ID).
  * The hub is connected while the calling component is mounted, so the web service only publishes
  * the device while it is shown.
  */
-export function useDeviceSubscription<T>(deviceType: Readonly<Ref<SubscribableDeviceType>>, deviceId: Readonly<Ref<number>>): DeviceSubscription<T> {
+export function useDeviceSubscription<T>(deviceType: Readonly<Ref<SubscribableDeviceType>>, id: Readonly<Ref<number | string>>): DeviceSubscription<T> {
     const status = ref<HubStatus>('disconnected');
     const device = shallowRef<T | null>(null);
     const received = ref(false);
@@ -49,7 +51,7 @@ export function useDeviceSubscription<T>(deviceType: Readonly<Ref<SubscribableDe
         }
 
         try {
-            await connection.invoke(hubMethods[deviceType.value].subscribe, deviceId.value);
+            await connection.invoke(hubMethods[deviceType.value].subscribe, id.value);
         } catch {
             // The connection was lost while subscribing, it subscribes again when it is reconnected.
         }
@@ -67,9 +69,9 @@ export function useDeviceSubscription<T>(deviceType: Readonly<Ref<SubscribableDe
             .build();
 
         for (const [type, methods] of Object.entries(hubMethods) as [SubscribableDeviceType, { updated: string }][]) {
-            hub.on(methods.updated, (id: number, value: T | null) => {
+            hub.on(methods.updated, (updatedId: number | string, value: T | null) => {
                 // Values of the previously shown device can still arrive right after the selection changed.
-                if (type !== deviceType.value || id !== deviceId.value) {
+                if (type !== deviceType.value || updatedId !== id.value) {
                     return;
                 }
 
@@ -113,7 +115,7 @@ export function useDeviceSubscription<T>(deviceType: Readonly<Ref<SubscribableDe
         retryTimer = setTimeout(() => void start(), 5000);
     }
 
-    watch([deviceType, deviceId], () => {
+    watch([deviceType, id], () => {
         device.value = null;
         received.value = false;
         void subscribe();

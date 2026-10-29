@@ -6,6 +6,7 @@ let savedTreeWidth: number | null = null;
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import DerTree from '../components/DerTree.vue';
+import BatteryStorageUnitContent from '../components/BatteryStorageUnitContent.vue';
 import BbContent from '../components/BbContent.vue';
 import PcsContent from '../components/PcsContent.vue';
 import PowerMeterContent from '../components/PowerMeterContent.vue';
@@ -164,6 +165,7 @@ onBeforeUnmount(() => abortController.abort());
                                :device-id="selectedNode.deviceId" />
             <PcsContent v-else-if="selectedNode?.type === 'PcsDto' && selectedNode.deviceId !== undefined" :device-id="selectedNode.deviceId" />
             <BbContent v-else-if="selectedNode?.type === 'BbDto' && selectedNode.deviceId !== undefined" :device-id="selectedNode.deviceId" />
+            <BatteryStorageUnitContent v-else-if="selectedNode?.type === 'DerBatteryStorageUnitDto'" :unit-name="selectedNode.name" />
             <template v-else-if="selectedNode">
                 <h2 class="om-heading">{{ selectedNode.name }}</h2>
                 <p class="mb-0">{{ selectedNode.type }}</p>

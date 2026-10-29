@@ -111,6 +111,20 @@ namespace paskalON.Luna.Service.WebApi.Hubs
 
 
         /// <summary>
+        /// Subscribes the caller to a battery storage unit, replacing its previous subscription.
+        /// </summary>
+        /// <param name="unitName">Name of the battery storage unit.</param>
+        /// <returns>Task</returns>
+        public async Task SubscribeBatteryStorageUnit(string unitName)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(unitName);
+
+            _subscriptions.Subscribe(Context.ConnectionId, new DeviceSubscription(DeviceSubscriptionType.BatteryStorageUnit, 0, unitName));
+            await Clients.Caller.BatteryStorageUnitUpdated(unitName, _deviceManager.GetBatteryStorageUnit(unitName));
+        }
+
+
+        /// <summary>
         /// Removes the subscription of the caller.
         /// </summary>
         public void Unsubscribe()
