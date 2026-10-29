@@ -479,6 +479,22 @@ body {
     overflow: hidden;
 }
 
+/* Lower and upper limit of the bar, small texts above its left and right end. */
+.deviation-bar-limits {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-top: .375rem;
+    font-size: .6875rem;
+    line-height: 1rem;
+    color: rgba(235, 235, 235, .75);
+    font-variant-numeric: tabular-nums;
+}
+
+.deviation-bar-limits + .deviation-bar {
+    margin-top: .125rem;
+}
+
 .deviation-bar-fill {
     position: absolute;
     top: 0;

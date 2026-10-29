@@ -56,6 +56,15 @@ function caption(value: number, decimals: number, positive: string, negative: st
     return '';
 }
 
+/** Text of a nameplate limit (in W or var) in mega with the unit, '—' until the nameplate is loaded. */
+function limitLabel(watts: number | undefined, unit: string): string {
+    if (watts === undefined) {
+        return '—';
+    }
+
+    return `${format(watts / WattsPerMegawatt, 2)} ${unit}`;
+}
+
 const activePowerMegawatts = computed(() => (summary.value === null ? null : summary.value.activePower.watts / WattsPerMegawatt));
 
 const reactivePowerMegavars = computed(() => (summary.value === null ? null : summary.value.reactivePower.voltAmperesReactive / WattsPerMegawatt));
@@ -134,6 +143,8 @@ onBeforeUnmount(() => abortController.abort());
                               :value="nameplate === null ? null : activePowerMegawatts"
                               :min="(nameplate?.minimumActivePowerWatts ?? -1) / WattsPerMegawatt"
                               :max="(nameplate?.maximumActivePowerWatts ?? 1) / WattsPerMegawatt"
+                              :min-label="limitLabel(nameplate?.minimumActivePowerWatts, 'MW')"
+                              :max-label="limitLabel(nameplate?.maximumActivePowerWatts, 'MW')"
                               color="#FFC857" />
             </MetricCard>
 
@@ -145,6 +156,8 @@ onBeforeUnmount(() => abortController.abort());
                               :value="nameplate === null ? null : reactivePowerMegavars"
                               :min="(nameplate?.minimumReactivePowerVars ?? -1) / WattsPerMegawatt"
                               :max="(nameplate?.maximumReactivePowerVars ?? 1) / WattsPerMegawatt"
+                              :min-label="limitLabel(nameplate?.minimumReactivePowerVars, 'MVAr')"
+                              :max-label="limitLabel(nameplate?.maximumReactivePowerVars, 'MVAr')"
                               color="#B79CED" />
             </MetricCard>
 
@@ -153,7 +166,7 @@ onBeforeUnmount(() => abortController.abort());
                         :value="format(stateOfCharge, 1)"
                         unit="%"
                         caption="">
-                <DeviationBar label="State of charge" :value="stateOfCharge" :min="0" :max="100" :color="stateOfChargeColor" />
+                <DeviationBar label="State of charge" :value="stateOfCharge" :min="0" :max="100" min-label="0 %" max-label="100 %" :color="stateOfChargeColor" />
             </MetricCard>
 
             <MetricCard label="Power Factor" :value="summary === null ? '—' : format(summary.powerFactor, 3)" />

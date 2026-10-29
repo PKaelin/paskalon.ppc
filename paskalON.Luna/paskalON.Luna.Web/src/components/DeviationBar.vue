@@ -16,7 +16,13 @@ const props = defineProps<{
     color: string;
     /** Accessible name of the bar. */
     label: string;
+    /** Optional small text above the left end of the bar, e.g. the formatted lower limit. */
+    minLabel?: string;
+    /** Optional small text above the right end of the bar, e.g. the formatted upper limit. */
+    maxLabel?: string;
 }>();
+
+const hasLimitLabels = computed(() => props.minLabel !== undefined || props.maxLabel !== undefined);
 
 function toPercent(value: number): number {
     const range = props.max - props.min;
@@ -48,6 +54,10 @@ const fill = computed(() => {
 </script>
 
 <template>
+    <div v-if="hasLimitLabels" class="deviation-bar-limits">
+        <span>{{ minLabel }}</span>
+        <span>{{ maxLabel }}</span>
+    </div>
     <div class="deviation-bar"
          role="meter"
          :aria-label="label"
