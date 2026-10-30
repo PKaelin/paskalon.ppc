@@ -962,13 +962,14 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
             if (ActivePowerTarget != null)
             {
+                // The usable SOC limits are on the absolute scale, the usable SOC is relative to the usable window
                 if (ActivePowerTarget.Value.Watts > 0)
                 {
-                    safety = unit.BatteryBanks.Any(b => b.UsableStateOfCharge < b.UsableMinimumStateOfCharge - 1);
+                    safety = unit.BatteryBanks.Any(b => b.AbsoluteStateOfCharge < b.UsableMinimumStateOfCharge - 1);
                 }
                 else if (ActivePowerTarget.Value.Watts < 0)
                 {
-                    safety = unit.BatteryBanks.Any(b => b.UsableStateOfCharge > b.UsableMaximumStateOfCharge + 1);
+                    safety = unit.BatteryBanks.Any(b => b.AbsoluteStateOfCharge > b.UsableMaximumStateOfCharge + 1);
                 }
 
                 if (safety == true)

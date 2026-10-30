@@ -54,19 +54,19 @@ namespace paskalON.PowerControls.Domain.Ders
 
 
         /// <summary>
-        /// DER unit energy storage state of charge.
+        /// DER unit energy storage absolute state of charge in percent, or null if unknown.
         /// </summary>
-        public double StateOfCharge { get => _map.StateOfCharge.Invoke(); }
+        public double? StateOfCharge { get => _map.StateOfCharge.Invoke(); }
 
 
         /// <summary>
-        /// DER unit energy storage state of charge maximum.
+        /// DER unit energy storage preferred state of charge maximum in absolute percent.
         /// </summary>
         public double StateOfChargeMaximum { get => _map.StateOfChargeMaximum.Invoke(); }
 
 
         /// <summary>
-        /// DER unit energy storage state of charge minimum.
+        /// DER unit energy storage preferred state of charge minimum in absolute percent.
         /// </summary>
         public double StateOfChargeMinimum { get => _map.StateOfChargeMinimum.Invoke(); }
 

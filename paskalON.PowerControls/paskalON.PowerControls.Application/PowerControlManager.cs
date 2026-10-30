@@ -276,7 +276,8 @@ namespace paskalON.PowerControls.Application
             {
                 PcsDeviceId = unit.PowerConversionSystem?.DeviceId ?? 0,
                 State = () => GetDerState(unit, unit.PowerConversionSystem),
-                StateOfCharge = () => unit.BatteryBanks.Select(b => b.Core?.StateOfCharge ?? 0).DefaultIfEmpty().Average(),
+                // The absolute SOC is on the same scale as the preferred SOC limits, the preferred SOC is clamped to its window
+                StateOfCharge = () => GetAbsoluteStateOfCharge(unit),
                 StateOfChargeMaximum = () => unit.BatteryBanks.Select(b => b.Definition.PreferredMaximumStateOfCharge).DefaultIfEmpty().Average(),
                 StateOfChargeMinimum = () => unit.BatteryBanks.Select(b => b.Definition.PreferredMinimumStateOfCharge).DefaultIfEmpty().Average(),
                 StateOfHealth = () => unit.BatteryBanks.Select(b => b.Detail?.StateOfHealth ?? 0).DefaultIfEmpty().Average()
@@ -303,6 +304,24 @@ namespace paskalON.PowerControls.Application
                 DerSolarUnitDto solar => solar.PowerConversionSystem,
                 _ => null
             };
+        }
+
+
+        /// <summary>
+        /// Get the average absolute state of charge of the battery banks of the unit.
+        /// </summary>
+        /// <param name="unit">The battery storage unit.</param>
+        /// <returns>The absolute state of charge in percent, or null if the unit has no battery bank or the state of charge of any battery bank is unknown.</returns>
+        private static double? GetAbsoluteStateOfCharge(DerBatteryStorageUnitDto unit)
+        {
+            List<double?> statesOfCharge = unit.BatteryBanks.Select(b => b.Core?.AbsoluteStateOfCharge).ToList();
+
+            if (statesOfCharge.Count == 0 || statesOfCharge.Any(soc => soc.HasValue is false))
+            {
+                return null;
+            }
+
+            return statesOfCharge.Average();
         }
 
 

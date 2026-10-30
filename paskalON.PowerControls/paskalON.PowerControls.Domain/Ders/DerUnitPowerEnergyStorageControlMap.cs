@@ -6,10 +6,22 @@ namespace paskalON.PowerControls.Domain.Ders
 {
     public class DerUnitPowerEnergyStorageControlMap : DerUnitPowerControlMap
     {
-        public required Func<double> StateOfCharge { get; init; }
+        /// <summary>
+        /// Absolute state of charge in percent, on the same scale as <see cref="StateOfChargeMaximum"/> and <see cref="StateOfChargeMinimum"/>.
+        /// Null if the state of charge is unknown.
+        /// </summary>
+        public required Func<double?> StateOfCharge { get; init; }
 
+
+        /// <summary>
+        /// Preferred state of charge maximum in absolute percent.
+        /// </summary>
         public required Func<double> StateOfChargeMaximum { get; init; }
 
+
+        /// <summary>
+        /// Preferred state of charge minimum in absolute percent.
+        /// </summary>
         public required Func<double> StateOfChargeMinimum { get; init; }
 
         public Func<double>? StateOfHealth { get; init; }
