@@ -10,7 +10,7 @@ This project is not yet an actual power plant controller.
 
 
 ## Network and Deployment Architecture Overview
-![Network and Deployment Architecture Overview](./Docs/Network%20and%20Deployment%20Architecture%20Overview.svg)
+![Network and Deployment Architecture Overview](./Docs/Network%20and%20Deployment%20Architecture%20Overview.svg)  
 *Overview does not show platform and infrastructure services*
 
 
@@ -60,17 +60,6 @@ Manages physical devices and keeps a constant connection to the devices.
 The actual devices (power resource) which can be a simulation, emulation or physical representation.
 
 
-## Internal power sign definition
-Within the power plant controller the power sign is defined the following:
-- Positive power means the PPC exports power to the grid.
-- Negative power means the PPC imports power from the grid.
-
-To external systems or devices the power sign can be customized.
-
-![Internal Power Sign Definition.drawio](./Docs/Internal%20Power%20Sign%20Definition.drawio.svg)
-
-
-
 ## Common design
 
 ### Configurations
@@ -78,7 +67,7 @@ Configurations are stored in a database to ensure accountability and to track ch
 
 
 ### Config - Domain - Application Overview
-PlantControl, OperatingMode, PowerControl, DeviceService are all setup using the same concept. The configuration and structure is stored in a database. During startup the configuration is read and factories create the domains and domain structure passing in the domain mappers that reference the subscribed data.
+PlantControl, OperatingMode, PowerControl, DeviceService are all setup using the same concept. The configuration and structure of the microservice is stored in a database. During startup the configuration is read and factories create the domains and domain structure passing in the domain mappers that reference the subscribed data.
 
 
 ![Config-Domain-Application Overview](./Docs/Config-Domain-Application%20Overview.drawio.svg)
@@ -107,8 +96,14 @@ MetricsPublisher.Register<Device, double>(this, nameof(Power), MetricType.Gauge,
 ![Metrics Publisher Design](./Docs/Metrics%20Publisher%20Design.drawio.svg)
 
 
+## Fault Tolerance
+For detailed setup and fault tolerance procedures see the [FAULT TOLERANCE](./FAULT_TOLERANCE.md)
+
+![Fault Tolerance](./Docs/Fault%20Tolerance.drawio.svg)
+
+
 ## Failover 
-[See: FAILOVER.md](./FAILOVER.md)
+For detailed setup and recovery procedures see the [FAILOVER](./FAILOVER.md)
 
 ![Failover](./Docs/Failover.drawio.svg)
 
