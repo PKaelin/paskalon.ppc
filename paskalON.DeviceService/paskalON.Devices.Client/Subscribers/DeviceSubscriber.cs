@@ -60,6 +60,12 @@ namespace paskalON.Devices.Client.Subscribers
 
 
         /// <summary>
+        /// Callback invoked after a core message updated the register or null.
+        /// </summary>
+        private readonly Action? _coreReceived;
+
+
+        /// <summary>
         /// Constructor of <see cref="DeviceSubscriber"/>.
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>
@@ -68,8 +74,9 @@ namespace paskalON.Devices.Client.Subscribers
         /// <param name="definitionTopic">The definition message topic name to subscribe to.</param>
         /// <param name="coreTopic">The core message topic name to subscribe to.</param>
         /// <param name="detailTopic">The detail message topic name to subscribe to.</param>
+        /// <param name="coreReceived">Callback invoked after a core message updated the register, e.g. to track the device data freshness.</param>
         public DeviceSubscriber(ILogger logger, IMessageSubscriber subscriber, IDeviceRegister<TDevice, TDefinition, TCore, TDetail> register,
-            string definitionTopic, string coreTopic, string detailTopic)
+            string definitionTopic, string coreTopic, string detailTopic, Action? coreReceived = null)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(subscriber);
@@ -81,6 +88,7 @@ namespace paskalON.Devices.Client.Subscribers
             _definitionTopic = definitionTopic;
             _coreTopic = coreTopic;
             _detailTopic = detailTopic;
+            _coreReceived = coreReceived;
             Subscribe();
         }
 
@@ -143,7 +151,11 @@ namespace paskalON.Devices.Client.Subscribers
             catch (Exception ex)
             {
                 _logger.LogError("Update device core threw an unexpected error: {Error}", ex.Message);
+
+                return;
             }
+
+            _coreReceived?.Invoke();
         }
 
 

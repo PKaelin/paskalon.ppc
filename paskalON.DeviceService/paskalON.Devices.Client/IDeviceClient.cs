@@ -17,6 +17,16 @@ namespace paskalON.Devices.Client
     public interface IDeviceClient
     {
         /// <summary>
+        /// Raised after a core message of any device updated the registers.
+        /// </summary>
+        /// <remarks>
+        /// The device service publishes the core messages periodically, so the event signals that the device data is fresh.
+        /// Raised on the message subscriber thread.
+        /// </remarks>
+        event EventHandler? CoreDataReceived;
+
+
+        /// <summary>
         /// Distributed Energy Resource Root.
         /// </summary>
         DerDto Der { get; }

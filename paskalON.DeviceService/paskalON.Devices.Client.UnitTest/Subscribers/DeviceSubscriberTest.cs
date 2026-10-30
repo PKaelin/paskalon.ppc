@@ -239,6 +239,52 @@ namespace paskalON.Devices.Client.UnitTest.Subscribers
         }
 
 
+        [TestMethod]
+        public void DeviceSubscriberUpdateCoreValidJsonInvokesCoreReceivedTest()
+        {
+            int coreReceived = 0;
+            DeviceSubscriber<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto> subscriber =
+                new DeviceSubscriber<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>(NullLogger.Instance,
+                _messageSubscriberMock.Object, _registerMock.Object, string.Empty, _coreTopic, string.Empty, () => coreReceived++);
+            string json = JsonSerializer.Serialize(CreateCoreMessage());
+
+            subscriber.UpdateCore(json);
+            subscriber.UpdateCore(json);
+
+            Assert.AreEqual(2, coreReceived);
+        }
+
+
+        [TestMethod]
+        [DataRow("{ invalid json }")]
+        [DataRow("null")]
+        public void DeviceSubscriberUpdateCoreInvalidJsonDoesNotInvokeCoreReceivedTest(string json)
+        {
+            int coreReceived = 0;
+            DeviceSubscriber<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto> subscriber =
+                new DeviceSubscriber<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>(NullLogger.Instance,
+                _messageSubscriberMock.Object, _registerMock.Object, string.Empty, _coreTopic, string.Empty, () => coreReceived++);
+
+            subscriber.UpdateCore(json);
+
+            Assert.AreEqual(0, coreReceived);
+        }
+
+
+        [TestMethod]
+        public void DeviceSubscriberUpdateCoreRegisterThrowsDoesNotInvokeCoreReceivedTest()
+        {
+            int coreReceived = 0;
+            _registerMock.Setup(x => x.UpdateCore(It.IsAny<PcsCoreDto>())).Throws(new KeyNotFoundException("Device 1 is not registered."));
+            DeviceSubscriber<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto> subscriber =
+                new DeviceSubscriber<PcsDto, PcsDefinitionDto, PcsCoreDto, PcsDetailDto>(NullLogger.Instance,
+                _messageSubscriberMock.Object, _registerMock.Object, string.Empty, _coreTopic, string.Empty, () => coreReceived++);
+
+            subscriber.UpdateCore(JsonSerializer.Serialize(CreateCoreMessage()));
+
+            Assert.AreEqual(0, coreReceived);
+        }
+
 
         [TestMethod]
         public void DeviceSubscriberUpdateDetailValidJsonTest()
@@ -291,6 +337,21 @@ namespace paskalON.Devices.Client.UnitTest.Subscribers
             IReadOnlyList<FakeLogRecord> logs = logger.Collector.GetSnapshot();
             Assert.HasCount(1, logs.Where(l => l.Level == LogLevel.Error));
             Assert.IsNotNull(logs.Where(l => l.Level == LogLevel.Error).First().Message.Contains("Deserialize", StringComparison.OrdinalIgnoreCase));
+        }
+
+
+        private static PcsCoreDto CreateCoreMessage()
+        {
+            return new PcsCoreDto
+            {
+                DeviceId = 1,
+                ActivePowerTarget = new ActivePower(1000000),
+                ActivePower = new ActivePower(998500),
+                ReactivePowerTarget = new ReactivePower(0),
+                ReactivePower = new ReactivePower(1200),
+                ACCurrent = 1450,
+                ACVoltage = 400,
+            };
         }
     }
 }

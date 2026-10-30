@@ -12,6 +12,8 @@ using paskalON.Devices.Dto.Meters.PowerMeters;
 using paskalON.Devices.Dto.Meters.PowerMeters.Concretes;
 using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.Messaging;
+using paskalON.PhysicalUnits.Electricals.Powers;
+using System.Text.Json;
 
 namespace paskalON.Devices.Client.UnitTest
 {
@@ -121,6 +123,36 @@ namespace paskalON.Devices.Client.UnitTest
             await client.Initialize(_subscriberTopic!);
 
             _subscriberMock.Verify(x => x.Subscribe(It.IsAny<string>(), It.IsAny<Action<string>>()), Times.AtLeastOnce);
+        }
+
+
+        [TestMethod]
+        public async Task DeviceClientCoreMessageRaisesCoreDataReceivedTest()
+        {
+            Dictionary<string, Action<string>> callbacks = new Dictionary<string, Action<string>>();
+            _subscriberMock.Setup(x => x.Subscribe(It.IsAny<string>(), It.IsAny<Action<string>>()))
+                .Callback<string, Action<string>>((topic, callback) => callbacks[topic] = callback);
+            _deviceServerMock.Setup(x => x.GetDer()).ReturnsAsync(CreateBatteryDevicesDto());
+            DeviceClient client = new DeviceClient(NullLogger<DeviceClient>.Instance, _subscriberMock.Object, _deviceServerMock.Object);
+            int coreDataReceived = 0;
+            client.CoreDataReceived += (_, _) => coreDataReceived++;
+            await client.Initialize(CreateSubscriberTopicWithTopics());
+
+            PcsCoreDto pcsCore = new PcsCoreDto
+            {
+                DeviceId = 1,
+                ActivePowerTarget = new ActivePower(1000000),
+                ActivePower = new ActivePower(998500),
+                ReactivePowerTarget = new ReactivePower(0),
+                ReactivePower = new ReactivePower(1200),
+                ACCurrent = 1450,
+                ACVoltage = 400
+            };
+
+            callbacks["pcs:core"].Invoke(JsonSerializer.Serialize(pcsCore));
+            callbacks["pcs:detail"].Invoke("{ invalid json }");
+
+            Assert.AreEqual(1, coreDataReceived);
         }
 
 

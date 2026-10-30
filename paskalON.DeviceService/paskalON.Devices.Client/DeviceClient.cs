@@ -128,6 +128,10 @@ namespace paskalON.Devices.Client
         #endregion
 
 
+        /// <inheritdoc/>
+        public event EventHandler? CoreDataReceived;
+
+
         /// <summary>
         /// The DER (Distributed Energy Resource) root DTO object.
         /// </summary>
@@ -260,7 +264,16 @@ namespace paskalON.Devices.Client
 
             logger.LogInformation("Device subscriber for device {DeviceTopic} was registered", typeof(TDevice).Name);
             return new DeviceSubscriber<TDevice, TDefinition, TCore, TDetail>
-                (logger, subscriber, register, entry.DefinitionTopic, entry.CoreTopic, entry.DetailTopic);
+                (logger, subscriber, register, entry.DefinitionTopic, entry.CoreTopic, entry.DetailTopic, OnCoreDataReceived);
+        }
+
+
+        /// <summary>
+        /// Raises the <see cref="CoreDataReceived"/> event.
+        /// </summary>
+        private void OnCoreDataReceived()
+        {
+            CoreDataReceived?.Invoke(this, EventArgs.Empty);
         }
     }
 }
