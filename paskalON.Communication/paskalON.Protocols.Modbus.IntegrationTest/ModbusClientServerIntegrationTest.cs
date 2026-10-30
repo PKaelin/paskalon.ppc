@@ -83,6 +83,34 @@ namespace paskalON.Protocols.Modbus.IntegrationTest
 
 
         [TestMethod]
+        public async Task ModbusClientServerRaisesConnectedOnEachSuccessfulConnectTest()
+        {
+            int port = GetUnusedPort();
+            ModbusDataMemoryStore store = new ModbusDataMemoryStore(32, 32, 32, 32);
+            await using NModbusServer server = new NModbusServer(NullLogger<NModbusServer>.Instance, store, "127.0.0.1", port, 1);
+            await using NModbusClient client = new NModbusClient(NullLogger<NModbusClient>.Instance, CreateConfiguration(port), 1);
+            int connectedEvents = 0;
+            client.OnConnected += (_, _) => connectedEvents++;
+            await server.StartAsync();
+
+            try
+            {
+                await client.ConnectAsync();
+                await client.ConnectAsync();
+                await client.DisconnectAsync();
+                await client.ConnectAsync();
+
+                Assert.AreEqual(2, connectedEvents);
+            }
+            finally
+            {
+                await client.DisconnectAsync();
+                await server.StopAsync();
+            }
+        }
+
+
+        [TestMethod]
         public async Task ModbusClientServerRestartedServerAnswersAgainTest()
         {
             int port = GetUnusedPort();

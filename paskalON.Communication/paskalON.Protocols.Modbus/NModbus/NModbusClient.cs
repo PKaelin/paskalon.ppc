@@ -89,6 +89,10 @@ namespace paskalON.Protocols.Modbus.NModbus
 
 
         /// <inheritdoc/>
+        public event EventHandler<EventArgs>? OnConnected;
+
+
+        /// <inheritdoc/>
         public ModbusClientState State
         {
             get { return _state; }
@@ -192,6 +196,7 @@ namespace paskalON.Protocols.Modbus.NModbus
                             _master.Transport.Retries = _clientConnection.SendRetryCount;
                             _master.Transport.WaitToRetryMilliseconds = _clientConnection.SendRetryIntervalMilliseconds;
                             State = ModbusClientState.Connected;
+                            OnConnected?.Invoke(this, EventArgs.Empty);
 
                             return;
                         }

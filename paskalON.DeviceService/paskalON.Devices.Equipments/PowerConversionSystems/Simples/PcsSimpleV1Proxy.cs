@@ -41,6 +41,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
 
             _client = client;
             _client.OnCommunicationError += OnCommunicationError;
+            _client.OnConnected += OnClientConnected;
         }
 
 
@@ -419,6 +420,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
         public void Dispose()
         {
             _client.OnCommunicationError -= OnCommunicationError;
+            _client.OnConnected -= OnClientConnected;
         }
     }
 }

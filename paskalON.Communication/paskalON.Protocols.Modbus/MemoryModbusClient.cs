@@ -23,6 +23,10 @@ namespace paskalON.Protocols.Modbus
         /// <inheritdoc/>
 #pragma warning disable CS0067 // Event is never used
         public event EventHandler<EventArgs>? OnCommunicationError;
+
+
+        /// <inheritdoc/>
+        public event EventHandler<EventArgs>? OnConnected;
 #pragma warning restore CS0067
 
         /// <inheritdoc/>

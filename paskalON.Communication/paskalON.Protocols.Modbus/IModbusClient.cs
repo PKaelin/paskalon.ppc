@@ -19,6 +19,12 @@ namespace paskalON.Protocols.Modbus
 
 
         /// <summary>
+        /// Event triggered each time the client successfully connected to the server.
+        /// </summary>
+        event EventHandler<EventArgs> OnConnected;
+
+
+        /// <summary>
         /// Current state of the Modbus client.
         /// </summary>
         ModbusClientState State { get; }

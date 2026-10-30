@@ -55,6 +55,24 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
+        /// Maximum attempts of the automatic initial start per connect.
+        /// </summary>
+        private const int InitialStartMaxAttempts = 5;
+
+
+        /// <summary>
+        /// Flag whether the automatic initial start has been triggered or is not needed anymore.
+        /// </summary>
+        private bool _initialStartHandled;
+
+
+        /// <summary>
+        /// Delay between the attempts of the automatic initial start.
+        /// </summary>
+        protected virtual TimeSpan InitialStartRetryDelay { get => TimeSpan.FromSeconds(10); }
+
+
+        /// <summary>
         /// Event when the Power Conversion System state <see cref="PcsState"/> changes.
         /// </summary>
         public event EventHandler<PcsStateChangedEventArgs>? StateChanged;
@@ -937,6 +955,79 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         {
             // Logging and even invocation is done in the setter of the CommunicationError property
             RaiseCommunicationError();
+        }
+
+
+        /// <summary>
+        /// Triggered when the communication client connected. Starts the PCS automatically on the
+        /// first connect if <see cref="InitiallyStarted"/> is true and it isn't in maintenance mode.
+        /// </summary>
+        /// <param name="sender">The communication client.</param>
+        /// <param name="e">The event arguments.</param>
+        /// <remarks>
+        /// A successful automatic start happens only once per service run so that a later reconnect
+        /// does not undo a stop command. The start runs in the background as the client raises
+        /// this event while it is still connecting.
+        /// </remarks>
+        protected void OnClientConnected(object? sender, EventArgs e)
+        {
+            if (InitiallyStarted is false)
+            {
+                return;
+            }
+
+            lock (dataLock)
+            {
+                if (_initialStartHandled == true)
+                {
+                    return;
+                }
+
+                _initialStartHandled = true;
+            }
+
+            if (IsInMaintenanceMode == true)
+            {
+                _logger.LogInformation("{Name} is in maintenance mode. Skip automatic initial start.", Name);
+
+                return;
+            }
+
+            _ = Task.Run(StartInitiallyAsync);
+        }
+
+
+        /// <summary>
+        /// Executes the automatic initial start. Retries as dependent devices like the battery banks
+        /// might still be connecting. If all attempts fail then the next connect tries again.
+        /// </summary>
+        /// <returns>Task</returns>
+        private async Task StartInitiallyAsync()
+        {
+            for (int attempt = 1; attempt <= InitialStartMaxAttempts; attempt++)
+            {
+                try
+                {
+                    _logger.LogInformation("{Name} automatic initial start. Attempt: {Attempt}", Name, attempt);
+                    await StartAsync().ConfigureAwait(false);
+
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("{Name} automatic initial start failed. Attempt: {Attempt} Error: {Error}", Name, attempt, ex.Message);
+                }
+
+                if (attempt < InitialStartMaxAttempts)
+                {
+                    await Task.Delay(InitialStartRetryDelay).ConfigureAwait(false);
+                }
+            }
+
+            lock (dataLock)
+            {
+                _initialStartHandled = false;
+            }
         }
 
 

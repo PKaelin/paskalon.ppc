@@ -238,5 +238,110 @@ namespace paskalON.Devices.Equipments.UnitTest.PowerConversionSystems.Simples
             // Reactive power is written in kilo vars
             Assert.AreEqual(reactivePowerTarget / 1000, reactivePower);
         }
+
+
+        [TestMethod]
+        public async Task PcsConnectedSendsStartCommandOnFirstConnectOnlyTest()
+        {
+            _pcsConfig!.InitiallyStarted = true;
+            TaskCompletionSource written = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            Mock<IModbusClient> client = CreateConnectedClient();
+            client
+                .Setup(x => x.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, (ushort)PcsSimpleV1Description.State.On, ModbusDataType.MbInt16, It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
+                .Callback(() => written.TrySetResult())
+                .Returns(Task.CompletedTask);
+            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig, _unit!.Object, new Mock<IMetricsPublisher>().Object, new Mock<IModbusDataface>().Object, client.Object);
+
+            client.Raise(x => x.OnConnected += null, client.Object, EventArgs.Empty);
+            await written.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            client.Raise(x => x.OnConnected += null, client.Object, EventArgs.Empty);
+
+            client.Verify(x => x.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, (ushort)PcsSimpleV1Description.State.On, ModbusDataType.MbInt16, It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Once);
+            Assert.AreEqual(PcsState.Starting, pcs.State);
+        }
+
+
+        [TestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, true)]
+        public void PcsConnectedDoesNotSendStartCommandTest(bool initiallyStarted, bool inMaintenanceMode)
+        {
+            _pcsConfig!.InitiallyStarted = initiallyStarted;
+            _unit!.Object.IsInMaintenanceMode = inMaintenanceMode;
+            Mock<IModbusClient> client = CreateConnectedClient();
+            PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig, _unit.Object, new Mock<IMetricsPublisher>().Object, new Mock<IModbusDataface>().Object, client.Object);
+
+            client.Raise(x => x.OnConnected += null, client.Object, EventArgs.Empty);
+
+            client.Verify(x => x.WriteSingleRegisterAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<ModbusDataType>(), It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Never);
+            Assert.AreNotEqual(PcsState.Starting, pcs.State);
+        }
+
+
+        [TestMethod]
+        public async Task PcsConnectedRetriesStartCommandAfterFailureTest()
+        {
+            _pcsConfig!.InitiallyStarted = true;
+            int attempts = 0;
+            TaskCompletionSource written = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            Mock<IModbusClient> client = CreateConnectedClient();
+            client
+                .Setup(x => x.WriteSingleRegisterAsync((ushort)PcsSimpleV1Description.Register.SelectorState, (ushort)PcsSimpleV1Description.State.On, ModbusDataType.MbInt16, It.IsAny<short>(), It.IsAny<double>(), It.IsAny<CancellationToken>()))
+                .Returns(() =>
+                {
+                    attempts++;
+
+                    if (attempts == 1)
+                    {
+                        return Task.FromException(new InvalidOperationException("The client is not connected."));
+                    }
+
+                    written.TrySetResult();
+
+                    return Task.CompletedTask;
+                });
+            PcsWithoutRetryDelay pcs = new PcsWithoutRetryDelay(_pcsConfig, _unit!.Object, client.Object);
+
+            client.Raise(x => x.OnConnected += null, client.Object, EventArgs.Empty);
+            await written.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+            Assert.AreEqual(2, attempts);
+            Assert.AreEqual(_pcsConfig.Name, pcs.Name);
+        }
+
+
+        /// <summary>
+        /// Creates a Modbus client mock in connected state.
+        /// </summary>
+        /// <returns>The Modbus client mock.</returns>
+        private Mock<IModbusClient> CreateConnectedClient()
+        {
+            Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.State).Returns(ModbusClientState.Connected);
+
+            return client;
+        }
+
+
+        /// <summary>
+        /// PCS without a delay between the automatic initial start attempts.
+        /// </summary>
+        private sealed class PcsWithoutRetryDelay : PcsSimpleV1Proxy
+        {
+            /// <inheritdoc/>
+            protected override TimeSpan InitialStartRetryDelay { get => TimeSpan.Zero; }
+
+
+            /// <summary>
+            /// Constructor of <see cref="PcsWithoutRetryDelay"/>.
+            /// </summary>
+            /// <param name="config">The power conversion system configuration.</param>
+            /// <param name="derUnit">The parent DER unit.</param>
+            /// <param name="client">The Modbus client interface.</param>
+            public PcsWithoutRetryDelay(PowerConversionSystemConfig config, DerUnit derUnit, IModbusClient client)
+                : base(NullLogger.Instance, config, derUnit, new Mock<IMetricsPublisher>().Object, new Mock<IModbusDataface>().Object, client)
+            {
+            }
+        }
     }
 }

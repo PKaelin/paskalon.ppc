@@ -32,6 +32,7 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.PowerElectronics
 
             _client = client;
             _client.OnCommunicationError += OnCommunicationError;
+            _client.OnConnected += OnClientConnected;
         }
 
         /// <inheritdoc/>
