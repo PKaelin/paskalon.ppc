@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using paskalON.ConstraintEngine.Domain;
 using paskalON.ConstraintEngine.Domain.Configs.Ders;
@@ -483,6 +484,27 @@ namespace paskalON.PowerControls.Domain.UnitTest.System
             unit.SetupGet(x => x.DistributionStrategyType).Returns(DistributionStrategyType.Equal);
 
             return unit;
+        }
+
+
+        [TestMethod]
+        public void UpdatePowerLogsInformationOnlyForChangedTargetTest()
+        {
+            FakeLogger logger = new FakeLogger();
+            SystemPowerControl system = new SystemPowerControl(logger, _config, _map.Object, _publisher.Object, _constraints, [_unit1.Object],
+                _distributions.Object);
+
+            system.UpdatePower(new ActivePower(5000), new ReactivePower(2000));
+            system.UpdatePower(new ActivePower(5000), new ReactivePower(2000));
+            system.UpdatePower(new ActivePower(6000), new ReactivePower(2000));
+
+            IReadOnlyList<FakeLogRecord> logs = logger.Collector.GetSnapshot();
+            List<FakeLogRecord> informationLogs = logs.Where(log => log.Level == LogLevel.Information && log.Message.StartsWith("Update system power control")).ToList();
+            List<FakeLogRecord> debugLogs = logs.Where(log => log.Level == LogLevel.Debug && log.Message.StartsWith("Update system power control unchanged")).ToList();
+            Assert.HasCount(2, informationLogs);
+            Assert.AreEqual("Update system power control. Active Power 5000 W, Reactive Power 2000 VAR", informationLogs[0].Message);
+            Assert.AreEqual("Update system power control. Active Power 6000 W, Reactive Power 2000 VAR", informationLogs[1].Message);
+            Assert.HasCount(1, debugLogs);
         }
 
 

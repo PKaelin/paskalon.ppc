@@ -140,5 +140,54 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Systems
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Warning);
             Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("below minimum limit", StringComparison.OrdinalIgnoreCase)));
         }
+
+
+        /// <summary>
+        /// Confirms a violation of the periodically applied setpoints is logged once when it starts and once when it ends.
+        /// </summary>
+        [TestMethod]
+        public void ApplyConstraintsLogsViolationOnceUntilWithinLimitsTest()
+        {
+            FakeLogger logger = new FakeLogger();
+            _config!.MaximumActivePowerWatt = 10000;
+            _config!.MinimumReactivePowerVars = -20000;
+            SystemPowerConstraint constraint = new SystemPowerConstraint(logger, _config!, _map!);
+            double[] requestedActivePowers = [20000, 20000, 20000, 8000, 8000, 20000];
+
+            foreach (double requestedActivePower in requestedActivePowers)
+            {
+                ActivePower activePower = new ActivePower(requestedActivePower);
+                ReactivePower reactivePower = ReactivePower.FromKilo(-40);
+                constraint.ApplyConstraints(ref activePower, ref reactivePower);
+            }
+
+            IReadOnlyList<FakeLogRecord> logs = logger.Collector.GetSnapshot();
+            Assert.HasCount(2, logs.Where(l => l.Level == LogLevel.Warning && l.Message.Contains("active power 20000 exceeds maximum limit")));
+            Assert.HasCount(1, logs.Where(l => l.Level == LogLevel.Information && l.Message.Contains("active power 8000 is within the limits again")));
+            Assert.HasCount(1, logs.Where(l => l.Level == LogLevel.Warning && l.Message.Contains("reactive power -40000 below minimum limit")));
+        }
+
+
+        /// <summary>
+        /// Confirms a constraint applied without logging the violations does not log nor change the logged violations.
+        /// </summary>
+        [TestMethod]
+        public void ApplyConstraintsWithoutLoggingViolationsTest()
+        {
+            FakeLogger logger = new FakeLogger();
+            _config!.MaximumActivePowerWatt = 10000;
+            SystemPowerConstraint constraint = new SystemPowerConstraint(logger, _config!, _map!);
+            ActivePower silentActivePower = new ActivePower(20000);
+            ReactivePower silentReactivePower = new ReactivePower(0);
+            constraint.ApplyConstraints(ref silentActivePower, ref silentReactivePower, false);
+            ActivePower activePower = new ActivePower(20000);
+            ReactivePower reactivePower = new ReactivePower(0);
+
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
+
+            Assert.AreEqual(10000, silentActivePower.Watts);
+            Assert.AreEqual(10000, activePower.Watts);
+            Assert.HasCount(1, logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Warning));
+        }
     }
 }

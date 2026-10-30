@@ -7,7 +7,7 @@ namespace paskalON.ConstraintEngine.Domain.Systems
     /// <summary>
     /// System ramp constraint map.
     /// </summary>
-    public class SystemRampConstraintMap : ConstraintBaseMap
+    public class SystemRampConstraintMap : PowerRampConstraintBaseMap
     {
     }
 }

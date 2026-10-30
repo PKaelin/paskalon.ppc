@@ -250,6 +250,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     b.Property<double>("MaximumActivePowerWattRampRatePerSecond")
                         .HasColumnType("double precision");
 
+                    b.Property<int>("MaximumRampIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<double>("MaximumReactivePowerVarsRampRatePerSecond")
                         .HasColumnType("double precision");
 
@@ -287,6 +290,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 
                     b.Property<double>("MaximumActivePowerWattRampRatePerSecond")
                         .HasColumnType("double precision");
+
+                    b.Property<int>("MaximumRampIntervalMilliseconds")
+                        .HasColumnType("integer");
 
                     b.Property<double>("MaximumReactivePowerVarsRampRatePerSecond")
                         .HasColumnType("double precision");

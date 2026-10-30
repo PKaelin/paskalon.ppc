@@ -12,7 +12,9 @@ using paskalON.Devices.Client.Subscribers;
 using paskalON.Hosting;
 using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
+using paskalON.Messaging.Heartbeats;
 using paskalON.Messaging.Redis;
+using paskalON.Messaging.Sequences;
 using paskalON.OperatingModes.Client.Subscribers;
 using paskalON.PowerControls.Application;
 using paskalON.PowerControls.Application.Publishers;
@@ -113,6 +115,9 @@ try
     builder.Services.AddSingleton<IDerUnitTargetPublisher, DerUnitTargetPublisher>();
 
     builder.Services.AddSingleton<IPowerControlManager, PowerControlManager>();
+    // Heartbeat, the operating mode holds its setpoints while the heartbeat of the power control is missing
+    builder.Services.AddSingleton<HeartbeatService>();
+    builder.Services.AddHostedService<HeartbeatService>(provider => provider.GetRequiredService<HeartbeatService>());
 
     if (startPublisher == true)
     {
@@ -196,6 +201,8 @@ try
         // Load and initialize manager, retry while the database is not reachable
         IPowerControlRepository powerControlRepository = scope.ServiceProvider.GetRequiredService<IPowerControlRepository>();
         await startupRetry.ExecuteAsync("Initialize power control manager", () => manager.Initialize(powerControlRepository), DatabaseTransientExceptionFilter.IsTransient);
+        // The heartbeat starts once the power control is initialized and able to distribute setpoints
+        InitializeHeartbeat(app, config);
 
         if (startPublisher == true)
         {
@@ -229,6 +236,30 @@ catch (Exception ex)
 
     // Fail application
     throw;
+}
+
+
+/// <summary>
+/// Initialize the heartbeat service that publishes the heartbeat of this power control service.
+/// </summary>
+/// <remarks>
+/// Without a configured heartbeat topic the operating mode cannot detect the power control and holds its setpoints if it monitors the power control.
+/// </remarks>
+static void InitializeHeartbeat(WebApplication app, SystemConfig config)
+{
+    if (string.IsNullOrWhiteSpace(config.PublisherTopicHeartbeat))
+    {
+        app.Logger.LogWarning("No heartbeat topic is configured, the heartbeat of the power control is not published.");
+
+        return;
+    }
+
+    const string serviceName = "PowerControl";
+    MessageSequencer sequencer = new MessageSequencer(MessageSequencer.CreateSourceInstance(serviceName), TimeProvider.System);
+    HeartbeatPublisher heartbeatPublisher = new HeartbeatPublisher(app.Services.GetRequiredService<ILogger<HeartbeatPublisher>>(),
+        app.Services.GetRequiredService<IMessagePublisher>(), sequencer, serviceName, config.PublisherTopicHeartbeat,
+        TimeSpan.FromMilliseconds(config.DependencyHeartbeatIntervalMilliseconds), TimeProvider.System);
+    app.Services.GetRequiredService<HeartbeatService>().Initialize(heartbeatPublisher);
 }
 
 

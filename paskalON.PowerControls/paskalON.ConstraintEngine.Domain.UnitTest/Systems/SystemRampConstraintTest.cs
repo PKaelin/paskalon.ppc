@@ -447,5 +447,112 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Systems
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Warning);
             Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("exceeds maximum limit", StringComparison.OrdinalIgnoreCase)));
         }
+
+
+        [TestMethod]
+        [DataRow(1, 1000000, 1000000)]
+        [DataRow(2, 2000000, 2000000)]
+        [DataRow(60, 2000000, 2000000)]
+        [DataRow(3600, 2000000, 2000000)]
+        public void ApplyConstraintsGapLimitsStepToMaximumRampIntervalTest(int gapSeconds, double expectedActivePowerWatts, double expectedReactivePowerVars)
+        {
+            // 1 MW/s ramp rate and 1 Mvar/s with a maximum ramp interval of 2 s, the setpoints jump from 0 to 20 MW and 20 Mvar after the gap
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            _config!.MaximumActivePowerWattRampRatePerSecond = 1000000;
+            _config.MaximumReactivePowerVarsRampRatePerSecond = 1000000;
+            _config.MaximumRampIntervalMilliseconds = 2000;
+            SystemRampConstraint constraint = new SystemRampConstraint(NullLogger.Instance, _config, _map!, timeProvider);
+            ActivePower initialActivePower = ActivePower.FromMega(0);
+            ReactivePower initialReactivePower = ReactivePower.FromMega(0);
+            constraint.ApplyConstraints(ref initialActivePower, ref initialReactivePower);
+            timeProvider.Advance(TimeSpan.FromSeconds(gapSeconds));
+            ActivePower activePower = ActivePower.FromMega(20);
+            ReactivePower reactivePower = ReactivePower.FromMega(20);
+
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
+
+            Assert.AreEqual(expectedActivePowerWatts, activePower.Watts);
+            Assert.AreEqual(expectedReactivePowerVars, reactivePower.VoltAmperesReactive);
+        }
+
+
+        [TestMethod]
+        [DataRow(15000000, 15005000, 15005000)]
+        [DataRow(15000000, 0, 14990000)]
+        [DataRow(-8000000, -8000000, -8000000)]
+        public void ApplyConstraintsFirstTargetStartsFromCurrentDeviceTargetTest(double currentTargetWatts, double setpointWatts, double expectedWatts)
+        {
+            // A restarted power control receives the setpoint while the devices still apply their last target
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
+            _config.MaximumReactivePowerVarsRampRatePerSecond = 10000;
+
+            SystemRampConstraintMap map = new SystemRampConstraintMap
+            {
+                CurrentActivePowerTarget = () => new ActivePower(currentTargetWatts),
+                CurrentReactivePowerTarget = () => new ReactivePower(250000)
+            };
+
+            SystemRampConstraint constraint = new SystemRampConstraint(NullLogger.Instance, _config, map, timeProvider);
+            ActivePower activePower = new ActivePower(setpointWatts);
+            ReactivePower reactivePower = new ReactivePower(250000);
+
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
+
+            Assert.AreEqual(expectedWatts, activePower.Watts);
+            Assert.AreEqual(250000, reactivePower.VoltAmperesReactive);
+        }
+
+
+        [TestMethod]
+        public void ApplyConstraintsFirstTargetUnknownDeviceTargetStartsFromZeroTest()
+        {
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
+            _config.MaximumReactivePowerVarsRampRatePerSecond = 10000;
+
+            SystemRampConstraintMap map = new SystemRampConstraintMap
+            {
+                CurrentActivePowerTarget = () => null,
+                CurrentReactivePowerTarget = () => null
+            };
+
+            SystemRampConstraint constraint = new SystemRampConstraint(NullLogger.Instance, _config, map, timeProvider);
+            ActivePower activePower = ActivePower.FromMega(15);
+            ReactivePower reactivePower = ReactivePower.FromKilo(5);
+
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
+
+            Assert.AreEqual(10000, activePower.Watts);
+            Assert.AreEqual(5000, reactivePower.VoltAmperesReactive);
+        }
+
+
+        /// <summary>
+        /// Confirms a ramp over several periodically applied setpoints is logged once when it starts and once when it reached the setpoint.
+        /// </summary>
+        [TestMethod]
+        public void ApplyConstraintsLogsRampOnceUntilReachedTest()
+        {
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            FakeLogger logger = new FakeLogger();
+            _config!.MaximumActivePowerWattRampRatePerSecond = 10000;
+            SystemRampConstraint constraint = new SystemRampConstraint(logger, _config!, _map!, timeProvider);
+            List<double> appliedActivePowers = new List<double>();
+
+            for (int i = 0; i < 4; i++)
+            {
+                ActivePower activePower = ActivePower.FromKilo(25);
+                ReactivePower reactivePower = ReactivePower.FromKilo(0);
+                constraint.ApplyConstraints(ref activePower, ref reactivePower);
+                appliedActivePowers.Add(activePower.Watts);
+                timeProvider.Advance(TimeSpan.FromSeconds(1));
+            }
+
+            IReadOnlyList<FakeLogRecord> logs = logger.Collector.GetSnapshot();
+            CollectionAssert.AreEqual(new List<double> { 10000, 20000, 25000, 25000 }, appliedActivePowers);
+            Assert.HasCount(1, logs.Where(l => l.Level == LogLevel.Warning && l.Message.Contains("active power ramp exceeds maximum limit")));
+            Assert.HasCount(1, logs.Where(l => l.Level == LogLevel.Information && l.Message.Contains("active power ramp reached 25000 within the limit")));
+        }
     }
 }

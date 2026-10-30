@@ -193,10 +193,22 @@ namespace paskalON.PowerControls.Domain.Systems
                     constraint.ApplyConstraints(ref constrainedActivePower, ref constrainedReactivePower);
                 }
 
+                // The setpoints are republished periodically, so only a changed target is logged as information
+                bool isTargetChanged = constrainedActivePower.Watts != TargetActivePower.Watts
+                    || constrainedReactivePower.VoltAmperesReactive != TargetReactivePower.VoltAmperesReactive;
                 // Set the target power to the actual targets
                 SetTargetPower(constrainedActivePower, constrainedReactivePower);
-                _logger.LogInformation("Update system power control. Active Power {ActivePower}, Reactive Power {ReactivePower}",
-                    constrainedActivePower.Watts, constrainedReactivePower.KiloVoltAmperesReactive);
+
+                if (isTargetChanged)
+                {
+                    _logger.LogInformation("Update system power control. Active Power {ActivePower} W, Reactive Power {ReactivePower} VAR",
+                        constrainedActivePower.Watts, constrainedReactivePower.VoltAmperesReactive);
+                }
+                else
+                {
+                    _logger.LogDebug("Update system power control unchanged. Active Power {ActivePower} W, Reactive Power {ReactivePower} VAR",
+                        constrainedActivePower.Watts, constrainedReactivePower.VoltAmperesReactive);
+                }
 
                 // Distribute to all units that can have different distribution strategies
                 // The distribution strategies filter unit per configured distribution strategy

@@ -38,6 +38,18 @@ namespace paskalON.ConstraintEngine.Domain
         private readonly ConstraintBaseMap _map;
 
 
+        /// <summary>
+        /// Lock object to protect the active violations.
+        /// </summary>
+        private readonly object _dataLock = new object();
+
+
+        /// <summary>
+        /// Names of the violations that are currently active.
+        /// </summary>
+        private readonly HashSet<string> _activeViolations = new HashSet<string>(StringComparer.Ordinal);
+
+
         /// <inheritdoc/>
         public string Name { get => _config.Name; }
 
@@ -62,5 +74,28 @@ namespace paskalON.ConstraintEngine.Domain
 
         /// <inheritdoc/>
         public abstract void ApplyConstraints(ref ActivePower activePower, ref ReactivePower reactivePower, bool shallLogViolations);
+
+
+        /// <summary>
+        /// Updates whether a violation is active, so that a violation is logged once when it starts and once when it ends
+        /// instead of on every applied setpoint.
+        /// </summary>
+        /// <param name="violation">Name of the violation, unique within the constraint.</param>
+        /// <param name="isViolated">Whether the violation is active for the current setpoint.</param>
+        /// <returns>True if the violation started or ended with this call.</returns>
+        protected bool UpdateViolation(string violation, bool isViolated)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(violation);
+
+            lock (_dataLock)
+            {
+                if (isViolated)
+                {
+                    return _activeViolations.Add(violation);
+                }
+
+                return _activeViolations.Remove(violation);
+            }
+        }
     }
 }

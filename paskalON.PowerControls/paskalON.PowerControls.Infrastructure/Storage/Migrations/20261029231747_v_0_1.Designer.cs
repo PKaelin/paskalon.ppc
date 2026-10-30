@@ -12,7 +12,7 @@ using paskalON.PowerControls.Infrastructure.Storage;
 namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(PowerControlContext))]
-    [Migration("20261029214028_v_0_1")]
+    [Migration("20261029231747_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -253,6 +253,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     b.Property<double>("MaximumActivePowerWattRampRatePerSecond")
                         .HasColumnType("double precision");
 
+                    b.Property<int>("MaximumRampIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<double>("MaximumReactivePowerVarsRampRatePerSecond")
                         .HasColumnType("double precision");
 
@@ -290,6 +293,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 
                     b.Property<double>("MaximumActivePowerWattRampRatePerSecond")
                         .HasColumnType("double precision");
+
+                    b.Property<int>("MaximumRampIntervalMilliseconds")
+                        .HasColumnType("integer");
 
                     b.Property<double>("MaximumReactivePowerVarsRampRatePerSecond")
                         .HasColumnType("double precision");

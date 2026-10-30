@@ -257,7 +257,7 @@ namespace paskalON.PowerControls.Application
             };
 
             IMetricsPublisher publisher = _metricsPublisherFactory.Create();
-            DerUnitPowerControl control = new DerUnitPowerControl(_logger, config, map, publisher, CreateUnitConstraints(config.Constraints));
+            DerUnitPowerControl control = new DerUnitPowerControl(_logger, config, map, publisher, CreateUnitConstraints(config.Constraints, unit));
             MetricsPublishers.Add(publisher);
 
             return control;
@@ -283,7 +283,7 @@ namespace paskalON.PowerControls.Application
             };
 
             IMetricsPublisher publisher = _metricsPublisherFactory.Create();
-            DerUnitPowerEnergyStorageControl control = new DerUnitPowerEnergyStorageControl(_logger, config, map, publisher, CreateUnitConstraints(config.Constraints));
+            DerUnitPowerEnergyStorageControl control = new DerUnitPowerEnergyStorageControl(_logger, config, map, publisher, CreateUnitConstraints(config.Constraints, unit));
             MetricsPublishers.Add(publisher);
 
             return control;
@@ -355,7 +355,12 @@ namespace paskalON.PowerControls.Application
                         break;
 
                     case SystemRampConstraintConfig ramp:
-                        constraints.Add(new SystemRampConstraint(_logger, ramp, new SystemRampConstraintMap(), TimeProvider.System));
+                        SystemRampConstraintMap rampMap = new SystemRampConstraintMap
+                        {
+                            CurrentActivePowerTarget = GetSystemActivePowerTarget,
+                            CurrentReactivePowerTarget = GetSystemReactivePowerTarget
+                        };
+                        constraints.Add(new SystemRampConstraint(_logger, ramp, rampMap, TimeProvider.System));
                         break;
                 }
             }
@@ -368,8 +373,9 @@ namespace paskalON.PowerControls.Application
         /// Create a list of DER unit constraints based on the provided configurations.
         /// </summary>
         /// <param name="configurations">The configurations used to create the DER unit constraints.</param>
+        /// <param name="unit">The DER unit the constraints belong to.</param>
         /// <returns>A list of DER unit constraints.</returns>
-        private List<IDerUnitConstraint> CreateUnitConstraints(IEnumerable<ConstraintBaseConfig> configurations)
+        private List<IDerUnitConstraint> CreateUnitConstraints(IEnumerable<ConstraintBaseConfig> configurations, DerUnitDto unit)
         {
             List<IDerUnitConstraint> constraints = new();
 
@@ -382,12 +388,65 @@ namespace paskalON.PowerControls.Application
                         break;
 
                     case DerUnitRampConstraintConfig ramp:
-                        constraints.Add(new DerUnitRampConstraint(_logger, ramp, new DerUnitRampConstraintMap(), TimeProvider.System));
+                        DerUnitRampConstraintMap rampMap = new DerUnitRampConstraintMap
+                        {
+                            CurrentActivePowerTarget = () => GetPcs(unit)?.Core?.ActivePowerTarget,
+                            CurrentReactivePowerTarget = () => GetPcs(unit)?.Core?.ReactivePowerTarget
+                        };
+                        constraints.Add(new DerUnitRampConstraint(_logger, ramp, rampMap, TimeProvider.System));
                         break;
                 }
             }
 
             return constraints;
+        }
+
+
+        /// <summary>
+        /// Get the sum of the active power targets currently applied by the PCS of all DER units that are not in maintenance.
+        /// </summary>
+        /// <returns>The system active power target or null if the target of a DER unit is unknown.</returns>
+        private ActivePower? GetSystemActivePowerTarget()
+        {
+            double watts = 0;
+
+            foreach (DerUnitDto unit in GetDerUnits().Where(u => u.IsInMaintenanceMode == false))
+            {
+                ActivePower? target = GetPcs(unit)?.Core?.ActivePowerTarget;
+
+                if (target.HasValue is false)
+                {
+                    return null;
+                }
+
+                watts += target.Value.Watts;
+            }
+
+            return new ActivePower(watts);
+        }
+
+
+        /// <summary>
+        /// Get the sum of the reactive power targets currently applied by the PCS of all DER units that are not in maintenance.
+        /// </summary>
+        /// <returns>The system reactive power target or null if the target of a DER unit is unknown.</returns>
+        private ReactivePower? GetSystemReactivePowerTarget()
+        {
+            double vars = 0;
+
+            foreach (DerUnitDto unit in GetDerUnits().Where(u => u.IsInMaintenanceMode == false))
+            {
+                ReactivePower? target = GetPcs(unit)?.Core?.ReactivePowerTarget;
+
+                if (target.HasValue is false)
+                {
+                    return null;
+                }
+
+                vars += target.Value.VoltAmperesReactive;
+            }
+
+            return new ReactivePower(vars);
         }
 
 

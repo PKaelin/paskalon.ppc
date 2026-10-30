@@ -425,5 +425,53 @@ namespace paskalON.ConstraintEngine.Domain.UnitTest.Ders
             IEnumerable<FakeLogRecord> logs = logger.Collector.GetSnapshot().Where(l => l.Level == LogLevel.Warning);
             Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("exceeds maximum limit", StringComparison.OrdinalIgnoreCase)));
         }
+
+
+        [TestMethod]
+        [DataRow(1, 500000)]
+        [DataRow(60, 1500000)]
+        public void ApplyConstraintsGapLimitsStepToMaximumRampIntervalTest(int gapSeconds, double expectedActivePowerWatts)
+        {
+            // 500 kW/s ramp rate with a maximum ramp interval of 3 s, the setpoint jumps from 0 to 3 MW after the gap
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            _config!.MaximumActivePowerWattRampRatePerSecond = 500000;
+            _config.MaximumRampIntervalMilliseconds = 3000;
+            DerUnitRampConstraint constraint = new DerUnitRampConstraint(NullLogger.Instance, _config, _map!, timeProvider);
+            ActivePower initialActivePower = ActivePower.FromMega(0);
+            ReactivePower initialReactivePower = ReactivePower.FromMega(0);
+            constraint.ApplyConstraints(ref initialActivePower, ref initialReactivePower);
+            timeProvider.Advance(TimeSpan.FromSeconds(gapSeconds));
+            ActivePower activePower = ActivePower.FromMega(3);
+            ReactivePower reactivePower = ReactivePower.FromMega(0);
+
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
+
+            Assert.AreEqual(expectedActivePowerWatts, activePower.Watts);
+        }
+
+
+        [TestMethod]
+        public void ApplyConstraintsFirstTargetStartsFromCurrentPcsTargetTest()
+        {
+            // A restarted power control receives the target while the PCS still applies its last target of 2.4 MW
+            FakeTimeProvider timeProvider = new FakeTimeProvider();
+            _config!.MaximumActivePowerWattRampRatePerSecond = 100000;
+            _config.MaximumReactivePowerVarsRampRatePerSecond = 100000;
+
+            DerUnitRampConstraintMap map = new DerUnitRampConstraintMap
+            {
+                CurrentActivePowerTarget = () => ActivePower.FromMega(2.4),
+                CurrentReactivePowerTarget = () => ReactivePower.FromKilo(-300)
+            };
+
+            DerUnitRampConstraint constraint = new DerUnitRampConstraint(NullLogger.Instance, _config, map, timeProvider);
+            ActivePower activePower = ActivePower.FromMega(0);
+            ReactivePower reactivePower = ReactivePower.FromKilo(-300);
+
+            constraint.ApplyConstraints(ref activePower, ref reactivePower);
+
+            Assert.AreEqual(2300000, activePower.Watts);
+            Assert.AreEqual(-300000, reactivePower.VoltAmperesReactive);
+        }
     }
 }

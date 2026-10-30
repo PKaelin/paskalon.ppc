@@ -7,7 +7,7 @@ namespace paskalON.ConstraintEngine.Domain.Ders
     /// <summary>
     /// DER unit ramp constraint map.
     /// </summary>
-    public class DerUnitRampConstraintMap : ConstraintBaseMap
+    public class DerUnitRampConstraintMap : PowerRampConstraintBaseMap
     {
     }
 }

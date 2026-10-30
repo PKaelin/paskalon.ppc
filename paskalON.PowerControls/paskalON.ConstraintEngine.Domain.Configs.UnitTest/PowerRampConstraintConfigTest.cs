@@ -50,6 +50,41 @@ namespace paskalON.ConstraintEngine.Domain.Configs.UnitTest
 
             Assert.AreEqual(1, config.MaximumActivePowerWattRampRatePerSecond);
             Assert.AreEqual(2, config.MaximumReactivePowerVarsRampRatePerSecond);
+            Assert.AreEqual(2000, config.MaximumRampIntervalMilliseconds);
+        }
+
+
+        [TestMethod]
+        [DataRow(0)]
+        [DataRow(-2000)]
+        public void PowerRampConstraintMaximumRampIntervalNotPositiveTest(int maximumRampIntervalMilliseconds)
+        {
+            PowerRampConstraintConfig config = new PowerRampConstraintConfig
+            {
+                ChangedBy = "Test",
+                Name = "PowerRampConstraintConfig"
+            };
+
+            Action act = () => config.MaximumRampIntervalMilliseconds = maximumRampIntervalMilliseconds;
+
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(act);
+        }
+
+
+        [TestMethod]
+        [DataRow(1)]
+        [DataRow(5000)]
+        public void PowerRampConstraintMaximumRampIntervalTest(int maximumRampIntervalMilliseconds)
+        {
+            PowerRampConstraintConfig config = new PowerRampConstraintConfig
+            {
+                ChangedBy = "Test",
+                Name = "PowerRampConstraintConfig"
+            };
+
+            config.MaximumRampIntervalMilliseconds = maximumRampIntervalMilliseconds;
+
+            Assert.AreEqual(maximumRampIntervalMilliseconds, config.MaximumRampIntervalMilliseconds);
         }
     }
 }

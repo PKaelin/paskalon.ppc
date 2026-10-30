@@ -108,7 +108,8 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: true),
                     MaximumActivePowerWattRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false),
-                    MaximumReactivePowerVarsRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false)
+                    MaximumReactivePowerVarsRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false),
+                    MaximumRampIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -201,7 +202,8 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
                     PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: true),
                     MaximumActivePowerWattRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false),
-                    MaximumReactivePowerVarsRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false)
+                    MaximumReactivePowerVarsRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false),
+                    MaximumRampIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
