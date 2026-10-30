@@ -37,6 +37,13 @@ export interface SystemMeterSummaryDto {
     frequency: number;
 }
 
+/** Availability of a dependency of the Luna service pushed by the dependency hub (DependencyStatusDto). */
+export interface DependencyStatusDto {
+    /** Name of the dependency: PowerControl, OperatingMode, DeviceService or Redis. */
+    name: string;
+    isAvailable: boolean;
+}
+
 /** System nameplate ratings (SystemNameplateDto). */
 export interface SystemNameplateDto {
     maximumActivePowerWatts: number;

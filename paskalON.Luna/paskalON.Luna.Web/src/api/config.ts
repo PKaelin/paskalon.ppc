@@ -13,12 +13,15 @@ export interface AppConfig {
     systemHubUrl: string;
     /** Absolute or relative URL of the SignalR device hub. Default: '/hubs/device' (reverse proxied). */
     deviceHubUrl: string;
+    /** Absolute or relative URL of the SignalR dependency hub. Default: '/hubs/dependency' (reverse proxied). */
+    dependencyHubUrl: string;
 }
 
 const defaultConfig: AppConfig = {
     apiBaseUrl: '/api',
     systemHubUrl: '/hubs/system',
-    deviceHubUrl: '/hubs/device'
+    deviceHubUrl: '/hubs/device',
+    dependencyHubUrl: '/hubs/dependency'
 };
 
 let current: AppConfig = defaultConfig;

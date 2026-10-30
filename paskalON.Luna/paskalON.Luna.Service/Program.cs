@@ -7,11 +7,14 @@ using paskalON.Devices.Client;
 using paskalON.Devices.Client.Subscribers;
 using paskalON.Hosting;
 using paskalON.Luna.Application;
+using paskalON.Luna.Application.Dependencies;
 using paskalON.Luna.Domain.Configs;
 using paskalON.Luna.Dto.Systems;
 using paskalON.Luna.Service.Publishers;
 using paskalON.Luna.Service.WebApi.Hubs;
 using paskalON.Messaging;
+using paskalON.Messaging.Health;
+using paskalON.Messaging.Heartbeats;
 using paskalON.Messaging.Redis;
 using paskalON.OperatingModes.Client;
 using paskalON.OperatingModes.Client.Subscribers;
@@ -19,6 +22,7 @@ using paskalON.PowerControls.Client.Subscribers;
 using StackExchange.Redis;
 using System.Xml.Serialization;
 
+const string serviceName = "Luna";
 WebApplication? app = null;
 Console.WriteLine("Starting service.....");
 
@@ -116,6 +120,15 @@ try
     builder.Services.AddSingleton<IPowerSetpointHandler>(provider => provider.GetRequiredService<LunaOperatingModeManager>());
     builder.Services.AddSingleton<IPowerSetpointSubscriber, PowerSetpointSubscriber>();
     builder.Services.AddHostedService<PowerSetpointSubscriberService>();
+    // Dependency monitoring and pushing the availability of the dependencies to the UI clients connected to the dependency hub
+    builder.Services.AddSingleton(TimeProvider.System);
+    builder.Services.AddSingleton<IDependencyHealthMonitor, DependencyHealthMonitor>();
+    builder.Services.AddSingleton<ILunaDependencyManager, LunaDependencyManager>();
+    builder.Services.AddHostedService(sp => new DependencyStatusPublisher(
+        sp.GetRequiredService<ILogger<DependencyStatusPublisher>>(),
+        sp.GetRequiredService<ILunaDependencyManager>(),
+        sp.GetRequiredService<IHubContext<DependencyHub, IDependencyClient>>(),
+        GetDependencyStatusInterval(config)));
 
     builder.Services.AddSingleton<ILunaSystemManager>(sp => new LunaSystemManager(
         sp.GetRequiredService<ILogger<LunaSystemManager>>(),
@@ -151,9 +164,21 @@ try
     app.Logger.LogInformation("Application starts initializing services.....");
     StartupRetry startupRetry = new StartupRetry(app.Logger, TimeProvider.System, startupRetryOptions);
 
-    // Initialize the device client with the subscriber topics of the system configuration, retry while the device service is not reachable
+    // Register the dependencies before subscribing, every dependency is lost until it is seen the first time
+    IDependencyHealthMonitor dependencyHealthMonitor = app.Services.GetRequiredService<IDependencyHealthMonitor>();
+    IConnectionMultiplexer connectionMultiplexer = app.Services.GetRequiredService<IConnectionMultiplexer>();
+    dependencyHealthMonitor.RegisterCondition(DependencyNames.Redis, () => connectionMultiplexer.IsConnected,
+        TimeSpan.FromMilliseconds(config.RedisLossTimeoutMilliseconds));
+    dependencyHealthMonitor.RegisterSignal(DependencyNames.DeviceService, TimeSpan.FromMilliseconds(config.DeviceServiceLossTimeoutMilliseconds));
+    dependencyHealthMonitor.RegisterSignal(DependencyNames.PowerControl, TimeSpan.FromMilliseconds(config.PowerControlLossTimeoutMilliseconds));
+    dependencyHealthMonitor.RegisterSignal(DependencyNames.OperatingMode, TimeSpan.FromMilliseconds(config.OperatingModeLossTimeoutMilliseconds));
+    SubscribeHeartbeat(app, dependencyHealthMonitor, config.SubscriberTopicPowerControlHeartbeat, DependencyNames.PowerControl);
+    SubscribeHeartbeat(app, dependencyHealthMonitor, config.SubscriberTopicOperatingModeHeartbeat, DependencyNames.OperatingMode);
+
+    // Initialize the device client with the subscriber topics of the system configuration, retry while the device service is not reachable. Received device data signals the device service.
     SubscriberTopic topics = GetSubscriberTopic(config);
     IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
+    deviceClient.CoreDataReceived += (_, _) => dependencyHealthMonitor.Signal(DependencyNames.DeviceService);
     await startupRetry.ExecuteAsync("Initialize device client", () => deviceClient.Initialize(topics), HttpTransientExceptionFilter.IsTransient);
 
     // Subscribe to the power targets and setpoints, they are handled once the application starts running
@@ -174,24 +199,63 @@ try
     app.MapControllers();
     app.MapHub<SystemHub>(SystemHub.Route);
     app.MapHub<DeviceHub>(DeviceHub.Route);
+    app.MapHub<DependencyHub>(DependencyHub.Route);
     app.Logger.LogInformation("Application about to run.....");
     app.Run();
 }
 catch (Exception ex)
 {
-    string error = $"Luna service startup failed: {ex.Message}";
-    Console.WriteLine(error);
+    string errorMessage = $"{serviceName} service startup failed: {ex.Message}";
+    Console.WriteLine($"An error occurred: {errorMessage}");
     Console.WriteLine(ex.StackTrace);
 
     if (app != null)
     {
-        app.Logger.LogError(ex, "Service failed to start");
+        app.Logger.LogError(errorMessage);
         app.Logger.LogError(ex.StackTrace);
     }
 
     // Fail application
     throw;
 }
+
+/// <summary>
+/// Subscribe to the heartbeat of a dependency.
+/// </summary>
+/// <remarks>
+/// Without a configured heartbeat topic the dependency stays lost.
+/// </remarks>
+static void SubscribeHeartbeat(WebApplication app, IDependencyHealthMonitor dependencyHealthMonitor, string? topic, string dependencyName)
+{
+    if (string.IsNullOrWhiteSpace(topic))
+    {
+        app.Logger.LogWarning("No heartbeat topic is configured for {Dependency}, it is reported as lost.", dependencyName);
+
+        return;
+    }
+
+    HeartbeatSubscriber heartbeatSubscriber = new HeartbeatSubscriber(app.Services.GetRequiredService<ILogger<HeartbeatSubscriber>>(),
+        app.Services.GetRequiredService<IMessageSubscriber>(), dependencyHealthMonitor, topic, dependencyName);
+    heartbeatSubscriber.Subscribe();
+}
+
+
+/// <summary>
+/// Get the interval to publish the dependency status, the shortest loss timeout of all dependencies.
+/// </summary>
+static TimeSpan GetDependencyStatusInterval(SystemConfig config)
+{
+    int[] lossTimeoutsMilliseconds = new int[]
+    {
+        config.RedisLossTimeoutMilliseconds,
+        config.DeviceServiceLossTimeoutMilliseconds,
+        config.PowerControlLossTimeoutMilliseconds,
+        config.OperatingModeLossTimeoutMilliseconds
+    };
+
+    return TimeSpan.FromMilliseconds(lossTimeoutsMilliseconds.Min());
+}
+
 
 /// <summary>
 /// Get subscriber topic configuration object.

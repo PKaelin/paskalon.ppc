@@ -1,5 +1,6 @@
 {
   "apiBaseUrl": "/api",
   "systemHubUrl": "/hubs/system",
-  "deviceHubUrl": "/hubs/device"
+  "deviceHubUrl": "/hubs/device",
+  "dependencyHubUrl": "/hubs/dependency"
 }

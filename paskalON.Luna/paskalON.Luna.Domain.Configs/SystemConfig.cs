@@ -10,6 +10,16 @@ namespace paskalON.Luna.Domain.Configs
     public class SystemConfig
     {
         /// <summary>
+        /// Indicates the minimum time, in milliseconds, after which a dependency is lost.
+        /// If this value is less than this constant it will cause an exception.
+        /// </summary>
+        /// <remarks>
+        /// Must be longer than the primary secondary failover (500 ms), so that a failover does not cause a loss.
+        /// </remarks>
+        private const long MinimumDependencyLossTimeoutMilliseconds = 1000;
+
+
+        /// <summary>
         /// Subscriber topic for current system setpoints used for the message subscriber.
         /// </summary>
         public string? SubscriberTopicCurrentSetpoint { get; set; }
@@ -25,6 +35,18 @@ namespace paskalON.Luna.Domain.Configs
         /// Subscriber topic for power control targets used for the message subscriber.
         /// </summary>
         public string? SubscriberTopicPowerTarget { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for the power control heartbeat used to monitor the power control service.
+        /// </summary>
+        public string? SubscriberTopicPowerControlHeartbeat { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for the operating mode heartbeat used to monitor the operating mode service.
+        /// </summary>
+        public string? SubscriberTopicOperatingModeHeartbeat { get; set; }
 
 
         /// <summary>
@@ -139,5 +161,57 @@ namespace paskalON.Luna.Domain.Configs
         /// Gets or sets the minimum reactive power at the system nameplate rating.
         /// </summary>
         public double MinimumReactivePowerSystemNameplateVars { get; set; }
+
+
+        /// <summary>
+        /// The time, in milliseconds, the message broker (Redis) must be disconnected after which it is lost.
+        /// </summary>
+        /// <remarks>
+        /// Shown in the UI as not available while it is lost.
+        /// </remarks>
+        public int RedisLossTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyLossTimeoutMilliseconds); field = value; }
+        } = 1500;
+
+
+        /// <summary>
+        /// The time, in milliseconds, without device data after which the device service is lost.
+        /// </summary>
+        /// <remarks>
+        /// Must be a multiple of the device publishing interval of the device service.
+        /// </remarks>
+        public int DeviceServiceLossTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyLossTimeoutMilliseconds); field = value; }
+        } = 3000;
+
+
+        /// <summary>
+        /// The time, in milliseconds, without a power control heartbeat after which the power control is lost.
+        /// </summary>
+        /// <remarks>
+        /// Must be a multiple of the power control heartbeat interval.
+        /// </remarks>
+        public int PowerControlLossTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyLossTimeoutMilliseconds); field = value; }
+        } = 3000;
+
+
+        /// <summary>
+        /// The time, in milliseconds, without an operating mode heartbeat after which the operating mode is lost.
+        /// </summary>
+        /// <remarks>
+        /// Must be a multiple of the operating mode heartbeat interval.
+        /// </remarks>
+        public int OperatingModeLossTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyLossTimeoutMilliseconds); field = value; }
+        } = 3000;
     }
 }

@@ -53,6 +53,11 @@ export function systemHubUrl(): string {
     return absoluteUrl(config().systemHubUrl);
 }
 
+/** Absolute URL of the dependency hub (resolves a relative path against the current origin). */
+export function dependencyHubUrl(): string {
+    return absoluteUrl(config().dependencyHubUrl);
+}
+
 async function readBody(response: Response): Promise<SystemCommandResponse | null> {
     try {
         return (await response.json()) as SystemCommandResponse;

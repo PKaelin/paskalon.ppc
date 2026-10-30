@@ -248,7 +248,7 @@ try
 }
 catch (Exception ex)
 {
-    string errorMessage = $"OperatingMode service startup failed: {ex.Message}";
+    string errorMessage = $"{serviceName} service startup failed: {ex.Message}";
     Console.WriteLine($"An error occurred: {errorMessage}");
     Console.WriteLine(ex.StackTrace);
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DependencyLeds from './DependencyLeds.vue';
 import SystemCommandMenu from './SystemCommandMenu.vue';
 
 /** Name of the application shown right after the logo. */
@@ -14,7 +15,10 @@ const appTitle = 'Luna';
                     <span class="app-title">{{ appTitle }}</span>
                 </a>
 
-                <SystemCommandMenu />
+                <div class="d-flex align-items-center gap-3">
+                    <DependencyLeds />
+                    <SystemCommandMenu />
+                </div>
             </div>
         </nav>
     </header>

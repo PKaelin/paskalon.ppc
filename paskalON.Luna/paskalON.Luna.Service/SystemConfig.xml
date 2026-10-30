@@ -4,6 +4,9 @@
     <SubscriberTopicCurrentDerUnitSetpoint>ppc:om:setpoints:unit</SubscriberTopicCurrentDerUnitSetpoint>
     <!-- Power control subscriber topics -->
     <SubscriberTopicPowerTarget>ppc:pc:targets</SubscriberTopicPowerTarget>
+    <!-- Dependency heartbeat subscriber topics -->
+    <SubscriberTopicPowerControlHeartbeat>ppc:pc:heartbeat</SubscriberTopicPowerControlHeartbeat>
+    <SubscriberTopicOperatingModeHeartbeat>ppc:om:heartbeat</SubscriberTopicOperatingModeHeartbeat>
     <!-- Devices subscriber topics -->
     <SubscriberTopicPcsCore>ppc:device:pcs:core</SubscriberTopicPcsCore>
     <SubscriberTopicPcsDetail>ppc:device:pcs:detail</SubscriberTopicPcsDetail>
@@ -26,4 +29,9 @@
     <MinimumActivePowerSystemNameplateWatts>-3630000</MinimumActivePowerSystemNameplateWatts>
     <MaximumReactivePowerSystemNameplateVars>3630000</MaximumReactivePowerSystemNameplateVars>
     <MinimumReactivePowerSystemNameplateVars>-3630000</MinimumReactivePowerSystemNameplateVars>
+    <!-- Dependency heartbeat timeouts -->
+    <RedisLossTimeoutMilliseconds>3000</RedisLossTimeoutMilliseconds>
+    <DeviceServiceLossTimeoutMilliseconds>3000</DeviceServiceLossTimeoutMilliseconds>
+    <PowerControlLossTimeoutMilliseconds>3000</PowerControlLossTimeoutMilliseconds>
+    <OperatingModeLossTimeoutMilliseconds>3000</OperatingModeLossTimeoutMilliseconds>
 </SystemConfig>

@@ -69,6 +69,46 @@ body {
     letter-spacing: .02em;
 }
 
+.dependency-leds {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+}
+
+.dependency-led {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .125rem;
+}
+
+.dependency-led-label {
+    color: #fff;
+    font-size: .625rem;
+    line-height: 1;
+}
+
+.dependency-led-light {
+    width: .75rem;
+    height: .75rem;
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-radius: 50%;
+}
+
+.dependency-led-available {
+    background-color: #22c55e;
+    box-shadow: 0 0 .25rem #22c55e;
+}
+
+.dependency-led-unavailable {
+    background-color: #ef4444;
+    box-shadow: 0 0 .25rem #ef4444;
+}
+
+.dependency-led-unknown {
+    background-color: #1a1a1a;
+}
+
 .system-command-toggle {
     font-size: 1.25rem;
     line-height: 1;
