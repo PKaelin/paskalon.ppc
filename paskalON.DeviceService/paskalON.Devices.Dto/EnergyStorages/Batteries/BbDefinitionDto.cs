@@ -101,13 +101,25 @@ namespace paskalON.Devices.Dto.EnergyStorages.Batteries
 
 
         /// <summary>
-        /// The preferred minimum state of charge, as a percentage of usable capacity.
+        /// The useable minimum state of charge, as a percentage of usable capacity.
+        /// </summary>
+        public double UsableMinimumStateOfCharge { get; init; }
+
+
+        /// <summary>
+        /// The useable maximum state of charge, as a percentage of usable capacity.
+        /// </summary>
+        public double UsableMaximumStateOfCharge { get; init; }
+
+
+        /// <summary>
+        /// The preferred minimum state of charge, as a percentage of preferred capacity.
         /// </summary>
         public double PreferredMinimumStateOfCharge { get; init; }
 
 
         /// <summary>
-        /// The preferred maximum state of charge, as a percentage of usable capacity.
+        /// The preferred maximum state of charge, as a percentage of preferred capacity.
         /// </summary>
         public double PreferredMaximumStateOfCharge { get; init; }
 

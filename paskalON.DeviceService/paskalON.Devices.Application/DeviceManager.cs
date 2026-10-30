@@ -527,13 +527,13 @@ namespace paskalON.Devices.Application
 
                 await pcs.SetActivePowerTargetAsync(activePowerWatt);
                 await pcs.SetReactivePowerTargetAsync(reactivePowerVar);
-                _logger.LogInformation("Set PCS power target for Device ID {DeviceId} to Active Power: {ActivePowerWatt}, Reactive Power: {ReactivePowerVar}",
+                // The targets are republished periodically and the PCS logs a changed target, so this is only a debug log
+                _logger.LogDebug("Set PCS power target for Device ID {DeviceId} to Active Power: {ActivePowerWatt}, Reactive Power: {ReactivePowerVar}",
                     deviceId, activePowerWatt, reactivePowerVar);
-
             }
             catch (Exception ex)
             {
-                _logger.LogError("Standby PCS failed error: {Error}", ex.Message);
+                _logger.LogError("Set PCS power target failed error: {Error}", ex.Message);
                 throw;
             }
         }

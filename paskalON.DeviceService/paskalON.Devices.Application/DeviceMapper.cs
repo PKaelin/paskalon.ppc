@@ -251,6 +251,8 @@ namespace paskalON.Devices.Application
                 AbsoluteMaximumStateOfCharge = batteryBank.AbsoluteMaximumStateOfCharge,
                 AbsoluteMinimumTemperature = batteryBank.AbsoluteMinimumTemperature,
                 AbsoluteMaximumTemperature = batteryBank.AbsoluteMaximumTemperature,
+                UsableMinimumStateOfCharge = batteryBank.UsableMinimumStateOfCharge,
+                UsableMaximumStateOfCharge = batteryBank.UsableMaximumStateOfCharge,
                 PreferredMinimumStateOfCharge = batteryBank.PreferredMinimumStateOfCharge,
                 PreferredMaximumStateOfCharge = batteryBank.PreferredMaximumStateOfCharge,
                 PreferredMinimumTemperature = batteryBank.PreferredMinimumTemperature,

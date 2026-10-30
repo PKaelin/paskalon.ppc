@@ -206,7 +206,7 @@ try
             DeviceMapper deviceMapper = new DeviceMapper();
             PublisherTopic topic = PublisherTopic.Create(config);
             DevicePublisher devicePublisher = new DevicePublisher(logger, deviceManager, deviceMapper, messagePublisher, topic, config.DeviceFactorCore, config.DeviceFactorDetail);
-            devicePublisherService.Initialize(devicePublisher, config.MetricsIntervalMilliseconds, config.StartupDelayForDevices);
+            devicePublisherService.Initialize(devicePublisher, config.DeviceIntervalMilliseconds, config.StartupDelayForDevices);
 
             // Create and load metric publisher
             MetricsPublisherService metricsPublisherService = app.Services.GetRequiredService<MetricsPublisherService>();
