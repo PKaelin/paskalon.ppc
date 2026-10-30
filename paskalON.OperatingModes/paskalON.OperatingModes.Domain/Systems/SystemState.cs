@@ -29,6 +29,11 @@
         /// <summary>
         /// The system has encountered a fault or error condition that prevents it from operating normally.
         /// </summary>
-        Faulted
+        Faulted,
+        /// <summary>
+        /// A dependency (e.g. message broker, power control or device service) is lost. The last setpoints are held and not published
+        /// until all dependencies are available again.
+        /// </summary>
+        Holding
     }
 }

@@ -68,6 +68,18 @@ namespace paskalON.OperatingModes.Domain
         }
 
 
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The feedback controls start from zero, so that a correction built up from stale measurements before holding is discarded.
+        /// </remarks>
+        internal override void Resume()
+        {
+            ActiveFeedback?.Reset();
+            ReactiveFeedback?.Reset();
+            base.Resume();
+        }
+
+
         /// <summary>
         /// Creates the active power feedback control. Call it in the constructor before registering the metrics.
         /// </summary>

@@ -125,5 +125,25 @@ namespace paskalON.OperatingModes.Domain.UnitTest.ClosedModes.FrequencyActives
 
             Assert.AreEqual(0, _mode!.ActiveFeedback!.ErrorAdjustment.Watts);
         }
+
+
+        /// <summary>
+        /// Confirms resuming after holding discards the feedback correction built up from the measurements before holding.
+        /// </summary>
+        [TestMethod]
+        public void ActivePowerModeResumeResetsFeedbackTest()
+        {
+            _map!.ActivePowerAtPoi = () => new ActivePower(900000);
+            _mode!.Activate();
+            _mode!.Calculate(new OperatingModeSignals { SetpointActivePower = new ActivePower(1000000), SetpointReactivePower = new ReactivePower(0) });
+            double adjustmentBeforeResume = _mode!.ActiveFeedback!.ErrorAdjustment.Watts;
+
+            _mode!.Resume();
+
+            Assert.AreEqual(25000, adjustmentBeforeResume);
+            Assert.AreEqual(0, _mode!.ActiveFeedback!.ErrorAdjustment.Watts);
+            Assert.IsTrue(_mode!.IsActivated);
+            Assert.AreEqual(1000000, _mode!.ActiveControl!.Target.Watts);
+        }
     }
 }

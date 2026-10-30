@@ -30,6 +30,11 @@ namespace paskalON.OperatingModes.Domain.Systems
     ///    target, without a previous cycle the measured power at the POI (or zero). Without a base or exclusive mode the
     ///    objective of the axis is zero.
     /// 6. Enforce the mandatory constraints immediately (plant-wide overrides and nameplate) and publish the applied targets.
+    ///    The applied targets are republished periodically even if they did not change.
+    ///
+    /// Holding: While the map reports a hold reason (e.g. a lost dependency) nothing is calculated or published and the applied
+    /// targets are held. Committed stack and override changes are applied after holding. When resuming, the time based ramps and
+    /// transitions restart and the feedback controls reset, so that the applied target ramps from the held setpoint to the objective.
     /// </remarks>
     public class SystemOperatingModeControl : ISystemOperatingModeControl
     {
@@ -99,6 +104,24 @@ namespace paskalON.OperatingModes.Domain.Systems
         private bool _hasAppliedTargets;
 
 
+        /// <summary>
+        /// Whether the last calculation cycle held the applied targets.
+        /// </summary>
+        private bool _isHolding;
+
+
+        /// <summary>
+        /// Number of calculation cycles after which the applied targets are republished even if they did not change.
+        /// </summary>
+        private readonly int _republishCycles;
+
+
+        /// <summary>
+        /// Number of completed calculation cycles since the applied targets were published the last time.
+        /// </summary>
+        private int _cyclesSincePublish;
+
+
         /// <inheritdoc/>
         public SystemState State
         {
@@ -114,6 +137,14 @@ namespace paskalON.OperatingModes.Domain.Systems
                     }
                 }
             }
+        }
+
+
+        /// <inheritdoc/>
+        public string? HoldReason
+        {
+            get { lock (_dataLock) { return field; } }
+            private set { lock (_dataLock) { field = value; } }
         }
 
 
@@ -270,6 +301,7 @@ namespace paskalON.OperatingModes.Domain.Systems
             _map = map;
             _publisher = publisher;
             _setpointsPublisher = setpointsPublisher;
+            _republishCycles = Math.Max(1, (int)Math.Ceiling((double)systemConfig.SetpointRepublishIntervalMilliseconds / systemConfig.OperatingModeCalculationIntervalMilliseconds));
             RegisterMetrics();
         }
 
@@ -297,9 +329,22 @@ namespace paskalON.OperatingModes.Domain.Systems
         /// <inheritdoc/>
         /// <remarks>
         /// If an operating mode throws an exception the actual setpoints of the last cycle are held and the state is set to faulted.
+        /// If the map reports a hold reason the actual setpoints of the last cycle are held and the state is set to holding.
         /// </remarks>
         public void Calculate(CancellationToken cancellationToken)
         {
+            string? holdReason = _map.HoldReason.Invoke();
+
+            if (holdReason is not null)
+            {
+                Hold(holdReason);
+
+                return;
+            }
+
+            // Without previously applied targets the first calculation after holding is the initial calculation
+            bool isResuming = _isHolding && _hasAppliedTargets;
+            EndHold();
             OperatingModeSignals signals;
 
             lock (_dataLock)
@@ -319,6 +364,11 @@ namespace paskalON.OperatingModes.Domain.Systems
 
             try
             {
+                if (isResuming)
+                {
+                    ResumeOperatingModes(stack.OperatingModes, overrides.OperatingModes);
+                }
+
                 List<AxisChange> changes = new List<AxisChange>();
                 // Activate "added" and deactivate "removed" modes and record which power axes changed
                 ApplyOverrideChanges(overrides.Changes, changes);
@@ -337,13 +387,16 @@ namespace paskalON.OperatingModes.Domain.Systems
                 // Get the system wide override mode that forces the applied targets. E.g. plant-wide shutdown
                 IOverrideMode? plantOverride = overrides.OperatingModes.FirstOrDefault(overrideMode => overrideMode.TargetDerUnit is null);
                 // Applied target = objective + ramped transition offsets, then forced by the plant-wide override and clamped to the nameplate
-                double activeApplied = ResolveAxis(PowerAxis.Active, signals.FinalActivePower.Watts, changes, plantOverride?.ActiveControl?.Target.Watts);
-                double reactiveApplied = ResolveAxis(PowerAxis.Reactive, signals.FinalReactivePower.VoltAmperesReactive, changes, plantOverride?.ReactiveControl?.Target.VoltAmperesReactive);
+                double activeApplied = ResolveAxis(PowerAxis.Active, signals.FinalActivePower.Watts, changes, plantOverride?.ActiveControl?.Target.Watts,
+                    stack.OperatingModes, isResuming);
+                double reactiveApplied = ResolveAxis(PowerAxis.Reactive, signals.FinalReactivePower.VoltAmperesReactive, changes,
+                    plantOverride?.ReactiveControl?.Target.VoltAmperesReactive, stack.OperatingModes, isResuming);
                 // Update the modes IsTransitioning state and remove the finished ones from the transition tracking
                 UpdateTransitionStates(stack.OperatingModes, changes);
                 ActivePower setpointActivePowerActual = new ActivePower(activeApplied);
                 ReactivePower setpointReactivePowerActual = new ReactivePower(reactiveApplied);
                 bool isSetpointChanged;
+                bool isRepublishDue;
 
                 lock (_dataLock)
                 {
@@ -363,11 +416,14 @@ namespace paskalON.OperatingModes.Domain.Systems
                     OverrideSetpoints = overrideSetpoints;
                     _hasAppliedTargets = true;
                     State = SystemState.Running;
+                    // Republish periodically, so that a restarted subscriber receives the applied setpoints
+                    isRepublishDue = ++_cyclesSincePublish >= _republishCycles;
                 }
 
-                if (isSetpointChanged == true)
+                if (isSetpointChanged || isResuming || isRepublishDue)
                 {
                     // Publishes the applied setpoints to the power control and other subscribers
+                    _cyclesSincePublish = 0;
                     PublishSetpoints(setpointActivePowerActual, setpointReactivePowerActual);
                 }
             }
@@ -380,6 +436,65 @@ namespace paskalON.OperatingModes.Domain.Systems
                 // Hold the actual setpoints of the last cycle
                 _logger.LogError(ex, "System operating mode control calculation failed. Actual setpoints are held.");
                 State = SystemState.Faulted;
+            }
+        }
+
+
+        /// <summary>
+        /// Holds the applied setpoints of the last cycle and logs the hold reason when it changes.
+        /// </summary>
+        /// <param name="holdReason">The reason why the setpoints are held.</param>
+        private void Hold(string holdReason)
+        {
+            lock (_dataLock)
+            {
+                if (string.Equals(HoldReason, holdReason, StringComparison.Ordinal) is false)
+                {
+                    _logger.LogWarning("System operating mode control holds the setpoints {SetpointActivePowerActual} and {SetpointReactivePowerActual}. {HoldReason}",
+                        SetpointActivePowerActual, SetpointReactivePowerActual, holdReason);
+                }
+
+                HoldReason = holdReason;
+                _isHolding = true;
+                State = SystemState.Holding;
+            }
+        }
+
+
+        /// <summary>
+        /// Ends holding the applied setpoints.
+        /// </summary>
+        private void EndHold()
+        {
+            if (_isHolding is false)
+            {
+                return;
+            }
+
+            lock (_dataLock)
+            {
+                HoldReason = null;
+                _isHolding = false;
+            }
+
+            _logger.LogInformation("System operating mode control resumes from the held setpoints {SetpointActivePowerActual} and {SetpointReactivePowerActual}.",
+                SetpointActivePowerActual, SetpointReactivePowerActual);
+        }
+
+
+        /// <summary>
+        /// Resumes the operating modes after holding, so that their time based ramps and feedback controls restart.
+        /// </summary>
+        /// <param name="stackModes">The selected operating modes of the current cycle.</param>
+        /// <param name="overrideModes">The active override modes of the current cycle.</param>
+        private static void ResumeOperatingModes(IReadOnlyList<IStackableMode> stackModes, IReadOnlyList<IOverrideMode> overrideModes)
+        {
+            foreach (IOperatingMode operatingMode in stackModes.Cast<IOperatingMode>().Concat(overrideModes))
+            {
+                if (operatingMode is OperatingModeBase operatingModeBase)
+                {
+                    operatingModeBase.Resume();
+                }
             }
         }
 
@@ -586,16 +701,30 @@ namespace paskalON.OperatingModes.Domain.Systems
         /// <param name="objective">The objective of the power axis in base unit.</param>
         /// <param name="changes">The power axis changes of the current cycle.</param>
         /// <param name="forcedTarget">The target forced by a plant-wide override or null.</param>
+        /// <param name="stackModes">The selected operating modes of the current cycle.</param>
+        /// <param name="isResuming">Whether this is the first cycle after holding.</param>
         /// <returns>The applied target in base unit.</returns>
-        private double ResolveAxis(PowerAxis axis, double objective, List<AxisChange> changes, double? forcedTarget)
+        private double ResolveAxis(PowerAxis axis, double objective, List<AxisChange> changes, double? forcedTarget, IReadOnlyList<IStackableMode> stackModes,
+            bool isResuming)
         {
             AxisTransition transition = axis == PowerAxis.Active ? ActivePowerTransition : ReactivePowerTransition;
+
+            if (isResuming)
+            {
+                // The time based segments progressed while holding, the new transition starts from the held setpoint instead
+                transition.Cancel();
+            }
 
             // The new segments cover the step against the offsets of the previous cycle, so running segments keep their own progress
             double previousOffset = transition.Offset;
             // Call all segments of transition (ramp controller calculate)
             transition.Advance();
             List<TransitionRequest> requests = BuildTransitionRequests(axis, changes);
+
+            if (isResuming)
+            {
+                AddResumeRequests(axis, stackModes, requests);
+            }
 
             if (requests.Count > 0)
             {
@@ -688,6 +817,33 @@ namespace paskalON.OperatingModes.Domain.Systems
             }
 
             return requests;
+        }
+
+
+        /// <summary>
+        /// Adds a resume request for every activated operating mode of the power axis that has no request yet.
+        /// </summary>
+        /// <remarks>
+        /// The requests have no own offset. The step from the held setpoint to the objective is absorbed by the operating mode that
+        /// owns the power axis and ramped with its ramp.
+        /// </remarks>
+        /// <param name="axis">The power axis.</param>
+        /// <param name="stackModes">The selected operating modes of the current cycle.</param>
+        /// <param name="requests">The transition requests of the current cycle.</param>
+        private void AddResumeRequests(PowerAxis axis, IReadOnlyList<IStackableMode> stackModes, List<TransitionRequest> requests)
+        {
+            foreach (IStackableMode operatingMode in stackModes)
+            {
+                IRampController? rampController = GetRampController(operatingMode, axis);
+                bool isRequested = requests.Any(request => string.Equals(request.OperatingModeName, operatingMode.Name, StringComparison.Ordinal));
+
+                if (rampController is null || operatingMode.IsActivated is false || isRequested)
+                {
+                    continue;
+                }
+
+                requests.Add(new TransitionRequest(operatingMode.Name, TransitionKind.Resume, 0, rampController.ShallowCopy(), OwnsAxis(operatingMode, axis)));
+            }
         }
 
 

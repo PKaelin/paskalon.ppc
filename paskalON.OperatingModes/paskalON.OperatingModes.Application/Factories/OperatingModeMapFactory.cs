@@ -114,14 +114,16 @@ namespace paskalON.OperatingModes.Application.Factories
 
 
         /// <inheritdoc/>
-        public SystemOperatingModeControlMap CreateSystemMap(DerDto der)
+        public SystemOperatingModeControlMap CreateSystemMap(DerDto der, Func<string?> holdReason)
         {
             ArgumentNullException.ThrowIfNull(der);
+            ArgumentNullException.ThrowIfNull(holdReason);
 
             return new SystemOperatingModeControlMap
             {
                 ActivePowerAtPoi = () => GetSystemActivePower(der),
-                ReactivePowerAtPoi = () => GetSystemReactivePower(der)
+                ReactivePowerAtPoi = () => GetSystemReactivePower(der),
+                HoldReason = holdReason
             };
         }
 

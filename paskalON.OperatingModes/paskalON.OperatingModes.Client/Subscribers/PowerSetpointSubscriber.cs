@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.Messaging;
+using paskalON.Messaging.Sequences;
 using paskalON.OperatingModes.Dto.Powers;
 using System.Text.Json;
 using System.Threading.Channels;
@@ -51,6 +52,18 @@ namespace paskalON.OperatingModes.Client.Subscribers
 
 
         /// <summary>
+        /// Guard to drop outdated or duplicated system power setpoints.
+        /// </summary>
+        private readonly MessageOrderGuard _setpointOrderGuard = new MessageOrderGuard();
+
+
+        /// <summary>
+        /// Guard to drop outdated or duplicated DER unit power setpoints.
+        /// </summary>
+        private readonly MessageOrderGuard _derUnitSetpointOrderGuard = new MessageOrderGuard();
+
+
+        /// <summary>
         /// Constructor of <see cref="PowerSetpointSubscriber"/>.
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>
@@ -78,7 +91,7 @@ namespace paskalON.OperatingModes.Client.Subscribers
                 return;
             }
 
-            _messageSubscriber.Subscribe(topic, Enqueue<CurrentSetpointsDto>);
+            _messageSubscriber.Subscribe(topic, json => Enqueue<CurrentSetpointsDto>(json, _setpointOrderGuard));
             _logger.LogInformation("Subscribed to power setpoints on topic {Topic}", topic);
         }
 
@@ -93,7 +106,7 @@ namespace paskalON.OperatingModes.Client.Subscribers
                 return;
             }
 
-            _messageSubscriber.Subscribe(topic, Enqueue<CurrentDerUnitSetpointsDto>);
+            _messageSubscriber.Subscribe(topic, json => Enqueue<CurrentDerUnitSetpointsDto>(json, _derUnitSetpointOrderGuard));
             _logger.LogInformation("Subscribed to DER unit power setpoints on topic {Topic}", topic);
         }
 
@@ -146,9 +159,14 @@ namespace paskalON.OperatingModes.Client.Subscribers
         /// <summary>
         /// Handles a received power setpoints message and queues it to be handled.
         /// </summary>
+        /// <remarks>
+        /// Stamped setpoints that are older than the last accepted setpoints of the same source instance are dropped, e.g. after the
+        /// message broker reconnected. Setpoints without a source instance are not stamped and always queued.
+        /// </remarks>
         /// <typeparam name="T">The DTO type of the power setpoints message.</typeparam>
         /// <param name="json">The json message with the power setpoints.</param>
-        private void Enqueue<T>(string json) where T : class
+        /// <param name="orderGuard">The guard of the subscribed topic to drop outdated setpoints.</param>
+        private void Enqueue<T>(string json, MessageOrderGuard orderGuard) where T : class, ISequencedMessage
         {
             try
             {
@@ -157,6 +175,15 @@ namespace paskalON.OperatingModes.Client.Subscribers
                 if (setpoint is null)
                 {
                     _logger.LogWarning("Received an empty {Type} message", typeof(T).Name);
+
+                    return;
+                }
+
+                bool isStamped = string.IsNullOrEmpty(setpoint.SourceInstance) is false;
+
+                if (isStamped && orderGuard.TryAccept(setpoint) is false)
+                {
+                    _logger.LogWarning("Dropped outdated {Type} message {Sequence} of {SourceInstance}", typeof(T).Name, setpoint.Sequence, setpoint.SourceInstance);
 
                     return;
                 }

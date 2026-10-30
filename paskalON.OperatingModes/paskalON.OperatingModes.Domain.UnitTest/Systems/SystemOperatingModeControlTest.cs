@@ -61,18 +61,28 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
 
 
         /// <summary>
+        /// The reason why the control holds the setpoints or null to calculate.
+        /// </summary>
+        private string? _holdReason;
+
+
+        /// <summary>
         /// Creates the system operating mode control with an empty stack and override slot.
         /// </summary>
+        /// <remarks>
+        /// The republish interval is 60 cycles, so that the tests see only published changes.
+        /// </remarks>
         [TestInitialize]
         public void Initialize()
         {
             _stack = new OperatingModeStack();
             _overrides = new OperatingModeOverrides();
             _activePowerAtPoi = null;
+            _holdReason = null;
             _setpointsPublisher = new Mock<ISetpointsPublisher>();
-            SystemOperatingModeControlMap map = new SystemOperatingModeControlMap { ActivePowerAtPoi = () => _activePowerAtPoi, ReactivePowerAtPoi = () => null };
-            _control = new SystemOperatingModeControl(NullLogger.Instance, OperatingModeTestData.CreateSystemConfig(), _stack, _overrides, map, new Mock<IMetricsPublisher>().Object,
-                _setpointsPublisher.Object);
+            SystemConfig systemConfig = OperatingModeTestData.CreateSystemConfig();
+            systemConfig.SetpointRepublishIntervalMilliseconds = 60 * systemConfig.OperatingModeCalculationIntervalMilliseconds;
+            _control = CreateControl(systemConfig);
         }
 
 
@@ -826,6 +836,194 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
 
             Assert.ThrowsExactly<OperationCanceledException>(() => _control!.Calculate(cancellation.Token));
             Assert.AreEqual(SystemState.Unknown, _control!.State);
+        }
+
+
+        /// <summary>
+        /// Confirms unchanged applied setpoints are republished every republish interval.
+        /// </summary>
+        /// <param name="republishCycles">The republish interval in calculation cycles.</param>
+        /// <param name="expectedPublishes">The expected number of publishes in 7 cycles.</param>
+        [TestMethod]
+        [DataRow(1, 7)]
+        [DataRow(3, 3)]
+        [DataRow(10, 2)]
+        public void SystemOperatingModeControlCalculateRepublishesUnchangedSetpointsTest(int republishCycles, int expectedPublishes)
+        {
+            SystemConfig systemConfig = OperatingModeTestData.CreateSystemConfig();
+            systemConfig.SetpointRepublishIntervalMilliseconds = republishCycles * systemConfig.OperatingModeCalculationIntervalMilliseconds;
+            _control = CreateControl(systemConfig);
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", 5000000), 1);
+
+            // Cycle 1 publishes 0 W, cycle 2 publishes the changed 5 MW, cycles 3 to 7 are unchanged
+            for (int cycle = 0; cycle < 7; cycle++)
+            {
+                _control.Calculate(CancellationToken.None);
+            }
+
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Exactly(expectedPublishes));
+        }
+
+
+        /// <summary>
+        /// Confirms a hold reason holds the applied setpoints, does not calculate the operating modes and does not publish.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateHoldReasonHoldsSetpointsTest()
+        {
+            int calculations = 0;
+            TestBaseActiveMode baseActive = CreateBaseActiveMode("ActivePowerMode", null);
+            Func<OperatingModeSignals, OperatingModeSignals> calculate = baseActive.CalculateAction;
+            baseActive.CalculateAction = signals => { calculations++; return calculate(signals); };
+            _stack!.Add(baseActive, 1);
+            _control!.UpdateSetpoints(new ActivePower(1000000), new ReactivePower(0));
+            CalculateSettled();
+            _setpointsPublisher!.Invocations.Clear();
+            int calculationsBefore = calculations;
+            _holdReason = "Lost dependencies: PowerControl";
+
+            _control!.UpdateSetpoints(new ActivePower(9000000), new ReactivePower(0));
+            _control!.Calculate(CancellationToken.None);
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(SystemState.Holding, _control!.State);
+            Assert.AreEqual("Lost dependencies: PowerControl", _control!.HoldReason);
+            Assert.AreEqual(1000000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(calculationsBefore, calculations);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+        }
+
+
+        /// <summary>
+        /// Confirms a hold reason before the first calculation holds and the first calculation afterwards is the initial calculation.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateHoldReasonAtStartupThenInitialCalculationTest()
+        {
+            Mock<IRampController> transitionRamp = CreateTransitionRamp(0);
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", 5000000, transitionRamp), 1);
+            _holdReason = "Lost dependencies: Redis, PowerControl, DeviceService";
+            _control!.Calculate(CancellationToken.None);
+            SystemState stateHolding = _control!.State;
+            _holdReason = null;
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(SystemState.Holding, stateHolding);
+            Assert.AreEqual(SystemState.Running, _control!.State);
+            Assert.IsNull(_control!.HoldReason);
+            Assert.AreEqual(TransitionKind.InitialActivation, _control!.ActivePowerTransition.Kind);
+            transitionRamp.Verify(controller => controller.Start(-5000000, 0), Times.Once);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 0), It.IsAny<ReactivePower>()), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms a transition in progress while holding is not continued on resume, the applied target ramps from the held setpoint
+        /// to the objective instead of jumping to where the time based ramp would be.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateResumeRampsFromHeldSetpointTest()
+        {
+            // The mocked time based transition ramp returns the offset of the current time
+            double rampOffset = 0;
+            Mock<IRampController> transitionRamp = new Mock<IRampController>();
+            transitionRamp.Setup(controller => controller.Calculate()).Returns(() => rampOffset);
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", null, transitionRamp), 1);
+            _control!.UpdateSetpoints(new ActivePower(1000000), new ReactivePower(0));
+            CalculateSettled();
+            // The 6 MW step from 1 MW to 7 MW starts and ramps to 3 MW
+            _control!.UpdateSetpoints(new ActivePower(7000000), new ReactivePower(0));
+            _control!.Calculate(CancellationToken.None);
+            rampOffset = -4000000;
+            _control!.Calculate(CancellationToken.None);
+            double heldActivePower = _control!.SetpointActivePowerActual.Watts;
+            _holdReason = "Lost dependencies: PowerControl";
+            _control!.Calculate(CancellationToken.None);
+            // The time based ramp finished while holding, continuing it would jump to 7 MW
+            rampOffset = 0;
+            _setpointsPublisher!.Invocations.Clear();
+            transitionRamp.Invocations.Clear();
+            _holdReason = null;
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(3000000, heldActivePower);
+            Assert.AreEqual(SystemState.Running, _control!.State);
+            Assert.AreEqual(3000000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(TransitionKind.Resume, _control!.ActivePowerTransition.Kind);
+            Assert.AreEqual(-4000000, _control!.ActivePowerTransition.Offset);
+            transitionRamp.Verify(controller => controller.Stop(), Times.AtLeastOnce);
+            transitionRamp.Verify(controller => controller.Start(-4000000, 0), Times.Once);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 3000000), It.IsAny<ReactivePower>()), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms a supervisory setpoint change while holding ramps from the held setpoint on resume.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateResumeSetpointChangedWhileHoldingRampsFromHeldSetpointTest()
+        {
+            Mock<IRampController> transitionRamp = CreateTransitionRamp(0);
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", null, transitionRamp), 1);
+            _control!.UpdateSetpoints(new ActivePower(1000000), new ReactivePower(0));
+            CalculateSettled();
+            _holdReason = "Lost dependencies: DeviceService";
+            _control!.Calculate(CancellationToken.None);
+            _control!.UpdateSetpoints(new ActivePower(7000000), new ReactivePower(0));
+            transitionRamp.Invocations.Clear();
+            _holdReason = null;
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(1000000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(7000000, _control!.ActivePowerObjective.Watts);
+            Assert.AreEqual(-6000000, _control!.ActivePowerTransition.Offset);
+            transitionRamp.Verify(controller => controller.Start(-6000000, 0), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms a stack change committed while holding is applied on resume and ramps from the held setpoint.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateResumeAppliesStackChangeWhileHoldingTest()
+        {
+            Mock<IRampController> transitionRamp = CreateTransitionRamp(0);
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", 2000000, transitionRamp), 1);
+            CalculateSettled();
+            _holdReason = "Lost dependencies: Redis";
+            _control!.Calculate(CancellationToken.None);
+            _stack!.Add(CreateAdditiveActiveMode("AdditiveMode", 1000000, transitionRamp), 2);
+            _control!.Calculate(CancellationToken.None);
+            double objectiveWhileHolding = _control!.ActivePowerObjective.Watts;
+            _holdReason = null;
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(2000000, objectiveWhileHolding);
+            Assert.AreEqual(3000000, _control!.ActivePowerObjective.Watts);
+            Assert.AreEqual(2000000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(-1000000, _control!.ActivePowerTransition.Offset);
+        }
+
+
+        /// <summary>
+        /// Creates the system operating mode control with the stack, override slot and hold reason of the test.
+        /// </summary>
+        /// <param name="systemConfig">The system configuration.</param>
+        /// <returns>The system operating mode control.</returns>
+        private SystemOperatingModeControl CreateControl(SystemConfig systemConfig)
+        {
+            SystemOperatingModeControlMap map = new SystemOperatingModeControlMap
+            {
+                ActivePowerAtPoi = () => _activePowerAtPoi,
+                ReactivePowerAtPoi = () => null,
+                HoldReason = () => _holdReason
+            };
+
+            return new SystemOperatingModeControl(NullLogger.Instance, systemConfig, _stack!, _overrides!, map, new Mock<IMetricsPublisher>().Object, _setpointsPublisher!.Object);
         }
 
 

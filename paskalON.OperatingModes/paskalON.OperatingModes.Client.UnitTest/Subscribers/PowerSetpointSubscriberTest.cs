@@ -19,6 +19,8 @@ namespace paskalON.OperatingModes.Client.UnitTest.Subscribers
         private const string SetpointTopic = "ppc:om:setpoints";
         private const string DerUnitSetpointTopic = "ppc:om:setpoints:unit";
         private const string DerUnitName = "BESS-Unit 1";
+        private const string PrimaryInstance = "OperatingMode-ppc-core-node1-5d4c3b2a19f84e7d8c6b5a4f3e2d1c0b";
+        private const string SecondaryInstance = "OperatingMode-ppc-core-node2-0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e";
         private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(10);
 
         private Mock<IPowerSetpointHandler> _powerSetpointHandler = null!;
@@ -320,6 +322,136 @@ namespace paskalON.OperatingModes.Client.UnitTest.Subscribers
             await run.WaitAsync(TestTimeout);
 
             _powerSetpointHandler.Verify(h => h.HandleDerUnitSetpointsAsync(It.IsAny<CurrentDerUnitSetpointsDto>()), Times.Exactly(2));
+        }
+
+
+        [TestMethod]
+        public async Task RunDropsOutdatedStampedSetpointsTest()
+        {
+            using CancellationTokenSource cancellation = new CancellationTokenSource();
+            List<long> handled = new List<long>();
+            TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            _powerSetpointHandler.Setup(h => h.HandleSetpointsAsync(It.IsAny<CurrentSetpointsDto>()))
+                .Callback<CurrentSetpointsDto>(setpoints =>
+                {
+                    handled.Add(setpoints.Sequence);
+
+                    if (setpoints.Sequence == 6)
+                    {
+                        completed.TrySetResult();
+                    }
+                })
+                .Returns(Task.CompletedTask);
+            FakeLogger<PowerSetpointSubscriber> logger = new FakeLogger<PowerSetpointSubscriber>();
+            PowerSetpointSubscriber subscriber = new PowerSetpointSubscriber(logger, _powerSetpointHandler.Object, _messageSubscriber.Object);
+            subscriber.Subscribe(SetpointTopic);
+            Task run = subscriber.RunAsync(cancellation.Token);
+
+            _callback!(CreateStampedSetpointsJson(PrimaryInstance, 5, 5000000));
+            _callback!(CreateStampedSetpointsJson(PrimaryInstance, 3, 1000000));
+            _callback!(CreateStampedSetpointsJson(PrimaryInstance, 5, 5000000));
+            _callback!(CreateStampedSetpointsJson(PrimaryInstance, 6, 6000000));
+            await completed.Task.WaitAsync(TestTimeout);
+            await cancellation.CancelAsync();
+            await run.WaitAsync(TestTimeout);
+
+            CollectionAssert.AreEqual(new List<long> { 5, 6 }, handled);
+            Assert.AreEqual(2, logger.Collector.GetSnapshot().Count(r => r.Level == LogLevel.Warning && r.Message.Contains("Dropped outdated")));
+        }
+
+
+        [TestMethod]
+        public async Task RunAcceptsSetpointsOfNewSourceInstanceTest()
+        {
+            using CancellationTokenSource cancellation = new CancellationTokenSource();
+            List<string> handled = new List<string>();
+            TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            _powerSetpointHandler.Setup(h => h.HandleSetpointsAsync(It.IsAny<CurrentSetpointsDto>()))
+                .Callback<CurrentSetpointsDto>(setpoints =>
+                {
+                    handled.Add($"{setpoints.SourceInstance}:{setpoints.Sequence}");
+
+                    if (handled.Count == 2)
+                    {
+                        completed.TrySetResult();
+                    }
+                })
+                .Returns(Task.CompletedTask);
+            PowerSetpointSubscriber subscriber = CreateSubscriber();
+            subscriber.Subscribe(SetpointTopic);
+            Task run = subscriber.RunAsync(cancellation.Token);
+
+            // After a failover or restart the new source instance starts its sequence again
+            _callback!(CreateStampedSetpointsJson(PrimaryInstance, 4711, 5000000));
+            _callback!(CreateStampedSetpointsJson(SecondaryInstance, 1, 5000000));
+            await completed.Task.WaitAsync(TestTimeout);
+            await cancellation.CancelAsync();
+            await run.WaitAsync(TestTimeout);
+
+            CollectionAssert.AreEqual(new List<string> { $"{PrimaryInstance}:4711", $"{SecondaryInstance}:1" }, handled);
+        }
+
+
+        [TestMethod]
+        public async Task RunDropsOutdatedStampedDerUnitSetpointsTest()
+        {
+            using CancellationTokenSource cancellation = new CancellationTokenSource();
+            List<long> handled = new List<long>();
+            TaskCompletionSource completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            _powerSetpointHandler.Setup(h => h.HandleDerUnitSetpointsAsync(It.IsAny<CurrentDerUnitSetpointsDto>()))
+                .Callback<CurrentDerUnitSetpointsDto>(setpoints =>
+                {
+                    handled.Add(setpoints.Sequence);
+
+                    if (setpoints.Sequence == 3)
+                    {
+                        completed.TrySetResult();
+                    }
+                })
+                .Returns(Task.CompletedTask);
+            PowerSetpointSubscriber subscriber = CreateSubscriber();
+            subscriber.SubscribeDerUnit(DerUnitSetpointTopic);
+            Task run = subscriber.RunAsync(cancellation.Token);
+
+            _derUnitCallback!(CreateStampedDerUnitSetpointsJson(2));
+            _derUnitCallback!(CreateStampedDerUnitSetpointsJson(1));
+            _derUnitCallback!(CreateStampedDerUnitSetpointsJson(3));
+            await completed.Task.WaitAsync(TestTimeout);
+            await cancellation.CancelAsync();
+            await run.WaitAsync(TestTimeout);
+
+            CollectionAssert.AreEqual(new List<long> { 2, 3 }, handled);
+        }
+
+
+        private static string CreateStampedSetpointsJson(string sourceInstance, long sequence, double activePowerWatts)
+        {
+            CurrentSetpointsDto setpoints = new CurrentSetpointsDto
+            {
+                SetpointActivePowerWatts = activePowerWatts,
+                SetpointReactivePowerVars = 0,
+                SourceInstance = sourceInstance,
+                Sequence = sequence,
+                Timestamp = new DateTimeOffset(2026, 10, 29, 8, 15, 0, TimeSpan.Zero)
+            };
+
+            return JsonSerializer.Serialize(setpoints);
+        }
+
+
+        private static string CreateStampedDerUnitSetpointsJson(long sequence)
+        {
+            CurrentDerUnitSetpointsDto setpoints = new CurrentDerUnitSetpointsDto
+            {
+                DerUnitName = DerUnitName,
+                SetpointActivePowerWatts = 250000,
+                SetpointReactivePowerVars = 0,
+                SourceInstance = PrimaryInstance,
+                Sequence = sequence,
+                Timestamp = new DateTimeOffset(2026, 10, 29, 8, 15, 0, TimeSpan.Zero)
+            };
+
+            return JsonSerializer.Serialize(setpoints);
         }
 
 

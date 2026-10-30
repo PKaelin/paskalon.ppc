@@ -455,6 +455,48 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Controls
 
 
         /// <summary>
+        /// Confirms a running ramp restarts from the current target after holding, so that the held time does not cause a jump.
+        /// </summary>
+        [TestMethod]
+        public void PowerControlRestartRampRampingRestartsFromCurrentTargetTest()
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            rampController.Setup(controller => controller.Calculate()).Returns(400000);
+            PowerControl<ActivePower> control = CreateControl(rampController);
+            control.Activate(PowerControlStart.RampFromCurrentTarget);
+            control.Calculate(new ActivePower(1000000), new ActivePower(8000000));
+
+            control.RestartRamp();
+
+            Assert.AreEqual(OperatingModeState.RampingToEnabled, control.State);
+            rampController.Verify(controller => controller.Start(0, 1000000), Times.Once);
+            rampController.Verify(controller => controller.Start(400000, 1000000), Times.Once);
+        }
+
+
+        /// <summary>
+        /// Confirms the restart of the ramp does nothing if the power control is not ramping.
+        /// </summary>
+        /// <param name="start">How the target is established.</param>
+        [TestMethod]
+        [DataRow(PowerControlStart.AtTargetSetpoint)]
+        [DataRow(PowerControlStart.RampFromCurrentTarget)]
+        public void PowerControlRestartRampNotRampingDoesNotStartRampTest(PowerControlStart start)
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            PowerControl<ActivePower> control = CreateControl(rampController);
+            // AtTargetSetpoint is enabled after the calculation, RampFromCurrentTarget is enabling without available power
+            control.Activate(start);
+            control.Calculate(new ActivePower(1000000), start == PowerControlStart.AtTargetSetpoint ? new ActivePower(8000000) : null);
+
+            control.RestartRamp();
+
+            Assert.AreNotEqual(OperatingModeState.RampingToEnabled, control.State);
+            rampController.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
+        }
+
+
+        /// <summary>
         /// Creates a deactivated active power control.
         /// </summary>
         /// <param name="rampController">The mocked ramp controller.</param>

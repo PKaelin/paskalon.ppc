@@ -273,6 +273,28 @@ namespace paskalON.OperatingModes.Domain.Controls
 
 
         /// <summary>
+        /// Restarts a running ramp from the current target after the operating mode control held the setpoints.
+        /// </summary>
+        /// <remarks>
+        /// The ramp is time based. Without a restart it would jump to the time elapsed while holding.
+        /// </remarks>
+        internal void RestartRamp()
+        {
+            lock (_dataLock)
+            {
+                if (ControlState != OperatingModeState.RampingToEnabled)
+                {
+                    return;
+                }
+
+                RampController.Start(_target, _targetSetpoint);
+
+                _logger.LogInformation("{Name} {Axis} power restarts the ramp from {Target} to target setpoint {TargetSetpoint}.", _operatingModeName, Axis, _target, _targetSetpoint);
+            }
+        }
+
+
+        /// <summary>
         /// Deactivates the power axis immediately and resets the target to zero.
         /// </summary>
         /// <remarks>

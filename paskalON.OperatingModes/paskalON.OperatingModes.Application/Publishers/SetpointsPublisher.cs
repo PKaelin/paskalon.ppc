@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.Messaging;
+using paskalON.Messaging.Sequences;
 using paskalON.OperatingModes.Domain.Systems;
 using paskalON.OperatingModes.Dto.Powers;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -40,30 +41,43 @@ namespace paskalON.OperatingModes.Application.Publishers
 
 
         /// <summary>
+        /// Sequencer to stamp the published setpoints.
+        /// </summary>
+        private readonly MessageSequencer _sequencer;
+
+
+        /// <summary>
         /// Constructor of <see cref="SetpointsPublisher"/>.
         /// </summary>
         /// <param name="logger">Logger for application logging and diagnostics.</param>
         /// <param name="publisher">Interface for publishing to message brokers.</param>
         /// <param name="topics">Message publisher topic.</param>
-        public SetpointsPublisher(ILogger<SetpointsPublisher> logger, IMessagePublisher publisher, PublisherTopic topics)
+        /// <param name="sequencer">Sequencer to stamp the published setpoints, so that the receivers drop outdated setpoints.</param>
+        public SetpointsPublisher(ILogger<SetpointsPublisher> logger, IMessagePublisher publisher, PublisherTopic topics, MessageSequencer sequencer)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(publisher);
             ArgumentNullException.ThrowIfNull(topics);
+            ArgumentNullException.ThrowIfNull(sequencer);
 
             _logger = logger;
             _publisher = publisher;
             _publisherTopics = topics;
+            _sequencer = sequencer;
         }
 
 
         /// <inheritdoc/>
         public void Publish(ActivePower setpointActivePower, ReactivePower setpointReactivePower)
         {
+            MessageStamp stamp = _sequencer.Next();
             CurrentSetpointsDto dto = new CurrentSetpointsDto
             {
                 SetpointActivePowerWatts = setpointActivePower.Watts,
-                SetpointReactivePowerVars = setpointReactivePower.VoltAmperesReactive
+                SetpointReactivePowerVars = setpointReactivePower.VoltAmperesReactive,
+                SourceInstance = stamp.SourceInstance,
+                Sequence = stamp.Sequence,
+                Timestamp = stamp.Timestamp
             };
             string json = JsonSerializer.Serialize(dto);
 
@@ -76,11 +90,15 @@ namespace paskalON.OperatingModes.Application.Publishers
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(derUnitName);
 
+            MessageStamp stamp = _sequencer.Next();
             CurrentDerUnitSetpointsDto dto = new CurrentDerUnitSetpointsDto
             {
                 DerUnitName = derUnitName,
                 SetpointActivePowerWatts = setpointActivePower.Watts,
-                SetpointReactivePowerVars = setpointReactivePower.VoltAmperesReactive
+                SetpointReactivePowerVars = setpointReactivePower.VoltAmperesReactive,
+                SourceInstance = stamp.SourceInstance,
+                Sequence = stamp.Sequence,
+                Timestamp = stamp.Timestamp
             };
             string json = JsonSerializer.Serialize(dto);
 

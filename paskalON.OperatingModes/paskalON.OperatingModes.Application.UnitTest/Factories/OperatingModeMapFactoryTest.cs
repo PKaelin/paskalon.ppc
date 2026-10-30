@@ -215,19 +215,22 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
 
 
         /// <summary>
-        /// Confirms the system map measures the power at the POI with the system power meter.
+        /// Confirms the system map measures the power at the POI with the system power meter and gets the hold reason from the given function.
         /// </summary>
         [TestMethod]
         public void OperatingModeMapFactoryCreateSystemMapTest()
         {
-            SystemOperatingModeControlMap map = _factory.CreateSystemMap(_der!);
+            SystemOperatingModeControlMap map = _factory.CreateSystemMap(_der!, () => "Lost dependencies: PowerControl.");
 
             ActivePower? activePowerAtPoi = map.ActivePowerAtPoi.Invoke();
             ReactivePower? reactivePowerAtPoi = map.ReactivePowerAtPoi.Invoke();
+            string? holdReason = map.HoldReason.Invoke();
 
             Assert.AreEqual(6000000, activePowerAtPoi!.Value.Watts);
             Assert.AreEqual(500000, reactivePowerAtPoi!.Value.VoltAmperesReactive);
-            Assert.ThrowsExactly<ArgumentNullException>(() => _factory.CreateSystemMap(null!));
+            Assert.AreEqual("Lost dependencies: PowerControl.", holdReason);
+            Assert.ThrowsExactly<ArgumentNullException>(() => _factory.CreateSystemMap(null!, () => null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => _factory.CreateSystemMap(_der!, null!));
         }
 
 
@@ -248,7 +251,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
         /// </summary>
         /// <param name="configKind">The kind of configuration.</param>
         /// <returns>The operating mode configuration.</returns>
-        private static OperatingModeBaseConfig CreateConfig(string configKind)
+        private OperatingModeBaseConfig CreateConfig(string configKind)
         {
             return configKind switch
             {
@@ -270,7 +273,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
         /// Creates the DER of the test plant.
         /// </summary>
         /// <returns>The DER.</returns>
-        private static DerDto CreateDer()
+        private DerDto CreateDer()
         {
             DerCircuitDto circuit = new DerCircuitDto
             {
@@ -303,7 +306,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
         /// <param name="availableReactive">The available reactive power in Vars or null if not reported.</param>
         /// <param name="communicationError">Whether the device has a communication error.</param>
         /// <returns>The power conversion system.</returns>
-        private static PcsDto CreatePcs(int deviceId, double availableActive, double? availableReactive, bool communicationError)
+        private PcsDto CreatePcs(int deviceId, double availableActive, double? availableReactive, bool communicationError)
         {
             PcsDto pcs = new PcsDto(new PcsDefinitionDto { DeviceId = deviceId, Name = $"Pcs{deviceId}", TargetAddress = $"10.0.0.{deviceId}", TargetPort = 502 });
             pcs.UpdateCore(new PcsCoreDto

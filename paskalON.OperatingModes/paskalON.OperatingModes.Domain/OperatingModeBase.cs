@@ -173,6 +173,20 @@ namespace paskalON.OperatingModes.Domain
 
 
         /// <summary>
+        /// Resumes the operating mode after the system operating mode control held the setpoints.
+        /// </summary>
+        /// <remarks>
+        /// Called by the system operating mode control before the first calculation after holding. Running ramps restart from
+        /// their current target, so that the time elapsed while holding does not cause a jump.
+        /// </remarks>
+        internal virtual void Resume()
+        {
+            ActiveControl?.RestartRamp();
+            ReactiveControl?.RestartRamp();
+        }
+
+
+        /// <summary>
         /// Deactivates the operating mode immediately when it is removed from the stack or the override slot.
         /// </summary>
         /// <remarks>

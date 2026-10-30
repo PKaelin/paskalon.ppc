@@ -3,8 +3,10 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
 using paskalON.Messaging;
+using paskalON.Messaging.Sequences;
 using paskalON.OperatingModes.Application.Publishers;
 using paskalON.OperatingModes.Dto.Powers;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -18,6 +20,18 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
     [TestClass]
     public sealed class SetpointsPublisherTest
     {
+        /// <summary>
+        /// The source instance of the published setpoints.
+        /// </summary>
+        private const string SourceInstance = "OperatingMode-ppc-core-node1-5d4c3b2a19f84e7d8c6b5a4f3e2d1c0b";
+
+
+        /// <summary>
+        /// The creation time of the published setpoints.
+        /// </summary>
+        private static readonly DateTimeOffset Now = new DateTimeOffset(2026, 10, 29, 8, 15, 0, TimeSpan.Zero);
+
+
         /// <summary>
         /// The mocked message publisher.
         /// </summary>
@@ -63,7 +77,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
         {
             PublisherTopic topics = CreateTopics();
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SetpointsPublisher(null!, _messagePublisher!.Object, topics));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SetpointsPublisher(null!, _messagePublisher!.Object, topics, CreateSequencer()));
         }
 
 
@@ -75,9 +89,8 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
         {
             PublisherTopic topics = CreateTopics();
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, null!, topics));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, null!, topics, CreateSequencer()));
         }
-
 
 
         /// <summary>
@@ -86,19 +99,30 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
         [TestMethod]
         public void SetpointsPublisherConstructorNullTopicsTest()
         {
-            PublisherTopic topics = CreateTopics();
-
-            Assert.ThrowsExactly<ArgumentNullException>(() => new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, _messagePublisher!.Object, null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, _messagePublisher!.Object, null!,
+                CreateSequencer()));
         }
 
 
         /// <summary>
-        /// Confirms the setpoints are published as current setpoints DTO to the current setpoint topic.
+        /// Confirms the constructor validates its arguments.
+        /// </summary>
+        [TestMethod]
+        public void SetpointsPublisherConstructorNullSequencerTest()
+        {
+            PublisherTopic topics = CreateTopics();
+
+            Assert.ThrowsExactly<ArgumentNullException>(() => new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, _messagePublisher!.Object, topics, null!));
+        }
+
+
+        /// <summary>
+        /// Confirms the setpoints are published as stamped current setpoints DTO to the current setpoint topic.
         /// </summary>
         [TestMethod]
         public void SetpointsPublisherPublishSendsCurrentSetpointsTest()
         {
-            SetpointsPublisher setpointsPublisher = new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, _messagePublisher!.Object, CreateTopics());
+            SetpointsPublisher setpointsPublisher = CreatePublisher(CreateTopics());
 
             setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(-1200000));
 
@@ -107,16 +131,19 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
             Assert.IsNotNull(dto);
             Assert.AreEqual(5000000, dto.SetpointActivePowerWatts);
             Assert.AreEqual(-1200000, dto.SetpointReactivePowerVars);
+            Assert.AreEqual(SourceInstance, dto.SourceInstance);
+            Assert.AreEqual(1, dto.Sequence);
+            Assert.AreEqual(Now, dto.Timestamp);
         }
 
 
         /// <summary>
-        /// Confirms the DER unit setpoints are published as current DER unit setpoints DTO to the current DER unit setpoint topic.
+        /// Confirms the DER unit setpoints are published as stamped current DER unit setpoints DTO to the current DER unit setpoint topic.
         /// </summary>
         [TestMethod]
         public void SetpointsPublisherPublishUnitSendsCurrentDerUnitSetpointsTest()
         {
-            SetpointsPublisher setpointsPublisher = new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, _messagePublisher!.Object, CreateTopics());
+            SetpointsPublisher setpointsPublisher = CreatePublisher(CreateTopics());
 
             setpointsPublisher.PublishUnit("Bess1", ActivePower.FromMega(2), new ReactivePower(500000));
 
@@ -126,6 +153,32 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
             Assert.AreEqual("Bess1", dto.DerUnitName);
             Assert.AreEqual(2000000, dto.SetpointActivePowerWatts);
             Assert.AreEqual(500000, dto.SetpointReactivePowerVars);
+            Assert.AreEqual(SourceInstance, dto.SourceInstance);
+            Assert.AreEqual(1, dto.Sequence);
+            Assert.AreEqual(Now, dto.Timestamp);
+        }
+
+
+        /// <summary>
+        /// Confirms every published message gets the next sequence number.
+        /// </summary>
+        [TestMethod]
+        public void SetpointsPublisherPublishIncreasesSequenceTest()
+        {
+            List<string> messages = new List<string>();
+            _messagePublisher!.Setup(publisher => publisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((_, json) => messages.Add(json))
+                .Returns(Task.CompletedTask);
+            SetpointsPublisher setpointsPublisher = CreatePublisher(CreateTopics());
+
+            setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(0));
+            setpointsPublisher.PublishUnit("Bess1", ActivePower.FromMega(2), new ReactivePower(0));
+            setpointsPublisher.Publish(ActivePower.FromMega(6), new ReactivePower(0));
+
+            Assert.HasCount(3, messages);
+            Assert.AreEqual(1, JsonSerializer.Deserialize<CurrentSetpointsDto>(messages[0])!.Sequence);
+            Assert.AreEqual(2, JsonSerializer.Deserialize<CurrentDerUnitSetpointsDto>(messages[1])!.Sequence);
+            Assert.AreEqual(3, JsonSerializer.Deserialize<CurrentSetpointsDto>(messages[2])!.Sequence);
         }
 
 
@@ -138,7 +191,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
         [DataRow(" ")]
         public void SetpointsPublisherPublishUnitInvalidNameThrowsTest(string derUnitName)
         {
-            SetpointsPublisher setpointsPublisher = new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, _messagePublisher!.Object, CreateTopics());
+            SetpointsPublisher setpointsPublisher = CreatePublisher(CreateTopics());
 
             Assert.ThrowsExactly<ArgumentException>(() => setpointsPublisher.PublishUnit(derUnitName, ActivePower.FromMega(2), new ReactivePower(0)));
         }
@@ -150,7 +203,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
         [TestMethod]
         public void SetpointsPublisherPublishWithoutTopicsDoesNotPublishTest()
         {
-            SetpointsPublisher setpointsPublisher = new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, _messagePublisher!.Object, new PublisherTopic());
+            SetpointsPublisher setpointsPublisher = CreatePublisher(new PublisherTopic());
 
             setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(0));
             setpointsPublisher.PublishUnit("Bess1", ActivePower.FromMega(2), new ReactivePower(0));
@@ -167,12 +220,33 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
         {
             _messagePublisher!.Setup(publisher => publisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromException(new InvalidOperationException("Broker not reachable.")));
-            SetpointsPublisher setpointsPublisher = new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, _messagePublisher!.Object, CreateTopics());
+            SetpointsPublisher setpointsPublisher = CreatePublisher(CreateTopics());
 
             setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(0));
             setpointsPublisher.PublishUnit("Bess1", ActivePower.FromMega(2), new ReactivePower(0));
 
             _messagePublisher!.Verify(publisher => publisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
+        }
+
+
+        /// <summary>
+        /// Creates the setpoints publisher with the mocked message publisher.
+        /// </summary>
+        /// <param name="topics">The publisher topics.</param>
+        /// <returns>The setpoints publisher.</returns>
+        private SetpointsPublisher CreatePublisher(PublisherTopic topics)
+        {
+            return new SetpointsPublisher(NullLogger<SetpointsPublisher>.Instance, _messagePublisher!.Object, topics, CreateSequencer());
+        }
+
+
+        /// <summary>
+        /// Creates the sequencer stamping the setpoints at a fixed time.
+        /// </summary>
+        /// <returns>The message sequencer.</returns>
+        private MessageSequencer CreateSequencer()
+        {
+            return new MessageSequencer(SourceInstance, new FakeTimeProvider(Now));
         }
 
 

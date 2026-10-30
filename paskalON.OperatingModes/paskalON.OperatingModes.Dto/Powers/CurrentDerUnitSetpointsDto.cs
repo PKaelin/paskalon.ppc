@@ -2,12 +2,18 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Messaging.Sequences;
+
 namespace paskalON.OperatingModes.Dto.Powers
 {
     /// <summary>
     /// Current DER unit setpoints DTO.
     /// </summary>
-    public record CurrentDerUnitSetpointsDto
+    /// <remarks>
+    /// The operating mode stamps the published setpoints with its source instance and sequence, so that the receivers drop outdated setpoints.
+    /// Setpoints without a source instance are not stamped.
+    /// </remarks>
+    public record CurrentDerUnitSetpointsDto : ISequencedMessage
     {
         /// <summary>
         /// Gets or sets the name of the derived unit.
@@ -26,5 +32,17 @@ namespace paskalON.OperatingModes.Dto.Powers
         /// Setpoint for reactive power in vars.
         /// </summary>
         public required double SetpointReactivePowerVars { get; set; }
+
+
+        /// <inheritdoc/>
+        public string SourceInstance { get; init; } = string.Empty;
+
+
+        /// <inheritdoc/>
+        public long Sequence { get; init; }
+
+
+        /// <inheritdoc/>
+        public DateTimeOffset Timestamp { get; init; }
     }
 }

@@ -38,5 +38,10 @@ namespace paskalON.OperatingModes.Domain.Transitions
         /// The target setpoint of an operating mode changed while running (setpoint or available power change).
         /// </summary>
         TargetChanged = 5,
+
+        /// <summary>
+        /// The operating mode control resumes after holding. The applied target ramps from the held setpoint to the objective.
+        /// </summary>
+        Resume = 6,
     }
 }

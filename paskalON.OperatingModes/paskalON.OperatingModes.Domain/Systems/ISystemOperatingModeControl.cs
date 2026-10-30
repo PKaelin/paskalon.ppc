@@ -19,6 +19,12 @@ namespace paskalON.OperatingModes.Domain.Systems
 
 
         /// <summary>
+        /// Gets the reason why the last setpoints are held or null if the operating mode control is not holding.
+        /// </summary>
+        string? HoldReason { get; }
+
+
+        /// <summary>
         /// Gets the active power setpoint received from the supervisory control.
         /// </summary>
         ActivePower SetpointActivePower { get; }

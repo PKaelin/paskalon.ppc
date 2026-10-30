@@ -4,6 +4,8 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.Devices.Client;
+using paskalON.Messaging.Health;
+using paskalON.OperatingModes.Application.Dependencies;
 using paskalON.OperatingModes.Application.Factories;
 using paskalON.OperatingModes.Application.Overrides;
 using paskalON.OperatingModes.Application.Stacks;
@@ -59,6 +61,12 @@ namespace paskalON.OperatingModes.Application
         private readonly TimeProvider _timeProvider;
 
 
+        /// <summary>
+        /// Monitor tracking the availability of the dependencies (message broker, power control, device service).
+        /// </summary>
+        private readonly IDependencyHealthMonitor _dependencyHealthMonitor;
+
+
         /// <inheritdoc/>
         public ICollection<IMetricsPublisher> MetricsPublishers { get; } = new List<IMetricsPublisher>();
 
@@ -84,8 +92,10 @@ namespace paskalON.OperatingModes.Application
         /// <param name="timeProvider">The time provider.</param>
         /// <param name="operatingModeFactory">Factory to create operating modes.</param>
         /// <param name="operatingModeMapFactory">Factory to create operating mode maps.</param>
+        /// <param name="dependencyHealthMonitor">Monitor tracking the availability of the dependencies.</param>
         public OperatingModeManager(ILogger<OperatingModeManager> logger, IDeviceClient deviceClient, IMetricsPublisherFactory metricsPublisherFactory,
-            TimeProvider timeProvider, IOperatingModeFactory operatingModeFactory, IOperatingModeMapFactory operatingModeMapFactory)
+            TimeProvider timeProvider, IOperatingModeFactory operatingModeFactory, IOperatingModeMapFactory operatingModeMapFactory,
+            IDependencyHealthMonitor dependencyHealthMonitor)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(deviceClient);
@@ -93,6 +103,7 @@ namespace paskalON.OperatingModes.Application
             ArgumentNullException.ThrowIfNull(timeProvider);
             ArgumentNullException.ThrowIfNull(operatingModeFactory);
             ArgumentNullException.ThrowIfNull(operatingModeMapFactory);
+            ArgumentNullException.ThrowIfNull(dependencyHealthMonitor);
 
             _logger = logger;
             _deviceClient = deviceClient;
@@ -100,6 +111,7 @@ namespace paskalON.OperatingModes.Application
             _operatingModeFactory = operatingModeFactory;
             _operatingModeMapFactory = operatingModeMapFactory;
             _timeProvider = timeProvider;
+            _dependencyHealthMonitor = dependencyHealthMonitor;
         }
 
 
@@ -129,8 +141,10 @@ namespace paskalON.OperatingModes.Application
             StackManager.InitializeStack(operatingModes);
             OverrideManager.InitializeOverrides(operatingModes);
             IMetricsPublisher systemModeMetrics = _metricsPublisherFactory.Create();
+            // The control holds the setpoints while a dependency is lost and until all are available for the settle time
+            DependencyGate dependencyGate = new DependencyGate(_dependencyHealthMonitor, TimeSpan.FromMilliseconds(systemConfig.ResumeSettleMilliseconds), _timeProvider);
             SystemOperatingModeControl = new SystemOperatingModeControl(_logger, systemConfig, StackManager.Stack, OverrideManager.Overrides,
-                _operatingModeMapFactory.CreateSystemMap(_deviceClient.Der), systemModeMetrics, setpointsPublisher);
+                _operatingModeMapFactory.CreateSystemMap(_deviceClient.Der, dependencyGate.GetHoldReason), systemModeMetrics, setpointsPublisher);
             MetricsPublishers.Add(systemModeMetrics);
             SystemOperatingModeControl.State = SystemState.Ready;
         }

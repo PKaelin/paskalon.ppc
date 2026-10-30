@@ -12,8 +12,12 @@ using paskalON.Devices.Client.Subscribers;
 using paskalON.Hosting;
 using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
+using paskalON.Messaging.Health;
+using paskalON.Messaging.Heartbeats;
 using paskalON.Messaging.Redis;
+using paskalON.Messaging.Sequences;
 using paskalON.OperatingModes.Application;
+using paskalON.OperatingModes.Application.Dependencies;
 using paskalON.OperatingModes.Application.Factories;
 using paskalON.OperatingModes.Application.Publishers;
 using paskalON.OperatingModes.Application.Stacks;
@@ -26,6 +30,8 @@ using paskalON.Telemetry;
 using paskalON.Telemetry.Factories;
 using StackExchange.Redis;
 
+// Name of this service in the heartbeat and the source instance of the published messages
+const string serviceName = "OperatingMode";
 WebApplication? app = null;
 Console.WriteLine("Starting service.....");
 
@@ -115,6 +121,10 @@ try
     builder.Services.AddSingleton<IOperatingModeMapFactory, OperatingModeMapFactory>();
     builder.Services.AddSingleton<IOperatingModeFactory, OperatingModeFactory>();
     builder.Services.AddSingleton<OperatingModeService>();
+    // Dependency monitoring, the operating mode control holds the setpoints while a dependency is lost
+    builder.Services.AddSingleton<IDependencyHealthMonitor, DependencyHealthMonitor>();
+    builder.Services.AddSingleton<HeartbeatService>();
+    builder.Services.AddHostedService<HeartbeatService>(provider => provider.GetRequiredService<HeartbeatService>());
 
     builder.Services.AddSingleton<IOperatingModeManager, OperatingModeManager>();
     builder.Services.AddSingleton<IOperatingModeStackDtoFactory, OperatingModeStackDtoFactory>();
@@ -188,15 +198,27 @@ try
         IRepository<OperatingModeContext, SystemConfig> systemConfigRepository = scope.ServiceProvider.GetRequiredService<IRepository<OperatingModeContext, SystemConfig>>();
         SystemConfig config = await startupRetry.ExecuteAsync("Load system configuration",
             async () => (await systemConfigRepository.GetAsync(0, 1, o => o.Id)).Single(), DatabaseTransientExceptionFilter.IsTransient);
-        // Load and initialize device client, retry while the device service is not reachable
+        // Register the dependencies before subscribing, every dependency is lost until it is seen the first time
+        IDependencyHealthMonitor dependencyHealthMonitor = app.Services.GetRequiredService<IDependencyHealthMonitor>();
+        IConnectionMultiplexer connectionMultiplexer = app.Services.GetRequiredService<IConnectionMultiplexer>();
+        dependencyHealthMonitor.RegisterCondition(DependencyNames.Redis, () => connectionMultiplexer.IsConnected,
+            TimeSpan.FromMilliseconds(config.RedisLossTimeoutMilliseconds));
+        dependencyHealthMonitor.RegisterSignal(DependencyNames.DeviceService, TimeSpan.FromMilliseconds(config.DeviceServiceLossTimeoutMilliseconds));
+        RegisterPowerControlHeartbeat(app, config, dependencyHealthMonitor);
+        // Load and initialize device client, retry while the device service is not reachable. Received device data signals the device service.
         SubscriberTopic topics = GetSubscriberTopic(config);
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
+        deviceClient.CoreDataReceived += (_, _) => dependencyHealthMonitor.Signal(DependencyNames.DeviceService);
         await startupRetry.ExecuteAsync("Initialize device client", () => deviceClient.Initialize(topics), HttpTransientExceptionFilter.IsTransient);
         // Create setpoints publisher with the configured topics
         PublisherTopic publisherTopic = PublisherTopic.Create(config);
         ILogger<SetpointsPublisher> setpointsPublisherLogger = app.Services.GetRequiredService<ILogger<SetpointsPublisher>>();
         IMessagePublisher messagePublisher = app.Services.GetRequiredService<IMessagePublisher>();
-        SetpointsPublisher setpointsPublisher = new SetpointsPublisher(setpointsPublisherLogger, messagePublisher, publisherTopic);
+        // A new source instance per process start, so that the receivers do not drop the restarted sequences
+        string sourceInstance = MessageSequencer.CreateSourceInstance(serviceName);
+        InitializeHeartbeat(app, config, messagePublisher, sourceInstance);
+        SetpointsPublisher setpointsPublisher = new SetpointsPublisher(setpointsPublisherLogger, messagePublisher, publisherTopic,
+            new MessageSequencer(sourceInstance, TimeProvider.System));
         // Load and initialize manager, retry while the database is not reachable
         IOperatingModeRepository repository = scope.ServiceProvider.GetRequiredService<IOperatingModeRepository>();
         await startupRetry.ExecuteAsync("Initialize operating mode manager", () => manager.Initialize(repository, config, setpointsPublisher), DatabaseTransientExceptionFilter.IsTransient);
@@ -238,6 +260,47 @@ catch (Exception ex)
 
     // Fail application
     throw;
+}
+
+
+/// <summary>
+/// Register the power control as dependency and subscribe to its heartbeat.
+/// </summary>
+/// <remarks>
+/// Without a configured heartbeat topic the power control is not monitored and a loss of the power control is not detected.
+/// </remarks>
+static void RegisterPowerControlHeartbeat(WebApplication app, SystemConfig config, IDependencyHealthMonitor dependencyHealthMonitor)
+{
+    if (string.IsNullOrWhiteSpace(config.SubscriberTopicPowerControlHeartbeat))
+    {
+        app.Logger.LogWarning("No power control heartbeat topic is configured, a loss of the power control is not detected.");
+
+        return;
+    }
+
+    dependencyHealthMonitor.RegisterSignal(DependencyNames.PowerControl, TimeSpan.FromMilliseconds(config.PowerControlLossTimeoutMilliseconds));
+    HeartbeatSubscriber heartbeatSubscriber = new HeartbeatSubscriber(app.Services.GetRequiredService<ILogger<HeartbeatSubscriber>>(),
+        app.Services.GetRequiredService<IMessageSubscriber>(), dependencyHealthMonitor, config.SubscriberTopicPowerControlHeartbeat, DependencyNames.PowerControl);
+    heartbeatSubscriber.Subscribe();
+}
+
+
+/// <summary>
+/// Initialize the heartbeat service that publishes the heartbeat of this operating mode service.
+/// </summary>
+static void InitializeHeartbeat(WebApplication app, SystemConfig config, IMessagePublisher messagePublisher, string sourceInstance)
+{
+    if (string.IsNullOrWhiteSpace(config.PublisherTopicHeartbeat))
+    {
+        app.Logger.LogWarning("No heartbeat topic is configured, the heartbeat of the operating mode is not published.");
+
+        return;
+    }
+
+    MessageSequencer sequencer = new MessageSequencer(sourceInstance, TimeProvider.System);
+    HeartbeatPublisher heartbeatPublisher = new HeartbeatPublisher(app.Services.GetRequiredService<ILogger<HeartbeatPublisher>>(), messagePublisher, sequencer,
+        serviceName, config.PublisherTopicHeartbeat, TimeSpan.FromMilliseconds(config.DependencyHeartbeatIntervalMilliseconds), TimeProvider.System);
+    app.Services.GetRequiredService<HeartbeatService>().Initialize(heartbeatPublisher);
 }
 
 

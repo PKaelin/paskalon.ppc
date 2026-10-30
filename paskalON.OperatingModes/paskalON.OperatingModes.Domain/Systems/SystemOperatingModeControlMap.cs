@@ -27,5 +27,14 @@ namespace paskalON.OperatingModes.Domain.Systems
         /// Used as transition origin at startup when there is no previous applied target. Return null if not available.
         /// </remarks>
         public required Func<ReactivePower?> ReactivePowerAtPoi { get; set; }
+
+
+        /// <summary>
+        /// Register function that gets the reason why the operating mode control must hold the last setpoints, e.g. a lost dependency.
+        /// </summary>
+        /// <remarks>
+        /// Return null if the operating mode control may calculate. The default never holds.
+        /// </remarks>
+        public Func<string?> HoldReason { get; set; } = () => null;
     }
 }

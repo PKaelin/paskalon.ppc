@@ -29,7 +29,8 @@ namespace paskalON.OperatingModes.Application.Factories
         /// Creates the input map of the system operating mode control.
         /// </summary>
         /// <param name="der">The DER device data.</param>
+        /// <param name="holdReason">Function that gets the reason why the setpoints must be held or null if the control may calculate.</param>
         /// <returns>The system operating mode control map.</returns>
-        SystemOperatingModeControlMap CreateSystemMap(DerDto der);
+        SystemOperatingModeControlMap CreateSystemMap(DerDto der, Func<string?> holdReason);
     }
 }
