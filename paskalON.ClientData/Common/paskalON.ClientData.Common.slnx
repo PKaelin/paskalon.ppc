@@ -1,7 +1,0 @@
-<Solution>
-  <Folder Name="/InitialDevelopment/">
-    <Project Path="../../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
-  </Folder>
-  <Project Path="paskalON.ClientData.Common/paskalON.ClientData.Common.csproj" />
-  <Project Path="paskalON.ClientData.Common.UnitTest/paskalON.ClientData.Common.UnitTest.csproj" />
-</Solution>

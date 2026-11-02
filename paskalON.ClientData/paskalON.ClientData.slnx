@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/InitialDevelopment/">
+    <Project Path="../paskalON.Common/paskalON.Dataface/paskalON.Dataface.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Infrastructure.PostgreSql/paskalON.Infrastructure.PostgreSql.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
+    <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
+    <Project Path="../paskalON.Communication/paskalON.Protocols.C37118/paskalON.Protocols.C37118.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Domain.Configs/paskalON.Devices.Domain.Configs.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Domain/paskalON.Devices.Domain.csproj" />
+    <Project Path="../paskalON.DeviceService/paskalON.Devices.Infrastructure/paskalON.Devices.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="paskalON.ClientData.Common/paskalON.ClientData.Common.csproj" />
+  <Folder Name="/Tests/">
+    <Project Path="paskalON.ClientData.Common.UnitTest/paskalON.ClientData.Common.UnitTest.csproj" />
+    <Project Path="paskalON.Devices.Data.IntegrationTest/paskalON.Devices.Data.IntegrationTest.csproj" />
+    <Project Path="paskalON.DeviceSimulator.Data.IntegrationTest/paskalON.DeviceSimulator.Data.IntegrationTest.csproj" />
+  </Folder>
+  <Project Path="paskalON.Devices.Data/paskalON.Devices.Data.csproj" />
+  <Project Path="paskalON.DeviceSimulator.Data/paskalON.DeviceSimulator.Data.csproj" />
+</Solution>

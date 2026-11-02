@@ -3,24 +3,20 @@ Loads client data or sample data into the microservices databases.
 
 ## How it works
 
-- For all client data projects we shall have one common solution.
-    - ./paskalON.ClientData/Common/paskalON.ClientData.Common.slnx
-- The common solution shall have one project that contains common functionalities like CSV parsing, Schema version selection, Property type conversion, etc.
-    - Solution in "./paskalON.ClientData/Common" has a project: paskalON.ClientData.Common.csproj
-    - The common project is a class library that is referenced by all other Data projects.
+- All client data projects are in one solution.
+    - ./paskalON.ClientData/paskalON.ClientData.slnx
+    - Each project is in its own subfolder of ./paskalON.ClientData.
     - In the initial phase all required project references in the namespace paskalON are under a folder named: "InitialDevelopment" instead of nuget packages.
 
-- Each microservice type shall have one visual studio solution.
-    - ./paskalON.ClientData/Devices/paskalON.ClientData.Devices.slnx
-    - ./paskalON.ClientData/DeviceSimulator/paskalON.ClientData.DeviceSimulator.slnx
-    - ./paskalON.ClientData/PlantControls/paskalON.ClientData.PlantControls.slnx
-    - ./paskalON.ClientData/OperatingModes/paskalON.ClientData.OperatingModes.slnx
-  
-- Each solution shall have one visual studio project that reads in a file and creates the data defined in that file.
-    - Solution in "./paskalON.ClientData/Devices" has a project: paskalON.Devices.Data.csproj
-    - Solution in "./paskalON.ClientData/DeviceSimulator" has a project: paskalON.DeviceSimulator.Data.csproj
-    - Solution in "./paskalON.ClientData/PlantControls" has a project: paskalON.PlantControls.Data.csproj
-    - Solution in "./paskalON.ClientData/OperatingModes" has a project: paskalON.OperatingModes.Data.csproj
+- The common project contains common functionalities like CSV parsing, Schema version selection, Property type conversion, etc.
+    - paskalON.ClientData.Common.csproj
+    - The common project is a class library that is referenced by all other Data projects.
+
+- Each microservice type has one project that reads in a file and creates the data defined in that file.
+    - paskalON.Devices.Data.csproj
+    - paskalON.DeviceSimulator.Data.csproj
+    - paskalON.PowerControls.Data.csproj
+    - paskalON.OperatingModes.Data.csproj
 - Each of the Data projects is a console application.
 - Each of the Data projects takes the following arguments described in section below.
 
@@ -39,7 +35,7 @@ Loads client data or sample data into the microservices databases.
 - The root data folder shall be named "ClientData" and the subfolders shall be named after the specific project or "Demo" if its demo/development configuration.
     - E.g. Devices: ClientData\Demo\DemoSuperSimpleBattery.csv or ClientData\TheClient\ClientSite.csv
     - E.g. DeviceSimulator: ClientData\Demo\DemoSuperSimpleBattery.csv or ClientData\TheClient\ClientSite.csv
-    - E.g. PlantControls: ClientData\Demo\DemoSuperSimpleBattery.csv or ClientData\TheClient\ClientSite.csv
+    - E.g. PowerControls: ClientData\Demo\DemoSuperSimpleBattery.csv or ClientData\TheClient\ClientSite.csv
     - E.g. OperatingModes: ClientData\Demo\DemoSuperSimpleBattery.csv or ClientData\TheClient\ClientSite.csv
 
 

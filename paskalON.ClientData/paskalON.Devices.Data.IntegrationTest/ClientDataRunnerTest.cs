@@ -51,6 +51,7 @@ namespace paskalON.Devices.Data.IntegrationTest
             Assert.AreEqual(BatteryType.LithiumIon, batteryBank.BatteryBankDeviceConfig.BatteryType);
             SystemPowerMeterConfig meter = await context.SystemPowerMeterConfigs.Include(x => x.DerConfig).Include(x => x.C37Config).Include(x => x.PowerMeterDeviceConfig).ThenInclude(x => x.PowerMeterMapC37Config).SingleAsync();
             Assert.AreEqual("Der 1", meter.DerConfig.Name);
+            Assert.IsNotNull(meter.C37Config);
             Assert.AreEqual((ushort)4800, meter.C37Config.Port);
             Assert.AreEqual("Analog0", meter.PowerMeterDeviceConfig.PowerMeterMapC37Config!.ApparentPower);
             Assert.AreEqual(0, await context.BatteryBankDeviceCustomConfigs.CountAsync());

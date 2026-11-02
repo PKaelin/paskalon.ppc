@@ -27,7 +27,10 @@ class Program
     /// </remarks>
     public static async Task<int> Main(string[] args)
     {
-        return await ClientDataRunner.RunAsync(args, CreateContext);
+        int code = await ClientDataRunner.RunAsync(args, CreateContext);
+        Console.WriteLine("Finished processing DeviceService database recreate with exit code: " + code);
+
+        return code;
     }
 
 
