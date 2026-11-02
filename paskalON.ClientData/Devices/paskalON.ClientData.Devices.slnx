@@ -1,7 +1,9 @@
 <Solution>
   <Folder Name="/InitialDevelopment/">
+    <Project Path="../Common/paskalON.ClientData.Common/paskalON.ClientData.Common.csproj" />
     <Project Path="../../paskalON.Common/paskalON.Dataface/paskalON.Dataface.csproj" />
     <Project Path="../../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
+    <Project Path="../../paskalON.Common/paskalON.Infrastructure.PostgreSql/paskalON.Infrastructure.PostgreSql.csproj" />
     <Project Path="../../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
     <Project Path="../../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
     <Project Path="../../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
@@ -13,4 +15,6 @@
   <Project Path="paskalON.DemoSimple.Devices.Data/paskalON.DemoSimple.Devices.Data.csproj" Id="6eb9e0b1-22bd-407c-88bb-6804f6b9595a" />
   <Project Path="paskalON.DemoSuperSimpleBattery.Devices.Data/paskalON.DemoSuperSimpleBattery.Devices.Data.csproj" Id="a5eb54b2-1bdc-43ee-9ff0-d9e33fa43b20" />
   <Project Path="paskalON.DemoSuperSimpleSolar.Devices.Data/paskalON.DemoSuperSimpleSolar.Devices.Data.csproj" Id="8df84521-8044-49e6-bfb8-c5321d203656" />
+  <Project Path="paskalON.Devices.Data/paskalON.Devices.Data.csproj" />
+  <Project Path="paskalON.Devices.Data.IntegrationTest/paskalON.Devices.Data.IntegrationTest.csproj" />
 </Solution>

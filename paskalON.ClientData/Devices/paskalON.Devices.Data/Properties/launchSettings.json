@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "paskalON.Devices.Data": {
+      "commandName": "Project",
+      "commandLineArgs": "\"DemoSuperSimpleBattery\"  \"ClientData\\Demo\\DemoSuperSimpleBattery.csv\" \"20261020230224_v_0_1\""
+    }
+  }
+}
