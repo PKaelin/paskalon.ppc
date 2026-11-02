@@ -37,6 +37,12 @@ namespace paskalON.ClientData.Common
 
 
         /// <summary>
+        /// Represents the character used to separate items in a list.
+        /// </summary>
+        private const char ListSeparator = ';';
+
+
+        /// <summary>
         /// Names of domain base properties managed automatically.
         /// </summary>
         private static readonly string[] _automaticProperties = [nameof(DomainBase.Id), nameof(DomainBase.ChangedBy), nameof(DomainBase.ChangedDate)];
@@ -263,8 +269,17 @@ namespace paskalON.ClientData.Common
 
                 try
                 {
-                    object? value = ConvertValue(cell, property!, entitiesByName);
-                    property!.SetValue(entity, value);
+                    Type? itemType = GetReferenceCollectionItemType(property!.PropertyType);
+
+                    if (itemType is not null)
+                    {
+                        AddReferences(entity, property, itemType, cell, entitiesByName);
+                    }
+                    else
+                    {
+                        object? value = ConvertValue(cell, property, entitiesByName);
+                        property.SetValue(entity, value);
+                    }
                 }
                 catch (FormatException ex)
                 {
@@ -306,6 +321,19 @@ namespace paskalON.ClientData.Common
             if (property is null)
             {
                 return $"Unknown property of entity type '{entityType.Name}'.";
+            }
+
+            if (GetReferenceCollectionItemType(property.PropertyType) is not null)
+            {
+                // The references are added to the existing list, therefore only the getter is required
+                bool hasPublicGetter = property.GetMethod is not null && property.GetMethod.IsPublic;
+
+                if (hasPublicGetter)
+                {
+                    return null;
+                }
+
+                return "The property cannot be set from the file.";
             }
 
             bool isCollection = property.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType);
@@ -358,17 +386,96 @@ namespace paskalON.ClientData.Common
                 return PropertyValueConverter.Convert(cell.Value, property.PropertyType);
             }
 
-            if (entitiesByName.TryGetValue(cell.Value, out object? reference) is false)
+            return ResolveReference(cell.Value, property.PropertyType, entitiesByName);
+        }
+
+
+        /// <summary>
+        /// Adds the references separated by semicolons to the existing list of the entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="property">The list property.</param>
+        /// <param name="itemType">The type of the list items.</param>
+        /// <param name="cell">The cell.</param>
+        /// <param name="entitiesByName">The entities previously defined in the file.</param>
+        /// <exception cref="FormatException">Thrown when a reference cannot be resolved.</exception>
+        private static void AddReferences(object entity, PropertyInfo property, Type itemType, CsvCell cell, Dictionary<string, object> entitiesByName)
+        {
+            if (cell.IsQuoted is false && (cell.Value == NullValue || cell.Value.Length == 0))
             {
-                throw new FormatException($"The reference '{cell.Value}' is not defined earlier in the file.");
+                throw new FormatException("The list needs at least one reference, omit the property for an empty list.");
             }
 
-            if (property.PropertyType.IsInstanceOfType(reference) is false)
+            object collection = property.GetValue(entity) ?? throw new FormatException("The list of the entity is not initialized.");
+            MethodInfo add = typeof(ICollection<>).MakeGenericType(itemType).GetMethod(nameof(ICollection<object>.Add))!;
+            HashSet<string> referenceNames = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (string item in cell.Value.Split(ListSeparator))
             {
-                throw new FormatException($"The reference '{cell.Value}' is of type '{reference.GetType().Name}' but '{property.PropertyType.Name}' is expected.");
+                string referenceName = item.Trim();
+
+                if (referenceName.Length == 0)
+                {
+                    throw new FormatException("The list contains an empty reference.");
+                }
+
+                if (referenceNames.Add(referenceName) is false)
+                {
+                    throw new FormatException($"The reference '{referenceName}' is in the list more than once.");
+                }
+
+                add.Invoke(collection, [ResolveReference(referenceName, itemType, entitiesByName)]);
+            }
+        }
+
+
+        /// <summary>
+        /// Finds the previously defined entity by its name.
+        /// </summary>
+        /// <param name="referenceName">The name of the referenced entity.</param>
+        /// <param name="expectedType">The type the entity must have.</param>
+        /// <param name="entitiesByName">The entities previously defined in the file.</param>
+        /// <returns>The referenced entity.</returns>
+        /// <exception cref="FormatException">Thrown when the entity is not defined earlier or has the wrong type.</exception>
+        private static object ResolveReference(string referenceName, Type expectedType, Dictionary<string, object> entitiesByName)
+        {
+            if (entitiesByName.TryGetValue(referenceName, out object? reference) is false)
+            {
+                throw new FormatException($"The reference '{referenceName}' is not defined earlier in the file.");
+            }
+
+            if (expectedType.IsInstanceOfType(reference) is false)
+            {
+                throw new FormatException($"The reference '{referenceName}' is of type '{reference.GetType().Name}' but '{expectedType.Name}' is expected.");
             }
 
             return reference;
+        }
+
+
+        /// <summary>
+        /// Gets the item type if the property type is a list of entity references.
+        /// </summary>
+        /// <param name="type">The property type.</param>
+        /// <returns>The item type or null if the type is not a list of entity references.</returns>
+        private static Type? GetReferenceCollectionItemType(Type type)
+        {
+            bool isCollectionInterface = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>);
+            Type? collectionType = isCollectionInterface ? type : type.GetInterfaces().FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ICollection<>));
+
+            if (collectionType is null)
+            {
+                return null;
+            }
+
+            Type itemType = collectionType.GetGenericArguments()[0];
+
+            if (PropertyValueConverter.IsScalar(itemType))
+            {
+                return null;
+            }
+
+            return itemType;
         }
 
 

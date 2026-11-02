@@ -73,6 +73,12 @@ namespace paskalON.ClientData.Common.UnitTest
         /// Collection.
         /// </summary>
         public ICollection<OtherEntity> Others { get; set; } = [];
+
+
+        /// <summary>
+        /// Collection of scalars that cannot be set from the file.
+        /// </summary>
+        public ICollection<string> Tags { get; set; } = [];
     }
 
 

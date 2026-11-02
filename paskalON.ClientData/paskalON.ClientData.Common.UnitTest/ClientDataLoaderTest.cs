@@ -49,6 +49,21 @@ namespace paskalON.ClientData.Common.UnitTest
 
 
         [TestMethod]
+        public void LoadAddsReferencesToListTest()
+        {
+            ClientDataLoader loader = CreateLoader();
+            string[] lines = [Connection, "Type=OtherEntity,Name=Other1", "Type=OtherEntity,Name=Other 2", "Type=DeviceEntity,Name=Dev1,Connection=Con1,Others=Other1; Other 2"];
+
+            IReadOnlyList<object> entities = loader.Load(FileName, lines);
+
+            DeviceEntity device = (DeviceEntity)entities[3];
+            Assert.HasCount(2, device.Others);
+            Assert.AreSame(entities[1], device.Others.ElementAt(0));
+            Assert.AreSame(entities[2], device.Others.ElementAt(1));
+        }
+
+
+        [TestMethod]
         public void LoadDistinguishesNullFromQuotedNullTest()
         {
             ClientDataLoader loader = CreateLoader();
@@ -153,7 +168,12 @@ namespace paskalON.ClientData.Common.UnitTest
         [DataRow("Type=DeviceEntity,Name=D,Connection=Other1", "Connection", "expected")]
         [DataRow("Type=DeviceEntity,Name=D,Connection=null", "Connection", "must not be null")]
         [DataRow("Type=DeviceEntity,Name=D,Connection=Con1,ConnectionId=1", "ConnectionId", "foreign key")]
-        [DataRow("Type=DeviceEntity,Name=D,Connection=Con1,Others=Other1", "Others", "cannot be set")]
+        [DataRow("Type=DeviceEntity,Name=D,Connection=Con1,Tags=Tag1", "Tags", "cannot be set")]
+        [DataRow("Type=DeviceEntity,Name=D,Connection=Con1,Others=Other1;Later", "Others", "not defined earlier")]
+        [DataRow("Type=DeviceEntity,Name=D,Connection=Con1,Others=Other1;Con1", "Others", "expected")]
+        [DataRow("Type=DeviceEntity,Name=D,Connection=Con1,Others=Other1; Other1", "Others", "more than once")]
+        [DataRow("Type=DeviceEntity,Name=D,Connection=Con1,Others=Other1;", "Others", "empty reference")]
+        [DataRow("Type=DeviceEntity,Name=D,Connection=Con1,Others=null", "Others", "at least one")]
         public void LoadRejectsInvalidReferenceTest(string line, string propertyName, string expectedMessage)
         {
             string[] lines = [Connection, "Type=OtherEntity,Name=Other1", line];
