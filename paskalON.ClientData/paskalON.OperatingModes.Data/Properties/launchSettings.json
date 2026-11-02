@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "paskalON.OperatingModes.Data": {
+      "commandName": "Project",
+      "commandLineArgs": "\"DemoSuperSimpleBattery\"  \"ClientData\\Demo\\DemoSuperSimpleBattery.csv\" \"20261029213954_v_0_1\""
+    }
+  }
+}

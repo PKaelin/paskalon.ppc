@@ -63,6 +63,7 @@ Loads client data or sample data into the microservices databases.
 - If the reference value is null the reference property remains null.
 - If a reference cannot be resolved loading fails with a descriptive error and how errors should be identified as described above.
 - A reference to an entity of the wrong domain type shall be rejected.
+- A list of references (e.g. Constraints) contains the names of the referenced entities separated by a semicolon. Each referenced entity is added to the list. Lists of values other than references are not supported.
 - Each line shall: Create the domain object, Populate their scalar properties, Resolve their references, Add them to the DbContext.
 
 
@@ -80,6 +81,7 @@ Loads client data or sample data into the microservices databases.
 | Enum | Connected | Enum value |
 | Reference | ModbusCon1 | Referenced entity |
 | Nullable reference | null | null |
+| List of references | Constraint1;Constraint2 | Referenced entities added to the list |
 
 
 ## Application exit codes
