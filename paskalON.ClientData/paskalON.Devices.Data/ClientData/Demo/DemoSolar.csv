@@ -1,0 +1,146 @@
+# -----------------------------------------------------------------------------
+# Device service data of the DemoSolar client project.
+# -----------------------------------------------------------------------------
+# Structure (Name (Type)): 5 circuits with 5 units each, every unit has 1 PCS (Total 25) and 1 solar panel config (Total 25).
+# Der 1 (DerConfig)
+#   SM 1 (SystemPowerMeterConfig)
+#   Group 1 (DerGroupConfig)
+#     Circuit 1 (DerCircuitConfig)
+#       PV-Unit 1 (DerSolarUnitConfig)
+#         PCS PV 1 (PowerConversionSystemConfig)
+#         PV 1 (SolarPanelConfig)
+#       PV-Unit 2 ... PV-Unit 5 (same as PV-Unit 1)
+#     Circuit 2 ... Circuit 5 (same as Circuit 1)
+#       Unit number n: 1 ... 5 in Circuit 1, c1 ... c5 in Circuit c (e.g. PV-Unit 21 ... PV-Unit 25 in Circuit 2)
+#       PV-Unit n contains PCS PV n and PV n
+#
+# Numbering:
+#   PCS PV n: DeviceId n, Modbus port 4400 ... 4424
+#   PV n:     DeviceId n
+#
+# Device configs used by the instances above:
+#   Device PCS 1, Device PV 1, System Power Meter Device
+# -----------------------------------------------------------------------------
+Type=Configuration,Name=AuditCleanUpInMonths,Key=AuditCleanUpInMonths,Value=60,Description=How long the updated records should be kept in the audit tables
+Type=SystemConfig,Name=System,Type=Solar,PollingIntervalMilliseconds=1000,MetricsIntervalMilliseconds=5000,DeviceIntervalMilliseconds=1000,DeviceHeartbeatIntervalMilliseconds=1000,DeviceFactorCore=1,DeviceFactorDetail=5,SubscriberTopicPowerTarget=ppc:pc:targets,PublisherTopicPcsCore=ppc:device:pcs:core,PublisherTopicPcsDetail=ppc:device:pcs:detail,PublisherTopicSolarPanelCore=ppc:device:pv:core,PublisherTopicSolarPanelDetail=ppc:device:pv:detail,PublisherTopicSystemPowerMeterCore=ppc:device:pm:system:core,PublisherTopicSystemPowerMeterDetail=ppc:device:pm:system:detail
+Type=DerConfig,Name=Der 1
+Type=DerGroupConfig,Name=Group 1,DerConfig=Der 1
+Type=ModbusConnectionConfig,Name=ModbusConnection for all,IsPipeliningEnabled=false,ConnectionTimeoutMilliseconds=5000,DisconnectionTimeoutMilliseconds=5000,ConnectRetryCount=3,ConnectRetryIntervalMilliseconds=5000,OperationTimeoutMilliseconds=500,SendRetryCount=1,SendRetryIntervalMilliseconds=100,ServerToClientAliveIntervalSeconds=-1,ServerMaximumConnections=5
+Type=PowerConversionSystemDeviceConfig,Name=Device PCS 1,ClassName=paskalON.Devices.Equipments.PowerConversionSystems.Simples.PcsSimpleV1Proxy,NameplateMaximumActivePower=3630000,NameplateMaximumReactivePower=3630000,NameplateMaximumApparentPower=3630000,NameplateMaximumACCurrent=3175,MaximumDCVoltage=1140,MinimumDCVoltage=100,ZeroOutputOnCommLoss=true
+Type=SolarPanelDeviceConfig,Name=Device PV 1,ClassName=paskalON.Devices.Equipments.EnergyResources.Solars.Simples.SolarPanelSimpleV1Proxy,MaximumVoltage=50,MinimumVoltage=10,MaximumCurrent=20,MinimumCurrent=0
+# Circuit 1
+Type=DerCircuitConfig,Name=Circuit 1,DerGroupConfig=Group 1
+Type=DerSolarUnitConfig,Name=PV-Unit 1,DerCircuitConfig=Circuit 1
+Type=ModbusConfig,Name=ModbusConfigPcs1,Address=paskalon.devicesimulator.service,Port=4400,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 1,IsActive=true,DeviceId=1,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs1,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 1
+Type=SolarPanelConfig,Name=PV 1,IsActive=true,DeviceId=1,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 1
+Type=DerSolarUnitConfig,Name=PV-Unit 2,DerCircuitConfig=Circuit 1
+Type=ModbusConfig,Name=ModbusConfigPcs2,Address=paskalon.devicesimulator.service,Port=4401,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 2,IsActive=true,DeviceId=2,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs2,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 2
+Type=SolarPanelConfig,Name=PV 2,IsActive=true,DeviceId=2,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 2
+Type=DerSolarUnitConfig,Name=PV-Unit 3,DerCircuitConfig=Circuit 1
+Type=ModbusConfig,Name=ModbusConfigPcs3,Address=paskalon.devicesimulator.service,Port=4402,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 3,IsActive=true,DeviceId=3,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs3,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 3
+Type=SolarPanelConfig,Name=PV 3,IsActive=true,DeviceId=3,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 3
+Type=DerSolarUnitConfig,Name=PV-Unit 4,DerCircuitConfig=Circuit 1
+Type=ModbusConfig,Name=ModbusConfigPcs4,Address=paskalon.devicesimulator.service,Port=4403,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 4,IsActive=true,DeviceId=4,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs4,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 4
+Type=SolarPanelConfig,Name=PV 4,IsActive=true,DeviceId=4,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 4
+Type=DerSolarUnitConfig,Name=PV-Unit 5,DerCircuitConfig=Circuit 1
+Type=ModbusConfig,Name=ModbusConfigPcs5,Address=paskalon.devicesimulator.service,Port=4404,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 5,IsActive=true,DeviceId=5,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs5,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 5
+Type=SolarPanelConfig,Name=PV 5,IsActive=true,DeviceId=5,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 5
+# Circuit 2
+Type=DerCircuitConfig,Name=Circuit 2,DerGroupConfig=Group 1
+Type=DerSolarUnitConfig,Name=PV-Unit 21,DerCircuitConfig=Circuit 2
+Type=ModbusConfig,Name=ModbusConfigPcs21,Address=paskalon.devicesimulator.service,Port=4405,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 21,IsActive=true,DeviceId=21,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs21,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 21
+Type=SolarPanelConfig,Name=PV 21,IsActive=true,DeviceId=21,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 21
+Type=DerSolarUnitConfig,Name=PV-Unit 22,DerCircuitConfig=Circuit 2
+Type=ModbusConfig,Name=ModbusConfigPcs22,Address=paskalon.devicesimulator.service,Port=4406,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 22,IsActive=true,DeviceId=22,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs22,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 22
+Type=SolarPanelConfig,Name=PV 22,IsActive=true,DeviceId=22,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 22
+Type=DerSolarUnitConfig,Name=PV-Unit 23,DerCircuitConfig=Circuit 2
+Type=ModbusConfig,Name=ModbusConfigPcs23,Address=paskalon.devicesimulator.service,Port=4407,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 23,IsActive=true,DeviceId=23,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs23,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 23
+Type=SolarPanelConfig,Name=PV 23,IsActive=true,DeviceId=23,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 23
+Type=DerSolarUnitConfig,Name=PV-Unit 24,DerCircuitConfig=Circuit 2
+Type=ModbusConfig,Name=ModbusConfigPcs24,Address=paskalon.devicesimulator.service,Port=4408,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 24,IsActive=true,DeviceId=24,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs24,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 24
+Type=SolarPanelConfig,Name=PV 24,IsActive=true,DeviceId=24,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 24
+Type=DerSolarUnitConfig,Name=PV-Unit 25,DerCircuitConfig=Circuit 2
+Type=ModbusConfig,Name=ModbusConfigPcs25,Address=paskalon.devicesimulator.service,Port=4409,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 25,IsActive=true,DeviceId=25,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs25,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 25
+Type=SolarPanelConfig,Name=PV 25,IsActive=true,DeviceId=25,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 25
+# Circuit 3
+Type=DerCircuitConfig,Name=Circuit 3,DerGroupConfig=Group 1
+Type=DerSolarUnitConfig,Name=PV-Unit 31,DerCircuitConfig=Circuit 3
+Type=ModbusConfig,Name=ModbusConfigPcs31,Address=paskalon.devicesimulator.service,Port=4410,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 31,IsActive=true,DeviceId=31,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs31,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 31
+Type=SolarPanelConfig,Name=PV 31,IsActive=true,DeviceId=31,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 31
+Type=DerSolarUnitConfig,Name=PV-Unit 32,DerCircuitConfig=Circuit 3
+Type=ModbusConfig,Name=ModbusConfigPcs32,Address=paskalon.devicesimulator.service,Port=4411,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 32,IsActive=true,DeviceId=32,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs32,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 32
+Type=SolarPanelConfig,Name=PV 32,IsActive=true,DeviceId=32,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 32
+Type=DerSolarUnitConfig,Name=PV-Unit 33,DerCircuitConfig=Circuit 3
+Type=ModbusConfig,Name=ModbusConfigPcs33,Address=paskalon.devicesimulator.service,Port=4412,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 33,IsActive=true,DeviceId=33,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs33,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 33
+Type=SolarPanelConfig,Name=PV 33,IsActive=true,DeviceId=33,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 33
+Type=DerSolarUnitConfig,Name=PV-Unit 34,DerCircuitConfig=Circuit 3
+Type=ModbusConfig,Name=ModbusConfigPcs34,Address=paskalon.devicesimulator.service,Port=4413,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 34,IsActive=true,DeviceId=34,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs34,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 34
+Type=SolarPanelConfig,Name=PV 34,IsActive=true,DeviceId=34,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 34
+Type=DerSolarUnitConfig,Name=PV-Unit 35,DerCircuitConfig=Circuit 3
+Type=ModbusConfig,Name=ModbusConfigPcs35,Address=paskalon.devicesimulator.service,Port=4414,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 35,IsActive=true,DeviceId=35,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs35,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 35
+Type=SolarPanelConfig,Name=PV 35,IsActive=true,DeviceId=35,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 35
+# Circuit 4
+Type=DerCircuitConfig,Name=Circuit 4,DerGroupConfig=Group 1
+Type=DerSolarUnitConfig,Name=PV-Unit 41,DerCircuitConfig=Circuit 4
+Type=ModbusConfig,Name=ModbusConfigPcs41,Address=paskalon.devicesimulator.service,Port=4415,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 41,IsActive=true,DeviceId=41,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs41,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 41
+Type=SolarPanelConfig,Name=PV 41,IsActive=true,DeviceId=41,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 41
+Type=DerSolarUnitConfig,Name=PV-Unit 42,DerCircuitConfig=Circuit 4
+Type=ModbusConfig,Name=ModbusConfigPcs42,Address=paskalon.devicesimulator.service,Port=4416,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 42,IsActive=true,DeviceId=42,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs42,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 42
+Type=SolarPanelConfig,Name=PV 42,IsActive=true,DeviceId=42,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 42
+Type=DerSolarUnitConfig,Name=PV-Unit 43,DerCircuitConfig=Circuit 4
+Type=ModbusConfig,Name=ModbusConfigPcs43,Address=paskalon.devicesimulator.service,Port=4417,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 43,IsActive=true,DeviceId=43,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs43,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 43
+Type=SolarPanelConfig,Name=PV 43,IsActive=true,DeviceId=43,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 43
+Type=DerSolarUnitConfig,Name=PV-Unit 44,DerCircuitConfig=Circuit 4
+Type=ModbusConfig,Name=ModbusConfigPcs44,Address=paskalon.devicesimulator.service,Port=4418,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 44,IsActive=true,DeviceId=44,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs44,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 44
+Type=SolarPanelConfig,Name=PV 44,IsActive=true,DeviceId=44,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 44
+Type=DerSolarUnitConfig,Name=PV-Unit 45,DerCircuitConfig=Circuit 4
+Type=ModbusConfig,Name=ModbusConfigPcs45,Address=paskalon.devicesimulator.service,Port=4419,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 45,IsActive=true,DeviceId=45,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs45,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 45
+Type=SolarPanelConfig,Name=PV 45,IsActive=true,DeviceId=45,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 45
+# Circuit 5
+Type=DerCircuitConfig,Name=Circuit 5,DerGroupConfig=Group 1
+Type=DerSolarUnitConfig,Name=PV-Unit 51,DerCircuitConfig=Circuit 5
+Type=ModbusConfig,Name=ModbusConfigPcs51,Address=paskalon.devicesimulator.service,Port=4420,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 51,IsActive=true,DeviceId=51,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs51,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 51
+Type=SolarPanelConfig,Name=PV 51,IsActive=true,DeviceId=51,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 51
+Type=DerSolarUnitConfig,Name=PV-Unit 52,DerCircuitConfig=Circuit 5
+Type=ModbusConfig,Name=ModbusConfigPcs52,Address=paskalon.devicesimulator.service,Port=4421,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 52,IsActive=true,DeviceId=52,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs52,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 52
+Type=SolarPanelConfig,Name=PV 52,IsActive=true,DeviceId=52,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 52
+Type=DerSolarUnitConfig,Name=PV-Unit 53,DerCircuitConfig=Circuit 5
+Type=ModbusConfig,Name=ModbusConfigPcs53,Address=paskalon.devicesimulator.service,Port=4422,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 53,IsActive=true,DeviceId=53,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs53,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 53
+Type=SolarPanelConfig,Name=PV 53,IsActive=true,DeviceId=53,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 53
+Type=DerSolarUnitConfig,Name=PV-Unit 54,DerCircuitConfig=Circuit 5
+Type=ModbusConfig,Name=ModbusConfigPcs54,Address=paskalon.devicesimulator.service,Port=4423,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 54,IsActive=true,DeviceId=54,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs54,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 54
+Type=SolarPanelConfig,Name=PV 54,IsActive=true,DeviceId=54,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 54
+Type=DerSolarUnitConfig,Name=PV-Unit 55,DerCircuitConfig=Circuit 5
+Type=ModbusConfig,Name=ModbusConfigPcs55,Address=paskalon.devicesimulator.service,Port=4424,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS PV 55,IsActive=true,DeviceId=55,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs55,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=PV-Unit 55
+Type=SolarPanelConfig,Name=PV 55,IsActive=true,DeviceId=55,NumberOfPanels=10,ConnectionType=Series,SolarPanelDeviceConfig=Device PV 1,DerUnitConfig=PV-Unit 55
+# System power meter
+Type=PowerMeterMapC37Config,Name=Power Meter Map C37,ApparentPower=Analog0,ActivePower=Analog1,ActivePowerA=Analog2,ActivePowerB=Analog3,ActivePowerC=Analog4,ReactivePower=Analog5,ReactivePowerA=Analog6,ReactivePowerB=Analog7,ReactivePowerC=Analog8,EnergyDelivered=Analog9,EnergyReceived=Analog10,ReactiveEnergyDelivered=Analog11,ReactiveEnergyReceived=Analog12,VoltageA=Phasor0,VoltageB=Phasor1,VoltageC=Phasor2,VoltageAB=Phasor3,VoltageBC=Phasor4,VoltageCA=Phasor5,VoltagePositiveSequence=Phasor6,VoltageLLAvg=Analog13,CurrentA=Phasor7,CurrentB=Phasor8,CurrentC=Phasor9
+Type=PowerMeterDeviceConfig,Name=System Power Meter Device,ClassName=paskalON.Devices.Equipments.Meters.PowerMeters.Simples.SystemPowerMeterSimpleV1Proxy,IsReversePowerFlow=false,IsCurrentSigned=true,PowerMeterMapC37Config=Power Meter Map C37
+Type=C37ConnectionConfig,Name=C37 connection for all C37,ConnectionTimeoutMilliseconds=5000,DisconnectionTimeoutMilliseconds=5000,ConnectRetryCount=3,ConnectRetryIntervalMilliseconds=5000,OperationTimeoutMilliseconds=5000
+Type=C37Config,Name=SystemPowerMeter 1,C37ConnectionConfig=C37 connection for all C37,AddressFamily=InterNetwork,Address=paskalon.devicesimulator.service,Port=4800,ConfigFrameTimeoutMilliseconds=3000,DataFrameRetryCount=3,DataFrameTimeoutMilliseconds=500,StreamId=1,StationName=PMU,TransportLayer=UDP
+Type=SystemPowerMeterConfig,Name=SM 1,IsActive=true,DeviceId=1,PowerFactorStandard=IEEE,C37Config=SystemPowerMeter 1,PowerMeterDeviceConfig=System Power Meter Device,DerConfig=Der 1

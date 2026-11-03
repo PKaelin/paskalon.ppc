@@ -1,0 +1,222 @@
+# -----------------------------------------------------------------------------
+# Device service data of the DemoBattery client project.
+# -----------------------------------------------------------------------------
+# Structure (Name (Type)): 5 circuits with 5 units each, every unit has 1 PCS (Total 25) and 2 battery banks (Total 50).
+# Der 1 (DerConfig)
+#   SM 1 (SystemPowerMeterConfig)
+#   Group 1 (DerGroupConfig)
+#     Circuit 1 (DerCircuitConfig)
+#       BMS-Unit 1 (DerBatteryStorageUnitConfig)
+#         PCS Bess 1 (PowerConversionSystemConfig)
+#         BB 1.1 (BatteryBankConfig)
+#         BB 1.2 (BatteryBankConfig)
+#       BMS-Unit 2 ... BMS-Unit 5 (same as BMS-Unit 1)
+#     Circuit 2 ... Circuit 5 (same as Circuit 1)
+#       Unit number n: 1 ... 5 in Circuit 1, c1 ... c5 in Circuit c (e.g. BMS-Unit 21 ... BMS-Unit 25 in Circuit 2)
+#       BMS-Unit n contains PCS Bess n, BB n.1 and BB n.2
+#
+# Numbering:
+#   PCS Bess n: DeviceId n, Modbus port 4400 ... 4424
+#   BB n.b:     DeviceId nb (e.g. BB 1.2 = 12, BB 21.2 = 212), Modbus port 4600 ... 4649
+#
+# Device configs used by the instances above:
+#   Device PCS 1, Device BMS 1, System Power Meter Device
+# -----------------------------------------------------------------------------
+Type=Configuration,Name=AuditCleanUpInMonths,Key=AuditCleanUpInMonths,Value=60,Description=How long the updated records should be kept in the audit tables
+Type=SystemConfig,Name=System,Type=Bess,PollingIntervalMilliseconds=1000,MetricsIntervalMilliseconds=5000,DeviceIntervalMilliseconds=1000,DeviceHeartbeatIntervalMilliseconds=1000,DeviceFactorCore=1,DeviceFactorDetail=5,SubscriberTopicPowerTarget=ppc:pc:targets,PublisherTopicPcsCore=ppc:device:pcs:core,PublisherTopicPcsDetail=ppc:device:pcs:detail,PublisherTopicBatteryBankCore=ppc:device:bb:core,PublisherTopicBatteryBankDetail=ppc:device:bb:detail,PublisherTopicSolarPanelCore=ppc:device:pv:core,PublisherTopicSolarPanelDetail=ppc:device:pv:detail,PublisherTopicExternalPowerMeterCore=ppc:device:pm:external:core,PublisherTopicExternalPowerMeterDetail=ppc:device:pm:external:detail,PublisherTopicAuxiliaryPowerMeterCore=ppc:device:pm:auxiliary:core,PublisherTopicAuxiliaryPowerMeterDetail=ppc:device:pm:auxiliary:detail,PublisherTopicSystemPowerMeterCore=ppc:device:pm:system:core,PublisherTopicSystemPowerMeterDetail=ppc:device:pm:system:detail,PublisherTopicCircuitPowerMeterCore=ppc:device:pm:circuit:core,PublisherTopicCircuitPowerMeterDetail=ppc:device:pm:circuit:detail
+Type=DerConfig,Name=Der 1
+Type=DerGroupConfig,Name=Group 1,DerConfig=Der 1
+Type=ModbusConnectionConfig,Name=ModbusConnection for all,IsPipeliningEnabled=false,ConnectionTimeoutMilliseconds=5000,DisconnectionTimeoutMilliseconds=5000,ConnectRetryCount=3,ConnectRetryIntervalMilliseconds=5000,OperationTimeoutMilliseconds=500,SendRetryCount=1,SendRetryIntervalMilliseconds=100,ServerToClientAliveIntervalSeconds=-1,ServerMaximumConnections=5
+Type=PowerConversionSystemDeviceConfig,Name=Device PCS 1,ClassName=paskalON.Devices.Equipments.PowerConversionSystems.Simples.PcsSimpleV1Proxy,NameplateMaximumActivePower=3630000,NameplateMaximumReactivePower=3630000,NameplateMaximumApparentPower=3630000,NameplateMaximumACCurrent=3175,MaximumDCVoltage=1140,MinimumDCVoltage=100,ZeroOutputOnCommLoss=true
+Type=BatteryBankDeviceConfig,Name=Device BMS 1,ClassName=paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples.BbSimpleV1Proxy,NameplateCapacity=5000000,NameplateMaximumChargeRate=5000000,NameplateMaximumDischargeRate=5000000,BatteryType=LithiumIon,RackCount=5,ModulesPerRackCount=1,InverterBusNumber=1,AbsoluteMinimumStateOfCharge=0,AbsoluteMaximumStateOfCharge=100,UsableMinimumStateOfCharge=10,UsableMaximumStateOfCharge=90,PreferredMinimumStateOfCharge=20,PreferredMaximumStateOfCharge=80,AbsoluteMaximumTemperature=60,AbsoluteMinimumTemperature=0,PreferredMaximumTemperature=40,PreferredMinimumTemperature=15,AbsoluteMaxChargeCurrentAmps=1100,AbsoluteMaxDischargeCurrentAmps=1200,MaximumDcVoltage=1000,MinimumDcVoltage=700,ZeroCapacityOnCommLoss=true
+# Circuit 1
+Type=DerCircuitConfig,Name=Circuit 1,DerGroupConfig=Group 1
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 1,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 1
+Type=ModbusConfig,Name=ModbusConfigPcs1,Address=paskalon.devicesimulator.service,Port=4400,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 1,IsActive=true,DeviceId=1,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs1,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 1
+Type=ModbusConfig,Name=ModbusConfigBB1.1,Address=paskalon.devicesimulator.service,Port=4600,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 1.1,IsActive=true,DeviceId=11,InitiallyConnected=true,ModbusConfig=ModbusConfigBB1.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 1
+Type=ModbusConfig,Name=ModbusConfigBB1.2,Address=paskalon.devicesimulator.service,Port=4601,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 1.2,IsActive=true,DeviceId=12,InitiallyConnected=true,ModbusConfig=ModbusConfigBB1.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 1
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 2,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 1
+Type=ModbusConfig,Name=ModbusConfigPcs2,Address=paskalon.devicesimulator.service,Port=4401,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 2,IsActive=true,DeviceId=2,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs2,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 2
+Type=ModbusConfig,Name=ModbusConfigBB2.1,Address=paskalon.devicesimulator.service,Port=4602,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 2.1,IsActive=true,DeviceId=21,InitiallyConnected=true,ModbusConfig=ModbusConfigBB2.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 2
+Type=ModbusConfig,Name=ModbusConfigBB2.2,Address=paskalon.devicesimulator.service,Port=4603,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 2.2,IsActive=true,DeviceId=22,InitiallyConnected=true,ModbusConfig=ModbusConfigBB2.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 2
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 3,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 1
+Type=ModbusConfig,Name=ModbusConfigPcs3,Address=paskalon.devicesimulator.service,Port=4402,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 3,IsActive=true,DeviceId=3,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs3,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 3
+Type=ModbusConfig,Name=ModbusConfigBB3.1,Address=paskalon.devicesimulator.service,Port=4604,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 3.1,IsActive=true,DeviceId=31,InitiallyConnected=true,ModbusConfig=ModbusConfigBB3.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 3
+Type=ModbusConfig,Name=ModbusConfigBB3.2,Address=paskalon.devicesimulator.service,Port=4605,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 3.2,IsActive=true,DeviceId=32,InitiallyConnected=true,ModbusConfig=ModbusConfigBB3.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 3
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 4,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 1
+Type=ModbusConfig,Name=ModbusConfigPcs4,Address=paskalon.devicesimulator.service,Port=4403,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 4,IsActive=true,DeviceId=4,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs4,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 4
+Type=ModbusConfig,Name=ModbusConfigBB4.1,Address=paskalon.devicesimulator.service,Port=4606,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 4.1,IsActive=true,DeviceId=41,InitiallyConnected=true,ModbusConfig=ModbusConfigBB4.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 4
+Type=ModbusConfig,Name=ModbusConfigBB4.2,Address=paskalon.devicesimulator.service,Port=4607,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 4.2,IsActive=true,DeviceId=42,InitiallyConnected=true,ModbusConfig=ModbusConfigBB4.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 4
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 5,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 1
+Type=ModbusConfig,Name=ModbusConfigPcs5,Address=paskalon.devicesimulator.service,Port=4404,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 5,IsActive=true,DeviceId=5,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs5,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 5
+Type=ModbusConfig,Name=ModbusConfigBB5.1,Address=paskalon.devicesimulator.service,Port=4608,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 5.1,IsActive=true,DeviceId=51,InitiallyConnected=true,ModbusConfig=ModbusConfigBB5.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 5
+Type=ModbusConfig,Name=ModbusConfigBB5.2,Address=paskalon.devicesimulator.service,Port=4609,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 5.2,IsActive=true,DeviceId=52,InitiallyConnected=true,ModbusConfig=ModbusConfigBB5.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 5
+# Circuit 2
+Type=DerCircuitConfig,Name=Circuit 2,DerGroupConfig=Group 1
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 21,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 2
+Type=ModbusConfig,Name=ModbusConfigPcs21,Address=paskalon.devicesimulator.service,Port=4405,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 21,IsActive=true,DeviceId=21,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs21,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 21
+Type=ModbusConfig,Name=ModbusConfigBB21.1,Address=paskalon.devicesimulator.service,Port=4610,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 21.1,IsActive=true,DeviceId=211,InitiallyConnected=true,ModbusConfig=ModbusConfigBB21.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 21
+Type=ModbusConfig,Name=ModbusConfigBB21.2,Address=paskalon.devicesimulator.service,Port=4611,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 21.2,IsActive=true,DeviceId=212,InitiallyConnected=true,ModbusConfig=ModbusConfigBB21.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 21
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 22,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 2
+Type=ModbusConfig,Name=ModbusConfigPcs22,Address=paskalon.devicesimulator.service,Port=4406,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 22,IsActive=true,DeviceId=22,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs22,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 22
+Type=ModbusConfig,Name=ModbusConfigBB22.1,Address=paskalon.devicesimulator.service,Port=4612,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 22.1,IsActive=true,DeviceId=221,InitiallyConnected=true,ModbusConfig=ModbusConfigBB22.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 22
+Type=ModbusConfig,Name=ModbusConfigBB22.2,Address=paskalon.devicesimulator.service,Port=4613,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 22.2,IsActive=true,DeviceId=222,InitiallyConnected=true,ModbusConfig=ModbusConfigBB22.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 22
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 23,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 2
+Type=ModbusConfig,Name=ModbusConfigPcs23,Address=paskalon.devicesimulator.service,Port=4407,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 23,IsActive=true,DeviceId=23,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs23,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 23
+Type=ModbusConfig,Name=ModbusConfigBB23.1,Address=paskalon.devicesimulator.service,Port=4614,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 23.1,IsActive=true,DeviceId=231,InitiallyConnected=true,ModbusConfig=ModbusConfigBB23.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 23
+Type=ModbusConfig,Name=ModbusConfigBB23.2,Address=paskalon.devicesimulator.service,Port=4615,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 23.2,IsActive=true,DeviceId=232,InitiallyConnected=true,ModbusConfig=ModbusConfigBB23.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 23
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 24,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 2
+Type=ModbusConfig,Name=ModbusConfigPcs24,Address=paskalon.devicesimulator.service,Port=4408,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 24,IsActive=true,DeviceId=24,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs24,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 24
+Type=ModbusConfig,Name=ModbusConfigBB24.1,Address=paskalon.devicesimulator.service,Port=4616,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 24.1,IsActive=true,DeviceId=241,InitiallyConnected=true,ModbusConfig=ModbusConfigBB24.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 24
+Type=ModbusConfig,Name=ModbusConfigBB24.2,Address=paskalon.devicesimulator.service,Port=4617,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 24.2,IsActive=true,DeviceId=242,InitiallyConnected=true,ModbusConfig=ModbusConfigBB24.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 24
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 25,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 2
+Type=ModbusConfig,Name=ModbusConfigPcs25,Address=paskalon.devicesimulator.service,Port=4409,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 25,IsActive=true,DeviceId=25,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs25,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 25
+Type=ModbusConfig,Name=ModbusConfigBB25.1,Address=paskalon.devicesimulator.service,Port=4618,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 25.1,IsActive=true,DeviceId=251,InitiallyConnected=true,ModbusConfig=ModbusConfigBB25.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 25
+Type=ModbusConfig,Name=ModbusConfigBB25.2,Address=paskalon.devicesimulator.service,Port=4619,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 25.2,IsActive=true,DeviceId=252,InitiallyConnected=true,ModbusConfig=ModbusConfigBB25.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 25
+# Circuit 3
+Type=DerCircuitConfig,Name=Circuit 3,DerGroupConfig=Group 1
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 31,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 3
+Type=ModbusConfig,Name=ModbusConfigPcs31,Address=paskalon.devicesimulator.service,Port=4410,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 31,IsActive=true,DeviceId=31,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs31,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 31
+Type=ModbusConfig,Name=ModbusConfigBB31.1,Address=paskalon.devicesimulator.service,Port=4620,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 31.1,IsActive=true,DeviceId=311,InitiallyConnected=true,ModbusConfig=ModbusConfigBB31.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 31
+Type=ModbusConfig,Name=ModbusConfigBB31.2,Address=paskalon.devicesimulator.service,Port=4621,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 31.2,IsActive=true,DeviceId=312,InitiallyConnected=true,ModbusConfig=ModbusConfigBB31.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 31
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 32,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 3
+Type=ModbusConfig,Name=ModbusConfigPcs32,Address=paskalon.devicesimulator.service,Port=4411,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 32,IsActive=true,DeviceId=32,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs32,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 32
+Type=ModbusConfig,Name=ModbusConfigBB32.1,Address=paskalon.devicesimulator.service,Port=4622,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 32.1,IsActive=true,DeviceId=321,InitiallyConnected=true,ModbusConfig=ModbusConfigBB32.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 32
+Type=ModbusConfig,Name=ModbusConfigBB32.2,Address=paskalon.devicesimulator.service,Port=4623,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 32.2,IsActive=true,DeviceId=322,InitiallyConnected=true,ModbusConfig=ModbusConfigBB32.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 32
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 33,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 3
+Type=ModbusConfig,Name=ModbusConfigPcs33,Address=paskalon.devicesimulator.service,Port=4412,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 33,IsActive=true,DeviceId=33,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs33,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 33
+Type=ModbusConfig,Name=ModbusConfigBB33.1,Address=paskalon.devicesimulator.service,Port=4624,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 33.1,IsActive=true,DeviceId=331,InitiallyConnected=true,ModbusConfig=ModbusConfigBB33.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 33
+Type=ModbusConfig,Name=ModbusConfigBB33.2,Address=paskalon.devicesimulator.service,Port=4625,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 33.2,IsActive=true,DeviceId=332,InitiallyConnected=true,ModbusConfig=ModbusConfigBB33.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 33
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 34,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 3
+Type=ModbusConfig,Name=ModbusConfigPcs34,Address=paskalon.devicesimulator.service,Port=4413,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 34,IsActive=true,DeviceId=34,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs34,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 34
+Type=ModbusConfig,Name=ModbusConfigBB34.1,Address=paskalon.devicesimulator.service,Port=4626,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 34.1,IsActive=true,DeviceId=341,InitiallyConnected=true,ModbusConfig=ModbusConfigBB34.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 34
+Type=ModbusConfig,Name=ModbusConfigBB34.2,Address=paskalon.devicesimulator.service,Port=4627,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 34.2,IsActive=true,DeviceId=342,InitiallyConnected=true,ModbusConfig=ModbusConfigBB34.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 34
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 35,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 3
+Type=ModbusConfig,Name=ModbusConfigPcs35,Address=paskalon.devicesimulator.service,Port=4414,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 35,IsActive=true,DeviceId=35,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs35,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 35
+Type=ModbusConfig,Name=ModbusConfigBB35.1,Address=paskalon.devicesimulator.service,Port=4628,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 35.1,IsActive=true,DeviceId=351,InitiallyConnected=true,ModbusConfig=ModbusConfigBB35.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 35
+Type=ModbusConfig,Name=ModbusConfigBB35.2,Address=paskalon.devicesimulator.service,Port=4629,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 35.2,IsActive=true,DeviceId=352,InitiallyConnected=true,ModbusConfig=ModbusConfigBB35.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 35
+# Circuit 4
+Type=DerCircuitConfig,Name=Circuit 4,DerGroupConfig=Group 1
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 41,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 4
+Type=ModbusConfig,Name=ModbusConfigPcs41,Address=paskalon.devicesimulator.service,Port=4415,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 41,IsActive=true,DeviceId=41,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs41,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 41
+Type=ModbusConfig,Name=ModbusConfigBB41.1,Address=paskalon.devicesimulator.service,Port=4630,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 41.1,IsActive=true,DeviceId=411,InitiallyConnected=true,ModbusConfig=ModbusConfigBB41.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 41
+Type=ModbusConfig,Name=ModbusConfigBB41.2,Address=paskalon.devicesimulator.service,Port=4631,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 41.2,IsActive=true,DeviceId=412,InitiallyConnected=true,ModbusConfig=ModbusConfigBB41.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 41
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 42,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 4
+Type=ModbusConfig,Name=ModbusConfigPcs42,Address=paskalon.devicesimulator.service,Port=4416,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 42,IsActive=true,DeviceId=42,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs42,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 42
+Type=ModbusConfig,Name=ModbusConfigBB42.1,Address=paskalon.devicesimulator.service,Port=4632,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 42.1,IsActive=true,DeviceId=421,InitiallyConnected=true,ModbusConfig=ModbusConfigBB42.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 42
+Type=ModbusConfig,Name=ModbusConfigBB42.2,Address=paskalon.devicesimulator.service,Port=4633,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 42.2,IsActive=true,DeviceId=422,InitiallyConnected=true,ModbusConfig=ModbusConfigBB42.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 42
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 43,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 4
+Type=ModbusConfig,Name=ModbusConfigPcs43,Address=paskalon.devicesimulator.service,Port=4417,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 43,IsActive=true,DeviceId=43,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs43,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 43
+Type=ModbusConfig,Name=ModbusConfigBB43.1,Address=paskalon.devicesimulator.service,Port=4634,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 43.1,IsActive=true,DeviceId=431,InitiallyConnected=true,ModbusConfig=ModbusConfigBB43.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 43
+Type=ModbusConfig,Name=ModbusConfigBB43.2,Address=paskalon.devicesimulator.service,Port=4635,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 43.2,IsActive=true,DeviceId=432,InitiallyConnected=true,ModbusConfig=ModbusConfigBB43.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 43
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 44,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 4
+Type=ModbusConfig,Name=ModbusConfigPcs44,Address=paskalon.devicesimulator.service,Port=4418,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 44,IsActive=true,DeviceId=44,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs44,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 44
+Type=ModbusConfig,Name=ModbusConfigBB44.1,Address=paskalon.devicesimulator.service,Port=4636,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 44.1,IsActive=true,DeviceId=441,InitiallyConnected=true,ModbusConfig=ModbusConfigBB44.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 44
+Type=ModbusConfig,Name=ModbusConfigBB44.2,Address=paskalon.devicesimulator.service,Port=4637,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 44.2,IsActive=true,DeviceId=442,InitiallyConnected=true,ModbusConfig=ModbusConfigBB44.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 44
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 45,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 4
+Type=ModbusConfig,Name=ModbusConfigPcs45,Address=paskalon.devicesimulator.service,Port=4419,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 45,IsActive=true,DeviceId=45,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs45,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 45
+Type=ModbusConfig,Name=ModbusConfigBB45.1,Address=paskalon.devicesimulator.service,Port=4638,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 45.1,IsActive=true,DeviceId=451,InitiallyConnected=true,ModbusConfig=ModbusConfigBB45.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 45
+Type=ModbusConfig,Name=ModbusConfigBB45.2,Address=paskalon.devicesimulator.service,Port=4639,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 45.2,IsActive=true,DeviceId=452,InitiallyConnected=true,ModbusConfig=ModbusConfigBB45.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 45
+# Circuit 5
+Type=DerCircuitConfig,Name=Circuit 5,DerGroupConfig=Group 1
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 51,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 5
+Type=ModbusConfig,Name=ModbusConfigPcs51,Address=paskalon.devicesimulator.service,Port=4420,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 51,IsActive=true,DeviceId=51,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs51,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 51
+Type=ModbusConfig,Name=ModbusConfigBB51.1,Address=paskalon.devicesimulator.service,Port=4640,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 51.1,IsActive=true,DeviceId=511,InitiallyConnected=true,ModbusConfig=ModbusConfigBB51.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 51
+Type=ModbusConfig,Name=ModbusConfigBB51.2,Address=paskalon.devicesimulator.service,Port=4641,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 51.2,IsActive=true,DeviceId=512,InitiallyConnected=true,ModbusConfig=ModbusConfigBB51.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 51
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 52,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 5
+Type=ModbusConfig,Name=ModbusConfigPcs52,Address=paskalon.devicesimulator.service,Port=4421,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 52,IsActive=true,DeviceId=52,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs52,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 52
+Type=ModbusConfig,Name=ModbusConfigBB52.1,Address=paskalon.devicesimulator.service,Port=4642,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 52.1,IsActive=true,DeviceId=521,InitiallyConnected=true,ModbusConfig=ModbusConfigBB52.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 52
+Type=ModbusConfig,Name=ModbusConfigBB52.2,Address=paskalon.devicesimulator.service,Port=4643,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 52.2,IsActive=true,DeviceId=522,InitiallyConnected=true,ModbusConfig=ModbusConfigBB52.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 52
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 53,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 5
+Type=ModbusConfig,Name=ModbusConfigPcs53,Address=paskalon.devicesimulator.service,Port=4422,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 53,IsActive=true,DeviceId=53,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs53,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 53
+Type=ModbusConfig,Name=ModbusConfigBB53.1,Address=paskalon.devicesimulator.service,Port=4644,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 53.1,IsActive=true,DeviceId=531,InitiallyConnected=true,ModbusConfig=ModbusConfigBB53.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 53
+Type=ModbusConfig,Name=ModbusConfigBB53.2,Address=paskalon.devicesimulator.service,Port=4645,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 53.2,IsActive=true,DeviceId=532,InitiallyConnected=true,ModbusConfig=ModbusConfigBB53.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 53
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 54,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 5
+Type=ModbusConfig,Name=ModbusConfigPcs54,Address=paskalon.devicesimulator.service,Port=4423,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 54,IsActive=true,DeviceId=54,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs54,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 54
+Type=ModbusConfig,Name=ModbusConfigBB54.1,Address=paskalon.devicesimulator.service,Port=4646,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 54.1,IsActive=true,DeviceId=541,InitiallyConnected=true,ModbusConfig=ModbusConfigBB54.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 54
+Type=ModbusConfig,Name=ModbusConfigBB54.2,Address=paskalon.devicesimulator.service,Port=4647,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 54.2,IsActive=true,DeviceId=542,InitiallyConnected=true,ModbusConfig=ModbusConfigBB54.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 54
+Type=DerBatteryStorageUnitConfig,Name=BMS-Unit 55,IncludeBatteryInOperations=true,DerCircuitConfig=Circuit 5
+Type=ModbusConfig,Name=ModbusConfigPcs55,Address=paskalon.devicesimulator.service,Port=4424,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=PowerConversionSystemConfig,Name=PCS Bess 55,IsActive=true,DeviceId=55,InitiallyStarted=true,ModbusConfig=ModbusConfigPcs55,PowerConversionSystemDeviceConfig=Device PCS 1,DerUnitConfig=BMS-Unit 55
+Type=ModbusConfig,Name=ModbusConfigBB55.1,Address=paskalon.devicesimulator.service,Port=4648,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 55.1,IsActive=true,DeviceId=551,InitiallyConnected=true,ModbusConfig=ModbusConfigBB55.1,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 55
+Type=ModbusConfig,Name=ModbusConfigBB55.2,Address=paskalon.devicesimulator.service,Port=4649,AddressFamily=InterNetwork,UnitId=1,ModbusConnectionConfig=ModbusConnection for all
+Type=BatteryBankConfig,Name=BB 55.2,IsActive=true,DeviceId=552,InitiallyConnected=true,ModbusConfig=ModbusConfigBB55.2,BatteryBankDeviceConfig=Device BMS 1,DerUnitConfig=BMS-Unit 55
+# System power meter
+Type=PowerMeterMapC37Config,Name=Power Meter Map C37,ApparentPower=Analog0,ActivePower=Analog1,ActivePowerA=Analog2,ActivePowerB=Analog3,ActivePowerC=Analog4,ReactivePower=Analog5,ReactivePowerA=Analog6,ReactivePowerB=Analog7,ReactivePowerC=Analog8,EnergyDelivered=Analog9,EnergyReceived=Analog10,ReactiveEnergyDelivered=Analog11,ReactiveEnergyReceived=Analog12,VoltageA=Phasor0,VoltageB=Phasor1,VoltageC=Phasor2,VoltageAB=Phasor3,VoltageBC=Phasor4,VoltageCA=Phasor5,VoltagePositiveSequence=Phasor6,VoltageLLAvg=Analog13,CurrentA=Phasor7,CurrentB=Phasor8,CurrentC=Phasor9
+Type=PowerMeterDeviceConfig,Name=System Power Meter Device,ClassName=paskalON.Devices.Equipments.Meters.PowerMeters.Simples.SystemPowerMeterSimpleV1Proxy,IsReversePowerFlow=false,IsCurrentSigned=true,PowerMeterMapC37Config=Power Meter Map C37
+Type=C37ConnectionConfig,Name=C37 connection for all C37,ConnectionTimeoutMilliseconds=5000,DisconnectionTimeoutMilliseconds=5000,ConnectRetryCount=3,ConnectRetryIntervalMilliseconds=5000,OperationTimeoutMilliseconds=5000
+Type=C37Config,Name=SystemPowerMeter 1,C37ConnectionConfig=C37 connection for all C37,AddressFamily=InterNetwork,Address=paskalon.devicesimulator.service,Port=4800,ConfigFrameTimeoutMilliseconds=3000,DataFrameRetryCount=3,DataFrameTimeoutMilliseconds=500,StreamId=1,StationName=PMU,TransportLayer=UDP
+Type=SystemPowerMeterConfig,Name=SM 1,IsActive=true,DeviceId=1,PowerFactorStandard=IEEE,C37Config=SystemPowerMeter 1,PowerMeterDeviceConfig=System Power Meter Device,DerConfig=Der 1
