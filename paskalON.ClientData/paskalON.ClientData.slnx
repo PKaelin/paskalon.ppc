@@ -18,6 +18,10 @@
     <Project Path="../paskalON.PowerControls/paskalON.PowerControls.Infrastructure/paskalON.PowerControls.Infrastructure.csproj" />
   </Folder>
   <Project Path="paskalON.ClientData.Common/paskalON.ClientData.Common.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path="ImportClientData.bat" />
+    <File Path="README.md" />
+  </Folder>
   <Folder Name="/Tests/">
     <Project Path="paskalON.ClientData.Common.UnitTest/paskalON.ClientData.Common.UnitTest.csproj" />
     <Project Path="paskalON.Devices.Data.IntegrationTest/paskalON.Devices.Data.IntegrationTest.csproj" />
