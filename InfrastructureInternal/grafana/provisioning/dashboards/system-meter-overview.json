@@ -1,0 +1,318 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "description": "Active power, reactive power and power factor of the first system meter that is Connected and has no communication error.",
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "influxdbdatasource"
+            },
+            "description": "Active power, reactive power and power factor of the first system meter that is Connected and has no communication error. |PF| >= 0.95 good, 0.85 to 0.95 warning, below 0.85 alarm.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": true,
+                        "axisColorMode": "series",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 4,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "never",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Active Power"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#B7791F"
+                                }
+                            },
+                            {
+                                "id": "unit",
+                                "value": "si:"
+                            },
+                            {
+                                "id": "custom.axisPlacement",
+                                "value": "left"
+                            },
+                            {
+                                "id": "custom.axisLabel",
+                                "value": "Active Power / Reactive Power"
+                            },
+                            {
+                                "id": "custom.axisColorMode",
+                                "value": "text"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Reactive Power"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#6C4AB6"
+                                }
+                            },
+                            {
+                                "id": "unit",
+                                "value": "si:"
+                            },
+                            {
+                                "id": "custom.axisPlacement",
+                                "value": "left"
+                            },
+                            {
+                                "id": "custom.axisLabel",
+                                "value": "Active Power / Reactive Power"
+                            },
+                            {
+                                "id": "custom.axisColorMode",
+                                "value": "text"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Power Factor"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "thresholds"
+                                }
+                            },
+                            {
+                                "id": "thresholds",
+                                "value": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "#EF4444",
+                                            "value": null
+                                        },
+                                        {
+                                            "color": "#ffdb44",
+                                            "value": 0.85
+                                        },
+                                        {
+                                            "color": "#22C55E",
+                                            "value": 0.95
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "id": "custom.gradientMode",
+                                "value": "scheme"
+                            },
+                            {
+                                "id": "unit",
+                                "value": "none"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 3
+                            },
+                            {
+                                "id": "min",
+                                "value": -1
+                            },
+                            {
+                                "id": "max",
+                                "value": 1
+                            },
+                            {
+                                "id": "custom.axisPlacement",
+                                "value": "right"
+                            },
+                            {
+                                "id": "custom.axisLabel",
+                                "value": "Power Factor"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 20,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "interval": "5s",
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "lastNotNull",
+                        "min",
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH latest_state AS (\n  SELECT \"DeviceId\", last_value(gauge ORDER BY time) AS state\n  FROM powermeter_state\n  WHERE \"MeterType\" = 'System' AND $__timeFilter(time)\n  GROUP BY \"DeviceId\"\n),\nlatest_communication_error AS (\n  SELECT \"DeviceId\", last_value(gauge ORDER BY time) AS communication_error\n  FROM powermeter_communicationerror\n  WHERE \"MeterType\" = 'System' AND $__timeFilter(time)\n  GROUP BY \"DeviceId\"\n),\nsystem_meter AS (\n  SELECT s.\"DeviceId\"\n  FROM latest_state s\n  JOIN latest_communication_error c ON s.\"DeviceId\" = c.\"DeviceId\"\n  WHERE s.state = 3 AND c.communication_error = 0\n  ORDER BY CAST(s.\"DeviceId\" AS BIGINT)\n  LIMIT 1\n)\nSELECT $__dateBin(v.time) AS time, avg(v.gauge) AS \"Active Power\"\nFROM powermeter_activepower v\nJOIN system_meter m ON v.\"DeviceId\" = m.\"DeviceId\"\nWHERE \"MeterType\" = 'System' AND $__timeFilter(v.time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "A"
+                },
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH latest_state AS (\n  SELECT \"DeviceId\", last_value(gauge ORDER BY time) AS state\n  FROM powermeter_state\n  WHERE \"MeterType\" = 'System' AND $__timeFilter(time)\n  GROUP BY \"DeviceId\"\n),\nlatest_communication_error AS (\n  SELECT \"DeviceId\", last_value(gauge ORDER BY time) AS communication_error\n  FROM powermeter_communicationerror\n  WHERE \"MeterType\" = 'System' AND $__timeFilter(time)\n  GROUP BY \"DeviceId\"\n),\nsystem_meter AS (\n  SELECT s.\"DeviceId\"\n  FROM latest_state s\n  JOIN latest_communication_error c ON s.\"DeviceId\" = c.\"DeviceId\"\n  WHERE s.state = 3 AND c.communication_error = 0\n  ORDER BY CAST(s.\"DeviceId\" AS BIGINT)\n  LIMIT 1\n)\nSELECT $__dateBin(v.time) AS time, avg(v.gauge) AS \"Reactive Power\"\nFROM powermeter_reactivepower v\nJOIN system_meter m ON v.\"DeviceId\" = m.\"DeviceId\"\nWHERE \"MeterType\" = 'System' AND $__timeFilter(v.time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "B"
+                },
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH latest_state AS (\n  SELECT \"DeviceId\", last_value(gauge ORDER BY time) AS state\n  FROM powermeter_state\n  WHERE \"MeterType\" = 'System' AND $__timeFilter(time)\n  GROUP BY \"DeviceId\"\n),\nlatest_communication_error AS (\n  SELECT \"DeviceId\", last_value(gauge ORDER BY time) AS communication_error\n  FROM powermeter_communicationerror\n  WHERE \"MeterType\" = 'System' AND $__timeFilter(time)\n  GROUP BY \"DeviceId\"\n),\nsystem_meter AS (\n  SELECT s.\"DeviceId\"\n  FROM latest_state s\n  JOIN latest_communication_error c ON s.\"DeviceId\" = c.\"DeviceId\"\n  WHERE s.state = 3 AND c.communication_error = 0\n  ORDER BY CAST(s.\"DeviceId\" AS BIGINT)\n  LIMIT 1\n)\nSELECT $__dateBin(v.time) AS time, avg(abs(v.gauge)) AS \"Power Factor\"\nFROM powermeter_powerfactor v\nJOIN system_meter m ON v.\"DeviceId\" = m.\"DeviceId\"\nWHERE \"MeterType\" = 'System' AND $__timeFilter(v.time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "C"
+                }
+            ],
+            "title": "System Meter Overview",
+            "type": "timeseries"
+        }
+    ],
+    "preload": false,
+    "refresh": "5s",
+    "schemaVersion": 41,
+    "tags": [
+        "ppc",
+        "system-meter-overview"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-15m",
+        "to": "now"
+    },
+    "timepicker": {
+        "refresh_intervals": [
+            "5s",
+            "10s",
+            "30s",
+            "1m",
+            "5m"
+        ],
+        "quick_ranges": [
+            {
+                "display": "Last 5 minutes",
+                "from": "now-5m",
+                "to": "now"
+            },
+            {
+                "display": "Last 15 minutes",
+                "from": "now-15m",
+                "to": "now"
+            },
+            {
+                "display": "Last 1 hour",
+                "from": "now-1h",
+                "to": "now"
+            },
+            {
+                "display": "Last 24 hours",
+                "from": "now-24h",
+                "to": "now"
+            }
+        ]
+    },
+    "timezone": "browser",
+    "title": "System Meter Overview",
+    "uid": "ppc-system-meter-overview",
+    "version": 1
+}

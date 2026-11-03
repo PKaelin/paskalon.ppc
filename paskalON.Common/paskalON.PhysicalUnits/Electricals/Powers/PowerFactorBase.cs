@@ -69,8 +69,13 @@ namespace paskalON.PhysicalUnits.Electricals.Powers
             // Apparent Power (S) = sqrt(P^2 + Q^2)
             double powerFactor;
 
+            // Without any power flow there is nothing to compensate and the power factor is considered ideal.
+            if (activePower == 0d && reactivePower == 0d)
+            {
+                powerFactor = 1d;
+            }
             // When a circuit is completely reactive circuit.
-            if (activePower == 0d)
+            else if (activePower == 0d)
             {
                 powerFactor = 0d;
             }

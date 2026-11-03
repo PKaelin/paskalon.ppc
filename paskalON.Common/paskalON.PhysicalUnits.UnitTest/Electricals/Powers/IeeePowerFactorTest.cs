@@ -31,6 +31,8 @@ namespace paskalON.PhysicalUnits.UnitTest.Electricals.Powers
         [DataRow(5, -2, 0.92848)]
         [DataRow(-10, 4, 0.92848)]
         [DataRow(-20, -2, -0.99504)]
+        [DataRow(0, 0, 1)]
+        [DataRow(0, 5, 0)]
         public void PowerFactorIeeeCalculateTest(double activePower, double reactivePower, double expectedPowerFactor)
         {
             double powerFactor = IeeePowerFactor.Calculate(activePower, reactivePower).PowerFactor;

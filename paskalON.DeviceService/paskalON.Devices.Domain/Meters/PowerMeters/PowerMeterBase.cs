@@ -215,12 +215,23 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         /// <summary>
         /// Calculated power factor according to power factor standard configuration.
         /// </summary>
+        /// <remarks>
+        /// Returns null when the active or reactive power value is missing and 1 when there is no power flow (both values are 0).
+        /// </remarks>
         public double? PowerFactor
         {
             get
             {
-                return PowerFactorStandard == PowerFactorStandard.IEEE ? IeeePowerFactor.Calculate(ActivePowerValue, ReactivePowerValue)?.PowerFactor
-                    : IecPowerFactor.Calculate(ActivePowerValue, ReactivePowerValue)?.PowerFactor;
+                double? activePower = ActivePowerValue;
+                double? reactivePower = ReactivePowerValue;
+
+                if (activePower == null || reactivePower == null)
+                {
+                    return null;
+                }
+
+                return PowerFactorStandard == PowerFactorStandard.IEEE ? IeeePowerFactor.Calculate(activePower.Value, reactivePower.Value).PowerFactor
+                    : IecPowerFactor.Calculate(activePower.Value, reactivePower.Value).PowerFactor;
             }
         }
 
