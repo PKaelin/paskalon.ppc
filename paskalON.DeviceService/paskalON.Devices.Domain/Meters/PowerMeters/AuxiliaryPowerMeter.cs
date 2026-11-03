@@ -28,6 +28,10 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         private readonly AuxiliaryPowerMeterConfig _config;
 
 
+        /// <inheritdoc/>
+        protected override string MeterType { get => "Auxiliary"; }
+
+
         /// <summary>
         /// Constructor of <see cref="AuxiliaryPowerMeter"/>.
         /// </summary>

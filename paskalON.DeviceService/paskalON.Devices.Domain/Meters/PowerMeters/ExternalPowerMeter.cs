@@ -23,6 +23,10 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         private readonly ExternalPowerMeterConfig _config;
 
 
+        /// <inheritdoc/>
+        protected override string MeterType { get => "External"; }
+
+
         /// <summary>
         /// Constructor of <see cref="ExternalPowerMeter"/>.
         /// </summary>

@@ -26,6 +26,10 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         private readonly CircuitPowerMeterConfig _config;
 
 
+        /// <inheritdoc/>
+        protected override string MeterType { get => "Circuit"; }
+
+
         /// <summary>
         /// Constructor of <see cref="CircuitPowerMeter"/>.
         /// </summary>

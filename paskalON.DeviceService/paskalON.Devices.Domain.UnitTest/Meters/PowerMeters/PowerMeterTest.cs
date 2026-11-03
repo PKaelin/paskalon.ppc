@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
+using paskalON.Dataface;
 using paskalON.Dataface.C37s;
 using paskalON.Dataface.Modbus;
 using paskalON.Devices.Domain.Configs;
@@ -227,5 +228,31 @@ namespace paskalON.Devices.Domain.UnitTest.Meters.PowerMeters
             Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("state changed", StringComparison.OrdinalIgnoreCase)));
         }
 
+
+        [TestMethod]
+        public void RegisterMetricsSystemMeterTypeAndStateTest()
+        {
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            IEnumerable<KeyValuePair<string, object?>>? tags = null;
+            publisher.Setup(x => x.Initialize("PowerMeter", It.IsAny<IEnumerable<KeyValuePair<string, object?>>>()))
+                .Callback<string, IEnumerable<KeyValuePair<string, object?>>>((measurement, t) => tags = t);
+            C37Register dataface = new C37Register("Test");
+
+            TestSystemPowerMeter powerMeter = new TestSystemPowerMeter(NullLogger.Instance, _powerMeterConfig!, publisher.Object, dataface);
+
+            Assert.IsNotNull(tags);
+            Assert.AreEqual("System", tags.Single(t => t.Key == "MeterType").Value);
+            Assert.AreEqual(1, tags.Single(t => t.Key == "DeviceId").Value);
+            publisher.Verify(x => x.Register<PowerMeterBase, int>(powerMeter,nameof(PowerMeterBase.State), MetricType.Gauge, It.IsAny<Func<PowerMeterBase, int?>>(), It.IsAny<int>()), Times.Once);
+        }
+
+
+        private class TestSystemPowerMeter : SystemPowerMeter
+        {
+            public TestSystemPowerMeter(ILogger logger, SystemPowerMeterConfig config, IMetricsPublisher publisher, IDataface dataface)
+                : base(logger, config, publisher, dataface)
+            {
+            }
+        }
     }
 }

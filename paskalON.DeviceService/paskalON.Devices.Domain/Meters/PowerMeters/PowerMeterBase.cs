@@ -156,6 +156,15 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
 
 
         /// <summary>
+        /// Meter type category used as metrics tag to distinguish the power meter types (e.g. System, Auxiliary).
+        /// </summary>
+        /// <remarks>
+        /// Is used during construction and therefore must return a constant value.
+        /// </remarks>
+        protected virtual string MeterType { get => "Undefined"; }
+
+
+        /// <summary>
         /// Active power value.
         /// </summary>
         public double? ActivePowerValue
@@ -663,13 +672,15 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
             IEnumerable<KeyValuePair<string, object?>> tags = new Dictionary<string, object?>
             {
                 { "Name", _config.Name },
-                { "DeviceId", _config.DeviceId }
+                { "DeviceId", _config.DeviceId },
+                { "MeterType", MeterType }
             };
 
             // Initialize metrics
             MetricsPublisher.Initialize("PowerMeter", tags);
             // MetricsFactorClass1
             MetricsPublisher.Register<PowerMeterBase, int>(this, nameof(CommunicationError), MetricType.Gauge, x => x.CommunicationError ? 1 : 0, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerMeterBase, int>(this, nameof(State), MetricType.Gauge, x => (int)x.State, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(Frequency), MetricType.Gauge, x => x.Frequency, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerMeterBase, double>(this, nameof(PowerFactor), MetricType.Gauge, x => x.PowerFactor, _config.MetricsFactorClass1);
             // Power A-C
