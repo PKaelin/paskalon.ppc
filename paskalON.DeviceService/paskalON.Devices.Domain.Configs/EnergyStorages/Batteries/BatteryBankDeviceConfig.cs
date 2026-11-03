@@ -275,6 +275,18 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         }
 
 
+        //-----------------------------------------------------------------------------------------
+        // Simplified power calculations to use when calculating the battery's power:
+        // Discharge (empty): AbsoluteMaxDischargeCurrentAmps * MinimumDcVoltage = AbsoluteMaxDischargePowerWatts (empty)
+        // Discharge (full):  AbsoluteMaxDischargeCurrentAmps * MaximumDcVoltage = AbsoluteMaxDischargePowerWatts (full)
+        // Charge (empty):    AbsoluteMaxChargeCurrentAmps * MinimumDcVoltage = AbsoluteMaxChargePowerWatts (empty)
+        // Charge (full):     AbsoluteMaxChargeCurrentAmps * MaximumDcVoltage = AbsoluteMaxChargePowerWatts (full)
+        //
+        // To calculate the supported maximum charge and discharge active power use the minimum DC voltage:
+        // AbsoluteMaxDischargeCurrentAmps * MinimumDcVoltage / AbsoluteMaxChargeCurrentAmps * MinimumDcVoltage
+        // E.g. 4600A * 1100V = 5'060'000W (5.06 MW) discharge / 4600A * 1100V = 5'060'000W (5.06 MW) charge.
+        //-----------------------------------------------------------------------------------------
+
         /// <summary>
         /// Expected maximum current (i.e. the absolute physical limit) the battery could produce.
         /// </summary>
