@@ -23,7 +23,34 @@ namespace paskalON.Devices.Data.IntegrationTest
     {
         private const string ClientProjectName = "DemoSuperSimpleBattery";
 
-        private static readonly string _clientProjectFile = Path.Combine(AppContext.BaseDirectory, "ClientData", "Demo", "DemoSuperSimpleBattery.csv");
+        private static readonly string _demoDirectory = Path.Combine(AppContext.BaseDirectory, "ClientData", "Demo");
+
+        private static readonly string _clientProjectFile = Path.Combine(_demoDirectory, "DemoSuperSimpleBattery.csv");
+
+
+        /// <summary>
+        /// Gets the client project names of all demo CSV files in the folder ClientData/Demo.
+        /// </summary>
+        public static IEnumerable<object[]> DemoClientProjectNames => Directory
+            .EnumerateFiles(_demoDirectory, "*.csv")
+            .Select(file => new object[] { Path.GetFileNameWithoutExtension(file) })
+            .OrderBy(x => (string)x[0], StringComparer.Ordinal);
+
+
+        [TestMethod]
+        [DynamicData(nameof(DemoClientProjectNames))]
+        public async Task RunAsyncImportsDemoClientDataTest(string clientProjectName)
+        {
+            string[] args = [clientProjectName, Path.Combine(_demoDirectory, $"{clientProjectName}.csv")];
+
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<DeviceServiceContext>);
+
+            Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
+            await using DeviceServiceContext context = CreateDbContext<DeviceServiceContext>();
+            SystemConfig systemConfig = await context.SystemConfigs.SingleAsync();
+            Assert.AreEqual(ClientDataLoader.ChangedBy, systemConfig.ChangedBy);
+            Assert.AreEqual(1, await context.DerConfigs.CountAsync());
+        }
 
 
         [TestMethod]

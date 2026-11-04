@@ -15,6 +15,12 @@ This document defines the strict constraints, patterns, and style requirements f
 - Reuse the application's real dependency injection configuration whenever practical.
 
 
+## Database Integration Tests
+- Integration tests using a database shall use the nuget package `Testcontainers.PostgreSql` and the project assembly `paskalON.Infrastructure.PostgreSql`.
+- Implement a static class `TestAssembly` for initializing (`[AssemblyInitialize]` calling `PostgresFixture.StartAsync()`) and cleaning up (`[AssemblyCleanup]` calling `PostgresFixture.StopAsync()`) the PostgreSQL container.
+- Reference implementation: project `paskalON.Devices.Infrastructure.IntegrationTest`.
+
+
 ## Test File Structure & Naming
 - **Integration Test Project:** Always end with .IntegrationTest
 - **Integration Test Class Names:** Shall begin with the name of the class that is tested and end with Test (e.g. `class Device` results in integration test `class DeviceTest`). 
