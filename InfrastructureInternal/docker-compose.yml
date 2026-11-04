@@ -167,6 +167,9 @@ services:
       - GF_AUTH_DISABLE_LOGIN_FORM=True
       - GF_AUTH_ANONYMOUS_ENABLED=True
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      # Allow embedding the dashboards in an iframe (Luna web application)
+      # TODO: Add security to this functionality!
+      - GF_SECURITY_ALLOW_EMBEDDING=true
     volumes:
       - paskalon.grafana:/var/lib/grafana
       # Mount datasources and dashboards

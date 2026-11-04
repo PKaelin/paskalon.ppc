@@ -2,5 +2,21 @@
   "apiBaseUrl": "/api",
   "systemHubUrl": "/hubs/system",
   "deviceHubUrl": "/hubs/device",
-  "dependencyHubUrl": "/hubs/dependency"
+  "dependencyHubUrl": "/hubs/dependency",
+  "grafana": {
+    "url": "http://localhost:41006",
+    "authMode": "anonymous",
+    "orgId": 1,
+    "theme": "dark",
+    "kiosk": true,
+    "hideLogo": true,
+    "autoFitPanels": true,
+    "dashboards": [
+      { "name": "System Meter Overview", "uid": "ppc-system-meter-overview" }
+    ]
+  },
+  "dashboardSection": {
+    "dashboards": [ "System Meter Overview" ],
+    "defaultDashboard": "System Meter Overview"
+  }
 }

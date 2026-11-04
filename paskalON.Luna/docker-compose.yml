@@ -42,6 +42,9 @@ services:
     environment:
       - LUNA_API_URL=http://paskalon.luna.service:8080
       - APP_API_BASE_URL=/api
+      # Grafana as seen from the browser, the dashboards are embedded in an iframe
+      # TODO: Add security to this functionality!
+      - APP_GRAFANA_URL=http://localhost:41006
     networks:
       - ppc.network
 
