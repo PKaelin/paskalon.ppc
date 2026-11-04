@@ -114,12 +114,18 @@ onBeforeUnmount(() => {
 
 <template>
     <div ref="container" class="grafana-dashboard" :aria-busy="state === 'loading'">
+        <!-- Grafana needs scripts and its own origin (session, storage). allow-same-origin is only safe
+             because Grafana runs on another origin than Luna. Not allowed: navigating the Luna page
+             (allow-top-navigation), new tabs (allow-popups), downloads (allow-downloads), form submits
+             (allow-forms), plugins and the like. Add allow-popups for dashboards with links and
+             allow-downloads for CSV/image exports. -->
         <iframe v-if="frameUrl !== null && hasSize"
                 :key="frameKey"
                 class="grafana-dashboard-frame"
                 :class="{ 'grafana-dashboard-frame-hidden': state !== 'ready' }"
                 :src="frameUrl"
                 :title="name"
+                sandbox="allow-scripts allow-same-origin"
                 referrerpolicy="strict-origin-when-cross-origin"
                 @load="onFrameLoad"></iframe>
 
