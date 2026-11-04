@@ -1,0 +1,49 @@
+# -----------------------------------------------------------------------------
+# Operating mode data of the DemoBattery client project.
+# -----------------------------------------------------------------------------
+# Derived from the device service data of the DemoBattery client project (25 PCS):
+#   SystemConfig nameplate power: 3630000 multiplied by 25 PCS = 90750000
+#   ActivePowerLimitModeConfig: 3000000 multiplied by 25 PCS = 75000000
+#   ReactivePowerLimitModeConfig: 2800000 multiplied by 25 PCS = 70000000
+#   MaintenanceModeConfig: one per DerBatteryStorageUnitConfig (25 units)
+# -----------------------------------------------------------------------------
+Type=Configuration,Name=AuditCleanUpInMonths,Key=AuditCleanUpInMonths,Value=60,Description=How long the updated records should be kept in the audit tables
+Type=SystemConfig,Name=System,Type=Bess,ReferenceFrequency=60.0,OperatingModeCalculationIntervalMilliseconds=1000,MetricsIntervalMilliseconds=5000,DependencyHeartbeatIntervalMilliseconds=500,RedisLossTimeoutMilliseconds=1500,PowerControlLossTimeoutMilliseconds=1500,DeviceServiceLossTimeoutMilliseconds=3000,ResumeSettleMilliseconds=2000,SetpointRepublishIntervalMilliseconds=1000,SubscriberTopicPcsCore=ppc:device:pcs:core,SubscriberTopicPcsDetail=ppc:device:pcs:detail,SubscriberTopicBatteryBankCore=ppc:device:bb:core,SubscriberTopicBatteryBankDetail=ppc:device:bb:detail,SubscriberTopicSolarPanelCore=ppc:device:pv:core,SubscriberTopicSolarPanelDetail=ppc:device:pv:detail,SubscriberTopicExternalPowerMeterCore=ppc:device:pm:external:core,SubscriberTopicExternalPowerMeterDetail=ppc:device:pm:external:detail,SubscriberTopicAuxiliaryPowerMeterCore=ppc:device:pm:auxiliary:core,SubscriberTopicAuxiliaryPowerMeterDetail=ppc:device:pm:auxiliary:detail,SubscriberTopicSystemPowerMeterCore=ppc:device:pm:system:core,SubscriberTopicSystemPowerMeterDetail=ppc:device:pm:system:detail,SubscriberTopicCircuitPowerMeterCore=ppc:device:pm:circuit:core,SubscriberTopicCircuitPowerMeterDetail=ppc:device:pm:circuit:detail,PublisherTopicCurrentSetpoint=ppc:om:setpoints,PublisherTopicCurrentDerUnitSetpoint=ppc:om:setpoints:unit,PublisherTopicHeartbeat=ppc:om:heartbeat,SubscriberTopicPowerControlHeartbeat=ppc:pc:heartbeat,NameplateMaximumActivePowerWatt=90750000,NameplateMinimumActivePowerWatt=-90750000,NameplateMaximumReactivePowerVars=90750000,NameplateMinimumReactivePowerVars=-90750000
+# Safety functions
+Type=RampRateConfig,Name=ShutdownRamp,RampTimeSeconds=0,RampUpRatePerSecond=90000,RampDownRatePerSecond=90000
+Type=ShutdownModeConfig,Name=ShutdownMode,IsActive=true,Type=Bess,RampConfig=ShutdownRamp
+# Basic operating modes
+Type=RampRateConfig,Name=DefaultRamp,RampTimeSeconds=0,RampUpRatePerSecond=60500,RampDownRatePerSecond=60500
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit1,DerUnitName=BMS-Unit 1,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit2,DerUnitName=BMS-Unit 2,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit3,DerUnitName=BMS-Unit 3,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit4,DerUnitName=BMS-Unit 4,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit5,DerUnitName=BMS-Unit 5,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit21,DerUnitName=BMS-Unit 21,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit22,DerUnitName=BMS-Unit 22,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit23,DerUnitName=BMS-Unit 23,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit24,DerUnitName=BMS-Unit 24,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit25,DerUnitName=BMS-Unit 25,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit31,DerUnitName=BMS-Unit 31,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit32,DerUnitName=BMS-Unit 32,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit33,DerUnitName=BMS-Unit 33,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit34,DerUnitName=BMS-Unit 34,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit35,DerUnitName=BMS-Unit 35,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit41,DerUnitName=BMS-Unit 41,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit42,DerUnitName=BMS-Unit 42,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit43,DerUnitName=BMS-Unit 43,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit44,DerUnitName=BMS-Unit 44,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit45,DerUnitName=BMS-Unit 45,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit51,DerUnitName=BMS-Unit 51,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit52,DerUnitName=BMS-Unit 52,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit53,DerUnitName=BMS-Unit 53,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit54,DerUnitName=BMS-Unit 54,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit55,DerUnitName=BMS-Unit 55,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=ActivePowerFixedModeConfig,Name=ActivePowerFixedMode,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=ReactivePowerFixedModeConfig,Name=ReactivePowerFixedMode,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=ActivePowerModeConfig,Name=ActivePowerMode,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=ReactivePowerModeConfig,Name=ReactivePowerMode,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+# Limiting modes
+Type=RampRateConfig,Name=LimitingRamp,RampTimeSeconds=0,RampUpRatePerSecond=10000,RampDownRatePerSecond=10000
+Type=ActivePowerLimitModeConfig,Name=ActivePowerLimitMode,IsActive=true,Type=Bess,RampConfig=LimitingRamp,MaximumActivePowerLimitWatt=75000000,MinimumActivePowerLimitWatt=-75000000
+Type=ReactivePowerLimitModeConfig,Name=ReactivePowerLimitMode,IsActive=true,Type=Bess,RampConfig=LimitingRamp,MaximumReactivePowerLimitVars=70000000,MinimumReactivePowerLimitVars=-70000000

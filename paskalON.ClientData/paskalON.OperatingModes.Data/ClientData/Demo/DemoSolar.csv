@@ -1,0 +1,49 @@
+# -----------------------------------------------------------------------------
+# Operating mode data of the DemoSolar client project.
+# -----------------------------------------------------------------------------
+# Derived from the device service data of the DemoSolar client project (25 PCS):
+#   SystemConfig nameplate active power: maximum 3630000 multiplied by 25 PCS = 90750000, minimum 0 (solar cannot charge), reactive power 0
+#   ActivePowerLimitModeConfig: maximum 3000000 multiplied by 25 PCS = 75000000, minimum 0
+#   ReactivePowerLimitModeConfig: 0 (solar provides no reactive power)
+#   MaintenanceModeConfig: one per DerSolarUnitConfig (25 units)
+# -----------------------------------------------------------------------------
+Type=Configuration,Name=AuditCleanUpInMonths,Key=AuditCleanUpInMonths,Value=60,Description=How long the updated records should be kept in the audit tables
+Type=SystemConfig,Name=System,Type=Solar,ReferenceFrequency=60.0,OperatingModeCalculationIntervalMilliseconds=1000,MetricsIntervalMilliseconds=5000,DependencyHeartbeatIntervalMilliseconds=500,RedisLossTimeoutMilliseconds=1500,PowerControlLossTimeoutMilliseconds=1500,DeviceServiceLossTimeoutMilliseconds=3000,ResumeSettleMilliseconds=2000,SetpointRepublishIntervalMilliseconds=1000,SubscriberTopicPcsCore=ppc:device:pcs:core,SubscriberTopicPcsDetail=ppc:device:pcs:detail,SubscriberTopicBatteryBankCore=ppc:device:bb:core,SubscriberTopicBatteryBankDetail=ppc:device:bb:detail,SubscriberTopicSolarPanelCore=ppc:device:pv:core,SubscriberTopicSolarPanelDetail=ppc:device:pv:detail,SubscriberTopicExternalPowerMeterCore=ppc:device:pm:external:core,SubscriberTopicExternalPowerMeterDetail=ppc:device:pm:external:detail,SubscriberTopicAuxiliaryPowerMeterCore=ppc:device:pm:auxiliary:core,SubscriberTopicAuxiliaryPowerMeterDetail=ppc:device:pm:auxiliary:detail,SubscriberTopicSystemPowerMeterCore=ppc:device:pm:system:core,SubscriberTopicSystemPowerMeterDetail=ppc:device:pm:system:detail,SubscriberTopicCircuitPowerMeterCore=ppc:device:pm:circuit:core,SubscriberTopicCircuitPowerMeterDetail=ppc:device:pm:circuit:detail,PublisherTopicCurrentSetpoint=ppc:om:setpoints,PublisherTopicCurrentDerUnitSetpoint=ppc:om:setpoints:unit,PublisherTopicHeartbeat=ppc:om:heartbeat,SubscriberTopicPowerControlHeartbeat=ppc:pc:heartbeat,NameplateMaximumActivePowerWatt=90750000,NameplateMinimumActivePowerWatt=0,NameplateMaximumReactivePowerVars=0,NameplateMinimumReactivePowerVars=0
+# Safety functions
+Type=RampRateConfig,Name=ShutdownRamp,RampTimeSeconds=0,RampUpRatePerSecond=90000,RampDownRatePerSecond=90000
+Type=ShutdownModeConfig,Name=ShutdownMode,IsActive=true,Type=Solar,RampConfig=ShutdownRamp
+# Basic operating modes
+Type=RampRateConfig,Name=DefaultRamp,RampTimeSeconds=0,RampUpRatePerSecond=60500,RampDownRatePerSecond=60500
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit1,DerUnitName=PV-Unit 1,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit2,DerUnitName=PV-Unit 2,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit3,DerUnitName=PV-Unit 3,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit4,DerUnitName=PV-Unit 4,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit5,DerUnitName=PV-Unit 5,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit21,DerUnitName=PV-Unit 21,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit22,DerUnitName=PV-Unit 22,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit23,DerUnitName=PV-Unit 23,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit24,DerUnitName=PV-Unit 24,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit25,DerUnitName=PV-Unit 25,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit31,DerUnitName=PV-Unit 31,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit32,DerUnitName=PV-Unit 32,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit33,DerUnitName=PV-Unit 33,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit34,DerUnitName=PV-Unit 34,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit35,DerUnitName=PV-Unit 35,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit41,DerUnitName=PV-Unit 41,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit42,DerUnitName=PV-Unit 42,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit43,DerUnitName=PV-Unit 43,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit44,DerUnitName=PV-Unit 44,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit45,DerUnitName=PV-Unit 45,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit51,DerUnitName=PV-Unit 51,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit52,DerUnitName=PV-Unit 52,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit53,DerUnitName=PV-Unit 53,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit54,DerUnitName=PV-Unit 54,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-PV-Unit55,DerUnitName=PV-Unit 55,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=ActivePowerFixedModeConfig,Name=ActivePowerFixedMode,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=ReactivePowerFixedModeConfig,Name=ReactivePowerFixedMode,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=ActivePowerModeConfig,Name=ActivePowerMode,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+Type=ReactivePowerModeConfig,Name=ReactivePowerMode,IsActive=true,Type=Solar,RampConfig=DefaultRamp
+# Limiting modes
+Type=RampRateConfig,Name=LimitingRamp,RampTimeSeconds=0,RampUpRatePerSecond=10000,RampDownRatePerSecond=10000
+Type=ActivePowerLimitModeConfig,Name=ActivePowerLimitMode,IsActive=true,Type=Solar,RampConfig=LimitingRamp,MaximumActivePowerLimitWatt=75000000,MinimumActivePowerLimitWatt=0
+Type=ReactivePowerLimitModeConfig,Name=ReactivePowerLimitMode,IsActive=true,Type=Solar,RampConfig=LimitingRamp,MaximumReactivePowerLimitVars=0,MinimumReactivePowerLimitVars=0

@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+# Operating mode data of the DemoSimpleBattery client project.
+# -----------------------------------------------------------------------------
+# Derived from the device service data of the DemoSimpleBattery client project (3 PCS):
+#   SystemConfig nameplate power: 3630000 multiplied by 3 PCS = 10890000
+#   ActivePowerLimitModeConfig: 3000000 multiplied by 3 PCS = 9000000
+#   ReactivePowerLimitModeConfig: 2800000 multiplied by 3 PCS = 8400000
+#   MaintenanceModeConfig: one per DerBatteryStorageUnitConfig (3 units)
+# -----------------------------------------------------------------------------
+Type=Configuration,Name=AuditCleanUpInMonths,Key=AuditCleanUpInMonths,Value=60,Description=How long the updated records should be kept in the audit tables
+Type=SystemConfig,Name=System,Type=Bess,ReferenceFrequency=60.0,OperatingModeCalculationIntervalMilliseconds=1000,MetricsIntervalMilliseconds=5000,DependencyHeartbeatIntervalMilliseconds=500,RedisLossTimeoutMilliseconds=1500,PowerControlLossTimeoutMilliseconds=1500,DeviceServiceLossTimeoutMilliseconds=3000,ResumeSettleMilliseconds=2000,SetpointRepublishIntervalMilliseconds=1000,SubscriberTopicPcsCore=ppc:device:pcs:core,SubscriberTopicPcsDetail=ppc:device:pcs:detail,SubscriberTopicBatteryBankCore=ppc:device:bb:core,SubscriberTopicBatteryBankDetail=ppc:device:bb:detail,SubscriberTopicSolarPanelCore=ppc:device:pv:core,SubscriberTopicSolarPanelDetail=ppc:device:pv:detail,SubscriberTopicExternalPowerMeterCore=ppc:device:pm:external:core,SubscriberTopicExternalPowerMeterDetail=ppc:device:pm:external:detail,SubscriberTopicAuxiliaryPowerMeterCore=ppc:device:pm:auxiliary:core,SubscriberTopicAuxiliaryPowerMeterDetail=ppc:device:pm:auxiliary:detail,SubscriberTopicSystemPowerMeterCore=ppc:device:pm:system:core,SubscriberTopicSystemPowerMeterDetail=ppc:device:pm:system:detail,SubscriberTopicCircuitPowerMeterCore=ppc:device:pm:circuit:core,SubscriberTopicCircuitPowerMeterDetail=ppc:device:pm:circuit:detail,PublisherTopicCurrentSetpoint=ppc:om:setpoints,PublisherTopicCurrentDerUnitSetpoint=ppc:om:setpoints:unit,PublisherTopicHeartbeat=ppc:om:heartbeat,SubscriberTopicPowerControlHeartbeat=ppc:pc:heartbeat,NameplateMaximumActivePowerWatt=10890000,NameplateMinimumActivePowerWatt=-10890000,NameplateMaximumReactivePowerVars=10890000,NameplateMinimumReactivePowerVars=-10890000
+# Safety functions
+Type=RampRateConfig,Name=ShutdownRamp,RampTimeSeconds=0,RampUpRatePerSecond=90000,RampDownRatePerSecond=90000
+Type=ShutdownModeConfig,Name=ShutdownMode,IsActive=true,Type=Bess,RampConfig=ShutdownRamp
+# Basic operating modes
+Type=RampRateConfig,Name=DefaultRamp,RampTimeSeconds=0,RampUpRatePerSecond=60500,RampDownRatePerSecond=60500
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit1,DerUnitName=BMS-Unit 1,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit2,DerUnitName=BMS-Unit 2,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=MaintenanceModeConfig,Name=MaintenanceMode-BMS-Unit3,DerUnitName=BMS-Unit 3,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=ActivePowerFixedModeConfig,Name=ActivePowerFixedMode,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=ReactivePowerFixedModeConfig,Name=ReactivePowerFixedMode,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=ActivePowerModeConfig,Name=ActivePowerMode,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+Type=ReactivePowerModeConfig,Name=ReactivePowerMode,IsActive=true,Type=Bess,RampConfig=DefaultRamp
+# Limiting modes
+Type=RampRateConfig,Name=LimitingRamp,RampTimeSeconds=0,RampUpRatePerSecond=10000,RampDownRatePerSecond=10000
+Type=ActivePowerLimitModeConfig,Name=ActivePowerLimitMode,IsActive=true,Type=Bess,RampConfig=LimitingRamp,MaximumActivePowerLimitWatt=9000000,MinimumActivePowerLimitWatt=-9000000
+Type=ReactivePowerLimitModeConfig,Name=ReactivePowerLimitMode,IsActive=true,Type=Bess,RampConfig=LimitingRamp,MaximumReactivePowerLimitVars=8400000,MinimumReactivePowerLimitVars=-8400000
