@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\paskalON.PowerControls.Data\ClientData\Demo\DemoSuperSimpleBattery.csv" Link="ClientData\Demo\DemoSuperSimpleBattery.csv">
+    <None Include="..\paskalON.PowerControls.Data\ClientData\Demo\*.csv" Link="ClientData\Demo\%(Filename)%(Extension)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

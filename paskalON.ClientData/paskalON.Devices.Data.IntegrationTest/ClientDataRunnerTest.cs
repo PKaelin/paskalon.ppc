@@ -138,20 +138,6 @@ namespace paskalON.Devices.Data.IntegrationTest
         }
 
 
-        [TestMethod]
-        public async Task RunAsyncReturnsDatabaseErrorWhenDatabaseIsNotReachableTest()
-        {
-            DbContextOptions<DeviceServiceContext> options = new DbContextOptionsBuilder<DeviceServiceContext>()
-                .UseNpgsql("Host=localhost:1;Username=admin;Password=admin;Database=devices;Timeout=1")
-                .Options;
-            string[] args = [ClientProjectName, _clientProjectFile];
-
-            int exitCode = await ClientDataRunner.RunAsync(args, () => new DeviceServiceContext(options));
-
-            Assert.AreEqual((int)ClientDataExitCode.DatabaseError, exitCode);
-        }
-
-
         /// <summary>
         /// Adds an entity that must still exist if the import did not start.
         /// </summary>

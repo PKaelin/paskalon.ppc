@@ -1,0 +1,17 @@
+# -----------------------------------------------------------------------------
+# Power control data of the DemoSimpleBattery client project.
+# -----------------------------------------------------------------------------
+# Derived from the device service data of the DemoSimpleBattery client project:
+#   SystemPowerConstraintConfig: PCS nameplate power 3630000 multiplied by 3 PCS = 10890000
+#   DerUnitPowerConstraintConfig: PCS nameplate power 3630000 (all PCS have the same definition)
+#   DerUnitEnergyStoragePowerControlConfig: one per DerBatteryStorageUnitConfig (3 units)
+# -----------------------------------------------------------------------------
+Type=Configuration,Name=AuditCleanUpInMonths,Key=AuditCleanUpInMonths,Value=60,Description=How long the updated records should be kept in the audit tables
+Type=SystemConfig,Name=System,Type=Bess,MetricsIntervalMilliseconds=5000,DependencyHeartbeatIntervalMilliseconds=500,PublisherTopicPowerTarget=ppc:pc:targets,PublisherTopicHeartbeat=ppc:pc:heartbeat,SubscriberTopicCurrentSetpoint=ppc:om:setpoints,SubscriberTopicCurrentDerUnitSetpoint=ppc:om:setpoints:unit,SubscriberTopicPcsCore=ppc:device:pcs:core,SubscriberTopicPcsDetail=ppc:device:pcs:detail,SubscriberTopicBatteryBankCore=ppc:device:bb:core,SubscriberTopicBatteryBankDetail=ppc:device:bb:detail,SubscriberTopicSolarPanelCore=ppc:device:pv:core,SubscriberTopicSolarPanelDetail=ppc:device:pv:detail,SubscriberTopicExternalPowerMeterCore=ppc:device:pm:external:core,SubscriberTopicExternalPowerMeterDetail=ppc:device:pm:external:detail,SubscriberTopicAuxiliaryPowerMeterCore=ppc:device:pm:auxiliary:core,SubscriberTopicAuxiliaryPowerMeterDetail=ppc:device:pm:auxiliary:detail,SubscriberTopicSystemPowerMeterCore=ppc:device:pm:system:core,SubscriberTopicSystemPowerMeterDetail=ppc:device:pm:system:detail,SubscriberTopicCircuitPowerMeterCore=ppc:device:pm:circuit:core,SubscriberTopicCircuitPowerMeterDetail=ppc:device:pm:circuit:detail
+# Constraints must be defined before the controls that list them in Constraints (several separated by ;)
+Type=SystemPowerConstraintConfig,Name=System power constraint,MaximumActivePowerWatt=10890000,MinimumActivePowerWatt=-10890000,MaximumReactivePowerVars=10890000,MinimumReactivePowerVars=-10890000,DeratePerUnitInMaintenance=true,DeratePerUnitStopped=false
+Type=DerUnitPowerConstraintConfig,Name=DER unit constraint,MaximumActivePowerWatt=3630000,MinimumActivePowerWatt=-3630000,MaximumReactivePowerVars=3630000,MinimumReactivePowerVars=-3630000
+Type=SystemPowerControlConfig,Name=SystemPowerControl,IsActive=true,IsEnabled=true,Constraints=System power constraint
+Type=DerUnitEnergyStoragePowerControlConfig,Name=DerUnitPowerControlUnit1,IsActive=true,IsEnabled=true,DerUnitName=BMS-Unit 1,DistributionStrategyType=Proportional,Constraints=DER unit constraint
+Type=DerUnitEnergyStoragePowerControlConfig,Name=DerUnitPowerControlUnit2,IsActive=true,IsEnabled=true,DerUnitName=BMS-Unit 2,DistributionStrategyType=Proportional,Constraints=DER unit constraint
+Type=DerUnitEnergyStoragePowerControlConfig,Name=DerUnitPowerControlUnit3,IsActive=true,IsEnabled=true,DerUnitName=BMS-Unit 3,DistributionStrategyType=Proportional,Constraints=DER unit constraint
