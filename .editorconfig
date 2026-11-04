@@ -1,6 +1,8 @@
 root = true
 
+# Line endings must match .gitattributes
 [*]
+end_of_line = lf
 trim_trailing_whitespace = true
 indent_style = space
 indent_size = 4
@@ -8,5 +10,15 @@ indent_size = 4
 [*.{json,yml,yaml}]
 indent_size = 2
 
+[*.{cs,csproj,dcproj,esproj,sln,slnx,props,targets,config,resx,http,bat,cmd}]
+end_of_line = crlf
+
+[{appsettings*.json,launchSettings.json}]
+end_of_line = crlf
+
 [*.md]
+trim_trailing_whitespace = false
+
+[**/secrets/**]
+insert_final_newline = false
 trim_trailing_whitespace = false

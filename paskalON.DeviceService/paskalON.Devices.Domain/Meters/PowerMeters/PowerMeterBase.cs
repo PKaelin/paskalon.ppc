@@ -888,4 +888,4 @@ namespace paskalON.Devices.Domain.Meters.PowerMeters
         }
 
     }
-}
+}

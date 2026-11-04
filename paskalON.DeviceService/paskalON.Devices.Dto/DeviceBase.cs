@@ -144,4 +144,4 @@ namespace paskalON.Devices.Dto
             }
         }
     }
-}
+}

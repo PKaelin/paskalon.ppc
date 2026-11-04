@@ -272,4 +272,4 @@ namespace paskalON.Devices.Equipments.C37
             }
         }
     }
-}
+}

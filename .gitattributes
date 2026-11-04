@@ -1,0 +1,46 @@
+# Line ending policy
+# - The repository always stores text files with LF.
+# - Visual Studio / .NET files are checked out with CRLF (NuGet and Visual Studio write CRLF).
+# - Everything else (frontend, scripts, Docker, YAML, Markdown, data) is checked out with LF.
+# Keep this file in sync with .editorconfig (end_of_line).
+
+# Default: auto-detect text files, check out with LF
+* text=auto eol=lf
+
+# Visual Studio / .NET files: CRLF
+*.cs                    text eol=crlf
+*.csproj                text eol=crlf
+*.dcproj                text eol=crlf
+*.esproj                text eol=crlf
+*.sln                   text eol=crlf
+*.slnx                  text eol=crlf
+*.props                 text eol=crlf
+*.targets               text eol=crlf
+*.config                text eol=crlf
+*.resx                  text eol=crlf
+*.http                  text eol=crlf
+*.bat                   text eol=crlf
+*.cmd                   text eol=crlf
+appsettings*.json       text eol=crlf
+launchSettings.json     text eol=crlf
+
+# Scripts executed inside Linux containers: always LF
+*.sh                    text eol=lf
+Dockerfile              text eol=lf
+
+# Docker secrets: keep bytes exactly as committed (no newline conversion)
+**/secrets/**           -text
+
+# Binary files
+*.png                   binary
+*.jpg                   binary
+*.jpeg                  binary
+*.gif                   binary
+*.ico                   binary
+*.pdf                   binary
+*.zip                   binary
+*.dll                   binary
+*.exe                   binary
+*.woff                  binary
+*.woff2                 binary
+*.ttf                   binary

@@ -130,4 +130,4 @@ namespace paskalON.Devices.Equipments.Modbus
             }
         }
     }
-}
+}
