@@ -123,22 +123,24 @@ body {
     height: 2rem;
 }
 
+/* By default only the outline is drawn in the event color; the inside stays transparent. */
 .event-shape svg {
     width: 100%;
     height: 100%;
+    fill: none;
+    stroke-width: 2;
 }
 
 .event-shape-info {
-    fill: #06b6d4;
+    stroke: #06b6d4;
 }
 
 .event-shape-warning {
-    fill: #ffdb44;
     stroke: #ffdb44;
 }
 
 .event-shape-error {
-    fill: #ef4444;
+    stroke: #ef4444;
 }
 
 .system-command-toggle {
