@@ -78,8 +78,12 @@ namespace paskalON.PowerControls.Data.IntegrationTest
             Assert.AreEqual(-expectedSystemPowerWatt, systemConstraint.MinimumReactivePowerVars);
             DerUnitPowerConstraintConfig unitConstraint = await context.DerUnitPowerConstraintConfigs.SingleAsync();
             Assert.AreEqual(3630000d, unitConstraint.MaximumActivePowerWatt);
-            Assert.AreEqual(expectedStorageControls, await context.DerUnitEnergyStoragePowerControlConfigs.CountAsync());
-            Assert.AreEqual(expectedUnitControls, await context.DerUnitPowerControlConfigs.CountAsync());
+            List<DerUnitEnergyStoragePowerControlConfig> storageControls = await context.DerUnitEnergyStoragePowerControlConfigs.Include(x => x.Constraints).ToListAsync();
+            Assert.AreEqual(expectedStorageControls, storageControls.Count);
+            Assert.IsTrue(storageControls.All(c => c.Constraints.Single().Id == unitConstraint.Id));
+            List<DerUnitPowerControlConfig> unitControls = await context.DerUnitPowerControlConfigs.Include(x => x.Constraints).ToListAsync();
+            Assert.AreEqual(expectedUnitControls, unitControls.Count);
+            Assert.IsTrue(unitControls.All(c => c.Constraints.Single().Id == unitConstraint.Id));
         }
 
 

@@ -12,7 +12,7 @@ using paskalON.PowerControls.Infrastructure.Storage;
 namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(PowerControlContext))]
-    [Migration("20261029231747_v_0_1")]
+    [Migration("20261105002408_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -27,6 +27,21 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.HasSequence("DomainBaseSequence");
+
+            modelBuilder.Entity("PowerControlConstraint", b =>
+                {
+                    b.Property<int>("PowerControlBaseConfigId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ConstraintBaseConfigId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PowerControlBaseConfigId", "ConstraintBaseConfigId");
+
+                    b.HasIndex("ConstraintBaseConfigId");
+
+                    b.ToTable("PowerControlConstraint");
+                });
 
             modelBuilder.Entity("paskalON.Domains.DomainBase", b =>
                 {
@@ -194,11 +209,6 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.NameBase");
 
-                    b.Property<int?>("PowerControlBaseConfigId")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("PowerControlBaseConfigId");
-
                     b.ToTable((string)null);
                 });
 
@@ -352,16 +362,19 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     b.ToTable("SystemPowerControlConfig");
                 });
 
-            modelBuilder.Entity("paskalON.ConstraintEngine.Domain.Configs.ConstraintBaseConfig", b =>
+            modelBuilder.Entity("PowerControlConstraint", b =>
                 {
-                    b.HasOne("paskalON.PowerControls.Domain.Configs.PowerControlBaseConfig", null)
-                        .WithMany("Constraints")
-                        .HasForeignKey("PowerControlBaseConfigId");
-                });
+                    b.HasOne("paskalON.ConstraintEngine.Domain.Configs.ConstraintBaseConfig", null)
+                        .WithMany()
+                        .HasForeignKey("ConstraintBaseConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-            modelBuilder.Entity("paskalON.PowerControls.Domain.Configs.PowerControlBaseConfig", b =>
-                {
-                    b.Navigation("Constraints");
+                    b.HasOne("paskalON.PowerControls.Domain.Configs.PowerControlBaseConfig", null)
+                        .WithMany()
+                        .HasForeignKey("PowerControlBaseConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

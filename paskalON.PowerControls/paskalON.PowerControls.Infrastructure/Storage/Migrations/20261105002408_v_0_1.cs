@@ -63,7 +63,6 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
-                    PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: true),
                     MaximumActivePowerWatt = table.Column<double>(type: "double precision", nullable: true),
                     MinimumActivePowerWatt = table.Column<double>(type: "double precision", nullable: true),
                     MaximumReactivePowerVars = table.Column<double>(type: "double precision", nullable: true),
@@ -106,7 +105,6 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
-                    PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: true),
                     MaximumActivePowerWattRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false),
                     MaximumReactivePowerVarsRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false),
                     MaximumRampIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false)
@@ -114,6 +112,18 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DerUnitRampConstraintConfig", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PowerControlConstraint",
+                columns: table => new
+                {
+                    PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: false),
+                    ConstraintBaseConfigId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PowerControlConstraint", x => new { x.PowerControlBaseConfigId, x.ConstraintBaseConfigId });
                 });
 
             migrationBuilder.CreateTable(
@@ -159,7 +169,6 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
-                    PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: true),
                     DeratePerUnitStopped = table.Column<bool>(type: "boolean", nullable: false),
                     DeratePerUnitInMaintenance = table.Column<bool>(type: "boolean", nullable: false),
                     MaximumActivePowerWatt = table.Column<double>(type: "double precision", nullable: true),
@@ -200,7 +209,6 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false, collation: "case_insensitive_collation"),
-                    PowerControlBaseConfigId = table.Column<int>(type: "integer", nullable: true),
                     MaximumActivePowerWattRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false),
                     MaximumReactivePowerVarsRampRatePerSecond = table.Column<double>(type: "double precision", nullable: false),
                     MaximumRampIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false)
@@ -235,11 +243,6 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_DerUnitPowerConstraintConfig_PowerControlBaseConfigId",
-                table: "DerUnitPowerConstraintConfig",
-                column: "PowerControlBaseConfigId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DerUnitPowerControlConfig_DerUnitName",
                 table: "DerUnitPowerControlConfig",
                 column: "DerUnitName",
@@ -258,20 +261,15 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_DerUnitRampConstraintConfig_PowerControlBaseConfigId",
-                table: "DerUnitRampConstraintConfig",
-                column: "PowerControlBaseConfigId");
+                name: "IX_PowerControlConstraint_ConstraintBaseConfigId",
+                table: "PowerControlConstraint",
+                column: "ConstraintBaseConfigId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SystemPowerConstraintConfig_Name",
                 table: "SystemPowerConstraintConfig",
                 column: "Name",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SystemPowerConstraintConfig_PowerControlBaseConfigId",
-                table: "SystemPowerConstraintConfig",
-                column: "PowerControlBaseConfigId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SystemPowerControlConfig_Name",
@@ -284,11 +282,6 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
                 table: "SystemRampConstraintConfig",
                 column: "Name",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SystemRampConstraintConfig_PowerControlBaseConfigId",
-                table: "SystemRampConstraintConfig",
-                column: "PowerControlBaseConfigId");
         }
 
         /// <inheritdoc />
@@ -308,6 +301,9 @@ namespace paskalON.PowerControls.Infrastructure.Storage.Migrations
 
             migrationBuilder.DropTable(
                 name: "DerUnitRampConstraintConfig");
+
+            migrationBuilder.DropTable(
+                name: "PowerControlConstraint");
 
             migrationBuilder.DropTable(
                 name: "SystemConfig");
