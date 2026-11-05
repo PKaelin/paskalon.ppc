@@ -1,0 +1,447 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "description": "Active and reactive power setpoints, objectives and additive deltas of the system operating mode control.",
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "influxdbdatasource"
+            },
+            "description": "Setpoints, objectives and additive deltas of the system operating mode control.\n\n- **SetpointActivePower**: Active power setpoint received from the supervisory control.\n- **SetpointActivePowerActual**: Actual active power setpoint published to the power control.\n- **ActivePowerObjective**: Active power objective (without override, transition, limits).\n- **AdditiveActivePowerDelta**: Total additive active power delta of the last calculation cycle.\n- **SetpointReactivePower**: Reactive power setpoint received from the supervisory control.\n- **SetpointReactivePowerActual**: Actual reactive power setpoint published to the power control.\n- **ReactivePowerObjective**: Reactive power objective (without override, transition, limits).\n- **AdditiveReactivePowerDelta**: Total additive reactive power delta of the last calculation cycle.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": true,
+                        "axisColorMode": "text",
+                        "axisLabel": "Active Power / Reactive Power",
+                        "axisPlacement": "left",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 4,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "never",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "si:"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "SetpointActivePower"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#FFD23F"
+                                }
+                            },
+                            {
+                                "id": "custom.lineWidth",
+                                "value": 3
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "SetpointActivePowerActual"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#FFAA00"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "ActivePowerObjective"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#E08A00"
+                                }
+                            },
+                            {
+                                "id": "custom.lineStyle",
+                                "value": {
+                                    "fill": "dash",
+                                    "dash": [
+                                        10,
+                                        10
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "AdditiveActivePowerDelta"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#B7791F"
+                                }
+                            },
+                            {
+                                "id": "custom.lineStyle",
+                                "value": {
+                                    "fill": "dot",
+                                    "dash": [
+                                        0,
+                                        10
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "SetpointReactivePower"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#C9B3FF"
+                                }
+                            },
+                            {
+                                "id": "custom.lineWidth",
+                                "value": 3
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "SetpointReactivePowerActual"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#A07CFF"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "ReactivePowerObjective"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#8456F0"
+                                }
+                            },
+                            {
+                                "id": "custom.lineStyle",
+                                "value": {
+                                    "fill": "dash",
+                                    "dash": [
+                                        10,
+                                        10
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "AdditiveReactivePowerDelta"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#6C4AB6"
+                                }
+                            },
+                            {
+                                "id": "custom.lineStyle",
+                                "value": {
+                                    "fill": "dot",
+                                    "dash": [
+                                        0,
+                                        10
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 20,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "interval": "5s",
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "lastNotNull",
+                        "min",
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT $__dateBin(time) AS time, avg(gauge) AS \"SetpointActivePower\"\nFROM systemoperatingmodecontrol_setpointactivepower\nWHERE '${PowerType}' IN ('All', 'Active') AND $__timeFilter(time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "A"
+                },
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT $__dateBin(time) AS time, avg(gauge) AS \"SetpointActivePowerActual\"\nFROM systemoperatingmodecontrol_setpointactivepoweractual\nWHERE '${PowerType}' IN ('All', 'Active') AND $__timeFilter(time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "B"
+                },
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT $__dateBin(time) AS time, avg(gauge) AS \"ActivePowerObjective\"\nFROM systemoperatingmodecontrol_activepowerobjective\nWHERE '${PowerType}' IN ('All', 'Active') AND $__timeFilter(time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "C"
+                },
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT $__dateBin(time) AS time, avg(gauge) AS \"AdditiveActivePowerDelta\"\nFROM systemoperatingmodecontrol_additiveactivepowerdelta\nWHERE '${PowerType}' IN ('All', 'Active') AND $__timeFilter(time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "D"
+                },
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT $__dateBin(time) AS time, avg(gauge) AS \"SetpointReactivePower\"\nFROM systemoperatingmodecontrol_setpointreactivepower\nWHERE '${PowerType}' IN ('All', 'Reactive') AND $__timeFilter(time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "E"
+                },
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT $__dateBin(time) AS time, avg(gauge) AS \"SetpointReactivePowerActual\"\nFROM systemoperatingmodecontrol_setpointreactivepoweractual\nWHERE '${PowerType}' IN ('All', 'Reactive') AND $__timeFilter(time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "F"
+                },
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT $__dateBin(time) AS time, avg(gauge) AS \"ReactivePowerObjective\"\nFROM systemoperatingmodecontrol_reactivepowerobjective\nWHERE '${PowerType}' IN ('All', 'Reactive') AND $__timeFilter(time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "G"
+                },
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdbdatasource"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT $__dateBin(time) AS time, avg(gauge) AS \"AdditiveReactivePowerDelta\"\nFROM systemoperatingmodecontrol_additivereactivepowerdelta\nWHERE '${PowerType}' IN ('All', 'Reactive') AND $__timeFilter(time)\nGROUP BY 1\nORDER BY 1",
+                    "refId": "H"
+                }
+            ],
+            "title": "System Operating Mode Control",
+            "type": "timeseries"
+        }
+    ],
+    "preload": false,
+    "refresh": "5s",
+    "schemaVersion": 41,
+    "tags": [
+        "ppc",
+        "system-operating-mode-control"
+    ],
+    "templating": {
+        "list": [
+            {
+                "current": {
+                    "text": "All",
+                    "value": "All"
+                },
+                "description": "Show all powers, only active powers or only reactive powers.",
+                "label": "Power Type",
+                "name": "PowerType",
+                "options": [
+                    {
+                        "selected": true,
+                        "text": "All",
+                        "value": "All"
+                    },
+                    {
+                        "selected": false,
+                        "text": "Active Power",
+                        "value": "Active"
+                    },
+                    {
+                        "selected": false,
+                        "text": "Reactive Power",
+                        "value": "Reactive"
+                    }
+                ],
+                "query": "All : All,Active Power : Active,Reactive Power : Reactive",
+                "type": "custom"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-15m",
+        "to": "now"
+    },
+    "timepicker": {
+        "refresh_intervals": [
+            "5s",
+            "10s",
+            "30s",
+            "1m",
+            "5m"
+        ],
+        "quick_ranges": [
+            {
+                "display": "Last 5 minutes",
+                "from": "now-5m",
+                "to": "now"
+            },
+            {
+                "display": "Last 15 minutes",
+                "from": "now-15m",
+                "to": "now"
+            },
+            {
+                "display": "Last 1 hour",
+                "from": "now-1h",
+                "to": "now"
+            },
+            {
+                "display": "Last 24 hours",
+                "from": "now-24h",
+                "to": "now"
+            }
+        ]
+    },
+    "timezone": "browser",
+    "title": "System Operating Mode Control",
+    "uid": "ppc-system-operating-mode-control",
+    "version": 1
+}

@@ -22,6 +22,7 @@ using paskalON.OperatingModes.Application.Factories;
 using paskalON.OperatingModes.Application.Publishers;
 using paskalON.OperatingModes.Application.Stacks;
 using paskalON.OperatingModes.Domain.Configs;
+using paskalON.OperatingModes.Domain.Systems;
 using paskalON.OperatingModes.Infrastructure.Storage;
 using paskalON.OperatingModes.Infrastructure.Storage.Repositories;
 using paskalON.OperatingModes.Service.Publishers;
@@ -160,6 +161,7 @@ try
         {
             builder.AddAspNetCoreInstrumentation();
             builder.AddMeter("OperatingMode");
+            builder.AddMeter(nameof(SystemOperatingModeControl));
 
             builder.AddOtlpExporter((otlpOptions, metricReaderOptions) =>
             {
