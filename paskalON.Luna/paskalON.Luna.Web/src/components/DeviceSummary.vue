@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, useId } from 'vue';
 import type { HubStatus } from '../composables/useSystemMeterSummary';
 import type { PropertyRow, ValueIndicator } from '../utils/deviceValues';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     status: HubStatus;
     /** False until the first values of the device were received. */
     received: boolean;
@@ -13,7 +13,19 @@ const props = defineProps<{
     leftRows: PropertyRow[];
     /** Rows of the right column, the first row stands apart from the others. */
     rightRows: PropertyRow[];
-}>();
+    /** Title of the section. */
+    title?: string;
+    /** Text shown instead of the rows, null to show the rows. */
+    emptyText?: string | null;
+    /** False to hide the connection status, the hint and the loading indicator (e.g. if a section above already shows them). */
+    statusVisible?: boolean;
+}>(), {
+    title: 'Summary',
+    emptyText: null,
+    statusVisible: true
+});
+
+const titleId = useId();
 
 const statusText: Record<HubStatus, string> = {
     connecting: 'Connecting…',
@@ -23,6 +35,10 @@ const statusText: Record<HubStatus, string> = {
 };
 
 const hint = computed(() => {
+    if (props.statusVisible === false) {
+        return null;
+    }
+
     if (props.status === 'disconnected' || props.status === 'reconnecting') {
         return 'The Luna service cannot be reached, the values are not updated.';
     }
@@ -43,10 +59,10 @@ const indicators: Record<ValueIndicator, { icon: string; label: string }> = {
 </script>
 
 <template>
-    <section aria-labelledby="device-summary-title">
+    <section :aria-labelledby="titleId">
         <div class="dash-section-header">
-            <h2 id="device-summary-title" class="dash-section-title">Summary</h2>
-            <span class="dash-status" :class="`dash-status-${status}`">
+            <h2 :id="titleId" class="dash-section-title">{{ title }}</h2>
+            <span v-if="statusVisible" class="dash-status" :class="`dash-status-${status}`">
                 <span class="dash-status-dot" aria-hidden="true"></span>{{ statusText[status] }}
             </span>
         </div>
@@ -55,10 +71,12 @@ const indicators: Record<ValueIndicator, { icon: string; label: string }> = {
             <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>{{ hint }}
         </p>
 
-        <div v-if="received === false && hint === null" class="d-flex align-items-center gap-2 small">
+        <div v-if="statusVisible && received === false && hint === null" class="d-flex align-items-center gap-2 small">
             <span class="spinner-border spinner-inline" role="status" aria-hidden="true"></span>
             Loading...
         </div>
+
+        <p v-else-if="received && found && emptyText !== null" class="pm-empty">{{ emptyText }}</p>
 
         <div v-else-if="received && found" class="pm-columns">
             <dl v-for="(rows, column) in columns" :key="column" class="pm-values">

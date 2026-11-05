@@ -66,5 +66,14 @@ namespace paskalON.Luna.Service.WebApi.Hubs
         /// <param name="unit">The battery storage unit, or null if the DER configuration has no battery storage unit with the name.</param>
         /// <returns>Task</returns>
         Task BatteryStorageUnitUpdated(string unitName, DerBatteryStorageUnitDto? unit);
+
+
+        /// <summary>
+        /// Current values of the subscribed DER circuit.
+        /// </summary>
+        /// <param name="circuitName">Name of the subscribed DER circuit.</param>
+        /// <param name="circuit">The DER circuit, or null if the DER configuration has no DER circuit with the name.</param>
+        /// <returns>Task</returns>
+        Task DerCircuitUpdated(string circuitName, DerCircuitDto? circuit);
     }
 }

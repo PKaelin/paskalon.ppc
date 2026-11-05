@@ -125,6 +125,20 @@ namespace paskalON.Luna.Service.WebApi.Hubs
 
 
         /// <summary>
+        /// Subscribes the caller to a DER circuit, replacing its previous subscription.
+        /// </summary>
+        /// <param name="circuitName">Name of the DER circuit.</param>
+        /// <returns>Task</returns>
+        public async Task SubscribeDerCircuit(string circuitName)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(circuitName);
+
+            _subscriptions.Subscribe(Context.ConnectionId, new DeviceSubscription(DeviceSubscriptionType.DerCircuit, 0, circuitName));
+            await Clients.Caller.DerCircuitUpdated(circuitName, _deviceManager.GetDerCircuit(circuitName));
+        }
+
+
+        /// <summary>
         /// Removes the subscription of the caller.
         /// </summary>
         public void Unsubscribe()

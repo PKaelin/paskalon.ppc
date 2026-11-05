@@ -42,6 +42,12 @@ namespace paskalON.Luna.Service.WebApi.Hubs
         /// <summary>
         /// A battery storage unit (DerBatteryStorageUnitDto), identified by its unit name.
         /// </summary>
-        BatteryStorageUnit
+        BatteryStorageUnit,
+
+
+        /// <summary>
+        /// A DER circuit (DerCircuitDto), identified by its circuit name.
+        /// </summary>
+        DerCircuit
     }
 }

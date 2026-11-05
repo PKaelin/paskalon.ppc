@@ -123,8 +123,11 @@ namespace paskalON.Luna.Service.Publishers
                     case DeviceSubscriptionType.BatteryBank:
                         await client.BatteryBankUpdated(subscription.DeviceId, _deviceManager.GetBatteryBank(subscription.DeviceId));
                         break;
-                    case DeviceSubscriptionType.BatteryStorageUnit when subscription.UnitName is not null:
-                        await client.BatteryStorageUnitUpdated(subscription.UnitName, _deviceManager.GetBatteryStorageUnit(subscription.UnitName));
+                    case DeviceSubscriptionType.BatteryStorageUnit when subscription.Name is not null:
+                        await client.BatteryStorageUnitUpdated(subscription.Name, _deviceManager.GetBatteryStorageUnit(subscription.Name));
+                        break;
+                    case DeviceSubscriptionType.DerCircuit when subscription.Name is not null:
+                        await client.DerCircuitUpdated(subscription.Name, _deviceManager.GetDerCircuit(subscription.Name));
                         break;
                     default:
                         _logger.LogWarning("Device subscription type {Type} is not supported.", subscription.Type);
@@ -133,7 +136,7 @@ namespace paskalON.Luna.Service.Publishers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Publishing device {DeviceId} {UnitName} of type {Type} failed.", subscription.DeviceId, subscription.UnitName, subscription.Type);
+                _logger.LogError(ex, "Publishing device {DeviceId} {Name} of type {Type} failed.", subscription.DeviceId, subscription.Name, subscription.Type);
             }
         }
     }

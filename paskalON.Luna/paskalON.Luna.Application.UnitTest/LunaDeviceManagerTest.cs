@@ -339,6 +339,51 @@ namespace paskalON.Luna.Application.UnitTest
 
 
         /// <summary>
+        /// Confirms the DER circuit with the name is returned from any DER group, or null if the DER has no such circuit.
+        /// </summary>
+        /// <param name="circuitName">The name of the requested DER circuit.</param>
+        /// <param name="isFound">True if the DER has a DER circuit with the name.</param>
+        [TestMethod]
+        [DataRow("Circuit1", true)]
+        [DataRow("Circuit2", true)]
+        [DataRow("UnknownCircuit", false)]
+        public void GetDerCircuitReturnsCircuitWithNameTest(string circuitName, bool isFound)
+        {
+            DerDto der = CreateDer(new List<PmSystemDto>(), new List<BbDto> { CreateBatteryBank(41, false, 80) });
+            PcsDto solarPcs = new PcsDto(new PcsDefinitionDto { DeviceId = 32, Name = "SolarPcs32", TargetAddress = "localhost", TargetPort = 502 });
+            DerCircuitDto secondCircuit = new DerCircuitDto
+            {
+                Name = "Circuit2",
+                DerUnits = new List<DerUnitDto> { new DerSolarUnitDto { Name = "SolarUnit1", PowerConversionSystem = solarPcs } }
+            };
+            der.DerGroups.Add(new DerGroupDto { Name = "Group2", DerCircuits = new List<DerCircuitDto> { secondCircuit } });
+            _deviceClient.Setup(client => client.Der).Returns(der);
+
+            DerCircuitDto? circuit = _manager.GetDerCircuit(circuitName);
+
+            Assert.AreEqual(isFound, circuit is not null);
+            Assert.AreEqual(isFound ? circuitName : null, circuit?.Name);
+        }
+
+
+        /// <summary>
+        /// Confirms a missing DER circuit name is rejected.
+        /// </summary>
+        /// <param name="circuitName">The invalid name of the DER circuit.</param>
+        [TestMethod]
+        [DataRow("")]
+        [DataRow(" ")]
+        public void GetDerCircuitWithoutNameThrowsTest(string circuitName)
+        {
+            _deviceClient.Setup(client => client.Der).Returns(CreateDer(new List<PmSystemDto>(), new List<BbDto>()));
+
+            Action action = () => _manager.GetDerCircuit(circuitName);
+
+            Assert.ThrowsExactly<ArgumentException>(action);
+        }
+
+
+        /// <summary>
         /// Creates a DER with the system power meters and one battery storage unit with the battery banks.
         /// </summary>
         /// <param name="systemMeters">The system power meters.</param>

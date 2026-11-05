@@ -78,5 +78,13 @@ namespace paskalON.Luna.Application
         /// <param name="unitName">The name of the battery storage unit.</param>
         /// <returns>The battery storage unit, or null if the DER configuration has no battery storage unit with the name.</returns>
         DerBatteryStorageUnitDto? GetBatteryStorageUnit(string unitName);
+
+
+        /// <summary>
+        /// Gets a DER circuit of the DER configuration.
+        /// </summary>
+        /// <param name="circuitName">The name of the DER circuit.</param>
+        /// <returns>The DER circuit, or null if the DER configuration has no DER circuit with the name.</returns>
+        DerCircuitDto? GetDerCircuit(string circuitName);
     }
 }

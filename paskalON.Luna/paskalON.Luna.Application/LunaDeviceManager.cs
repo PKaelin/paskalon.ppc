@@ -139,6 +139,17 @@ namespace paskalON.Luna.Application
         }
 
 
+        /// <inheritdoc/>
+        public DerCircuitDto? GetDerCircuit(string circuitName)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(circuitName);
+
+            return _deviceClient.Der.DerGroups
+                .SelectMany(group => group.DerCircuits)
+                .FirstOrDefault(circuit => circuit.Name == circuitName);
+        }
+
+
         /// <summary>
         /// Gets the PCS of a DER unit.
         /// </summary>

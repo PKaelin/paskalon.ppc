@@ -59,7 +59,7 @@ export function isPowerMeterType(type: string): type is PowerMeterType {
     return type === 'PmSystemDto' || type === 'PmAuxiliaryDto' || type === 'PmExternalDto';
 }
 
-/** PmSystemDto, PmAuxiliaryDto or PmExternalDto. Core and detail are null until the device service delivered them. */
+/** PmSystemDto, PmAuxiliaryDto, PmExternalDto or PmCircuitDto. Core and detail are null until the device service delivered them. */
 export interface PowerMeterDto extends DeviceDto {
     core: PmCoreDto | null;
     detail: PmDetailDto | null;
@@ -200,8 +200,8 @@ export type DerUnitDto = DerBatteryStorageUnitDto | DerSolarUnitDto;
 export interface DerCircuitDto {
     name: string;
     derUnits: DerUnitDto[];
-    /** Optional circuit power meter. */
-    circuitPowerMeter: DeviceDto | null;
+    /** Optional circuit power meter (PmCircuitDto). */
+    circuitPowerMeter: PowerMeterDto | null;
 }
 
 /** DerGroupDto. */

@@ -830,6 +830,18 @@ button.der-tree-toggle:disabled {
     border-bottom: 1px solid rgba(255, 255, 255, .15);
 }
 
+/* Text shown instead of the properties, e.g. if a DER circuit has no circuit power meter. */
+.pm-empty {
+    margin: 0;
+    font-size: .875rem;
+    font-weight: 600;
+}
+
+/* A summary section that follows another one, e.g. the PCS summary below the circuit meter summary of a DER circuit. */
+.pm-section-next {
+    margin-top: 1.5rem;
+}
+
 /* Icon next to a value: green tick if all right, red X if not. */
 .value-indicator {
     margin-left: .375rem;
