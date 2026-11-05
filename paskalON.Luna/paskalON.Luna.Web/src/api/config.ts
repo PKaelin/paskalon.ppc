@@ -32,6 +32,7 @@ export interface AppConfig {
 }
 
 const systemMeterOverview = 'System Meter Overview';
+const systemOperatingModeControl = 'System Operating Mode Control';
 
 const defaultConfig: AppConfig = {
     apiBaseUrl: '/api',
@@ -46,10 +47,13 @@ const defaultConfig: AppConfig = {
         kiosk: true,
         hideLogo: true,
         autoFitPanels: true,
-        dashboards: [{ name: systemMeterOverview, uid: 'ppc-system-meter-overview' }]
+        dashboards: [
+            { name: systemMeterOverview, uid: 'ppc-system-meter-overview' },
+            { name: systemOperatingModeControl, uid: 'ppc-system-operating-mode-control' }
+        ]
     },
     dashboardSection: {
-        dashboards: [systemMeterOverview],
+        dashboards: [systemMeterOverview, systemOperatingModeControl],
         defaultDashboard: systemMeterOverview
     }
 };

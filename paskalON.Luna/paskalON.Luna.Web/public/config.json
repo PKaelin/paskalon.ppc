@@ -12,11 +12,12 @@
     "hideLogo": true,
     "autoFitPanels": true,
     "dashboards": [
-      { "name": "System Meter Overview", "uid": "ppc-system-meter-overview" }
+      { "name": "System Meter Overview", "uid": "ppc-system-meter-overview" },
+      { "name": "System Operating Mode Control", "uid": "ppc-system-operating-mode-control" }
     ]
   },
   "dashboardSection": {
-    "dashboards": [ "System Meter Overview" ],
+    "dashboards": [ "System Meter Overview", "System Operating Mode Control" ],
     "defaultDashboard": "System Meter Overview"
   }
 }

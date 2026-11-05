@@ -22,9 +22,9 @@ CONFIG_FILE=${1:-/usr/share/nginx/html/config.json}
 : "${APP_GRAFANA_HIDE_LOGO:=true}"
 : "${APP_GRAFANA_AUTO_FIT_PANELS:=true}"
 # JSON array of the embeddable dashboards: [{ "name": "<dashboard title>", "uid": "<dashboard uid>" }, ...]
-[ -n "${APP_GRAFANA_DASHBOARDS}" ] || APP_GRAFANA_DASHBOARDS='[{ "name": "System Meter Overview", "uid": "ppc-system-meter-overview" }]'
+[ -n "${APP_GRAFANA_DASHBOARDS}" ] || APP_GRAFANA_DASHBOARDS='[{ "name": "System Meter Overview", "uid": "ppc-system-meter-overview" }, { "name": "System Operating Mode Control", "uid": "ppc-system-operating-mode-control" }]'
 # JSON array of the dashboard names in the Dashboard section and the one selected at start.
-[ -n "${APP_DASHBOARD_SECTION_DASHBOARDS}" ] || APP_DASHBOARD_SECTION_DASHBOARDS='[ "System Meter Overview" ]'
+[ -n "${APP_DASHBOARD_SECTION_DASHBOARDS}" ] || APP_DASHBOARD_SECTION_DASHBOARDS='[ "System Meter Overview", "System Operating Mode Control" ]'
 : "${APP_DASHBOARD_SECTION_DEFAULT:=System Meter Overview}"
 
 cat > "$CONFIG_FILE" <<JSON
