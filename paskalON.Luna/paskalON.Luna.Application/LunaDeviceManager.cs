@@ -150,6 +150,15 @@ namespace paskalON.Luna.Application
         }
 
 
+        /// <inheritdoc/>
+        public DerGroupDto? GetDerGroup(string groupName)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(groupName);
+
+            return _deviceClient.Der.DerGroups.FirstOrDefault(group => group.Name == groupName);
+        }
+
+
         /// <summary>
         /// Gets the PCS of a DER unit.
         /// </summary>

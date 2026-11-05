@@ -48,6 +48,12 @@ namespace paskalON.Luna.Service.WebApi.Hubs
         /// <summary>
         /// A DER circuit (DerCircuitDto), identified by its circuit name.
         /// </summary>
-        DerCircuit
+        DerCircuit,
+
+
+        /// <summary>
+        /// A DER group (DerGroupDto), identified by its group name.
+        /// </summary>
+        DerGroup
     }
 }

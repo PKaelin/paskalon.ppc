@@ -384,6 +384,52 @@ namespace paskalON.Luna.Application.UnitTest
 
 
         /// <summary>
+        /// Confirms the DER group with the name is returned, or null if the DER has no such group.
+        /// </summary>
+        /// <param name="groupName">The name of the requested DER group.</param>
+        /// <param name="isFound">True if the DER has a DER group with the name.</param>
+        [TestMethod]
+        [DataRow("Group1", true)]
+        [DataRow("Group2", true)]
+        [DataRow("Circuit1", false)]
+        [DataRow("UnknownGroup", false)]
+        public void GetDerGroupReturnsGroupWithNameTest(string groupName, bool isFound)
+        {
+            DerDto der = CreateDer(new List<PmSystemDto>(), new List<BbDto> { CreateBatteryBank(41, false, 80) });
+            PcsDto solarPcs = new PcsDto(new PcsDefinitionDto { DeviceId = 32, Name = "SolarPcs32", TargetAddress = "localhost", TargetPort = 502 });
+            DerCircuitDto secondCircuit = new DerCircuitDto
+            {
+                Name = "Circuit2",
+                DerUnits = new List<DerUnitDto> { new DerSolarUnitDto { Name = "SolarUnit1", PowerConversionSystem = solarPcs } }
+            };
+            der.DerGroups.Add(new DerGroupDto { Name = "Group2", DerCircuits = new List<DerCircuitDto> { secondCircuit } });
+            _deviceClient.Setup(client => client.Der).Returns(der);
+
+            DerGroupDto? group = _manager.GetDerGroup(groupName);
+
+            Assert.AreEqual(isFound, group is not null);
+            Assert.AreEqual(isFound ? groupName : null, group?.Name);
+        }
+
+
+        /// <summary>
+        /// Confirms a missing DER group name is rejected.
+        /// </summary>
+        /// <param name="groupName">The invalid name of the DER group.</param>
+        [TestMethod]
+        [DataRow("")]
+        [DataRow(" ")]
+        public void GetDerGroupWithoutNameThrowsTest(string groupName)
+        {
+            _deviceClient.Setup(client => client.Der).Returns(CreateDer(new List<PmSystemDto>(), new List<BbDto>()));
+
+            Action action = () => _manager.GetDerGroup(groupName);
+
+            Assert.ThrowsExactly<ArgumentException>(action);
+        }
+
+
+        /// <summary>
         /// Creates a DER with the system power meters and one battery storage unit with the battery banks.
         /// </summary>
         /// <param name="systemMeters">The system power meters.</param>

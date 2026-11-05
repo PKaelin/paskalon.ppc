@@ -5,7 +5,7 @@ import type { HubStatus } from './useSystemMeterSummary';
 import type { PowerMeterType } from '../types/der';
 
 /** The device DTO types the device hub publishes. */
-export type SubscribableDeviceType = PowerMeterType | 'PcsDto' | 'BbDto' | 'DerBatteryStorageUnitDto' | 'DerCircuitDto';
+export type SubscribableDeviceType = PowerMeterType | 'PcsDto' | 'BbDto' | 'DerBatteryStorageUnitDto' | 'DerCircuitDto' | 'DerGroupDto';
 
 export interface DeviceSubscription<T> {
     status: Ref<HubStatus>;
@@ -23,16 +23,17 @@ const hubMethods: Record<SubscribableDeviceType, { subscribe: string; updated: s
     PcsDto: { subscribe: 'SubscribePcs', updated: 'PcsUpdated' },
     BbDto: { subscribe: 'SubscribeBatteryBank', updated: 'BatteryBankUpdated' },
     DerBatteryStorageUnitDto: { subscribe: 'SubscribeBatteryStorageUnit', updated: 'BatteryStorageUnitUpdated' },
-    DerCircuitDto: { subscribe: 'SubscribeDerCircuit', updated: 'DerCircuitUpdated' }
+    DerCircuitDto: { subscribe: 'SubscribeDerCircuit', updated: 'DerCircuitUpdated' },
+    DerGroupDto: { subscribe: 'SubscribeDerGroup', updated: 'DerGroupUpdated' }
 };
 
 /**
  * Receives the values of one device from the device hub (Hub<IDeviceHubClient> on the server):
  *
- *   Subscribe{SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs|BatteryBank|BatteryStorageUnit|DerCircuit}(id)   <- on connect and when the device changes
- *   {SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs|BatteryBank|BatteryStorageUnit|DerCircuit}Updated(id, dto) -> on subscribe, then every 2 seconds
+ *   Subscribe{SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs|BatteryBank|BatteryStorageUnit|DerCircuit|DerGroup}(id)   <- on connect and when the device changes
+ *   {SystemPowerMeter|AuxiliaryPowerMeter|ExternalPowerMeter|Pcs|BatteryBank|BatteryStorageUnit|DerCircuit|DerGroup}Updated(id, dto) -> on subscribe, then every 2 seconds
  *
- * The id is the device ID of a device, or the name of a DER unit or DER circuit (they have no device ID).
+ * The id is the device ID of a device, or the name of a DER unit, DER circuit or DER group (they have no device ID).
  * The hub is connected while the calling component is mounted, so the web service only publishes
  * the device while it is shown.
  */

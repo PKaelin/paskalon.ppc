@@ -86,5 +86,13 @@ namespace paskalON.Luna.Application
         /// <param name="circuitName">The name of the DER circuit.</param>
         /// <returns>The DER circuit, or null if the DER configuration has no DER circuit with the name.</returns>
         DerCircuitDto? GetDerCircuit(string circuitName);
+
+
+        /// <summary>
+        /// Gets a DER group of the DER configuration.
+        /// </summary>
+        /// <param name="groupName">The name of the DER group.</param>
+        /// <returns>The DER group, or null if the DER configuration has no DER group with the name.</returns>
+        DerGroupDto? GetDerGroup(string groupName);
     }
 }

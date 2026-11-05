@@ -139,6 +139,20 @@ namespace paskalON.Luna.Service.WebApi.Hubs
 
 
         /// <summary>
+        /// Subscribes the caller to a DER group, replacing its previous subscription.
+        /// </summary>
+        /// <param name="groupName">Name of the DER group.</param>
+        /// <returns>Task</returns>
+        public async Task SubscribeDerGroup(string groupName)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(groupName);
+
+            _subscriptions.Subscribe(Context.ConnectionId, new DeviceSubscription(DeviceSubscriptionType.DerGroup, 0, groupName));
+            await Clients.Caller.DerGroupUpdated(groupName, _deviceManager.GetDerGroup(groupName));
+        }
+
+
+        /// <summary>
         /// Removes the subscription of the caller.
         /// </summary>
         public void Unsubscribe()

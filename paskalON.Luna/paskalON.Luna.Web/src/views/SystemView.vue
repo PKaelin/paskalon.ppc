@@ -9,6 +9,7 @@ import DerTree from '../components/DerTree.vue';
 import BatteryStorageUnitContent from '../components/BatteryStorageUnitContent.vue';
 import BbContent from '../components/BbContent.vue';
 import DerCircuitContent from '../components/DerCircuitContent.vue';
+import DerGroupContent from '../components/DerGroupContent.vue';
 import PcsContent from '../components/PcsContent.vue';
 import PowerMeterContent from '../components/PowerMeterContent.vue';
 import { isPowerMeterType } from '../types/der';
@@ -168,6 +169,7 @@ onBeforeUnmount(() => abortController.abort());
             <BbContent v-else-if="selectedNode?.type === 'BbDto' && selectedNode.deviceId !== undefined" :device-id="selectedNode.deviceId" />
             <BatteryStorageUnitContent v-else-if="selectedNode?.type === 'DerBatteryStorageUnitDto'" :unit-name="selectedNode.name" />
             <DerCircuitContent v-else-if="selectedNode?.type === 'DerCircuitDto'" :circuit-name="selectedNode.name" />
+            <DerGroupContent v-else-if="selectedNode?.type === 'DerGroupDto'" :group-name="selectedNode.name" />
             <template v-else-if="selectedNode">
                 <h2 class="om-heading">{{ selectedNode.name }}</h2>
                 <p class="mb-0">{{ selectedNode.type }}</p>

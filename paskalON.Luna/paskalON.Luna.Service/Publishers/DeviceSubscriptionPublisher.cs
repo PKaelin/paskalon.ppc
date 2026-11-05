@@ -129,6 +129,9 @@ namespace paskalON.Luna.Service.Publishers
                     case DeviceSubscriptionType.DerCircuit when subscription.Name is not null:
                         await client.DerCircuitUpdated(subscription.Name, _deviceManager.GetDerCircuit(subscription.Name));
                         break;
+                    case DeviceSubscriptionType.DerGroup when subscription.Name is not null:
+                        await client.DerGroupUpdated(subscription.Name, _deviceManager.GetDerGroup(subscription.Name));
+                        break;
                     default:
                         _logger.LogWarning("Device subscription type {Type} is not supported.", subscription.Type);
                         break;

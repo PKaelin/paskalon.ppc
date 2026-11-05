@@ -75,5 +75,14 @@ namespace paskalON.Luna.Service.WebApi.Hubs
         /// <param name="circuit">The DER circuit, or null if the DER configuration has no DER circuit with the name.</param>
         /// <returns>Task</returns>
         Task DerCircuitUpdated(string circuitName, DerCircuitDto? circuit);
+
+
+        /// <summary>
+        /// Current values of the subscribed DER group.
+        /// </summary>
+        /// <param name="groupName">Name of the subscribed DER group.</param>
+        /// <param name="group">The DER group, or null if the DER configuration has no DER group with the name.</param>
+        /// <returns>Task</returns>
+        Task DerGroupUpdated(string groupName, DerGroupDto? group);
     }
 }
