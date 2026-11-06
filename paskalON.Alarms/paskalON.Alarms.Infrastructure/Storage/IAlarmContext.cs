@@ -7,6 +7,7 @@ using paskalON.Alarms.Domain.Configs;
 using paskalON.Alarms.Domain.Configs.Actions;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Ppcs;
+using paskalON.Alarms.Infrastructure.Storage.Outboxes;
 using paskalON.Domains;
 
 namespace paskalON.Alarms.Infrastructure.Storage
@@ -50,6 +51,12 @@ namespace paskalON.Alarms.Infrastructure.Storage
         /// PPC alarms.
         /// </summary>
         DbSet<PpcAlarm> PpcAlarms { get; set; }
+
+
+        /// <summary>
+        /// Alarm action messages of the transactional outbox.
+        /// </summary>
+        DbSet<AlarmActionOutboxMessage> AlarmActionOutboxMessages { get; set; }
 
 
         /// <summary>

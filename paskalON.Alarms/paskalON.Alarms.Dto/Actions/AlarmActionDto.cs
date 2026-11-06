@@ -10,9 +10,16 @@ namespace paskalON.Alarms.Dto.Actions
     /// <remarks>
     /// Recipients implement a command design pattern where the command maps to the name of the action
     /// and takes the key/value parameters.
+    /// The action is delivered at least once, recipients use the message id to ignore duplicated deliveries.
     /// </remarks>
     public record AlarmActionDto
     {
+        /// <summary>
+        /// Unique identifier of the action message.
+        /// </summary>
+        public required Guid MessageId { get; init; }
+
+
         /// <summary>
         /// Unique identifiable action name.
         /// </summary>

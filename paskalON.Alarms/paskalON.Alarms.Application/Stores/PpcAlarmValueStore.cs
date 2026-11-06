@@ -83,5 +83,15 @@ namespace paskalON.Alarms.Application.Stores
                 return new List<PpcAlarmKeyValue>();
             }
         }
+
+
+        /// <inheritdoc/>
+        public void Remove(PpcAlarmKey key)
+        {
+            lock (_dataLock)
+            {
+                _values.Remove(key);
+            }
+        }
     }
 }

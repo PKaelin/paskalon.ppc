@@ -124,10 +124,54 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "AlarmActionOutboxMessage",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
+                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    MessageId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PpcAlarmId = table.Column<int>(type: "integer", nullable: false),
+                    ActionName = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Payload = table.Column<string>(type: "jsonb", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    SentOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    FailedAttempts = table.Column<int>(type: "integer", nullable: false),
+                    LastError = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AlarmActionOutboxMessage", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AlarmActionOutboxMessage_PpcAlarm_PpcAlarmId",
+                        column: x => x.PpcAlarmId,
+                        principalTable: "PpcAlarm",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AlarmActionConfig_AlarmConfigBaseId",
                 table: "AlarmActionConfig",
                 column: "AlarmConfigBaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AlarmActionOutboxMessage_MessageId",
+                table: "AlarmActionOutboxMessage",
+                column: "MessageId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AlarmActionOutboxMessage_Pending",
+                table: "AlarmActionOutboxMessage",
+                column: "CreatedOn",
+                filter: "\"SentOn\" IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AlarmActionOutboxMessage_PpcAlarmId",
+                table: "AlarmActionOutboxMessage",
+                column: "PpcAlarmId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AlarmActionParameterConfig_AlarmActionConfigId_Key",
@@ -168,6 +212,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AlarmActionOutboxMessage");
+
             migrationBuilder.DropTable(
                 name: "AlarmActionParameterConfig");
 

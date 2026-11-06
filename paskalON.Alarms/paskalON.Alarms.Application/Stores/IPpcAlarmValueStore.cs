@@ -30,5 +30,15 @@ namespace paskalON.Alarms.Application.Stores
         /// <param name="key">Key of the publisher.</param>
         /// <returns>Latest values of the publisher, or empty if the publisher is unknown.</returns>
         List<PpcAlarmKeyValue> GetValues(PpcAlarmKey key);
+
+
+        /// <summary>
+        /// Removes the values of a publisher, so that all values of its next update are changed values.
+        /// </summary>
+        /// <remarks>
+        /// Used when the evaluation of the changed values failed (e.g. database not available), so that no change gets lost.
+        /// </remarks>
+        /// <param name="key">Key of the publisher.</param>
+        void Remove(PpcAlarmKey key);
     }
 }

@@ -12,7 +12,7 @@ using paskalON.Alarms.Infrastructure.Storage;
 namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(AlarmContext))]
-    [Migration("20261106052330_v_0_1")]
+    [Migration("20261106172043_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -171,6 +171,50 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     b.ToTable((string)null);
                 });
 
+            modelBuilder.Entity("paskalON.Alarms.Infrastructure.Storage.Outboxes.AlarmActionOutboxMessage", b =>
+                {
+                    b.HasBaseType("paskalON.Domains.DomainBase");
+
+                    b.Property<string>("ActionName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("PpcAlarmId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("SentOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasIndex("CreatedOn")
+                        .HasDatabaseName("IX_AlarmActionOutboxMessage_Pending")
+                        .HasFilter("\"SentOn\" IS NULL");
+
+                    b.HasIndex("MessageId")
+                        .IsUnique();
+
+                    b.HasIndex("PpcAlarmId");
+
+                    b.ToTable("AlarmActionOutboxMessage");
+                });
+
             modelBuilder.Entity("paskalON.Domains.ConfigurationBase", b =>
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
@@ -282,6 +326,17 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                         .IsRequired();
 
                     b.Navigation("AlarmActionConfig");
+                });
+
+            modelBuilder.Entity("paskalON.Alarms.Infrastructure.Storage.Outboxes.AlarmActionOutboxMessage", b =>
+                {
+                    b.HasOne("paskalON.Alarms.Domain.Ppcs.PpcAlarm", "PpcAlarm")
+                        .WithMany()
+                        .HasForeignKey("PpcAlarmId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PpcAlarm");
                 });
 
             modelBuilder.Entity("paskalON.Alarms.Domain.Ppcs.PpcAlarm", b =>
