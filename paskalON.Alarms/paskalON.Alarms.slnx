@@ -13,6 +13,7 @@
   <Folder Name="/Tests/">
     <Project Path="paskalON.Alarms.Application.UnitTest/paskalON.Alarms.Application.UnitTest.csproj" />
     <Project Path="paskalON.Alarms.Domain.UnitTest/paskalON.Alarms.Domain.UnitTest.csproj" />
+    <Project Path="paskalON.Alarms.Infrastructure.IntegrationTest/paskalON.Alarms.Infrastructure.IntegrationTest.csproj" />
   </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />

@@ -13,9 +13,21 @@ namespace paskalON.Alarms.Domain.Configs
     /// <remarks>
     /// Name, Description, PossibleCauses, Response and Consequences are string identifiers (e.g. {{PCS.OverTemp.Name}}),
     /// that the user interface maps to a language dependent text.
+    /// Not derived from NameBase, because the name is not unique: a device or dictionary entry configuration that overrides
+    /// another configuration can use the same name.
     /// </remarks>
-    public abstract class AlarmConfigBase : NameBase
+    public abstract class AlarmConfigBase : DomainBase
     {
+        /// <summary>
+        /// String identifier of the name of the alarm.
+        /// </summary>
+        public required string Name
+        {
+            get;
+            set { ArgumentException.ThrowIfNullOrWhiteSpace(value); field = value; }
+        }
+
+
         /// <summary>
         /// Indicates whether the alarm is enabled (active) or disabled (inactive).
         /// </summary>

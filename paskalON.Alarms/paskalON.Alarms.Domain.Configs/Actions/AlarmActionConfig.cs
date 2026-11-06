@@ -10,10 +10,20 @@ namespace paskalON.Alarms.Domain.Configs.Actions
     /// Alarm action configuration that includes enough information for the recipient to execute the action without making another API call.
     /// </summary>
     /// <remarks>
-    /// The name is the unique identifiable action name the recipient maps to its command.
+    /// Not derived from NameBase, because the same action (e.g. ReducePower) can be configured for multiple alarms.
     /// </remarks>
-    public class AlarmActionConfig : NameBase
+    public class AlarmActionConfig : DomainBase
     {
+        /// <summary>
+        /// Identifiable action name the recipient maps to its command.
+        /// </summary>
+        public required string Name
+        {
+            get;
+            set { ArgumentException.ThrowIfNullOrWhiteSpace(value); field = value; }
+        }
+
+
         /// <summary>
         /// Parent relationship to AlarmConfigBase Id.
         /// </summary>
