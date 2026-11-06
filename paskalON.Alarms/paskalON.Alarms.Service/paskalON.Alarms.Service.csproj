@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>6720a23a-f7c9-4db8-b9b5-a330b342889b</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.24.2-preview.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.18.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Hosting\paskalON.Hosting.csproj" />
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Telemetry\paskalON.Telemetry.csproj" />
+    <ProjectReference Include="..\paskalON.Alarms.Application\paskalON.Alarms.Application.csproj" />
+    <ProjectReference Include="..\paskalON.Alarms.Infrastructure\paskalON.Alarms.Infrastructure.csproj" />
+    <ProjectReference Include="..\paskalON.Alarms.Service.Dto\paskalON.Alarms.Service.Dto.csproj" />
+  </ItemGroup>
+
+</Project>

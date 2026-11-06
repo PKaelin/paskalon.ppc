@@ -1,0 +1,71 @@
+services:
+  # Database
+  paskalon.alarms.data:
+    container_name: paskalon.alarms.data
+    image: postgres:18.6
+    restart: unless-stopped
+    ports:
+      - 45031:5432
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/db_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_DB: alarms
+    secrets:
+      - db_user
+      - db_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d alarms -U $$(cat /run/secrets/db_user)"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - paskalon.alarms.data:/var/lib/postgresql
+    networks:
+      - ppc.network
+
+  # Alarm Service
+  paskalon.alarms.service:
+    container_name: paskalon.alarms.service
+    image: ${DOCKER_REGISTRY-}paskalonalarmsservice
+    build:
+      context: .
+      dockerfile: paskalON.Alarms.Service/Dockerfile
+    depends_on:
+      paskalon.alarms.data:
+        condition: service_healthy
+    ports:
+      - 45030:8080
+    environment:
+      - DATABASE_CONNECTION_FILE=/run/secrets/database_connection
+      - MESSAGING_CONNECTION_FILE=/run/secrets/messaging_connection
+      - TELEMETRY_LOGGING_ENDPOINT=http://collector:4317
+      - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
+      - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
+      - STARTUP_RETRY_COUNT=6
+      - STARTUP_RETRY_INTERVAL_SECONDS=15
+    secrets:
+      - database_connection
+      - messaging_connection
+    networks:
+      - ppc.network
+
+secrets:
+  database_connection:
+    file: ./secrets/database_connection
+  messaging_connection:
+    file: ./secrets/messaging_connection
+  db_user:
+    file: ./secrets/db_user
+  db_password:
+    file: ./secrets/db_password
+
+volumes:
+  paskalon.alarms.data:
+    name: paskalon.alarms.data
+
+networks:
+  ppc.network:
+    name: ppc.network
+    # Attachable only for development and test
+    attachable: true

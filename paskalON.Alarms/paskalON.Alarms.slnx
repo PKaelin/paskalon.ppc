@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/InitialDevelopment/">
+    <Project Path="../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Hosting/paskalON.Hosting.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Infrastructure.PostgreSql/paskalON.Infrastructure.PostgreSql.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Infrastructure/paskalON.Infrastructure.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Messaging/paskalON.Messaging.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+  <Project Path="paskalON.Alarms.Application/paskalON.Alarms.Application.csproj" />
+  <Project Path="paskalON.Alarms.Client/paskalON.Alarms.Client.csproj" />
+  <Project Path="paskalON.Alarms.Domain.Configs/paskalON.Alarms.Domain.Configs.csproj" />
+  <Project Path="paskalON.Alarms.Domain/paskalON.Alarms.Domain.csproj" />
+  <Project Path="paskalON.Alarms.Dto/paskalON.Alarms.Dto.csproj" />
+  <Project Path="paskalON.Alarms.Infrastructure/paskalON.Alarms.Infrastructure.csproj" />
+  <Project Path="paskalON.Alarms.Service.Dto/paskalON.Alarms.Service.Dto.csproj" />
+  <Project Path="paskalON.Alarms.Service/paskalON.Alarms.Service.csproj" />
+</Solution>
