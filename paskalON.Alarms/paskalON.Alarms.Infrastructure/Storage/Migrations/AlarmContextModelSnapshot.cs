@@ -172,6 +172,12 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
 
+                    b.Property<int>("AlarmActionRetryIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AlarmActionSendIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PublisherExchangeAlarmActions")
                         .HasColumnType("text");
 

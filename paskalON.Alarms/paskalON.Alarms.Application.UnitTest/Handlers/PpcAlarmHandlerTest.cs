@@ -5,6 +5,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.Alarms.Application.Handlers;
+using paskalON.Alarms.Application.Outboxes;
 using paskalON.Alarms.Application.Stores;
 using paskalON.Alarms.Application.UnitTest.SampleData;
 using paskalON.Alarms.Domain;
@@ -53,6 +54,12 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
         /// Mocked outbox repository.
         /// </summary>
         private readonly Mock<IAlarmActionOutboxRepository> _outboxRepository = new Mock<IAlarmActionOutboxRepository>();
+
+
+        /// <summary>
+        /// Mocked outbox signal.
+        /// </summary>
+        private readonly Mock<IAlarmActionOutboxSignal> _outboxSignal = new Mock<IAlarmActionOutboxSignal>();
 
 
         /// <summary>
@@ -110,6 +117,7 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             Assert.AreEqual(message.MessageId, action.MessageId);
             Assert.AreEqual("7", action.AlarmActionParameters.Single(parameter => parameter.Key == "DeviceId").Value);
             _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
         }
 
 
@@ -136,6 +144,28 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             Assert.AreEqual("ResetPower", _addedMessages[0].ActionName);
             Assert.AreSame(activeAlarm, _addedMessages[0].PpcAlarm);
             _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
+        }
+
+
+        /// <summary>
+        /// A raised alarm without configured actions is saved but does not wake up the outbox publisher service.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleAsyncAlarmWithoutActionsDoesNotNotifyTest()
+        {
+            PpcAlarmConfig faultConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            faultConfig.AlarmActions.Clear();
+            _configRepository.Setup(repository => repository.GetEnabledAsync(PpcAlarmType.PcsAlarm, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<PpcAlarmConfig> { faultConfig });
+            PpcAlarmHandler handler = CreateHandler(new PpcAlarmValueStore());
+
+            PpcAlarmEvaluation evaluation = await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn);
+
+            Assert.HasCount(1, evaluation.Raised);
+            Assert.IsEmpty(_addedMessages);
+            _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _outboxSignal.Verify(signal => signal.Notify(), Times.Never);
         }
 
 
@@ -192,6 +222,8 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             Assert.HasCount(1, _addedAlarms);
             Assert.HasCount(1, _addedMessages);
             _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
+            // Only the successful save notifies, the failed save has no committed messages
+            _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
         }
 
 
@@ -201,7 +233,7 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
         private PpcAlarmHandler CreateHandler(IPpcAlarmValueStore valueStore)
         {
             return new PpcAlarmHandler(NullLogger<PpcAlarmHandler>.Instance, valueStore, new PpcAlarmEvaluator(),
-                _configRepository.Object, _alarmRepository.Object, _outboxRepository.Object);
+                _configRepository.Object, _alarmRepository.Object, _outboxRepository.Object, _outboxSignal.Object);
         }
 
 

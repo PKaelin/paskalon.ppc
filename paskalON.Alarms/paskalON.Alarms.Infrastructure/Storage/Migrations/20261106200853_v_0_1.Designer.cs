@@ -12,7 +12,7 @@ using paskalON.Alarms.Infrastructure.Storage;
 namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(AlarmContext))]
-    [Migration("20261106195539_v_0_1")]
+    [Migration("20261106200853_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -174,6 +174,12 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
             modelBuilder.Entity("paskalON.Alarms.Domain.Configs.SystemConfig", b =>
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
+
+                    b.Property<int>("AlarmActionRetryIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AlarmActionSendIntervalMilliseconds")
+                        .HasColumnType("integer");
 
                     b.Property<string>("PublisherExchangeAlarmActions")
                         .HasColumnType("text");

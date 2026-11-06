@@ -5,6 +5,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using paskalON.Alarms.Application.Actions;
+using paskalON.Alarms.Application.Outboxes;
 using paskalON.Alarms.Application.Stores;
 using paskalON.Alarms.Application.Values;
 using paskalON.Alarms.Domain.Configs.Actions;
@@ -63,6 +64,12 @@ namespace paskalON.Alarms.Application.Handlers
 
 
         /// <summary>
+        /// Signal that sends the saved alarm actions immediately.
+        /// </summary>
+        private readonly IAlarmActionOutboxSignal _outboxSignal;
+
+
+        /// <summary>
         /// Constructor of <see cref="PpcAlarmHandler"/>.
         /// </summary>
         /// <param name="logger">Logger instance.</param>
@@ -71,8 +78,10 @@ namespace paskalON.Alarms.Application.Handlers
         /// <param name="configRepository">Repository of the alarm configurations.</param>
         /// <param name="alarmRepository">Repository of the alarms.</param>
         /// <param name="outboxRepository">Repository of the alarm action outbox.</param>
+        /// <param name="outboxSignal">Signal that sends the saved alarm actions immediately.</param>
         public PpcAlarmHandler(ILogger<PpcAlarmHandler> logger, IPpcAlarmValueStore valueStore, IPpcAlarmEvaluator evaluator,
-            IPpcAlarmConfigRepository configRepository, IPpcAlarmRepository alarmRepository, IAlarmActionOutboxRepository outboxRepository)
+            IPpcAlarmConfigRepository configRepository, IPpcAlarmRepository alarmRepository, IAlarmActionOutboxRepository outboxRepository,
+            IAlarmActionOutboxSignal outboxSignal)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(valueStore);
@@ -80,6 +89,7 @@ namespace paskalON.Alarms.Application.Handlers
             ArgumentNullException.ThrowIfNull(configRepository);
             ArgumentNullException.ThrowIfNull(alarmRepository);
             ArgumentNullException.ThrowIfNull(outboxRepository);
+            ArgumentNullException.ThrowIfNull(outboxSignal);
 
             _logger = logger;
             _valueStore = valueStore;
@@ -87,6 +97,7 @@ namespace paskalON.Alarms.Application.Handlers
             _configRepository = configRepository;
             _alarmRepository = alarmRepository;
             _outboxRepository = outboxRepository;
+            _outboxSignal = outboxSignal;
         }
 
 
@@ -118,9 +129,17 @@ namespace paskalON.Alarms.Application.Handlers
                     return evaluation;
                 }
 
+                List<AlarmActionOutboxMessage> messages = CreateOutboxMessages(evaluation);
                 _alarmRepository.Add(evaluation.Raised);
-                _outboxRepository.Add(CreateOutboxMessages(evaluation));
+                _outboxRepository.Add(messages);
                 await _alarmRepository.SaveChangesAsync(cancellationToken);
+
+                // Only after the commit, otherwise the publisher service might not see the messages yet
+                if (messages.Count > 0)
+                {
+                    _outboxSignal.Notify();
+                }
+
                 _logger.LogInformation("Alarms of {PpcAlarmType} device {DeviceId}: {RaisedCount} raised, {NormalizedCount} normalized.",
                     key.PpcAlarmType, key.DeviceId, evaluation.Raised.Count, evaluation.Normalized.Count);
 

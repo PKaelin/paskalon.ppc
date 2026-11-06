@@ -83,6 +83,8 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    AlarmActionSendIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    AlarmActionRetryIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     PublisherExchangeAlarmActions = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
