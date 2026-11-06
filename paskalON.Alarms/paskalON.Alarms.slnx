@@ -10,6 +10,9 @@
   <Folder Name="/Solution Items/">
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="paskalON.Alarms.Domain.UnitTest/paskalON.Alarms.Domain.UnitTest.csproj" />
+  </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
