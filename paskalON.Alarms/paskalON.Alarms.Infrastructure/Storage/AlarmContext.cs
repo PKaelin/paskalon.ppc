@@ -26,6 +26,10 @@ namespace paskalON.Alarms.Infrastructure.Storage
 
 
         /// <inheritdoc/>
+        public DbSet<SystemConfig> SystemConfigs { get; set; }
+
+
+        /// <inheritdoc/>
         public DbSet<PpcAlarmConfig> PpcAlarmConfigs { get; set; }
 
 

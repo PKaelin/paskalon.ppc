@@ -12,7 +12,7 @@ using paskalON.Alarms.Infrastructure.Storage;
 namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(AlarmContext))]
-    [Migration("20261106172043_v_0_1")]
+    [Migration("20261106195539_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -169,6 +169,16 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                         .HasColumnType("bigint");
 
                     b.ToTable((string)null);
+                });
+
+            modelBuilder.Entity("paskalON.Alarms.Domain.Configs.SystemConfig", b =>
+                {
+                    b.HasBaseType("paskalON.Domains.DomainBase");
+
+                    b.Property<string>("PublisherExchangeAlarmActions")
+                        .HasColumnType("text");
+
+                    b.ToTable("SystemConfig");
                 });
 
             modelBuilder.Entity("paskalON.Alarms.Infrastructure.Storage.Outboxes.AlarmActionOutboxMessage", b =>

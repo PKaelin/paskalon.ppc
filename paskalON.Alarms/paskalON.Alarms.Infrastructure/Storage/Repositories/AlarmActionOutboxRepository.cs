@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using paskalON.Alarms.Infrastructure.Storage.Outboxes;
 using paskalON.Infrastructure.Repositories;
@@ -29,6 +30,30 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
             ArgumentNullException.ThrowIfNull(messages);
 
             Context.AlarmActionOutboxMessages.AddRange(messages);
+        }
+
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// Messages with the same creation time are ordered by id (insert order), so that e.g. the actions of one alarm keep their order.
+        /// </remarks>
+        public async Task<List<AlarmActionOutboxMessage>> GetPendingAsync(int take, CancellationToken cancellationToken = default)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(take, 1);
+
+            return await Context.AlarmActionOutboxMessages
+                .Where(message => message.SentOn == null)
+                .OrderBy(message => message.CreatedOn)
+                .ThenBy(message => message.Id)
+                .Take(take)
+                .ToListAsync(cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            return await Context.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -77,6 +77,20 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SystemConfig",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
+                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    PublisherExchangeAlarmActions = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SystemConfig", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AlarmActionParameterConfig",
                 columns: table => new
                 {
@@ -220,6 +234,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 
             migrationBuilder.DropTable(
                 name: "Configuration");
+
+            migrationBuilder.DropTable(
+                name: "SystemConfig");
 
             migrationBuilder.DropTable(
                 name: "PpcAlarm");

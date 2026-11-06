@@ -168,6 +168,16 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     b.ToTable((string)null);
                 });
 
+            modelBuilder.Entity("paskalON.Alarms.Domain.Configs.SystemConfig", b =>
+                {
+                    b.HasBaseType("paskalON.Domains.DomainBase");
+
+                    b.Property<string>("PublisherExchangeAlarmActions")
+                        .HasColumnType("text");
+
+                    b.ToTable("SystemConfig");
+                });
+
             modelBuilder.Entity("paskalON.Alarms.Infrastructure.Storage.Outboxes.AlarmActionOutboxMessage", b =>
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");

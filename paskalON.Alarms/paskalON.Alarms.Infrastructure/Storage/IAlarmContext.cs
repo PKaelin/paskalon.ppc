@@ -30,6 +30,12 @@ namespace paskalON.Alarms.Infrastructure.Storage
 
 
         /// <summary>
+        /// System configuration of the microservice.
+        /// </summary>
+        DbSet<SystemConfig> SystemConfigs { get; set; }
+
+
+        /// <summary>
         /// PPC alarm configurations.
         /// </summary>
         DbSet<PpcAlarmConfig> PpcAlarmConfigs { get; set; }

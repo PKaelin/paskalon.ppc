@@ -29,5 +29,22 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
         /// </remarks>
         /// <param name="messages">Alarm action messages.</param>
         void Add(IEnumerable<AlarmActionOutboxMessage> messages);
+
+
+        /// <summary>
+        /// Gets the oldest pending (not sent) messages in creation order.
+        /// </summary>
+        /// <param name="take">Maximum number of messages.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Tracked pending messages, changes (sent or failed) are saved with <see cref="SaveChangesAsync"/>.</returns>
+        Task<List<AlarmActionOutboxMessage>> GetPendingAsync(int take, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Saves the changes of the tracked messages (sent or failed attempts).
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Number of state entries written to the database.</returns>
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

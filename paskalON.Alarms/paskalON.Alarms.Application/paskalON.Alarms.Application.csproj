@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging.RabbitMq\paskalON.Messaging.RabbitMq.csproj" />
     <ProjectReference Include="..\paskalON.Alarms.Domain\paskalON.Alarms.Domain.csproj" />
     <ProjectReference Include="..\paskalON.Alarms.Dto\paskalON.Alarms.Dto.csproj" />
     <ProjectReference Include="..\paskalON.Alarms.Infrastructure\paskalON.Alarms.Infrastructure.csproj" />
