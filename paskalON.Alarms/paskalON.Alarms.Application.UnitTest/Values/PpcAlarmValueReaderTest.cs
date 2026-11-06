@@ -5,7 +5,9 @@
 using paskalON.Alarms.Application.Values;
 using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Dto.PowerConversionSystems;
+using paskalON.OperatingModes.Dto.Powers;
 using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.PowerControls.Dto.Powers;
 
 namespace paskalON.Alarms.Application.UnitTest.Values
 {
@@ -119,6 +121,45 @@ namespace paskalON.Alarms.Application.UnitTest.Values
             Dictionary<string, double> values = PpcAlarmValueReader.Read(pcsCore);
 
             Assert.IsFalse(values.Keys.Any(name => name.StartsWith(propertyName, StringComparison.Ordinal)));
+        }
+
+
+        /// <summary>
+        /// The setpoints of a sequenced message are read, the sequence (changes with every message) is ignored.
+        /// </summary>
+        [TestMethod]
+        public void ReadSequencedMessageIgnoresSequenceTest()
+        {
+            CurrentSetpointsDto setpoints = new CurrentSetpointsDto
+            {
+                SetpointActivePowerWatts = 2500000,
+                SetpointReactivePowerVars = -300000,
+                SourceInstance = "OperatingMode-1a2b3c",
+                Sequence = 4711,
+                Timestamp = new DateTimeOffset(2026, 11, 6, 8, 15, 30, TimeSpan.Zero)
+            };
+
+            Dictionary<string, double> values = PpcAlarmValueReader.Read(setpoints);
+
+            CollectionAssert.AreEquivalent(new List<string> { "SetpointActivePowerWatts", "SetpointReactivePowerVars" }, values.Keys.ToList());
+            Assert.AreEqual(2500000, values["SetpointActivePowerWatts"]);
+            Assert.AreEqual(-300000, values["SetpointReactivePowerVars"]);
+        }
+
+
+        /// <summary>
+        /// The power target of a PCS published by the power control is read with its device id.
+        /// </summary>
+        [TestMethod]
+        public void ReadPowerTargetReadsNumericsTest()
+        {
+            CurrentTargetsDto target = new CurrentTargetsDto { DeviceId = 7, ActivePowerWatt = 1000000, ReactivePowerVar = 200000 };
+
+            Dictionary<string, double> values = PpcAlarmValueReader.Read(target);
+
+            Assert.AreEqual(7, values["DeviceId"]);
+            Assert.AreEqual(1000000, values["ActivePowerWatt"]);
+            Assert.AreEqual(200000, values["ReactivePowerVar"]);
         }
 
 

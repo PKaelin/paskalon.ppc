@@ -37,5 +37,18 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
                 .OrderBy(config => config.Id)
                 .ToListAsync(cancellationToken);
         }
+
+
+        /// <inheritdoc/>
+        public async Task<List<PpcAlarmConfig>> GetAllEnabledAsync(CancellationToken cancellationToken = default)
+        {
+            return await Context.PpcAlarmConfigs
+                .Where(config => config.IsEnabled)
+                .Include(config => config.AlarmActions)
+                .ThenInclude(action => action.AlarmActionParameters)
+                .OrderBy(config => config.Id)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
     }
 }

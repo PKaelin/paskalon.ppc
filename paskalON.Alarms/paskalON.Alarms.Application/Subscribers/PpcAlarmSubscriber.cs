@@ -67,40 +67,48 @@ namespace paskalON.Alarms.Application.Subscribers
         /// <inheritdoc/>
         public void SubscribeDevice<TDevice>(string topic, PpcAlarmType ppcAlarmType) where TDevice : class, IDevice
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(topic);
+            Subscribe<TDevice>(topic, ppcAlarmType, device => device.DeviceId);
+        }
 
-            _subscriber.Subscribe(topic, json => EnqueueDevice<TDevice>(json, ppcAlarmType));
-            _logger.LogInformation("Subscribed {PpcAlarmType} data {DataType} to topic {Topic}.", ppcAlarmType, typeof(TDevice).Name, topic);
+
+        /// <inheritdoc/>
+        public void Subscribe<TData>(string topic, PpcAlarmType ppcAlarmType, Func<TData, int?> getDeviceId) where TData : class
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(topic);
+            ArgumentNullException.ThrowIfNull(getDeviceId);
+
+            _subscriber.Subscribe(topic, json => Enqueue(json, ppcAlarmType, getDeviceId));
+            _logger.LogInformation("Subscribed {PpcAlarmType} data {DataType} to topic {Topic}.", ppcAlarmType, typeof(TData).Name, topic);
         }
 
 
         /// <summary>
-        /// Deserializes the published device data and queues it with the device as publisher.
+        /// Deserializes the published data and queues it with its publisher.
         /// </summary>
-        private void EnqueueDevice<TDevice>(string json, PpcAlarmType ppcAlarmType) where TDevice : class, IDevice
+        private void Enqueue<TData>(string json, PpcAlarmType ppcAlarmType, Func<TData, int?> getDeviceId) where TData : class
         {
-            TDevice? device;
+            TData? data;
 
             try
             {
-                device = JsonSerializer.Deserialize<TDevice>(json);
+                data = JsonSerializer.Deserialize<TData>(json);
             }
             catch (JsonException exception)
             {
-                _logger.LogError(exception, "Deserializing {DataType} of {PpcAlarmType} failed.", typeof(TDevice).Name, ppcAlarmType);
+                _logger.LogError(exception, "Deserializing {DataType} of {PpcAlarmType} failed.", typeof(TData).Name, ppcAlarmType);
 
                 return;
             }
 
-            if (device is null)
+            if (data is null)
             {
                 return;
             }
 
             _queue.Enqueue(new PpcAlarmMessage
             {
-                Key = new PpcAlarmKey { PpcAlarmType = ppcAlarmType, DeviceId = device.DeviceId },
-                Data = device,
+                Key = new PpcAlarmKey { PpcAlarmType = ppcAlarmType, DeviceId = getDeviceId(data) },
+                Data = data,
                 ReceivedOn = _timeProvider.GetUtcNow()
             });
         }

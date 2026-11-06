@@ -71,8 +71,98 @@ namespace paskalON.Alarms.Domain.Configs
         /// </summary>
         /// <remarks>
         /// The fault states, warning states and vendor events of the detail data raise the PCS alarms.
-        /// Null means the PCS alarms are not evaluated.
+        /// Null means the PCS detail data is not evaluated, the same applies to all subscriber topics.
         /// </remarks>
         public string? SubscriberTopicPcsDetail { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for power conversion system core used for the message subscriber, e.g. ppc:pcs:core.
+        /// </summary>
+        public string? SubscriberTopicPcsCore { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for battery bank core used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicBatteryBankCore { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for battery bank detail used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicBatteryBankDetail { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for solar panel core used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicSolarPanelCore { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for solar panel detail used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicSolarPanelDetail { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for external power meter core used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicExternalPowerMeterCore { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for external power meter detail used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicExternalPowerMeterDetail { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for auxiliary power meter core used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicAuxiliaryPowerMeterCore { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for auxiliary power meter detail used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicAuxiliaryPowerMeterDetail { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for circuit power meter core used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicCircuitPowerMeterCore { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for circuit power meter detail used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicCircuitPowerMeterDetail { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for system power meter core used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicSystemPowerMeterCore { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for system power meter detail used for the message subscriber.
+        /// </summary>
+        public string? SubscriberTopicSystemPowerMeterDetail { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for the power targets of the power conversion systems published by the power control, e.g. ppc:pc:targets.
+        /// </summary>
+        public string? SubscriberTopicPowerTarget { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for the current system setpoint published by the operating mode.
+        /// </summary>
+        public string? SubscriberTopicCurrentSetpoint { get; set; }
     }
 }

@@ -5,6 +5,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using paskalON.Alarms.Domain.Evaluations;
+using paskalON.Messaging.Sequences;
 
 namespace paskalON.Alarms.Application.Values
 {
@@ -17,6 +18,7 @@ namespace paskalON.Alarms.Application.Values
     /// - Numeric properties converted to double.
     /// - Dictionaries of string/boolean, every entry as [Dictionary].[Key], e.g. FaultStates.OverTemperature.
     /// Null values and all other property types (strings, arrays, nested objects, etc.) are ignored.
+    /// The sequence properties of a sequenced message (<see cref="ISequencedMessage"/>) are ignored.
     /// </remarks>
     public static class PpcAlarmValueReader
     {
@@ -33,6 +35,15 @@ namespace paskalON.Alarms.Application.Values
         {
             typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(int), typeof(uint),
             typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal)
+        };
+
+
+        /// <summary>
+        /// Properties of a sequenced message that are not alarm relevant.
+        /// </summary>
+        private static readonly HashSet<string> SequencedMessageProperties = new HashSet<string>(StringComparer.Ordinal)
+        {
+            nameof(ISequencedMessage.SourceInstance), nameof(ISequencedMessage.Sequence), nameof(ISequencedMessage.Timestamp)
         };
 
 
@@ -98,12 +109,18 @@ namespace paskalON.Alarms.Application.Values
 
 
         /// <summary>
-        /// Gets the readable public instance properties of a type, without indexers.
+        /// Gets the readable public instance properties of a type, without indexers and without the message sequence.
         /// </summary>
+        /// <remarks>
+        /// The sequence of a sequenced message changes with every message, it would evaluate every message again.
+        /// </remarks>
         private static PropertyInfo[] GetReadableProperties(Type type)
         {
+            bool isSequencedMessage = typeof(ISequencedMessage).IsAssignableFrom(type);
+
             return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(property => property.CanRead && property.GetIndexParameters().Length == 0)
+                .Where(property => isSequencedMessage is false || SequencedMessageProperties.Contains(property.Name) is false)
                 .ToArray();
         }
     }

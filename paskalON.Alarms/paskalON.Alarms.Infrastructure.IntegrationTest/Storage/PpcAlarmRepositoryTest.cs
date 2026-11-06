@@ -77,6 +77,30 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
 
 
         /// <summary>
+        /// A raised alarm with a cached (detached) configuration is persisted although the context already tracks
+        /// the same configuration with an active alarm.
+        /// </summary>
+        [TestMethod]
+        public async Task AddRaisedAlarmWithCachedConfigTrackedByActiveAlarmPersistsAlarmTest()
+        {
+            await SeedAlarmsAsync();
+            PpcAlarmConfig cachedFaultConfig = await GetConfigAsync("PCS-FAULT");
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmRepository repository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
+            List<PpcAlarm> activeAlarms = await repository.GetActiveAsync(Pcs7Key);
+            PpcAlarm raisedAlarm = PcsAlarmSampleData.CreateAlarm(cachedFaultConfig, 7, "FaultStates.OverCurrent");
+
+            repository.Add(new List<PpcAlarm> { raisedAlarm });
+            await repository.SaveChangesAsync();
+
+            Assert.AreSame(activeAlarms[0].PpcAlarmConfig, raisedAlarm.PpcAlarmConfig);
+            await using AlarmContext verifyContext = CreateDbContext<AlarmContext>();
+            Assert.IsTrue(await verifyContext.PpcAlarms.AnyAsync(alarm => alarm.DeviceId == 7 && alarm.PropertyName == "FaultStates.OverCurrent"));
+            Assert.AreEqual(3, await verifyContext.PpcAlarmConfigs.CountAsync());
+        }
+
+
+        /// <summary>
         /// Only the active alarms of the publisher are returned, including the configuration with its actions.
         /// </summary>
         [TestMethod]

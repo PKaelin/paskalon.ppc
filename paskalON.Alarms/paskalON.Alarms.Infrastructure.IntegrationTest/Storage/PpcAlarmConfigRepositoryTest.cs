@@ -55,6 +55,24 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
 
 
         /// <summary>
+        /// The enabled configurations of all alarm types are returned with their actions, not tracked so that they can be cached.
+        /// </summary>
+        [TestMethod]
+        public async Task GetAllEnabledAsyncReturnsUntrackedEnabledConfigsOfAllTypesTest()
+        {
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmConfigRepository repository = new PpcAlarmConfigRepository(NullLogger<PpcAlarmConfigRepository>.Instance, context);
+
+            List<PpcAlarmConfig> configs = await repository.GetAllEnabledAsync();
+
+            CollectionAssert.AreEquivalent(new string[] { "PCS-FAULT", "PCS-WARNING", "PCS-GRIDLOSS", "SYS-RTU" },
+                configs.Select(config => config.AlarmId).ToArray());
+            Assert.HasCount(2, configs.Single(config => config.AlarmId == "PCS-FAULT").AlarmActions);
+            Assert.IsEmpty(context.ChangeTracker.Entries());
+        }
+
+
+        /// <summary>
         /// The configurations are returned with their actions and action parameters.
         /// </summary>
         [TestMethod]

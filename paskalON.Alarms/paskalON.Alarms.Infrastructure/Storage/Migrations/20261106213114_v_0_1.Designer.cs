@@ -12,7 +12,7 @@ using paskalON.Alarms.Infrastructure.Storage;
 namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(AlarmContext))]
-    [Migration("20261106210459_v_0_1")]
+    [Migration("20261106213114_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -184,7 +184,52 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     b.Property<string>("PublisherExchangeAlarmActions")
                         .HasColumnType("text");
 
+                    b.Property<string>("SubscriberTopicAuxiliaryPowerMeterCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicAuxiliaryPowerMeterDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicBatteryBankCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicBatteryBankDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicCircuitPowerMeterCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicCircuitPowerMeterDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicCurrentSetpoint")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicExternalPowerMeterCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicExternalPowerMeterDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicPcsCore")
+                        .HasColumnType("text");
+
                     b.Property<string>("SubscriberTopicPcsDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicPowerTarget")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicSolarPanelCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicSolarPanelDetail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicSystemPowerMeterCore")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicSystemPowerMeterDetail")
                         .HasColumnType("text");
 
                     b.ToTable("SystemConfig");

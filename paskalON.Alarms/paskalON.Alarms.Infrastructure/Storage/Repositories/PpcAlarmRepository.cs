@@ -5,6 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using paskalON.Alarms.Domain;
+using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Domain.Ppcs;
 using paskalON.Infrastructure.Repositories;
@@ -50,9 +51,17 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
 
             foreach (PpcAlarm alarm in alarms)
             {
-                if (Context.Entry(alarm.PpcAlarmConfig).State == EntityState.Detached)
+                // The configuration might be cached (detached) while the context already tracks the same configuration
+                // (e.g. loaded with an active alarm), a second instance with the same key must not be attached.
+                PpcAlarmConfig? trackedConfig = Context.PpcAlarmConfigs.Local.FirstOrDefault(config => config.Id == alarm.PpcAlarmConfig.Id);
+
+                if (trackedConfig is null)
                 {
                     Context.PpcAlarmConfigs.Attach(alarm.PpcAlarmConfig);
+                }
+                else if (ReferenceEquals(trackedConfig, alarm.PpcAlarmConfig) is false)
+                {
+                    alarm.PpcAlarmConfig = trackedConfig;
                 }
 
                 Context.PpcAlarms.Add(alarm);

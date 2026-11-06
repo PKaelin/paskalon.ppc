@@ -86,7 +86,22 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     AlarmActionSendIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     AlarmActionRetryIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     PublisherExchangeAlarmActions = table.Column<string>(type: "text", nullable: true),
-                    SubscriberTopicPcsDetail = table.Column<string>(type: "text", nullable: true)
+                    SubscriberTopicPcsDetail = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicPcsCore = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicBatteryBankCore = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicBatteryBankDetail = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicSolarPanelCore = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicSolarPanelDetail = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicExternalPowerMeterCore = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicExternalPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicAuxiliaryPowerMeterCore = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicAuxiliaryPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicCircuitPowerMeterCore = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicCircuitPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicSystemPowerMeterCore = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicSystemPowerMeterDetail = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicPowerTarget = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicCurrentSetpoint = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

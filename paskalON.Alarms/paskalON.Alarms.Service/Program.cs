@@ -2,11 +2,13 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using paskalON.Alarms.Application.Caches;
 using paskalON.Alarms.Application.Handlers;
 using paskalON.Alarms.Application.Outboxes;
 using paskalON.Alarms.Application.Stores;
@@ -18,7 +20,12 @@ using paskalON.Alarms.Infrastructure.Storage;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
 using paskalON.Alarms.Service.Publishers;
 using paskalON.Alarms.Service.Workers;
+using paskalON.Devices.Dto.EnergyResources.Solars;
+using paskalON.Devices.Dto.EnergyStorages.Batteries;
+using paskalON.Devices.Dto.Meters.PowerMeters.Concretes;
 using paskalON.Devices.Dto.PowerConversionSystems;
+using paskalON.OperatingModes.Dto.Powers;
+using paskalON.PowerControls.Dto.Powers;
 using paskalON.Hosting;
 using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
@@ -93,6 +100,8 @@ try
     // Add alarm processing
     builder.Services.AddSingleton(TimeProvider.System);
     builder.Services.AddSingleton<IPpcAlarmValueStore, PpcAlarmValueStore>();
+    // The enabled alarm configurations are loaded at startup and reloaded on request, not queried for every received data
+    builder.Services.AddSingleton<IPpcAlarmConfigCache, PpcAlarmConfigCache>();
     builder.Services.AddSingleton<IPpcAlarmEvaluator, PpcAlarmEvaluator>();
     // Signals the saved alarm actions from the scoped handlers to the outbox publisher service, so that they are sent immediately
     builder.Services.AddSingleton<IAlarmActionOutboxSignal, AlarmActionOutboxSignal>();
@@ -183,6 +192,10 @@ try
         // Fail the startup instead of the first send when the alarm action exchange is missing
         string alarmActionExchange = GetAlarmActionExchange(systemConfig);
         app.Logger.LogInformation("Alarm actions are published to exchange {ExchangeName}.", alarmActionExchange);
+        // Load the alarm configurations before subscribing, retry while the database is not reachable
+        IPpcAlarmConfigRepository configRepository = scope.ServiceProvider.GetRequiredService<IPpcAlarmConfigRepository>();
+        IPpcAlarmConfigCache configCache = app.Services.GetRequiredService<IPpcAlarmConfigCache>();
+        await startupRetry.ExecuteAsync("Load alarm configurations", () => configCache.LoadAsync(configRepository), DatabaseTransientExceptionFilter.IsTransient);
 
         if (startPublisher == true)
         {
@@ -245,20 +258,59 @@ static void RegisterRedisConnectionLogging(WebApplication app)
 /// Subscribe to the configured topics of the published data.
 /// </summary>
 /// <remarks>
-/// Without a configured topic the alarms of the data are not evaluated.
+/// - Without a configured topic the alarms of the data are not evaluated.
+/// - The core and detail data of a device share the PPC alarm type and the device id, their values are evaluated together.
+/// - The DER unit setpoints of the operating mode are not subscribed, they identify the DER unit only by name.
 /// </remarks>
 static void SubscribePublishedData(WebApplication app, SystemConfig config)
 {
     IPpcAlarmSubscriber subscriber = app.Services.GetRequiredService<IPpcAlarmSubscriber>();
+    // Device service
+    SubscribeIfConfigured(app, config.SubscriberTopicPcsCore, topic => subscriber.SubscribeDevice<PcsCoreDto>(topic, PpcAlarmType.PcsAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicPcsDetail, topic => subscriber.SubscribeDevice<PcsDetailDto>(topic, PpcAlarmType.PcsAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicBatteryBankCore, topic => subscriber.SubscribeDevice<BbCoreDto>(topic, PpcAlarmType.BatteryAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicBatteryBankDetail, topic => subscriber.SubscribeDevice<BbDetailDto>(topic, PpcAlarmType.BatteryAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicSolarPanelCore, topic => subscriber.SubscribeDevice<PvCoreDto>(topic, PpcAlarmType.SolarPanelAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicSolarPanelDetail, topic => subscriber.SubscribeDevice<PvDetailDto>(topic, PpcAlarmType.SolarPanelAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicExternalPowerMeterCore,
+        topic => subscriber.SubscribeDevice<PmExternalCoreDto>(topic, PpcAlarmType.ExternalPowerMeterAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicExternalPowerMeterDetail,
+        topic => subscriber.SubscribeDevice<PmExternalDetailDto>(topic, PpcAlarmType.ExternalPowerMeterAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicAuxiliaryPowerMeterCore,
+        topic => subscriber.SubscribeDevice<PmAuxiliaryCoreDto>(topic, PpcAlarmType.AuxiliaryPowerMeterAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicAuxiliaryPowerMeterDetail,
+        topic => subscriber.SubscribeDevice<PmAuxiliaryDetailDto>(topic, PpcAlarmType.AuxiliaryPowerMeterAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicCircuitPowerMeterCore,
+        topic => subscriber.SubscribeDevice<PmCircuitCoreDto>(topic, PpcAlarmType.CircuitPowerMeterAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicCircuitPowerMeterDetail,
+        topic => subscriber.SubscribeDevice<PmCircuitDetailDto>(topic, PpcAlarmType.CircuitPowerMeterAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicSystemPowerMeterCore,
+        topic => subscriber.SubscribeDevice<PmSystemCoreDto>(topic, PpcAlarmType.SystemPowerMeterAlarm));
+    SubscribeIfConfigured(app, config.SubscriberTopicSystemPowerMeterDetail,
+        topic => subscriber.SubscribeDevice<PmSystemDetailDto>(topic, PpcAlarmType.SystemPowerMeterAlarm));
+    // Power control service: the power target of a PCS
+    SubscribeIfConfigured(app, config.SubscriberTopicPowerTarget,
+        topic => subscriber.Subscribe<CurrentTargetsDto>(topic, PpcAlarmType.PowerControlAlarm, target => target.DeviceId));
+    // Operating mode service: the system wide setpoint has no device
+    SubscribeIfConfigured(app, config.SubscriberTopicCurrentSetpoint,
+        topic => subscriber.Subscribe<CurrentSetpointsDto>(topic, PpcAlarmType.OperatingModeAlarm, _ => null));
+}
 
-    if (string.IsNullOrWhiteSpace(config.SubscriberTopicPcsDetail))
+
+/// <summary>
+/// Subscribe to a topic if it is configured, otherwise log that its data is not evaluated.
+/// </summary>
+static void SubscribeIfConfigured(WebApplication app, string? topic, Action<string> subscribe,
+    [CallerArgumentExpression(nameof(topic))] string topicName = "")
+{
+    if (string.IsNullOrWhiteSpace(topic))
     {
-        app.Logger.LogWarning("No PCS detail topic is configured, the PCS alarms are not evaluated.");
+        app.Logger.LogWarning("Topic {TopicName} is not configured, its data is not evaluated for alarms.", topicName);
+
+        return;
     }
-    else
-    {
-        subscriber.SubscribeDevice<PcsDetailDto>(config.SubscriberTopicPcsDetail, PpcAlarmType.PcsAlarm);
-    }
+
+    subscribe(topic);
 }
 
 

@@ -5,6 +5,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using paskalON.Alarms.Application.Actions;
+using paskalON.Alarms.Application.Caches;
 using paskalON.Alarms.Application.Outboxes;
 using paskalON.Alarms.Application.Stores;
 using paskalON.Alarms.Application.Values;
@@ -46,9 +47,9 @@ namespace paskalON.Alarms.Application.Handlers
 
 
         /// <summary>
-        /// Repository of the alarm configurations.
+        /// Cache of the enabled alarm configurations.
         /// </summary>
-        private readonly IPpcAlarmConfigRepository _configRepository;
+        private readonly IPpcAlarmConfigCache _configCache;
 
 
         /// <summary>
@@ -75,18 +76,18 @@ namespace paskalON.Alarms.Application.Handlers
         /// <param name="logger">Logger instance.</param>
         /// <param name="valueStore">Stateless store of the latest values per publisher.</param>
         /// <param name="evaluator">Evaluator of the changed values.</param>
-        /// <param name="configRepository">Repository of the alarm configurations.</param>
+        /// <param name="configCache">Cache of the enabled alarm configurations.</param>
         /// <param name="alarmRepository">Repository of the alarms.</param>
         /// <param name="outboxRepository">Repository of the alarm action outbox.</param>
         /// <param name="outboxSignal">Signal that sends the saved alarm actions immediately.</param>
         public PpcAlarmHandler(ILogger<PpcAlarmHandler> logger, IPpcAlarmValueStore valueStore, IPpcAlarmEvaluator evaluator,
-            IPpcAlarmConfigRepository configRepository, IPpcAlarmRepository alarmRepository, IAlarmActionOutboxRepository outboxRepository,
+            IPpcAlarmConfigCache configCache, IPpcAlarmRepository alarmRepository, IAlarmActionOutboxRepository outboxRepository,
             IAlarmActionOutboxSignal outboxSignal)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(valueStore);
             ArgumentNullException.ThrowIfNull(evaluator);
-            ArgumentNullException.ThrowIfNull(configRepository);
+            ArgumentNullException.ThrowIfNull(configCache);
             ArgumentNullException.ThrowIfNull(alarmRepository);
             ArgumentNullException.ThrowIfNull(outboxRepository);
             ArgumentNullException.ThrowIfNull(outboxSignal);
@@ -94,7 +95,7 @@ namespace paskalON.Alarms.Application.Handlers
             _logger = logger;
             _valueStore = valueStore;
             _evaluator = evaluator;
-            _configRepository = configRepository;
+            _configCache = configCache;
             _alarmRepository = alarmRepository;
             _outboxRepository = outboxRepository;
             _outboxSignal = outboxSignal;
@@ -120,7 +121,7 @@ namespace paskalON.Alarms.Application.Handlers
 
             try
             {
-                List<PpcAlarmConfig> configs = await _configRepository.GetEnabledAsync(key.PpcAlarmType, cancellationToken);
+                IReadOnlyList<PpcAlarmConfig> configs = _configCache.GetEnabled(key.PpcAlarmType);
                 List<PpcAlarm> activeAlarms = await _alarmRepository.GetActiveAsync(key, cancellationToken);
                 PpcAlarmEvaluation evaluation = _evaluator.Evaluate(key, changedValues, configs, activeAlarms);
 

@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using paskalON.Alarms.Application.Caches;
 using paskalON.Alarms.Application.Handlers;
 using paskalON.Alarms.Application.Outboxes;
 using paskalON.Alarms.Application.Stores;
@@ -39,9 +40,9 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
 
 
         /// <summary>
-        /// Mocked configuration repository.
+        /// Mocked configuration cache.
         /// </summary>
-        private readonly Mock<IPpcAlarmConfigRepository> _configRepository = new Mock<IPpcAlarmConfigRepository>();
+        private readonly Mock<IPpcAlarmConfigCache> _configCache = new Mock<IPpcAlarmConfigCache>();
 
 
         /// <summary>
@@ -80,8 +81,8 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
         [TestInitialize]
         public void Initialize()
         {
-            _configRepository.Setup(repository => repository.GetEnabledAsync(PpcAlarmType.PcsAlarm, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(() => new List<PpcAlarmConfig> { PcsAlarmConfigSampleData.CreatePcsFaultConfig() });
+            _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm))
+                .Returns(() => new List<PpcAlarmConfig> { PcsAlarmConfigSampleData.CreatePcsFaultConfig() });
             _alarmRepository.Setup(repository => repository.GetActiveAsync(Pcs7Key, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<PpcAlarm>());
             _alarmRepository.Setup(repository => repository.Add(It.IsAny<IEnumerable<PpcAlarm>>()))
@@ -129,8 +130,8 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
         {
             PpcAlarmConfig faultConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
             PpcAlarm activeAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
-            _configRepository.Setup(repository => repository.GetEnabledAsync(PpcAlarmType.PcsAlarm, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PpcAlarmConfig> { faultConfig });
+            _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm))
+                .Returns(new List<PpcAlarmConfig> { faultConfig });
             _alarmRepository.Setup(repository => repository.GetActiveAsync(Pcs7Key, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<PpcAlarm> { activeAlarm });
             PpcAlarmHandler handler = CreateHandler(new PpcAlarmValueStore());
@@ -156,8 +157,8 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
         {
             PpcAlarmConfig faultConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
             faultConfig.AlarmActions.Clear();
-            _configRepository.Setup(repository => repository.GetEnabledAsync(PpcAlarmType.PcsAlarm, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PpcAlarmConfig> { faultConfig });
+            _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm))
+                .Returns(new List<PpcAlarmConfig> { faultConfig });
             PpcAlarmHandler handler = CreateHandler(new PpcAlarmValueStore());
 
             PpcAlarmEvaluation evaluation = await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn);
@@ -181,7 +182,7 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             PpcAlarmEvaluation evaluation = await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn.AddSeconds(1));
 
             Assert.IsFalse(evaluation.HasChanges);
-            _configRepository.Verify(repository => repository.GetEnabledAsync(It.IsAny<PpcAlarmType>(), It.IsAny<CancellationToken>()), Times.Once);
+            _configCache.Verify(cache => cache.GetEnabled(It.IsAny<PpcAlarmType>()), Times.Once);
             _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -233,7 +234,7 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
         private PpcAlarmHandler CreateHandler(IPpcAlarmValueStore valueStore)
         {
             return new PpcAlarmHandler(NullLogger<PpcAlarmHandler>.Instance, valueStore, new PpcAlarmEvaluator(),
-                _configRepository.Object, _alarmRepository.Object, _outboxRepository.Object, _outboxSignal.Object);
+                _configCache.Object, _alarmRepository.Object, _outboxRepository.Object, _outboxSignal.Object);
         }
 
 

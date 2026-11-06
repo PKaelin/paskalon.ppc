@@ -19,5 +19,15 @@ namespace paskalON.Alarms.Application.Subscribers
         /// <param name="topic">Topic of the published data, e.g. ppc:pcs:detail.</param>
         /// <param name="ppcAlarmType">PPC alarm type of the devices, e.g. PcsAlarm.</param>
         void SubscribeDevice<TDevice>(string topic, PpcAlarmType ppcAlarmType) where TDevice : class, IDevice;
+
+
+        /// <summary>
+        /// Subscribes to published data, e.g. the CurrentTargetsDto of the power control or the CurrentSetpointsDto of the operating mode.
+        /// </summary>
+        /// <typeparam name="TData">Type of the published data.</typeparam>
+        /// <param name="topic">Topic of the published data, e.g. ppc:pc:targets.</param>
+        /// <param name="ppcAlarmType">PPC alarm type of the data, e.g. PowerControlAlarm.</param>
+        /// <param name="getDeviceId">Gets the device id of the publisher from the data, null for data without device (system wide).</param>
+        void Subscribe<TData>(string topic, PpcAlarmType ppcAlarmType, Func<TData, int?> getDeviceId) where TData : class;
     }
 }
