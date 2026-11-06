@@ -64,5 +64,15 @@ namespace paskalON.Alarms.Domain.Configs
         /// recipients bind their queues to this exchange with the actions they execute.
         /// </remarks>
         public string? PublisherExchangeAlarmActions { get; set; }
+
+
+        /// <summary>
+        /// Subscriber topic for power conversion system detail used for the message subscriber, e.g. ppc:pcs:detail.
+        /// </summary>
+        /// <remarks>
+        /// The fault states, warning states and vendor events of the detail data raise the PCS alarms.
+        /// Null means the PCS alarms are not evaluated.
+        /// </remarks>
+        public string? SubscriberTopicPcsDetail { get; set; }
     }
 }

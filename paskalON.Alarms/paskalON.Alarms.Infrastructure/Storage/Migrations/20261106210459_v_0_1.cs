@@ -85,7 +85,8 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     AlarmActionSendIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     AlarmActionRetryIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
-                    PublisherExchangeAlarmActions = table.Column<string>(type: "text", nullable: true)
+                    PublisherExchangeAlarmActions = table.Column<string>(type: "text", nullable: true),
+                    SubscriberTopicPcsDetail = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -10,14 +10,21 @@ using OpenTelemetry.Trace;
 using paskalON.Alarms.Application.Handlers;
 using paskalON.Alarms.Application.Outboxes;
 using paskalON.Alarms.Application.Stores;
+using paskalON.Alarms.Application.Subscribers;
 using paskalON.Alarms.Domain.Configs;
+using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Infrastructure.Storage;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
 using paskalON.Alarms.Service.Publishers;
+using paskalON.Alarms.Service.Workers;
+using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.Hosting;
 using paskalON.Infrastructure.Repositories;
+using paskalON.Messaging;
 using paskalON.Messaging.RabbitMq;
+using paskalON.Messaging.Redis;
+using StackExchange.Redis;
 
 // Name of this service in the heartbeat and the source instance of the published messages
 const string serviceName = "Alarm";
@@ -36,6 +43,12 @@ try
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dbConnectionStringFile, "Cannot find the database secret file. DATABASE_CONNECTION_FILE");
     string dbConnectionString = (await File.ReadAllTextAsync(dbConnectionStringFile)).Trim();
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dbConnectionString, "Cannot find the database connection string definition");
+
+    // Get messaging connection string of the published data (Redis)
+    string? msgConnectionStringFile = Environment.GetEnvironmentVariable("MESSAGING_CONNECTION_FILE");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(msgConnectionStringFile, "Cannot find the messaging secret file. MESSAGING_CONNECTION_FILE");
+    string msgConnectionString = (await File.ReadAllTextAsync(msgConnectionStringFile)).Trim();
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(msgConnectionString, "Cannot find the messaging connection string definition");
 
     // Get RabbitMQ connection URI, e.g. amqp://user:password@paskalon.rabbitmq:5672/
     string? rabbitMqConnectionFile = Environment.GetEnvironmentVariable("RABBITMQ_CONNECTION_FILE");
@@ -84,6 +97,16 @@ try
     // Signals the saved alarm actions from the scoped handlers to the outbox publisher service, so that they are sent immediately
     builder.Services.AddSingleton<IAlarmActionOutboxSignal, AlarmActionOutboxSignal>();
     builder.Services.AddScoped<IPpcAlarmHandler, PpcAlarmHandler>();
+
+    // Add subscriptions of the published data: the subscriber queues the received data, the handler service evaluates it in order.
+    // Do not abort when Redis is not reachable at startup, the multiplexer keeps retrying to connect in the background.
+    ConfigurationOptions msgOptions = ConfigurationOptions.Parse(msgConnectionString);
+    msgOptions.AbortOnConnectFail = false;
+    builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(msgOptions));
+    builder.Services.AddSingleton<IMessageSubscriber, RedisMessageSubscriber>();
+    builder.Services.AddSingleton<IPpcAlarmMessageQueue>(provider => new PpcAlarmMessageQueue(provider.GetRequiredService<ILogger<PpcAlarmMessageQueue>>()));
+    builder.Services.AddSingleton<IPpcAlarmSubscriber, PpcAlarmSubscriber>();
+    builder.Services.AddHostedService<PpcAlarmHandlerService>();
 
     // Add alarm actions: the publisher keeps the RabbitMQ connection (singleton), the sender uses the repository (scoped).
     // The publisher is created on the first send, after the system configuration is loaded.
@@ -148,6 +171,8 @@ try
     lifetime.ApplicationStopping.Register(() => { app.Logger.LogInformation("Microservice Alarm is stopping."); });
     app.Logger.LogInformation("Application starts initializing services.....");
     StartupRetry startupRetry = new StartupRetry(app.Logger, TimeProvider.System, startupRetryOptions);
+    // The multiplexer reconnects and resubscribes automatically, log the loss and the restore of the connection
+    RegisterRedisConnectionLogging(app);
 
     using (IServiceScope scope = app.Services.CreateScope())
     {
@@ -164,6 +189,9 @@ try
             AlarmActionOutboxPublisherService outboxPublisherService = app.Services.GetRequiredService<AlarmActionOutboxPublisherService>();
             outboxPublisherService.Initialize(systemConfig.AlarmActionSendIntervalMilliseconds, systemConfig.AlarmActionRetryIntervalMilliseconds);
         }
+
+        // Subscribe to the published data, the received data is queued and evaluated once the application runs
+        SubscribePublishedData(app, systemConfig);
     }
 
     if (app.Environment.IsDevelopment())
@@ -190,6 +218,47 @@ catch (Exception ex)
 
     // Fail application
     throw;
+}
+
+
+/// <summary>
+/// Log the loss and the restore of the Redis connection.
+/// </summary>
+/// <remarks>
+/// - The multiplexer retries to connect forever and resubscribes the topics after a restore.
+/// - Data published while the connection is lost is not received (Pub/Sub), the next published data of a device
+///   is evaluated against its last known values.
+/// - The events are raised per connection type (interactive and subscription) and for each failed reconnect attempt.
+/// </remarks>
+static void RegisterRedisConnectionLogging(WebApplication app)
+{
+    IConnectionMultiplexer connectionMultiplexer = app.Services.GetRequiredService<IConnectionMultiplexer>();
+    connectionMultiplexer.ConnectionFailed += (_, args) => app.Logger.LogWarning(args.Exception,
+        "Redis {ConnectionType} connection to {EndPoint} failed ({FailureType}), published data is not received until the connection is restored.",
+        args.ConnectionType, args.EndPoint, args.FailureType);
+    connectionMultiplexer.ConnectionRestored += (_, args) => app.Logger.LogInformation(
+        "Redis {ConnectionType} connection to {EndPoint} restored.", args.ConnectionType, args.EndPoint);
+}
+
+
+/// <summary>
+/// Subscribe to the configured topics of the published data.
+/// </summary>
+/// <remarks>
+/// Without a configured topic the alarms of the data are not evaluated.
+/// </remarks>
+static void SubscribePublishedData(WebApplication app, SystemConfig config)
+{
+    IPpcAlarmSubscriber subscriber = app.Services.GetRequiredService<IPpcAlarmSubscriber>();
+
+    if (string.IsNullOrWhiteSpace(config.SubscriberTopicPcsDetail))
+    {
+        app.Logger.LogWarning("No PCS detail topic is configured, the PCS alarms are not evaluated.");
+    }
+    else
+    {
+        subscriber.SubscribeDevice<PcsDetailDto>(config.SubscriberTopicPcsDetail, PpcAlarmType.PcsAlarm);
+    }
 }
 
 

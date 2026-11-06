@@ -12,7 +12,7 @@ using paskalON.Alarms.Infrastructure.Storage;
 namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(AlarmContext))]
-    [Migration("20261106200853_v_0_1")]
+    [Migration("20261106210459_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -182,6 +182,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("PublisherExchangeAlarmActions")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubscriberTopicPcsDetail")
                         .HasColumnType("text");
 
                     b.ToTable("SystemConfig");

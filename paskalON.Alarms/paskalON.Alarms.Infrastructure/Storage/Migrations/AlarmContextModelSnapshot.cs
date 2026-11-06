@@ -181,6 +181,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     b.Property<string>("PublisherExchangeAlarmActions")
                         .HasColumnType("text");
 
+                    b.Property<string>("SubscriberTopicPcsDetail")
+                        .HasColumnType("text");
+
                     b.ToTable("SystemConfig");
                 });
 
