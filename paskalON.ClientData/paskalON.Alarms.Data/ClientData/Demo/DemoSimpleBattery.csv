@@ -1,0 +1,41 @@
+# -----------------------------------------------------------------------------
+# Alarm service data of the DemoSimpleBattery client project.
+# -----------------------------------------------------------------------------
+Type=Configuration,Name=AuditCleanUpInMonths,Key=AuditCleanUpInMonths,Value=60,Description=How long the updated records should be kept in the audit tables
+Type=SystemConfig,Name=System,AlarmActionSendIntervalMilliseconds=1000,AlarmActionRetryIntervalMilliseconds=5000,PublisherExchangeAlarmActions=ppc:alarms:actions,SubscriberTopicPcsCore=ppc:device:pcs:core,SubscriberTopicPcsDetail=ppc:device:pcs:detail,SubscriberTopicBatteryBankCore=ppc:device:bb:core,SubscriberTopicBatteryBankDetail=ppc:device:bb:detail,SubscriberTopicSolarPanelCore=ppc:device:pv:core,SubscriberTopicSolarPanelDetail=ppc:device:pv:detail,SubscriberTopicExternalPowerMeterCore=ppc:device:pm:external:core,SubscriberTopicExternalPowerMeterDetail=ppc:device:pm:external:detail,SubscriberTopicAuxiliaryPowerMeterCore=ppc:device:pm:auxiliary:core,SubscriberTopicAuxiliaryPowerMeterDetail=ppc:device:pm:auxiliary:detail,SubscriberTopicCircuitPowerMeterCore=ppc:device:pm:circuit:core,SubscriberTopicCircuitPowerMeterDetail=ppc:device:pm:circuit:detail,SubscriberTopicSystemPowerMeterCore=ppc:device:pm:system:core,SubscriberTopicSystemPowerMeterDetail=ppc:device:pm:system:detail,SubscriberTopicPowerTarget=ppc:pc:targets,SubscriberTopicCurrentSetpoint=ppc:om:setpoints
+# -----------------------------------------------------------------------------
+# Shared alarm actions
+# Actions must be defined before the alarm configurations that list them in AlarmActions (several separated by ;).
+# The placeholders {{AlarmId}}, {{PpcAlarmType}}, {{SeverityLevel}}, {{DeviceId}} and {{PropertyName}} are replaced with the values of the alarm.
+# -----------------------------------------------------------------------------
+# Shows the raised alarm in Luna
+Type=AlarmActionConfig,Name=ShowAlarm,Trigger=Raise
+Type=AlarmActionParameterConfig,Name=ShowAlarm.AlarmId,AlarmActionConfig=ShowAlarm,Key=AlarmId,Value={{AlarmId}}
+Type=AlarmActionParameterConfig,Name=ShowAlarm.PpcAlarmType,AlarmActionConfig=ShowAlarm,Key=PpcAlarmType,Value={{PpcAlarmType}}
+Type=AlarmActionParameterConfig,Name=ShowAlarm.SeverityLevel,AlarmActionConfig=ShowAlarm,Key=SeverityLevel,Value={{SeverityLevel}}
+Type=AlarmActionParameterConfig,Name=ShowAlarm.DeviceId,AlarmActionConfig=ShowAlarm,Key=DeviceId,Value={{DeviceId}}
+Type=AlarmActionParameterConfig,Name=ShowAlarm.PropertyName,AlarmActionConfig=ShowAlarm,Key=PropertyName,Value={{PropertyName}}
+# -----------------------------------------------------------------------------
+# Localization of the alarm texts
+# These fields of an alarm configuration (PpcAlarmConfig) can be localized:
+#   Name, Description, PossibleCauses, Response, Consequences
+# A value written as {{Key}} is a localization key: the alarm service stores and sends it unchanged,
+# the UI (Luna) shows the text of that key in the language of the user.
+# Any other value is plain text and is shown as it is (not localized).
+# Key convention: {{<Device>.<Alarm>.<Field>}}, Field = Name, Desc, Causes, Response or Consequences,
+#   e.g. Name={{PCS.CommunicationError.Name}},Description={{PCS.CommunicationError.Desc}}
+# Not localized (identifiers): AlarmId, PropertyName, the action names and the parameter keys.
+# The {{AlarmId}}, {{DeviceId}}, ... in action parameter values are placeholders, not localization keys:
+# the alarm service replaces them with the values of the alarm before the action is sent.
+# Note: Luna does not resolve the localization keys yet.
+# -----------------------------------------------------------------------------
+# Communication errors of the devices, one configuration per device type for all its devices (no DeviceId).
+# CommunicationError is a boolean of the core data: true = 1, false = 0.
+# -----------------------------------------------------------------------------
+Type=PpcAlarmConfig,Name={{PCS.CommunicationError.Name}},IsEnabled=true,AlarmId=PCS-COMM,SeverityLevel=Error,Description={{PCS.CommunicationError.Desc}},PpcAlarmType=PcsAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
+Type=PpcAlarmConfig,Name={{BB.CommunicationError.Name}},IsEnabled=true,AlarmId=BB-COMM,SeverityLevel=Error,Description={{BB.CommunicationError.Desc}},PpcAlarmType=BatteryAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
+Type=PpcAlarmConfig,Name={{PV.CommunicationError.Name}},IsEnabled=true,AlarmId=PV-COMM,SeverityLevel=Error,Description={{PV.CommunicationError.Desc}},PpcAlarmType=SolarPanelAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
+Type=PpcAlarmConfig,Name={{PM.External.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-EXT-COMM,SeverityLevel=Error,Description={{PM.External.CommunicationError.Desc}},PpcAlarmType=ExternalPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
+Type=PpcAlarmConfig,Name={{PM.Auxiliary.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-AUX-COMM,SeverityLevel=Error,Description={{PM.Auxiliary.CommunicationError.Desc}},PpcAlarmType=AuxiliaryPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
+Type=PpcAlarmConfig,Name={{PM.Circuit.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-CIR-COMM,SeverityLevel=Error,Description={{PM.Circuit.CommunicationError.Desc}},PpcAlarmType=CircuitPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
+Type=PpcAlarmConfig,Name={{PM.System.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-SYS-COMM,SeverityLevel=Error,Description={{PM.System.CommunicationError.Desc}},PpcAlarmType=SystemPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm

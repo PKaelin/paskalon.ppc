@@ -1,8 +1,12 @@
 <Solution>
   <Folder Name="/InitialDevelopment/">
+    <Project Path="../paskalON.Alarms/paskalON.Alarms.Domain.Configs/paskalON.Alarms.Domain.Configs.csproj" />
+    <Project Path="../paskalON.Alarms/paskalON.Alarms.Domain/paskalON.Alarms.Domain.csproj" />
+    <Project Path="../paskalON.Alarms/paskalON.Alarms.Infrastructure/paskalON.Alarms.Infrastructure.csproj" />
     <Project Path="../paskalON.Common/paskalON.Dataface/paskalON.Dataface.csproj" />
     <Project Path="../paskalON.Common/paskalON.Domains/paskalON.Domains.csproj" />
     <Project Path="../paskalON.Common/paskalON.Infrastructure.PostgreSql/paskalON.Infrastructure.PostgreSql.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Infrastructure/paskalON.Infrastructure.csproj" />
     <Project Path="../paskalON.Common/paskalON.Maths/paskalON.Maths.csproj" />
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
     <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
@@ -10,25 +14,26 @@
     <Project Path="../paskalON.DeviceService/paskalON.Devices.Domain.Configs/paskalON.Devices.Domain.Configs.csproj" />
     <Project Path="../paskalON.DeviceService/paskalON.Devices.Domain/paskalON.Devices.Domain.csproj" />
     <Project Path="../paskalON.DeviceService/paskalON.Devices.Infrastructure/paskalON.Devices.Infrastructure.csproj" />
-    <Project Path="../paskalON.Common/paskalON.Infrastructure/paskalON.Infrastructure.csproj" />
     <Project Path="../paskalON.OperatingModes/paskalON.OperatingModes.Domain.Configs/paskalON.OperatingModes.Domain.Configs.csproj" />
     <Project Path="../paskalON.OperatingModes/paskalON.OperatingModes.Infrastructure/paskalON.OperatingModes.Infrastructure.csproj" />
     <Project Path="../paskalON.PowerControls/paskalON.ConstraintEngine.Domain.Configs/paskalON.ConstraintEngine.Domain.Configs.csproj" />
     <Project Path="../paskalON.PowerControls/paskalON.PowerControls.Domain.Configs/paskalON.PowerControls.Domain.Configs.csproj" />
     <Project Path="../paskalON.PowerControls/paskalON.PowerControls.Infrastructure/paskalON.PowerControls.Infrastructure.csproj" />
   </Folder>
-  <Project Path="paskalON.ClientData.Common/paskalON.ClientData.Common.csproj" />
   <Folder Name="/Solution Items/">
     <File Path="ImportClientData.bat" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="paskalON.Alarms.Data.IntegrationTest/paskalON.Alarms.Data.IntegrationTest.csproj" />
     <Project Path="paskalON.ClientData.Common.UnitTest/paskalON.ClientData.Common.UnitTest.csproj" />
     <Project Path="paskalON.Devices.Data.IntegrationTest/paskalON.Devices.Data.IntegrationTest.csproj" />
     <Project Path="paskalON.DeviceSimulator.Data.IntegrationTest/paskalON.DeviceSimulator.Data.IntegrationTest.csproj" />
     <Project Path="paskalON.OperatingModes.Data.IntegrationTest/paskalON.OperatingModes.Data.IntegrationTest.csproj" />
     <Project Path="paskalON.PowerControls.Data.IntegrationTest/paskalON.PowerControls.Data.IntegrationTest.csproj" />
   </Folder>
+  <Project Path="paskalON.Alarms.Data/paskalON.Alarms.Data.csproj" Id="b91020f6-aa92-433f-8b73-8f3699d88aae" />
+  <Project Path="paskalON.ClientData.Common/paskalON.ClientData.Common.csproj" />
   <Project Path="paskalON.Devices.Data/paskalON.Devices.Data.csproj" />
   <Project Path="paskalON.DeviceSimulator.Data/paskalON.DeviceSimulator.Data.csproj" />
   <Project Path="paskalON.OperatingModes.Data/paskalON.OperatingModes.Data.csproj" />

@@ -17,6 +17,7 @@ Loads client data or sample data into the microservices databases.
     - paskalON.DeviceSimulator.Data.csproj
     - paskalON.PowerControls.Data.csproj
     - paskalON.OperatingModes.Data.csproj
+    - paskalON.Alarms.Data.csproj
 - Each of the Data projects is a console application.
 - Each of the Data projects takes the following arguments described in section below.
 
@@ -37,6 +38,7 @@ Loads client data or sample data into the microservices databases.
     - E.g. DeviceSimulator: ClientData\Demo\DemoSuperSimpleBattery.csv or ClientData\TheClient\ClientSite.csv
     - E.g. PowerControls: ClientData\Demo\DemoSuperSimpleBattery.csv or ClientData\TheClient\ClientSite.csv
     - E.g. OperatingModes: ClientData\Demo\DemoSuperSimpleBattery.csv or ClientData\TheClient\ClientSite.csv
+    - E.g. Alarms: ClientData\Demo\DemoSuperSimpleBattery.csv or ClientData\TheClient\ClientSite.csv
 
 
 ## Client Project Data (CSV) File Definition
@@ -82,6 +84,14 @@ Loads client data or sample data into the microservices databases.
 | Reference | ModbusCon1 | Referenced entity |
 | Nullable reference | null | null |
 | List of references | Constraint1;Constraint2 | Referenced entities added to the list |
+
+
+## Alarms client data
+- Alarm actions (AlarmActionConfig) are shared: one action can be listed by many alarm configurations.
+- Define the action and its parameters (AlarmActionParameterConfig) before the alarm configurations that list it in AlarmActions (several separated by ;).
+- The parameter values can contain placeholders that are replaced with the values of the alarm when the action is sent:
+  {{AlarmId}}, {{PpcAlarmType}}, {{SeverityLevel}}, {{DeviceId}} and {{PropertyName}}.
+- E.g. one ShowAlarm action shared by the communication error configurations of all device types.
 
 
 ## Application exit codes
