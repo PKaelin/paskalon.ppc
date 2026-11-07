@@ -186,6 +186,8 @@ services:
   # RabbitMQ message broker for reliable command delivery (e.g. alarm actions).
   # Management UI: http://localhost:41008
   # Default credentials are configured in ./secrets/rabbitmq_config (mounted into the RabbitMQ conf.d folder).
+  # Exchanges, queues and bindings of the PPC are defined in ./rabbitmq/definitions.json,
+  # ./rabbitmq/import-definitions.sh starts RabbitMQ and imports them once the node is running.
   rabbitmq:
     container_name: paskalon.rabbitmq
     # Use the management image only in DEV/TST environments.
@@ -195,6 +197,7 @@ services:
     image: rabbitmq:4.3.3-management
     restart: unless-stopped
     hostname: paskalon.rabbitmq
+    entrypoint: ["/bin/sh", "/etc/rabbitmq/import-definitions.sh"]
     # Expose ports only in DEV/TST environments!
     ports:
       - 41007:5672    # Advanced Message Queuing Protoco (AMQP)
@@ -207,6 +210,8 @@ services:
       start_period: 20s
     volumes:
       - paskalon.rabbitmq:/var/lib/rabbitmq
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./rabbitmq/import-definitions.sh:/etc/rabbitmq/import-definitions.sh:ro
     networks:
       - ppc.network
     secrets:
