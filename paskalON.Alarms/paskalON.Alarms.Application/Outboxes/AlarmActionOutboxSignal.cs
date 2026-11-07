@@ -33,6 +33,12 @@ namespace paskalON.Alarms.Application.Outboxes
 
 
         /// <summary>
+        /// Wait for a notification that is still pending after a timed out <see cref="WaitAsync"/>, null if there is none.
+        /// </summary>
+        private Task<bool>? _pendingWait;
+
+
+        /// <summary>
         /// Constructor of <see cref="AlarmActionOutboxSignal"/>.
         /// </summary>
         /// <param name="timeProvider">Time provider of the wait timeout.</param>
@@ -52,23 +58,40 @@ namespace paskalON.Alarms.Application.Outboxes
 
 
         /// <inheritdoc/>
+        /// <remarks>
+        /// The timeout is the normal case (every send interval), therefore it does not cancel a token:
+        /// a cancelled read would throw an <see cref="OperationCanceledException"/> every interval.
+        /// Only a cancellation of <paramref name="cancellationToken"/> (e.g. shutdown) throws.
+        /// Not thread-safe, there is only one waiting reader (the outbox publisher service).
+        /// </remarks>
         public async Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
         {
             ArgumentOutOfRangeException.ThrowIfLessThan(timeout, TimeSpan.Zero);
+            cancellationToken.ThrowIfCancellationRequested();
 
-            using CancellationTokenSource timeoutSource = new CancellationTokenSource(timeout, _timeProvider);
-            using CancellationTokenSource linkedSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutSource.Token, cancellationToken);
-
-            try
+            if (_channel.Reader.TryRead(out _))
             {
-                await _channel.Reader.ReadAsync(linkedSource.Token);
-
                 return true;
             }
-            catch (OperationCanceledException) when (timeoutSource.IsCancellationRequested && cancellationToken.IsCancellationRequested is false)
+
+            // A timed out wait stays pending and is reused, a new wait per call would add a waiter to the channel every interval
+            _pendingWait ??= _channel.Reader.WaitToReadAsync(CancellationToken.None).AsTask();
+            using CancellationTokenSource delaySource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            Task delay = Task.Delay(timeout, _timeProvider, delaySource.Token);
+            Task completed = await Task.WhenAny(_pendingWait, delay);
+
+            if (completed == _pendingWait)
             {
-                return false;
+                _pendingWait = null;
+                // Stops the timer of the delay, the cancelled delay is not awaited and therefore does not throw
+                await delaySource.CancelAsync();
+
+                return _channel.Reader.TryRead(out _);
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return false;
         }
     }
 }

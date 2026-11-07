@@ -82,6 +82,35 @@ namespace paskalON.Alarms.Application.UnitTest.Outboxes
 
 
         /// <summary>
+        /// After several timed out waits (send intervals without new actions) a notification still completes the next wait,
+        /// and the notification is taken so that the following wait times out again.
+        /// </summary>
+        [TestMethod]
+        public async Task WaitAsyncNotifiedAfterTimeoutsReturnsTrueTest()
+        {
+            AlarmActionOutboxSignal signal = new AlarmActionOutboxSignal(_timeProvider);
+            List<bool> timedOutResults = new List<bool>();
+
+            for (int i = 0; i < 3; i++)
+            {
+                Task<bool> timedOutWait = signal.WaitAsync(Timeout);
+                _timeProvider.Advance(Timeout);
+                timedOutResults.Add(await timedOutWait.WaitAsync(TestTimeout));
+            }
+
+            Task<bool> wait = signal.WaitAsync(Timeout);
+            signal.Notify();
+            bool isNotified = await wait.WaitAsync(TestTimeout);
+            Task<bool> nextWait = signal.WaitAsync(Timeout);
+            _timeProvider.Advance(Timeout);
+
+            CollectionAssert.AreEqual(new List<bool> { false, false, false }, timedOutResults);
+            Assert.IsTrue(isNotified);
+            Assert.IsFalse(await nextWait.WaitAsync(TestTimeout));
+        }
+
+
+        /// <summary>
         /// Several notifications before the wait are combined into one, because one send sends all pending actions.
         /// </summary>
         [TestMethod]
