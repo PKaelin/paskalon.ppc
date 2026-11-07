@@ -15,6 +15,10 @@ namespace paskalON.Alarms.Application.Actions
     /// Supported placeholders:
     /// - {{DeviceId}}: Device id of the alarm, empty if the alarm is not a device alarm (e.g. system alarm).
     /// - {{PropertyName}}: Property or dictionary entry that raised the alarm, e.g. FaultStates.OverTemperature.
+    /// - {{AlarmId}}: Alarm id of the configuration, e.g. PCS-COMM.
+    /// - {{PpcAlarmType}}: Alarm type of the configuration, e.g. PcsAlarm.
+    /// - {{SeverityLevel}}: Severity level of the alarm, e.g. Error.
+    /// The placeholders allow one action to be shared by many alarm configurations.
     /// Other text is not changed.
     /// </remarks>
     public static class AlarmActionDtoFactory
@@ -29,6 +33,24 @@ namespace paskalON.Alarms.Application.Actions
         /// Placeholder of the property name.
         /// </summary>
         public const string PropertyNamePlaceholder = "{{PropertyName}}";
+
+
+        /// <summary>
+        /// Placeholder of the alarm id of the configuration.
+        /// </summary>
+        public const string AlarmIdPlaceholder = "{{AlarmId}}";
+
+
+        /// <summary>
+        /// Placeholder of the alarm type of the configuration.
+        /// </summary>
+        public const string PpcAlarmTypePlaceholder = "{{PpcAlarmType}}";
+
+
+        /// <summary>
+        /// Placeholder of the severity level of the alarm.
+        /// </summary>
+        public const string SeverityLevelPlaceholder = "{{SeverityLevel}}";
 
 
         /// <summary>
@@ -68,7 +90,10 @@ namespace paskalON.Alarms.Application.Actions
         {
             return value
                 .Replace(DeviceIdPlaceholder, alarm.DeviceId?.ToString() ?? string.Empty, StringComparison.Ordinal)
-                .Replace(PropertyNamePlaceholder, alarm.PropertyName, StringComparison.Ordinal);
+                .Replace(PropertyNamePlaceholder, alarm.PropertyName, StringComparison.Ordinal)
+                .Replace(AlarmIdPlaceholder, alarm.PpcAlarmConfig.AlarmId, StringComparison.Ordinal)
+                .Replace(PpcAlarmTypePlaceholder, alarm.PpcAlarmConfig.PpcAlarmType.ToString(), StringComparison.Ordinal)
+                .Replace(SeverityLevelPlaceholder, alarm.SeverityLevel.ToString(), StringComparison.Ordinal);
         }
     }
 }

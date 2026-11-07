@@ -14,7 +14,8 @@ namespace paskalON.Alarms.Application.Caches
     /// <remarks>
     /// - Singleton, loaded at startup and reloaded on request (reload API), the configurations change rarely.
     /// - A load builds a complete new set and replaces the cached set at once, so that an evaluation during a reload
-    ///   uses either the old or the new configurations and never a mix.
+    ///   uses either the old or the new configurations and never a mix. Reading is lock free, the cached set is never changed.
+    /// - Loads run one after another, so that overlapping reloads cannot replace newer with older configurations.
     /// - Not loaded configurations throw instead of returning no configurations, because an evaluation without
     ///   configurations would normalize all active alarms (orphaned).
     /// - The configurations are not tracked by a database context, the alarm repository attaches them when saving an alarm.
@@ -25,6 +26,12 @@ namespace paskalON.Alarms.Application.Caches
         /// Logger instance.
         /// </summary>
         private readonly ILogger<PpcAlarmConfigCache> _logger;
+
+
+        /// <summary>
+        /// Serializes the loads, so that the last started load is also the last replaced configurations.
+        /// </summary>
+        private readonly SemaphoreSlim _dataLock = new SemaphoreSlim(1, 1);
 
 
         /// <summary>
@@ -54,14 +61,24 @@ namespace paskalON.Alarms.Application.Caches
         {
             ArgumentNullException.ThrowIfNull(repository);
 
-            List<PpcAlarmConfig> configs = await repository.GetAllEnabledAsync(cancellationToken);
-            Dictionary<PpcAlarmType, IReadOnlyList<PpcAlarmConfig>> configsByType = configs
-                .GroupBy(config => config.PpcAlarmType)
-                .ToDictionary(group => group.Key, group => (IReadOnlyList<PpcAlarmConfig>)group.ToList().AsReadOnly());
-            _configsByType = configsByType;
-            _logger.LogInformation("Loaded {ConfigCount} enabled alarm configurations of {TypeCount} alarm types.", configs.Count, configsByType.Count);
+            // Overlapping loads (e.g. reload requested twice) would otherwise replace newer with older configurations
+            await _dataLock.WaitAsync(cancellationToken);
 
-            return configs.Count;
+            try
+            {
+                List<PpcAlarmConfig> configs = await repository.GetAllEnabledAsync(cancellationToken);
+                Dictionary<PpcAlarmType, IReadOnlyList<PpcAlarmConfig>> configsByType = configs
+                    .GroupBy(config => config.PpcAlarmType)
+                    .ToDictionary(group => group.Key, group => (IReadOnlyList<PpcAlarmConfig>)group.ToList().AsReadOnly());
+                _configsByType = configsByType;
+                _logger.LogInformation("Loaded {ConfigCount} enabled alarm configurations of {TypeCount} alarm types.", configs.Count, configsByType.Count);
+
+                return configs.Count;
+            }
+            finally
+            {
+                _dataLock.Release();
+            }
         }
 
 

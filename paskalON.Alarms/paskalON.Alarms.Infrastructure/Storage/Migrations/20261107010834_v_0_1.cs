@@ -25,7 +25,6 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    AlarmConfigBaseId = table.Column<int>(type: "integer", nullable: false),
                     Trigger = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -131,6 +130,24 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AlarmConfigAction",
+                columns: table => new
+                {
+                    AlarmActionConfigId = table.Column<int>(type: "integer", nullable: false),
+                    AlarmConfigBaseId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AlarmConfigAction", x => new { x.AlarmActionConfigId, x.AlarmConfigBaseId });
+                    table.ForeignKey(
+                        name: "FK_AlarmConfigAction_AlarmActionConfig_AlarmActionConfigId",
+                        column: x => x.AlarmActionConfigId,
+                        principalTable: "AlarmActionConfig",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PpcAlarm",
                 columns: table => new
                 {
@@ -184,11 +201,6 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AlarmActionConfig_AlarmConfigBaseId",
-                table: "AlarmActionConfig",
-                column: "AlarmConfigBaseId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AlarmActionOutboxMessage_MessageId",
                 table: "AlarmActionOutboxMessage",
                 column: "MessageId",
@@ -210,6 +222,11 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                 table: "AlarmActionParameterConfig",
                 columns: new[] { "AlarmActionConfigId", "Key" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AlarmConfigAction_AlarmConfigBaseId",
+                table: "AlarmConfigAction",
+                column: "AlarmConfigBaseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Configuration_Key",
@@ -249,6 +266,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 
             migrationBuilder.DropTable(
                 name: "AlarmActionParameterConfig");
+
+            migrationBuilder.DropTable(
+                name: "AlarmConfigAction");
 
             migrationBuilder.DropTable(
                 name: "Configuration");

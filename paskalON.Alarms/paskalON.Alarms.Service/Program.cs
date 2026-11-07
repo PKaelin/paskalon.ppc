@@ -102,6 +102,10 @@ try
     builder.Services.AddSingleton<IPpcAlarmValueStore, PpcAlarmValueStore>();
     // The enabled alarm configurations are loaded at startup and reloaded on request, not queried for every received data
     builder.Services.AddSingleton<IPpcAlarmConfigCache, PpcAlarmConfigCache>();
+    // The active alarms are loaded at startup and kept up to date by the alarm handler (only writer of the alarms)
+    builder.Services.AddSingleton<IPpcAlarmActiveCache, PpcAlarmActiveCache>();
+    // Only one writer at a time changes and saves the cached active alarms (handler service, web API)
+    builder.Services.AddSingleton<IPpcAlarmWriteLock, PpcAlarmWriteLock>();
     builder.Services.AddSingleton<IPpcAlarmEvaluator, PpcAlarmEvaluator>();
     // Signals the saved alarm actions from the scoped handlers to the outbox publisher service, so that they are sent immediately
     builder.Services.AddSingleton<IAlarmActionOutboxSignal, AlarmActionOutboxSignal>();
@@ -196,6 +200,9 @@ try
         IPpcAlarmConfigRepository configRepository = scope.ServiceProvider.GetRequiredService<IPpcAlarmConfigRepository>();
         IPpcAlarmConfigCache configCache = app.Services.GetRequiredService<IPpcAlarmConfigCache>();
         await startupRetry.ExecuteAsync("Load alarm configurations", () => configCache.LoadAsync(configRepository), DatabaseTransientExceptionFilter.IsTransient);
+        IPpcAlarmRepository alarmRepository = scope.ServiceProvider.GetRequiredService<IPpcAlarmRepository>();
+        IPpcAlarmActiveCache activeCache = app.Services.GetRequiredService<IPpcAlarmActiveCache>();
+        await startupRetry.ExecuteAsync("Load active alarms", () => activeCache.LoadAsync(alarmRepository), DatabaseTransientExceptionFilter.IsTransient);
 
         if (startPublisher == true)
         {

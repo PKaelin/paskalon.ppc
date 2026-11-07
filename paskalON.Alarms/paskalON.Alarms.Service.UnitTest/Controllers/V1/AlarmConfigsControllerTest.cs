@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.Alarms.Application.Caches;
+using paskalON.Alarms.Application.Handlers;
 using paskalON.Alarms.Domain.Configs;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
@@ -40,11 +41,18 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
 
 
         /// <summary>
+        /// Mocked alarm handler.
+        /// </summary>
+        private readonly Mock<IPpcAlarmHandler> _alarmHandler = new Mock<IPpcAlarmHandler>();
+
+
+        /// <summary>
         /// The reload loads the enabled configurations into the cache and returns their number.
         /// </summary>
         [TestMethod]
         public async Task ReloadReturnsConfigCountTest()
         {
+            _alarmHandler.Setup(handler => handler.NormalizeOrphanedAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
             SetupConfigs(CreateConfig(1, "PCS-FAULT", PpcAlarmType.PcsAlarm), CreateConfig(2, "SYS-RTU", PpcAlarmType.SystemAlarm));
             AlarmConfigsController controller = CreateController();
 
@@ -53,6 +61,7 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
             OkObjectResult okResult = (OkObjectResult)result.Result!;
             ReloadAlarmConfigsResponse response = (ReloadAlarmConfigsResponse)okResult.Value!;
             Assert.AreEqual(2, response.ConfigCount);
+            Assert.AreEqual(1, response.NormalizedAlarmCount);
             Assert.AreEqual("PCS-FAULT", _cache.GetEnabled(PpcAlarmType.PcsAlarm).Single().AlarmId);
         }
 
@@ -91,6 +100,27 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
             ObjectResult problemResult = (ObjectResult)result.Result!;
             Assert.AreEqual(StatusCodes.Status503ServiceUnavailable, problemResult.StatusCode);
             Assert.AreEqual("PCS-FAULT", _cache.GetEnabled(PpcAlarmType.PcsAlarm).Single().AlarmId);
+            _alarmHandler.Verify(handler => handler.NormalizeOrphanedAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+
+        /// <summary>
+        /// The configurations are reloaded, but when the database is not available to normalize the alarms of removed
+        /// configurations the reload returns 503.
+        /// </summary>
+        [TestMethod]
+        public async Task ReloadNormalizeOrphanedFailsReturnsServiceUnavailableTest()
+        {
+            SetupConfigs(CreateConfig(2, "PCS-WARNING", PpcAlarmType.PcsAlarm));
+            _alarmHandler.Setup(handler => handler.NormalizeOrphanedAsync(It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new TimeoutException("Database not available."));
+            AlarmConfigsController controller = CreateController();
+
+            ActionResult<ReloadAlarmConfigsResponse> result = await controller.Reload(CancellationToken.None);
+
+            ObjectResult problemResult = (ObjectResult)result.Result!;
+            Assert.AreEqual(StatusCodes.Status503ServiceUnavailable, problemResult.StatusCode);
+            Assert.AreEqual("PCS-WARNING", _cache.GetEnabled(PpcAlarmType.PcsAlarm).Single().AlarmId);
         }
 
 
@@ -125,7 +155,7 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
         /// </summary>
         private AlarmConfigsController CreateController()
         {
-            return new AlarmConfigsController(NullLogger<AlarmConfigsController>.Instance, _cache, _repository.Object)
+            return new AlarmConfigsController(NullLogger<AlarmConfigsController>.Instance, _cache, _repository.Object, _alarmHandler.Object)
             {
                 ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
             };

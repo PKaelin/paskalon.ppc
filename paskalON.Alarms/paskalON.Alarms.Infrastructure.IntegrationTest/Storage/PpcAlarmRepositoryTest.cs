@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using paskalON.Alarms.Domain;
 using paskalON.Alarms.Domain.Configs;
+using paskalON.Alarms.Domain.Configs.Actions;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Domain.Ppcs;
@@ -77,26 +78,86 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
 
 
         /// <summary>
-        /// A raised alarm with a cached (detached) configuration is persisted although the context already tracks
-        /// the same configuration with an active alarm.
+        /// A cached active alarm that got normalized and a raised alarm with another cached instance of the same
+        /// configuration are saved together in a new context, the configuration is neither inserted nor updated.
         /// </summary>
         [TestMethod]
-        public async Task AddRaisedAlarmWithCachedConfigTrackedByActiveAlarmPersistsAlarmTest()
+        public async Task UpdateNormalizedCachedAlarmAndAddRaisedAlarmOfSameConfigPersistsBothTest()
         {
             await SeedAlarmsAsync();
+            PpcAlarm cachedAlarm = await GetCachedActiveAlarmAsync();
             PpcAlarmConfig cachedFaultConfig = await GetConfigAsync("PCS-FAULT");
+            cachedAlarm.Normalize("System", ChangedOn);
+            PpcAlarm raisedAlarm = PcsAlarmSampleData.CreateAlarm(cachedFaultConfig, 7, "FaultStates.OverCurrent");
             await using AlarmContext context = CreateDbContext<AlarmContext>();
             PpcAlarmRepository repository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
-            List<PpcAlarm> activeAlarms = await repository.GetActiveAsync(Pcs7Key);
-            PpcAlarm raisedAlarm = PcsAlarmSampleData.CreateAlarm(cachedFaultConfig, 7, "FaultStates.OverCurrent");
 
+            repository.Update(new List<PpcAlarm> { cachedAlarm });
             repository.Add(new List<PpcAlarm> { raisedAlarm });
             await repository.SaveChangesAsync();
 
-            Assert.AreSame(activeAlarms[0].PpcAlarmConfig, raisedAlarm.PpcAlarmConfig);
+            Assert.AreSame(cachedAlarm.PpcAlarmConfig, raisedAlarm.PpcAlarmConfig);
             await using AlarmContext verifyContext = CreateDbContext<AlarmContext>();
-            Assert.IsTrue(await verifyContext.PpcAlarms.AnyAsync(alarm => alarm.DeviceId == 7 && alarm.PropertyName == "FaultStates.OverCurrent"));
+            PpcAlarm activeAlarm = (await new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, verifyContext).GetActiveAsync(Pcs7Key)).Single();
+            Assert.AreEqual("FaultStates.OverCurrent", activeAlarm.PropertyName);
+            PpcAlarm normalizedAlarm = await verifyContext.PpcAlarms.SingleAsync(alarm => alarm.Id == cachedAlarm.Id);
+            Assert.AreEqual(AlarmSequenceState.Normal, normalizedAlarm.AlarmSequenceState);
+            Assert.AreEqual(ChangedOn, normalizedAlarm.ChangedDate);
             Assert.AreEqual(3, await verifyContext.PpcAlarmConfigs.CountAsync());
+            Assert.AreEqual(PcsAlarmSampleData.ChangedOn, (await verifyContext.PpcAlarmConfigs.SingleAsync(config => config.AlarmId == "PCS-FAULT")).ChangedDate);
+        }
+
+
+        /// <summary>
+        /// The actions of the fault configuration are shared with the grid loss configuration. A cached active fault alarm
+        /// that got normalized and a raised grid loss alarm, each configuration with its own instances of the shared actions,
+        /// are saved together. The shared action instances do not collide and the actions are neither inserted nor updated.
+        /// </summary>
+        [TestMethod]
+        public async Task UpdateAndAddAlarmsOfConfigsWithSharedActionsPersistsBothTest()
+        {
+            await SeedAlarmsAsync();
+            await ShareFaultActionsWithGridLossConfigAsync();
+            PpcAlarm cachedAlarm = await GetCachedActiveAlarmAsync();
+            PpcAlarmConfig cachedGridLossConfig = await GetConfigAsync("PCS-GRIDLOSS");
+            cachedAlarm.Normalize("System", ChangedOn);
+            PpcAlarm raisedAlarm = PcsAlarmSampleData.CreateAlarm(cachedGridLossConfig, 7, "FaultStates.GridLoss");
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmRepository repository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
+
+            repository.Update(new List<PpcAlarm> { cachedAlarm });
+            repository.Add(new List<PpcAlarm> { raisedAlarm });
+            await repository.SaveChangesAsync();
+
+            AlarmActionConfig cachedReducePower = cachedAlarm.PpcAlarmConfig.AlarmActions.Single(action => action.Name == "ReducePower");
+            AlarmActionConfig raisedReducePower = raisedAlarm.PpcAlarmConfig.AlarmActions.Single(action => action.Name == "ReducePower");
+            Assert.AreNotSame(cachedReducePower, raisedReducePower);
+            Assert.AreEqual(cachedReducePower.Id, raisedReducePower.Id);
+            await using AlarmContext verifyContext = CreateDbContext<AlarmContext>();
+            PpcAlarm activeAlarm = (await new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, verifyContext).GetActiveAsync(Pcs7Key)).Single();
+            Assert.AreEqual("PCS-GRIDLOSS", activeAlarm.PpcAlarmConfig.AlarmId);
+            Assert.HasCount(2, activeAlarm.PpcAlarmConfig.AlarmActions);
+            Assert.AreEqual(AlarmSequenceState.Normal, (await verifyContext.PpcAlarms.SingleAsync(alarm => alarm.Id == cachedAlarm.Id)).AlarmSequenceState);
+            Assert.AreEqual(2, await verifyContext.AlarmActionConfigs.CountAsync());
+            Assert.IsTrue(await verifyContext.AlarmActionConfigs.AllAsync(action => action.ChangedDate == PcsAlarmSampleData.ChangedOn));
+        }
+
+
+        /// <summary>
+        /// All active alarms of all publishers are returned not tracked, the alarms of a configuration share its instance.
+        /// </summary>
+        [TestMethod]
+        public async Task GetAllActiveAsyncReturnsUntrackedActiveAlarmsTest()
+        {
+            await SeedAlarmsAsync();
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmRepository repository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
+
+            List<PpcAlarm> alarms = await repository.GetAllActiveAsync();
+
+            CollectionAssert.AreEquivalent(new List<int?> { 7, 8, null }, alarms.Select(alarm => alarm.DeviceId).ToList());
+            Assert.AreSame(alarms.Single(alarm => alarm.DeviceId == 7).PpcAlarmConfig, alarms.Single(alarm => alarm.DeviceId == 8).PpcAlarmConfig);
+            Assert.IsEmpty(context.ChangeTracker.Entries());
         }
 
 
@@ -150,6 +211,7 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
                 PpcAlarmRepository repository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
                 PpcAlarm alarm = (await repository.GetActiveAsync(Pcs7Key)).Single();
                 alarm.Acknowledge("Homer", ChangedOn);
+                repository.Update(new List<PpcAlarm> { alarm });
 
                 await repository.SaveChangesAsync();
             }
@@ -175,6 +237,7 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
                 PpcAlarmRepository repository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
                 PpcAlarm alarm = (await repository.GetActiveAsync(Pcs7Key)).Single();
                 alarm.Normalize("System", ChangedOn);
+                repository.Update(new List<PpcAlarm> { alarm });
 
                 await repository.SaveChangesAsync();
             }
@@ -250,6 +313,7 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
                 List<PpcAlarm> activeAlarms = await alarmRepository.GetActiveAsync(Pcs7Key);
                 PpcAlarmEvaluation evaluation = new PpcAlarmEvaluator().Evaluate(Pcs7Key, changedValues, configs, activeAlarms);
                 alarmRepository.Add(evaluation.Raised);
+                alarmRepository.Update(evaluation.Normalized);
 
                 await alarmRepository.SaveChangesAsync();
             }
@@ -280,6 +344,31 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
             context.PpcAlarms.Add(PcsAlarmSampleData.CreateAlarm(faultConfig, 8, "FaultStates.OverTemperature"));
             context.PpcAlarms.Add(PcsAlarmSampleData.CreateAlarm(rtuConfig, null, "IsRtuCommunicationLost"));
             await context.SaveChangesAsync();
+        }
+
+
+        /// <summary>
+        /// Adds the actions of the fault configuration to the grid loss configuration, the actions are shared.
+        /// </summary>
+        private async Task ShareFaultActionsWithGridLossConfigAsync()
+        {
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmConfig faultConfig = await context.PpcAlarmConfigs.Include(config => config.AlarmActions).SingleAsync(config => config.AlarmId == "PCS-FAULT");
+            PpcAlarmConfig gridLossConfig = await context.PpcAlarmConfigs.Include(config => config.AlarmActions).SingleAsync(config => config.AlarmId == "PCS-GRIDLOSS");
+            gridLossConfig.AlarmActions.AddRange(faultConfig.AlarmActions);
+            await context.SaveChangesAsync();
+        }
+
+
+        /// <summary>
+        /// Gets the active over temperature alarm of PCS 7 from a disposed context, like the active alarm cache.
+        /// </summary>
+        private async Task<PpcAlarm> GetCachedActiveAlarmAsync()
+        {
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmRepository repository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
+
+            return (await repository.GetActiveAsync(Pcs7Key)).Single();
         }
 
 

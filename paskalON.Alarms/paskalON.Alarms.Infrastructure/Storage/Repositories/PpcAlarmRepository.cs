@@ -28,15 +28,17 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
 
 
         /// <inheritdoc/>
+        public async Task<List<PpcAlarm>> GetAllActiveAsync(CancellationToken cancellationToken = default)
+        {
+            return await QueryActive().ToListAsync(cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
         public async Task<List<PpcAlarm>> GetActiveAsync(PpcAlarmKey key, CancellationToken cancellationToken = default)
         {
-            return await Context.PpcAlarms
-                .Where(alarm => alarm.AlarmSequenceState != AlarmSequenceState.Normal)
+            return await QueryActive()
                 .Where(alarm => alarm.DeviceId == key.DeviceId && alarm.PpcAlarmConfig.PpcAlarmType == key.PpcAlarmType)
-                .Include(alarm => alarm.PpcAlarmConfig)
-                .ThenInclude(config => config.AlarmActions)
-                .ThenInclude(action => action.AlarmActionParameters)
-                .OrderBy(alarm => alarm.Id)
                 .ToListAsync(cancellationToken);
         }
 
@@ -51,20 +53,30 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
 
             foreach (PpcAlarm alarm in alarms)
             {
-                // The configuration might be cached (detached) while the context already tracks the same configuration
-                // (e.g. loaded with an active alarm), a second instance with the same key must not be attached.
-                PpcAlarmConfig? trackedConfig = Context.PpcAlarmConfigs.Local.FirstOrDefault(config => config.Id == alarm.PpcAlarmConfig.Id);
-
-                if (trackedConfig is null)
-                {
-                    Context.PpcAlarmConfigs.Attach(alarm.PpcAlarmConfig);
-                }
-                else if (ReferenceEquals(trackedConfig, alarm.PpcAlarmConfig) is false)
-                {
-                    alarm.PpcAlarmConfig = trackedConfig;
-                }
-
+                AttachConfig(alarm);
                 Context.PpcAlarms.Add(alarm);
+            }
+        }
+
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The alarm is attached and marked as modified, its configuration is attached unchanged so that it is not written.
+        /// </remarks>
+        public void Update(IEnumerable<PpcAlarm> alarms)
+        {
+            ArgumentNullException.ThrowIfNull(alarms);
+
+            foreach (PpcAlarm alarm in alarms)
+            {
+                if (Context.Entry(alarm).State != EntityState.Detached)
+                {
+                    continue;
+                }
+
+                AttachConfig(alarm);
+                Context.PpcAlarms.Attach(alarm);
+                Context.Entry(alarm).State = EntityState.Modified;
             }
         }
 
@@ -73,6 +85,49 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await Context.SaveChangesAsync(cancellationToken);
+        }
+
+
+        /// <summary>
+        /// Query of the active alarms including their configuration, not tracked.
+        /// </summary>
+        /// <remarks>
+        /// With identity resolution the alarms of the same configuration share one configuration instance.
+        /// </remarks>
+        private IQueryable<PpcAlarm> QueryActive()
+        {
+            return Context.PpcAlarms
+                .AsNoTrackingWithIdentityResolution()
+                .Where(alarm => alarm.AlarmSequenceState != AlarmSequenceState.Normal)
+                .Include(alarm => alarm.PpcAlarmConfig)
+                .ThenInclude(config => config.AlarmActions)
+                .ThenInclude(action => action.AlarmActionParameters)
+                .OrderBy(alarm => alarm.Id);
+        }
+
+
+        /// <summary>
+        /// Attaches the configuration of an alarm unchanged, or uses the configuration the context already tracks.
+        /// </summary>
+        /// <remarks>
+        /// The configuration might be cached (detached) while the context already tracks the same configuration
+        /// (e.g. of another alarm), a second instance with the same key must not be attached.
+        /// Only the configuration itself is attached, not its graph: the actions are shared by several configurations
+        /// and other instances of the same action (e.g. of a configuration loaded from the database) must not collide.
+        /// The actions are only read, they are never saved with the alarms.
+        /// </remarks>
+        private void AttachConfig(PpcAlarm alarm)
+        {
+            PpcAlarmConfig? trackedConfig = Context.PpcAlarmConfigs.Local.FirstOrDefault(config => config.Id == alarm.PpcAlarmConfig.Id);
+
+            if (trackedConfig is null)
+            {
+                Context.Entry(alarm.PpcAlarmConfig).State = EntityState.Unchanged;
+            }
+            else if (ReferenceEquals(trackedConfig, alarm.PpcAlarmConfig) is false)
+            {
+                alarm.PpcAlarmConfig = trackedConfig;
+            }
         }
     }
 }

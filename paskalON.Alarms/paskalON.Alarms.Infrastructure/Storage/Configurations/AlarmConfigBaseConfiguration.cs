@@ -5,6 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using paskalON.Alarms.Domain.Configs;
+using paskalON.Alarms.Domain.Configs.Actions;
 
 namespace paskalON.Alarms.Infrastructure.Storage.Configurations
 {
@@ -13,6 +14,12 @@ namespace paskalON.Alarms.Infrastructure.Storage.Configurations
     /// </summary>
     public class AlarmConfigBaseConfiguration : IEntityTypeConfiguration<AlarmConfigBase>
     {
+        /// <summary>
+        /// Name of the join table between the alarm configurations and their shared actions.
+        /// </summary>
+        public const string AlarmConfigActionTable = "AlarmConfigAction";
+
+
         /// <summary>
         /// Configures the entity of type TEntity.
         /// </summary>
@@ -29,10 +36,12 @@ namespace paskalON.Alarms.Infrastructure.Storage.Configurations
             builder.Property(x => x.Consequences).HasMaxLength(250);
             builder.Property(x => x.TimeBeforeRaisingAlarmMilliseconds).IsRequired();
 
+            // The actions are shared by the alarm configurations (e.g. ShowAlarm for all communication errors)
             builder.HasMany(x => x.AlarmActions)
-                .WithOne(x => x.AlarmConfigBase)
-                .HasForeignKey(x => x.AlarmConfigBaseId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .WithMany()
+                .UsingEntity(AlarmConfigActionTable,
+                    right => right.HasOne(typeof(AlarmActionConfig)).WithMany().HasForeignKey("AlarmActionConfigId").OnDelete(DeleteBehavior.Cascade),
+                    left => left.HasOne(typeof(AlarmConfigBase)).WithMany().HasForeignKey("AlarmConfigBaseId").OnDelete(DeleteBehavior.Cascade));
         }
     }
 }

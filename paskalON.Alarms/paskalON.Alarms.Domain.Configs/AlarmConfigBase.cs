@@ -92,6 +92,7 @@ namespace paskalON.Alarms.Domain.Configs
         /// </summary>
         /// <remarks>
         /// The trigger of the action defines whether it is a raise or normalize action.
+        /// The actions are shared, the same action can be configured for many alarms.
         /// </remarks>
         public List<AlarmActionConfig> AlarmActions { get; set; } = new List<AlarmActionConfig>();
     }

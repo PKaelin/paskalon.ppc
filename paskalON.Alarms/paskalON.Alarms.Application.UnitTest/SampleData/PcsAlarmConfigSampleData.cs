@@ -40,11 +40,11 @@ namespace paskalON.Alarms.Application.UnitTest.SampleData
                 PropertyOperator = PropertyOperator.Equal,
                 PropertyValue = 1
             };
-            AlarmActionConfig reducePower = CreateAction(config, 10, "ReducePower", AlarmActionTrigger.Raise);
+            AlarmActionConfig reducePower = CreateAction(10, "ReducePower", AlarmActionTrigger.Raise);
             reducePower.AlarmActionParameters.Add(CreateParameter(reducePower, 11, "DeviceId", "{{DeviceId}}"));
             reducePower.AlarmActionParameters.Add(CreateParameter(reducePower, 12, "Percentage", "50"));
             reducePower.AlarmActionParameters.Add(CreateParameter(reducePower, 13, "Reason", "Alarm {{PropertyName}} of PCS {{DeviceId}}"));
-            AlarmActionConfig resetPower = CreateAction(config, 20, "ResetPower", AlarmActionTrigger.Normalize);
+            AlarmActionConfig resetPower = CreateAction(20, "ResetPower", AlarmActionTrigger.Normalize);
             resetPower.AlarmActionParameters.Add(CreateParameter(resetPower, 21, "DeviceId", "{{DeviceId}}"));
             config.AlarmActions.Add(reducePower);
             config.AlarmActions.Add(resetPower);
@@ -73,9 +73,9 @@ namespace paskalON.Alarms.Application.UnitTest.SampleData
 
 
         /// <summary>
-        /// Creates an action of a configuration.
+        /// Creates an action, it can be shared by several configurations.
         /// </summary>
-        private static AlarmActionConfig CreateAction(PpcAlarmConfig config, int id, string name, AlarmActionTrigger trigger)
+        private static AlarmActionConfig CreateAction(int id, string name, AlarmActionTrigger trigger)
         {
             return new AlarmActionConfig
             {
@@ -83,9 +83,7 @@ namespace paskalON.Alarms.Application.UnitTest.SampleData
                 ChangedBy = "Homer",
                 ChangedDate = ChangedOn,
                 Name = name,
-                Trigger = trigger,
-                AlarmConfigBaseId = config.Id,
-                AlarmConfigBase = config
+                Trigger = trigger
             };
         }
 

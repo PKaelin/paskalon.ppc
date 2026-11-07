@@ -111,6 +111,32 @@ namespace paskalON.Alarms.Application.UnitTest.Caches
 
 
         /// <summary>
+        /// Overlapping reloads run one after another: the later started reload replaces the configurations last,
+        /// although the earlier reload finishes loading later.
+        /// </summary>
+        [TestMethod]
+        public async Task LoadAsyncOverlappingReloadsKeepLaterConfigsTest()
+        {
+            TaskCompletionSource<List<PpcAlarmConfig>> slowOldLoad = new TaskCompletionSource<List<PpcAlarmConfig>>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _repository.SetupSequence(repository => repository.GetAllEnabledAsync(It.IsAny<CancellationToken>()))
+                .Returns(slowOldLoad.Task)
+                .ReturnsAsync(new List<PpcAlarmConfig> { CreateSystemRtuConfig() });
+            PpcAlarmConfigCache cache = CreateCache();
+            Task<int> oldReload = cache.LoadAsync(_repository.Object);
+            Task<int> newReload = cache.LoadAsync(_repository.Object);
+            bool isNewReloadWaiting = newReload.IsCompleted is false;
+
+            slowOldLoad.SetResult(new List<PpcAlarmConfig> { PcsAlarmConfigSampleData.CreatePcsFaultConfig() });
+
+            await Task.WhenAll(oldReload, newReload).WaitAsync(TimeSpan.FromSeconds(10));
+            Assert.IsTrue(isNewReloadWaiting);
+            Assert.IsEmpty(cache.GetEnabled(PpcAlarmType.PcsAlarm));
+            Assert.HasCount(1, cache.GetEnabled(PpcAlarmType.SystemAlarm));
+            _repository.Verify(repository => repository.GetAllEnabledAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
+        }
+
+
+        /// <summary>
         /// Sets up the repository to return the enabled configurations.
         /// </summary>
         private void SetupConfigs(params PpcAlarmConfig[] configs)

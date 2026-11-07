@@ -13,5 +13,11 @@ namespace paskalON.Alarms.Service.Dto.V1.Responses
         /// Gets or sets the number of loaded enabled alarm configurations.
         /// </summary>
         public required int ConfigCount { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets the number of normalized active alarms whose configuration was removed or disabled.
+        /// </summary>
+        public required int NormalizedAlarmCount { get; set; }
     }
 }

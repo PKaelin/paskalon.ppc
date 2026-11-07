@@ -25,6 +25,21 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 
             modelBuilder.HasSequence("DomainBaseSequence");
 
+            modelBuilder.Entity("AlarmConfigAction", b =>
+                {
+                    b.Property<int>("AlarmActionConfigId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AlarmConfigBaseId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("AlarmActionConfigId", "AlarmConfigBaseId");
+
+                    b.HasIndex("AlarmConfigBaseId");
+
+                    b.ToTable("AlarmConfigAction");
+                });
+
             modelBuilder.Entity("paskalON.Domains.DomainBase", b =>
                 {
                     b.Property<int>("Id")
@@ -86,9 +101,6 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
 
-                    b.Property<int>("AlarmConfigBaseId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -96,8 +108,6 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 
                     b.Property<int>("Trigger")
                         .HasColumnType("integer");
-
-                    b.HasIndex("AlarmConfigBaseId");
 
                     b.ToTable("AlarmActionConfig");
                 });
@@ -367,15 +377,19 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     b.ToTable("Configuration");
                 });
 
-            modelBuilder.Entity("paskalON.Alarms.Domain.Configs.Actions.AlarmActionConfig", b =>
+            modelBuilder.Entity("AlarmConfigAction", b =>
                 {
-                    b.HasOne("paskalON.Alarms.Domain.Configs.AlarmConfigBase", "AlarmConfigBase")
-                        .WithMany("AlarmActions")
-                        .HasForeignKey("AlarmConfigBaseId")
+                    b.HasOne("paskalON.Alarms.Domain.Configs.Actions.AlarmActionConfig", null)
+                        .WithMany()
+                        .HasForeignKey("AlarmActionConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AlarmConfigBase");
+                    b.HasOne("paskalON.Alarms.Domain.Configs.AlarmConfigBase", null)
+                        .WithMany()
+                        .HasForeignKey("AlarmConfigBaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("paskalON.Alarms.Domain.Configs.Actions.AlarmActionParameterConfig", b =>
@@ -414,11 +428,6 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
             modelBuilder.Entity("paskalON.Alarms.Domain.Configs.Actions.AlarmActionConfig", b =>
                 {
                     b.Navigation("AlarmActionParameters");
-                });
-
-            modelBuilder.Entity("paskalON.Alarms.Domain.Configs.AlarmConfigBase", b =>
-                {
-                    b.Navigation("AlarmActions");
                 });
 #pragma warning restore 612, 618
         }

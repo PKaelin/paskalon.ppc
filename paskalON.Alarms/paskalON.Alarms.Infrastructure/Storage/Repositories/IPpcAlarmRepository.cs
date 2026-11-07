@@ -10,14 +10,26 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
     /// <summary>
     /// PPC alarm repository interface definition.
     /// </summary>
+    /// <remarks>
+    /// The alarms are read not tracked, so that they can be cached. Changes are saved with <see cref="Add"/> for raised
+    /// alarms and <see cref="Update"/> for changed (e.g. normalized) alarms, followed by <see cref="SaveChangesAsync"/>.
+    /// </remarks>
     public interface IPpcAlarmRepository
     {
         /// <summary>
-        /// Gets the active (not normalized) alarms of a publisher including their configuration.
+        /// Gets the active (not normalized) alarms of all publishers including their configuration, not tracked.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Active alarms of all publishers.</returns>
+        Task<List<PpcAlarm>> GetAllActiveAsync(CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Gets the active (not normalized) alarms of a publisher including their configuration, not tracked.
         /// </summary>
         /// <param name="key">Key of the publisher.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Tracked active alarms of the publisher, changes are saved with <see cref="SaveChangesAsync"/>.</returns>
+        /// <returns>Active alarms of the publisher.</returns>
         Task<List<PpcAlarm>> GetActiveAsync(PpcAlarmKey key, CancellationToken cancellationToken = default);
 
 
@@ -26,6 +38,16 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
         /// </summary>
         /// <param name="alarms">Newly raised alarms.</param>
         void Add(IEnumerable<PpcAlarm> alarms);
+
+
+        /// <summary>
+        /// Updates changed existing alarms (e.g. normalized or acknowledged), saved with <see cref="SaveChangesAsync"/>.
+        /// </summary>
+        /// <param name="alarms">Changed existing alarms, e.g. from a cache.</param>
+        /// <remarks>
+        /// Must be called before adding outbox messages of the alarms, otherwise the alarms would be added again.
+        /// </remarks>
+        void Update(IEnumerable<PpcAlarm> alarms);
 
 
         /// <summary>

@@ -26,10 +26,10 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage.SampleData
         public static PpcAlarmConfig CreatePcsFaultConfig()
         {
             PpcAlarmConfig config = CreateConfig("PCS-FAULT", "PCS.Fault", AlarmSeverity.Error, PpcAlarmType.PcsAlarm, null, "FaultStates");
-            AlarmActionConfig reducePower = CreateAction(config, "ReducePower", AlarmActionTrigger.Raise);
+            AlarmActionConfig reducePower = CreateAction("ReducePower", AlarmActionTrigger.Raise);
             reducePower.AlarmActionParameters.Add(CreateParameter(reducePower, "DeviceId", "{{DeviceId}}"));
             reducePower.AlarmActionParameters.Add(CreateParameter(reducePower, "Percentage", "50"));
-            AlarmActionConfig resetPower = CreateAction(config, "ResetPower", AlarmActionTrigger.Normalize);
+            AlarmActionConfig resetPower = CreateAction("ResetPower", AlarmActionTrigger.Normalize);
             resetPower.AlarmActionParameters.Add(CreateParameter(resetPower, "DeviceId", "{{DeviceId}}"));
             config.AlarmActions.Add(reducePower);
             config.AlarmActions.Add(resetPower);
@@ -110,17 +110,16 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage.SampleData
 
 
         /// <summary>
-        /// Creates an action of a configuration.
+        /// Creates an action, it can be shared by several configurations.
         /// </summary>
-        private static AlarmActionConfig CreateAction(PpcAlarmConfig config, string name, AlarmActionTrigger trigger)
+        private static AlarmActionConfig CreateAction(string name, AlarmActionTrigger trigger)
         {
             return new AlarmActionConfig
             {
                 ChangedBy = "Homer",
                 ChangedDate = ChangedOn,
                 Name = name,
-                Trigger = trigger,
-                AlarmConfigBase = config
+                Trigger = trigger
             };
         }
 

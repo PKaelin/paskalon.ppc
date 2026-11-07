@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using paskalON.Alarms.Domain.Configs.Actions;
 using paskalON.Alarms.Domain.Configs.Ppcs;
@@ -19,6 +20,7 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
     {
         /// <summary>
         /// Seeds the PCS fault, warning, grid loss, a disabled PCS and the system configurations.
+        /// The grid loss configuration shares the actions of the fault configuration.
         /// </summary>
         protected override async Task SeedAsync(AlarmContext db)
         {
@@ -27,9 +29,12 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
             disabledConfig.AlarmId = "PCS-DISABLED";
             disabledConfig.PropertyName = "VendorEvents";
             disabledConfig.IsEnabled = false;
-            db.PpcAlarmConfigs.Add(PcsAlarmSampleData.CreatePcsFaultConfig());
+            PpcAlarmConfig faultConfig = PcsAlarmSampleData.CreatePcsFaultConfig();
+            PpcAlarmConfig gridLossConfig = PcsAlarmSampleData.CreatePcsGridLossConfig();
+            gridLossConfig.AlarmActions.AddRange(faultConfig.AlarmActions);
+            db.PpcAlarmConfigs.Add(faultConfig);
             db.PpcAlarmConfigs.Add(PcsAlarmSampleData.CreatePcsWarningConfig());
-            db.PpcAlarmConfigs.Add(PcsAlarmSampleData.CreatePcsGridLossConfig());
+            db.PpcAlarmConfigs.Add(gridLossConfig);
             db.PpcAlarmConfigs.Add(PcsAlarmSampleData.CreateSystemRtuConfig());
             db.PpcAlarmConfigs.Add(disabledConfig);
             await db.SaveChangesAsync();
@@ -69,6 +74,27 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
                 configs.Select(config => config.AlarmId).ToArray());
             Assert.HasCount(2, configs.Single(config => config.AlarmId == "PCS-FAULT").AlarmActions);
             Assert.IsEmpty(context.ChangeTracker.Entries());
+        }
+
+
+        /// <summary>
+        /// An action shared by several configurations is stored once and returned as one instance,
+        /// so that the cache holds one instance per action.
+        /// </summary>
+        [TestMethod]
+        public async Task GetAllEnabledAsyncSharedActionsAreOneInstanceTest()
+        {
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmConfigRepository repository = new PpcAlarmConfigRepository(NullLogger<PpcAlarmConfigRepository>.Instance, context);
+
+            List<PpcAlarmConfig> configs = await repository.GetAllEnabledAsync();
+
+            PpcAlarmConfig faultConfig = configs.Single(config => config.AlarmId == "PCS-FAULT");
+            PpcAlarmConfig gridLossConfig = configs.Single(config => config.AlarmId == "PCS-GRIDLOSS");
+            Assert.AreSame(faultConfig.AlarmActions.Single(action => action.Name == "ReducePower"),
+                gridLossConfig.AlarmActions.Single(action => action.Name == "ReducePower"));
+            Assert.HasCount(2, gridLossConfig.AlarmActions.Single(action => action.Name == "ReducePower").AlarmActionParameters);
+            Assert.AreEqual(2, await context.AlarmActionConfigs.CountAsync());
         }
 
 

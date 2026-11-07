@@ -40,6 +40,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
 
 
         /// <inheritdoc/>
+        /// <remarks>
+        /// With identity resolution an action shared by several configurations is one instance.
+        /// </remarks>
         public async Task<List<PpcAlarmConfig>> GetAllEnabledAsync(CancellationToken cancellationToken = default)
         {
             return await Context.PpcAlarmConfigs
@@ -47,7 +50,7 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
                 .Include(config => config.AlarmActions)
                 .ThenInclude(action => action.AlarmActionParameters)
                 .OrderBy(config => config.Id)
-                .AsNoTracking()
+                .AsNoTrackingWithIdentityResolution()
                 .ToListAsync(cancellationToken);
         }
     }

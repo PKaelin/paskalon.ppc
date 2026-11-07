@@ -21,5 +21,14 @@ namespace paskalON.Alarms.Application.Handlers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Persisted raised and normalized alarms, empty if nothing changed.</returns>
         Task<PpcAlarmEvaluation> HandleAsync(PpcAlarmKey key, object data, DateTimeOffset receivedOn, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Normalizes the active alarms whose configuration is no longer enabled (removed or disabled), e.g. after a
+        /// configuration reload, and persists them with their normalize actions per publisher.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Number of normalized alarms.</returns>
+        Task<int> NormalizeOrphanedAsync(CancellationToken cancellationToken = default);
     }
 }

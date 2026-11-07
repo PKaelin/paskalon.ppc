@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
 using paskalON.Alarms.Application.Caches;
 using paskalON.Alarms.Application.Handlers;
@@ -22,7 +23,7 @@ using System.Text.Json;
 namespace paskalON.Alarms.Application.UnitTest.Handlers
 {
     /// <summary>
-    /// Tests <see cref="PpcAlarmHandler"/> with the real store, reader and evaluator and mocked repositories.
+    /// Tests <see cref="PpcAlarmHandler"/> with the real store, reader, evaluator and active alarm cache and mocked repositories.
     /// </summary>
     [TestClass]
     public class PpcAlarmHandlerTest
@@ -76,6 +77,36 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
 
 
         /// <summary>
+        /// Alarms updated in the alarm repository.
+        /// </summary>
+        private readonly List<PpcAlarm> _updatedAlarms = new List<PpcAlarm>();
+
+
+        /// <summary>
+        /// Active alarms in the database, loaded into the active alarm cache.
+        /// </summary>
+        private readonly List<PpcAlarm> _savedActiveAlarms = new List<PpcAlarm>();
+
+
+        /// <summary>
+        /// Real active alarm cache, loaded from the mocked alarm repository.
+        /// </summary>
+        private readonly PpcAlarmActiveCache _activeCache = new PpcAlarmActiveCache(NullLogger<PpcAlarmActiveCache>.Instance);
+
+
+        /// <summary>
+        /// Real lock of the alarm writers.
+        /// </summary>
+        private readonly PpcAlarmWriteLock _writeLock = new PpcAlarmWriteLock();
+
+
+        /// <summary>
+        /// Time when the orphaned alarms are normalized.
+        /// </summary>
+        private static readonly DateTimeOffset NormalizedOn = new DateTimeOffset(2026, 11, 6, 9, 30, 0, TimeSpan.Zero);
+
+
+        /// <summary>
         /// Sets up the repositories with the PCS fault configuration and without active alarms.
         /// </summary>
         [TestInitialize]
@@ -83,10 +114,14 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
         {
             _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm))
                 .Returns(() => new List<PpcAlarmConfig> { PcsAlarmConfigSampleData.CreatePcsFaultConfig() });
+            _alarmRepository.Setup(repository => repository.GetAllActiveAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(() => new List<PpcAlarm>(_savedActiveAlarms));
             _alarmRepository.Setup(repository => repository.GetActiveAsync(Pcs7Key, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PpcAlarm>());
+                .ReturnsAsync(() => new List<PpcAlarm>(_savedActiveAlarms));
             _alarmRepository.Setup(repository => repository.Add(It.IsAny<IEnumerable<PpcAlarm>>()))
                 .Callback<IEnumerable<PpcAlarm>>(alarms => _addedAlarms.AddRange(alarms));
+            _alarmRepository.Setup(repository => repository.Update(It.IsAny<IEnumerable<PpcAlarm>>()))
+                .Callback<IEnumerable<PpcAlarm>>(alarms => _updatedAlarms.AddRange(alarms));
             _alarmRepository.Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(1);
             _outboxRepository.Setup(repository => repository.Add(It.IsAny<IEnumerable<AlarmActionOutboxMessage>>()))
@@ -100,7 +135,7 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
         [TestMethod]
         public async Task HandleAsyncFaultStateRaisesAlarmAndAddsRaiseActionTest()
         {
-            PpcAlarmHandler handler = CreateHandler(new PpcAlarmValueStore());
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
 
             PpcAlarmEvaluation evaluation = await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn);
 
@@ -119,6 +154,8 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             Assert.AreEqual("7", action.AlarmActionParameters.Single(parameter => parameter.Key == "DeviceId").Value);
             _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
+            List<PpcAlarm> cachedAlarms = await _activeCache.GetActiveAsync(Pcs7Key, _alarmRepository.Object);
+            Assert.AreSame(_addedAlarms[0], cachedAlarms.Single());
         }
 
 
@@ -132,20 +169,50 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             PpcAlarm activeAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
             _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm))
                 .Returns(new List<PpcAlarmConfig> { faultConfig });
-            _alarmRepository.Setup(repository => repository.GetActiveAsync(Pcs7Key, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PpcAlarm> { activeAlarm });
-            PpcAlarmHandler handler = CreateHandler(new PpcAlarmValueStore());
+            _savedActiveAlarms.Add(activeAlarm);
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
 
             PpcAlarmEvaluation evaluation = await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: false), ReceivedOn);
 
             Assert.HasCount(1, evaluation.Normalized);
             Assert.AreEqual(AlarmSequenceState.Normal, activeAlarm.AlarmSequenceState);
             Assert.IsEmpty(_addedAlarms);
+            Assert.AreSame(activeAlarm, _updatedAlarms.Single());
             Assert.HasCount(1, _addedMessages);
             Assert.AreEqual("ResetPower", _addedMessages[0].ActionName);
             Assert.AreSame(activeAlarm, _addedMessages[0].PpcAlarm);
             _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
+            Assert.IsEmpty(await _activeCache.GetActiveAsync(Pcs7Key, _alarmRepository.Object));
+        }
+
+
+        /// <summary>
+        /// When saving a normalization fails the cached alarm is not used again, the next data is evaluated against
+        /// the active alarm loaded again from the database.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleAsyncSaveNormalizationFailsReloadsActiveAlarmTest()
+        {
+            PpcAlarmConfig faultConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm))
+                .Returns(new List<PpcAlarmConfig> { faultConfig });
+            PpcAlarm cachedAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
+            _savedActiveAlarms.Add(cachedAlarm);
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+            PpcAlarm savedAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
+            _savedActiveAlarms[0] = savedAlarm;
+            _alarmRepository.SetupSequence(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new TimeoutException("Database not available."))
+                .ReturnsAsync(2);
+            await Assert.ThrowsExactlyAsync<TimeoutException>(() => handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: false), ReceivedOn));
+            _updatedAlarms.Clear();
+
+            PpcAlarmEvaluation evaluation = await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: false), ReceivedOn.AddSeconds(1));
+
+            Assert.AreSame(savedAlarm, evaluation.Normalized.Single());
+            Assert.AreSame(savedAlarm, _updatedAlarms.Single());
+            _alarmRepository.Verify(repository => repository.GetActiveAsync(Pcs7Key, It.IsAny<CancellationToken>()), Times.Once);
         }
 
 
@@ -159,7 +226,7 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             faultConfig.AlarmActions.Clear();
             _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm))
                 .Returns(new List<PpcAlarmConfig> { faultConfig });
-            PpcAlarmHandler handler = CreateHandler(new PpcAlarmValueStore());
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
 
             PpcAlarmEvaluation evaluation = await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn);
 
@@ -176,7 +243,7 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
         [TestMethod]
         public async Task HandleAsyncUnchangedDataDoesNotEvaluateTest()
         {
-            PpcAlarmHandler handler = CreateHandler(new PpcAlarmValueStore());
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
             await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn);
 
             PpcAlarmEvaluation evaluation = await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn.AddSeconds(1));
@@ -188,12 +255,28 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
 
 
         /// <summary>
+        /// The configurations and active alarms come from the caches, an evaluation without changes does not query the database.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleAsyncChangedValuesUseCachesWithoutQueryTest()
+        {
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+
+            await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: false), ReceivedOn);
+
+            _alarmRepository.Verify(repository => repository.GetActiveAsync(It.IsAny<PpcAlarmKey>(), It.IsAny<CancellationToken>()), Times.Never);
+            _alarmRepository.Verify(repository => repository.GetAllActiveAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+
+        /// <summary>
         /// Changed values without a matching configuration do not save anything.
         /// </summary>
         [TestMethod]
         public async Task HandleAsyncChangedValuesWithoutAlarmDoesNotSaveTest()
         {
-            PpcAlarmHandler handler = CreateHandler(new PpcAlarmValueStore());
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
 
             PpcAlarmEvaluation evaluation = await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: false), ReceivedOn);
 
@@ -212,7 +295,7 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             _alarmRepository.SetupSequence(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new TimeoutException("Database not available."))
                 .ReturnsAsync(2);
-            PpcAlarmHandler handler = CreateHandler(new PpcAlarmValueStore());
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
             await Assert.ThrowsExactlyAsync<TimeoutException>(() => handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn));
             _addedAlarms.Clear();
             _addedMessages.Clear();
@@ -225,16 +308,90 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
             // Only the successful save notifies, the failed save has no committed messages
             _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
+            // The failed save invalidated the active alarms of the publisher, they are loaded again once
+            _alarmRepository.Verify(repository => repository.GetActiveAsync(Pcs7Key, It.IsAny<CancellationToken>()), Times.Once);
         }
 
 
         /// <summary>
-        /// Creates the handler with the real evaluator and the mocked repositories.
+        /// An active alarm whose configuration is no longer enabled is normalized with its normalize action,
+        /// the alarm of an enabled configuration stays active.
         /// </summary>
-        private PpcAlarmHandler CreateHandler(IPpcAlarmValueStore valueStore)
+        [TestMethod]
+        public async Task NormalizeOrphanedAsyncNormalizesAlarmsOfRemovedConfigsTest()
         {
+            PpcAlarmConfig faultConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            PpcAlarmConfig removedConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            removedConfig.Id = 2;
+            removedConfig.AlarmId = "PCS-REMOVED";
+            PpcAlarm activeAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
+            PpcAlarm orphanedAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(removedConfig, 7, "FaultStates.GridLoss");
+            _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm)).Returns(new List<PpcAlarmConfig> { faultConfig });
+            _savedActiveAlarms.Add(activeAlarm);
+            _savedActiveAlarms.Add(orphanedAlarm);
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+
+            int normalizedCount = await handler.NormalizeOrphanedAsync();
+
+            Assert.AreEqual(1, normalizedCount);
+            Assert.AreEqual(AlarmSequenceState.Normal, orphanedAlarm.AlarmSequenceState);
+            Assert.AreEqual(NormalizedOn, orphanedAlarm.ChangedDate);
+            Assert.AreEqual(PpcAlarmEvaluator.SystemUser, orphanedAlarm.ChangedBy);
+            Assert.AreEqual(AlarmSequenceState.Alarm, activeAlarm.AlarmSequenceState);
+            Assert.AreSame(orphanedAlarm, _updatedAlarms.Single());
+            Assert.AreEqual("ResetPower", _addedMessages.Single().ActionName);
+            _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
+            Assert.AreSame(activeAlarm, (await _activeCache.GetActiveAsync(Pcs7Key, _alarmRepository.Object)).Single());
+        }
+
+
+        /// <summary>
+        /// Without orphaned alarms nothing is saved.
+        /// </summary>
+        [TestMethod]
+        public async Task NormalizeOrphanedAsyncWithoutOrphanedAlarmsSavesNothingTest()
+        {
+            PpcAlarmConfig faultConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm)).Returns(new List<PpcAlarmConfig> { faultConfig });
+            _savedActiveAlarms.Add(PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature"));
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+
+            int normalizedCount = await handler.NormalizeOrphanedAsync();
+
+            Assert.AreEqual(0, normalizedCount);
+            _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+
+        /// <summary>
+        /// An evaluation waits while another writer (e.g. the web API) holds the write lock.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleAsyncWaitsForWriteLockTest()
+        {
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+            IDisposable otherWriter = await _writeLock.AcquireAsync();
+            Task<PpcAlarmEvaluation> evaluation = handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn);
+            bool isEvaluatedWhileLocked = evaluation.IsCompleted;
+
+            otherWriter.Dispose();
+
+            Assert.IsFalse(isEvaluatedWhileLocked);
+            Assert.HasCount(1, (await evaluation.WaitAsync(TimeSpan.FromSeconds(10))).Raised);
+        }
+
+
+        /// <summary>
+        /// Creates the handler with the real evaluator, the real active alarm cache loaded from the mocked repository
+        /// and the mocked repositories.
+        /// </summary>
+        private async Task<PpcAlarmHandler> CreateHandlerAsync(IPpcAlarmValueStore valueStore)
+        {
+            await _activeCache.LoadAsync(_alarmRepository.Object);
+
             return new PpcAlarmHandler(NullLogger<PpcAlarmHandler>.Instance, valueStore, new PpcAlarmEvaluator(),
-                _configCache.Object, _alarmRepository.Object, _outboxRepository.Object, _outboxSignal.Object);
+                _configCache.Object, _activeCache, _alarmRepository.Object, _outboxRepository.Object, _outboxSignal.Object, _writeLock,
+                new FakeTimeProvider(NormalizedOn));
         }
 
 
