@@ -7,6 +7,8 @@
     <!-- Dependency heartbeat subscriber topics -->
     <SubscriberTopicPowerControlHeartbeat>ppc:pc:heartbeat</SubscriberTopicPowerControlHeartbeat>
     <SubscriberTopicOperatingModeHeartbeat>ppc:om:heartbeat</SubscriberTopicOperatingModeHeartbeat>
+    <!-- Alarm service RabbitMQ exchange of the alarm actions -->
+    <SubscriberExchangeAlarmActions>ppc:alarms:actions</SubscriberExchangeAlarmActions>
     <!-- Devices subscriber topics -->
     <SubscriberTopicPcsCore>ppc:device:pcs:core</SubscriberTopicPcsCore>
     <SubscriberTopicPcsDetail>ppc:device:pcs:detail</SubscriberTopicPcsDetail>

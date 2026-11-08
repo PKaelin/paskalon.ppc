@@ -1,5 +1,9 @@
 <Solution>
   <Folder Name="/InitialDevelopment/">
+    <Project Path="../paskalON.Alarms/paskalON.Alarms.Client/paskalON.Alarms.Client.csproj" />
+    <Project Path="../paskalON.Alarms/paskalON.Alarms.Dto/paskalON.Alarms.Dto.csproj" />
+    <Project Path="../paskalON.Alarms/paskalON.Alarms.Service.Dto/paskalON.Alarms.Service.Dto.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Messaging.RabbitMq/paskalON.Messaging.RabbitMq.csproj" />
     <Project Path="../paskalON.Common/paskalON.Hosting/paskalON.Hosting.csproj" />
     <Project Path="../paskalON.Common/paskalON.Messaging/paskalON.Messaging.csproj" />
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />

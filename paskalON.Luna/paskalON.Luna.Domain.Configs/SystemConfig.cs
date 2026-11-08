@@ -50,6 +50,13 @@ namespace paskalON.Luna.Domain.Configs
 
 
         /// <summary>
+        /// RabbitMQ topic exchange of the alarm actions of the alarm service (e.g. ppc:alarms:actions).
+        /// Every Luna instance subscribes with its own queue.
+        /// </summary>
+        public string? SubscriberExchangeAlarmActions { get; set; }
+
+
+        /// <summary>
         /// Subscriber topic for power conversion system core used for the message subscriber.
         /// </summary>
         public string? SubscriberTopicPcsCore { get; set; }

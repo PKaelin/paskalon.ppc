@@ -14,6 +14,9 @@ services:
       - DEVICE_SERVICE_ENDPOINT=/api/v1
       - OPERATINGMODE_CONNECTION_FILE=/run/secrets/operatingmode_connection
       - OPERATINGMODE_SERVICE_ENDPOINT=/api/v1
+      - ALARMSERVICE_CONNECTION_FILE=/run/secrets/alarmservice_connection
+      - ALARM_SERVICE_ENDPOINT=/api/v1
+      - RABBITMQ_CONNECTION_FILE=/run/secrets/rabbitmq_connection
       - TELEMETRY_LOGGING_ENDPOINT=http://collector:4317
       - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
       - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
@@ -23,6 +26,8 @@ services:
       - messaging_connection
       - deviceservice_connection
       - operatingmode_connection
+      - alarmservice_connection
+      - rabbitmq_connection
     networks:
       - ppc.network
 
@@ -55,6 +60,10 @@ secrets:
     file: ./secrets/deviceservice_connection
   operatingmode_connection:
     file: ./secrets/operatingmode_connection
+  alarmservice_connection:
+    file: ./secrets/alarmservice_connection
+  rabbitmq_connection:
+    file: ./secrets/rabbitmq_connection
 
 networks:
   ppc.network:

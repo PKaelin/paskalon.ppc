@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\paskalON.Alarms\paskalON.Alarms.Client\paskalON.Alarms.Client.csproj" />
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Client\paskalON.Devices.Client.csproj" />
     <ProjectReference Include="..\..\paskalON.OperatingModes\paskalON.OperatingModes.Client\paskalON.OperatingModes.Client.csproj" />
     <ProjectReference Include="..\..\paskalON.OperatingModes\paskalON.OperatingModes.Dto\paskalON.OperatingModes.Dto.csproj" />

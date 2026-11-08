@@ -3,6 +3,8 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.AspNetCore.SignalR;
+using paskalON.Alarms.Client;
+using paskalON.Alarms.Client.Subscribers;
 using paskalON.Devices.Client;
 using paskalON.Devices.Client.Subscribers;
 using paskalON.Hosting;
@@ -15,6 +17,7 @@ using paskalON.Luna.Service.WebApi.Hubs;
 using paskalON.Messaging;
 using paskalON.Messaging.Health;
 using paskalON.Messaging.Heartbeats;
+using paskalON.Messaging.RabbitMq;
 using paskalON.Messaging.Redis;
 using paskalON.OperatingModes.Client;
 using paskalON.OperatingModes.Client.Subscribers;
@@ -53,6 +56,21 @@ try
     string? omEndpoint = Environment.GetEnvironmentVariable("OPERATINGMODE_SERVICE_ENDPOINT");
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(omEndpoint, "Cannot find the operating mode service endpoint. OPERATINGMODE_SERVICE_ENDPOINT");
 
+    // Get alarm service connection string
+    string? alConnectionStringFile = Environment.GetEnvironmentVariable("ALARMSERVICE_CONNECTION_FILE");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(alConnectionStringFile, "Cannot find the alarm service secret file. ALARMSERVICE_CONNECTION_FILE");
+    string alConnectionString = (await File.ReadAllTextAsync(alConnectionStringFile)).Trim();
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(alConnectionString, "Cannot find the alarm service connection string definition");
+    // Get alarm service endpoint
+    string? alEndpoint = Environment.GetEnvironmentVariable("ALARM_SERVICE_ENDPOINT");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(alEndpoint, "Cannot find the alarm service endpoint. ALARM_SERVICE_ENDPOINT");
+
+    // Get RabbitMQ connection URI of the alarm actions
+    string? rabbitMqConnectionFile = Environment.GetEnvironmentVariable("RABBITMQ_CONNECTION_FILE");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(rabbitMqConnectionFile, "Cannot find the RabbitMQ secret file. RABBITMQ_CONNECTION_FILE");
+    string rabbitMqConnectionString = (await File.ReadAllTextAsync(rabbitMqConnectionFile)).Trim();
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(rabbitMqConnectionString, "Cannot find the RabbitMQ connection string definition");
+
     // Get Logging, Metrics, Tracing endpoint strings
     string? logEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_LOGGING_ENDPOINT");
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(logEndpointString, "Cannot find the logging endpoint. TELEMETRY_LOGGING_ENDPOINT");
@@ -72,6 +90,8 @@ try
     SystemConfig config = LoadSystemConfig("SystemConfig.xml");
     string shutdownOperatingModeName = config.ShutdownOperatingModeName ?? string.Empty;
     ArgumentException.ThrowIfNullOrWhiteSpace(shutdownOperatingModeName, "Cannot find the shutdown operating mode name. ShutdownOperatingModeName");
+    string alarmActionExchange = config.SubscriberExchangeAlarmActions ?? string.Empty;
+    ArgumentException.ThrowIfNullOrWhiteSpace(alarmActionExchange, "Cannot find the alarm action exchange. SubscriberExchangeAlarmActions");
     SystemNameplateDto nameplate = GetSystemNameplate(config);
 
     // Add WebApi's
@@ -105,6 +125,29 @@ try
         Timeout = TimeSpan.FromSeconds(10)
     });
     builder.Services.AddSingleton<IOperatingModeServer>(sp => new OperatingModeServer(sp.GetRequiredKeyedService<HttpClient>(nameof(OperatingModeServer))));
+
+    // Long living HTTP client for the alarm service API
+    Uri alBaseAddress = new Uri($"{alConnectionString.TrimEnd('/')}/{alEndpoint.Trim('/')}/");
+    builder.Services.AddKeyedSingleton(nameof(AlarmServer), (_, _) => new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
+    {
+        BaseAddress = alBaseAddress,
+        Timeout = TimeSpan.FromSeconds(10)
+    });
+    builder.Services.AddSingleton<IAlarmServer>(sp => new AlarmServer(sp.GetRequiredKeyedService<HttpClient>(nameof(AlarmServer))));
+
+    // Alarm actions of the alarm service: every Luna instance subscribes with its own queue and receives every action
+    Uri rabbitMqConnectionUri = new Uri(rabbitMqConnectionString);
+    builder.Services.AddSingleton<IRabbitMqSubscriber>(sp => new RabbitMqSubscriber(sp.GetRequiredService<ILogger<RabbitMqSubscriber>>(),
+        rabbitMqConnectionUri, alarmActionExchange, $"{serviceName}:{Environment.MachineName}"));
+    builder.Services.AddSingleton<LunaAlarmManager>();
+    builder.Services.AddSingleton<ILunaAlarmManager>(provider => provider.GetRequiredService<LunaAlarmManager>());
+    builder.Services.AddSingleton<IAlarmActionHandler>(provider => provider.GetRequiredService<LunaAlarmManager>());
+    builder.Services.AddHostedService(sp => new AlarmActionSubscriberService(
+        sp.GetRequiredService<ILogger<AlarmActionSubscriberService>>(),
+        sp.GetRequiredService<IRabbitMqSubscriber>(),
+        sp.GetRequiredService<IAlarmActionHandler>(),
+        TimeSpan.FromSeconds(5),
+        TimeProvider.System));
 
     // Add managers
     builder.Services.AddSingleton<ILunaDeviceManager, LunaDeviceManager>();
