@@ -2,6 +2,8 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Alarms.Dto.Summaries;
+
 namespace paskalON.Alarms.Dto.Actions
 {
     /// <summary>
@@ -30,5 +32,11 @@ namespace paskalON.Alarms.Dto.Actions
         /// Key/Value parameters needed to execute the action.
         /// </summary>
         public List<AlarmActionParameterDto> AlarmActionParameters { get; init; } = new List<AlarmActionParameterDto>();
+
+
+        /// <summary>
+        /// Alarm summary of the alarm service after the alarm of the action was raised or normalized.
+        /// </summary>
+        public required AlarmSummaryDto AlarmSummary { get; init; }
     }
 }

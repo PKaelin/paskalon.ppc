@@ -36,7 +36,7 @@ namespace paskalON.Alarms.Infrastructure.Storage.Configurations
             builder.Property(x => x.Consequences).HasMaxLength(250);
             builder.Property(x => x.TimeBeforeRaisingAlarmMilliseconds).IsRequired();
 
-            // The actions are shared by the alarm configurations (e.g. ShowAlarm for all communication errors)
+            // The actions are shared by the alarm configurations (e.g. RaiseAlarm for all communication errors)
             builder.HasMany(x => x.AlarmActions)
                 .WithMany()
                 .UsingEntity(AlarmConfigActionTable,

@@ -15,6 +15,7 @@ using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Domain.Ppcs;
 using paskalON.Alarms.Dto.Actions;
+using paskalON.Alarms.Dto.Summaries;
 using paskalON.Alarms.Infrastructure.Storage.Outboxes;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
 using paskalON.Devices.Dto.PowerConversionSystems;
@@ -152,6 +153,8 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             Assert.IsNotNull(action);
             Assert.AreEqual(message.MessageId, action.MessageId);
             Assert.AreEqual("7", action.AlarmActionParameters.Single(parameter => parameter.Key == "DeviceId").Value);
+            Assert.AreEqual(NormalizedOn, action.AlarmSummary.CalculatedOn);
+            Assert.AreEqual(1, action.AlarmSummary.ErrorCount);
             _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
             List<PpcAlarm> cachedAlarms = await _activeCache.GetActiveAsync(Pcs7Key, _alarmRepository.Object);
@@ -181,9 +184,51 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             Assert.HasCount(1, _addedMessages);
             Assert.AreEqual("ResetPower", _addedMessages[0].ActionName);
             Assert.AreSame(activeAlarm, _addedMessages[0].PpcAlarm);
+            Assert.AreEqual(0, JsonSerializer.Deserialize<AlarmActionDto>(_addedMessages[0].Payload)!.AlarmSummary.ErrorCount);
             _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
             Assert.IsEmpty(await _activeCache.GetActiveAsync(Pcs7Key, _alarmRepository.Object));
+        }
+
+
+        /// <summary>
+        /// The summary sent with the actions counts the alarms of all publishers after the evaluation.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleAsyncRaisedAlarmActionContainsSummaryOfAllPublishersTest()
+        {
+            PpcAlarmConfig faultConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm))
+                .Returns(new List<PpcAlarmConfig> { faultConfig });
+            _savedActiveAlarms.Add(PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 8, "FaultStates.GridLoss"));
+            _savedActiveAlarms.Add(PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 9, "FaultStates.GridLoss"));
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+
+            await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn);
+
+            AlarmActionDto action = JsonSerializer.Deserialize<AlarmActionDto>(_addedMessages.Single().Payload)!;
+            Assert.AreEqual(3, action.AlarmSummary.ErrorCount);
+            Assert.AreEqual(0, action.AlarmSummary.WarningCount);
+        }
+
+
+        /// <summary>
+        /// When saving fails the evaluation was already applied to the cache for the summary, the publisher is invalidated
+        /// so that the summary is calculated again from the saved alarms.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleAsyncSaveFailsSummaryCountsSavedAlarmsTest()
+        {
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+            _alarmRepository.Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new TimeoutException("Database not available."));
+            await Assert.ThrowsExactlyAsync<TimeoutException>(() => handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), ReceivedOn));
+
+            AlarmSummaryDto summary = await handler.GetSummaryAsync();
+
+            Assert.AreEqual(0, summary.ErrorCount);
+            Assert.AreEqual(NormalizedOn, summary.CalculatedOn);
+            _alarmRepository.Verify(repository => repository.GetActiveAsync(Pcs7Key, It.IsAny<CancellationToken>()), Times.Once);
         }
 
 

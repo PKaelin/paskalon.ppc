@@ -14,6 +14,7 @@ using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Domain.Ppcs;
 using paskalON.Alarms.Dto.Actions;
+using paskalON.Alarms.Dto.Summaries;
 using paskalON.Alarms.Infrastructure.Storage.Outboxes;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
 
@@ -83,7 +84,7 @@ namespace paskalON.Alarms.Application.Handlers
 
 
         /// <summary>
-        /// Time provider of the normalization of orphaned alarms.
+        /// Time provider of the normalization of orphaned alarms and of the alarm summaries.
         /// </summary>
         private readonly TimeProvider _timeProvider;
 
@@ -100,7 +101,7 @@ namespace paskalON.Alarms.Application.Handlers
         /// <param name="outboxRepository">Repository of the alarm action outbox.</param>
         /// <param name="outboxSignal">Signal that sends the saved alarm actions immediately.</param>
         /// <param name="writeLock">Lock of the alarm writers.</param>
-        /// <param name="timeProvider">Time provider of the normalization of orphaned alarms.</param>
+        /// <param name="timeProvider">Time provider of the normalization of orphaned alarms and of the alarm summaries.</param>
         public PpcAlarmHandler(ILogger<PpcAlarmHandler> logger, IPpcAlarmValueStore valueStore, IPpcAlarmEvaluator evaluator,
             IPpcAlarmConfigCache configCache, IPpcAlarmActiveCache activeCache, IPpcAlarmRepository alarmRepository,
             IAlarmActionOutboxRepository outboxRepository, IAlarmActionOutboxSignal outboxSignal, IPpcAlarmWriteLock writeLock,
@@ -230,19 +231,35 @@ namespace paskalON.Alarms.Application.Handlers
         }
 
 
+        /// <inheritdoc/>
+        /// <remarks>
+        /// Calculated under the write lock from the active alarm cache, like the summary sent with the alarm actions.
+        /// </remarks>
+        public async Task<AlarmSummaryDto> GetSummaryAsync(CancellationToken cancellationToken = default)
+        {
+            using IDisposable writeLock = await _writeLock.AcquireAsync(cancellationToken);
+
+            return await _activeCache.GetSummaryAsync(_alarmRepository, _timeProvider.GetUtcNow(), cancellationToken);
+        }
+
+
         /// <summary>
         /// Saves the raised and normalized alarms with their alarm actions in one transaction and applies them to the cache.
         /// </summary>
+        /// <remarks>
+        /// The evaluation is applied to the cache before the save, so that the alarm summary sent with the actions
+        /// contains it. When the save fails the callers invalidate the publisher, its alarms are loaded again from the database.
+        /// </remarks>
         private async Task SaveEvaluationAsync(PpcAlarmKey key, PpcAlarmEvaluation evaluation, CancellationToken cancellationToken)
         {
-            List<AlarmActionOutboxMessage> messages = CreateOutboxMessages(evaluation);
+            _activeCache.Apply(key, evaluation);
+            AlarmSummaryDto alarmSummary = await _activeCache.GetSummaryAsync(_alarmRepository, _timeProvider.GetUtcNow(), cancellationToken);
+            List<AlarmActionOutboxMessage> messages = CreateOutboxMessages(evaluation, alarmSummary);
             _alarmRepository.Add(evaluation.Raised);
             // The normalized alarms are cached instances, they are updated before their outbox messages reference them
             _alarmRepository.Update(evaluation.Normalized);
             _outboxRepository.Add(messages);
             await _alarmRepository.SaveChangesAsync(cancellationToken);
-            // Only after the commit, so that the cache and the outbox publisher service see the saved state
-            _activeCache.Apply(key, evaluation);
 
             if (messages.Count > 0)
             {
@@ -257,18 +274,18 @@ namespace paskalON.Alarms.Application.Handlers
         /// <summary>
         /// Creates the outbox messages of the raise actions of the raised alarms and the normalize actions of the normalized alarms.
         /// </summary>
-        private static List<AlarmActionOutboxMessage> CreateOutboxMessages(PpcAlarmEvaluation evaluation)
+        private static List<AlarmActionOutboxMessage> CreateOutboxMessages(PpcAlarmEvaluation evaluation, AlarmSummaryDto alarmSummary)
         {
             List<AlarmActionOutboxMessage> messages = new List<AlarmActionOutboxMessage>();
 
             foreach (PpcAlarm alarm in evaluation.Raised)
             {
-                messages.AddRange(CreateOutboxMessages(alarm, AlarmActionTrigger.Raise));
+                messages.AddRange(CreateOutboxMessages(alarm, AlarmActionTrigger.Raise, alarmSummary));
             }
 
             foreach (PpcAlarm alarm in evaluation.Normalized)
             {
-                messages.AddRange(CreateOutboxMessages(alarm, AlarmActionTrigger.Normalize));
+                messages.AddRange(CreateOutboxMessages(alarm, AlarmActionTrigger.Normalize, alarmSummary));
             }
 
             return messages;
@@ -278,9 +295,9 @@ namespace paskalON.Alarms.Application.Handlers
         /// <summary>
         /// Creates the outbox messages of the actions of an alarm for the trigger.
         /// </summary>
-        private static IEnumerable<AlarmActionOutboxMessage> CreateOutboxMessages(PpcAlarm alarm, AlarmActionTrigger trigger)
+        private static IEnumerable<AlarmActionOutboxMessage> CreateOutboxMessages(PpcAlarm alarm, AlarmActionTrigger trigger, AlarmSummaryDto alarmSummary)
         {
-            foreach (AlarmActionDto action in AlarmActionDtoFactory.Create(alarm, trigger))
+            foreach (AlarmActionDto action in AlarmActionDtoFactory.Create(alarm, trigger, alarmSummary))
             {
                 yield return new AlarmActionOutboxMessage
                 {

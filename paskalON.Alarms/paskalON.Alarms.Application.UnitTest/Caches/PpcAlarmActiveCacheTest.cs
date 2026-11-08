@@ -6,9 +6,11 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.Alarms.Application.Caches;
 using paskalON.Alarms.Application.UnitTest.SampleData;
+using paskalON.Alarms.Domain.Configs;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Domain.Ppcs;
+using paskalON.Alarms.Dto.Summaries;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
 
 namespace paskalON.Alarms.Application.UnitTest.Caches
@@ -29,6 +31,12 @@ namespace paskalON.Alarms.Application.UnitTest.Caches
         /// Key of PCS 8.
         /// </summary>
         private static readonly PpcAlarmKey Pcs8Key = new PpcAlarmKey { PpcAlarmType = PpcAlarmType.PcsAlarm, DeviceId = 8 };
+
+
+        /// <summary>
+        /// Time of the summary calculation.
+        /// </summary>
+        private static readonly DateTimeOffset CalculatedOn = new DateTimeOffset(2026, 11, 7, 10, 30, 0, TimeSpan.Zero);
 
 
         /// <summary>
@@ -179,6 +187,54 @@ namespace paskalON.Alarms.Application.UnitTest.Caches
             IReadOnlyList<PpcAlarmKey> keys = cache.GetKeys();
 
             CollectionAssert.AreEquivalent(new List<PpcAlarmKey> { Pcs7Key, batteryKey }, keys.ToList());
+        }
+
+
+        /// <summary>
+        /// The summary counts the alarms in the sequence state Alarm per severity level of all publishers,
+        /// acknowledged alarms are not counted.
+        /// </summary>
+        [TestMethod]
+        public async Task GetSummaryAsyncCountsAlarmsInStateAlarmPerSeverityTest()
+        {
+            PpcAlarmConfig warningConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            warningConfig.Id = 2;
+            warningConfig.SeverityLevel = AlarmSeverity.Warning;
+            PpcAlarm acknowledgedAlarm = CreateAlarm(8, "FaultStates.GridLoss");
+            acknowledgedAlarm.Acknowledge("Homer", CalculatedOn);
+            SetupAllActive(CreateAlarm(7, "FaultStates.OverTemperature"), CreateAlarm(8, "FaultStates.OverTemperature"), acknowledgedAlarm,
+                PcsAlarmConfigSampleData.CreateActiveAlarm(warningConfig, 7, "FaultStates.OverCurrent"));
+            PpcAlarmActiveCache cache = CreateCache();
+            await cache.LoadAsync(_repository.Object);
+
+            AlarmSummaryDto summary = await cache.GetSummaryAsync(_repository.Object, CalculatedOn);
+
+            Assert.AreEqual(CalculatedOn, summary.CalculatedOn);
+            Assert.AreEqual(0, summary.InfoCount);
+            Assert.AreEqual(1, summary.WarningCount);
+            Assert.AreEqual(2, summary.ErrorCount);
+            Assert.AreEqual(0, summary.CriticalCount);
+        }
+
+
+        /// <summary>
+        /// The invalidated publishers are loaded from the database before the alarms are counted.
+        /// </summary>
+        [TestMethod]
+        public async Task GetSummaryAsyncReloadsInvalidatedPublishersTest()
+        {
+            SetupAllActive(CreateAlarm(7, "FaultStates.OverTemperature"));
+            PpcAlarmActiveCache cache = CreateCache();
+            await cache.LoadAsync(_repository.Object);
+            _repository.Setup(repository => repository.GetActiveAsync(Pcs7Key, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<PpcAlarm> { CreateAlarm(7, "FaultStates.OverTemperature"), CreateAlarm(7, "FaultStates.GridLoss") });
+            cache.Invalidate(Pcs7Key);
+
+            AlarmSummaryDto summary = await cache.GetSummaryAsync(_repository.Object, CalculatedOn);
+
+            Assert.AreEqual(2, summary.ErrorCount);
+            Assert.HasCount(2, await cache.GetActiveAsync(Pcs7Key, _repository.Object));
+            _repository.Verify(repository => repository.GetActiveAsync(Pcs7Key, It.IsAny<CancellationToken>()), Times.Once);
         }
 
 

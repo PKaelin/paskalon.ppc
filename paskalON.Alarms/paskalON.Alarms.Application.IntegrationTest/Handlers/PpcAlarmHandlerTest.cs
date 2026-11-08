@@ -15,10 +15,12 @@ using paskalON.Alarms.Domain.Configs.Actions;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Domain.Ppcs;
+using paskalON.Alarms.Dto.Actions;
 using paskalON.Alarms.Infrastructure.Storage;
 using paskalON.Alarms.Infrastructure.Storage.Outboxes;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
 using paskalON.Devices.Dto.PowerConversionSystems;
+using System.Text.Json;
 
 namespace paskalON.Alarms.Application.IntegrationTest.Handlers
 {
@@ -127,6 +129,10 @@ namespace paskalON.Alarms.Application.IntegrationTest.Handlers
             Assert.AreEqual(AlarmSequenceState.Normal, alarm.AlarmSequenceState);
             Assert.AreEqual(ReceivedOn.AddSeconds(5), alarm.ChangedDate);
             CollectionAssert.AreEqual(new List<string> { "ReducePower", "ResetPower" }, await GetActionNamesAsync(context));
+            List<AlarmActionDto> actions = (await context.AlarmActionOutboxMessages.OrderBy(message => message.CreatedOn).ToListAsync())
+                .Select(message => JsonSerializer.Deserialize<AlarmActionDto>(message.Payload)!)
+                .ToList();
+            CollectionAssert.AreEqual(new List<int> { 1, 0 }, actions.Select(action => action.AlarmSummary.ErrorCount).ToList());
             Assert.AreEqual(ConfiguredOn, (await context.PpcAlarmConfigs.SingleAsync()).ChangedDate);
             Assert.IsEmpty(await _activeCache.GetActiveAsync(Pcs7Key, new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context)));
         }

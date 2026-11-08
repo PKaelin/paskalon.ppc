@@ -9,6 +9,7 @@ using paskalON.Alarms.Domain.Configs.Actions;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Ppcs;
 using paskalON.Alarms.Dto.Actions;
+using paskalON.Alarms.Dto.Summaries;
 
 namespace paskalON.Alarms.Application.UnitTest.Actions
 {
@@ -19,7 +20,20 @@ namespace paskalON.Alarms.Application.UnitTest.Actions
     public class AlarmActionDtoFactoryTest
     {
         /// <summary>
-        /// Only the actions of the trigger are created, with the configured name.
+        /// Alarm summary of the alarm service after the alarm was raised or normalized.
+        /// </summary>
+        private static readonly AlarmSummaryDto Summary = new AlarmSummaryDto
+        {
+            CalculatedOn = new DateTimeOffset(2026, 11, 7, 10, 0, 0, TimeSpan.Zero),
+            InfoCount = 0,
+            WarningCount = 1,
+            ErrorCount = 3,
+            CriticalCount = 0
+        };
+
+
+        /// <summary>
+        /// Only the actions of the trigger are created, with the configured name and the alarm summary.
         /// </summary>
         [TestMethod]
         [DataRow(AlarmActionTrigger.Raise, "ReducePower")]
@@ -28,10 +42,11 @@ namespace paskalON.Alarms.Application.UnitTest.Actions
         {
             PpcAlarm alarm = PcsAlarmConfigSampleData.CreateActiveAlarm(PcsAlarmConfigSampleData.CreatePcsFaultConfig(), 7, "FaultStates.OverTemperature");
 
-            List<AlarmActionDto> actions = AlarmActionDtoFactory.Create(alarm, trigger);
+            List<AlarmActionDto> actions = AlarmActionDtoFactory.Create(alarm, trigger, Summary);
 
             Assert.HasCount(1, actions);
             Assert.AreEqual(expectedName, actions[0].Name);
+            Assert.AreSame(Summary, actions[0].AlarmSummary);
         }
 
 
@@ -43,7 +58,7 @@ namespace paskalON.Alarms.Application.UnitTest.Actions
         {
             PpcAlarm alarm = PcsAlarmConfigSampleData.CreateActiveAlarm(PcsAlarmConfigSampleData.CreatePcsFaultConfig(), 7, "FaultStates.OverTemperature");
 
-            List<AlarmActionDto> actions = AlarmActionDtoFactory.Create(alarm, AlarmActionTrigger.Raise);
+            List<AlarmActionDto> actions = AlarmActionDtoFactory.Create(alarm, AlarmActionTrigger.Raise, Summary);
 
             List<AlarmActionParameterDto> parameters = actions[0].AlarmActionParameters;
             Assert.HasCount(3, parameters);
@@ -69,7 +84,7 @@ namespace paskalON.Alarms.Application.UnitTest.Actions
                 Id = 30,
                 ChangedBy = "Homer",
                 ChangedDate = new DateTimeOffset(2026, 11, 6, 8, 0, 0, TimeSpan.Zero),
-                Name = "ShowAlarm",
+                Name = "RaiseAlarm",
                 Trigger = AlarmActionTrigger.Raise
             };
             showAlarm.AlarmActionParameters.Add(new AlarmActionParameterConfig
@@ -90,9 +105,9 @@ namespace paskalON.Alarms.Application.UnitTest.Actions
             config.PropertyName = "CommunicationError";
             PpcAlarm alarm = PcsAlarmConfigSampleData.CreateActiveAlarm(config, deviceId, "CommunicationError");
 
-            List<AlarmActionDto> actions = AlarmActionDtoFactory.Create(alarm, AlarmActionTrigger.Raise);
+            List<AlarmActionDto> actions = AlarmActionDtoFactory.Create(alarm, AlarmActionTrigger.Raise, Summary);
 
-            Assert.AreEqual("ShowAlarm", actions.Single().Name);
+            Assert.AreEqual("RaiseAlarm", actions.Single().Name);
             Assert.AreEqual(expectedValue, actions.Single().AlarmActionParameters.Single().Value);
         }
 
@@ -107,7 +122,7 @@ namespace paskalON.Alarms.Application.UnitTest.Actions
             config.PpcAlarmType = PpcAlarmType.SystemAlarm;
             PpcAlarm alarm = PcsAlarmConfigSampleData.CreateActiveAlarm(config, null, "FaultStates.OverTemperature");
 
-            List<AlarmActionDto> actions = AlarmActionDtoFactory.Create(alarm, AlarmActionTrigger.Raise);
+            List<AlarmActionDto> actions = AlarmActionDtoFactory.Create(alarm, AlarmActionTrigger.Raise, Summary);
 
             Assert.AreEqual(string.Empty, actions[0].AlarmActionParameters[0].Value);
         }
@@ -121,8 +136,8 @@ namespace paskalON.Alarms.Application.UnitTest.Actions
         {
             PpcAlarm alarm = PcsAlarmConfigSampleData.CreateActiveAlarm(PcsAlarmConfigSampleData.CreatePcsFaultConfig(), 7, "FaultStates.OverTemperature");
 
-            Guid first = AlarmActionDtoFactory.Create(alarm, AlarmActionTrigger.Raise)[0].MessageId;
-            Guid second = AlarmActionDtoFactory.Create(alarm, AlarmActionTrigger.Raise)[0].MessageId;
+            Guid first = AlarmActionDtoFactory.Create(alarm, AlarmActionTrigger.Raise, Summary)[0].MessageId;
+            Guid second = AlarmActionDtoFactory.Create(alarm, AlarmActionTrigger.Raise, Summary)[0].MessageId;
 
             Assert.AreNotEqual(Guid.Empty, first);
             Assert.AreNotEqual(first, second);

@@ -10,7 +10,7 @@ namespace paskalON.Alarms.Domain.Configs.Actions
     /// Alarm action configuration that includes enough information for the recipient to execute the action without making another API call.
     /// </summary>
     /// <remarks>
-    /// One action can be shared by many alarm configurations (e.g. ShowAlarm for all communication errors).
+    /// One action can be shared by many alarm configurations (e.g. RaiseAlarm for all communication errors).
     /// Alarm specific values are passed with the placeholders in the parameter values (e.g. {{AlarmId}}).
     /// Not derived from NameBase, because different actions can have the same name (e.g. ReducePower with different parameters).
     /// </remarks>

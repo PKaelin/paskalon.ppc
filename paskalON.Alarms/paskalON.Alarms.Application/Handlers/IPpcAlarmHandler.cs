@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Alarms.Domain.Evaluations;
+using paskalON.Alarms.Dto.Summaries;
 
 namespace paskalON.Alarms.Application.Handlers
 {
@@ -30,5 +31,13 @@ namespace paskalON.Alarms.Application.Handlers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Number of normalized alarms.</returns>
         Task<int> NormalizeOrphanedAsync(CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Gets the number of alarms in the sequence state Alarm per severity level.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The current alarm summary.</returns>
+        Task<AlarmSummaryDto> GetSummaryAsync(CancellationToken cancellationToken = default);
     }
 }

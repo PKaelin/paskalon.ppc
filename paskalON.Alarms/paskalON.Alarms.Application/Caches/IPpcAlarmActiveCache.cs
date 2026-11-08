@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Domain.Ppcs;
+using paskalON.Alarms.Dto.Summaries;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
 
 namespace paskalON.Alarms.Application.Caches
@@ -45,6 +46,21 @@ namespace paskalON.Alarms.Application.Caches
         /// <returns>Keys of the publishers.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the active alarms have not been loaded.</exception>
         IReadOnlyList<PpcAlarmKey> GetKeys();
+
+
+        /// <summary>
+        /// Counts the active alarms in the sequence state Alarm per severity level of all publishers.
+        /// The invalidated publishers are loaded from the database first.
+        /// </summary>
+        /// <remarks>
+        /// Only call it while holding the alarm write lock, like <see cref="GetActiveAsync"/>.
+        /// </remarks>
+        /// <param name="repository">Repository of the alarms, used only for the invalidated publishers.</param>
+        /// <param name="calculatedOn">Time of the calculation.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The alarm summary.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the active alarms have not been loaded.</exception>
+        Task<AlarmSummaryDto> GetSummaryAsync(IPpcAlarmRepository repository, DateTimeOffset calculatedOn, CancellationToken cancellationToken = default);
 
 
         /// <summary>

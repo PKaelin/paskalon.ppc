@@ -5,6 +5,7 @@
 using paskalON.Alarms.Domain.Configs.Actions;
 using paskalON.Alarms.Domain.Ppcs;
 using paskalON.Alarms.Dto.Actions;
+using paskalON.Alarms.Dto.Summaries;
 
 namespace paskalON.Alarms.Application.Actions
 {
@@ -58,10 +59,12 @@ namespace paskalON.Alarms.Application.Actions
         /// </summary>
         /// <param name="alarm">Raised or normalized alarm.</param>
         /// <param name="trigger">Raise for a raised alarm, normalize for a normalized alarm.</param>
+        /// <param name="alarmSummary">Alarm summary after the alarm was raised or normalized, sent with every action.</param>
         /// <returns>Action DTOs, each with a new message id, in the configured order.</returns>
-        public static List<AlarmActionDto> Create(PpcAlarm alarm, AlarmActionTrigger trigger)
+        public static List<AlarmActionDto> Create(PpcAlarm alarm, AlarmActionTrigger trigger, AlarmSummaryDto alarmSummary)
         {
             ArgumentNullException.ThrowIfNull(alarm);
+            ArgumentNullException.ThrowIfNull(alarmSummary);
 
             return alarm.PpcAlarmConfig.AlarmActions
                 .Where(action => action.Trigger == trigger)
@@ -77,7 +80,8 @@ namespace paskalON.Alarms.Application.Actions
                             Key = parameter.Key,
                             Value = ReplacePlaceholders(parameter.Value, alarm)
                         })
-                        .ToList()
+                        .ToList(),
+                    AlarmSummary = alarmSummary
                 })
                 .ToList();
         }

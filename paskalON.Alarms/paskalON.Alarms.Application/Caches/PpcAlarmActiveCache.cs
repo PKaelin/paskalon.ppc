@@ -3,8 +3,11 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
+using paskalON.Alarms.Domain;
+using paskalON.Alarms.Domain.Configs;
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Domain.Ppcs;
+using paskalON.Alarms.Dto.Summaries;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
 
 namespace paskalON.Alarms.Application.Caches
@@ -144,6 +147,48 @@ namespace paskalON.Alarms.Application.Caches
                 }
 
                 return _alarmsByKey.Keys.Union(_invalidKeys).ToList();
+            }
+        }
+
+
+        /// <inheritdoc/>
+        public async Task<AlarmSummaryDto> GetSummaryAsync(IPpcAlarmRepository repository, DateTimeOffset calculatedOn,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(repository);
+
+            List<PpcAlarmKey> invalidKeys;
+
+            lock (_dataLock)
+            {
+                if (_isLoaded is false)
+                {
+                    throw new InvalidOperationException("The active alarms have not been loaded.");
+                }
+
+                invalidKeys = _invalidKeys.ToList();
+            }
+
+            foreach (PpcAlarmKey key in invalidKeys)
+            {
+                await GetActiveAsync(key, repository, cancellationToken);
+            }
+
+            lock (_dataLock)
+            {
+                List<PpcAlarm> alarms = _alarmsByKey.Values
+                    .SelectMany(keyAlarms => keyAlarms)
+                    .Where(alarm => alarm.AlarmSequenceState == AlarmSequenceState.Alarm)
+                    .ToList();
+
+                return new AlarmSummaryDto
+                {
+                    CalculatedOn = calculatedOn,
+                    InfoCount = alarms.Count(alarm => alarm.SeverityLevel == AlarmSeverity.Info),
+                    WarningCount = alarms.Count(alarm => alarm.SeverityLevel == AlarmSeverity.Warning),
+                    ErrorCount = alarms.Count(alarm => alarm.SeverityLevel == AlarmSeverity.Error),
+                    CriticalCount = alarms.Count(alarm => alarm.SeverityLevel == AlarmSeverity.Critical)
+                };
             }
         }
 

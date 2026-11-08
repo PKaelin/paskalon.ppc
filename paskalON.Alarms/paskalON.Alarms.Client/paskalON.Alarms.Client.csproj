@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging.RabbitMq\paskalON.Messaging.RabbitMq.csproj" />
     <ProjectReference Include="..\paskalON.Alarms.Dto\paskalON.Alarms.Dto.csproj" />
     <ProjectReference Include="..\paskalON.Alarms.Service.Dto\paskalON.Alarms.Service.Dto.csproj" />
   </ItemGroup>
