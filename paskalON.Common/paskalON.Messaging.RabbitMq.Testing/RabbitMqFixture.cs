@@ -63,6 +63,23 @@ namespace paskalON.Messaging.RabbitMq.Testing
 
 
         /// <summary>
+        /// Closes all client connections from the broker side, like a broker restart or network failure,
+        /// so that the clients recover their connections.
+        /// </summary>
+        /// <returns>Task.</returns>
+        public static async Task CloseAllConnectionsAsync()
+        {
+            RabbitMqContainer container = _container ?? throw new InvalidOperationException("RabbitMQ container has not been started.");
+            string[] command = new string[] { "rabbitmqctl", "close_all_connections", "Closed by the test." };
+
+            if (await container.ExecAsync(command) is { ExitCode: not 0 } failedResult)
+            {
+                throw new InvalidOperationException($"Closing the connections failed: {failedResult.Stderr}");
+            }
+        }
+
+
+        /// <summary>
         /// Stops and disposes of the RabbitMQ container.
         /// </summary>
         /// <returns>Task.</returns>
