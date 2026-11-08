@@ -91,7 +91,7 @@ Loads client data or sample data into the microservices databases.
 - Define the action and its parameters (AlarmActionParameterConfig) before the alarm configurations that list it in AlarmActions (several separated by ;).
 - The parameter values can contain placeholders that are replaced with the values of the alarm when the action is sent:
   {{AlarmId}}, {{PpcAlarmType}}, {{SeverityLevel}}, {{DeviceId}} and {{PropertyName}}.
-- E.g. one ShowAlarm action shared by the communication error configurations of all device types.
+- E.g. one RaiseAlarm action shared by the communication error configurations of all device types.
 
 
 ## Application exit codes

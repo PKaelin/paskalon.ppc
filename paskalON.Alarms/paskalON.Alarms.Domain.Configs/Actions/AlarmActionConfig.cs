@@ -27,8 +27,11 @@ namespace paskalON.Alarms.Domain.Configs.Actions
 
 
         /// <summary>
-        /// Defines whether the action is performed when the alarm is raised or normalized.
+        /// Defines whether the action is sent when the alarm is raised (Raise) or normalized (Normalize).
         /// </summary>
+        /// <remarks>
+        /// See <see cref="AlarmActionTrigger"/> for when an alarm is raised and normalized.
+        /// </remarks>
         public required AlarmActionTrigger Trigger { get; set; }
 
 

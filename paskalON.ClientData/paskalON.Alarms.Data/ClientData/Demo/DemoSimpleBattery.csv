@@ -6,15 +6,31 @@ Type=SystemConfig,Name=System,AlarmActionSendIntervalMilliseconds=1000,AlarmActi
 # -----------------------------------------------------------------------------
 # Shared alarm actions
 # Actions must be defined before the alarm configurations that list them in AlarmActions (several separated by ;).
+# Trigger defines at which change of the alarm the action is sent:
+#   Trigger=Raise      Sent when the alarm is raised: the condition of the alarm configuration
+#                      (PropertyName, PropertyOperator, PropertyValue, e.g. CommunicationError Equal 1) became true.
+#   Trigger=Normalize  Sent when the alarm is normalized: the condition became false again (e.g. CommunicationError = 0),
+#                      or the alarm configuration was disabled or removed (configuration reload).
+# Each alarm occurrence sends its Raise actions once and its Normalize actions once, an unchanged value sends nothing.
+# An alarm configuration can list any number of actions, all actions with the trigger of the change are sent.
 # The placeholders {{AlarmId}}, {{PpcAlarmType}}, {{SeverityLevel}}, {{DeviceId}} and {{PropertyName}} are replaced with the values of the alarm.
+# Every action message also carries the alarm summary (number of alarms in the state Alarm per severity level).
+# Luna receives the RaiseAlarm and ClearAlarm actions (every Luna instance with its own queue).
 # -----------------------------------------------------------------------------
-# Shows the raised alarm in Luna
-Type=AlarmActionConfig,Name=ShowAlarm,Trigger=Raise
-Type=AlarmActionParameterConfig,Name=ShowAlarm.AlarmId,AlarmActionConfig=ShowAlarm,Key=AlarmId,Value={{AlarmId}}
-Type=AlarmActionParameterConfig,Name=ShowAlarm.PpcAlarmType,AlarmActionConfig=ShowAlarm,Key=PpcAlarmType,Value={{PpcAlarmType}}
-Type=AlarmActionParameterConfig,Name=ShowAlarm.SeverityLevel,AlarmActionConfig=ShowAlarm,Key=SeverityLevel,Value={{SeverityLevel}}
-Type=AlarmActionParameterConfig,Name=ShowAlarm.DeviceId,AlarmActionConfig=ShowAlarm,Key=DeviceId,Value={{DeviceId}}
-Type=AlarmActionParameterConfig,Name=ShowAlarm.PropertyName,AlarmActionConfig=ShowAlarm,Key=PropertyName,Value={{PropertyName}}
+# Trigger=Raise: the alarm was raised, e.g. shown in Luna or sent as email by another service
+Type=AlarmActionConfig,Name=RaiseAlarm,Trigger=Raise
+Type=AlarmActionParameterConfig,Name=RaiseAlarm.AlarmId,AlarmActionConfig=RaiseAlarm,Key=AlarmId,Value={{AlarmId}}
+Type=AlarmActionParameterConfig,Name=RaiseAlarm.PpcAlarmType,AlarmActionConfig=RaiseAlarm,Key=PpcAlarmType,Value={{PpcAlarmType}}
+Type=AlarmActionParameterConfig,Name=RaiseAlarm.SeverityLevel,AlarmActionConfig=RaiseAlarm,Key=SeverityLevel,Value={{SeverityLevel}}
+Type=AlarmActionParameterConfig,Name=RaiseAlarm.DeviceId,AlarmActionConfig=RaiseAlarm,Key=DeviceId,Value={{DeviceId}}
+Type=AlarmActionParameterConfig,Name=RaiseAlarm.PropertyName,AlarmActionConfig=RaiseAlarm,Key=PropertyName,Value={{PropertyName}}
+# Trigger=Normalize: the alarm was normalized, e.g. cleared in Luna
+Type=AlarmActionConfig,Name=ClearAlarm,Trigger=Normalize
+Type=AlarmActionParameterConfig,Name=ClearAlarm.AlarmId,AlarmActionConfig=ClearAlarm,Key=AlarmId,Value={{AlarmId}}
+Type=AlarmActionParameterConfig,Name=ClearAlarm.PpcAlarmType,AlarmActionConfig=ClearAlarm,Key=PpcAlarmType,Value={{PpcAlarmType}}
+Type=AlarmActionParameterConfig,Name=ClearAlarm.SeverityLevel,AlarmActionConfig=ClearAlarm,Key=SeverityLevel,Value={{SeverityLevel}}
+Type=AlarmActionParameterConfig,Name=ClearAlarm.DeviceId,AlarmActionConfig=ClearAlarm,Key=DeviceId,Value={{DeviceId}}
+Type=AlarmActionParameterConfig,Name=ClearAlarm.PropertyName,AlarmActionConfig=ClearAlarm,Key=PropertyName,Value={{PropertyName}}
 # -----------------------------------------------------------------------------
 # Localization of the alarm texts
 # These fields of an alarm configuration (PpcAlarmConfig) can be localized:
@@ -32,10 +48,10 @@ Type=AlarmActionParameterConfig,Name=ShowAlarm.PropertyName,AlarmActionConfig=Sh
 # Communication errors of the devices, one configuration per device type for all its devices (no DeviceId).
 # CommunicationError is a boolean of the core data: true = 1, false = 0.
 # -----------------------------------------------------------------------------
-Type=PpcAlarmConfig,Name={{PCS.CommunicationError.Name}},IsEnabled=true,AlarmId=PCS-COMM,SeverityLevel=Error,Description={{PCS.CommunicationError.Desc}},PpcAlarmType=PcsAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
-Type=PpcAlarmConfig,Name={{BB.CommunicationError.Name}},IsEnabled=true,AlarmId=BB-COMM,SeverityLevel=Error,Description={{BB.CommunicationError.Desc}},PpcAlarmType=BatteryAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
-Type=PpcAlarmConfig,Name={{PV.CommunicationError.Name}},IsEnabled=true,AlarmId=PV-COMM,SeverityLevel=Error,Description={{PV.CommunicationError.Desc}},PpcAlarmType=SolarPanelAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
-Type=PpcAlarmConfig,Name={{PM.External.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-EXT-COMM,SeverityLevel=Error,Description={{PM.External.CommunicationError.Desc}},PpcAlarmType=ExternalPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
-Type=PpcAlarmConfig,Name={{PM.Auxiliary.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-AUX-COMM,SeverityLevel=Error,Description={{PM.Auxiliary.CommunicationError.Desc}},PpcAlarmType=AuxiliaryPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
-Type=PpcAlarmConfig,Name={{PM.Circuit.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-CIR-COMM,SeverityLevel=Error,Description={{PM.Circuit.CommunicationError.Desc}},PpcAlarmType=CircuitPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
-Type=PpcAlarmConfig,Name={{PM.System.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-SYS-COMM,SeverityLevel=Error,Description={{PM.System.CommunicationError.Desc}},PpcAlarmType=SystemPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=ShowAlarm
+Type=PpcAlarmConfig,Name={{PCS.CommunicationError.Name}},IsEnabled=true,AlarmId=PCS-COMM,SeverityLevel=Error,Description={{PCS.CommunicationError.Desc}},PpcAlarmType=PcsAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm;ClearAlarm
+Type=PpcAlarmConfig,Name={{BB.CommunicationError.Name}},IsEnabled=true,AlarmId=BB-COMM,SeverityLevel=Error,Description={{BB.CommunicationError.Desc}},PpcAlarmType=BatteryAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm;ClearAlarm
+Type=PpcAlarmConfig,Name={{PV.CommunicationError.Name}},IsEnabled=true,AlarmId=PV-COMM,SeverityLevel=Error,Description={{PV.CommunicationError.Desc}},PpcAlarmType=SolarPanelAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm;ClearAlarm
+Type=PpcAlarmConfig,Name={{PM.External.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-EXT-COMM,SeverityLevel=Error,Description={{PM.External.CommunicationError.Desc}},PpcAlarmType=ExternalPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm;ClearAlarm
+Type=PpcAlarmConfig,Name={{PM.Auxiliary.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-AUX-COMM,SeverityLevel=Error,Description={{PM.Auxiliary.CommunicationError.Desc}},PpcAlarmType=AuxiliaryPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm;ClearAlarm
+Type=PpcAlarmConfig,Name={{PM.Circuit.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-CIR-COMM,SeverityLevel=Error,Description={{PM.Circuit.CommunicationError.Desc}},PpcAlarmType=CircuitPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm;ClearAlarm
+Type=PpcAlarmConfig,Name={{PM.System.CommunicationError.Name}},IsEnabled=true,AlarmId=PM-SYS-COMM,SeverityLevel=Error,Description={{PM.System.CommunicationError.Desc}},PpcAlarmType=SystemPowerMeterAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm;ClearAlarm

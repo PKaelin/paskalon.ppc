@@ -140,18 +140,20 @@ namespace paskalON.Alarms.Data.IntegrationTest
             Assert.AreEqual(1, config.PropertyValue);
             Assert.AreEqual(0, config.TimeBeforeRaisingAlarmMilliseconds);
             Assert.AreEqual(ClientDataLoader.ChangedBy, config.ChangedBy);
-            AlarmActionConfig action = config.AlarmActions.Single();
-            Assert.AreEqual("ShowAlarm", action.Name);
-            Assert.AreEqual(AlarmActionTrigger.Raise, action.Trigger);
+            CollectionAssert.AreEquivalent(new List<(string, AlarmActionTrigger)> { ("RaiseAlarm", AlarmActionTrigger.Raise), ("ClearAlarm", AlarmActionTrigger.Normalize) },
+                config.AlarmActions.Select(action => (action.Name, action.Trigger)).ToList());
         }
 
 
         /// <summary>
-        /// The show alarm action is stored once and shared by all communication error configurations,
-        /// its parameters pass the values of the raised alarm with placeholders.
+        /// The show and clear alarm actions are stored once and shared by all communication error configurations,
+        /// their parameters pass the values of the alarm with placeholders.
         /// </summary>
+        /// <param name="actionName">Name of the shared action.</param>
         [TestMethod]
-        public async Task RunAsyncImportsSharedShowAlarmActionTest()
+        [DataRow("RaiseAlarm")]
+        [DataRow("ClearAlarm")]
+        public async Task RunAsyncImportsSharedAlarmActionTest(string actionName)
         {
             string[] args = new string[] { ClientProjectName, _clientProjectFile };
 
@@ -159,7 +161,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
             Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
             await using AlarmContext context = CreateDbContext<AlarmContext>();
-            AlarmActionConfig action = await context.AlarmActionConfigs.Include(x => x.AlarmActionParameters).SingleAsync();
+            AlarmActionConfig action = await context.AlarmActionConfigs.Include(x => x.AlarmActionParameters).SingleAsync(x => x.Name == actionName);
             Dictionary<string, string> parameters = action.AlarmActionParameters.ToDictionary(x => x.Key, x => x.Value);
             Assert.HasCount(5, parameters);
             Assert.AreEqual("{{AlarmId}}", parameters["AlarmId"]);
@@ -168,7 +170,8 @@ namespace paskalON.Alarms.Data.IntegrationTest
             Assert.AreEqual("{{DeviceId}}", parameters["DeviceId"]);
             Assert.AreEqual("{{PropertyName}}", parameters["PropertyName"]);
             List<PpcAlarmConfig> configs = await context.PpcAlarmConfigs.Include(x => x.AlarmActions).ToListAsync();
-            Assert.IsTrue(configs.All(config => config.AlarmActions.Single().Id == action.Id));
+            Assert.IsTrue(configs.All(config => config.AlarmActions.Count(configAction => configAction.Id == action.Id) == 1));
+            Assert.AreEqual(2, await context.AlarmActionConfigs.CountAsync());
         }
 
 
