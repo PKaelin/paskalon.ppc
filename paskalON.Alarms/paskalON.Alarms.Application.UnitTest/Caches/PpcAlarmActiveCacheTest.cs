@@ -192,10 +192,10 @@ namespace paskalON.Alarms.Application.UnitTest.Caches
 
         /// <summary>
         /// The summary counts the alarms in the sequence state Alarm per severity level of all publishers,
-        /// acknowledged alarms are not counted.
+        /// acknowledged alarms are counted separately.
         /// </summary>
         [TestMethod]
-        public async Task GetSummaryAsyncCountsAlarmsInStateAlarmPerSeverityTest()
+        public async Task GetSummaryAsyncCountsUnacknowledgedAndAcknowledgedPerSeverityTest()
         {
             PpcAlarmConfig warningConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
             warningConfig.Id = 2;
@@ -214,6 +214,8 @@ namespace paskalON.Alarms.Application.UnitTest.Caches
             Assert.AreEqual(1, summary.WarningCount);
             Assert.AreEqual(2, summary.ErrorCount);
             Assert.AreEqual(0, summary.CriticalCount);
+            Assert.AreEqual(0, summary.AcknowledgedWarningCount);
+            Assert.AreEqual(1, summary.AcknowledgedErrorCount);
         }
 
 

@@ -44,7 +44,7 @@ namespace paskalON.Alarms.Service.Controllers.V1
 
 
         /// <summary>
-        /// Gets the number of alarms in the sequence state Alarm per severity level, e.g. for Luna at startup.
+        /// Gets the number of active alarms per severity level, unacknowledged and acknowledged separately, e.g. for Luna at startup.
         /// The same summary is sent with every alarm action.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token of the request.</param>

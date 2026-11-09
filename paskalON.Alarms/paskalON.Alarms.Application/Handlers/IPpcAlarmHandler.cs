@@ -34,7 +34,7 @@ namespace paskalON.Alarms.Application.Handlers
 
 
         /// <summary>
-        /// Gets the number of alarms in the sequence state Alarm per severity level.
+        /// Gets the number of active alarms per severity level, unacknowledged and acknowledged separately.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The current alarm summary.</returns>

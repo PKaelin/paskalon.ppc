@@ -75,7 +75,7 @@ namespace paskalON.Alarms.Client.UnitTest
         [TestMethod]
         public async Task GetAlarmSummaryReturnsSummaryTest()
         {
-            _handler.ResponseContent = "{\"calculatedOn\":\"2026-11-07T11:00:00+00:00\",\"infoCount\":2,\"warningCount\":1,\"errorCount\":7,\"criticalCount\":0}";
+            _handler.ResponseContent = "{\"calculatedOn\":\"2026-11-07T11:00:00+00:00\",\"infoCount\":2,\"warningCount\":1,\"errorCount\":7,\"criticalCount\":0,\"acknowledgedInfoCount\":0,\"acknowledgedWarningCount\":0,\"acknowledgedErrorCount\":3,\"acknowledgedCriticalCount\":1}";
 
             AlarmSummaryDto summary = await _server.GetAlarmSummary();
 
@@ -86,6 +86,8 @@ namespace paskalON.Alarms.Client.UnitTest
             Assert.AreEqual(1, summary.WarningCount);
             Assert.AreEqual(7, summary.ErrorCount);
             Assert.AreEqual(0, summary.CriticalCount);
+            Assert.AreEqual(3, summary.AcknowledgedErrorCount);
+            Assert.AreEqual(1, summary.AcknowledgedCriticalCount);
         }
 
 

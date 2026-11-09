@@ -289,7 +289,11 @@ namespace paskalON.Alarms.Client.UnitTest.Subscribers
                     InfoCount = 0,
                     WarningCount = 0,
                     ErrorCount = 1,
-                    CriticalCount = 0
+                    CriticalCount = 0,
+                    AcknowledgedInfoCount = 0,
+                    AcknowledgedWarningCount = 0,
+                    AcknowledgedErrorCount = 0,
+                    AcknowledgedCriticalCount = 0
                 }
             };
         }

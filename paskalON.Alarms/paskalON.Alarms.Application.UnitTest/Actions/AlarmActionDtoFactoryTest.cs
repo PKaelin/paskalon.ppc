@@ -28,7 +28,11 @@ namespace paskalON.Alarms.Application.UnitTest.Actions
             InfoCount = 0,
             WarningCount = 1,
             ErrorCount = 3,
-            CriticalCount = 0
+            CriticalCount = 0,
+            AcknowledgedInfoCount = 0,
+            AcknowledgedWarningCount = 0,
+            AcknowledgedErrorCount = 0,
+            AcknowledgedCriticalCount = 0
         };
 
 

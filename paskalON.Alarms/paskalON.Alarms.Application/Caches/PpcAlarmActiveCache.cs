@@ -176,18 +176,19 @@ namespace paskalON.Alarms.Application.Caches
 
             lock (_dataLock)
             {
-                List<PpcAlarm> alarms = _alarmsByKey.Values
-                    .SelectMany(keyAlarms => keyAlarms)
-                    .Where(alarm => alarm.AlarmSequenceState == AlarmSequenceState.Alarm)
-                    .ToList();
+                List<PpcAlarm> alarms = _alarmsByKey.Values.SelectMany(keyAlarms => keyAlarms).ToList();
 
                 return new AlarmSummaryDto
                 {
                     CalculatedOn = calculatedOn,
-                    InfoCount = alarms.Count(alarm => alarm.SeverityLevel == AlarmSeverity.Info),
-                    WarningCount = alarms.Count(alarm => alarm.SeverityLevel == AlarmSeverity.Warning),
-                    ErrorCount = alarms.Count(alarm => alarm.SeverityLevel == AlarmSeverity.Error),
-                    CriticalCount = alarms.Count(alarm => alarm.SeverityLevel == AlarmSeverity.Critical)
+                    InfoCount = Count(alarms, AlarmSequenceState.Alarm, AlarmSeverity.Info),
+                    WarningCount = Count(alarms, AlarmSequenceState.Alarm, AlarmSeverity.Warning),
+                    ErrorCount = Count(alarms, AlarmSequenceState.Alarm, AlarmSeverity.Error),
+                    CriticalCount = Count(alarms, AlarmSequenceState.Alarm, AlarmSeverity.Critical),
+                    AcknowledgedInfoCount = Count(alarms, AlarmSequenceState.Acknowledged, AlarmSeverity.Info),
+                    AcknowledgedWarningCount = Count(alarms, AlarmSequenceState.Acknowledged, AlarmSeverity.Warning),
+                    AcknowledgedErrorCount = Count(alarms, AlarmSequenceState.Acknowledged, AlarmSeverity.Error),
+                    AcknowledgedCriticalCount = Count(alarms, AlarmSequenceState.Acknowledged, AlarmSeverity.Critical)
                 };
             }
         }
@@ -246,6 +247,15 @@ namespace paskalON.Alarms.Application.Caches
             }
 
             _alarmsByKey[key] = alarms;
+        }
+
+
+        /// <summary>
+        /// Counts the alarms with the sequence state and severity level.
+        /// </summary>
+        private static int Count(List<PpcAlarm> alarms, AlarmSequenceState sequenceState, AlarmSeverity severityLevel)
+        {
+            return alarms.Count(alarm => alarm.AlarmSequenceState == sequenceState && alarm.SeverityLevel == severityLevel);
         }
 
 

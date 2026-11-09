@@ -36,7 +36,11 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
                 InfoCount = 2,
                 WarningCount = 1,
                 ErrorCount = 7,
-                CriticalCount = 0
+                CriticalCount = 0,
+                AcknowledgedInfoCount = 0,
+                AcknowledgedWarningCount = 0,
+                AcknowledgedErrorCount = 0,
+                AcknowledgedCriticalCount = 0
             };
             _alarmHandler.Setup(handler => handler.GetSummaryAsync(It.IsAny<CancellationToken>())).ReturnsAsync(summary);
             AlarmsController controller = CreateController();

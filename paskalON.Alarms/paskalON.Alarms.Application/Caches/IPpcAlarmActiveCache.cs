@@ -49,7 +49,7 @@ namespace paskalON.Alarms.Application.Caches
 
 
         /// <summary>
-        /// Counts the active alarms in the sequence state Alarm per severity level of all publishers.
+        /// Counts the active alarms of all publishers per severity level, unacknowledged (Alarm) and acknowledged separately.
         /// The invalidated publishers are loaded from the database first.
         /// </summary>
         /// <remarks>
