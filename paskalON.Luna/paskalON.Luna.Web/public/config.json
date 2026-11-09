@@ -3,6 +3,7 @@
   "systemHubUrl": "/hubs/system",
   "deviceHubUrl": "/hubs/device",
   "dependencyHubUrl": "/hubs/dependency",
+  "alarmHubUrl": "/hubs/alarm",
   "grafana": {
     "url": "http://localhost:41006",
     "authMode": "anonymous",

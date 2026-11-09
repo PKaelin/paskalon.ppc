@@ -92,6 +92,27 @@ namespace paskalON.Luna.Application.UnitTest
 
 
         /// <summary>
+        /// The change event is raised for a newer summary only, so that the UI clients get every change once.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleAsyncRaisesSummaryChangedForNewerSummaryOnlyTest()
+        {
+            LunaAlarmManager manager = CreateManager();
+            List<AlarmSummaryDto> changedSummaries = new List<AlarmSummaryDto>();
+            manager.SummaryChanged += (_, summary) => changedSummaries.Add(summary);
+            AlarmSummaryDto first = CreateSummary(CalculatedOn, 1);
+            AlarmSummaryDto newer = CreateSummary(CalculatedOn.AddSeconds(1), 2);
+
+            await manager.HandleAsync(CreateAction("RaiseAlarm", first));
+            await manager.HandleAsync(CreateAction("RaiseAlarm", first));
+            await manager.HandleAsync(CreateAction("RaiseAlarm", newer));
+            await manager.HandleAsync(CreateAction("ClearAlarm", CreateSummary(CalculatedOn, 0)));
+
+            CollectionAssert.AreEqual(new List<AlarmSummaryDto> { first, newer }, changedSummaries);
+        }
+
+
+        /// <summary>
         /// The synchronization loads the summary from the alarm service API.
         /// </summary>
         [TestMethod]
@@ -160,7 +181,11 @@ namespace paskalON.Luna.Application.UnitTest
                 InfoCount = 0,
                 WarningCount = 0,
                 ErrorCount = errorCount,
-                CriticalCount = 0
+                CriticalCount = 0,
+                AcknowledgedInfoCount = 0,
+                AcknowledgedWarningCount = 0,
+                AcknowledgedErrorCount = 0,
+                AcknowledgedCriticalCount = 0
             };
         }
 

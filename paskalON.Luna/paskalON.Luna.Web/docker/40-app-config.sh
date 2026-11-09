@@ -11,6 +11,7 @@ CONFIG_FILE=${1:-/usr/share/nginx/html/config.json}
 : "${APP_SYSTEM_HUB_URL:=/hubs/system}"
 : "${APP_DEVICE_HUB_URL:=/hubs/device}"
 : "${APP_DEPENDENCY_HUB_URL:=/hubs/dependency}"
+: "${APP_ALARM_HUB_URL:=/hubs/alarm}"
 
 # Grafana as seen FROM THE BROWSER (not from the container).
 # TODO: Add security to this functionality!
@@ -33,6 +34,7 @@ cat > "$CONFIG_FILE" <<JSON
   "systemHubUrl": "${APP_SYSTEM_HUB_URL}",
   "deviceHubUrl": "${APP_DEVICE_HUB_URL}",
   "dependencyHubUrl": "${APP_DEPENDENCY_HUB_URL}",
+  "alarmHubUrl": "${APP_ALARM_HUB_URL}",
   "grafana": {
     "url": "${APP_GRAFANA_URL}",
     "authMode": "${APP_GRAFANA_AUTH_MODE}",
@@ -50,4 +52,4 @@ cat > "$CONFIG_FILE" <<JSON
 }
 JSON
 
-echo "40-app-config.sh: wrote $CONFIG_FILE (api=${APP_API_BASE_URL}, hub=${APP_SYSTEM_HUB_URL}, device hub=${APP_DEVICE_HUB_URL}, dependency hub=${APP_DEPENDENCY_HUB_URL}, grafana=${APP_GRAFANA_URL}, upstream=${LUNA_API_URL:-unset})"
+echo "40-app-config.sh: wrote $CONFIG_FILE (api=${APP_API_BASE_URL}, hub=${APP_SYSTEM_HUB_URL}, device hub=${APP_DEVICE_HUB_URL}, dependency hub=${APP_DEPENDENCY_HUB_URL}, alarm hub=${APP_ALARM_HUB_URL}, grafana=${APP_GRAFANA_URL}, upstream=${LUNA_API_URL:-unset})"

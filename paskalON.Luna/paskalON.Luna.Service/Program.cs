@@ -148,6 +148,8 @@ try
         sp.GetRequiredService<IAlarmActionHandler>(),
         TimeSpan.FromSeconds(5),
         TimeProvider.System));
+    // Push every changed alarm summary to the UI clients connected to the alarm hub
+    builder.Services.AddHostedService<AlarmSummaryPublisher>();
 
     // Add managers
     builder.Services.AddSingleton<ILunaDeviceManager, LunaDeviceManager>();
@@ -243,6 +245,7 @@ try
     app.MapHub<SystemHub>(SystemHub.Route);
     app.MapHub<DeviceHub>(DeviceHub.Route);
     app.MapHub<DependencyHub>(DependencyHub.Route);
+    app.MapHub<AlarmHub>(AlarmHub.Route);
     app.Logger.LogInformation("Application about to run.....");
     app.Run();
 }

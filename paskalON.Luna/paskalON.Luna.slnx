@@ -3,8 +3,8 @@
     <Project Path="../paskalON.Alarms/paskalON.Alarms.Client/paskalON.Alarms.Client.csproj" />
     <Project Path="../paskalON.Alarms/paskalON.Alarms.Dto/paskalON.Alarms.Dto.csproj" />
     <Project Path="../paskalON.Alarms/paskalON.Alarms.Service.Dto/paskalON.Alarms.Service.Dto.csproj" />
-    <Project Path="../paskalON.Common/paskalON.Messaging.RabbitMq/paskalON.Messaging.RabbitMq.csproj" />
     <Project Path="../paskalON.Common/paskalON.Hosting/paskalON.Hosting.csproj" />
+    <Project Path="../paskalON.Common/paskalON.Messaging.RabbitMq/paskalON.Messaging.RabbitMq.csproj" />
     <Project Path="../paskalON.Common/paskalON.Messaging/paskalON.Messaging.csproj" />
     <Project Path="../paskalON.Common/paskalON.PhysicalUnits/paskalON.PhysicalUnits.csproj" />
     <Project Path="../paskalON.Common/paskalON.Telemetry/paskalON.Telemetry.csproj" />
@@ -14,6 +14,9 @@
     <Project Path="../paskalON.OperatingModes/paskalON.OperatingModes.Dto/paskalON.OperatingModes.Dto.csproj" />
     <Project Path="../paskalON.PowerControls/paskalON.PowerControls.Client/paskalON.PowerControls.Client.csproj" />
     <Project Path="../paskalON.PowerControls/paskalON.PowerControls.Dto/paskalON.PowerControls.Dto.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="paskalON.Luna.Application.UnitTest/paskalON.Luna.Application.UnitTest.csproj" />

@@ -72,6 +72,10 @@ namespace paskalON.Luna.Application
 
 
         /// <inheritdoc/>
+        public event EventHandler<AlarmSummaryDto>? SummaryChanged;
+
+
+        /// <inheritdoc/>
         public IReadOnlyCollection<string> ActionNames { get; } = new string[] { RaiseAlarmActionName, ClearAlarmActionName };
 
 
@@ -128,8 +132,12 @@ namespace paskalON.Luna.Application
                 _summary = summary;
             }
 
-            _logger.LogInformation("Alarm summary of {Source}: {CriticalCount} critical, {ErrorCount} error, {WarningCount} warning, {InfoCount} info alarms.",
-                source, summary.CriticalCount, summary.ErrorCount, summary.WarningCount, summary.InfoCount);
+            _logger.LogInformation("Alarm summary of {Source}: unacknowledged {CriticalCount} critical, {ErrorCount} error, {WarningCount} warning, " +
+                "{InfoCount} info, acknowledged {AcknowledgedCriticalCount} critical, {AcknowledgedErrorCount} error, {AcknowledgedWarningCount} warning, " +
+                "{AcknowledgedInfoCount} info alarms.", source, summary.CriticalCount, summary.ErrorCount, summary.WarningCount, summary.InfoCount,
+                summary.AcknowledgedCriticalCount, summary.AcknowledgedErrorCount, summary.AcknowledgedWarningCount, summary.AcknowledgedInfoCount);
+            // Raised outside the lock, the subscribers might call GetSummary
+            SummaryChanged?.Invoke(this, summary);
         }
     }
 }

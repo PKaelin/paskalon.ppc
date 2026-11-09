@@ -131,16 +131,74 @@ body {
     stroke-width: 2;
 }
 
+/* Event color of the shape, used for the outline and, with active alarms, for the fill. */
 .event-shape-info {
-    stroke: #06b6d4;
+    --event-color: #06b6d4;
+    --event-count-color: #1a1a1a;
 }
 
 .event-shape-warning {
-    stroke: #ffdb44;
+    --event-color: #ffdb44;
+    --event-count-color: #1a1a1a;
 }
 
 .event-shape-error {
-    stroke: #ef4444;
+    --event-color: #ef4444;
+    --event-count-color: #fff;
+}
+
+.event-shape-critical {
+    --event-color: #b91c1c;
+    --event-count-color: #fff;
+}
+
+.event-shape svg {
+    stroke: var(--event-color);
+}
+
+/* Alarm state unknown (no summary or no connection to the web service): gray outline. */
+.event-shape-unknown svg {
+    stroke: #6b7280;
+}
+
+/* Active alarms: the shape is filled and shows the number of active alarms. */
+.event-shape-active .event-shape-body {
+    fill: var(--event-color);
+}
+
+.event-shape-count {
+    fill: var(--event-count-color);
+    stroke: none;
+    font-size: 11px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+.event-shape-count-small {
+    font-size: 8px;
+}
+
+/* At least one alarm is not acknowledged: the shape blinks until all its alarms are acknowledged. */
+.event-shape-blinking {
+    animation: event-shape-blink 1s ease-in-out infinite alternate;
+}
+
+@keyframes event-shape-blink {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: .35;
+    }
+}
+
+/* Operators who reduced motion in their system settings see the filled shape without blinking. */
+@media (prefers-reduced-motion: reduce) {
+    .event-shape-blinking {
+        animation: none;
+    }
 }
 
 .system-command-toggle {

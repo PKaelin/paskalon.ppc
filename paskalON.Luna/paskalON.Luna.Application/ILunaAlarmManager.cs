@@ -12,9 +12,15 @@ namespace paskalON.Luna.Application
     public interface ILunaAlarmManager
     {
         /// <summary>
-        /// Gets the latest alarm summary: the number of alarms in the sequence state Alarm per severity level.
+        /// Gets the latest alarm summary: the number of active alarms per severity level, unacknowledged and acknowledged separately.
         /// </summary>
         /// <returns>The latest alarm summary, null until the first summary was received from the alarm service.</returns>
         AlarmSummaryDto? GetSummary();
+
+
+        /// <summary>
+        /// Raised after a newer alarm summary was received, e.g. to push it to the UI clients.
+        /// </summary>
+        event EventHandler<AlarmSummaryDto>? SummaryChanged;
     }
 }

@@ -25,6 +25,8 @@ export interface AppConfig {
     deviceHubUrl: string;
     /** Absolute or relative URL of the SignalR dependency hub. Default: '/hubs/dependency' (reverse proxied). */
     dependencyHubUrl: string;
+    /** Absolute or relative URL of the SignalR alarm hub. Default: '/hubs/alarm' (reverse proxied). */
+    alarmHubUrl: string;
     /** Connection to Grafana and the dashboards that can be embedded. */
     grafana: GrafanaConfig;
     /** The Grafana dashboards of the Dashboard section. */
@@ -39,6 +41,7 @@ const defaultConfig: AppConfig = {
     systemHubUrl: '/hubs/system',
     deviceHubUrl: '/hubs/device',
     dependencyHubUrl: '/hubs/dependency',
+    alarmHubUrl: '/hubs/alarm',
     grafana: {
         url: 'http://localhost:41006',
         authMode: 'anonymous',

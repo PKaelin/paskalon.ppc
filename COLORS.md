@@ -23,6 +23,7 @@ Default: #06B6D4
 
 | Event Type | Shape | Color |
 |------------|-------|-------|
+| Critical | Octagon (stop sign) | #B91C1C |
 | Error | Circle | #EF4444 |
 | Warning | Triangle | #FFDB44 |
 | Info | Square | #06B6D4 |
