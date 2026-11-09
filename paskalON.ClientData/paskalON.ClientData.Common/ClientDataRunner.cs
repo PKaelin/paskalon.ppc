@@ -23,7 +23,21 @@ namespace paskalON.ClientData.Common
         /// <param name="args">The program arguments.</param>
         /// <param name="contextFactory">Creates the database context.</param>
         /// <returns>The application exit code.</returns>
-        public static async Task<int> RunAsync<TContext>(string[] args, Func<TContext> contextFactory) where TContext : DbContext
+        public static Task<int> RunAsync<TContext>(string[] args, Func<TContext> contextFactory) where TContext : DbContext
+        {
+            return RunAsync(args, contextFactory, null);
+        }
+
+
+        /// <summary>
+        /// Validates the file and its supplementary files and only if they are valid recreates the database and imports the data.
+        /// </summary>
+        /// <typeparam name="TContext">The database context type of the service.</typeparam>
+        /// <param name="args">The program arguments.</param>
+        /// <param name="contextFactory">Creates the database context.</param>
+        /// <param name="supplement">Loads the entities of the supplementary files (e.g. the localized texts), null if there are none.</param>
+        /// <returns>The application exit code.</returns>
+        public static async Task<int> RunAsync<TContext>(string[] args, Func<TContext> contextFactory, IClientDataSupplement? supplement) where TContext : DbContext
         {
             try
             {
@@ -35,9 +49,16 @@ namespace paskalON.ClientData.Common
                 }
 
                 string[] lines = await File.ReadAllLinesAsync(arguments.ClientProjectFile);
-                ClientDataLoader loader = new ClientDataLoader(EntityTypeRegistry.FromContext<TContext>(), DateTimeOffset.UtcNow);
+                DateTimeOffset changedDate = DateTimeOffset.UtcNow;
+                ClientDataLoader loader = new ClientDataLoader(GetProjectEntityTypes<TContext>(supplement), changedDate);
                 // Loads the entities from the client project file
-                IReadOnlyList<object> entities = loader.Load(arguments.ClientProjectFile, lines);
+                IReadOnlyList<ClientDataEntity> projectEntities = loader.LoadEntities(arguments.ClientProjectFile, lines);
+                List<object> entities = projectEntities.Select(x => x.Entity).ToList();
+
+                if (supplement is not null)
+                {
+                    entities.AddRange(await supplement.LoadAsync(arguments.ClientProjectFile, projectEntities, changedDate));
+                }
 
                 await using TContext context = contextFactory();
                 string? migration = SchemaVersionResolver.Resolve(arguments.SchemaVersion, context.Database.GetMigrations());
@@ -79,6 +100,27 @@ namespace paskalON.ClientData.Common
 
                 return (int)ClientDataExitCode.GeneralError;
             }
+        }
+
+
+        /// <summary>
+        /// Gets the entity types of the context that can be defined in the client project file.
+        /// </summary>
+        /// <typeparam name="TContext">The database context type of the service.</typeparam>
+        /// <param name="supplement">The supplement whose entity types are only allowed in its own files, or null.</param>
+        /// <returns>The entity types by their class name.</returns>
+        private static IReadOnlyDictionary<string, Type> GetProjectEntityTypes<TContext>(IClientDataSupplement? supplement) where TContext : DbContext
+        {
+            IReadOnlyDictionary<string, Type> entityTypes = EntityTypeRegistry.FromContext<TContext>();
+
+            if (supplement is null)
+            {
+                return entityTypes;
+            }
+
+            return entityTypes
+                .Where(x => supplement.EntityTypes.Contains(x.Value) is false)
+                .ToDictionary(x => x.Key, x => x.Value, StringComparer.Ordinal);
         }
     }
 }

@@ -95,6 +95,44 @@ namespace paskalON.ClientData.Common.UnitTest
 
 
     /// <summary>
+    /// Localized text test entity whose name is the localization key.
+    /// </summary>
+    public class TextEntity : DomainBase
+    {
+        /// <summary>
+        /// Localization key without braces, validated in its setter.
+        /// </summary>
+        public required string Name
+        {
+            get;
+            set
+            {
+                ArgumentException.ThrowIfNullOrWhiteSpace(value);
+
+                if (value.Contains('{'))
+                {
+                    throw new ArgumentException("The key must be written without braces.", nameof(value));
+                }
+
+                field = value;
+            }
+        }
+
+
+        /// <summary>
+        /// Language of the text.
+        /// </summary>
+        public required string Language { get; set; }
+
+
+        /// <summary>
+        /// Text of the key.
+        /// </summary>
+        public required string Text { get; set; }
+    }
+
+
+    /// <summary>
     /// Entity that does not inherit from the domain base.
     /// </summary>
     public class PlainEntity

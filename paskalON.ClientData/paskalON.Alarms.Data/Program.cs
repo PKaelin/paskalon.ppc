@@ -4,11 +4,13 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using paskalON.Alarms.Domain.Configs;
+using paskalON.Alarms.Domain.Configs.Localizations;
 using paskalON.Alarms.Infrastructure.Storage;
 using paskalON.ClientData.Common;
 
 /// <summary>
-/// Imports a client project file into the alarm database.
+/// Imports a client project file and its localized text files into the alarm database.
 /// </summary>
 class Program
 {
@@ -27,7 +29,10 @@ class Program
     /// </remarks>
     public static async Task<int> Main(string[] args)
     {
-        int code = await ClientDataRunner.RunAsync(args, CreateContext);
+        // The texts of the localization keys are in the text files next to the client project file, e.g. DemoBattery.Texts.en.csv
+        LocalizedTextSupplement<LocalizedText> texts = new LocalizedTextSupplement<LocalizedText>(text => text.Name, text => text.Language,
+            entity => entity is AlarmConfigBase config ? config.GetLocalizableValues() : [], LocalizedText.DefaultLanguage);
+        int code = await ClientDataRunner.RunAsync(args, CreateContext, texts);
         Console.WriteLine("Finished processing Alarm database recreate with exit code: " + code);
 
         return code;

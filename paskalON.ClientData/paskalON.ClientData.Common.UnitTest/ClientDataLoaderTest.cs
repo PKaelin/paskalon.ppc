@@ -211,6 +211,40 @@ namespace paskalON.ClientData.Common.UnitTest
             Assert.AreEqual(2, exception.Errors[1].LineNumber);
         }
 
+
+        [TestMethod]
+        public void LoadEntitiesReturnsEntitiesWithPositionsTest()
+        {
+            ClientDataLoader loader = CreateLoader();
+            string[] lines = ["# Connections", Connection, "", "Type=PlainEntity,Value=5"];
+
+            IReadOnlyList<ClientDataEntity> entities = loader.LoadEntities(FileName, lines);
+
+            Assert.HasCount(2, entities);
+            Assert.IsInstanceOfType<ConnectionEntity>(entities[0].Entity);
+            Assert.AreEqual(FileName, entities[0].File);
+            Assert.AreEqual(2, entities[0].LineNumber);
+            Assert.AreEqual("Con1", entities[0].EntityName);
+            Assert.IsInstanceOfType<PlainEntity>(entities[1].Entity);
+            Assert.AreEqual(4, entities[1].LineNumber);
+            Assert.IsNull(entities[1].EntityName);
+        }
+
+
+        [TestMethod]
+        public void LoadNameRejectedByDomainReportsErrorTest()
+        {
+            string[] lines = ["Type=TextEntity,Name={{PCS.CommunicationError.Name}},Language=en,Text=PCS communication error"];
+
+            ClientDataError error = LoadSingleError(lines);
+
+            Assert.AreEqual(1, error.LineNumber);
+            Assert.AreEqual("{{PCS.CommunicationError.Name}}", error.EntityName);
+            Assert.AreEqual("Name", error.PropertyName);
+            StringAssert.Contains(error.Message, "without braces");
+        }
+
+
         /// <summary>
         /// Creates the loader with all test entity types.
         /// </summary>
@@ -223,6 +257,7 @@ namespace paskalON.ClientData.Common.UnitTest
                 [nameof(OtherEntity)] = typeof(OtherEntity),
                 [nameof(DeviceEntity)] = typeof(DeviceEntity),
                 [nameof(SettingEntity)] = typeof(SettingEntity),
+                [nameof(TextEntity)] = typeof(TextEntity),
                 [nameof(PlainEntity)] = typeof(PlainEntity)
             };
 

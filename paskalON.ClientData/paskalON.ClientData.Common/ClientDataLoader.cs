@@ -83,11 +83,24 @@ namespace paskalON.ClientData.Common
         /// <exception cref="ClientDataValidationException">Thrown with all the errors if at least one line is not valid.</exception>
         public IReadOnlyList<object> Load(string file, IReadOnlyList<string> lines)
         {
+            return LoadEntities(file, lines).Select(x => x.Entity).ToList();
+        }
+
+
+        /// <summary>
+        /// Validates all the lines and creates their entities in the order of the file together with their positions in the file.
+        /// </summary>
+        /// <param name="file">The name of the file, used for the error messages and the positions.</param>
+        /// <param name="lines">The lines of the file.</param>
+        /// <returns>The created entities with their positions.</returns>
+        /// <exception cref="ClientDataValidationException">Thrown with all the errors if at least one line is not valid.</exception>
+        public IReadOnlyList<ClientDataEntity> LoadEntities(string file, IReadOnlyList<string> lines)
+        {
             ArgumentException.ThrowIfNullOrEmpty(file);
             ArgumentNullException.ThrowIfNull(lines);
 
             List<ClientDataError> errors = new List<ClientDataError>();
-            List<object> entities = new List<object>();
+            List<ClientDataEntity> entities = new List<ClientDataEntity>();
             Dictionary<string, object> entitiesByName = new Dictionary<string, object>(StringComparer.Ordinal);
 
             for (int i = 0; i < lines.Count; i++)
@@ -98,11 +111,12 @@ namespace paskalON.ClientData.Common
                 }
 
                 // Parses the line and creates the entity (domain object) if its valid.
-                object? entity = LoadLine(new LineContext(file, i + 1, errors), lines[i], entitiesByName);
+                LineContext line = new LineContext(file, i + 1, errors);
+                object? entity = LoadLine(line, lines[i], entitiesByName, out string? name);
 
                 if (entity is not null)
                 {
-                    entities.Add(entity);
+                    entities.Add(new ClientDataEntity(entity, file, line.LineNumber, name));
                 }
             }
 
@@ -121,9 +135,11 @@ namespace paskalON.ClientData.Common
         /// <param name="line">The position in the file.</param>
         /// <param name="text">The text of the line.</param>
         /// <param name="entitiesByName">The entities previously defined in the file.</param>
+        /// <param name="name">The entity name if the line defines one.</param>
         /// <returns>The entity or null if it could not be created.</returns>
-        private object? LoadLine(LineContext line, string text, Dictionary<string, object> entitiesByName)
+        private object? LoadLine(LineContext line, string text, Dictionary<string, object> entitiesByName, out string? name)
         {
+            name = null;
             IReadOnlyList<CsvCell> cells;
 
             try
@@ -145,7 +161,7 @@ namespace paskalON.ClientData.Common
             }
 
             bool hasName = cells.Count > 1 && cells[1].Key == NameColumn;
-            string? name = hasName ? cells[1].Value : null;
+            name = hasName ? cells[1].Value : null;
 
             if (_entityTypes.TryGetValue(cells[0].Value, out Type? entityType) is false)
             {
@@ -223,7 +239,17 @@ namespace paskalON.ClientData.Common
 
             if (name is not null && nameProperty is not null && nameProperty.PropertyType == typeof(string))
             {
-                nameProperty.SetValue(entity, name);
+                try
+                {
+                    nameProperty.SetValue(entity, name);
+                }
+                catch (TargetInvocationException ex)
+                {
+                    // The domain rejected the name
+                    line.AddError(name, NameColumn, ex.InnerException?.Message ?? ex.Message);
+
+                    return null;
+                }
             }
 
             return entity;

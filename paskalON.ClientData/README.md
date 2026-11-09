@@ -94,6 +94,24 @@ Loads client data or sample data into the microservices databases.
 - E.g. one RaiseAlarm action shared by the communication error configurations of all device types.
 
 
+### Localized alarm texts
+- The fields Name, Description, PossibleCauses, Response and Consequences of an alarm configuration can be localization keys written as {{Key}},
+  e.g. Name={{PCS.CommunicationError.Name}}. Any other value is plain text and shown as it is.
+- The alarm service stores and sends the keys unchanged. Luna loads the texts of the keys from the alarm service (via the Luna service) and shows them.
+- The texts are in the text files next to the client project file, one file per language: [ClientProjectName].Texts.[Language].csv
+    - E.g. ClientData\Demo\DemoBattery.Texts.en.csv for ClientData\Demo\DemoBattery.csv
+    - The text files are found automatically, the import arguments do not change.
+- A text file has the same line format as the client project file but only contains texts:
+  Type=LocalizedText,Name=PCS.CommunicationError.Name,Language=en,Text=PCS communication error
+    - Name is the localization key without the braces, unique per file.
+    - Language must match the language of the file name: an ISO 639-1 language code, optionally with an ISO 3166-1 region code (e.g. en or de-CH).
+    - Put a text that contains a comma in double quotes.
+- Texts are not allowed in the client project file.
+- Every localization key used in the client project file needs an English (en) text, otherwise the import fails with a CSV validation error
+  that names the file, line, alarm configuration and field of the key.
+- A key without a text in the language of the user is shown with its English text.
+
+
 ## Application exit codes
 Application exit codes are used to indicate the result of the execution of the Data project. 
 The following table describes the exit codes and their meanings:

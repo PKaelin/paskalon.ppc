@@ -43,7 +43,7 @@ Type=AlarmActionParameterConfig,Name=ClearAlarm.PropertyName,AlarmActionConfig=C
 # Not localized (identifiers): AlarmId, PropertyName, the action names and the parameter keys.
 # The {{AlarmId}}, {{DeviceId}}, ... in action parameter values are placeholders, not localization keys:
 # the alarm service replaces them with the values of the alarm before the action is sent.
-# Note: Luna does not resolve the localization keys yet.
+# The texts of the keys are in the text files [ClientProject].Texts.[Language].csv, e.g. DemoBattery.Texts.en.csv.
 # -----------------------------------------------------------------------------
 # Communication errors of the devices, one configuration per device type for all its devices (no DeviceId).
 # CommunicationError is a boolean of the core data: true = 1, false = 0.

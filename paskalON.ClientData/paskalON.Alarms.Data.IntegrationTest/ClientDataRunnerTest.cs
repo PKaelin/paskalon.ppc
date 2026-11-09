@@ -5,6 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using paskalON.Alarms.Domain.Configs;
 using paskalON.Alarms.Domain.Configs.Actions;
+using paskalON.Alarms.Domain.Configs.Localizations;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Infrastructure.Storage;
 using paskalON.ClientData.Common;
@@ -55,11 +56,19 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
 
         /// <summary>
-        /// Gets the client project names of all demo CSV files in the folder ClientData/Demo.
+        /// Number of English texts of a demo client project: name and description of every alarm configuration.
+        /// </summary>
+        private const int EnglishTextCount = 2 * PpcAlarmConfigCount;
+
+
+        /// <summary>
+        /// Gets the client project names of all demo client project files in the folder ClientData/Demo, without the text files.
         /// </summary>
         public static IEnumerable<object[]> DemoClientProjectNames => Directory
             .EnumerateFiles(_demoDirectory, "*.csv")
-            .Select(file => new object[] { Path.GetFileNameWithoutExtension(file) })
+            .Select(Path.GetFileNameWithoutExtension)
+            .Where(name => name!.Contains(LocalizedTextSupplement<LocalizedText>.TextFileInfix, StringComparison.Ordinal) is false)
+            .Select(name => new object[] { name! })
             .OrderBy(x => (string)x[0], StringComparer.Ordinal);
 
 
@@ -73,13 +82,89 @@ namespace paskalON.Alarms.Data.IntegrationTest
         {
             string[] args = new string[] { clientProjectName, Path.Combine(_demoDirectory, $"{clientProjectName}.csv") };
 
-            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>);
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
 
             Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
             await using AlarmContext context = CreateDbContext<AlarmContext>();
             SystemConfig systemConfig = await context.SystemConfigs.SingleAsync();
             Assert.AreEqual(ClientDataLoader.ChangedBy, systemConfig.ChangedBy);
             Assert.AreEqual(PpcAlarmConfigCount, await context.PpcAlarmConfigs.CountAsync());
+            Assert.AreEqual(EnglishTextCount, await context.LocalizedTexts.CountAsync(text => text.Language == LocalizedText.DefaultLanguage));
+        }
+
+
+        /// <summary>
+        /// The English texts of the text file are imported, every localization key of the alarm configurations has an English text.
+        /// </summary>
+        [TestMethod]
+        public async Task RunAsyncImportsEnglishTextOfEveryLocalizationKeyTest()
+        {
+            string[] args = new string[] { ClientProjectName, _clientProjectFile };
+
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
+
+            Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            Dictionary<string, string> texts = await context.LocalizedTexts.Where(text => text.Language == LocalizedText.DefaultLanguage)
+                .ToDictionaryAsync(text => text.Name, text => text.Text);
+            Assert.HasCount(EnglishTextCount, texts);
+            Assert.AreEqual("PCS communication error", texts["PCS.CommunicationError.Name"]);
+            Assert.AreEqual("The PPC cannot communicate with the power conversion system.", texts["PCS.CommunicationError.Desc"]);
+            List<PpcAlarmConfig> configs = await context.PpcAlarmConfigs.ToListAsync();
+            List<string> keys = configs.SelectMany(config => new string[] { config.Name, config.Description }).ToList();
+            Assert.IsTrue(keys.All(key => LocalizationKey.TryParse(key, out string textKey) && texts.ContainsKey(textKey)));
+        }
+
+
+        /// <summary>
+        /// A localization key without an English text is rejected before the database is recreated.
+        /// </summary>
+        [TestMethod]
+        public async Task RunAsyncKeepsDatabaseWhenEnglishTextIsMissingTest()
+        {
+            await AddExistingActionAsync();
+            string directory = Directory.CreateTempSubdirectory().FullName;
+            string file = Path.Combine(directory, "MissingText.csv");
+            await File.WriteAllLinesAsync(file, new string[]
+            {
+                "Type=AlarmActionConfig,Name=RaiseAlarm,Trigger=Raise",
+                "Type=PpcAlarmConfig,Name={{PCS.CommunicationError.Name}},IsEnabled=true,AlarmId=PCS-COMM,SeverityLevel=Error,Description={{PCS.CommunicationError.Desc}}," +
+                "PpcAlarmType=PcsAlarm,PropertyName=CommunicationError,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm"
+            });
+            await File.WriteAllLinesAsync(Path.Combine(directory, "MissingText.Texts.en.csv"), new string[]
+            {
+                "Type=LocalizedText,Name=PCS.CommunicationError.Name,Language=en,Text=PCS communication error"
+            });
+            string[] args = new string[] { ClientProjectName, file };
+
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
+            Directory.Delete(directory, true);
+
+            Assert.AreEqual((int)ClientDataExitCode.CsvValidationError, exitCode);
+            await AssertExistingActionIsKeptAsync();
+        }
+
+
+        /// <summary>
+        /// A text in the client project file instead of a text file is rejected before the database is recreated.
+        /// </summary>
+        [TestMethod]
+        public async Task RunAsyncKeepsDatabaseWhenTextIsInClientProjectFileTest()
+        {
+            await AddExistingActionAsync();
+            string directory = Directory.CreateTempSubdirectory().FullName;
+            string file = Path.Combine(directory, "TextInProject.csv");
+            await File.WriteAllLinesAsync(file, new string[]
+            {
+                "Type=LocalizedText,Name=PCS.CommunicationError.Name,Language=en,Text=PCS communication error"
+            });
+            string[] args = new string[] { ClientProjectName, file };
+
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
+            Directory.Delete(directory, true);
+
+            Assert.AreEqual((int)ClientDataExitCode.CsvValidationError, exitCode);
+            await AssertExistingActionIsKeptAsync();
         }
 
 
@@ -91,7 +176,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
         {
             string[] args = new string[] { ClientProjectName, _clientProjectFile };
 
-            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>);
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
 
             Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
             await using AlarmContext context = CreateDbContext<AlarmContext>();
@@ -139,7 +224,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
         {
             string[] args = new string[] { ClientProjectName, _clientProjectFile };
 
-            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>);
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
 
             Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
             await using AlarmContext context = CreateDbContext<AlarmContext>();
@@ -185,7 +270,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
         {
             string[] args = new string[] { ClientProjectName, _clientProjectFile };
 
-            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>);
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
 
             Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
             await using AlarmContext context = CreateDbContext<AlarmContext>();
@@ -215,7 +300,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
         {
             string[] args = new string[] { ClientProjectName, _clientProjectFile };
 
-            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>);
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
 
             Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
             await using AlarmContext context = CreateDbContext<AlarmContext>();
@@ -241,7 +326,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
         {
             string[] args = new string[] { ClientProjectName, _clientProjectFile, "0.1" };
 
-            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>);
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
 
             Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
             await using AlarmContext context = CreateDbContext<AlarmContext>();
@@ -258,7 +343,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
             await AddExistingActionAsync();
             string[] args = new string[] { ClientProjectName, _clientProjectFile, "9.9" };
 
-            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>);
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
 
             Assert.AreEqual((int)ClientDataExitCode.InvalidArguments, exitCode);
             await AssertExistingActionIsKeptAsync();
@@ -280,7 +365,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
             });
             string[] args = new string[] { ClientProjectName, file };
 
-            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>);
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
             File.Delete(file);
 
             Assert.AreEqual((int)ClientDataExitCode.CsvValidationError, exitCode);
@@ -296,9 +381,20 @@ namespace paskalON.Alarms.Data.IntegrationTest
         {
             string[] args = new string[] { ClientProjectName, "DoesNotExist.csv" };
 
-            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>);
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
 
             Assert.AreEqual((int)ClientDataExitCode.InvalidArguments, exitCode);
+        }
+
+
+        /// <summary>
+        /// Creates the supplement of the localized texts as the alarm client data program does.
+        /// </summary>
+        /// <returns>The supplement that imports the text files of the client project file.</returns>
+        private static LocalizedTextSupplement<LocalizedText> CreateTextSupplement()
+        {
+            return new LocalizedTextSupplement<LocalizedText>(text => text.Name, text => text.Language,
+                entity => entity is AlarmConfigBase config ? config.GetLocalizableValues() : [], LocalizedText.DefaultLanguage);
         }
 
 

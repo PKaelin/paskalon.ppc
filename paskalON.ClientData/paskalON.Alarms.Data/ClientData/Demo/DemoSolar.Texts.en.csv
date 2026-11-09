@@ -1,0 +1,55 @@
+# -----------------------------------------------------------------------------
+# English texts (en) of the localization keys of the DemoSolar alarm configurations.
+# -----------------------------------------------------------------------------
+# File name: [ClientProject].Texts.[Language].csv next to the client project file (DemoSolar.csv).
+# Every line is a text: Type=LocalizedText,Name=<key without braces>,Language=<language>,Text=<text>
+#   e.g. Name={{PCS.CommunicationError.Name}} in DemoSolar.csv has the text of Name=PCS.CommunicationError.Name.
+# Language must match the language of the file name (en, or e.g. de-CH for DemoSolar.Texts.de-CH.csv).
+# Every key used in DemoSolar.csv needs a text in English (en), otherwise the import fails.
+# A key without a text in the language of the user is shown with the English text.
+# Put a text that contains a comma in double quotes, e.g. Text="Low voltage, check the grid".
+# -----------------------------------------------------------------------------
+# Communication errors
+Type=LocalizedText,Name=PCS.CommunicationError.Name,Language=en,Text=PCS communication error
+Type=LocalizedText,Name=PCS.CommunicationError.Desc,Language=en,Text=The PPC cannot communicate with the power conversion system.
+Type=LocalizedText,Name=BB.CommunicationError.Name,Language=en,Text=Battery bank communication error
+Type=LocalizedText,Name=BB.CommunicationError.Desc,Language=en,Text=The PPC cannot communicate with the battery bank.
+Type=LocalizedText,Name=PV.CommunicationError.Name,Language=en,Text=Solar panel communication error
+Type=LocalizedText,Name=PV.CommunicationError.Desc,Language=en,Text=The PPC cannot communicate with the solar panel.
+Type=LocalizedText,Name=PM.External.CommunicationError.Name,Language=en,Text=External power meter communication error
+Type=LocalizedText,Name=PM.External.CommunicationError.Desc,Language=en,Text=The PPC cannot communicate with the external power meter.
+Type=LocalizedText,Name=PM.Auxiliary.CommunicationError.Name,Language=en,Text=Auxiliary power meter communication error
+Type=LocalizedText,Name=PM.Auxiliary.CommunicationError.Desc,Language=en,Text=The PPC cannot communicate with the auxiliary power meter.
+Type=LocalizedText,Name=PM.Circuit.CommunicationError.Name,Language=en,Text=Circuit power meter communication error
+Type=LocalizedText,Name=PM.Circuit.CommunicationError.Desc,Language=en,Text=The PPC cannot communicate with the circuit power meter.
+Type=LocalizedText,Name=PM.System.CommunicationError.Name,Language=en,Text=System power meter communication error
+Type=LocalizedText,Name=PM.System.CommunicationError.Desc,Language=en,Text=The PPC cannot communicate with the system power meter.
+# PCS faults
+Type=LocalizedText,Name=PCS.FaultStates.HighInputVoltage.Name,Language=en,Text=PCS fault: high input voltage
+Type=LocalizedText,Name=PCS.FaultStates.HighInputVoltage.Desc,Language=en,Text=The power conversion system reports a fault: the input voltage is above the fault limit.
+Type=LocalizedText,Name=PCS.FaultStates.LowInputVoltage.Name,Language=en,Text=PCS fault: low input voltage
+Type=LocalizedText,Name=PCS.FaultStates.LowInputVoltage.Desc,Language=en,Text=The power conversion system reports a fault: the input voltage is below the fault limit.
+Type=LocalizedText,Name=PCS.FaultStates.HighFrequency.Name,Language=en,Text=PCS fault: high frequency
+Type=LocalizedText,Name=PCS.FaultStates.HighFrequency.Desc,Language=en,Text=The power conversion system reports a fault: the frequency is above the fault limit.
+Type=LocalizedText,Name=PCS.FaultStates.LowFrequency.Name,Language=en,Text=PCS fault: low frequency
+Type=LocalizedText,Name=PCS.FaultStates.LowFrequency.Desc,Language=en,Text=The power conversion system reports a fault: the frequency is below the fault limit.
+Type=LocalizedText,Name=PCS.FaultStates.Unknown.Name,Language=en,Text=PCS fault: unknown fault code
+Type=LocalizedText,Name=PCS.FaultStates.Unknown.Desc,Language=en,Text=The power conversion system reports a fault code that is not defined in its device description.
+# PCS warnings
+Type=LocalizedText,Name=PCS.WarningStates.HighInputVoltage.Name,Language=en,Text=PCS warning: high input voltage
+Type=LocalizedText,Name=PCS.WarningStates.HighInputVoltage.Desc,Language=en,Text=The power conversion system reports a warning: the input voltage is above the warning limit.
+Type=LocalizedText,Name=PCS.WarningStates.LowInputVoltage.Name,Language=en,Text=PCS warning: low input voltage
+Type=LocalizedText,Name=PCS.WarningStates.LowInputVoltage.Desc,Language=en,Text=The power conversion system reports a warning: the input voltage is below the warning limit.
+Type=LocalizedText,Name=PCS.WarningStates.HighFrequency.Name,Language=en,Text=PCS warning: high frequency
+Type=LocalizedText,Name=PCS.WarningStates.HighFrequency.Desc,Language=en,Text=The power conversion system reports a warning: the frequency is above the warning limit.
+Type=LocalizedText,Name=PCS.WarningStates.LowFrequency.Name,Language=en,Text=PCS warning: low frequency
+Type=LocalizedText,Name=PCS.WarningStates.LowFrequency.Desc,Language=en,Text=The power conversion system reports a warning: the frequency is below the warning limit.
+Type=LocalizedText,Name=PCS.WarningStates.Unknown.Name,Language=en,Text=PCS warning: unknown warning code
+Type=LocalizedText,Name=PCS.WarningStates.Unknown.Desc,Language=en,Text=The power conversion system reports a warning code that is not defined in its device description.
+# PCS vendor events
+Type=LocalizedText,Name=PCS.VendorEvents.MaintenanceDue.Name,Language=en,Text=PCS maintenance due
+Type=LocalizedText,Name=PCS.VendorEvents.MaintenanceDue.Desc,Language=en,Text=The power conversion system reports that its maintenance is due.
+Type=LocalizedText,Name=PCS.VendorEvents.EndOfLifeDue.Name,Language=en,Text=PCS end of life due
+Type=LocalizedText,Name=PCS.VendorEvents.EndOfLifeDue.Desc,Language=en,Text=The power conversion system reports that it reaches the end of its service life.
+Type=LocalizedText,Name=PCS.VendorEvents.Unknown.Name,Language=en,Text=PCS event: unknown vendor event
+Type=LocalizedText,Name=PCS.VendorEvents.Unknown.Desc,Language=en,Text=The power conversion system reports a vendor event that is not defined in its device description.
