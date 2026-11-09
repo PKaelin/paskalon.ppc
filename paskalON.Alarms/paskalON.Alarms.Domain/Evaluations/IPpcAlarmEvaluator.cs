@@ -19,8 +19,23 @@ namespace paskalON.Alarms.Domain.Evaluations
         /// <param name="changedValues">Values that changed with the latest update.</param>
         /// <param name="configs">All PPC alarm configurations.</param>
         /// <param name="activeAlarms">All active (not normalized) PPC alarms.</param>
-        /// <returns>Newly raised alarms and the normalized active alarms.</returns>
+        /// <param name="pendingTransitions">Delayed raises and normalizations, started and cancelled by the evaluation.</param>
+        /// <returns>Newly raised alarms and the normalized active alarms, without the delayed ones.</returns>
         PpcAlarmEvaluation Evaluate(PpcAlarmKey key, IEnumerable<PpcAlarmKeyValue> changedValues,
-            IEnumerable<PpcAlarmConfig> configs, IEnumerable<PpcAlarm> activeAlarms);
+            IEnumerable<PpcAlarmConfig> configs, IEnumerable<PpcAlarm> activeAlarms, PpcAlarmPendingTransitions pendingTransitions);
+
+
+        /// <summary>
+        /// Raises and normalizes the alarms of a publisher whose delay elapsed, with the time the value changed.
+        /// The due transitions are removed from the pending transitions.
+        /// </summary>
+        /// <param name="key">Key of the publisher.</param>
+        /// <param name="now">Current time.</param>
+        /// <param name="configs">All PPC alarm configurations, a transition of a configuration that is no longer enabled is dropped.</param>
+        /// <param name="activeAlarms">All active (not normalized) PPC alarms.</param>
+        /// <param name="pendingTransitions">Delayed raises and normalizations.</param>
+        /// <returns>Raised alarms and normalized active alarms whose delay elapsed.</returns>
+        PpcAlarmEvaluation EvaluateDue(PpcAlarmKey key, DateTimeOffset now, IEnumerable<PpcAlarmConfig> configs,
+            IEnumerable<PpcAlarm> activeAlarms, PpcAlarmPendingTransitions pendingTransitions);
     }
 }

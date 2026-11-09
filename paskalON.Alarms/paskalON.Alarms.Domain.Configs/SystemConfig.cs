@@ -26,6 +26,13 @@ namespace paskalON.Alarms.Domain.Configs
 
 
         /// <summary>
+        /// Indicates the minimum interval, in milliseconds, between two checks of the delayed alarm raises and normalizations.
+        /// If this value is less than this constant it will cause an exception.
+        /// </summary>
+        private const int MinimumAlarmDelayCheckIntervalMilliseconds = 100;
+
+
+        /// <summary>
         /// The interval, in milliseconds, between two sends of the pending alarm actions in the outbox.
         /// </summary>
         public int AlarmActionSendIntervalMilliseconds
@@ -54,6 +61,24 @@ namespace paskalON.Alarms.Domain.Configs
                 field = value;
             }
         } = 5000;
+
+
+        /// <summary>
+        /// The interval, in milliseconds, between two checks of the delayed alarm raises and normalizations
+        /// (TimeBeforeRaisingAlarmMilliseconds and TimeBeforeNormalizingAlarmMilliseconds of the alarm configurations).
+        /// </summary>
+        /// <remarks>
+        /// A delayed alarm is raised or normalized at most this interval after its delay elapsed.
+        /// </remarks>
+        public int AlarmDelayCheckIntervalMilliseconds
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumAlarmDelayCheckIntervalMilliseconds);
+                field = value;
+            }
+        } = 500;
 
 
         /// <summary>

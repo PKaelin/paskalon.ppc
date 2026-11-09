@@ -12,7 +12,7 @@ using paskalON.Alarms.Infrastructure.Storage;
 namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(AlarmContext))]
-    [Migration("20261107010834_v_0_1")]
+    [Migration("20261109164452_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -175,6 +175,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     b.Property<int>("SeverityLevel")
                         .HasColumnType("integer");
 
+                    b.Property<long>("TimeBeforeNormalizingAlarmMilliseconds")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("TimeBeforeRaisingAlarmMilliseconds")
                         .HasColumnType("bigint");
 
@@ -189,6 +192,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("AlarmActionSendIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AlarmDelayCheckIntervalMilliseconds")
                         .HasColumnType("integer");
 
                     b.Property<string>("PublisherExchangeAlarmActions")

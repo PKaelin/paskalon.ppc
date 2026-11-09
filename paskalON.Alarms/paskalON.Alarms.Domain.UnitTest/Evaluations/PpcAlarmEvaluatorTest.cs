@@ -40,6 +40,12 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
 
 
         /// <summary>
+        /// Delayed raises and normalizations of the evaluations.
+        /// </summary>
+        private readonly PpcAlarmPendingTransitions _pendingTransitions = new PpcAlarmPendingTransitions();
+
+
+        /// <summary>
         /// A fault state that turns true raises an alarm with the dictionary configuration for all devices.
         /// </summary>
         [TestMethod]
@@ -48,7 +54,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             PpcAlarmConfig faultConfig = CreateConfig(1, AlarmSeverity.Error, null, "FaultStates");
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("FaultStates.OverTemperature", 1) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig }, new List<PpcAlarm>());
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig }, new List<PpcAlarm>(), _pendingTransitions);
 
             Assert.HasCount(1, evaluation.Raised);
             Assert.IsEmpty(evaluation.Normalized);
@@ -73,7 +79,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             PpcAlarmConfig faultConfig = CreateConfig(1, AlarmSeverity.Error, null, "FaultStates");
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("FaultStates.OverTemperature", 0) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig }, new List<PpcAlarm>());
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig }, new List<PpcAlarm>(), _pendingTransitions);
 
             Assert.IsFalse(evaluation.HasChanges);
         }
@@ -91,7 +97,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             PpcAlarm activeAlarm = CreateActiveAlarm(faultConfig, "FaultStates.OverTemperature", state);
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("FaultStates.OverTemperature", 1) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig }, new List<PpcAlarm> { activeAlarm });
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig }, new List<PpcAlarm> { activeAlarm }, _pendingTransitions);
 
             Assert.IsFalse(evaluation.HasChanges);
             Assert.AreEqual(state, activeAlarm.AlarmSequenceState);
@@ -110,7 +116,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             PpcAlarm activeAlarm = CreateActiveAlarm(faultConfig, "FaultStates.OverTemperature", state);
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("FaultStates.OverTemperature", 0) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig }, new List<PpcAlarm> { activeAlarm });
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig }, new List<PpcAlarm> { activeAlarm }, _pendingTransitions);
 
             Assert.IsEmpty(evaluation.Raised);
             Assert.HasCount(1, evaluation.Normalized);
@@ -134,7 +140,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
                 CreateValue("FaultStates.GridLoss", 1)
             };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig, gridLossConfig }, new List<PpcAlarm>());
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig, gridLossConfig }, new List<PpcAlarm>(), _pendingTransitions);
 
             Assert.HasCount(2, evaluation.Raised);
             PpcAlarm overTemperature = evaluation.Raised.Single(alarm => alarm.PropertyName == "FaultStates.OverTemperature");
@@ -155,7 +161,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             PpcAlarmConfig deviceConfig = CreateConfig(2, AlarmSeverity.Warning, PcsDeviceId, "FaultStates");
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("FaultStates.OverTemperature", 1) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { allDevicesConfig, deviceConfig }, new List<PpcAlarm>());
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { allDevicesConfig, deviceConfig }, new List<PpcAlarm>(), _pendingTransitions);
 
             Assert.HasCount(1, evaluation.Raised);
             Assert.AreSame(deviceConfig, evaluation.Raised[0].PpcAlarmConfig);
@@ -173,7 +179,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             PpcAlarmConfig gridLossConfig = CreateConfig(2, AlarmSeverity.Critical, null, "FaultStates.GridLoss");
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("FaultStates.GridLoss", 1) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { deviceFaultConfig, gridLossConfig }, new List<PpcAlarm>());
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { deviceFaultConfig, gridLossConfig }, new List<PpcAlarm>(), _pendingTransitions);
 
             Assert.HasCount(1, evaluation.Raised);
             Assert.AreSame(gridLossConfig, evaluation.Raised[0].PpcAlarmConfig);
@@ -192,7 +198,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             PpcAlarm activeAlarm = CreateActiveAlarm(faultConfig, "FaultStates.GridLoss", AlarmSequenceState.Alarm);
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("FaultStates.GridLoss", 1) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig, gridLossConfig }, new List<PpcAlarm> { activeAlarm });
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig, gridLossConfig }, new List<PpcAlarm> { activeAlarm }, _pendingTransitions);
 
             Assert.HasCount(1, evaluation.Normalized);
             Assert.AreSame(activeAlarm, evaluation.Normalized[0]);
@@ -212,7 +218,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             faultConfig.IsEnabled = false;
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("FaultStates.OverTemperature", 1) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig }, new List<PpcAlarm> { activeAlarm });
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { faultConfig }, new List<PpcAlarm> { activeAlarm }, _pendingTransitions);
 
             Assert.IsEmpty(evaluation.Raised);
             Assert.HasCount(1, evaluation.Normalized);
@@ -235,7 +241,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
 
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("FaultStates.OverTemperature", 1) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, configs, new List<PpcAlarm>());
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, configs, new List<PpcAlarm>(), _pendingTransitions);
 
             Assert.IsFalse(evaluation.HasChanges);
         }
@@ -254,7 +260,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             PpcAlarmConfig errorConfig = CreateConfig(2, AlarmSeverity.Error, null, "Temperature", operation: PropertyOperator.GreaterThan, propertyValue: 90);
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("Temperature", temperature) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { warningConfig, errorConfig }, new List<PpcAlarm>());
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { warningConfig, errorConfig }, new List<PpcAlarm>(), _pendingTransitions);
 
             Assert.HasCount(expectedAlarms, evaluation.Raised);
         }
@@ -281,7 +287,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             PpcAlarmConfig config = CreateConfig(1, AlarmSeverity.Warning, null, "Frequency", operation: operation, propertyValue: 50);
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("Frequency", frequency) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { config }, new List<PpcAlarm>());
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { config }, new List<PpcAlarm>(), _pendingTransitions);
 
             Assert.AreEqual(isRaised, evaluation.Raised.Count == 1);
         }
@@ -297,10 +303,174 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
             PpcAlarmConfig systemConfig = CreateConfig(1, AlarmSeverity.Critical, null, "IsRtuCommunicationLost", PpcAlarmType.SystemAlarm);
             List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("IsRtuCommunicationLost", 1) };
 
-            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(systemKey, values, new List<PpcAlarmConfig> { systemConfig }, new List<PpcAlarm>());
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(systemKey, values, new List<PpcAlarmConfig> { systemConfig }, new List<PpcAlarm>(), _pendingTransitions);
 
             Assert.HasCount(1, evaluation.Raised);
             Assert.IsNull(evaluation.Raised[0].DeviceId);
+        }
+
+
+        /// <summary>
+        /// An abnormal value of a configuration with a raise delay does not raise the alarm yet, it starts the delay.
+        /// </summary>
+        [TestMethod]
+        public void EvaluateAbnormalWithRaiseDelayStartsPendingRaiseTest()
+        {
+            PpcAlarmConfig config = CreateDelayedConfig(raiseDelayMilliseconds: 3000, normalizeDelayMilliseconds: 0);
+            List<PpcAlarmKeyValue> values = new List<PpcAlarmKeyValue> { CreateValue("CommunicationError", 1) };
+
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, values, new List<PpcAlarmConfig> { config }, new List<PpcAlarm>(), _pendingTransitions);
+
+            Assert.IsFalse(evaluation.HasChanges);
+            PpcAlarmPendingTransition? pending = _pendingTransitions.Get(PcsKey, config.Id, "CommunicationError");
+            Assert.IsNotNull(pending);
+            Assert.AreEqual(PpcAlarmTransition.Raise, pending.Transition);
+            Assert.AreEqual(ChangedOn.AddSeconds(3), pending.DueOn);
+        }
+
+
+        /// <summary>
+        /// The delayed raise is applied once its delay elapsed, the alarm is created at the time the value became abnormal.
+        /// Before the delay elapsed nothing happens.
+        /// </summary>
+        [TestMethod]
+        [DataRow(2999, false)]
+        [DataRow(3000, true)]
+        [DataRow(10000, true)]
+        public void EvaluateDueRaisesAlarmAtAbnormalTimeAfterDelayTest(int millisecondsAfterChange, bool isRaised)
+        {
+            PpcAlarmConfig config = CreateDelayedConfig(raiseDelayMilliseconds: 3000, normalizeDelayMilliseconds: 0);
+            List<PpcAlarmConfig> configs = new List<PpcAlarmConfig> { config };
+            _evaluator.Evaluate(PcsKey, new List<PpcAlarmKeyValue> { CreateValue("CommunicationError", 1) }, configs, new List<PpcAlarm>(), _pendingTransitions);
+
+            PpcAlarmEvaluation evaluation = _evaluator.EvaluateDue(PcsKey, ChangedOn.AddMilliseconds(millisecondsAfterChange), configs,
+                new List<PpcAlarm>(), _pendingTransitions);
+
+            Assert.AreEqual(isRaised, evaluation.Raised.Count == 1);
+            Assert.AreEqual(isRaised ? 0 : 1, _pendingTransitions.Count);
+
+            if (isRaised)
+            {
+                Assert.AreEqual(ChangedOn, evaluation.Raised[0].CreatedOn);
+                Assert.AreEqual("CommunicationError", evaluation.Raised[0].PropertyName);
+            }
+        }
+
+
+        /// <summary>
+        /// A value that is normal again before the raise delay elapsed cancels the raise, no alarm is raised.
+        /// </summary>
+        [TestMethod]
+        public void EvaluateNormalBeforeRaiseDelayCancelsRaiseTest()
+        {
+            PpcAlarmConfig config = CreateDelayedConfig(raiseDelayMilliseconds: 3000, normalizeDelayMilliseconds: 0);
+            List<PpcAlarmConfig> configs = new List<PpcAlarmConfig> { config };
+            _evaluator.Evaluate(PcsKey, new List<PpcAlarmKeyValue> { CreateValue("CommunicationError", 1) }, configs, new List<PpcAlarm>(), _pendingTransitions);
+
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, new List<PpcAlarmKeyValue> { CreateValue("CommunicationError", 0, ChangedOn.AddMilliseconds(200)) },
+                configs, new List<PpcAlarm>(), _pendingTransitions);
+
+            Assert.IsFalse(evaluation.HasChanges);
+            Assert.AreEqual(0, _pendingTransitions.Count);
+            Assert.IsFalse(_evaluator.EvaluateDue(PcsKey, ChangedOn.AddMinutes(1), configs, new List<PpcAlarm>(), _pendingTransitions).HasChanges);
+        }
+
+
+        /// <summary>
+        /// A further change of a value that stays abnormal keeps the running raise delay, it does not start again.
+        /// </summary>
+        [TestMethod]
+        public void EvaluateAbnormalValueChangesKeepsRaiseDelayTest()
+        {
+            PpcAlarmConfig config = CreateDelayedConfig(raiseDelayMilliseconds: 3000, normalizeDelayMilliseconds: 0, PropertyOperator.GreaterThan, 80);
+            List<PpcAlarmConfig> configs = new List<PpcAlarmConfig> { config };
+            _evaluator.Evaluate(PcsKey, new List<PpcAlarmKeyValue> { CreateValue("CommunicationError", 85) }, configs, new List<PpcAlarm>(), _pendingTransitions);
+
+            _evaluator.Evaluate(PcsKey, new List<PpcAlarmKeyValue> { CreateValue("CommunicationError", 90, ChangedOn.AddSeconds(2)) }, configs,
+                new List<PpcAlarm>(), _pendingTransitions);
+
+            PpcAlarmPendingTransition? pending = _pendingTransitions.Get(PcsKey, config.Id, "CommunicationError");
+            Assert.IsNotNull(pending);
+            Assert.AreEqual(ChangedOn.AddSeconds(3), pending.DueOn);
+            Assert.AreEqual(85, pending.Value.Value);
+        }
+
+
+        /// <summary>
+        /// A normal value of a configuration with a normalize delay keeps the alarm active until the delay elapsed,
+        /// then the alarm is normalized at the time the value became normal.
+        /// </summary>
+        [TestMethod]
+        public void EvaluateDueNormalizesAlarmAtNormalTimeAfterDelayTest()
+        {
+            PpcAlarmConfig config = CreateDelayedConfig(raiseDelayMilliseconds: 0, normalizeDelayMilliseconds: 5000);
+            List<PpcAlarmConfig> configs = new List<PpcAlarmConfig> { config };
+            PpcAlarm activeAlarm = CreateActiveAlarm(config, "CommunicationError", AlarmSequenceState.Alarm);
+            PpcAlarmEvaluation delayedEvaluation = _evaluator.Evaluate(PcsKey, new List<PpcAlarmKeyValue> { CreateValue("CommunicationError", 0) },
+                configs, new List<PpcAlarm> { activeAlarm }, _pendingTransitions);
+
+            PpcAlarmEvaluation evaluation = _evaluator.EvaluateDue(PcsKey, ChangedOn.AddSeconds(5), configs, new List<PpcAlarm> { activeAlarm },
+                _pendingTransitions);
+
+            Assert.IsFalse(delayedEvaluation.HasChanges);
+            Assert.AreSame(activeAlarm, evaluation.Normalized.Single());
+            Assert.AreEqual(AlarmSequenceState.Normal, activeAlarm.AlarmSequenceState);
+            Assert.AreEqual(ChangedOn, activeAlarm.ChangedDate);
+        }
+
+
+        /// <summary>
+        /// A value that is abnormal again before the normalize delay elapsed (flicker) cancels the normalization,
+        /// the alarm stays active and is not raised again.
+        /// </summary>
+        [TestMethod]
+        public void EvaluateAbnormalBeforeNormalizeDelayCancelsNormalizationTest()
+        {
+            PpcAlarmConfig config = CreateDelayedConfig(raiseDelayMilliseconds: 0, normalizeDelayMilliseconds: 5000);
+            List<PpcAlarmConfig> configs = new List<PpcAlarmConfig> { config };
+            PpcAlarm activeAlarm = CreateActiveAlarm(config, "CommunicationError", AlarmSequenceState.Alarm);
+            _evaluator.Evaluate(PcsKey, new List<PpcAlarmKeyValue> { CreateValue("CommunicationError", 0) }, configs, new List<PpcAlarm> { activeAlarm },
+                _pendingTransitions);
+
+            PpcAlarmEvaluation evaluation = _evaluator.Evaluate(PcsKey, new List<PpcAlarmKeyValue> { CreateValue("CommunicationError", 1, ChangedOn.AddSeconds(1)) },
+                configs, new List<PpcAlarm> { activeAlarm }, _pendingTransitions);
+
+            Assert.IsFalse(evaluation.HasChanges);
+            Assert.AreEqual(0, _pendingTransitions.Count);
+            Assert.AreEqual(AlarmSequenceState.Alarm, activeAlarm.AlarmSequenceState);
+        }
+
+
+        /// <summary>
+        /// A delayed raise of a configuration that was disabled or removed meanwhile is dropped.
+        /// </summary>
+        [TestMethod]
+        public void EvaluateDueConfigNoLongerEnabledDropsRaiseTest()
+        {
+            PpcAlarmConfig config = CreateDelayedConfig(raiseDelayMilliseconds: 3000, normalizeDelayMilliseconds: 0);
+            _evaluator.Evaluate(PcsKey, new List<PpcAlarmKeyValue> { CreateValue("CommunicationError", 1) }, new List<PpcAlarmConfig> { config },
+                new List<PpcAlarm>(), _pendingTransitions);
+            config.IsEnabled = false;
+
+            PpcAlarmEvaluation evaluation = _evaluator.EvaluateDue(PcsKey, ChangedOn.AddSeconds(3), new List<PpcAlarmConfig> { config },
+                new List<PpcAlarm>(), _pendingTransitions);
+
+            Assert.IsFalse(evaluation.HasChanges);
+            Assert.AreEqual(0, _pendingTransitions.Count);
+        }
+
+
+        /// <summary>
+        /// Creates the communication error configuration of all PCS with the delays.
+        /// </summary>
+        private PpcAlarmConfig CreateDelayedConfig(long raiseDelayMilliseconds, long normalizeDelayMilliseconds,
+            PropertyOperator operation = PropertyOperator.Equal, double propertyValue = 1)
+        {
+            PpcAlarmConfig config = CreateConfig(1, AlarmSeverity.Error, null, "CommunicationError", PpcAlarmType.PcsAlarm, operation, propertyValue);
+            config.TimeBeforeRaisingAlarmMilliseconds = raiseDelayMilliseconds;
+            config.TimeBeforeNormalizingAlarmMilliseconds = normalizeDelayMilliseconds;
+
+            return config;
         }
 
 
@@ -333,12 +503,21 @@ namespace paskalON.Alarms.Domain.UnitTest.Evaluations
         /// </summary>
         private PpcAlarmKeyValue CreateValue(string name, double value)
         {
+            return CreateValue(name, value, ChangedOn);
+        }
+
+
+        /// <summary>
+        /// Creates a value that changed at the given time.
+        /// </summary>
+        private PpcAlarmKeyValue CreateValue(string name, double value, DateTimeOffset changedOn)
+        {
             return new PpcAlarmKeyValue
             {
                 Name = name,
                 Value = value,
                 ValueChanged = true,
-                ValueChangedOn = ChangedOn
+                ValueChangedOn = changedOn
             };
         }
 

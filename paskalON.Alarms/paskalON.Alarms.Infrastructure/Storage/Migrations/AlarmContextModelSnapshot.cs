@@ -172,6 +172,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     b.Property<int>("SeverityLevel")
                         .HasColumnType("integer");
 
+                    b.Property<long>("TimeBeforeNormalizingAlarmMilliseconds")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("TimeBeforeRaisingAlarmMilliseconds")
                         .HasColumnType("bigint");
 
@@ -186,6 +189,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("AlarmActionSendIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AlarmDelayCheckIntervalMilliseconds")
                         .HasColumnType("integer");
 
                     b.Property<string>("PublisherExchangeAlarmActions")

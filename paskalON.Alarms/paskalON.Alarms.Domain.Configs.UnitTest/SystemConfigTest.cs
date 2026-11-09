@@ -23,6 +23,12 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
 
 
         /// <summary>
+        /// Name of the delay check interval property.
+        /// </summary>
+        private const string DelayCheckInterval = nameof(SystemConfig.AlarmDelayCheckIntervalMilliseconds);
+
+
+        /// <summary>
         /// A new configuration has the default intervals and no exchange.
         /// </summary>
         [TestMethod]
@@ -32,9 +38,11 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
 
             int sendInterval = config.AlarmActionSendIntervalMilliseconds;
             int retryInterval = config.AlarmActionRetryIntervalMilliseconds;
+            int delayCheckInterval = config.AlarmDelayCheckIntervalMilliseconds;
 
             Assert.AreEqual(1000, sendInterval);
             Assert.AreEqual(5000, retryInterval);
+            Assert.AreEqual(500, delayCheckInterval);
             Assert.IsNull(config.PublisherExchangeAlarmActions);
         }
 
@@ -47,6 +55,8 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
         [DataRow(SendInterval, int.MaxValue)]
         [DataRow(RetryInterval, 1000)]
         [DataRow(RetryInterval, int.MaxValue)]
+        [DataRow(DelayCheckInterval, 100)]
+        [DataRow(DelayCheckInterval, int.MaxValue)]
         public void IntervalAtOrAboveMinimumTest(string propertyName, int interval)
         {
             SystemConfig config = CreateConfig();
@@ -66,6 +76,8 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
         [DataRow(SendInterval, -1, 1000)]
         [DataRow(RetryInterval, 999, 5000)]
         [DataRow(RetryInterval, 0, 5000)]
+        [DataRow(DelayCheckInterval, 99, 500)]
+        [DataRow(DelayCheckInterval, 0, 500)]
         public void IntervalBelowMinimumThrowsTest(string propertyName, int interval, int expectedInterval)
         {
             SystemConfig config = CreateConfig();
@@ -103,6 +115,9 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
                 case RetryInterval:
                     config.AlarmActionRetryIntervalMilliseconds = interval;
                     break;
+                case DelayCheckInterval:
+                    config.AlarmDelayCheckIntervalMilliseconds = interval;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(propertyName));
             }
@@ -118,6 +133,7 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
             {
                 SendInterval => config.AlarmActionSendIntervalMilliseconds,
                 RetryInterval => config.AlarmActionRetryIntervalMilliseconds,
+                DelayCheckInterval => config.AlarmDelayCheckIntervalMilliseconds,
                 _ => throw new ArgumentOutOfRangeException(nameof(propertyName))
             };
         }

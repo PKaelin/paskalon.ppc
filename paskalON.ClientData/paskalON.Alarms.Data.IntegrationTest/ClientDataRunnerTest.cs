@@ -102,6 +102,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
             Assert.AreEqual("ppc:alarms:actions", systemConfig.PublisherExchangeAlarmActions);
             Assert.AreEqual(1000, systemConfig.AlarmActionSendIntervalMilliseconds);
             Assert.AreEqual(5000, systemConfig.AlarmActionRetryIntervalMilliseconds);
+            Assert.AreEqual(500, systemConfig.AlarmDelayCheckIntervalMilliseconds);
             Assert.AreEqual("ppc:device:pcs:core", systemConfig.SubscriberTopicPcsCore);
             Assert.AreEqual("ppc:device:pcs:detail", systemConfig.SubscriberTopicPcsDetail);
             Assert.AreEqual("ppc:device:bb:core", systemConfig.SubscriberTopicBatteryBankCore);
@@ -152,6 +153,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
             Assert.AreEqual(PropertyOperator.Equal, config.PropertyOperator);
             Assert.AreEqual(1, config.PropertyValue);
             Assert.AreEqual(0, config.TimeBeforeRaisingAlarmMilliseconds);
+            Assert.AreEqual(0, config.TimeBeforeNormalizingAlarmMilliseconds);
             Assert.AreEqual(ClientDataLoader.ChangedBy, config.ChangedBy);
             CollectionAssert.AreEquivalent(new List<(string, AlarmActionTrigger)> { ("RaiseAlarm", AlarmActionTrigger.Raise), ("ClearAlarm", AlarmActionTrigger.Normalize) },
                 config.AlarmActions.Select(action => (action.Name, action.Trigger)).ToList());

@@ -108,6 +108,24 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
 
 
         /// <summary>
+        /// Time the data of the delay tests was received, after the start of the fake time so that it can be advanced to the due time.
+        /// </summary>
+        private static readonly DateTimeOffset DelayedReceivedOn = NormalizedOn.AddMinutes(1);
+
+
+        /// <summary>
+        /// Fake time of the orphan normalization, the delayed alarms and the summaries.
+        /// </summary>
+        private readonly FakeTimeProvider _timeProvider = new FakeTimeProvider(NormalizedOn);
+
+
+        /// <summary>
+        /// Delayed raises and normalizations of the handler.
+        /// </summary>
+        private readonly PpcAlarmPendingTransitions _pendingTransitions = new PpcAlarmPendingTransitions();
+
+
+        /// <summary>
         /// Sets up the repositories with the PCS fault configuration and without active alarms.
         /// </summary>
         [TestInitialize]
@@ -409,6 +427,84 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
 
 
         /// <summary>
+        /// With a raise delay the received fault state saves nothing, once the delay elapsed the due handling raises and saves
+        /// the alarm with its raise action, created at the time the fault state turned true.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleDueAsyncRaisesDelayedAlarmAfterDelayTest()
+        {
+            PpcAlarmConfig faultConfig = SetupDelayedFaultConfig(raiseDelayMilliseconds: 3000);
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+            PpcAlarmEvaluation delayedEvaluation = await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), DelayedReceivedOn);
+            _timeProvider.SetUtcNow(DelayedReceivedOn.AddSeconds(3));
+
+            int changedCount = await handler.HandleDueAsync();
+
+            Assert.IsFalse(delayedEvaluation.HasChanges);
+            Assert.AreEqual(1, changedCount);
+            PpcAlarm raisedAlarm = _addedAlarms.Single();
+            Assert.AreSame(faultConfig, raisedAlarm.PpcAlarmConfig);
+            Assert.AreEqual(DelayedReceivedOn, raisedAlarm.CreatedOn);
+            Assert.AreEqual("ReducePower", _addedMessages.Single().ActionName);
+            _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
+            Assert.AreEqual(0, _pendingTransitions.Count);
+        }
+
+
+        /// <summary>
+        /// Before the delay elapsed, or when the fault state was cleared before, the due handling saves nothing.
+        /// </summary>
+        [TestMethod]
+        [DataRow(2, false)]
+        [DataRow(5, true)]
+        public async Task HandleDueAsyncNothingDueSavesNothingTest(int secondsAfterReceived, bool isClearedBefore)
+        {
+            SetupDelayedFaultConfig(raiseDelayMilliseconds: 3000);
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+            await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), DelayedReceivedOn);
+
+            if (isClearedBefore)
+            {
+                await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: false), DelayedReceivedOn.AddSeconds(1));
+            }
+
+            _timeProvider.SetUtcNow(DelayedReceivedOn.AddSeconds(secondsAfterReceived));
+
+            int changedCount = await handler.HandleDueAsync();
+
+            Assert.AreEqual(0, changedCount);
+            Assert.IsEmpty(_addedAlarms);
+            _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+
+        /// <summary>
+        /// When saving the delayed alarm fails, the publisher's values and delays are reset so that its next data
+        /// is evaluated completely again and its delay starts again.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleDueAsyncSaveFailsResetsPublisherTest()
+        {
+            SetupDelayedFaultConfig(raiseDelayMilliseconds: 3000);
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+            await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), DelayedReceivedOn);
+            _alarmRepository.Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new TimeoutException("Database not available."));
+            _timeProvider.SetUtcNow(DelayedReceivedOn.AddSeconds(3));
+            int changedCount = await handler.HandleDueAsync();
+            _alarmRepository.Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+            await handler.HandleAsync(Pcs7Key, CreatePcsDetail(overTemperature: true), DelayedReceivedOn.AddSeconds(10));
+
+            Assert.AreEqual(0, changedCount);
+            PpcAlarmPendingTransition? pending = _pendingTransitions.Get(Pcs7Key, PcsAlarmConfigSampleData.CreatePcsFaultConfig().Id, "FaultStates.OverTemperature");
+            Assert.IsNotNull(pending);
+            Assert.AreEqual(DelayedReceivedOn.AddSeconds(13), pending.DueOn);
+        }
+
+
+        /// <summary>
         /// An evaluation waits while another writer (e.g. the web API) holds the write lock.
         /// </summary>
         [TestMethod]
@@ -427,6 +523,20 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
 
 
         /// <summary>
+        /// Sets up the configuration cache with the PCS fault configuration with a raise delay.
+        /// </summary>
+        private PpcAlarmConfig SetupDelayedFaultConfig(long raiseDelayMilliseconds)
+        {
+            PpcAlarmConfig faultConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            faultConfig.TimeBeforeRaisingAlarmMilliseconds = raiseDelayMilliseconds;
+            _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm))
+                .Returns(new List<PpcAlarmConfig> { faultConfig });
+
+            return faultConfig;
+        }
+
+
+        /// <summary>
         /// Creates the handler with the real evaluator, the real active alarm cache loaded from the mocked repository
         /// and the mocked repositories.
         /// </summary>
@@ -436,7 +546,7 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
 
             return new PpcAlarmHandler(NullLogger<PpcAlarmHandler>.Instance, valueStore, new PpcAlarmEvaluator(),
                 _configCache.Object, _activeCache, _alarmRepository.Object, _outboxRepository.Object, _outboxSignal.Object, _writeLock,
-                new FakeTimeProvider(NormalizedOn));
+                _timeProvider, _pendingTransitions);
         }
 
 

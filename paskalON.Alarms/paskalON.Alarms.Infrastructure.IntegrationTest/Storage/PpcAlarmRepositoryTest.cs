@@ -311,7 +311,7 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
                 PpcAlarmRepository alarmRepository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
                 List<PpcAlarmConfig> configs = await configRepository.GetEnabledAsync(Pcs7Key.PpcAlarmType);
                 List<PpcAlarm> activeAlarms = await alarmRepository.GetActiveAsync(Pcs7Key);
-                PpcAlarmEvaluation evaluation = new PpcAlarmEvaluator().Evaluate(Pcs7Key, changedValues, configs, activeAlarms);
+                PpcAlarmEvaluation evaluation = new PpcAlarmEvaluator().Evaluate(Pcs7Key, changedValues, configs, activeAlarms, new PpcAlarmPendingTransitions());
                 alarmRepository.Add(evaluation.Raised);
                 alarmRepository.Update(evaluation.Normalized);
 

@@ -90,6 +90,12 @@ namespace paskalON.Alarms.Application.Handlers
 
 
         /// <summary>
+        /// Delayed raises and normalizations of the alarms.
+        /// </summary>
+        private readonly PpcAlarmPendingTransitions _pendingTransitions;
+
+
+        /// <summary>
         /// Constructor of <see cref="PpcAlarmHandler"/>.
         /// </summary>
         /// <param name="logger">Logger instance.</param>
@@ -101,11 +107,12 @@ namespace paskalON.Alarms.Application.Handlers
         /// <param name="outboxRepository">Repository of the alarm action outbox.</param>
         /// <param name="outboxSignal">Signal that sends the saved alarm actions immediately.</param>
         /// <param name="writeLock">Lock of the alarm writers.</param>
-        /// <param name="timeProvider">Time provider of the normalization of orphaned alarms and of the alarm summaries.</param>
+        /// <param name="timeProvider">Time provider of the normalization of orphaned alarms, the delayed alarms and the alarm summaries.</param>
+        /// <param name="pendingTransitions">Delayed raises and normalizations of the alarms.</param>
         public PpcAlarmHandler(ILogger<PpcAlarmHandler> logger, IPpcAlarmValueStore valueStore, IPpcAlarmEvaluator evaluator,
             IPpcAlarmConfigCache configCache, IPpcAlarmActiveCache activeCache, IPpcAlarmRepository alarmRepository,
             IAlarmActionOutboxRepository outboxRepository, IAlarmActionOutboxSignal outboxSignal, IPpcAlarmWriteLock writeLock,
-            TimeProvider timeProvider)
+            TimeProvider timeProvider, PpcAlarmPendingTransitions pendingTransitions)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(valueStore);
@@ -117,6 +124,7 @@ namespace paskalON.Alarms.Application.Handlers
             ArgumentNullException.ThrowIfNull(outboxSignal);
             ArgumentNullException.ThrowIfNull(writeLock);
             ArgumentNullException.ThrowIfNull(timeProvider);
+            ArgumentNullException.ThrowIfNull(pendingTransitions);
 
             _logger = logger;
             _valueStore = valueStore;
@@ -128,6 +136,7 @@ namespace paskalON.Alarms.Application.Handlers
             _outboxSignal = outboxSignal;
             _writeLock = writeLock;
             _timeProvider = timeProvider;
+            _pendingTransitions = pendingTransitions;
         }
 
 
@@ -156,7 +165,7 @@ namespace paskalON.Alarms.Application.Handlers
             {
                 IReadOnlyList<PpcAlarmConfig> configs = _configCache.GetEnabled(key.PpcAlarmType);
                 List<PpcAlarm> activeAlarms = await _activeCache.GetActiveAsync(key, _alarmRepository, cancellationToken);
-                PpcAlarmEvaluation evaluation = _evaluator.Evaluate(key, changedValues, configs, activeAlarms);
+                PpcAlarmEvaluation evaluation = _evaluator.Evaluate(key, changedValues, configs, activeAlarms, _pendingTransitions);
 
                 if (evaluation.HasChanges is false)
                 {
@@ -172,9 +181,51 @@ namespace paskalON.Alarms.Application.Handlers
                 // The evaluator might have normalized cached alarms that are not saved, they are loaded again with the next data
                 _valueStore.Remove(key);
                 _activeCache.Invalidate(key);
+                // The delays start again when the values are evaluated again
+                _pendingTransitions.CancelAll(key);
 
                 throw;
             }
+        }
+
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// - Each publisher is saved separately like a received data, a failed publisher is logged and evaluated
+        ///   completely again with its next data (its delays start again), the other publishers are still saved.
+        /// - The raised alarms are created and the normalized alarms are normalized at the time their value changed.
+        /// </remarks>
+        public async Task<int> HandleDueAsync(CancellationToken cancellationToken = default)
+        {
+            using IDisposable writeLock = await _writeLock.AcquireAsync(cancellationToken);
+            DateTimeOffset now = _timeProvider.GetUtcNow();
+            int changedCount = 0;
+
+            foreach (PpcAlarmKey key in _pendingTransitions.GetDueKeys(now))
+            {
+                try
+                {
+                    IReadOnlyList<PpcAlarmConfig> configs = _configCache.GetEnabled(key.PpcAlarmType);
+                    List<PpcAlarm> activeAlarms = await _activeCache.GetActiveAsync(key, _alarmRepository, cancellationToken);
+                    PpcAlarmEvaluation evaluation = _evaluator.EvaluateDue(key, now, configs, activeAlarms, _pendingTransitions);
+
+                    if (evaluation.HasChanges)
+                    {
+                        await SaveEvaluationAsync(key, evaluation, cancellationToken);
+                        changedCount += evaluation.Raised.Count + evaluation.Normalized.Count;
+                    }
+                }
+                catch (Exception exception) when (exception is not OperationCanceledException)
+                {
+                    _logger.LogError(exception, "Raising or normalizing the delayed alarms of {PpcAlarmType} device {DeviceId} failed.",
+                        key.PpcAlarmType, key.DeviceId);
+                    _valueStore.Remove(key);
+                    _activeCache.Invalidate(key);
+                    _pendingTransitions.CancelAll(key);
+                }
+            }
+
+            return changedCount;
         }
 
 

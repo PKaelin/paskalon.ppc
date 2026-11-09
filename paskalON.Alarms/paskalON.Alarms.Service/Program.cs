@@ -107,6 +107,10 @@ try
     // Only one writer at a time changes and saves the cached active alarms (handler service, web API)
     builder.Services.AddSingleton<IPpcAlarmWriteLock, PpcAlarmWriteLock>();
     builder.Services.AddSingleton<IPpcAlarmEvaluator, PpcAlarmEvaluator>();
+    // Delayed raises and normalizations (in memory), checked by the delay service every interval
+    builder.Services.AddSingleton<PpcAlarmPendingTransitions>();
+    builder.Services.AddSingleton<PpcAlarmDelayService>();
+    builder.Services.AddHostedService(provider => provider.GetRequiredService<PpcAlarmDelayService>());
     // Signals the saved alarm actions from the scoped handlers to the outbox publisher service, so that they are sent immediately
     builder.Services.AddSingleton<IAlarmActionOutboxSignal, AlarmActionOutboxSignal>();
     builder.Services.AddScoped<IPpcAlarmHandler, PpcAlarmHandler>();
@@ -203,6 +207,9 @@ try
         IPpcAlarmRepository alarmRepository = scope.ServiceProvider.GetRequiredService<IPpcAlarmRepository>();
         IPpcAlarmActiveCache activeCache = app.Services.GetRequiredService<IPpcAlarmActiveCache>();
         await startupRetry.ExecuteAsync("Load active alarms", () => activeCache.LoadAsync(alarmRepository), DatabaseTransientExceptionFilter.IsTransient);
+
+        PpcAlarmDelayService delayService = app.Services.GetRequiredService<PpcAlarmDelayService>();
+        delayService.Initialize(systemConfig.AlarmDelayCheckIntervalMilliseconds);
 
         if (startPublisher == true)
         {

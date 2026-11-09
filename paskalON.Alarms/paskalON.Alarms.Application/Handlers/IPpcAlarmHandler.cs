@@ -34,6 +34,15 @@ namespace paskalON.Alarms.Application.Handlers
 
 
         /// <summary>
+        /// Raises and normalizes the delayed alarms whose delay elapsed (TimeBeforeRaisingAlarmMilliseconds and
+        /// TimeBeforeNormalizingAlarmMilliseconds) and persists them with their actions per publisher.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Number of raised and normalized alarms.</returns>
+        Task<int> HandleDueAsync(CancellationToken cancellationToken = default);
+
+
+        /// <summary>
         /// Gets the number of active alarms per severity level, unacknowledged and acknowledged separately.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>

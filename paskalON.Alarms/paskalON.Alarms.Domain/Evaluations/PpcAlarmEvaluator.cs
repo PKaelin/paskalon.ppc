@@ -17,10 +17,13 @@ namespace paskalON.Alarms.Domain.Evaluations
     /// 2. Configuration of the device before the configuration of all devices.
     /// All configurations of the winning level are evaluated, so that e.g. warning and error thresholds of the same value raise their own alarms.
     /// Per configuration and value:
-    /// - Abnormal without an active alarm raises a new alarm.
-    /// - Normal with an active alarm normalizes the alarm.
-    /// - Otherwise nothing happens.
-    /// Active alarms of a value whose configuration no longer wins (overridden or disabled) are normalized.
+    /// - Abnormal without an active alarm raises a new alarm or after TimeBeforeRaisingAlarmMilliseconds.
+    /// - Normal with an active alarm normalizes the alarm or after TimeBeforeNormalizingAlarmMilliseconds.
+    /// - Otherwise a pending raise or normalization is cancelled: the value is normal again before the delayed raise
+    ///   or abnormal again before the delayed normalization (no action is sent).
+    /// A delayed raise or normalization waits in <see cref="PpcAlarmPendingTransitions"/> until <see cref="EvaluateDue"/>
+    /// applies it with the time the value changed.
+    /// Active alarms of a value whose configuration no longer wins (overridden or disabled) are normalized without delay.
     /// </remarks>
     public class PpcAlarmEvaluator : IPpcAlarmEvaluator
     {
@@ -44,29 +47,26 @@ namespace paskalON.Alarms.Domain.Evaluations
 
         /// <inheritdoc/>
         public PpcAlarmEvaluation Evaluate(PpcAlarmKey key, IEnumerable<PpcAlarmKeyValue> changedValues,
-            IEnumerable<PpcAlarmConfig> configs, IEnumerable<PpcAlarm> activeAlarms)
+            IEnumerable<PpcAlarmConfig> configs, IEnumerable<PpcAlarm> activeAlarms, PpcAlarmPendingTransitions pendingTransitions)
         {
             ArgumentNullException.ThrowIfNull(changedValues);
             ArgumentNullException.ThrowIfNull(configs);
             ArgumentNullException.ThrowIfNull(activeAlarms);
+            ArgumentNullException.ThrowIfNull(pendingTransitions);
 
-            List<PpcAlarmConfig> keyConfigs = configs
-                .Where(config => config.IsEnabled && config.PpcAlarmType == key.PpcAlarmType)
-                .Where(config => config.DeviceId == null || config.DeviceId == key.DeviceId)
-                .ToList();
-            List<PpcAlarm> keyAlarms = activeAlarms
-                .Where(alarm => alarm.IsActive && alarm.DeviceId == key.DeviceId && alarm.PpcAlarmConfig.PpcAlarmType == key.PpcAlarmType)
-                .ToList();
+            List<PpcAlarmConfig> keyConfigs = GetKeyConfigs(key, configs);
+            List<PpcAlarm> keyAlarms = GetKeyAlarms(key, activeAlarms);
             PpcAlarmEvaluation evaluation = new PpcAlarmEvaluation();
 
             foreach (PpcAlarmKeyValue value in changedValues)
             {
                 List<PpcAlarmConfig> winningConfigs = SelectMostSpecificConfigs(keyConfigs, value.Name);
                 List<PpcAlarm> valueAlarms = keyAlarms.Where(alarm => alarm.PropertyName == value.Name).ToList();
-                // Normalize the alarms of configurations that no longer apply to the value (overridden or disabled)
+                // Normalize the alarms of configurations that no longer apply to the value (overridden or disabled), without delay
                 List<PpcAlarm> orphanedAlarms = valueAlarms
                     .Where(alarm => winningConfigs.Any(config => config.Id == alarm.PpcAlarmConfigId) is false)
                     .ToList();
+                pendingTransitions.CancelOthers(key, value.Name, winningConfigs.Select(config => config.Id).ToList());
 
                 foreach (PpcAlarm alarm in orphanedAlarms)
                 {
@@ -81,17 +81,138 @@ namespace paskalON.Alarms.Domain.Evaluations
 
                     if (isAbnormal && activeAlarm == null)
                     {
-                        evaluation.Raised.Add(CreateAlarm(key, value, config));
+                        RaiseOrStartDelay(key, value, config, pendingTransitions, evaluation);
                     }
                     else if (isAbnormal is false && activeAlarm != null)
                     {
-                        activeAlarm.Normalize(SystemUser, value.ValueChangedOn);
-                        evaluation.Normalized.Add(activeAlarm);
+                        NormalizeOrStartDelay(key, value, config, activeAlarm, pendingTransitions, evaluation);
+                    }
+                    else
+                    {
+                        // Abnormal again before a delayed normalization, or normal again before a delayed raise
+                        pendingTransitions.Cancel(key, config.Id, value.Name);
                     }
                 }
             }
 
             return evaluation;
+        }
+
+
+        /// <inheritdoc/>
+        public PpcAlarmEvaluation EvaluateDue(PpcAlarmKey key, DateTimeOffset now, IEnumerable<PpcAlarmConfig> configs,
+            IEnumerable<PpcAlarm> activeAlarms, PpcAlarmPendingTransitions pendingTransitions)
+        {
+            ArgumentNullException.ThrowIfNull(configs);
+            ArgumentNullException.ThrowIfNull(activeAlarms);
+            ArgumentNullException.ThrowIfNull(pendingTransitions);
+
+            List<PpcAlarmConfig> keyConfigs = GetKeyConfigs(key, configs);
+            List<PpcAlarm> keyAlarms = GetKeyAlarms(key, activeAlarms);
+            PpcAlarmEvaluation evaluation = new PpcAlarmEvaluation();
+
+            foreach (PpcAlarmPendingTransition transition in pendingTransitions.TakeDue(key, now))
+            {
+                // The configuration might have been disabled or removed by a configuration reload meanwhile
+                PpcAlarmConfig? config = keyConfigs.FirstOrDefault(keyConfig => keyConfig.Id == transition.PpcAlarmConfigId);
+                PpcAlarm? activeAlarm = keyAlarms.FirstOrDefault(alarm =>
+                    alarm.PpcAlarmConfigId == transition.PpcAlarmConfigId && alarm.PropertyName == transition.PropertyName);
+
+                if (config == null)
+                {
+                    continue;
+                }
+
+                if (transition.Transition == PpcAlarmTransition.Raise && activeAlarm == null)
+                {
+                    evaluation.Raised.Add(CreateAlarm(key, transition.Value, config));
+                }
+                else if (transition.Transition == PpcAlarmTransition.Normalize && activeAlarm != null)
+                {
+                    activeAlarm.Normalize(SystemUser, transition.Value.ValueChangedOn);
+                    evaluation.Normalized.Add(activeAlarm);
+                }
+            }
+
+            return evaluation;
+        }
+
+
+        /// <summary>
+        /// Raises the alarm, or starts the delay of the raise when the configuration has a delay.
+        /// </summary>
+        private static void RaiseOrStartDelay(PpcAlarmKey key, PpcAlarmKeyValue value, PpcAlarmConfig config,
+            PpcAlarmPendingTransitions pendingTransitions, PpcAlarmEvaluation evaluation)
+        {
+            if (config.TimeBeforeRaisingAlarmMilliseconds == 0)
+            {
+                // Raise the alarm immediately
+                evaluation.Raised.Add(CreateAlarm(key, value, config));
+
+                return;
+            }
+
+            // Start the delay of the raise, it will be raised when the delay elapses
+            pendingTransitions.Start(CreateTransition(key, value, config, PpcAlarmTransition.Raise, config.TimeBeforeRaisingAlarmMilliseconds));
+        }
+
+
+        /// <summary>
+        /// Normalizes the active alarm, or starts the delay of the normalization when the configuration has a delay.
+        /// </summary>
+        private static void NormalizeOrStartDelay(PpcAlarmKey key, PpcAlarmKeyValue value, PpcAlarmConfig config, PpcAlarm activeAlarm,
+            PpcAlarmPendingTransitions pendingTransitions, PpcAlarmEvaluation evaluation)
+        {
+            if (config.TimeBeforeNormalizingAlarmMilliseconds == 0)
+            {
+                activeAlarm.Normalize(SystemUser, value.ValueChangedOn);
+                evaluation.Normalized.Add(activeAlarm);
+
+                return;
+            }
+
+            pendingTransitions.Start(CreateTransition(key, value, config, PpcAlarmTransition.Normalize, config.TimeBeforeNormalizingAlarmMilliseconds));
+        }
+
+
+        /// <summary>
+        /// Creates the pending transition that is due when the delay after the value change elapsed.
+        /// </summary>
+        private static PpcAlarmPendingTransition CreateTransition(PpcAlarmKey key, PpcAlarmKeyValue value, PpcAlarmConfig config,
+            PpcAlarmTransition transition, long delayMilliseconds)
+        {
+            return new PpcAlarmPendingTransition
+            {
+                Key = key,
+                PpcAlarmConfigId = config.Id,
+                PropertyName = value.Name,
+                Transition = transition,
+                Value = value,
+                DueOn = value.ValueChangedOn.AddMilliseconds(delayMilliseconds)
+            };
+        }
+
+
+        /// <summary>
+        /// Gets the enabled configurations of the publisher's alarm type and device (or all devices).
+        /// </summary>
+        private static List<PpcAlarmConfig> GetKeyConfigs(PpcAlarmKey key, IEnumerable<PpcAlarmConfig> configs)
+        {
+            return configs
+                .Where(config => config.IsEnabled && config.PpcAlarmType == key.PpcAlarmType)
+                .Where(config => config.DeviceId == null || config.DeviceId == key.DeviceId)
+                .ToList();
+        }
+
+
+        /// <summary>
+        /// Gets the active alarms of the publisher.
+        /// </summary>
+        private static List<PpcAlarm> GetKeyAlarms(PpcAlarmKey key, IEnumerable<PpcAlarm> activeAlarms)
+        {
+            return activeAlarms
+                .Where(alarm => alarm.IsActive && alarm.DeviceId == key.DeviceId && alarm.PpcAlarmConfig.PpcAlarmType == key.PpcAlarmType)
+                .ToList();
         }
 
 

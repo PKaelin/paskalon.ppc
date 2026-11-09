@@ -75,12 +75,33 @@ namespace paskalON.Alarms.Domain.Configs
 
 
         /// <summary>
-        /// Delays the raise of the alarm by a certain time in milliseconds.
+        /// Time in milliseconds the value must stay abnormal before the alarm is raised.
         /// </summary>
         /// <remarks>
-        /// Value of 0 raises the alarm immediately.
+        /// - 0 raises the alarm immediately.
+        /// - When the value is normal again before the time elapsed, the alarm is not raised and no action is sent
+        ///   (e.g. a communication error of 200 milliseconds).
+        /// - The raised alarm is created at the time the value became abnormal, not when the time elapsed.
+        /// - The pending raise is only kept in memory, after a restart the time starts again with the first received value.
         /// </remarks>
         public long TimeBeforeRaisingAlarmMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }
+        }
+
+
+        /// <summary>
+        /// Time in milliseconds the value must stay normal before the active alarm is normalized.
+        /// </summary>
+        /// <remarks>
+        /// - 0 normalizes the alarm immediately.
+        /// - When the value is abnormal again before the time elapsed, the alarm stays active and no action is sent,
+        ///   so that short flickers back to normal do not normalize and raise the alarm again.
+        /// - The alarm is normalized at the time the value became normal, not when the time elapsed.
+        /// - The pending normalization is only kept in memory, after a restart the time starts again with the first received value.
+        /// </remarks>
+        public long TimeBeforeNormalizingAlarmMilliseconds
         {
             get;
             set { ArgumentOutOfRangeException.ThrowIfLessThan(value, 0); field = value; }

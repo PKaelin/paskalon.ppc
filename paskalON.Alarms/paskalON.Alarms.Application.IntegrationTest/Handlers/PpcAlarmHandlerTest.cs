@@ -86,6 +86,18 @@ namespace paskalON.Alarms.Application.IntegrationTest.Handlers
 
 
         /// <summary>
+        /// Fake time of the handlers (orphan normalization, delayed alarms and summaries), after the received data.
+        /// </summary>
+        private readonly FakeTimeProvider _timeProvider = new FakeTimeProvider(NormalizedOn);
+
+
+        /// <summary>
+        /// Delayed raises and normalizations shared by the handlers like the singleton in the service.
+        /// </summary>
+        private readonly PpcAlarmPendingTransitions _pendingTransitions = new PpcAlarmPendingTransitions();
+
+
+        /// <summary>
         /// Seeds the PCS fault configuration with the raise action ReducePower and the normalize action ResetPower.
         /// </summary>
         protected override async Task SeedAsync(AlarmContext db)
@@ -194,6 +206,57 @@ namespace paskalON.Alarms.Application.IntegrationTest.Handlers
 
 
         /// <summary>
+        /// With a raise delay nothing is persisted when the fault state turns true. Once the delay elapsed the due handling
+        /// persists the alarm with the time the fault state turned true and its raise action.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleDueAsyncAfterRaiseDelayPersistsAlarmAtAbnormalTimeTest()
+        {
+            await SetRaiseDelayAsync(3000);
+            await LoadCachesAsync();
+            PpcAlarmEvaluation delayedEvaluation = await HandleAsync(CreatePcsDetail(overTemperature: true, gridLoss: false), ReceivedOn);
+            await using AlarmContext beforeDueContext = CreateDbContext<AlarmContext>();
+            int alarmCountBeforeDue = await beforeDueContext.PpcAlarms.CountAsync();
+
+            int changedCount = await HandleDueAsync();
+
+            Assert.IsFalse(delayedEvaluation.HasChanges);
+            Assert.AreEqual(0, alarmCountBeforeDue);
+            Assert.AreEqual(1, changedCount);
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarm alarm = await context.PpcAlarms.SingleAsync();
+            Assert.AreEqual("FaultStates.OverTemperature", alarm.PropertyName);
+            Assert.AreEqual(ReceivedOn, alarm.CreatedOn);
+            Assert.AreEqual(AlarmSequenceState.Alarm, alarm.AlarmSequenceState);
+            CollectionAssert.AreEqual(new List<string> { "ReducePower" }, await GetActionNamesAsync(context));
+        }
+
+
+        /// <summary>
+        /// Sets the raise delay of the PCS fault configuration in the database.
+        /// </summary>
+        private async Task SetRaiseDelayAsync(long raiseDelayMilliseconds)
+        {
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmConfig config = await context.PpcAlarmConfigs.SingleAsync();
+            config.TimeBeforeRaisingAlarmMilliseconds = raiseDelayMilliseconds;
+            await context.SaveChangesAsync();
+        }
+
+
+        /// <summary>
+        /// Raises and normalizes the due delayed alarms in a new context (scope), like the delay service.
+        /// </summary>
+        private async Task<int> HandleDueAsync()
+        {
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmHandler handler = CreateHandler(context, _configCache, _activeCache, _valueStore);
+
+            return await handler.HandleDueAsync();
+        }
+
+
+        /// <summary>
         /// Disables the PCS fault configuration in the database, like an operator in Luna.
         /// </summary>
         private async Task DisableConfigAsync()
@@ -258,7 +321,7 @@ namespace paskalON.Alarms.Application.IntegrationTest.Handlers
             return new PpcAlarmHandler(NullLogger<PpcAlarmHandler>.Instance, valueStore, new PpcAlarmEvaluator(),
                 configCache, activeCache, new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context),
                 new AlarmActionOutboxRepository(NullLogger<AlarmActionOutboxRepository>.Instance, context), _outboxSignal,
-                _writeLock, new FakeTimeProvider(NormalizedOn));
+                _writeLock, _timeProvider, _pendingTransitions);
         }
 
 
