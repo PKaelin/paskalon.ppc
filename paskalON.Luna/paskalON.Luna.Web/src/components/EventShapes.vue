@@ -71,6 +71,7 @@ function countText(count: number): string {
 
 <template>
     <div class="event-shapes">
+        <span class="header-group-label">Events:</span>
         <div v-for="state in states"
              :key="state.kind"
              class="event-shape"

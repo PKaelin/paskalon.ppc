@@ -44,6 +44,7 @@ const leds = computed(() => dependencies.map((dependency) => {
 
 <template>
     <div class="dependency-leds">
+        <span class="header-group-label">Services:</span>
         <div v-for="led in leds"
              :key="led.name"
              class="dependency-led"
