@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using paskalON.Alarms.Domain.Configs;
 using paskalON.Alarms.Domain.Configs.Actions;
+using paskalON.Alarms.Domain.Configs.Localizations;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Ppcs;
 using paskalON.Alarms.Infrastructure.Storage.Outboxes;
@@ -47,6 +48,10 @@ namespace paskalON.Alarms.Infrastructure.Storage
 
         /// <inheritdoc/>
         public DbSet<AlarmActionOutboxMessage> AlarmActionOutboxMessages { get; set; }
+
+
+        /// <inheritdoc/>
+        public DbSet<LocalizedText> LocalizedTexts { get; set; }
 
 
         /// <summary>

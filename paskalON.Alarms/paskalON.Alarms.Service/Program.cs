@@ -10,6 +10,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using paskalON.Alarms.Application.Caches;
 using paskalON.Alarms.Application.Handlers;
+using paskalON.Alarms.Application.Localizations;
 using paskalON.Alarms.Application.Outboxes;
 using paskalON.Alarms.Application.Queries;
 using paskalON.Alarms.Application.Stores;
@@ -97,6 +98,7 @@ try
     builder.Services.AddScoped<IPpcAlarmConfigRepository, PpcAlarmConfigRepository>();
     builder.Services.AddScoped<IPpcAlarmRepository, PpcAlarmRepository>();
     builder.Services.AddScoped<IAlarmActionOutboxRepository, AlarmActionOutboxRepository>();
+    builder.Services.AddScoped<ILocalizedTextRepository, LocalizedTextRepository>();
 
     // Add alarm processing
     builder.Services.AddSingleton(TimeProvider.System);
@@ -117,6 +119,8 @@ try
     builder.Services.AddScoped<IPpcAlarmHandler, PpcAlarmHandler>();
     // Reads the saved alarms for the alarm list, without the write lock of the alarm writers
     builder.Services.AddScoped<IPpcAlarmQueryHandler, PpcAlarmQueryHandler>();
+    // Reads the texts of the localization keys of the alarm configurations for the user interface
+    builder.Services.AddScoped<ILocalizedTextQueryHandler, LocalizedTextQueryHandler>();
 
     // Add subscriptions of the published data: the subscriber queues the received data, the handler service evaluates it in order.
     // Do not abort when Redis is not reachable at startup, the multiplexer keeps retrying to connect in the background.

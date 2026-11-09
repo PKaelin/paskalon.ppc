@@ -45,7 +45,7 @@ export type AlarmSequenceState = (typeof AlarmSequenceState)[keyof typeof AlarmS
  * Configuration of a PPC alarm (paskalON.Alarms.Dto PpcAlarmConfigDto).
  *
  * Name, description, possible causes, response and consequences are string identifiers
- * (e.g. {{PCS.OverTemp.Name}}) that are mapped to a language dependent text, see utils/alarmTexts.ts.
+ * (e.g. {{PCS.OverTemp.Name}}) or plain texts, they are shown with resolveAlarmText of utils/alarmTexts.ts.
  */
 export interface PpcAlarmConfigDto {
     alarmId: string;
@@ -84,4 +84,15 @@ export interface PpcAlarmFilter {
     alarmSequenceState: AlarmSequenceState | null;
     /** Part of the device name (case insensitive), empty for all alarms. */
     deviceName: string;
+}
+
+/**
+ * Texts of the localization keys of the alarm configurations in one language (paskalON.Alarms.Dto LocalizedTextsDto).
+ * A key without a text in the requested language has the English text.
+ */
+export interface LocalizedTextsDto {
+    /** The requested language, e.g. en. */
+    language: string;
+    /** Texts by their localization key without the braces, e.g. PCS.CommunicationError.Name for {{PCS.CommunicationError.Name}}. */
+    texts: Record<string, string>;
 }

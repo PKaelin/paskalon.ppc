@@ -1,5 +1,5 @@
 import { absoluteUrl, config } from './config';
-import type { PpcAlarmDto, PpcAlarmFilter } from '../types/alarm';
+import type { LocalizedTextsDto, PpcAlarmDto, PpcAlarmFilter } from '../types/alarm';
 
 /** Absolute URL of the alarm hub (resolves a relative path against the current origin). */
 export function alarmHubUrl(): string {
@@ -61,4 +61,33 @@ export async function getPpcAlarms(filter: PpcAlarmFilter, signal?: AbortSignal)
     }
 
     return (await response.json()) as PpcAlarmDto[];
+}
+
+/**
+ * GET /v1/alarm/getlocalizedtexts - the texts of the localization keys of the alarm configurations in the language.
+ * Throws if the service cannot be reached or answers with an error.
+ */
+export async function getAlarmTexts(language: string, signal?: AbortSignal): Promise<LocalizedTextsDto> {
+    const query = new URLSearchParams({ language });
+    let response: Response;
+
+    try {
+        response = await fetch(`${config().apiBaseUrl}/v1/alarm/getlocalizedtexts?${query.toString()}`, {
+            signal,
+            headers: { Accept: 'application/json' }
+        });
+    } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+            throw error;
+        }
+
+        const reason = error instanceof Error ? error.message : String(error);
+        throw new Error(`The Luna service could not be reached: ${reason}`);
+    }
+
+    if (response.ok === false) {
+        throw new Error(await readProblemDetail(response) ?? `The alarm texts could not be loaded (HTTP ${response.status}).`);
+    }
+
+    return (await response.json()) as LocalizedTextsDto;
 }

@@ -5,6 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using paskalON.Alarms.Domain.Configs;
 using paskalON.Alarms.Domain.Configs.Actions;
+using paskalON.Alarms.Domain.Configs.Localizations;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Ppcs;
 using paskalON.Alarms.Infrastructure.Storage.Outboxes;
@@ -63,6 +64,12 @@ namespace paskalON.Alarms.Infrastructure.Storage
         /// Alarm action messages of the transactional outbox.
         /// </summary>
         DbSet<AlarmActionOutboxMessage> AlarmActionOutboxMessages { get; set; }
+
+
+        /// <summary>
+        /// Texts of the localization keys of the alarm configurations.
+        /// </summary>
+        DbSet<LocalizedText> LocalizedTexts { get; set; }
 
 
         /// <summary>

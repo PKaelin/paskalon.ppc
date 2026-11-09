@@ -49,6 +49,22 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LocalizedText",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"DomainBaseSequence\"')"),
+                    ChangedBy = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ChangedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Language = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    Text = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LocalizedText", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PpcAlarmConfig",
                 columns: table => new
                 {
@@ -237,6 +253,12 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_LocalizedText_Name_Language",
+                table: "LocalizedText",
+                columns: new[] { "Name", "Language" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PpcAlarm_Active",
                 table: "PpcAlarm",
                 columns: new[] { "DeviceId", "PropertyName", "PpcAlarmConfigId" },
@@ -274,6 +296,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 
             migrationBuilder.DropTable(
                 name: "Configuration");
+
+            migrationBuilder.DropTable(
+                name: "LocalizedText");
 
             migrationBuilder.DropTable(
                 name: "SystemConfig");

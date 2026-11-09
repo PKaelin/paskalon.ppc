@@ -4,6 +4,7 @@
 //----------------------------------------‐------------------------------------
 using System.Globalization;
 using System.Net.Http.Json;
+using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
 
@@ -24,6 +25,12 @@ namespace paskalON.Alarms.Client
         /// Path of the PPC alarms, relative to the base address of the API.
         /// </summary>
         private const string GetPpcAlarmsPath = "alarms/ppcalarms";
+
+
+        /// <summary>
+        /// Path of the localized texts, relative to the base address of the API.
+        /// </summary>
+        private const string GetLocalizedTextsPath = "localizations/texts";
 
 
         /// <summary>
@@ -72,6 +79,24 @@ namespace paskalON.Alarms.Client
             List<PpcAlarmDto>? alarms = await response.Content.ReadFromJsonAsync<List<PpcAlarmDto>>(cancellationToken);
 
             return alarms ?? new List<PpcAlarmDto>();
+        }
+
+
+        /// <inheritdoc/>
+        public async Task<LocalizedTextsDto> GetLocalizedTexts(string language, CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(language);
+
+            using HttpResponseMessage response = await _client.GetAsync($"{GetLocalizedTextsPath}?language={Uri.EscapeDataString(language.Trim())}", cancellationToken);
+            response.EnsureSuccessStatusCode();
+            LocalizedTextsDto? texts = await response.Content.ReadFromJsonAsync<LocalizedTextsDto>(cancellationToken);
+
+            if (texts == null)
+            {
+                throw new InvalidOperationException("Alarm server returned empty localized texts.");
+            }
+
+            return texts;
         }
 
 

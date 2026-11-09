@@ -8,6 +8,7 @@ using Moq;
 using paskalON.Alarms.Client;
 using paskalON.Alarms.Dto;
 using paskalON.Alarms.Dto.Actions;
+using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
 
@@ -251,6 +252,64 @@ namespace paskalON.Luna.Application.UnitTest
             Func<Task> getAlarms = () => manager.GetPpcAlarmsAsync(TimeSpan.FromHours(8), null, null, null, null);
 
             await Assert.ThrowsExactlyAsync<HttpRequestException>(getAlarms);
+        }
+
+
+        /// <summary>
+        /// The texts of the trimmed language are read from the alarm service and returned.
+        /// </summary>
+        [TestMethod]
+        public async Task GetLocalizedTextsAsyncReturnsTextsOfAlarmServiceTest()
+        {
+            LocalizedTextsDto texts = new LocalizedTextsDto
+            {
+                Language = "en",
+                Texts = new Dictionary<string, string>
+                {
+                    ["PCS.CommunicationError.Name"] = "PCS communication error",
+                    ["PCS.CommunicationError.Desc"] = "The PPC cannot communicate with the power conversion system."
+                }
+            };
+            _alarmServer.Setup(server => server.GetLocalizedTexts("en", It.IsAny<CancellationToken>())).ReturnsAsync(texts);
+            LunaAlarmManager manager = CreateManager();
+
+            LocalizedTextsDto result = await manager.GetLocalizedTextsAsync(" en ");
+
+            Assert.AreSame(texts, result);
+        }
+
+
+        /// <summary>
+        /// An empty language is rejected without a request to the alarm service.
+        /// </summary>
+        /// <param name="language">Empty language.</param>
+        [TestMethod]
+        [DataRow("")]
+        [DataRow(" ")]
+        public async Task GetLocalizedTextsAsyncEmptyLanguageThrowsTest(string language)
+        {
+            LunaAlarmManager manager = CreateManager();
+
+            Func<Task> getTexts = () => manager.GetLocalizedTextsAsync(language);
+
+            await Assert.ThrowsExactlyAsync<ArgumentException>(getTexts);
+            _alarmServer.Verify(server => server.GetLocalizedTexts(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+
+        /// <summary>
+        /// When the alarm service is not reachable the exception is passed on, so that the controller answers with the error.
+        /// </summary>
+        [TestMethod]
+        public async Task GetLocalizedTextsAsyncAlarmServiceNotReachableThrowsTest()
+        {
+            _alarmServer.Setup(server => server.GetLocalizedTexts(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new HttpRequestException("Alarm service not reachable."));
+            LunaAlarmManager manager = CreateManager();
+
+            Func<Task> getTexts = () => manager.GetLocalizedTextsAsync("en");
+
+            await Assert.ThrowsExactlyAsync<HttpRequestException>(getTexts);
         }
 
 

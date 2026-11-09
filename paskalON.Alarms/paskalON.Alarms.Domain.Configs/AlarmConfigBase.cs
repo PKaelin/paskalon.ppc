@@ -12,7 +12,7 @@ namespace paskalON.Alarms.Domain.Configs
     /// </summary>
     /// <remarks>
     /// Name, Description, PossibleCauses, Response and Consequences are string identifiers (e.g. {{PCS.OverTemp.Name}}),
-    /// that the user interface maps to a language dependent text.
+    /// that the user interface maps to a language dependent text (see <see cref="Localizations.LocalizedText"/>).
     /// Not derived from NameBase, because the name is not unique: a device or dictionary entry configuration that overrides
     /// another configuration can use the same name.
     /// </remarks>
@@ -116,5 +116,22 @@ namespace paskalON.Alarms.Domain.Configs
         /// The actions are shared, the same action can be configured for many alarms.
         /// </remarks>
         public List<AlarmActionConfig> AlarmActions { get; set; } = new List<AlarmActionConfig>();
+
+
+        /// <summary>
+        /// Gets the property names and values that can be localization keys (e.g. {{PCS.OverTemp.Name}}).
+        /// </summary>
+        /// <returns>Name, Description, PossibleCauses, Response and Consequences with their values.</returns>
+        public IReadOnlyList<KeyValuePair<string, string?>> GetLocalizableValues()
+        {
+            return new KeyValuePair<string, string?>[]
+            {
+                new KeyValuePair<string, string?>(nameof(Name), Name),
+                new KeyValuePair<string, string?>(nameof(Description), Description),
+                new KeyValuePair<string, string?>(nameof(PossibleCauses), PossibleCauses),
+                new KeyValuePair<string, string?>(nameof(Response), Response),
+                new KeyValuePair<string, string?>(nameof(Consequences), Consequences)
+            };
+        }
     }
 }

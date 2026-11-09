@@ -5,6 +5,7 @@
 using System.Net;
 using System.Text;
 using paskalON.Alarms.Dto;
+using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
 
@@ -192,6 +193,57 @@ namespace paskalON.Alarms.Client.UnitTest
 
             HttpRequestException exception = await Assert.ThrowsExactlyAsync<HttpRequestException>(getAlarms);
             Assert.AreEqual(HttpStatusCode.ServiceUnavailable, exception.StatusCode);
+        }
+
+
+        /// <summary>
+        /// The texts are requested in the escaped language and deserialized by their localization key.
+        /// </summary>
+        [TestMethod]
+        public async Task GetLocalizedTextsReturnsTextsOfLanguageTest()
+        {
+            _handler.ResponseContent = "{\"language\":\"de-CH\",\"texts\":{\"PCS.CommunicationError.Name\":\"PCS Kommunikationsfehler\"," +
+                "\"PCS.CommunicationError.Desc\":\"The PPC cannot communicate with the power conversion system.\"}}";
+
+            LocalizedTextsDto texts = await _server.GetLocalizedTexts(" de-CH ");
+
+            Assert.AreEqual(HttpMethod.Get, _handler.Request!.Method);
+            Assert.AreEqual("/api/v1/localizations/texts", _handler.Request.RequestUri!.AbsolutePath);
+            Assert.AreEqual("?language=de-CH", _handler.Request.RequestUri.Query);
+            Assert.AreEqual("de-CH", texts.Language);
+            Assert.HasCount(2, texts.Texts);
+            Assert.AreEqual("PCS Kommunikationsfehler", texts.Texts["PCS.CommunicationError.Name"]);
+        }
+
+
+        /// <summary>
+        /// A rejected language or an unavailable alarm service throws with the status code.
+        /// </summary>
+        /// <param name="statusCode">Status code of the alarm service.</param>
+        [TestMethod]
+        [DataRow(HttpStatusCode.BadRequest)]
+        [DataRow(HttpStatusCode.ServiceUnavailable)]
+        public async Task GetLocalizedTextsErrorThrowsTest(HttpStatusCode statusCode)
+        {
+            _handler.StatusCode = statusCode;
+
+            Func<Task> getTexts = () => _server.GetLocalizedTexts("en");
+
+            HttpRequestException exception = await Assert.ThrowsExactlyAsync<HttpRequestException>(getTexts);
+            Assert.AreEqual(statusCode, exception.StatusCode);
+        }
+
+
+        /// <summary>
+        /// An empty language is rejected without a request.
+        /// </summary>
+        [TestMethod]
+        public async Task GetLocalizedTextsEmptyLanguageThrowsTest()
+        {
+            Func<Task> getTexts = () => _server.GetLocalizedTexts(" ");
+
+            await Assert.ThrowsExactlyAsync<ArgumentException>(getTexts);
+            Assert.IsNull(_handler.Request);
         }
 
 

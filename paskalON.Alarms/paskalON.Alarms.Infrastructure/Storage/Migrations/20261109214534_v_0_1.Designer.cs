@@ -12,7 +12,7 @@ using paskalON.Alarms.Infrastructure.Storage;
 namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(AlarmContext))]
-    [Migration("20261109164452_v_0_1")]
+    [Migration("20261109214534_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -182,6 +182,31 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                         .HasColumnType("bigint");
 
                     b.ToTable((string)null);
+                });
+
+            modelBuilder.Entity("paskalON.Alarms.Domain.Configs.Localizations.LocalizedText", b =>
+                {
+                    b.HasBaseType("paskalON.Domains.DomainBase");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.HasIndex("Name", "Language")
+                        .IsUnique();
+
+                    b.ToTable("LocalizedText");
                 });
 
             modelBuilder.Entity("paskalON.Alarms.Domain.Configs.SystemConfig", b =>

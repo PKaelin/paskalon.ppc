@@ -3,13 +3,14 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Alarms.Dto;
+using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
 
 namespace paskalON.Luna.Application
 {
     /// <summary>
-    /// Keeps the alarm summary of the alarm service for the UI and reads the alarm list of the alarm service.
+    /// Keeps the alarm summary of the alarm service for the UI and reads the alarm list and the alarm texts of the alarm service.
     /// </summary>
     public interface ILunaAlarmManager
     {
@@ -33,6 +34,17 @@ namespace paskalON.Luna.Application
         /// <exception cref="HttpRequestException">Thrown when the alarm service is not reachable or answers with an error (e.g. 503).</exception>
         Task<List<PpcAlarmDto>> GetPpcAlarmsAsync(TimeSpan triggeredWithin, AlarmSeverityDto? severityLevel, AlarmProcessConditionDto? processCondition,
             AlarmSequenceStateDto? sequenceState, string? deviceName, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Gets the texts of the localization keys of the alarm configurations (e.g. {{PCS.CommunicationError.Name}}) from the alarm service.
+        /// A key without a text in the language has the text of the default language (en).
+        /// </summary>
+        /// <param name="language">Language of the texts, e.g. en or de-CH.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The texts by their localization key without the braces.</returns>
+        /// <exception cref="HttpRequestException">Thrown when the alarm service is not reachable or answers with an error (e.g. 400 or 503).</exception>
+        Task<LocalizedTextsDto> GetLocalizedTextsAsync(string language, CancellationToken cancellationToken = default);
 
 
         /// <summary>

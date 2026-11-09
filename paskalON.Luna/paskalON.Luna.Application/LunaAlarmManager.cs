@@ -7,6 +7,7 @@ using paskalON.Alarms.Client;
 using paskalON.Alarms.Client.Subscribers;
 using paskalON.Alarms.Dto;
 using paskalON.Alarms.Dto.Actions;
+using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
 
@@ -119,6 +120,18 @@ namespace paskalON.Luna.Application
             };
 
             return await _alarmServer.GetPpcAlarms(filter, cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The texts are not cached, the UI loads them once at its start and the alarm service owns them.
+        /// </remarks>
+        public async Task<LocalizedTextsDto> GetLocalizedTextsAsync(string language, CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(language);
+
+            return await _alarmServer.GetLocalizedTexts(language.Trim(), cancellationToken);
         }
 
 

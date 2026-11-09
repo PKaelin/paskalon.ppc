@@ -181,6 +181,31 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     b.ToTable((string)null);
                 });
 
+            modelBuilder.Entity("paskalON.Alarms.Domain.Configs.Localizations.LocalizedText", b =>
+                {
+                    b.HasBaseType("paskalON.Domains.DomainBase");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.HasIndex("Name", "Language")
+                        .IsUnique();
+
+                    b.ToTable("LocalizedText");
+                });
+
             modelBuilder.Entity("paskalON.Alarms.Domain.Configs.SystemConfig", b =>
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");

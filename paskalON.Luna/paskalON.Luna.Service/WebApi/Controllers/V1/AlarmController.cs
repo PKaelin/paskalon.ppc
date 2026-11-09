@@ -5,13 +5,14 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using paskalON.Alarms.Dto;
+using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Luna.Application;
 
 namespace paskalON.Luna.Service.WebApi.Controllers.V1
 {
     /// <summary>
-    /// Controller of the alarm list, forwarded to the alarm service API.
+    /// Controller of the alarm list and the alarm texts, forwarded to the alarm service API.
     /// </summary>
     /// <remarks>
     /// A request rejected by the alarm service is answered with its status code, an unreachable alarm service with 503.
@@ -74,31 +75,68 @@ namespace paskalON.Luna.Service.WebApi.Controllers.V1
             [FromQuery] AlarmSeverityDto? severityLevel, [FromQuery] AlarmProcessConditionDto? alarmProcessCondition,
             [FromQuery] AlarmSequenceStateDto? alarmSequenceState, [FromQuery] string? deviceName, CancellationToken cancellationToken)
         {
+            return await ForwardAsync("alarm list", "Alarms not available", "The alarm service could not provide the alarms.",
+                () => _alarmManager.GetPpcAlarmsAsync(TimeSpan.FromHours(triggeredWithinHours), severityLevel, alarmProcessCondition,
+                    alarmSequenceState, deviceName, cancellationToken), cancellationToken);
+        }
+
+
+        /// <summary>
+        /// Gets the texts of the localization keys of the alarm configurations (e.g. {{PCS.CommunicationError.Name}}) in the language of the user.
+        /// A key without a text in the language has the English text.
+        /// </summary>
+        /// <param name="language">Language of the texts, e.g. en or de-CH.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>
+        /// 200 with the texts by their localization key without the braces, 400 without a language,
+        /// the status code of the alarm service when it rejected the request (e.g. 400 for an invalid language), 503 when it is not reachable.
+        /// </returns>
+        [HttpGet]
+        [ProducesResponseType<LocalizedTextsDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+        public async Task<ActionResult<LocalizedTextsDto>> GetLocalizedTexts([FromQuery, Required] string language, CancellationToken cancellationToken)
+        {
+            return await ForwardAsync("alarm text", "Alarm texts not available", "The alarm service could not provide the alarm texts.",
+                () => _alarmManager.GetLocalizedTextsAsync(language, cancellationToken), cancellationToken);
+        }
+
+
+        /// <summary>
+        /// Forwards a request to the alarm service and translates its failures into problem responses.
+        /// </summary>
+        /// <typeparam name="T">Type of the response of the alarm service.</typeparam>
+        /// <param name="requestName">Name of the request for the log, e.g. alarm list.</param>
+        /// <param name="title">Title of the problem responses.</param>
+        /// <param name="rejectedDetail">Detail of the problem response when the alarm service rejected the request.</param>
+        /// <param name="request">Request to the alarm service.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>200 with the response, the status code of the alarm service when it rejected the request, 503 when it is not reachable, 504 on timeout.</returns>
+        private async Task<ActionResult<T>> ForwardAsync<T>(string requestName, string title, string rejectedDetail, Func<Task<T>> request,
+            CancellationToken cancellationToken)
+        {
             try
             {
-                List<PpcAlarmDto> alarms = await _alarmManager.GetPpcAlarmsAsync(TimeSpan.FromHours(triggeredWithinHours), severityLevel,
-                    alarmProcessCondition, alarmSequenceState, deviceName, cancellationToken);
-
-                return Ok(alarms);
+                return Ok(await request());
             }
             catch (HttpRequestException ex) when (ex.StatusCode.HasValue)
             {
-                _logger.LogWarning(ex, "Alarm service rejected the alarm list request with status code {StatusCode}.", ex.StatusCode);
+                _logger.LogWarning(ex, "Alarm service rejected the {RequestName} request with status code {StatusCode}.", requestName, ex.StatusCode);
 
-                return Problem(detail: "The alarm service could not provide the alarms.", statusCode: (int)ex.StatusCode.Value, title: "Alarms not available");
+                return Problem(detail: rejectedDetail, statusCode: (int)ex.StatusCode.Value, title: title);
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogWarning(ex, "Alarm service is not reachable for the alarm list request.");
+                _logger.LogWarning(ex, "Alarm service is not reachable for the {RequestName} request.", requestName);
 
-                return Problem(detail: "The alarm service is not reachable.", statusCode: StatusCodes.Status503ServiceUnavailable, title: "Alarms not available");
+                return Problem(detail: "The alarm service is not reachable.", statusCode: StatusCodes.Status503ServiceUnavailable, title: title);
             }
             catch (TaskCanceledException ex) when (cancellationToken.IsCancellationRequested is false)
             {
                 // The timeout of the HTTP client elapsed, the request of the browser was not cancelled
-                _logger.LogWarning(ex, "Alarm service did not answer the alarm list request in time.");
+                _logger.LogWarning(ex, "Alarm service did not answer the {RequestName} request in time.", requestName);
 
-                return Problem(detail: "The alarm service did not answer in time.", statusCode: StatusCodes.Status504GatewayTimeout, title: "Alarms not available");
+                return Problem(detail: "The alarm service did not answer in time.", statusCode: StatusCodes.Status504GatewayTimeout, title: title);
             }
         }
     }
