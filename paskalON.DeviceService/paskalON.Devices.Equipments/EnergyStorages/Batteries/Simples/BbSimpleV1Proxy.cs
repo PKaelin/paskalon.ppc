@@ -21,6 +21,18 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
     public class BbSimpleV1Proxy : BatteryBankBase, IDisposable
     {
         /// <summary>
+        /// Mask of the 16 bits of a register, the bit flag registers are read as signed 16 bit values.
+        /// </summary>
+        private const int RegisterBitMask = 0xFFFF;
+
+
+        /// <summary>
+        /// Name of the state that is set when the device reports a bit that is not defined.
+        /// </summary>
+        private const string UnknownStateName = "Unknown";
+
+
+        /// <summary>
         /// Modbus client communication.
         /// </summary>
         private readonly IModbusClient _client;
@@ -180,7 +192,7 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                 (x, v) => x.SetVendorEvent(v), (int)BbSimpleV1Description.Register.CurrentVendorEvent, ModbusScale.NoScale, ModbusDataType.MbInt16));
             // State, Warnings, Faults, VendorEvents range
             Dataface.Register<BbSimpleV1Proxy, IModbusRegister>(r => r.RegisterRange((int)BbSimpleV1Description.Register.CurrentState,
-                (int)BbSimpleV1Description.Register.CurrentVendorEvent, ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass2));
+                (int)BbSimpleV1Description.Register.CurrentVendorEvent, ModbusRegistryType.HoldingRegister, _config.ModbusConfig.ModbusConnectionConfig.PollingFactorClass1));
         }
 
 
@@ -191,9 +203,12 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         /// <remarks>
         /// All possible state should be mapped to the device state.
         /// Do not add states in base class without consulting the lead.
+        /// The state register was read successfully, so the communication works again whatever the state is.
         /// </remarks>
         private void SetState(int state)
         {
+            CommunicationError = false;
+
             // Check whether we have defined all state
             if (Enum.IsDefined(typeof(BbSimpleV1Description.State), state) == false)
             {
@@ -229,77 +244,78 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
         /// <summary>
         /// Sets the warning states.
         /// </summary>
-        /// <param name="warning">The warning value.</param>
-        /// <remarks>
-        /// Keep it simple in simple proxy
-        /// </remarks>
+        /// <param name="warning">The warning register value, bit flags of <see cref="BbSimpleV1Description.WarningCode"/>.</param>
         private void SetWarning(int warning)
         {
-            if (Enum.IsDefined(typeof(BbSimpleV1Description.WarningCode), warning) == false)
-            {
-                _logger.LogError("{Name} Unknow warning code found: {Warning}", Name, warning);
-                WarningStates["Unknown"] = true;
-            }
-            else
-            {
-                BbSimpleV1Description.WarningCode code = (BbSimpleV1Description.WarningCode)warning;
-
-                if (code != BbSimpleV1Description.WarningCode.None)
-                {
-                    SetWarning(code.ToString(), true);
-                }
-            }
+            SetBitFlagStates<BbSimpleV1Description.WarningCode>(warning, WarningStates, SetWarning, nameof(BbSimpleV1Description.Register.CurrentWarning));
         }
 
 
         /// <summary>
         /// Sets the fault states.
         /// </summary>
-        /// <param name="fault">The fault value.</param>
-        /// <remarks>
-        /// Keep it simple in simple proxy
-        /// </remarks>
+        /// <param name="fault">The fault register value, bit flags of <see cref="BbSimpleV1Description.FaultCode"/>.</param>
         private void SetFault(int fault)
         {
-            if (Enum.IsDefined(typeof(BbSimpleV1Description.FaultCode), fault) == false)
-            {
-                _logger.LogError("{Name} Unknow fault code found: {Fault}", Name, fault);
-                FaultStates["Unknown"] = true;
-            }
-            else
-            {
-                BbSimpleV1Description.FaultCode code = (BbSimpleV1Description.FaultCode)fault;
-
-                if (code != BbSimpleV1Description.FaultCode.None)
-                {
-                    SetFault(code.ToString(), true);
-                }
-            }
+            SetBitFlagStates<BbSimpleV1Description.FaultCode>(fault, FaultStates, SetFault, nameof(BbSimpleV1Description.Register.CurrentFault));
         }
 
 
         /// <summary>
         /// Sets the vendor events.
         /// </summary>
-        /// <param name="vendorEvent">The vendor event value.</param>
-        /// <remarks>
-        /// Keep it simple in simple proxy
-        /// </remarks>
+        /// <param name="vendorEvent">The vendor event register value, bit flags of <see cref="BbSimpleV1Description.VendorEvents"/>.</param>
         private void SetVendorEvent(int vendorEvent)
         {
-            if (Enum.IsDefined(typeof(BbSimpleV1Description.VendorEvents), vendorEvent) == false)
-            {
-                _logger.LogError("{Name} Unknow vendor event found: {VendorEvent}", Name, vendorEvent);
-                VendorEvents["Unknown"] = true;
-            }
-            else
-            {
-                BbSimpleV1Description.VendorEvents code = (BbSimpleV1Description.VendorEvents)vendorEvent;
+            SetBitFlagStates<BbSimpleV1Description.VendorEvents>(vendorEvent, VendorEvents, SetVendorEvent, nameof(BbSimpleV1Description.Register.CurrentVendorEvent));
+        }
 
-                if (code != BbSimpleV1Description.VendorEvents.None)
+
+        /// <summary>
+        /// Sets the states of a bit flag register.
+        /// </summary>
+        /// <typeparam name="TCode">Bit flag enumeration of the register.</typeparam>
+        /// <param name="value">The register value.</param>
+        /// <param name="states">The current states of the register.</param>
+        /// <param name="setState">Sets one state by its name.</param>
+        /// <param name="registerName">Name of the register for logging.</param>
+        /// <remarks>
+        /// A set bit sets its state to true, a cleared bit sets an already reported state back to false.
+        /// Codes that have never been active are not added, so that only reported codes are published.
+        /// Bits that are not defined in the enumeration set the Unknown state, it is not reset.
+        /// </remarks>
+        private void SetBitFlagStates<TCode>(int value, IReadOnlyDictionary<string, bool> states, Action<string, bool> setState, string registerName)
+            where TCode : struct, Enum
+        {
+            int bits = value & RegisterBitMask;
+            int definedBits = 0;
+
+            foreach (TCode code in Enum.GetValues<TCode>())
+            {
+                int codeBit = Convert.ToInt32(code);
+
+                if (codeBit == 0)
                 {
-                    SetVendorEvent(code.ToString(), true);
+                    continue;
                 }
+
+                // Bitwise OR to accumulate all defined bits, so that we can check for undefined bits later.
+                definedBits |= codeBit;
+                string name = code.ToString();
+                bool isActive = (bits & codeBit) == codeBit;
+
+                if (isActive || states.ContainsKey(name))
+                {
+                    setState(name, isActive);
+                }
+            }
+
+            int undefinedBits = bits & ~definedBits;
+
+            if (undefinedBits != 0)
+            {
+                _logger.LogError("{Name} Undefined bits found in {Register}. Undefined bits: {UndefinedBits}, value: {Value}", Name, registerName, undefinedBits, bits);
+                setState(UnknownStateName, true);
             }
         }
 

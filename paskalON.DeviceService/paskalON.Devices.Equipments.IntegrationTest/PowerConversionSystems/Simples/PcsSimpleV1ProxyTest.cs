@@ -137,7 +137,8 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
 
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.P, (ushort)PcsSimpleV1Description.Register.QAvailable, It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.Frequency, (ushort)PcsSimpleV1Description.Register.ACVoltage, It.IsAny<CancellationToken>()), Times.Once);
-            client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+            client.Verify(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.CurrentState, (ushort)PcsSimpleV1Description.Register.DcContactor, It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
 
             Assert.IsNotNull(pcs.ActivePower);
             Assert.AreEqual(p, pcs.ActivePower.Value.KiloWatts);
@@ -219,6 +220,151 @@ namespace paskalON.Devices.Equipments.IntegrationTest.PowerConversionSystems.Sim
             Assert.IsNotNull(pcs.IsDcContactorClosed);
             Assert.HasCount(1, pcs.IsDcContactorClosed);
             Assert.IsTrue(pcs.IsDcContactorClosed.First());
+        }
+
+
+        [TestMethod]
+        [DataRow((ushort)0b0000_0001, new string[] { nameof(PcsSimpleV1Description.FaultCode.HighInputVoltage) })]
+        [DataRow((ushort)0b0000_0101, new string[] { nameof(PcsSimpleV1Description.FaultCode.HighInputVoltage), nameof(PcsSimpleV1Description.FaultCode.HighFrequency) })]
+        [DataRow((ushort)0b0000_1111, new string[] { nameof(PcsSimpleV1Description.FaultCode.HighInputVoltage), nameof(PcsSimpleV1Description.FaultCode.LowInputVoltage),
+            nameof(PcsSimpleV1Description.FaultCode.HighFrequency), nameof(PcsSimpleV1Description.FaultCode.LowFrequency) })]
+        public async Task PcsPollFaultBitFlagsSetActiveFaultStatesTest(ushort fault, string[] expectedFaults)
+        {
+            ushort[] registers = CreateEventRegisters(0, fault, 0);
+            ModbusRegister dataface = new ModbusRegister("Test");
+            Mock<IModbusClient> client = CreateEventRegisterClient(() => registers);
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
+            using PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, new Mock<IMetricsPublisher>().Object, dataface, client.Object);
+
+            await engine.PollAsync(3, CancellationToken.None);
+
+            Assert.IsTrue(pcs.HasActiveFaults);
+            Assert.HasCount(expectedFaults.Length, pcs.FaultStates);
+            CollectionAssert.AreEquivalent(expectedFaults, pcs.FaultStates.Where(x => x.Value).Select(x => x.Key).ToArray());
+            Assert.IsFalse(pcs.HasActiveWarnings);
+            Assert.IsEmpty(pcs.WarningStates);
+            Assert.IsFalse(pcs.HasVendorEvents);
+            Assert.IsEmpty(pcs.VendorEvents);
+        }
+
+
+        [TestMethod]
+        public async Task PcsPollClearedBitsResetReportedStatesTest()
+        {
+            ushort[] registers = CreateEventRegisters(0b0000_1000, 0b0000_0101, 0b0000_0011);
+            ModbusRegister dataface = new ModbusRegister("Test");
+            Mock<IModbusClient> client = CreateEventRegisterClient(() => registers);
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
+            using PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, new Mock<IMetricsPublisher>().Object, dataface, client.Object);
+            await engine.PollAsync(3, CancellationToken.None);
+            registers = CreateEventRegisters(0, 0b0000_0100, 0);
+
+            await engine.PollAsync(3, CancellationToken.None);
+
+            // Warnings
+            Assert.IsFalse(pcs.HasActiveWarnings);
+            Assert.HasCount(1, pcs.WarningStates);
+            Assert.IsFalse(pcs.WarningStates[nameof(PcsSimpleV1Description.WarningCode.LowFrequency)]);
+            // Faults
+            Assert.IsTrue(pcs.HasActiveFaults);
+            Assert.HasCount(2, pcs.FaultStates);
+            Assert.IsFalse(pcs.FaultStates[nameof(PcsSimpleV1Description.FaultCode.HighInputVoltage)]);
+            Assert.IsTrue(pcs.FaultStates[nameof(PcsSimpleV1Description.FaultCode.HighFrequency)]);
+            // Vendor events
+            Assert.IsFalse(pcs.HasVendorEvents);
+            Assert.HasCount(2, pcs.VendorEvents);
+            Assert.IsFalse(pcs.VendorEvents[nameof(PcsSimpleV1Description.VendorEvents.MaintenanceDue)]);
+            Assert.IsFalse(pcs.VendorEvents[nameof(PcsSimpleV1Description.VendorEvents.EndOfLifeDue)]);
+        }
+
+
+        [TestMethod]
+        [DataRow((ushort)0b0001_0001, true)]
+        [DataRow((ushort)0b1000_0000_0000_0000, false)]
+        public async Task PcsPollUndefinedFaultBitSetsUnknownStateTest(ushort fault, bool isHighInputVoltageActive)
+        {
+            ushort[] registers = CreateEventRegisters(0, fault, 0);
+            ModbusRegister dataface = new ModbusRegister("Test");
+            Mock<IModbusClient> client = CreateEventRegisterClient(() => registers);
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
+            using PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, new Mock<IMetricsPublisher>().Object, dataface, client.Object);
+
+            await engine.PollAsync(3, CancellationToken.None);
+
+            Assert.IsTrue(pcs.HasActiveFaults);
+            Assert.IsTrue(pcs.FaultStates["Unknown"]);
+            Assert.AreEqual(isHighInputVoltageActive, pcs.FaultStates.GetValueOrDefault(nameof(PcsSimpleV1Description.FaultCode.HighInputVoltage)));
+        }
+
+
+        [TestMethod]
+        public async Task PcsPollUndefinedBitClearedKeepsUnknownStateTest()
+        {
+            ushort[] registers = CreateEventRegisters(0b0001_0000, 0b0001_0000, 0b0000_0100);
+            ModbusRegister dataface = new ModbusRegister("Test");
+            Mock<IModbusClient> client = CreateEventRegisterClient(() => registers);
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
+            using PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, new Mock<IMetricsPublisher>().Object, dataface, client.Object);
+            await engine.PollAsync(3, CancellationToken.None);
+            registers = CreateEventRegisters(0, 0, 0);
+
+            await engine.PollAsync(3, CancellationToken.None);
+
+            Assert.IsTrue(pcs.WarningStates["Unknown"]);
+            Assert.IsTrue(pcs.FaultStates["Unknown"]);
+            Assert.IsTrue(pcs.VendorEvents["Unknown"]);
+        }
+
+
+        [TestMethod]
+        [DataRow(PcsSimpleV1Description.State.On)]
+        [DataRow(PcsSimpleV1Description.State.Fault)]
+        [DataRow(PcsSimpleV1Description.State.Stop)]
+        [DataRow(PcsSimpleV1Description.State.Off)]
+        [DataRow(PcsSimpleV1Description.State.Standby)]
+        [DataRow(PcsSimpleV1Description.State.NightMode)]
+        public async Task PcsPollStateRegisterResetsCommunicationErrorTest(PcsSimpleV1Description.State state)
+        {
+            ushort[] registers = new ushort[] { (ushort)state, 0, 0, 0, 1, 1 };
+            ModbusRegister dataface = new ModbusRegister("Test");
+            Mock<IModbusClient> client = CreateEventRegisterClient(() => registers);
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
+            using PcsSimpleV1Proxy pcs = new PcsSimpleV1Proxy(NullLogger.Instance, _pcsConfig!, _unit!.Object, new Mock<IMetricsPublisher>().Object, dataface, client.Object);
+            client.Raise(x => x.OnCommunicationError += null, EventArgs.Empty);
+            Assert.IsTrue(pcs.CommunicationError);
+
+            await engine.PollAsync(3, CancellationToken.None);
+
+            Assert.IsFalse(pcs.CommunicationError);
+        }
+
+
+        /// <summary>
+        /// Creates the raw register words of the range CurrentState to DcContactor.
+        /// </summary>
+        private static ushort[] CreateEventRegisters(ushort warning, ushort fault, ushort vendorEvent)
+        {
+            return new ushort[] { (ushort)PcsSimpleV1Description.State.Stop, warning, fault, vendorEvent, 1, 1 };
+        }
+
+
+        /// <summary>
+        /// Creates a connected Modbus client that returns the given raw words for the range CurrentState to DcContactor.
+        /// </summary>
+        private static Mock<IModbusClient> CreateEventRegisterClient(Func<ushort[]> eventRegisters)
+        {
+            ModbusDataConverter converter = new ModbusDataConverter();
+            Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.State).Returns(ModbusClientState.Connected);
+            client.Setup(x => x.ConvertRawData(It.IsAny<bool[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
+                .Returns((bool[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
+            client.Setup(x => x.ConvertRawData(It.IsAny<ushort[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
+                .Returns((ushort[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
+            client
+                .Setup(x => x.ReadHoldingRegistersAsync((ushort)PcsSimpleV1Description.Register.CurrentState, (ushort)PcsSimpleV1Description.Register.DcContactor, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(eventRegisters);
+
+            return client;
         }
     }
 }

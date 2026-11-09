@@ -117,7 +117,8 @@ namespace paskalON.Devices.Equipments.IntegrationTest.EnergyStorages.Batteries.S
             await engine.PollAsync(1, CancellationToken.None);
 
             client.Verify(x => x.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.TotalStateOfCharge, (ushort)BbSimpleV1Description.Register.TotalDCCurrent, It.IsAny<CancellationToken>()), Times.Once);
-            client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
+            client.Verify(x => x.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.CurrentState, (ushort)BbSimpleV1Description.Register.CurrentVendorEvent, It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(x => x.ReadHoldingRegistersAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
 
             Assert.AreEqual(totalStateOfCharge, bb.UsableStateOfCharge);
             Assert.AreEqual(totalStateOfHealth, bb.StateOfHealth);
@@ -184,5 +185,104 @@ namespace paskalON.Devices.Equipments.IntegrationTest.EnergyStorages.Batteries.S
         }
 
 
+        [TestMethod]
+        public async Task BbPollClearedBitsResetReportedStatesTest()
+        {
+            ushort[] registers = CreateEventRegisters(0b0100_0001, 0b0010_0010, 0b0000_0001);
+            ModbusRegister dataface = new ModbusRegister("Test");
+            Mock<IModbusClient> client = CreateEventRegisterClient(() => registers);
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
+            using BbSimpleV1Proxy bb = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, new Mock<IMetricsPublisher>().Object, dataface, client.Object);
+            await engine.PollAsync(3, CancellationToken.None);
+            registers = CreateEventRegisters(0b0100_0000, 0, 0b0000_0010);
+
+            await engine.PollAsync(3, CancellationToken.None);
+
+            // Warnings
+            Assert.IsTrue(bb.HasActiveWarnings);
+            Assert.HasCount(2, bb.WarningStates);
+            Assert.IsFalse(bb.WarningStates[nameof(BbSimpleV1Description.WarningCode.CurrentOverLimit)]);
+            Assert.IsTrue(bb.WarningStates[nameof(BbSimpleV1Description.WarningCode.CellExtremeVoltage)]);
+            // Faults
+            Assert.IsFalse(bb.HasActiveFaults);
+            Assert.HasCount(2, bb.FaultStates);
+            Assert.IsFalse(bb.FaultStates[nameof(BbSimpleV1Description.FaultCode.SystemOverVoltage)]);
+            Assert.IsFalse(bb.FaultStates[nameof(BbSimpleV1Description.FaultCode.CellExtremeTemperature)]);
+            // Vendor events
+            Assert.IsTrue(bb.HasVendorEvents);
+            Assert.HasCount(2, bb.VendorEvents);
+            Assert.IsFalse(bb.VendorEvents[nameof(BbSimpleV1Description.VendorEvents.MaintenanceDue)]);
+            Assert.IsTrue(bb.VendorEvents[nameof(BbSimpleV1Description.VendorEvents.EndOfLifeDue)]);
+        }
+
+
+        [TestMethod]
+        [DataRow((ushort)0b1000_0000_0000_0001, true)]
+        [DataRow((ushort)0b0000_0000_1000_0000, false)]
+        public async Task BbPollUndefinedFaultBitSetsUnknownStateTest(ushort fault, bool isCurrentOverLimitActive)
+        {
+            ushort[] registers = CreateEventRegisters(0, fault, 0);
+            ModbusRegister dataface = new ModbusRegister("Test");
+            Mock<IModbusClient> client = CreateEventRegisterClient(() => registers);
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
+            using BbSimpleV1Proxy bb = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, new Mock<IMetricsPublisher>().Object, dataface, client.Object);
+
+            await engine.PollAsync(3, CancellationToken.None);
+
+            Assert.IsTrue(bb.HasActiveFaults);
+            Assert.IsTrue(bb.FaultStates["Unknown"]);
+            Assert.AreEqual(isCurrentOverLimitActive, bb.FaultStates.GetValueOrDefault(nameof(BbSimpleV1Description.FaultCode.CurrentOverLimit)));
+        }
+
+
+        [TestMethod]
+        [DataRow(BbSimpleV1Description.State.Disconnected)]
+        [DataRow(BbSimpleV1Description.State.Connected)]
+        [DataRow(BbSimpleV1Description.State.Idle)]
+        [DataRow(BbSimpleV1Description.State.Charging)]
+        [DataRow(BbSimpleV1Description.State.Discharging)]
+        public async Task BbPollStateRegisterResetsCommunicationErrorTest(BbSimpleV1Description.State state)
+        {
+            ushort[] registers = new ushort[] { (ushort)state, 0, 0, 0 };
+            ModbusRegister dataface = new ModbusRegister("Test");
+            Mock<IModbusClient> client = CreateEventRegisterClient(() => registers);
+            ModbusPollingEngine engine = new ModbusPollingEngine(NullLogger.Instance, client.Object, dataface);
+            using BbSimpleV1Proxy bb = new BbSimpleV1Proxy(NullLogger.Instance, _bbConfig!, _unit!.Object, new Mock<IMetricsPublisher>().Object, dataface, client.Object);
+            client.Raise(x => x.OnCommunicationError += null, EventArgs.Empty);
+            Assert.IsTrue(bb.CommunicationError);
+
+            await engine.PollAsync(3, CancellationToken.None);
+
+            Assert.IsFalse(bb.CommunicationError);
+        }
+
+
+        /// <summary>
+        /// Creates the raw register words of the range CurrentState to CurrentVendorEvent.
+        /// </summary>
+        private static ushort[] CreateEventRegisters(ushort warning, ushort fault, ushort vendorEvent)
+        {
+            return new ushort[] { (ushort)BbSimpleV1Description.State.Connected, warning, fault, vendorEvent };
+        }
+
+
+        /// <summary>
+        /// Creates a connected Modbus client that returns the given raw words for the range CurrentState to CurrentVendorEvent.
+        /// </summary>
+        private static Mock<IModbusClient> CreateEventRegisterClient(Func<ushort[]> eventRegisters)
+        {
+            ModbusDataConverter converter = new ModbusDataConverter();
+            Mock<IModbusClient> client = new Mock<IModbusClient>();
+            client.Setup(x => x.State).Returns(ModbusClientState.Connected);
+            client.Setup(x => x.ConvertRawData(It.IsAny<bool[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
+                .Returns((bool[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
+            client.Setup(x => x.ConvertRawData(It.IsAny<ushort[]>(), It.IsAny<IModbusRegisterEntry>(), It.IsAny<ushort>()))
+                .Returns((ushort[] data, IModbusRegisterEntry register, ushort start) => { return converter.ConvertRawData(data, register, start); });
+            client
+                .Setup(x => x.ReadHoldingRegistersAsync((ushort)BbSimpleV1Description.Register.CurrentState, (ushort)BbSimpleV1Description.Register.CurrentVendorEvent, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(eventRegisters);
+
+            return client;
+        }
     }
 }

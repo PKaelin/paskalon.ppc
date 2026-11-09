@@ -32,45 +32,57 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
 
 
         /// <summary>
-        /// Enumeration of warning codes.
+        /// Bit flags of the warning codes.
         /// </summary>
+        /// <remarks>
+        /// Several warnings can be active at the same time. Bits that are not defined are reported as Unknown.
+        /// </remarks>
+        [Flags]
         public enum WarningCode
         {
             None = 0,
-            CurrentOverLimit = 1,
-            SystemOverVoltage = 2,
-            SystemUnderVoltage = 3,
-            BigVoltageDifferenceSingleCell = 4,
-            BigTemperatureDifferenceBank = 5,
-            CellExtremeTemperature = 6,
-            CellExtremeVoltage = 7,
+            CurrentOverLimit = 1 << 0,
+            SystemOverVoltage = 1 << 1,
+            SystemUnderVoltage = 1 << 2,
+            BigVoltageDifferenceSingleCell = 1 << 3,
+            BigTemperatureDifferenceBank = 1 << 4,
+            CellExtremeTemperature = 1 << 5,
+            CellExtremeVoltage = 1 << 6,
         }
 
 
         /// <summary>
-        /// Enumeration of fault (error) codes.
+        /// Bit flags of the fault (error) codes.
         /// </summary>
+        /// <remarks>
+        /// Several faults can be active at the same time. Bits that are not defined are reported as Unknown.
+        /// </remarks>
+        [Flags]
         public enum FaultCode
         {
             None = 0,
-            CurrentOverLimit = 1,
-            SystemOverVoltage = 2,
-            SystemUnderVoltage = 3,
-            BigVoltageDifferenceSingleCell = 4,
-            BigTemperatureDifferenceBank = 5,
-            CellExtremeTemperature = 6,
-            CellExtremeVoltage = 7,
+            CurrentOverLimit = 1 << 0,
+            SystemOverVoltage = 1 << 1,
+            SystemUnderVoltage = 1 << 2,
+            BigVoltageDifferenceSingleCell = 1 << 3,
+            BigTemperatureDifferenceBank = 1 << 4,
+            CellExtremeTemperature = 1 << 5,
+            CellExtremeVoltage = 1 << 6,
         }
 
 
         /// <summary>
-        /// Enumeration of vendor events.
+        /// Bit flags of the vendor events.
         /// </summary>
+        /// <remarks>
+        /// Several vendor events can be active at the same time. Bits that are not defined are reported as Unknown.
+        /// </remarks>
+        [Flags]
         public enum VendorEvents
         {
             None = 0,
-            MaintenanceDue = 1,
-            EndOfLifeDue = 2,
+            MaintenanceDue = 1 << 0,
+            EndOfLifeDue = 1 << 1,
         }
 
 

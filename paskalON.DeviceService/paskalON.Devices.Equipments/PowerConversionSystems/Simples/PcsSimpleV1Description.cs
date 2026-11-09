@@ -29,39 +29,51 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
 
 
         /// <summary>
-        /// Enumeration of warning codes.
+        /// Bit flags of the warning codes.
         /// </summary>
+        /// <remarks>
+        /// Several warnings can be active at the same time. Bits that are not defined are reported as Unknown.
+        /// </remarks>
+        [Flags]
         public enum WarningCode
         {
             None = 0,
-            HighInputVoltage = 1,
-            LowInputVoltage = 2,
-            HighFrequency = 3,
-            LowFrequency = 4,
+            HighInputVoltage = 1 << 0,
+            LowInputVoltage = 1 << 1,
+            HighFrequency = 1 << 2,
+            LowFrequency = 1 << 3,
         }
 
 
         /// <summary>
-        /// Enumeration of fault (error) codes.
+        /// Bit flags of the fault (error) codes.
         /// </summary>
+        /// <remarks>
+        /// Several faults can be active at the same time. Bits that are not defined are reported as Unknown.
+        /// </remarks>
+        [Flags]
         public enum FaultCode
         {
             None = 0,
-            HighInputVoltage = 1,
-            LowInputVoltage = 2,
-            HighFrequency = 3,
-            LowFrequency = 4,
+            HighInputVoltage = 1 << 0,
+            LowInputVoltage = 1 << 1,
+            HighFrequency = 1 << 2,
+            LowFrequency = 1 << 3,
         }
 
 
         /// <summary>
-        /// Enumeration of vendor events.
+        /// Bit flags of the vendor events.
         /// </summary>
+        /// <remarks>
+        /// Several vendor events can be active at the same time. Bits that are not defined are reported as Unknown.
+        /// </remarks>
+        [Flags]
         public enum VendorEvents
         {
             None = 0,
-            MaintenanceDue = 1,
-            EndOfLifeDue = 2,
+            MaintenanceDue = 1 << 0,
+            EndOfLifeDue = 1 << 1,
         }
 
 

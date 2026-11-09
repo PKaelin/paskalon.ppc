@@ -109,6 +109,6 @@ namespace paskalON.Devices.Dto.EnergyStorages.Batteries
         /// <summary>
         /// Indicates whether there are any vendor events.
         /// </summary>
-        public bool HasVendorEvents { get => WarningStates.Any(a => a.Value == true); }
+        public bool HasVendorEvents { get => VendorEvents.Any(a => a.Value == true); }
     }
 }

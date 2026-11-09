@@ -31,6 +31,18 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
 
         /// <summary>
+        /// Number of PCS fault, warning and vendor event configurations of the PcsSimpleV1 (including Unknown).
+        /// </summary>
+        private const int PcsEventConfigCount = 13;
+
+
+        /// <summary>
+        /// Number of all alarm configurations of a demo client project.
+        /// </summary>
+        private const int PpcAlarmConfigCount = CommunicationErrorConfigCount + PcsEventConfigCount;
+
+
+        /// <summary>
         /// Folder of the demo client project files.
         /// </summary>
         private static readonly string _demoDirectory = Path.Combine(AppContext.BaseDirectory, "ClientData", "Demo");
@@ -52,7 +64,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
 
         /// <summary>
-        /// Every demo client project is imported with the system configuration and the communication error configurations.
+        /// Every demo client project is imported with the system configuration, the communication error and the PCS event configurations.
         /// </summary>
         /// <param name="clientProjectName">Name of the demo client project.</param>
         [TestMethod]
@@ -67,7 +79,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
             await using AlarmContext context = CreateDbContext<AlarmContext>();
             SystemConfig systemConfig = await context.SystemConfigs.SingleAsync();
             Assert.AreEqual(ClientDataLoader.ChangedBy, systemConfig.ChangedBy);
-            Assert.AreEqual(CommunicationErrorConfigCount, await context.PpcAlarmConfigs.CountAsync());
+            Assert.AreEqual(PpcAlarmConfigCount, await context.PpcAlarmConfigs.CountAsync());
         }
 
 
@@ -110,7 +122,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
 
         /// <summary>
-        /// Every device type has an enabled configuration for all its devices that raises an error alarm on a communication error.
+        /// Every device type has an enabled configuration for all its devices that raises a critical alarm on a communication error.
         /// </summary>
         /// <param name="ppcAlarmType">Alarm type of the device type.</param>
         /// <param name="alarmId">Expected alarm id.</param>
@@ -130,16 +142,60 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
             Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
             await using AlarmContext context = CreateDbContext<AlarmContext>();
-            PpcAlarmConfig config = await context.PpcAlarmConfigs.Include(x => x.AlarmActions).SingleAsync(x => x.PpcAlarmType == ppcAlarmType);
+            PpcAlarmConfig config = await context.PpcAlarmConfigs.Include(x => x.AlarmActions)
+                .SingleAsync(x => x.PpcAlarmType == ppcAlarmType && x.PropertyName == "CommunicationError");
             Assert.AreEqual(alarmId, config.AlarmId);
             Assert.IsTrue(config.IsEnabled);
-            Assert.AreEqual(AlarmSeverity.Error, config.SeverityLevel);
+            Assert.AreEqual(AlarmSeverity.Critical, config.SeverityLevel);
             Assert.IsNull(config.DeviceId);
             Assert.AreEqual("CommunicationError", config.PropertyName);
             Assert.AreEqual(PropertyOperator.Equal, config.PropertyOperator);
             Assert.AreEqual(1, config.PropertyValue);
             Assert.AreEqual(0, config.TimeBeforeRaisingAlarmMilliseconds);
             Assert.AreEqual(ClientDataLoader.ChangedBy, config.ChangedBy);
+            CollectionAssert.AreEquivalent(new List<(string, AlarmActionTrigger)> { ("RaiseAlarm", AlarmActionTrigger.Raise), ("ClearAlarm", AlarmActionTrigger.Normalize) },
+                config.AlarmActions.Select(action => (action.Name, action.Trigger)).ToList());
+        }
+
+
+        /// <summary>
+        /// Every PcsSimpleV1 fault, warning and vendor event (including Unknown) has an enabled configuration for all PCS
+        /// that raises an alarm of its severity when the entry of the detail data dictionary is true.
+        /// </summary>
+        /// <param name="alarmId">Alarm id of the configuration.</param>
+        /// <param name="propertyName">Dictionary entry of the PCS detail data.</param>
+        /// <param name="severity">Expected severity level.</param>
+        [TestMethod]
+        [DataRow("PCS-FAULT-HIGH-INPUT-VOLTAGE", "FaultStates.HighInputVoltage", AlarmSeverity.Error)]
+        [DataRow("PCS-FAULT-LOW-INPUT-VOLTAGE", "FaultStates.LowInputVoltage", AlarmSeverity.Error)]
+        [DataRow("PCS-FAULT-HIGH-FREQUENCY", "FaultStates.HighFrequency", AlarmSeverity.Error)]
+        [DataRow("PCS-FAULT-LOW-FREQUENCY", "FaultStates.LowFrequency", AlarmSeverity.Error)]
+        [DataRow("PCS-FAULT-UNKNOWN", "FaultStates.Unknown", AlarmSeverity.Error)]
+        [DataRow("PCS-WARN-HIGH-INPUT-VOLTAGE", "WarningStates.HighInputVoltage", AlarmSeverity.Warning)]
+        [DataRow("PCS-WARN-LOW-INPUT-VOLTAGE", "WarningStates.LowInputVoltage", AlarmSeverity.Warning)]
+        [DataRow("PCS-WARN-HIGH-FREQUENCY", "WarningStates.HighFrequency", AlarmSeverity.Warning)]
+        [DataRow("PCS-WARN-LOW-FREQUENCY", "WarningStates.LowFrequency", AlarmSeverity.Warning)]
+        [DataRow("PCS-WARN-UNKNOWN", "WarningStates.Unknown", AlarmSeverity.Warning)]
+        [DataRow("PCS-EVENT-MAINTENANCE-DUE", "VendorEvents.MaintenanceDue", AlarmSeverity.Info)]
+        [DataRow("PCS-EVENT-END-OF-LIFE-DUE", "VendorEvents.EndOfLifeDue", AlarmSeverity.Info)]
+        [DataRow("PCS-EVENT-UNKNOWN", "VendorEvents.Unknown", AlarmSeverity.Info)]
+        public async Task RunAsyncImportsPcsEventConfigTest(string alarmId, string propertyName, AlarmSeverity severity)
+        {
+            string[] args = new string[] { ClientProjectName, _clientProjectFile };
+
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>);
+
+            Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmConfig config = await context.PpcAlarmConfigs.Include(x => x.AlarmActions).SingleAsync(x => x.AlarmId == alarmId);
+            Assert.AreEqual(PpcAlarmType.PcsAlarm, config.PpcAlarmType);
+            Assert.IsTrue(config.IsEnabled);
+            Assert.AreEqual(severity, config.SeverityLevel);
+            Assert.IsNull(config.DeviceId);
+            Assert.AreEqual(propertyName, config.PropertyName);
+            Assert.AreEqual(PropertyOperator.Equal, config.PropertyOperator);
+            Assert.AreEqual(1, config.PropertyValue);
+            Assert.AreEqual($"{{{{PCS.{propertyName}.Name}}}}", config.Name);
             CollectionAssert.AreEquivalent(new List<(string, AlarmActionTrigger)> { ("RaiseAlarm", AlarmActionTrigger.Raise), ("ClearAlarm", AlarmActionTrigger.Normalize) },
                 config.AlarmActions.Select(action => (action.Name, action.Trigger)).ToList());
         }
@@ -187,7 +243,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
             Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
             await using AlarmContext context = CreateDbContext<AlarmContext>();
-            Assert.AreEqual(CommunicationErrorConfigCount, await context.PpcAlarmConfigs.CountAsync());
+            Assert.AreEqual(PpcAlarmConfigCount, await context.PpcAlarmConfigs.CountAsync());
         }
 
 
