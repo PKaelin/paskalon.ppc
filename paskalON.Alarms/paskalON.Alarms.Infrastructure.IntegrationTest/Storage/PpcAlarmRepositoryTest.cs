@@ -328,6 +328,101 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
 
 
         /// <summary>
+        /// The alarms created from the timestamp are returned latest first with their configuration
+        /// without the actions, not tracked. Older alarms are not returned, also when they are active.
+        /// </summary>
+        [TestMethod]
+        public async Task GetAsyncReturnsAlarmsCreatedFromLatestFirstTest()
+        {
+            await SeedListAlarmsAsync();
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmRepository repository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
+            PpcAlarmFilter filter = new PpcAlarmFilter { CreatedFrom = PcsAlarmSampleData.ChangedOn.AddHours(-2) };
+
+            List<PpcAlarm> alarms = await repository.GetAsync(filter);
+
+            CollectionAssert.AreEqual(new List<string> { "PCS-FAULT:8", "SYS-RTU:", "PCS-GRIDLOSS:7" }, alarms.Select(Label).ToList());
+            Assert.AreEqual("{{PCS.Fault.Name}}", alarms[0].PpcAlarmConfig.Name);
+            Assert.IsEmpty(alarms[0].PpcAlarmConfig.AlarmActions);
+            Assert.IsEmpty(context.ChangeTracker.Entries());
+        }
+
+
+        /// <summary>
+        /// Only the alarms that match all set criteria are returned, the device name matches a part of it case insensitive.
+        /// </summary>
+        [TestMethod]
+        [DataRow(null, null, null, null, "PCS-FAULT:8,SYS-RTU:,PCS-GRIDLOSS:7,PCS-FAULT:7")]
+        [DataRow(AlarmSeverity.Critical, null, null, null, "SYS-RTU:,PCS-GRIDLOSS:7")]
+        [DataRow(AlarmSeverity.Info, null, null, null, "")]
+        [DataRow(null, AlarmProcessCondition.Normal, null, null, "PCS-GRIDLOSS:7")]
+        [DataRow(null, AlarmProcessCondition.Abnormal, null, null, "PCS-FAULT:8,SYS-RTU:,PCS-FAULT:7")]
+        [DataRow(null, null, AlarmSequenceState.Alarm, null, "SYS-RTU:,PCS-FAULT:7")]
+        [DataRow(null, null, AlarmSequenceState.Acknowledged, null, "PCS-FAULT:8")]
+        [DataRow(null, null, null, "inverter", "PCS-GRIDLOSS:7,PCS-FAULT:7")]
+        [DataRow(null, null, null, " PCS 8 ", "PCS-FAULT:8")]
+        [DataRow(AlarmSeverity.Error, AlarmProcessCondition.Abnormal, AlarmSequenceState.Alarm, "Inv", "PCS-FAULT:7")]
+        public async Task GetAsyncReturnsAlarmsMatchingAllCriteriaTest(AlarmSeverity? severityLevel, AlarmProcessCondition? processCondition,
+            AlarmSequenceState? sequenceState, string? deviceName, string expectedLabels)
+        {
+            await SeedListAlarmsAsync();
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmRepository repository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
+            PpcAlarmFilter filter = new PpcAlarmFilter
+            {
+                CreatedFrom = PcsAlarmSampleData.ChangedOn.AddDays(-1),
+                SeverityLevel = severityLevel,
+                AlarmProcessCondition = processCondition,
+                AlarmSequenceState = sequenceState,
+                DeviceName = deviceName
+            };
+
+            List<PpcAlarm> alarms = await repository.GetAsync(filter);
+
+            Assert.AreEqual(expectedLabels, string.Join(",", alarms.Select(Label)));
+        }
+
+
+        /// <summary>
+        /// Seeds alarms created at different times for the alarm list:
+        /// - an active over temperature alarm of PCS 7 (device "PCS 7 Inverter") created 3 hours before the sample timestamp,
+        /// - a normalized grid loss alarm of PCS 7 created 1 hour before,
+        /// - an active RTU system alarm without device created 30 minutes before,
+        /// - an acknowledged over temperature alarm of PCS 8 (device "PCS 8") created at the sample timestamp.
+        /// </summary>
+        private async Task SeedListAlarmsAsync()
+        {
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmConfig faultConfig = await context.PpcAlarmConfigs.SingleAsync(config => config.AlarmId == "PCS-FAULT");
+            PpcAlarmConfig gridLossConfig = await context.PpcAlarmConfigs.SingleAsync(config => config.AlarmId == "PCS-GRIDLOSS");
+            PpcAlarmConfig rtuConfig = await context.PpcAlarmConfigs.SingleAsync(config => config.AlarmId == "SYS-RTU");
+            PpcAlarm pcs7Fault = PcsAlarmSampleData.CreateAlarm(faultConfig, 7, "FaultStates.OverTemperature");
+            pcs7Fault.DeviceName = "PCS 7 Inverter";
+            pcs7Fault.CreatedOn = PcsAlarmSampleData.ChangedOn.AddHours(-3);
+            PpcAlarm pcs7GridLoss = PcsAlarmSampleData.CreateAlarm(gridLossConfig, 7, "FaultStates.GridLoss");
+            pcs7GridLoss.DeviceName = "PCS 7 Inverter";
+            pcs7GridLoss.CreatedOn = PcsAlarmSampleData.ChangedOn.AddHours(-1);
+            pcs7GridLoss.Normalize("System", PcsAlarmSampleData.ChangedOn.AddMinutes(-50));
+            PpcAlarm systemRtu = PcsAlarmSampleData.CreateAlarm(rtuConfig, null, "IsRtuCommunicationLost");
+            systemRtu.CreatedOn = PcsAlarmSampleData.ChangedOn.AddMinutes(-30);
+            PpcAlarm pcs8Fault = PcsAlarmSampleData.CreateAlarm(faultConfig, 8, "FaultStates.OverTemperature");
+            pcs8Fault.DeviceName = "PCS 8";
+            pcs8Fault.Acknowledge("Homer", PcsAlarmSampleData.ChangedOn.AddMinutes(2));
+            context.PpcAlarms.AddRange(pcs7Fault, pcs7GridLoss, systemRtu, pcs8Fault);
+            await context.SaveChangesAsync();
+        }
+
+
+        /// <summary>
+        /// Label of an alarm in the assertions: [AlarmId]:[DeviceId].
+        /// </summary>
+        private static string Label(PpcAlarm alarm)
+        {
+            return $"{alarm.PpcAlarmConfig.AlarmId}:{alarm.DeviceId}";
+        }
+
+
+        /// <summary>
         /// Seeds an active over temperature alarm and a normalized grid loss alarm of PCS 7,
         /// an active over temperature alarm of PCS 8 and an active RTU system alarm.
         /// </summary>

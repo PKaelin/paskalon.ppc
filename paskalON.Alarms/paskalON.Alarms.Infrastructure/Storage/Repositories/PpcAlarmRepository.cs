@@ -5,6 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using paskalON.Alarms.Domain;
+using paskalON.Alarms.Domain.Configs;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Domain.Ppcs;
@@ -39,6 +40,51 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
         {
             return await QueryActive()
                 .Where(alarm => alarm.DeviceId == key.DeviceId && alarm.PpcAlarmConfig.PpcAlarmType == key.PpcAlarmType)
+                .ToListAsync(cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The actions of the configurations are not loaded, they are not needed to list the alarms.
+        /// </remarks>
+        public async Task<List<PpcAlarm>> GetAsync(PpcAlarmFilter filter, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(filter);
+
+            DateTimeOffset createdFrom = filter.CreatedFrom.ToUniversalTime();
+            IQueryable<PpcAlarm> query = Context.PpcAlarms
+                .AsNoTrackingWithIdentityResolution()
+                .Include(alarm => alarm.PpcAlarmConfig)
+                .Where(alarm => alarm.CreatedOn >= createdFrom);
+
+            if (filter.SeverityLevel.HasValue)
+            {
+                AlarmSeverity severityLevel = filter.SeverityLevel.Value;
+                query = query.Where(alarm => alarm.PpcAlarmConfig.SeverityLevel == severityLevel);
+            }
+
+            if (filter.AlarmProcessCondition.HasValue)
+            {
+                AlarmProcessCondition processCondition = filter.AlarmProcessCondition.Value;
+                query = query.Where(alarm => alarm.AlarmProcessCondition == processCondition);
+            }
+
+            if (filter.AlarmSequenceState.HasValue)
+            {
+                AlarmSequenceState sequenceState = filter.AlarmSequenceState.Value;
+                query = query.Where(alarm => alarm.AlarmSequenceState == sequenceState);
+            }
+
+            if (string.IsNullOrWhiteSpace(filter.DeviceName) is false)
+            {
+                string deviceName = filter.DeviceName.Trim().ToLowerInvariant();
+                query = query.Where(alarm => alarm.DeviceName != null && alarm.DeviceName.ToLower().Contains(deviceName));
+            }
+
+            return await query
+                .OrderByDescending(alarm => alarm.CreatedOn)
+                .ThenByDescending(alarm => alarm.Id)
                 .ToListAsync(cancellationToken);
         }
 

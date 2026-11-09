@@ -2,6 +2,7 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
 
 namespace paskalON.Alarms.Client
@@ -18,5 +19,15 @@ namespace paskalON.Alarms.Client
         /// <returns>The current alarm summary.</returns>
         /// <exception cref="HttpRequestException">Thrown when the alarm service is not reachable or answers with an error (e.g. 503).</exception>
         Task<AlarmSummaryDto> GetAlarmSummary(CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Gets the active and normalized PPC alarms that match the filter.
+        /// </summary>
+        /// <param name="filter">Filter of the alarms.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Matching alarms, the latest created alarm first.</returns>
+        /// <exception cref="HttpRequestException">Thrown when the alarm service is not reachable or answers with an error (e.g. 503).</exception>
+        Task<List<PpcAlarmDto>> GetPpcAlarms(PpcAlarmFilterDto filter, CancellationToken cancellationToken = default);
     }
 }

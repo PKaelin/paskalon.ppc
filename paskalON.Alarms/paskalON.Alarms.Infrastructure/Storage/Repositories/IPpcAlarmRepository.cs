@@ -34,6 +34,15 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
 
 
         /// <summary>
+        /// Gets the active and normalized alarms that match the filter including their configuration without the actions, not tracked.
+        /// </summary>
+        /// <param name="filter">Filter of the alarms.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Matching alarms, the latest created alarm first.</returns>
+        Task<List<PpcAlarm>> GetAsync(PpcAlarmFilter filter, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
         /// Adds newly raised alarms, saved with <see cref="SaveChangesAsync"/>.
         /// </summary>
         /// <param name="alarms">Newly raised alarms.</param>

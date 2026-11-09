@@ -11,6 +11,7 @@ using OpenTelemetry.Trace;
 using paskalON.Alarms.Application.Caches;
 using paskalON.Alarms.Application.Handlers;
 using paskalON.Alarms.Application.Outboxes;
+using paskalON.Alarms.Application.Queries;
 using paskalON.Alarms.Application.Stores;
 using paskalON.Alarms.Application.Subscribers;
 using paskalON.Alarms.Domain.Configs;
@@ -114,6 +115,8 @@ try
     // Signals the saved alarm actions from the scoped handlers to the outbox publisher service, so that they are sent immediately
     builder.Services.AddSingleton<IAlarmActionOutboxSignal, AlarmActionOutboxSignal>();
     builder.Services.AddScoped<IPpcAlarmHandler, PpcAlarmHandler>();
+    // Reads the saved alarms for the alarm list, without the write lock of the alarm writers
+    builder.Services.AddScoped<IPpcAlarmQueryHandler, PpcAlarmQueryHandler>();
 
     // Add subscriptions of the published data: the subscriber queues the received data, the handler service evaluates it in order.
     // Do not abort when Redis is not reachable at startup, the multiplexer keeps retrying to connect in the background.
