@@ -5,7 +5,9 @@
 using Microsoft.Extensions.Logging;
 using paskalON.Alarms.Client;
 using paskalON.Alarms.Client.Subscribers;
+using paskalON.Alarms.Dto;
 using paskalON.Alarms.Dto.Actions;
+using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
 
 namespace paskalON.Luna.Application
@@ -45,6 +47,12 @@ namespace paskalON.Luna.Application
 
 
         /// <summary>
+        /// Time provider of the period of the alarm list.
+        /// </summary>
+        private readonly TimeProvider _timeProvider;
+
+
+        /// <summary>
         /// Lock of the summary.
         /// </summary>
         private readonly object _dataLock = new object();
@@ -61,13 +69,16 @@ namespace paskalON.Luna.Application
         /// </summary>
         /// <param name="logger">Logger instance.</param>
         /// <param name="alarmServer">Client of the alarm service API.</param>
-        public LunaAlarmManager(ILogger<LunaAlarmManager> logger, IAlarmServer alarmServer)
+        /// <param name="timeProvider">Time provider of the period of the alarm list.</param>
+        public LunaAlarmManager(ILogger<LunaAlarmManager> logger, IAlarmServer alarmServer, TimeProvider timeProvider)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(alarmServer);
+            ArgumentNullException.ThrowIfNull(timeProvider);
 
             _logger = logger;
             _alarmServer = alarmServer;
+            _timeProvider = timeProvider;
         }
 
 
@@ -86,6 +97,28 @@ namespace paskalON.Luna.Application
             {
                 return _summary;
             }
+        }
+
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The period is calculated with the clock of the service, not of the browser.
+        /// </remarks>
+        public async Task<List<PpcAlarmDto>> GetPpcAlarmsAsync(TimeSpan triggeredWithin, AlarmSeverityDto? severityLevel,
+            AlarmProcessConditionDto? processCondition, AlarmSequenceStateDto? sequenceState, string? deviceName, CancellationToken cancellationToken = default)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(triggeredWithin, TimeSpan.Zero);
+
+            PpcAlarmFilterDto filter = new PpcAlarmFilterDto
+            {
+                CreatedFrom = _timeProvider.GetUtcNow() - triggeredWithin,
+                SeverityLevel = severityLevel,
+                AlarmProcessCondition = processCondition,
+                AlarmSequenceState = sequenceState,
+                DeviceName = string.IsNullOrWhiteSpace(deviceName) ? null : deviceName.Trim()
+            };
+
+            return await _alarmServer.GetPpcAlarms(filter, cancellationToken);
         }
 
 

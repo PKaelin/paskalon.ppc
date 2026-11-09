@@ -961,3 +961,292 @@ button.der-tree-toggle:disabled {
     flex-direction: column;
     gap: .5rem;
 }
+
+/* ==========================================================================
+   ALARMS - filters on the left, alarm list on the right with the details of the
+   selected alarm below it. Only the list scrolls, the filters and details stay visible.
+   ========================================================================== */
+
+.alarm-layout {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "filters grid"
+        "filters details";
+    gap: 1rem;
+    height: 100%;
+    min-height: 0;
+}
+
+.alarm-area-filters {
+    grid-area: filters;
+}
+
+.alarm-area-grid {
+    grid-area: grid;
+}
+
+.alarm-area-details {
+    grid-area: details;
+}
+
+@media (max-width: 767.98px) {
+
+    .alarm-layout {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto minmax(16rem, 1fr) auto;
+        grid-template-areas:
+            "filters"
+            "grid"
+            "details";
+        height: auto;
+        min-height: 100%;
+    }
+}
+
+.alarm-filters,
+.alarm-details {
+    padding: .75rem 1rem;
+    border-radius: .375rem;
+    background-color: rgba(var(--bs-primary-rgb, 78, 93, 108), .45);
+}
+
+.alarm-filters {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    min-width: 0;
+    overflow: auto;
+}
+
+.alarm-filters-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.alarm-filters-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.alarm-filters-status {
+    margin-top: auto;
+}
+
+/* The list fills the remaining height, the error and the overlay sit on top of it. */
+.alarm-grid {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.alarm-grid-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    border-radius: .375rem;
+    background-color: rgba(var(--bs-primary-rgb, 78, 93, 108), .45);
+}
+
+.alarm-grid-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: .375rem;
+    background-color: rgba(32, 55, 76, .35);
+    pointer-events: none;
+}
+
+.alarm-grid-message {
+    padding: .75rem 1rem;
+    margin: 0;
+    font-size: .875rem;
+    color: rgba(235, 235, 235, .75);
+}
+
+/* Fixed layout: the column widths come from the colgroup, longer texts are cut with an ellipsis. */
+.alarm-table {
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: .875rem;
+}
+
+.alarm-table th,
+.alarm-table td {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: .375rem .625rem;
+}
+
+/* The header stays visible while the rows scroll. */
+.alarm-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 0;
+    font-weight: 700;
+    text-align: left;
+    background-color: #20374c;
+    border-bottom: 1px solid rgba(255, 255, 255, .15);
+}
+
+.alarm-cell-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.alarm-header-text,
+.alarm-sort {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    width: 100%;
+    padding: .5rem .625rem;
+}
+
+.alarm-sort {
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+}
+
+.alarm-sort:hover {
+    background-color: rgba(255, 255, 255, .08);
+}
+
+.alarm-sort:focus-visible {
+    outline: 2px solid #6496be;
+    outline-offset: -2px;
+}
+
+.alarm-sort-icon {
+    flex-shrink: 0;
+    font-size: .625rem;
+}
+
+.alarm-sort-icon-inactive {
+    opacity: .35;
+}
+
+/* Grab area on the right edge of a header cell, the visible line is in its middle. */
+.alarm-column-border {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    width: .5rem;
+    cursor: col-resize;
+    touch-action: none;
+}
+
+.alarm-column-border::before {
+    content: "";
+    position: absolute;
+    top: 25%;
+    bottom: 25%;
+    right: 0;
+    width: 2px;
+    border-radius: 1px;
+    background-color: rgba(255, 255, 255, .15);
+}
+
+.alarm-column-border:hover::before,
+.alarm-column-border:active::before,
+.alarm-column-border:focus-visible::before {
+    top: 0;
+    bottom: 0;
+    background-color: #6496be;
+}
+
+.alarm-column-border:focus-visible {
+    outline: none;
+}
+
+.alarm-row {
+    cursor: pointer;
+}
+
+.alarm-row td {
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.alarm-row:hover {
+    background-color: rgba(255, 255, 255, .08);
+}
+
+.alarm-row.active {
+    background-color: var(--bs-primary, #4e5d6c);
+}
+
+.alarm-row:focus-visible {
+    outline: 2px solid #6496be;
+    outline-offset: -2px;
+}
+
+/* Severity with the colours of the alarm shapes in the header. */
+.alarm-severity {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+}
+
+.alarm-severity::before {
+    content: "";
+    flex-shrink: 0;
+    width: .625rem;
+    height: .625rem;
+    border-radius: 50%;
+    background-color: var(--alarm-severity-color);
+}
+
+.alarm-severity-info {
+    --alarm-severity-color: #06b6d4;
+}
+
+.alarm-severity-warning {
+    --alarm-severity-color: #ffdb44;
+}
+
+.alarm-severity-error {
+    --alarm-severity-color: #ef4444;
+}
+
+.alarm-severity-critical {
+    --alarm-severity-color: #b91c1c;
+}
+
+.alarm-details {
+    min-width: 0;
+    max-height: 12rem;
+    overflow: auto;
+}
+
+.alarm-details-list {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 1rem;
+    row-gap: .25rem;
+    margin: 0;
+    font-size: .875rem;
+}
+
+.alarm-details-list dt {
+    font-weight: 700;
+}
+
+.alarm-details-list dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}

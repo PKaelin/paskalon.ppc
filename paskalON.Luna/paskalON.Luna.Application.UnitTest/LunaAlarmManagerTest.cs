@@ -3,9 +3,12 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
 using paskalON.Alarms.Client;
+using paskalON.Alarms.Dto;
 using paskalON.Alarms.Dto.Actions;
+using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
 
 namespace paskalON.Luna.Application.UnitTest
@@ -26,6 +29,12 @@ namespace paskalON.Luna.Application.UnitTest
         /// Mocked alarm service API.
         /// </summary>
         private readonly Mock<IAlarmServer> _alarmServer = new Mock<IAlarmServer>();
+
+
+        /// <summary>
+        /// Clock of the service, the period of the alarm list ends now.
+        /// </summary>
+        private readonly FakeTimeProvider _timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 11, 9, 14, 0, 0, TimeSpan.Zero));
 
 
         /// <summary>
@@ -162,11 +171,124 @@ namespace paskalON.Luna.Application.UnitTest
 
 
         /// <summary>
+        /// The period before now is sent as creation timestamp with the criteria, the device name trimmed, and the alarms are returned.
+        /// </summary>
+        [TestMethod]
+        public async Task GetPpcAlarmsAsyncSendsFilterOfPeriodAndReturnsAlarmsTest()
+        {
+            List<PpcAlarmDto> alarms = new List<PpcAlarmDto> { CreateAlarm() };
+            PpcAlarmFilterDto? sentFilter = null;
+            _alarmServer.Setup(server => server.GetPpcAlarms(It.IsAny<PpcAlarmFilterDto>(), It.IsAny<CancellationToken>()))
+                .Callback<PpcAlarmFilterDto, CancellationToken>((filter, _) => sentFilter = filter)
+                .ReturnsAsync(alarms);
+            LunaAlarmManager manager = CreateManager();
+
+            List<PpcAlarmDto> result = await manager.GetPpcAlarmsAsync(TimeSpan.FromHours(8), AlarmSeverityDto.Error, AlarmProcessConditionDto.Abnormal,
+                AlarmSequenceStateDto.Alarm, " PCS 7 ");
+
+            Assert.AreSame(alarms, result);
+            PpcAlarmFilterDto expectedFilter = new PpcAlarmFilterDto
+            {
+                CreatedFrom = new DateTimeOffset(2026, 11, 9, 6, 0, 0, TimeSpan.Zero),
+                SeverityLevel = AlarmSeverityDto.Error,
+                AlarmProcessCondition = AlarmProcessConditionDto.Abnormal,
+                AlarmSequenceState = AlarmSequenceStateDto.Alarm,
+                DeviceName = "PCS 7"
+            };
+            Assert.AreEqual(expectedFilter, sentFilter);
+        }
+
+
+        /// <summary>
+        /// Without criteria only the creation timestamp is set, an empty device name is not sent.
+        /// </summary>
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow("   ")]
+        public async Task GetPpcAlarmsAsyncWithoutCriteriaSendsCreatedFromOnlyTest(string? deviceName)
+        {
+            PpcAlarmFilterDto? sentFilter = null;
+            _alarmServer.Setup(server => server.GetPpcAlarms(It.IsAny<PpcAlarmFilterDto>(), It.IsAny<CancellationToken>()))
+                .Callback<PpcAlarmFilterDto, CancellationToken>((filter, _) => sentFilter = filter)
+                .ReturnsAsync(new List<PpcAlarmDto>());
+            LunaAlarmManager manager = CreateManager();
+
+            await manager.GetPpcAlarmsAsync(TimeSpan.FromDays(30), null, null, null, deviceName);
+
+            PpcAlarmFilterDto expectedFilter = new PpcAlarmFilterDto { CreatedFrom = new DateTimeOffset(2026, 10, 10, 14, 0, 0, TimeSpan.Zero) };
+            Assert.AreEqual(expectedFilter, sentFilter);
+        }
+
+
+        /// <summary>
+        /// A period that is not positive is rejected without calling the alarm service.
+        /// </summary>
+        [TestMethod]
+        [DataRow(0)]
+        [DataRow(-1)]
+        public async Task GetPpcAlarmsAsyncNotPositivePeriodThrowsTest(int hours)
+        {
+            LunaAlarmManager manager = CreateManager();
+
+            Func<Task> getAlarms = () => manager.GetPpcAlarmsAsync(TimeSpan.FromHours(hours), null, null, null, null);
+
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(getAlarms);
+            _alarmServer.Verify(server => server.GetPpcAlarms(It.IsAny<PpcAlarmFilterDto>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+
+        /// <summary>
+        /// When the alarm service is not reachable the exception is passed on, so that the controller answers with the error.
+        /// </summary>
+        [TestMethod]
+        public async Task GetPpcAlarmsAsyncAlarmServiceNotReachableThrowsTest()
+        {
+            _alarmServer.Setup(server => server.GetPpcAlarms(It.IsAny<PpcAlarmFilterDto>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new HttpRequestException("Alarm service not reachable."));
+            LunaAlarmManager manager = CreateManager();
+
+            Func<Task> getAlarms = () => manager.GetPpcAlarmsAsync(TimeSpan.FromHours(8), null, null, null, null);
+
+            await Assert.ThrowsExactlyAsync<HttpRequestException>(getAlarms);
+        }
+
+
+        /// <summary>
         /// Creates the manager.
         /// </summary>
         private LunaAlarmManager CreateManager()
         {
-            return new LunaAlarmManager(NullLogger<LunaAlarmManager>.Instance, _alarmServer.Object);
+            return new LunaAlarmManager(NullLogger<LunaAlarmManager>.Instance, _alarmServer.Object, _timeProvider);
+        }
+
+
+        /// <summary>
+        /// Creates an active error alarm of the over temperature fault of PCS 7.
+        /// </summary>
+        private static PpcAlarmDto CreateAlarm()
+        {
+            return new PpcAlarmDto
+            {
+                Id = 100,
+                PpcAlarmType = PpcAlarmTypeDto.PcsAlarm,
+                DeviceId = 7,
+                DeviceName = "PCS 7",
+                PropertyName = "FaultStates.OverTemperature",
+                AlarmSequenceState = AlarmSequenceStateDto.Alarm,
+                AlarmProcessCondition = AlarmProcessConditionDto.Abnormal,
+                CreatedOn = new DateTimeOffset(2026, 11, 9, 13, 0, 0, TimeSpan.Zero),
+                ChangedBy = "System",
+                ChangedDate = new DateTimeOffset(2026, 11, 9, 13, 0, 0, TimeSpan.Zero),
+                PpcAlarmConfig = new PpcAlarmConfigDto
+                {
+                    AlarmId = "PCS-FAULT",
+                    Name = "{{PCS.Fault.Name}}",
+                    SeverityLevel = AlarmSeverityDto.Error,
+                    Description = "{{PCS.Fault.Desc}}",
+                    PossibleCauses = "{{PCS.Fault.Causes}}"
+                }
+            };
         }
 
 
