@@ -69,6 +69,72 @@ namespace paskalON.Protocols.C37118.IntegrationTest
         }
 
 
+        [TestMethod]
+        public async Task C37ClientServerRestartStreamsDataFramesAgainTest()
+        {
+            int port = GetUnusedPort();
+            PmuDataSimulation simulation = new PmuDataSimulation
+            {
+                StationName = "PMU",
+                StreamId = 16,
+                Frequency = 50,
+                Analogs = new Dictionary<string, AnalogMeasurement> { { "P", new AnalogMeasurement("P", 1.5f) } }.AsReadOnly()
+            };
+            C37Server server = new C37Server(NullLogger<C37Server>.Instance, new[] { simulation }, port, 10);
+
+            try
+            {
+                await server.StartAsync();
+                bool receivedBeforeStop = await ClientReceivesDataFrameAsync(port, 16);
+                await server.StopAsync();
+                C37ServerState stoppedState = server.State;
+                await server.StartAsync();
+                bool receivedAfterRestart = await ClientReceivesDataFrameAsync(port, 16);
+
+                Assert.IsTrue(receivedBeforeStop);
+                Assert.AreEqual(C37ServerState.Idle, stoppedState);
+                Assert.IsTrue(receivedAfterRestart);
+                Assert.AreEqual(C37ServerState.Streaming, server.State);
+            }
+            finally
+            {
+                await server.StopAsync();
+                await server.DisposeAsync();
+            }
+        }
+
+
+        private async Task<bool> ClientReceivesDataFrameAsync(int port, ushort streamId)
+        {
+            C37Client client = new C37Client(NullLogger<C37Client>.Instance, CreateConfiguration(port));
+            TaskCompletionSource<bool> dataReceived = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            client.DataFrameReceived += (_, args) =>
+            {
+                if (args.Header.StreamIdCode == streamId)
+                {
+                    dataReceived.TrySetResult(true);
+                }
+            };
+
+            try
+            {
+                await client.StartStreamingAsync();
+
+                return await dataReceived.Task.WaitAsync(TimeSpan.FromSeconds(3));
+            }
+            catch (TimeoutException)
+            {
+                return false;
+            }
+            finally
+            {
+                await client.StopStreamingAsync();
+                await client.DisposeAsync();
+            }
+        }
+
+
         private ClientConnectionConfig CreateConfiguration(int port)
         {
             return new ClientConnectionConfig

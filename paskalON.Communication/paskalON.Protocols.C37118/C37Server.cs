@@ -185,6 +185,17 @@ namespace paskalON.Protocols.C37118
                 {
                     // Expected when active streaming sessions are canceled during shutdown.
                 }
+                catch (Exception ex) when (ex is IOException or SocketException)
+                {
+                    // A session already ended because the client dropped the connection.
+                    _logger.LogInformation("C37 client session ended with a network error. {Error}", ex.Message);
+                }
+
+                lock (_clientSessions)
+                {
+                    // All sessions have ended, a restart must not wait for them again.
+                    _clientSessions.Clear();
+                }
 
                 State = C37ServerState.Idle;
             }
