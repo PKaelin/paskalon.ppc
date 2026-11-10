@@ -2,7 +2,6 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -22,18 +21,21 @@ using paskalON.Alarms.Infrastructure.Storage;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
 using paskalON.Alarms.Service.Publishers;
 using paskalON.Alarms.Service.Workers;
+using paskalON.Devices.Client;
+using paskalON.Devices.Client.Subscribers;
 using paskalON.Devices.Dto.EnergyResources.Solars;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.Meters.PowerMeters.Concretes;
 using paskalON.Devices.Dto.PowerConversionSystems;
-using paskalON.OperatingModes.Dto.Powers;
-using paskalON.PowerControls.Dto.Powers;
 using paskalON.Hosting;
 using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
 using paskalON.Messaging.RabbitMq;
 using paskalON.Messaging.Redis;
+using paskalON.OperatingModes.Dto.Powers;
+using paskalON.PowerControls.Dto.Powers;
 using StackExchange.Redis;
+using System.Runtime.CompilerServices;
 
 // Name of this service in the heartbeat and the source instance of the published messages
 const string serviceName = "Alarm";
@@ -65,6 +67,15 @@ try
     string rabbitMqConnectionString = (await File.ReadAllTextAsync(rabbitMqConnectionFile)).Trim();
     ArgumentOutOfRangeException.ThrowIfNullOrEmpty(rabbitMqConnectionString, "Cannot find the RabbitMQ connection string definition");
     Uri rabbitMqConnectionUri = new Uri(rabbitMqConnectionString);
+
+    // Get device service connection string (for the names of the devices of the alarms)
+    string? dsConnectionStringFile = Environment.GetEnvironmentVariable("DEVICESERVICE_CONNECTION_FILE");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsConnectionStringFile, "Cannot find the device service secret file. DEVICESERVICE_CONNECTION_FILE");
+    string dsConnectionString = (await File.ReadAllTextAsync(dsConnectionStringFile)).Trim();
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsConnectionString, "Cannot find the device service connection string definition");
+    // Get device service endpoint
+    string? dsEndpoint = Environment.GetEnvironmentVariable("DEVICE_SERVICE_ENDPOINT");
+    ArgumentOutOfRangeException.ThrowIfNullOrEmpty(dsEndpoint, "Cannot find the device service endpoint. DEVICE_SERVICE_ENDPOINT");
 
     // Get Logging, Metrics, Tracing endpoint strings
     string? logEndpointString = Environment.GetEnvironmentVariable("TELEMETRY_LOGGING_ENDPOINT");
@@ -121,6 +132,16 @@ try
     builder.Services.AddScoped<IPpcAlarmQueryHandler, PpcAlarmQueryHandler>();
     // Reads the texts of the localization keys of the alarm configurations for the user interface
     builder.Services.AddScoped<ILocalizedTextQueryHandler, LocalizedTextQueryHandler>();
+
+    // Device client with the DER of the device service, the raised alarms get the name of their device from it
+    Uri dsBaseAddress = new Uri($"{dsConnectionString.TrimEnd('/')}/{dsEndpoint.Trim('/')}/");
+    builder.Services.AddKeyedSingleton(nameof(DeviceServer), (_, _) => new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
+    {
+        BaseAddress = dsBaseAddress,
+        Timeout = TimeSpan.FromSeconds(10)
+    });
+    builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(sp.GetRequiredKeyedService<HttpClient>(nameof(DeviceServer))));
+    builder.Services.AddSingleton<IDeviceClient, DeviceClient>();
 
     // Add subscriptions of the published data: the subscriber queues the received data, the handler service evaluates it in order.
     // Do not abort when Redis is not reachable at startup, the multiplexer keeps retrying to connect in the background.
@@ -217,6 +238,12 @@ try
 
         PpcAlarmDelayService delayService = app.Services.GetRequiredService<PpcAlarmDelayService>();
         delayService.Initialize(systemConfig.AlarmDelayCheckIntervalMilliseconds);
+        // Load the DER (device names) before subscribing, so that the first raised alarm already gets its device name.
+        // No subscriber topics are passed on purpose: the device client only keeps the latest state of every device and
+        // signals no detail data, the alarm evaluation needs every received message with its publisher and receive time
+        // in order, which the alarm subscriber (SubscribePublishedData) provides. Topics would subscribe the same data twice.
+        IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
+        await startupRetry.ExecuteAsync("Initialize device client", () => deviceClient.Initialize(new SubscriberTopic()), HttpTransientExceptionFilter.IsTransient);
 
         if (startPublisher == true)
         {

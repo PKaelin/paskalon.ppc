@@ -40,6 +40,8 @@ services:
       - DATABASE_CONNECTION_FILE=/run/secrets/database_connection
       - MESSAGING_CONNECTION_FILE=/run/secrets/messaging_connection
       - RABBITMQ_CONNECTION_FILE=/run/secrets/rabbitmq_connection
+      - DEVICESERVICE_CONNECTION_FILE=/run/secrets/deviceservice_connection
+      - DEVICE_SERVICE_ENDPOINT=/api/v1
       - TELEMETRY_LOGGING_ENDPOINT=http://collector:4317
       - TELEMETRY_METRICS_ENDPOINT=http://collector:4317
       - TELEMETRY_TRACING_ENDPOINT=http://collector:4317
@@ -49,6 +51,7 @@ services:
       - database_connection
       - messaging_connection
       - rabbitmq_connection
+      - deviceservice_connection
     networks:
       - ppc.network
 
@@ -59,6 +62,8 @@ secrets:
     file: ./secrets/messaging_connection
   rabbitmq_connection:
     file: ./secrets/rabbitmq_connection
+  deviceservice_connection:
+    file: ./secrets/deviceservice_connection
   db_user:
     file: ./secrets/db_user
   db_password:

@@ -18,6 +18,9 @@ using paskalON.Alarms.Dto.Actions;
 using paskalON.Alarms.Dto.Summaries;
 using paskalON.Alarms.Infrastructure.Storage.Outboxes;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
+using paskalON.Devices.Client;
+using paskalON.Devices.Dto.EnergyResources.Solars;
+using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.PowerConversionSystems;
 using System.Text.Json;
 
@@ -63,6 +66,12 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
         /// Mocked outbox signal.
         /// </summary>
         private readonly Mock<IAlarmActionOutboxSignal> _outboxSignal = new Mock<IAlarmActionOutboxSignal>();
+
+
+        /// <summary>
+        /// Mocked device client with PCS 7 and battery bank 7 (the same device id of another device type).
+        /// </summary>
+        private readonly Mock<IDeviceClient> _deviceClient = new Mock<IDeviceClient>();
 
 
         /// <summary>
@@ -145,6 +154,14 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
                 .ReturnsAsync(1);
             _outboxRepository.Setup(repository => repository.Add(It.IsAny<IEnumerable<AlarmActionOutboxMessage>>()))
                 .Callback<IEnumerable<AlarmActionOutboxMessage>>(messages => _addedMessages.AddRange(messages));
+            _deviceClient.Setup(client => client.PowerConversionSystems).Returns(new List<PcsDto>
+            {
+                new PcsDto(new PcsDefinitionDto { DeviceId = 7, TargetAddress = "10.0.0.7", TargetPort = 502, Name = "PCS Bess 7" })
+            });
+            _deviceClient.Setup(client => client.BatteryBanks).Returns(new List<BbDto>
+            {
+                new BbDto(new BbDefinitionDto { DeviceId = 7, TargetAddress = "10.0.0.70", TargetPort = 502, Name = "BB 7.1" })
+            });
         }
 
 
@@ -177,6 +194,39 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
             List<PpcAlarm> cachedAlarms = await _activeCache.GetActiveAsync(Pcs7Key, _alarmRepository.Object);
             Assert.AreSame(_addedAlarms[0], cachedAlarms.Single());
+        }
+
+
+        /// <summary>
+        /// A raised alarm gets the name of the device of its type with its device id, the power control alarms the name of the PCS.
+        /// A device that is not in the DER leaves the name empty.
+        /// </summary>
+        /// <param name="ppcAlarmType">PPC alarm type of the publisher.</param>
+        /// <param name="deviceId">Device id of the publisher.</param>
+        /// <param name="expectedDeviceName">Expected device name of the raised alarm.</param>
+        [TestMethod]
+        [DataRow(PpcAlarmType.PcsAlarm, 7, "PCS Bess 7")]
+        [DataRow(PpcAlarmType.BatteryAlarm, 7, "BB 7.1")]
+        [DataRow(PpcAlarmType.PowerControlAlarm, 7, "PCS Bess 7")]
+        [DataRow(PpcAlarmType.PcsAlarm, 8, null)]
+        [DataRow(PpcAlarmType.SolarPanelAlarm, 7, null)]
+        public async Task HandleAsyncRaisedAlarmGetsDeviceNameOfTypeTest(PpcAlarmType ppcAlarmType, int deviceId, string? expectedDeviceName)
+        {
+            PpcAlarmKey key = new PpcAlarmKey { PpcAlarmType = ppcAlarmType, DeviceId = deviceId };
+            // The fault configuration with the alarm type of the publisher, the evaluator only uses configurations of its type
+            PpcAlarmConfig config = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            config.PpcAlarmType = ppcAlarmType;
+            _configCache.Setup(cache => cache.GetEnabled(ppcAlarmType)).Returns(new List<PpcAlarmConfig> { config });
+            _alarmRepository.Setup(repository => repository.GetActiveAsync(key, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<PpcAlarm>());
+            _deviceClient.Setup(client => client.SolarPanels).Returns(new List<PvDto>());
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+
+            await handler.HandleAsync(key, CreatePcsDetail(overTemperature: true), ReceivedOn);
+
+            PpcAlarm alarm = _addedAlarms.Single();
+            Assert.AreEqual(deviceId, alarm.DeviceId);
+            Assert.AreEqual(expectedDeviceName, alarm.DeviceName);
         }
 
 
@@ -546,7 +596,7 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
 
             return new PpcAlarmHandler(NullLogger<PpcAlarmHandler>.Instance, valueStore, new PpcAlarmEvaluator(),
                 _configCache.Object, _activeCache, _alarmRepository.Object, _outboxRepository.Object, _outboxSignal.Object, _writeLock,
-                _timeProvider, _pendingTransitions);
+                _timeProvider, _pendingTransitions, _deviceClient.Object);
         }
 
 

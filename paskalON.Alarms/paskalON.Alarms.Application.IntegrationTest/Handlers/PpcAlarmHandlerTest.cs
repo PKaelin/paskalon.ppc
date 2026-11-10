@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
 using paskalON.Alarms.Application.Caches;
 using paskalON.Alarms.Application.Handlers;
+using paskalON.Alarms.Application.IntegrationTest.TestDoubles;
 using paskalON.Alarms.Application.Outboxes;
 using paskalON.Alarms.Application.Stores;
 using paskalON.Alarms.Domain;
@@ -98,6 +99,12 @@ namespace paskalON.Alarms.Application.IntegrationTest.Handlers
 
 
         /// <summary>
+        /// Device client with PCS 7, a singleton in the service initialized with the DER of the device service.
+        /// </summary>
+        private readonly InMemoryDeviceClient _deviceClient = new InMemoryDeviceClient();
+
+
+        /// <summary>
         /// Seeds the PCS fault configuration with the raise action ReducePower and the normalize action ResetPower.
         /// </summary>
         protected override async Task SeedAsync(AlarmContext db)
@@ -147,6 +154,26 @@ namespace paskalON.Alarms.Application.IntegrationTest.Handlers
             CollectionAssert.AreEqual(new List<int> { 1, 0 }, actions.Select(action => action.AlarmSummary.ErrorCount).ToList());
             Assert.AreEqual(ConfiguredOn, (await context.PpcAlarmConfigs.SingleAsync()).ChangedDate);
             Assert.IsEmpty(await _activeCache.GetActiveAsync(Pcs7Key, new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context)));
+        }
+
+
+        /// <summary>
+        /// A raised alarm is saved with the name of its device and keeps it when it is normalized in another context.
+        /// </summary>
+        [TestMethod]
+        public async Task HandleAsyncRaisedAlarmPersistsDeviceNameTest()
+        {
+            _deviceClient.PowerConversionSystems.Add(new PcsDto(new PcsDefinitionDto { DeviceId = 7, TargetAddress = "10.0.0.7", TargetPort = 502, Name = "PCS Bess 7" }));
+            await LoadCachesAsync();
+            await HandleAsync(CreatePcsDetail(overTemperature: true, gridLoss: false), ReceivedOn);
+
+            await HandleAsync(CreatePcsDetail(overTemperature: false, gridLoss: false), ReceivedOn.AddSeconds(5));
+
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarm alarm = await context.PpcAlarms.SingleAsync();
+            Assert.AreEqual(7, alarm.DeviceId);
+            Assert.AreEqual("PCS Bess 7", alarm.DeviceName);
+            Assert.AreEqual(AlarmSequenceState.Normal, alarm.AlarmSequenceState);
         }
 
 
@@ -321,7 +348,7 @@ namespace paskalON.Alarms.Application.IntegrationTest.Handlers
             return new PpcAlarmHandler(NullLogger<PpcAlarmHandler>.Instance, valueStore, new PpcAlarmEvaluator(),
                 configCache, activeCache, new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context),
                 new AlarmActionOutboxRepository(NullLogger<AlarmActionOutboxRepository>.Instance, context), _outboxSignal,
-                _writeLock, _timeProvider, _pendingTransitions);
+                _writeLock, _timeProvider, _pendingTransitions, _deviceClient);
         }
 
 

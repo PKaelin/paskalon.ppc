@@ -17,6 +17,7 @@ using paskalON.Alarms.Dto.Actions;
 using paskalON.Alarms.Dto.Summaries;
 using paskalON.Alarms.Infrastructure.Storage.Outboxes;
 using paskalON.Alarms.Infrastructure.Storage.Repositories;
+using paskalON.Devices.Client;
 
 namespace paskalON.Alarms.Application.Handlers
 {
@@ -96,6 +97,12 @@ namespace paskalON.Alarms.Application.Handlers
 
 
         /// <summary>
+        /// Device client with the devices of the DER, the raised alarms get the name of their device from it.
+        /// </summary>
+        private readonly IDeviceClient _deviceClient;
+
+
+        /// <summary>
         /// Constructor of <see cref="PpcAlarmHandler"/>.
         /// </summary>
         /// <param name="logger">Logger instance.</param>
@@ -109,10 +116,11 @@ namespace paskalON.Alarms.Application.Handlers
         /// <param name="writeLock">Lock of the alarm writers.</param>
         /// <param name="timeProvider">Time provider of the normalization of orphaned alarms, the delayed alarms and the alarm summaries.</param>
         /// <param name="pendingTransitions">Delayed raises and normalizations of the alarms.</param>
+        /// <param name="deviceClient">Device client with the devices of the DER, the raised alarms get the name of their device from it.</param>
         public PpcAlarmHandler(ILogger<PpcAlarmHandler> logger, IPpcAlarmValueStore valueStore, IPpcAlarmEvaluator evaluator,
             IPpcAlarmConfigCache configCache, IPpcAlarmActiveCache activeCache, IPpcAlarmRepository alarmRepository,
             IAlarmActionOutboxRepository outboxRepository, IAlarmActionOutboxSignal outboxSignal, IPpcAlarmWriteLock writeLock,
-            TimeProvider timeProvider, PpcAlarmPendingTransitions pendingTransitions)
+            TimeProvider timeProvider, PpcAlarmPendingTransitions pendingTransitions, IDeviceClient deviceClient)
         {
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(valueStore);
@@ -125,6 +133,7 @@ namespace paskalON.Alarms.Application.Handlers
             ArgumentNullException.ThrowIfNull(writeLock);
             ArgumentNullException.ThrowIfNull(timeProvider);
             ArgumentNullException.ThrowIfNull(pendingTransitions);
+            ArgumentNullException.ThrowIfNull(deviceClient);
 
             _logger = logger;
             _valueStore = valueStore;
@@ -137,6 +146,7 @@ namespace paskalON.Alarms.Application.Handlers
             _writeLock = writeLock;
             _timeProvider = timeProvider;
             _pendingTransitions = pendingTransitions;
+            _deviceClient = deviceClient;
         }
 
 
@@ -300,9 +310,17 @@ namespace paskalON.Alarms.Application.Handlers
         /// <remarks>
         /// The evaluation is applied to the cache before the save, so that the alarm summary sent with the actions
         /// contains it. When the save fails the callers invalidate the publisher, its alarms are loaded again from the database.
+        /// The raised alarms get the name of their device.
         /// </remarks>
         private async Task SaveEvaluationAsync(PpcAlarmKey key, PpcAlarmEvaluation evaluation, CancellationToken cancellationToken)
         {
+            string? deviceName = GetDeviceName(key);
+
+            foreach (PpcAlarm alarm in evaluation.Raised)
+            {
+                alarm.DeviceName = deviceName;
+            }
+
             _activeCache.Apply(key, evaluation);
             AlarmSummaryDto alarmSummary = await _activeCache.GetSummaryAsync(_alarmRepository, _timeProvider.GetUtcNow(), cancellationToken);
             List<AlarmActionOutboxMessage> messages = CreateOutboxMessages(evaluation, alarmSummary);
@@ -319,6 +337,36 @@ namespace paskalON.Alarms.Application.Handlers
 
             _logger.LogInformation("Alarms of {PpcAlarmType} device {DeviceId}: {RaisedCount} raised, {NormalizedCount} normalized.",
                 key.PpcAlarmType, key.DeviceId, evaluation.Raised.Count, evaluation.Normalized.Count);
+        }
+
+
+        /// <summary>
+        /// Gets the name of the device of the publisher from the DER of the device client.
+        /// </summary>
+        /// <remarks>
+        /// The device ids are only unique per device type (e.g. PCS 21 and battery bank 21), therefore the device is searched
+        /// in the devices of the type of the publisher. The power control publishes the targets with the device id of the PCS.
+        /// </remarks>
+        /// <param name="key">Publisher of the data: the PPC alarm type and the device id.</param>
+        /// <returns>The name of the device, null if the publisher is not a device or the device is not in the DER.</returns>
+        private string? GetDeviceName(PpcAlarmKey key)
+        {
+            if (key.DeviceId is not int deviceId)
+            {
+                return null;
+            }
+
+            return key.PpcAlarmType switch
+            {
+                PpcAlarmType.PcsAlarm or PpcAlarmType.PowerControlAlarm => _deviceClient.PowerConversionSystems.FirstOrDefault(device => device.DeviceId == deviceId)?.Name,
+                PpcAlarmType.BatteryAlarm => _deviceClient.BatteryBanks.FirstOrDefault(device => device.DeviceId == deviceId)?.Name,
+                PpcAlarmType.SolarPanelAlarm => _deviceClient.SolarPanels.FirstOrDefault(device => device.DeviceId == deviceId)?.Name,
+                PpcAlarmType.ExternalPowerMeterAlarm => _deviceClient.ExternalPowerMeters.FirstOrDefault(device => device.DeviceId == deviceId)?.Name,
+                PpcAlarmType.AuxiliaryPowerMeterAlarm => _deviceClient.AuxiliaryPowerMeters.FirstOrDefault(device => device.DeviceId == deviceId)?.Name,
+                PpcAlarmType.CircuitPowerMeterAlarm => _deviceClient.CircuitPowerMeters.FirstOrDefault(device => device.DeviceId == deviceId)?.Name,
+                PpcAlarmType.SystemPowerMeterAlarm => _deviceClient.SystemPowerMeters.FirstOrDefault(device => device.DeviceId == deviceId)?.Name,
+                _ => null
+            };
         }
 
 
