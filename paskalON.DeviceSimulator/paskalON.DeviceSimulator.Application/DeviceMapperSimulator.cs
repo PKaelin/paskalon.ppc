@@ -32,6 +32,18 @@ namespace paskalON.DeviceSimulator.Application
     public class DeviceMapperSimulator
     {
         /// <summary>
+        /// Simulation state of a power meter whose C37 server streams data.
+        /// </summary>
+        public const string PowerMeterStreamingState = "Streaming";
+
+
+        /// <summary>
+        /// Simulation state of a power meter whose C37 server is stopped (communication loss).
+        /// </summary>
+        public const string PowerMeterStoppedState = "Stopped";
+
+
+        /// <summary>
         /// Simulation store registry.
         /// </summary>
         private readonly ISimulationStoreRegistry _stores;
@@ -50,7 +62,7 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
-        /// Gets whether the Modbus server of an endpoint (address, port) answers requests.
+        /// Gets whether the Modbus or C37 server of an endpoint (address, port) answers requests.
         /// </summary>
         private readonly Func<string, int, bool> _isResponding;
 
@@ -61,7 +73,7 @@ namespace paskalON.DeviceSimulator.Application
         /// <param name="stores">Simulation store registry.</param>
         /// <param name="streams">Simulation stream registry.</param>
         /// <param name="simulations">Registry of the simulated devices.</param>
-        /// <param name="isResponding">Gets whether the Modbus server of an endpoint (address, port) answers requests.</param>
+        /// <param name="isResponding">Gets whether the Modbus or C37 server of an endpoint (address, port) answers requests.</param>
         public DeviceMapperSimulator(ISimulationStoreRegistry stores, ISimulationStreamRegistry streams, SimulationDeviceRegistry simulations,
             Func<string, int, bool> isResponding)
         {
@@ -149,7 +161,8 @@ namespace paskalON.DeviceSimulator.Application
                 {
                     DeviceId = meter.DeviceId,
                     Name = meter.Name,
-                    Endpoints = MapC37Endpoints(meter).Cast<object>().ToList()
+                    Endpoints = MapC37Endpoints(meter).Cast<object>().ToList(),
+                    Simulation = MapPowerMeterSimulation(meter)
                 })
                 .ToList();
         }
@@ -328,7 +341,13 @@ namespace paskalON.DeviceSimulator.Application
         {
             ArgumentNullException.ThrowIfNull(device);
 
-            return new PmSystemDto { DeviceId = device.DeviceId, Name = device.Name, Endpoints = MapC37Endpoints(device) };
+            return new PmSystemDto
+            {
+                DeviceId = device.DeviceId,
+                Name = device.Name,
+                Endpoints = MapC37Endpoints(device),
+                Simulation = MapPowerMeterSimulation(device)
+            };
         }
 
 
@@ -339,7 +358,13 @@ namespace paskalON.DeviceSimulator.Application
         {
             ArgumentNullException.ThrowIfNull(device);
 
-            return new PmExternalDto { DeviceId = device.DeviceId, Name = device.Name, Endpoints = MapC37Endpoints(device) };
+            return new PmExternalDto
+            {
+                DeviceId = device.DeviceId,
+                Name = device.Name,
+                Endpoints = MapC37Endpoints(device),
+                Simulation = MapPowerMeterSimulation(device)
+            };
         }
 
 
@@ -350,7 +375,13 @@ namespace paskalON.DeviceSimulator.Application
         {
             ArgumentNullException.ThrowIfNull(device);
 
-            return new PmAuxiliaryDto { DeviceId = device.DeviceId, Name = device.Name, Endpoints = MapC37Endpoints(device) };
+            return new PmAuxiliaryDto
+            {
+                DeviceId = device.DeviceId,
+                Name = device.Name,
+                Endpoints = MapC37Endpoints(device),
+                Simulation = MapPowerMeterSimulation(device)
+            };
         }
 
 
@@ -361,7 +392,36 @@ namespace paskalON.DeviceSimulator.Application
         {
             ArgumentNullException.ThrowIfNull(device);
 
-            return new PmCircuitDto { DeviceId = device.DeviceId, Name = device.Name, Endpoints = MapC37Endpoints(device) };
+            return new PmCircuitDto
+            {
+                DeviceId = device.DeviceId,
+                Name = device.Name,
+                Endpoints = MapC37Endpoints(device),
+                Simulation = MapPowerMeterSimulation(device)
+            };
+        }
+
+
+        /// <summary>
+        /// Maps the simulation state (C37 communication) of a power meter.
+        /// </summary>
+        /// <param name="device">The power meter.</param>
+        /// <returns>The simulation DTO. Power meters have no event registers.</returns>
+        public SimulationDto MapPowerMeterSimulation(PowerMeterBase device)
+        {
+            ArgumentNullException.ThrowIfNull(device);
+
+            bool isResponding = _isResponding(device.TargetAddress, device.TargetPort);
+
+            return new SimulationDto
+            {
+                DeviceType = SimulationDeviceType.PowerMeter,
+                State = isResponding ? PowerMeterStreamingState : PowerMeterStoppedState,
+                IsResponding = isResponding,
+                HasWarningRegister = false,
+                HasFaultRegister = false,
+                HasVendorEventRegister = false
+            };
         }
 
 

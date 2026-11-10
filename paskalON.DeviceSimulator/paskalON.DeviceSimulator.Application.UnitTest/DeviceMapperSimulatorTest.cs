@@ -2,6 +2,13 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
+using paskalON.Dataface.C37s;
+using paskalON.Devices.Domain.Configs;
+using paskalON.Devices.Domain.Configs.Ders;
+using paskalON.Devices.Domain.Configs.Meters.PowerMeters;
+using paskalON.Devices.Equipments.Meters.PowerMeters.Simples;
 using paskalON.DeviceSimulator.Dto.Simulations;
 using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries;
 using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries.Simples;
@@ -9,7 +16,11 @@ using paskalON.DeviceSimulator.Equipments.Grids;
 using paskalON.DeviceSimulator.Equipments.PowerConversionSystems;
 using paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples;
 using paskalON.DeviceSimulator.Equipments.Simulations;
+using paskalON.PhysicalUnits.Electricals.Powers;
+using paskalON.Protocols.C37118;
 using paskalON.Protocols.Modbus.Stores;
+using paskalON.Telemetry;
+using System.Net.Sockets;
 
 namespace paskalON.DeviceSimulator.Application.UnitTest
 {
@@ -19,6 +30,52 @@ namespace paskalON.DeviceSimulator.Application.UnitTest
         private static DeviceMapperSimulator CreateMapper(Func<string, int, bool> isResponding)
         {
             return new DeviceMapperSimulator(new SimulationStoreRegistry(), new SimulationStreamRegistry(), new SimulationDeviceRegistry(), isResponding);
+        }
+
+
+        private static SystemPowerMeterSimpleV1Proxy CreateSystemPowerMeter()
+        {
+            Mock<DerConfig> derConfig = new Mock<DerConfig>();
+            derConfig.SetupGet(x => x.Name).Returns("DerConfig");
+
+            SystemPowerMeterConfig meterConfig = new SystemPowerMeterConfig
+            {
+                ChangedBy = "Test",
+                Name = "System Power Meter",
+                IsActive = true,
+                DeviceId = 21,
+                PowerFactorStandard = PowerFactorStandard.IEEE,
+                DerConfig = derConfig.Object,
+                PowerMeterDeviceConfig = new PowerMeterDeviceConfig
+                {
+                    ChangedBy = "Test",
+                    Name = "System Power Meter Device",
+                    ClassName = "paskalON.Devices.Equipments.Meters.PowerMeters.Simples.SystemPowerMeterSimpleV1Proxy",
+                    IsCurrentSigned = true,
+                    PowerMeterMapC37Config = new PowerMeterMapC37Config
+                    {
+                        ChangedBy = "Test",
+                        Name = "PowerMeterMapC37Config",
+                        ActivePower = "Analog1",
+                        ReactivePower = "Analog5"
+                    }
+                },
+                C37Config = new C37Config
+                {
+                    ChangedBy = "Test",
+                    Name = "C37Config",
+                    C37ConnectionConfig = new C37ConnectionConfig { ChangedBy = "Test", Name = "C37Config for all" },
+                    AddressFamily = AddressFamily.InterNetwork,
+                    StationName = "PMU",
+                    StreamId = 1,
+                    Address = "paskalon.devicesimulator.service",
+                    Port = 4712,
+                    TransportLayer = C37TransportLayer.TCP
+                }
+            };
+
+            return new SystemPowerMeterSimpleV1Proxy(NullLogger.Instance, meterConfig, new Mock<IMetricsPublisher>().Object,
+                new Mock<IC37Dataface>().Object, new Mock<IC37Client>().Object);
         }
 
 
@@ -99,6 +156,47 @@ namespace paskalON.DeviceSimulator.Application.UnitTest
             Assert.AreEqual(87.5, dto.UsableStateOfCharge);
             Assert.AreEqual((ushort)0, dto.Fault);
             Assert.IsNull(dto.SlowActivePowerByPercent);
+        }
+
+
+        [TestMethod]
+        [DataRow(true, DeviceMapperSimulator.PowerMeterStreamingState)]
+        [DataRow(false, DeviceMapperSimulator.PowerMeterStoppedState)]
+        public void MapPowerMeterSimulationMapsCommunicationTest(bool isResponding, string expectedState)
+        {
+            SystemPowerMeterSimpleV1Proxy meter = CreateSystemPowerMeter();
+            string? requestedAddress = null;
+            int requestedPort = 0;
+            DeviceMapperSimulator mapper = CreateMapper((address, port) =>
+            {
+                requestedAddress = address;
+                requestedPort = port;
+
+                return isResponding;
+            });
+
+            SimulationDto dto = mapper.MapPowerMeterSimulation(meter);
+
+            Assert.AreEqual(SimulationDeviceType.PowerMeter, dto.DeviceType);
+            Assert.AreEqual(expectedState, dto.State);
+            Assert.AreEqual(isResponding, dto.IsResponding);
+            Assert.AreEqual("paskalon.devicesimulator.service", requestedAddress);
+            Assert.AreEqual(4712, requestedPort);
+            Assert.IsFalse(dto.HasWarningRegister);
+            Assert.IsFalse(dto.HasFaultRegister);
+            Assert.IsFalse(dto.HasVendorEventRegister);
+            Assert.IsNull(dto.Warning);
+            Assert.IsNull(dto.Fault);
+            Assert.IsNull(dto.VendorEvent);
+        }
+
+
+        [TestMethod]
+        public void MapPowerMeterSimulationNullDeviceThrowsTest()
+        {
+            DeviceMapperSimulator mapper = CreateMapper((address, port) => true);
+
+            Assert.ThrowsExactly<ArgumentNullException>(() => mapper.MapPowerMeterSimulation(null!));
         }
     }
 }

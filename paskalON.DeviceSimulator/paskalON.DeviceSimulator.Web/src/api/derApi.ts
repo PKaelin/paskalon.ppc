@@ -210,7 +210,10 @@ export interface SetCommunicationRequest {
     isResponding: boolean;
 }
 
-/** Starts (true) or stops (false, communication loss) answering Modbus requests of a device. */
+/**
+ * Starts (true) or stops (false, communication loss) answering Modbus requests of a PCS / battery bank
+ * or streaming the C37 data of a power meter. All devices on the same endpoint (port) are affected.
+ */
 export async function setCommunication(request: SetCommunicationRequest): Promise<void> {
     await postSimulation('setcommunication', request, 'Changing the communication');
 }

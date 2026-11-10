@@ -5,7 +5,7 @@
 namespace paskalON.DeviceSimulator.Dto.Simulations
 {
     /// <summary>
-    /// Simulation state of a simulated Modbus device.
+    /// Simulation state of a simulated Modbus or C37 device.
     /// </summary>
     public record SimulationDto
     {
@@ -16,13 +16,13 @@ namespace paskalON.DeviceSimulator.Dto.Simulations
 
 
         /// <summary>
-        /// Vendor independent simulated state (e.g. Off, On, Standby, Fault, Disconnected, PreCharging, Connected).
+        /// Vendor independent simulated state (e.g. Off, On, Standby, Fault, Disconnected, PreCharging, Connected, Streaming, Stopped).
         /// </summary>
         public required string State { get; init; }
 
 
         /// <summary>
-        /// Flag whether the device answers Modbus requests (false simulates a communication loss).
+        /// Flag whether the device answers Modbus requests or streams C37 data (false simulates a communication loss).
         /// </summary>
         public required bool IsResponding { get; init; }
 

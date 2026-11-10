@@ -7,7 +7,7 @@ using paskalON.DeviceSimulator.Dto.Simulations;
 namespace paskalON.DeviceSimulator.Service.Dto.V1.Requests
 {
     /// <summary>
-    /// Starts or stops answering Modbus requests of a simulated PCS or battery bank (communication loss).
+    /// Starts or stops answering Modbus requests of a simulated PCS or battery bank or streaming the C37 data of a power meter (communication loss).
     /// </summary>
     public class SetCommunicationRequest
     {
@@ -24,7 +24,7 @@ namespace paskalON.DeviceSimulator.Service.Dto.V1.Requests
 
 
         /// <summary>
-        /// True to answer Modbus requests, false to stop answering them (communication loss).
+        /// True to answer Modbus requests or stream C37 data, false to stop it (communication loss).
         /// </summary>
         public bool IsResponding { get; set; }
     }

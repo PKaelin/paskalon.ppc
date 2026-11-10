@@ -7,9 +7,9 @@ import { setCommunication, setEvents, slowDownPower } from '@/api/derApi';
 import { useNotifications } from '@/composables/useNotifications';
 
 /**
- * Simulation controls of a simulated PCS or battery bank:
- *   - warning / fault / vendor event bitmask injection
- *   - communication loss (the Modbus server stops answering)
+ * Simulation controls of a simulated PCS, battery bank or power meter:
+ *   - warning / fault / vendor event bitmask injection (PCS, battery bank)
+ *   - communication loss (the Modbus server stops answering / the C37 server stops streaming)
  *   - PCS only: slow down the power response
  *
  * Successful changes are written into the simulation DTO right away, the next refresh /
@@ -19,7 +19,7 @@ const props = defineProps<{
     simulation: SimulationDto;
     deviceId: number;
     deviceName: string;
-    isPowerConversionSystem: boolean;
+    deviceType: SimulationDeviceTypeValue;
 }>();
 
 type EventKind = 'warning' | 'fault' | 'vendorEvent';
@@ -27,9 +27,11 @@ type EventKind = 'warning' | 'fault' | 'vendorEvent';
 const { notify } = useNotifications();
 const busy = ref(false);
 
-const deviceType = computed<SimulationDeviceTypeValue>(() =>
-    props.isPowerConversionSystem ? SimulationDeviceType.PowerConversionSystem : SimulationDeviceType.BatteryBank
-);
+const isPowerConversionSystem = computed(() => props.deviceType === SimulationDeviceType.PowerConversionSystem);
+const isPowerMeter = computed(() => props.deviceType === SimulationDeviceType.PowerMeter);
+
+/** Protocol whose server is stopped to simulate a communication loss. */
+const protocol = computed(() => (isPowerMeter.value ? 'C37' : 'Modbus'));
 
 const stateBadge = computed(() => {
     switch (props.simulation.state) {
@@ -37,6 +39,7 @@ const stateBadge = computed(() => {
             return 'bg-danger';
         case 'On':
         case 'Connected':
+        case 'Streaming':
             return 'bg-success';
         case 'Standby':
         case 'PreCharging':
@@ -48,7 +51,7 @@ const stateBadge = computed(() => {
 
 /** The panel starts collapsed, the header always shows state, active events and communication loss. */
 const isOpen = ref(false);
-const panelId = computed(() => `simulation-${deviceType.value}-${props.deviceId}`);
+const panelId = computed(() => `simulation-${props.deviceType}-${props.deviceId}`);
 
 const hasStateOfCharge = computed(
     () => props.simulation.usableStateOfCharge !== null && props.simulation.usableStateOfCharge !== undefined
@@ -113,7 +116,7 @@ const eventLabels: Record<EventKind, string> = {
 
 async function applyEvent(kind: EventKind, value: number): Promise<void> {
     const applied = await run(
-        () => setEvents({ deviceType: deviceType.value, deviceId: props.deviceId, [kind]: value }),
+        () => setEvents({ deviceType: props.deviceType, deviceId: props.deviceId, [kind]: value }),
         `${props.deviceName} / ${eventLabels[kind]} = ${value} (0x${value.toString(16).toUpperCase()}) written.`
     );
 
@@ -124,9 +127,21 @@ async function applyEvent(kind: EventKind, value: number): Promise<void> {
     props.simulation[kind] = value;
 
     // An injected PCS fault stops the PCS until the controller sends the next command.
-    if (kind === 'fault' && value !== 0 && props.isPowerConversionSystem) {
+    if (kind === 'fault' && value !== 0 && isPowerConversionSystem.value) {
         props.simulation.state = 'Fault';
     }
+}
+
+function communicationMessage(isResponding: boolean): string {
+    if (isPowerMeter.value) {
+        return isResponding
+            ? `${props.deviceName} streams C37 data again.`
+            : `${props.deviceName} stopped streaming C37 data (communication loss).`;
+    }
+
+    return isResponding
+        ? `${props.deviceName} answers Modbus requests again.`
+        : `${props.deviceName} stopped answering Modbus requests (communication loss).`;
 }
 
 async function onCommunicationChange(event: Event): Promise<void> {
@@ -134,14 +149,16 @@ async function onCommunicationChange(event: Event): Promise<void> {
     const isResponding = checkbox.checked;
 
     const applied = await run(
-        () => setCommunication({ deviceType: deviceType.value, deviceId: props.deviceId, isResponding }),
-        isResponding
-            ? `${props.deviceName} answers Modbus requests again.`
-            : `${props.deviceName} stopped answering Modbus requests (communication loss).`
+        () => setCommunication({ deviceType: props.deviceType, deviceId: props.deviceId, isResponding }),
+        communicationMessage(isResponding)
     );
 
     if (applied) {
         props.simulation.isResponding = isResponding;
+
+        if (isPowerMeter.value) {
+            props.simulation.state = isResponding ? 'Streaming' : 'Stopped';
+        }
     } else {
         checkbox.checked = props.simulation.isResponding;
     }
@@ -200,13 +217,18 @@ async function applySlowDown(): Promise<void> {
                                :disabled="busy"
                                @change="onCommunicationChange" />
                         <label class="form-check-label" :for="`responding-${deviceType}-${deviceId}`">
-                            Modbus responding
+                            {{ protocol }} responding
                         </label>
                     </div>
                     <span v-if="!simulation.isResponding" class="badge bg-danger">Communication loss</span>
                 </div>
 
-                <div class="d-flex flex-column gap-1">
+                <p v-if="isPowerMeter" class="simulation-hint mt-1 mb-0">
+                    Switching C37 off stops the C37 server of the meter's port: the connection is closed and new connections
+                    are refused (C37 communication error). All power meters streaming on the same port lose the communication too.
+                </p>
+
+                <div v-if="!isPowerMeter" class="d-flex flex-column gap-1">
                     <BitmaskEditor v-if="simulation.hasFaultRegister"
                                    label="Fault"
                                    :model-value="simulation.fault ?? 0"

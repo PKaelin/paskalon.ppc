@@ -68,9 +68,9 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
-        /// C37 servers hosted by the simulator.
+        /// C37 servers hosted by the simulator keyed by their endpoint (address in upper case).
         /// </summary>
-        private readonly List<C37Server> _c37Servers = new List<C37Server>();
+        private readonly Dictionary<(string Address, int Port), C37Server> _c37Servers = new Dictionary<(string Address, int Port), C37Server>();
 
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
-        /// Endpoints of the Modbus servers that simulate a communication loss.
+        /// Endpoints (address in upper case) of the Modbus and C37 servers that simulate a communication loss.
         /// </summary>
         private readonly HashSet<(string Address, int Port)> _notResponding = new HashSet<(string Address, int Port)>();
 
@@ -203,9 +203,11 @@ namespace paskalON.DeviceSimulator.Application
         /// <inheritdoc/>
         public bool IsResponding(string address, int port)
         {
+            ArgumentNullException.ThrowIfNull(address);
+
             lock (_dataLock)
             {
-                return _notResponding.Contains((address, port)) is false;
+                return _notResponding.Contains(Normalize((address, port))) is false;
             }
         }
 
@@ -231,36 +233,25 @@ namespace paskalON.DeviceSimulator.Application
         public async Task SetCommunicationAsync(SimulationDeviceType deviceType, int deviceId, bool isResponding)
         {
             (string Address, int Port) endpoint = FindEndpoint(deviceType, deviceId);
-            NModbusServer? server;
 
-            lock (_dataLock)
+            if (deviceType == SimulationDeviceType.PowerMeter)
             {
-                _modbusServers.TryGetValue(endpoint, out server);
-            }
-
-            if (server is null)
-            {
-                throw new KeyNotFoundException($"No Modbus server exists for {deviceType} with device ID {deviceId}.");
-            }
-
-            if (isResponding)
-            {
-                await server.StartAsync(_cancellationToken);
+                await SetC37CommunicationAsync(deviceType, deviceId, endpoint, isResponding);
             }
             else
             {
-                await server.StopAsync();
+                await SetModbusCommunicationAsync(deviceType, deviceId, endpoint, isResponding);
             }
 
             lock (_dataLock)
             {
                 if (isResponding)
                 {
-                    _notResponding.Remove(endpoint);
+                    _notResponding.Remove(Normalize(endpoint));
                 }
                 else
                 {
-                    _notResponding.Add(endpoint);
+                    _notResponding.Add(Normalize(endpoint));
                 }
             }
 
@@ -282,7 +273,89 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
-        /// Finds the Modbus endpoint of a device.
+        /// Starts or stops the Modbus server of a PCS or battery bank.
+        /// </summary>
+        /// <param name="deviceType">Type of the simulated device.</param>
+        /// <param name="deviceId">Device ID of the simulated device.</param>
+        /// <param name="endpoint">Modbus endpoint of the device.</param>
+        /// <param name="isResponding">True to start, false to stop the server.</param>
+        /// <returns>Task</returns>
+        /// <exception cref="KeyNotFoundException">No Modbus server exists for the endpoint.</exception>
+        private async Task SetModbusCommunicationAsync(SimulationDeviceType deviceType, int deviceId, (string Address, int Port) endpoint, bool isResponding)
+        {
+            NModbusServer? server;
+
+            lock (_dataLock)
+            {
+                _modbusServers.TryGetValue(endpoint, out server);
+            }
+
+            if (server is null)
+            {
+                throw new KeyNotFoundException($"No Modbus server exists for {deviceType} with device ID {deviceId}.");
+            }
+
+            if (isResponding)
+            {
+                await server.StartAsync(_cancellationToken);
+            }
+            else
+            {
+                await server.StopAsync();
+            }
+        }
+
+
+        /// <summary>
+        /// Starts or stops the C37 server of a power meter.
+        /// </summary>
+        /// <param name="deviceType">Type of the simulated device.</param>
+        /// <param name="deviceId">Device ID of the simulated device.</param>
+        /// <param name="endpoint">C37 endpoint of the device.</param>
+        /// <param name="isResponding">True to start, false to stop the server.</param>
+        /// <returns>Task</returns>
+        /// <exception cref="KeyNotFoundException">No C37 server exists for the endpoint.</exception>
+        /// <remarks>
+        /// A C37 server streams all PMU streams of its port, so all power meters on the same port lose the communication.
+        /// </remarks>
+        private async Task SetC37CommunicationAsync(SimulationDeviceType deviceType, int deviceId, (string Address, int Port) endpoint, bool isResponding)
+        {
+            C37Server? server;
+
+            lock (_dataLock)
+            {
+                _c37Servers.TryGetValue(Normalize(endpoint), out server);
+            }
+
+            if (server is null)
+            {
+                throw new KeyNotFoundException($"No C37 server exists for {deviceType} with device ID {deviceId}.");
+            }
+
+            if (isResponding)
+            {
+                await server.StartAsync(_cancellationToken);
+            }
+            else
+            {
+                await server.StopAsync();
+            }
+        }
+
+
+        /// <summary>
+        /// Normalizes an endpoint so that the address is compared case insensitive.
+        /// </summary>
+        /// <param name="endpoint">The endpoint.</param>
+        /// <returns>The endpoint with the address in upper case.</returns>
+        private static (string Address, int Port) Normalize((string Address, int Port) endpoint)
+        {
+            return (endpoint.Address.ToUpperInvariant(), endpoint.Port);
+        }
+
+
+        /// <summary>
+        /// Finds the Modbus or C37 endpoint of a device.
         /// </summary>
         private (string Address, int Port) FindEndpoint(SimulationDeviceType deviceType, int deviceId)
         {
@@ -306,9 +379,31 @@ namespace paskalON.DeviceSimulator.Application
                     }
 
                     break;
+                case SimulationDeviceType.PowerMeter:
+                    PowerMeterBase? meter = AllPowerMeters().FirstOrDefault(device => device.DeviceId == deviceId);
+
+                    if (meter is not null)
+                    {
+                        return (meter.TargetAddress, meter.TargetPort);
+                    }
+
+                    break;
             }
 
             throw new KeyNotFoundException($"No {deviceType} with device ID {deviceId} exists.");
+        }
+
+
+        /// <summary>
+        /// Gets all system, auxiliary, external and circuit power meters.
+        /// </summary>
+        /// <returns>All power meters.</returns>
+        private IEnumerable<PowerMeterBase> AllPowerMeters()
+        {
+            return SystemPowerMeters.Cast<PowerMeterBase>()
+                .Concat(AuxiliaryPowerMeters)
+                .Concat(ExternalPowerMeters)
+                .Concat(CircuitPowerMeters);
         }
 
 
@@ -344,7 +439,12 @@ namespace paskalON.DeviceSimulator.Application
                     .Select(entry => (IPmuDataSimulation)entry.Value)
                     .ToArray();
                 C37Server server = new C37Server(c37Logger, simulations, engineGroup.Key.Port, _dataRate);
-                _c37Servers.Add(server);
+
+                lock (_dataLock)
+                {
+                    _c37Servers[engineGroup.Key] = server;
+                }
+
                 _ = Task.Run(() => server.StartAsync(_cancellationToken));
             }
 
@@ -410,10 +510,7 @@ namespace paskalON.DeviceSimulator.Application
                 }
             }
 
-            IEnumerable<PowerMeterBase> powerMeters = SystemPowerMeters.Cast<PowerMeterBase>()
-                .Concat(AuxiliaryPowerMeters)
-                .Concat(ExternalPowerMeters)
-                .Concat(CircuitPowerMeters);
+            IEnumerable<PowerMeterBase> powerMeters = AllPowerMeters();
             IReadOnlyCollection<PowerConversionSystemSimulationBase> allPcsSimulations = pcsSimulations.Values.ToArray();
 
             foreach (PowerMeterBase device in powerMeters.Where(device => device.TargetStreamId is not 0))
@@ -437,17 +534,19 @@ namespace paskalON.DeviceSimulator.Application
         /// </summary>
         public override async void Dispose()
         {
-            foreach (C37Server server in _c37Servers)
-            {
-                await server.StopAsync();
-                await server.DisposeAsync();
-            }
-
+            List<C37Server> c37Servers;
             List<NModbusServer> modbusServers;
 
             lock (_dataLock)
             {
+                c37Servers = _c37Servers.Values.ToList();
                 modbusServers = _modbusServers.Values.ToList();
+            }
+
+            foreach (C37Server server in c37Servers)
+            {
+                await server.StopAsync();
+                await server.DisposeAsync();
             }
 
             foreach (NModbusServer server in modbusServers)

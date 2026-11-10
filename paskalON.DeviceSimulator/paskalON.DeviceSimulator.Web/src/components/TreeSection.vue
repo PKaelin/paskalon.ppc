@@ -6,6 +6,7 @@ import ModbusEndpointGrid from './ModbusEndpointGrid.vue';
 import C37EndpointGrid from './C37EndpointGrid.vue';
 import SimulationPanel from './SimulationPanel.vue';
 import type { TreeNode } from '@/types/tree';
+import { SimulationDeviceType, type SimulationDeviceTypeValue } from '@/types/der';
 
 /**
  * Renders one node of the tree and - recursively - all of its children.
@@ -19,6 +20,23 @@ const props = defineProps<{
 }>();
 
 const deviceId = computed(() => props.node.deviceId ?? -1);
+
+/** Simulation device type of the node, undefined when the node kind has no simulation panel. */
+const simulationDeviceType = computed<SimulationDeviceTypeValue | undefined>(() => {
+    switch (props.node.kind) {
+        case 'pcs':
+            return SimulationDeviceType.PowerConversionSystem;
+        case 'batteryBank':
+            return SimulationDeviceType.BatteryBank;
+        case 'meterSystem':
+        case 'meterAuxiliary':
+        case 'meterExternal':
+        case 'meterCircuit':
+            return SimulationDeviceType.PowerMeter;
+        default:
+            return undefined;
+    }
+});
 
 const counter = computed(() => {
     const parts: string[] = [];
@@ -48,11 +66,11 @@ const counter = computed(() => {
                       :matched="matchedIds.has(node.id)">
         <PropertyGrid :rows="node.properties" />
 
-        <SimulationPanel v-if="node.simulation && (node.kind === 'pcs' || node.kind === 'batteryBank')"
+        <SimulationPanel v-if="node.simulation && simulationDeviceType !== undefined"
                          :simulation="node.simulation"
                          :device-id="deviceId"
                          :device-name="node.name"
-                         :is-power-conversion-system="node.kind === 'pcs'" />
+                         :device-type="simulationDeviceType" />
 
         <ModbusEndpointGrid v-if="node.modbusEndpoints && node.modbusEndpoints.length > 0"
                             :endpoints="node.modbusEndpoints"

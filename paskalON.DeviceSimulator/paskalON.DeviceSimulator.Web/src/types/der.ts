@@ -42,18 +42,23 @@ export interface C37EndpointDto {
  */
 export const SimulationDeviceType = {
     PowerConversionSystem: 0,
-    BatteryBank: 1
+    BatteryBank: 1,
+    /** Device ids are unique over all power meter types (system, auxiliary, external, circuit). */
+    PowerMeter: 2
 } as const;
 
 export type SimulationDeviceTypeValue = (typeof SimulationDeviceType)[keyof typeof SimulationDeviceType];
 
-/** Simulation state of a simulated PCS or battery bank. */
+/** Simulation state of a simulated PCS, battery bank or power meter. */
 export interface SimulationDto {
     /** Serialized as number or string (JsonStringEnumConverter). */
     deviceType: number | string;
-    /** Vendor independent state, e.g. Off, On, Standby, Fault, Disconnected, PreCharging, Connected. */
+    /**
+     * Vendor independent state, e.g. Off, On, Standby, Fault, Disconnected, PreCharging, Connected.
+     * Power meters: Streaming or Stopped.
+     */
     state: string;
-    /** False while a communication loss is simulated. */
+    /** False while a communication loss is simulated (Modbus not answering / C37 not streaming). */
     isResponding: boolean;
     hasWarningRegister: boolean;
     hasFaultRegister: boolean;
@@ -85,6 +90,8 @@ export interface PvDto extends IDevice {
 
 export interface PmBaseDto extends IDevice {
     endpoints: C37EndpointDto[];
+    /** C37 communication simulation (no event registers). */
+    simulation?: SimulationDto | null;
 }
 
 export type PmSystemDto = PmBaseDto;

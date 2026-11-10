@@ -43,7 +43,7 @@ export interface TreeNode {
     deviceId?: number;
     modbusEndpoints?: ModbusEndpointDto[];
     c37Endpoints?: C37EndpointDto[];
-    /** Simulation state - only set for simulated PCS and battery banks (reference into the DerDto). */
+    /** Simulation state - only set for simulated PCS, battery banks and power meters (reference into the DerDto). */
     simulation?: SimulationDto;
     children: TreeNode[];
 }

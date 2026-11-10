@@ -71,7 +71,8 @@ namespace paskalON.DeviceSimulator.Service.WebApi.Controllers.V1
 
 
         /// <summary>
-        /// Starts or stops answering Modbus requests of a simulated PCS or battery bank (communication loss).
+        /// Starts or stops answering Modbus requests of a simulated PCS or battery bank or streaming the C37 data of a power meter
+        /// (communication loss).
         /// </summary>
         /// <param name="request">The communication request.</param>
         /// <returns>Ok or NotFound when the device does not exist.</returns>

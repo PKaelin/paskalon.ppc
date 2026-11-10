@@ -32,7 +32,7 @@ export interface DeviceUpdate {
     deviceId: number;
     name: string;
     endpoints: (ModbusEndpointDto | C37EndpointDto)[];
-    /** Simulation state of a simulated PCS or battery bank. */
+    /** Simulation state of a simulated PCS, battery bank or power meter. */
     simulation?: SimulationDto | null;
 }
 
@@ -204,7 +204,7 @@ function mergeSimulation(target: AnyDevice, simulation: SimulationDto | null | u
         return;
     }
 
-    const own = target as PcsDto | BbDto;
+    const own = target as PcsDto | BbDto | PmBaseDto;
 
     if (own.simulation) {
         Object.assign(own.simulation, simulation);

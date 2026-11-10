@@ -5,7 +5,7 @@
 namespace paskalON.DeviceSimulator.Dto.Simulations
 {
     /// <summary>
-    /// Type of a simulated Modbus device.
+    /// Type of a simulated device.
     /// </summary>
     /// <remarks>
     /// Device IDs are only unique within one device type, so requests identify a device by its type and device ID.
@@ -21,5 +21,10 @@ namespace paskalON.DeviceSimulator.Dto.Simulations
         /// Battery bank.
         /// </summary>
         BatteryBank = 1,
+
+        /// <summary>
+        /// Power meter (C37 device). Device IDs are unique over all power meter types (system, auxiliary, external, circuit).
+        /// </summary>
+        PowerMeter = 2,
     }
 }

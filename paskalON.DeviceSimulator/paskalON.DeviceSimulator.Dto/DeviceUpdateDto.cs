@@ -32,7 +32,7 @@ namespace paskalON.DeviceSimulator.Dto
 
 
         /// <summary>
-        /// Simulation state or null when the device is not a simulated PCS or battery bank.
+        /// Simulation state or null when the device is not a simulated PCS, battery bank or power meter.
         /// </summary>
         public SimulationDto? Simulation { get; init; }
     }

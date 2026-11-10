@@ -3,6 +3,7 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.DeviceSimulator.Dto.Endpoints;
+using paskalON.DeviceSimulator.Dto.Simulations;
 
 namespace paskalON.DeviceSimulator.Dto.Meters.PowerMeters
 {
@@ -24,5 +25,11 @@ namespace paskalON.DeviceSimulator.Dto.Meters.PowerMeters
         /// List of C37 endpoints.
         /// </summary>
         public required List<C37EndpointDto> Endpoints { get; init; }
+
+
+        /// <summary>
+        /// Simulation state (C37 communication) or null when the power meter is not simulated.
+        /// </summary>
+        public SimulationDto? Simulation { get; init; }
     }
 }

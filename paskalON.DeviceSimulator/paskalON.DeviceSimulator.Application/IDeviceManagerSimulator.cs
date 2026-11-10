@@ -44,9 +44,9 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
-        /// Gets whether the Modbus server of an endpoint answers requests.
+        /// Gets whether the Modbus or C37 server of an endpoint answers requests.
         /// </summary>
-        /// <param name="address">Endpoint address.</param>
+        /// <param name="address">Endpoint address (case insensitive).</param>
         /// <param name="port">Endpoint port.</param>
         /// <returns>False when a communication loss is simulated, otherwise true.</returns>
         bool IsResponding(string address, int port);
@@ -66,13 +66,18 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
-        /// Starts or stops answering Modbus requests of a simulated device to simulate a communication loss.
+        /// Starts or stops answering Modbus requests (PCS, battery bank) or streaming C37 data (power meter) of a simulated device
+        /// to simulate a communication loss.
         /// </summary>
         /// <param name="deviceType">Type of the simulated device.</param>
         /// <param name="deviceId">Device ID of the simulated device.</param>
         /// <param name="isResponding">True to answer requests, false to stop answering (communication loss).</param>
         /// <returns>Task</returns>
-        /// <exception cref="KeyNotFoundException">The device or its Modbus server does not exist.</exception>
+        /// <exception cref="KeyNotFoundException">The device or its Modbus or C37 server does not exist.</exception>
+        /// <remarks>
+        /// The server of the device endpoint is stopped, so all devices sharing the endpoint (e.g. power meters streaming on the
+        /// same C37 port) lose the communication.
+        /// </remarks>
         Task SetCommunicationAsync(SimulationDeviceType deviceType, int deviceId, bool isResponding);
 
 

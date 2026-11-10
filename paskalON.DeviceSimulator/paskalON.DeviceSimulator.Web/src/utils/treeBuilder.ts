@@ -64,6 +64,7 @@ function meterNode(id: string, kind: NodeKind, typeLabel: string, meter: PmBaseD
         deviceId: meter.deviceId,
         properties: deviceProperties(meter),
         c37Endpoints: meter.endpoints ?? [],
+        simulation: meter.simulation ?? undefined,
         children: []
     };
 }
