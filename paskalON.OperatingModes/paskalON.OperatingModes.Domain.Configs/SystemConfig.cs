@@ -269,6 +269,21 @@ namespace paskalON.OperatingModes.Domain.Configs
 
 
         /// <summary>
+        /// The time, in milliseconds, without valid system power meter data (communication error or no active and reactive power)
+        /// after which the system power meter is lost.
+        /// </summary>
+        /// <remarks>
+        /// Without the measurement at the point of interconnection the closed loop operating modes cannot verify their targets.
+        /// While a dependency is lost the operating mode control holds the last setpoint.
+        /// </remarks>
+        public int SystemPowerMeterLossTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyLossTimeoutMilliseconds); field = value; }
+        } = 2000;
+
+
+        /// <summary>
         /// The time, in milliseconds, all dependencies must be available after a loss before the operating mode control resumes.
         /// </summary>
         public int ResumeSettleMilliseconds

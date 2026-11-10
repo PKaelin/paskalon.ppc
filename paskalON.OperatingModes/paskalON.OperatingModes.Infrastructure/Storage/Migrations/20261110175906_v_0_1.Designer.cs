@@ -12,7 +12,7 @@ using paskalON.OperatingModes.Infrastructure.Storage;
 namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(OperatingModeContext))]
-    [Migration("20261029213954_v_0_1")]
+    [Migration("20261110175906_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -252,6 +252,9 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
 
                     b.Property<string>("SubscriberTopicSystemPowerMeterDetail")
                         .HasColumnType("text");
+
+                    b.Property<int>("SystemPowerMeterLossTimeoutMilliseconds")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");

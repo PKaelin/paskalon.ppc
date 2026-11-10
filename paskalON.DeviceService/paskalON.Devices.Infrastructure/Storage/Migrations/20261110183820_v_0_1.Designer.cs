@@ -12,7 +12,7 @@ using paskalON.Devices.Infrastructure.Storage;
 namespace paskalON.Devices.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(DeviceServiceContext))]
-    [Migration("20261020230224_v_0_1")]
+    [Migration("20261110183820_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -131,6 +131,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
 
+                    b.Property<int>("C37ReconnectIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<int>("DeviceFactorCore")
                         .HasColumnType("integer");
 
@@ -144,6 +147,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("MetricsIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ModbusReconnectIntervalMilliseconds")
                         .HasColumnType("integer");
 
                     b.Property<int>("PollingIntervalMilliseconds")

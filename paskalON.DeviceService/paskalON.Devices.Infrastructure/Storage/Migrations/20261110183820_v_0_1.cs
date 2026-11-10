@@ -279,6 +279,8 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                     Type = table.Column<int>(type: "integer", nullable: false),
                     MetricsIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     PollingIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    ModbusReconnectIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    C37ReconnectIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     DeviceIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     DeviceHeartbeatIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     DeviceFactorCore = table.Column<int>(type: "integer", nullable: false),

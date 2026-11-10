@@ -212,6 +212,9 @@ try
         IDeviceClient deviceClient = app.Services.GetRequiredService<IDeviceClient>();
         deviceClient.CoreDataReceived += (_, _) => dependencyHealthMonitor.Signal(DependencyNames.DeviceService);
         await startupRetry.ExecuteAsync("Initialize device client", () => deviceClient.Initialize(topics), HttpTransientExceptionFilter.IsTransient);
+        // Polled after the device client is initialized: the configured system power meters are lost until they deliver valid data
+        dependencyHealthMonitor.RegisterCondition(DependencyNames.SystemPowerMeter, () => SystemPowerMeterAvailability.IsAvailable(deviceClient.Der),
+            TimeSpan.FromMilliseconds(config.SystemPowerMeterLossTimeoutMilliseconds));
         // Create setpoints publisher with the configured topics
         PublisherTopic publisherTopic = PublisherTopic.Create(config);
         ILogger<SetpointsPublisher> setpointsPublisherLogger = app.Services.GetRequiredService<ILogger<SetpointsPublisher>>();

@@ -662,6 +662,7 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     RedisLossTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     PowerControlLossTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     DeviceServiceLossTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    SystemPowerMeterLossTimeoutMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     ResumeSettleMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     SetpointRepublishIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     SubscriberTopicPcsCore = table.Column<string>(type: "text", nullable: true),

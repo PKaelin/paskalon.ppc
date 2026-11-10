@@ -250,6 +250,9 @@ namespace paskalON.OperatingModes.Infrastructure.Storage.Migrations
                     b.Property<string>("SubscriberTopicSystemPowerMeterDetail")
                         .HasColumnType("text");
 
+                    b.Property<int>("SystemPowerMeterLossTimeoutMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 

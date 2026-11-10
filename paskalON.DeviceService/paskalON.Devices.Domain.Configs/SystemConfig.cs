@@ -40,6 +40,13 @@ namespace paskalON.Devices.Domain.Configs
 
 
         /// <summary>
+        /// Indicates the minimum valid reconnect interval value.
+        /// If this value is less than 1000 milliseconds it will cause an exception.
+        /// </summary>
+        private const long MinimumReconnectIntervalMilliseconds = 1000;
+
+
+        /// <summary>
         /// Device service type.
         /// </summary>
         /// <remarks>
@@ -84,6 +91,34 @@ namespace paskalON.Devices.Domain.Configs
             get;
             set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumPollingIntervalMilliseconds); field = value; }
         } = 1000;
+
+
+        /// <summary>
+        /// Interval in milliseconds in which lost Modbus connections are reconnected.
+        /// </summary>
+        /// <remarks>
+        /// Each interval the not connected Modbus engines start a connect attempt including the connect retries of their
+        /// <see cref="ModbusConnectionConfig"/>. A restored device delivers data again within this interval at the latest.
+        /// </remarks>
+        public int ModbusReconnectIntervalMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumReconnectIntervalMilliseconds); field = value; }
+        } = 30000;
+
+
+        /// <summary>
+        /// Interval in milliseconds in which lost C37 connections are reconnected.
+        /// </summary>
+        /// <remarks>
+        /// Each interval the not connected C37 engines start a connect attempt including the connect retries of their
+        /// <see cref="C37ConnectionConfig"/>. A restored device delivers data again within this interval at the latest.
+        /// </remarks>
+        public int C37ReconnectIntervalMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumReconnectIntervalMilliseconds); field = value; }
+        } = 30000;
 
 
         /// <summary>

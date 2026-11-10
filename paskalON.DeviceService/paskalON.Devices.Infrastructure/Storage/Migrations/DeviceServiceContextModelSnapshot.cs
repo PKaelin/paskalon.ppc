@@ -128,6 +128,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
 
+                    b.Property<int>("C37ReconnectIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<int>("DeviceFactorCore")
                         .HasColumnType("integer");
 
@@ -141,6 +144,9 @@ namespace paskalON.Devices.Infrastructure.Storage.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("MetricsIntervalMilliseconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ModbusReconnectIntervalMilliseconds")
                         .HasColumnType("integer");
 
                     b.Property<int>("PollingIntervalMilliseconds")

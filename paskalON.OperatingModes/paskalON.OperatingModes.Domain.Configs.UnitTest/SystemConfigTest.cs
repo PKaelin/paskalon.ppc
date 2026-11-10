@@ -18,6 +18,7 @@ namespace paskalON.OperatingModes.Domain.Configs.UnitTest
             config.RedisLossTimeoutMilliseconds = 1000;
             config.PowerControlLossTimeoutMilliseconds = 1000;
             config.DeviceServiceLossTimeoutMilliseconds = 1000;
+            config.SystemPowerMeterLossTimeoutMilliseconds = 1000;
             config.ResumeSettleMilliseconds = 0;
             config.SetpointRepublishIntervalMilliseconds = 200;
             config.PublisherTopicHeartbeat = "ppc:om:heartbeat";
@@ -27,6 +28,7 @@ namespace paskalON.OperatingModes.Domain.Configs.UnitTest
             Assert.AreEqual(1000, config.RedisLossTimeoutMilliseconds);
             Assert.AreEqual(1000, config.PowerControlLossTimeoutMilliseconds);
             Assert.AreEqual(1000, config.DeviceServiceLossTimeoutMilliseconds);
+            Assert.AreEqual(1000, config.SystemPowerMeterLossTimeoutMilliseconds);
             Assert.AreEqual(0, config.ResumeSettleMilliseconds);
             Assert.AreEqual(200, config.SetpointRepublishIntervalMilliseconds);
             Assert.AreEqual("ppc:om:heartbeat", config.PublisherTopicHeartbeat);
@@ -43,6 +45,8 @@ namespace paskalON.OperatingModes.Domain.Configs.UnitTest
         [DataRow(nameof(SystemConfig.PowerControlLossTimeoutMilliseconds), 500)]
         [DataRow(nameof(SystemConfig.DeviceServiceLossTimeoutMilliseconds), 999)]
         [DataRow(nameof(SystemConfig.DeviceServiceLossTimeoutMilliseconds), 500)]
+        [DataRow(nameof(SystemConfig.SystemPowerMeterLossTimeoutMilliseconds), 999)]
+        [DataRow(nameof(SystemConfig.SystemPowerMeterLossTimeoutMilliseconds), 500)]
         [DataRow(nameof(SystemConfig.ResumeSettleMilliseconds), -1)]
         [DataRow(nameof(SystemConfig.SetpointRepublishIntervalMilliseconds), 199)]
         [DataRow(nameof(SystemConfig.SetpointRepublishIntervalMilliseconds), 0)]
@@ -82,6 +86,9 @@ namespace paskalON.OperatingModes.Domain.Configs.UnitTest
                     break;
                 case nameof(SystemConfig.DeviceServiceLossTimeoutMilliseconds):
                     config.DeviceServiceLossTimeoutMilliseconds = value;
+                    break;
+                case nameof(SystemConfig.SystemPowerMeterLossTimeoutMilliseconds):
+                    config.SystemPowerMeterLossTimeoutMilliseconds = value;
                     break;
                 case nameof(SystemConfig.ResumeSettleMilliseconds):
                     config.ResumeSettleMilliseconds = value;

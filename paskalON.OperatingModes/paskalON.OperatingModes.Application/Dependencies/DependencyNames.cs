@@ -25,5 +25,11 @@ namespace paskalON.OperatingModes.Application.Dependencies
         /// The device service, lost without device core data.
         /// </summary>
         public const string DeviceService = "DeviceService";
+
+
+        /// <summary>
+        /// The system power meter at the point of interconnection, lost while no system power meter delivers valid data.
+        /// </summary>
+        public const string SystemPowerMeter = "SystemPowerMeter";
     }
 }
