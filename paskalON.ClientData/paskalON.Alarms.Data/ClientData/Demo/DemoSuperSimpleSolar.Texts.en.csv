@@ -53,3 +53,44 @@ Type=LocalizedText,Name=PCS.VendorEvents.EndOfLifeDue.Name,Language=en,Text=PCS 
 Type=LocalizedText,Name=PCS.VendorEvents.EndOfLifeDue.Desc,Language=en,Text=The power conversion system reports that it reaches the end of its service life.
 Type=LocalizedText,Name=PCS.VendorEvents.Unknown.Name,Language=en,Text=PCS event: unknown vendor event
 Type=LocalizedText,Name=PCS.VendorEvents.Unknown.Desc,Language=en,Text=The power conversion system reports a vendor event that is not defined in its device description.
+# BB faults
+Type=LocalizedText,Name=BB.FaultStates.CurrentOverLimit.Name,Language=en,Text=BB fault: current over limit
+Type=LocalizedText,Name=BB.FaultStates.CurrentOverLimit.Desc,Language=en,Text=The battery bank reports a fault: the current is above the fault limit.
+Type=LocalizedText,Name=BB.FaultStates.SystemOverVoltage.Name,Language=en,Text=BB fault: system over voltage
+Type=LocalizedText,Name=BB.FaultStates.SystemOverVoltage.Desc,Language=en,Text=The battery bank reports a fault: the system voltage is above the fault limit.
+Type=LocalizedText,Name=BB.FaultStates.SystemUnderVoltage.Name,Language=en,Text=BB fault: system under voltage
+Type=LocalizedText,Name=BB.FaultStates.SystemUnderVoltage.Desc,Language=en,Text=The battery bank reports a fault: the system voltage is below the fault limit.
+Type=LocalizedText,Name=BB.FaultStates.BigVoltageDifferenceSingleCell.Name,Language=en,Text=BB fault: big voltage difference of a single cell
+Type=LocalizedText,Name=BB.FaultStates.BigVoltageDifferenceSingleCell.Desc,Language=en,Text=The battery bank reports a fault: the voltage difference of a single cell is above the fault limit.
+Type=LocalizedText,Name=BB.FaultStates.BigTemperatureDifferenceBank.Name,Language=en,Text=BB fault: big temperature difference in the bank
+Type=LocalizedText,Name=BB.FaultStates.BigTemperatureDifferenceBank.Desc,Language=en,Text=The battery bank reports a fault: the temperature difference within the battery bank is above the fault limit.
+Type=LocalizedText,Name=BB.FaultStates.CellExtremeTemperature.Name,Language=en,Text=BB fault: extreme cell temperature
+Type=LocalizedText,Name=BB.FaultStates.CellExtremeTemperature.Desc,Language=en,Text=The battery bank reports a fault: a cell temperature is outside the fault limits.
+Type=LocalizedText,Name=BB.FaultStates.CellExtremeVoltage.Name,Language=en,Text=BB fault: extreme cell voltage
+Type=LocalizedText,Name=BB.FaultStates.CellExtremeVoltage.Desc,Language=en,Text=The battery bank reports a fault: a cell voltage is outside the fault limits.
+Type=LocalizedText,Name=BB.FaultStates.Unknown.Name,Language=en,Text=BB fault: unknown fault code
+Type=LocalizedText,Name=BB.FaultStates.Unknown.Desc,Language=en,Text=The battery bank reports a fault code that is not defined in its device description.
+# BB warnings
+Type=LocalizedText,Name=BB.WarningStates.CurrentOverLimit.Name,Language=en,Text=BB warning: current over limit
+Type=LocalizedText,Name=BB.WarningStates.CurrentOverLimit.Desc,Language=en,Text=The battery bank reports a warning: the current is above the warning limit.
+Type=LocalizedText,Name=BB.WarningStates.SystemOverVoltage.Name,Language=en,Text=BB warning: system over voltage
+Type=LocalizedText,Name=BB.WarningStates.SystemOverVoltage.Desc,Language=en,Text=The battery bank reports a warning: the system voltage is above the warning limit.
+Type=LocalizedText,Name=BB.WarningStates.SystemUnderVoltage.Name,Language=en,Text=BB warning: system under voltage
+Type=LocalizedText,Name=BB.WarningStates.SystemUnderVoltage.Desc,Language=en,Text=The battery bank reports a warning: the system voltage is below the warning limit.
+Type=LocalizedText,Name=BB.WarningStates.BigVoltageDifferenceSingleCell.Name,Language=en,Text=BB warning: big voltage difference of a single cell
+Type=LocalizedText,Name=BB.WarningStates.BigVoltageDifferenceSingleCell.Desc,Language=en,Text=The battery bank reports a warning: the voltage difference of a single cell is above the warning limit.
+Type=LocalizedText,Name=BB.WarningStates.BigTemperatureDifferenceBank.Name,Language=en,Text=BB warning: big temperature difference in the bank
+Type=LocalizedText,Name=BB.WarningStates.BigTemperatureDifferenceBank.Desc,Language=en,Text=The battery bank reports a warning: the temperature difference within the battery bank is above the warning limit.
+Type=LocalizedText,Name=BB.WarningStates.CellExtremeTemperature.Name,Language=en,Text=BB warning: extreme cell temperature
+Type=LocalizedText,Name=BB.WarningStates.CellExtremeTemperature.Desc,Language=en,Text=The battery bank reports a warning: a cell temperature is outside the warning limits.
+Type=LocalizedText,Name=BB.WarningStates.CellExtremeVoltage.Name,Language=en,Text=BB warning: extreme cell voltage
+Type=LocalizedText,Name=BB.WarningStates.CellExtremeVoltage.Desc,Language=en,Text=The battery bank reports a warning: a cell voltage is outside the warning limits.
+Type=LocalizedText,Name=BB.WarningStates.Unknown.Name,Language=en,Text=BB warning: unknown warning code
+Type=LocalizedText,Name=BB.WarningStates.Unknown.Desc,Language=en,Text=The battery bank reports a warning code that is not defined in its device description.
+# BB vendor events
+Type=LocalizedText,Name=BB.VendorEvents.MaintenanceDue.Name,Language=en,Text=BB maintenance due
+Type=LocalizedText,Name=BB.VendorEvents.MaintenanceDue.Desc,Language=en,Text=The battery bank reports that its maintenance is due.
+Type=LocalizedText,Name=BB.VendorEvents.EndOfLifeDue.Name,Language=en,Text=BB end of life due
+Type=LocalizedText,Name=BB.VendorEvents.EndOfLifeDue.Desc,Language=en,Text=The battery bank reports that it reaches the end of its service life.
+Type=LocalizedText,Name=BB.VendorEvents.Unknown.Name,Language=en,Text=BB event: unknown vendor event
+Type=LocalizedText,Name=BB.VendorEvents.Unknown.Desc,Language=en,Text=The battery bank reports a vendor event that is not defined in its device description.

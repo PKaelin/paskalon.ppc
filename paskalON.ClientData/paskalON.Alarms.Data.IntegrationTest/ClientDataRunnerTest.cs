@@ -38,9 +38,15 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
 
         /// <summary>
+        /// Number of BB fault, warning and vendor event configurations of the BbSimpleV1 (including Unknown).
+        /// </summary>
+        private const int BbEventConfigCount = 19;
+
+
+        /// <summary>
         /// Number of all alarm configurations of a demo client project.
         /// </summary>
-        private const int PpcAlarmConfigCount = CommunicationErrorConfigCount + PcsEventConfigCount;
+        private const int PpcAlarmConfigCount = CommunicationErrorConfigCount + PcsEventConfigCount + BbEventConfigCount;
 
 
         /// <summary>
