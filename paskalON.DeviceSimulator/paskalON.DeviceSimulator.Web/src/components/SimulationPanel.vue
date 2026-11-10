@@ -135,12 +135,12 @@ async function applyEvent(kind: EventKind, value: number): Promise<void> {
 function communicationMessage(isResponding: boolean): string {
     if (isPowerMeter.value) {
         return isResponding
-            ? `${props.deviceName} streams C37 data again.`
+            ? `${props.deviceName} streams C37 data again. The device service reconnects within its reconnect interval.`
             : `${props.deviceName} stopped streaming C37 data (communication loss).`;
     }
 
     return isResponding
-        ? `${props.deviceName} answers Modbus requests again.`
+        ? `${props.deviceName} answers Modbus requests again. The device service reconnects within its reconnect interval.`
         : `${props.deviceName} stopped answering Modbus requests (communication loss).`;
 }
 
@@ -226,6 +226,12 @@ async function applySlowDown(): Promise<void> {
                 <p v-if="isPowerMeter" class="simulation-hint mt-1 mb-0">
                     Switching C37 off stops the C37 server of the meter's port: the connection is closed and new connections
                     are refused (C37 communication error). All power meters streaming on the same port lose the communication too.
+                </p>
+
+                <p class="simulation-hint mt-1 mb-2">
+                    Restoring the communication takes some time: the device service reconnects lost {{ protocol }} connections
+                    only every {{ protocol }}ReconnectIntervalMilliseconds (system configuration of the device service, default 30 s).
+                    Until then the device keeps its communication error, a lost system power meter keeps the operating modes holding.
                 </p>
 
                 <div v-if="!isPowerMeter" class="d-flex flex-column gap-1">

@@ -13,6 +13,8 @@ namespace paskalON.Devices.Domain.Configs.UnitTest
         private const string Polling = nameof(SystemConfig.PollingIntervalMilliseconds);
         private const string Device = nameof(SystemConfig.DeviceIntervalMilliseconds);
         private const string Heartbeat = nameof(SystemConfig.DeviceHeartbeatIntervalMilliseconds);
+        private const string ModbusReconnect = nameof(SystemConfig.ModbusReconnectIntervalMilliseconds);
+        private const string C37Reconnect = nameof(SystemConfig.C37ReconnectIntervalMilliseconds);
 
 
         [TestMethod]
@@ -64,6 +66,8 @@ namespace paskalON.Devices.Domain.Configs.UnitTest
         [DataRow(Polling, 100)]
         [DataRow(Device, 100)]
         [DataRow(Heartbeat, 100)]
+        [DataRow(ModbusReconnect, 1000)]
+        [DataRow(C37Reconnect, 1000)]
         [DataRow(Metrics, int.MaxValue)]
         public void IntervalAtMinimumTest(string propertyName, int interval)
         {
@@ -89,6 +93,34 @@ namespace paskalON.Devices.Domain.Configs.UnitTest
             Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => SetInterval(config, propertyName, interval));
 
             Assert.AreEqual(1000, GetInterval(config, propertyName));
+        }
+
+
+        [TestMethod]
+        [DataRow(ModbusReconnect)]
+        [DataRow(C37Reconnect)]
+        public void ReconnectIntervalDefaultTest(string propertyName)
+        {
+            SystemConfig config = CreateConfig();
+
+            int interval = GetInterval(config, propertyName);
+
+            Assert.AreEqual(30000, interval);
+        }
+
+
+        [TestMethod]
+        [DataRow(ModbusReconnect, 999)]
+        [DataRow(C37Reconnect, 999)]
+        [DataRow(ModbusReconnect, 0)]
+        [DataRow(C37Reconnect, -1)]
+        public void ReconnectIntervalBelowMinimumTest(string propertyName, int interval)
+        {
+            SystemConfig config = CreateConfig();
+
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => SetInterval(config, propertyName, interval));
+
+            Assert.AreEqual(30000, GetInterval(config, propertyName));
         }
 
 
@@ -151,6 +183,12 @@ namespace paskalON.Devices.Domain.Configs.UnitTest
                 case Heartbeat:
                     config.DeviceHeartbeatIntervalMilliseconds = interval;
                     break;
+                case ModbusReconnect:
+                    config.ModbusReconnectIntervalMilliseconds = interval;
+                    break;
+                case C37Reconnect:
+                    config.C37ReconnectIntervalMilliseconds = interval;
+                    break;
                 default:
                     throw new ArgumentException($"Unknown property {propertyName}.", nameof(propertyName));
             }
@@ -165,6 +203,8 @@ namespace paskalON.Devices.Domain.Configs.UnitTest
                 Polling => config.PollingIntervalMilliseconds,
                 Device => config.DeviceIntervalMilliseconds,
                 Heartbeat => config.DeviceHeartbeatIntervalMilliseconds,
+                ModbusReconnect => config.ModbusReconnectIntervalMilliseconds,
+                C37Reconnect => config.C37ReconnectIntervalMilliseconds,
                 _ => throw new ArgumentException($"Unknown property {propertyName}.", nameof(propertyName))
             };
         }

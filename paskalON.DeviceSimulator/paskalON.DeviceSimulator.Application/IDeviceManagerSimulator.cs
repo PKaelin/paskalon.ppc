@@ -77,6 +77,8 @@ namespace paskalON.DeviceSimulator.Application
         /// <remarks>
         /// The server of the device endpoint is stopped, so all devices sharing the endpoint (e.g. power meters streaming on the
         /// same C37 port) lose the communication.
+        /// Restoring the communication takes some time: the device service only reconnects lost connections every
+        /// ModbusReconnectIntervalMilliseconds or C37ReconnectIntervalMilliseconds of its system configuration (default 30 s).
         /// </remarks>
         Task SetCommunicationAsync(SimulationDeviceType deviceType, int deviceId, bool isResponding);
 

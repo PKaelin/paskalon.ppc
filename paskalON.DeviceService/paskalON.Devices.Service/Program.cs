@@ -186,11 +186,11 @@ try
         {
             // Create and load Modbus polling service
             ModbusPollService modbusPollService = app.Services.GetRequiredService<ModbusPollService>();
-            modbusPollService.Initialize(deviceManager.ModbusPollingEngines, config.PollingIntervalMilliseconds);
+            modbusPollService.Initialize(deviceManager.ModbusPollingEngines, config.PollingIntervalMilliseconds, config.ModbusReconnectIntervalMilliseconds);
 
             // Create and load C37 stream service
             C37StreamService c37StreamService = app.Services.GetRequiredService<C37StreamService>();
-            c37StreamService.Initialize(deviceManager.C37TransmissionEngines);
+            c37StreamService.Initialize(deviceManager.C37TransmissionEngines, config.C37ReconnectIntervalMilliseconds);
 
             // Create the heartbeat service
             DeviceHeartbeatService heartbeatService = app.Services.GetRequiredService<DeviceHeartbeatService>();
