@@ -1,0 +1,12 @@
+# This Docker compose file is only used in DEV & TST.
+# QA and PRD will use docker stack and orchestration.
+# It loads the whole internal infrastructure:
+#   - infra.yaml: shared infrastructure (pgAdmin, Redis, OpenTelemetry, Loki, InfluxDB, Tempo, Grafana, RabbitMQ)
+#   - data.yaml:  PostgreSQL databases of the microservices
+# Both files can also be started on their own (e.g. docker compose -f data.yaml up -d).
+# Compose ignores the project name of included files, therefore the name is defined here as well.
+name: paskalon_ppc_infra
+
+include:
+  - infra.yaml
+  - data.yaml

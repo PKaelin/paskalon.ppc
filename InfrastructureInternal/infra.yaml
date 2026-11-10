@@ -2,6 +2,7 @@
 # QA and PRD will use docker stack and orchestration.
 # Network is defined as attachable so that we can easely spin up more container and attach them to the same network.
 # Dont use random ports use Microservice Development Port Assignments:
+# Loaded via docker-compose.yaml together with data.yaml (PostgreSQL databases of the microservices).
 name: paskalon_ppc_infra
 
 services:

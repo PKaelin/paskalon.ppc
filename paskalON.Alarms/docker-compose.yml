@@ -1,28 +1,8 @@
 services:
-  # Database
-  paskalon.alarms.data:
-    container_name: paskalon.alarms.data
-    image: postgres:18.6
-    restart: unless-stopped
-    ports:
-      - 45031:5432
-    environment:
-      POSTGRES_USER_FILE: /run/secrets/db_user
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      POSTGRES_DB: alarms
-    secrets:
-      - db_user
-      - db_password
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d alarms -U $$(cat /run/secrets/db_user)"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
-    volumes:
-      - paskalon.alarms.data:/var/lib/postgresql
-    networks:
-      - ppc.network
+  # Database (paskalON.Alarms.Data)
+  # The PostgreSQL database container paskalon.alarms.data is in the internal infrastructure:
+  # ../InfrastructureInternal/data.yaml (loaded by ../InfrastructureInternal/docker-compose.yaml).
+  # Start the internal infrastructure before starting this service.
 
   # Alarm Service
   paskalon.alarms.service:
@@ -31,9 +11,6 @@ services:
     build:
       context: .
       dockerfile: paskalON.Alarms.Service/Dockerfile
-    depends_on:
-      paskalon.alarms.data:
-        condition: service_healthy
     ports:
       - 45030:8080
     environment:
@@ -64,14 +41,6 @@ secrets:
     file: ./secrets/rabbitmq_connection
   deviceservice_connection:
     file: ./secrets/deviceservice_connection
-  db_user:
-    file: ./secrets/db_user
-  db_password:
-    file: ./secrets/db_password
-
-volumes:
-  paskalon.alarms.data:
-    name: paskalon.alarms.data
 
 networks:
   ppc.network:

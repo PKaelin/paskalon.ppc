@@ -1,28 +1,8 @@
 services:
-  # Database
-  paskalon.powercontrols.data:
-    container_name: paskalon.powercontrols.data
-    image: postgres:18.6
-    restart: unless-stopped
-    ports:
-      - 45011:5432
-    environment:
-      POSTGRES_USER_FILE: /run/secrets/db_user
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      POSTGRES_DB: powercontrols
-    secrets:
-      - db_user
-      - db_password
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d powercontrols -U $$(cat /run/secrets/db_user)"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
-    volumes:
-      - paskalon.powercontrols.data:/var/lib/postgresql
-    networks:
-      - ppc.network
+  # Database (paskalON.PowerControls.Data)
+  # The PostgreSQL database container paskalon.powercontrols.data is in the internal infrastructure:
+  # ../InfrastructureInternal/data.yaml (loaded by ../InfrastructureInternal/docker-compose.yaml).
+  # Start the internal infrastructure before starting this service.
 
   # Power Controls Service
   paskalon.powercontrols.service:
@@ -31,9 +11,6 @@ services:
     build:
       context: .
       dockerfile: paskalON.PowerControls.Service/Dockerfile
-    depends_on:
-      paskalon.powercontrols.data:
-        condition: service_healthy
     ports:
       - 45010:8080
     environment:
@@ -61,14 +38,6 @@ secrets:
     file: ./secrets/messaging_connection
   deviceservice_connection:
     file: ./secrets/deviceservice_connection
-  db_user:
-    file: ./secrets/db_user
-  db_password:
-    file: ./secrets/db_password
-
-volumes:
-  paskalon.powercontrols.data:
-    name: paskalon.powercontrols.data
 
 networks:
   ppc.network:
