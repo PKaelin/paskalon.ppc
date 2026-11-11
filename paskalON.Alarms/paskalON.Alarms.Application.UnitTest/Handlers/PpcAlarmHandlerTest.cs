@@ -11,6 +11,7 @@ using paskalON.Alarms.Application.Outboxes;
 using paskalON.Alarms.Application.Stores;
 using paskalON.Alarms.Application.UnitTest.SampleData;
 using paskalON.Alarms.Domain;
+using paskalON.Alarms.Domain.Configs.Actions;
 using paskalON.Alarms.Domain.Configs.Ppcs;
 using paskalON.Alarms.Domain.Evaluations;
 using paskalON.Alarms.Domain.Ppcs;
@@ -551,6 +552,144 @@ namespace paskalON.Alarms.Application.UnitTest.Handlers
             PpcAlarmPendingTransition? pending = _pendingTransitions.Get(Pcs7Key, PcsAlarmConfigSampleData.CreatePcsFaultConfig().Id, "FaultStates.OverTemperature");
             Assert.IsNotNull(pending);
             Assert.AreEqual(DelayedReceivedOn.AddSeconds(13), pending.DueOn);
+        }
+
+
+        /// <summary>
+        /// An active alarm is acknowledged on its cached instance (not the loaded one), so that the summary sent with its
+        /// acknowledge action already counts it as acknowledged.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeAsyncActiveAlarmAcknowledgesCachedInstanceTest()
+        {
+            PpcAlarmConfig faultConfig = SetupAcknowledgeConfig();
+            PpcAlarm cachedAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
+            _savedActiveAlarms.Add(cachedAlarm);
+            PpcAlarm storedAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
+            SetupStoredAlarms(storedAlarm);
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+
+            int acknowledgedCount = await handler.AcknowledgeAsync(new List<int> { cachedAlarm.Id }, "Operator");
+
+            Assert.AreEqual(1, acknowledgedCount);
+            Assert.AreEqual(AlarmSequenceState.Acknowledged, cachedAlarm.AlarmSequenceState);
+            Assert.AreEqual("Operator", cachedAlarm.AcknowledgedBy);
+            Assert.AreEqual(NormalizedOn, cachedAlarm.AcknowledgedOn);
+            Assert.AreEqual(AlarmSequenceState.Alarm, storedAlarm.AlarmSequenceState);
+            Assert.AreSame(cachedAlarm, _updatedAlarms.Single());
+            AlarmActionOutboxMessage message = _addedMessages.Single();
+            Assert.AreEqual("AcknowledgeAlarm", message.ActionName);
+            AlarmActionDto action = JsonSerializer.Deserialize<AlarmActionDto>(message.Payload)!;
+            Assert.AreEqual(0, action.AlarmSummary.ErrorCount);
+            Assert.AreEqual(1, action.AlarmSummary.AcknowledgedErrorCount);
+            _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _outboxSignal.Verify(signal => signal.Notify(), Times.Once);
+        }
+
+
+        /// <summary>
+        /// An alarm that is already normal is acknowledged on the loaded instance and stays normal.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeAsyncNormalAlarmAcknowledgesLoadedInstanceTest()
+        {
+            PpcAlarmConfig faultConfig = SetupAcknowledgeConfig();
+            PpcAlarm normalAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
+            normalAlarm.Normalize("System", PcsAlarmConfigSampleData.ChangedOn.AddMinutes(1));
+            SetupStoredAlarms(normalAlarm);
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+
+            int acknowledgedCount = await handler.AcknowledgeAsync(new List<int> { normalAlarm.Id }, "Operator");
+
+            Assert.AreEqual(1, acknowledgedCount);
+            Assert.AreEqual(AlarmSequenceState.Normal, normalAlarm.AlarmSequenceState);
+            Assert.AreEqual("Operator", normalAlarm.AcknowledgedBy);
+            Assert.AreSame(normalAlarm, _updatedAlarms.Single());
+            Assert.AreEqual("AcknowledgeAlarm", _addedMessages.Single().ActionName);
+        }
+
+
+        /// <summary>
+        /// Alarms that cannot be acknowledged (not acknowledgeable, already acknowledged) and unknown ids are skipped,
+        /// nothing is saved when no alarm was acknowledged.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeAsyncNothingToAcknowledgeSavesNothingTest()
+        {
+            PpcAlarmConfig faultConfig = SetupAcknowledgeConfig();
+            PpcAlarmConfig notAcknowledgeableConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            notAcknowledgeableConfig.Id = 2;
+            notAcknowledgeableConfig.IsAcknowledgeable = false;
+            PpcAlarm notAcknowledgeableAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(notAcknowledgeableConfig, 7, "FaultStates.GridLoss");
+            notAcknowledgeableAlarm.Normalize("System", PcsAlarmConfigSampleData.ChangedOn.AddMinutes(1));
+            PpcAlarm acknowledgedAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
+            acknowledgedAlarm.Id = 101;
+            acknowledgedAlarm.Acknowledge("Homer", PcsAlarmConfigSampleData.ChangedOn.AddMinutes(1));
+            acknowledgedAlarm.Normalize("System", PcsAlarmConfigSampleData.ChangedOn.AddMinutes(2));
+            SetupStoredAlarms(notAcknowledgeableAlarm, acknowledgedAlarm);
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+
+            int acknowledgedCount = await handler.AcknowledgeAsync(new List<int> { 100, 101, 999 }, "Operator");
+
+            Assert.AreEqual(0, acknowledgedCount);
+            Assert.AreEqual("Homer", acknowledgedAlarm.AcknowledgedBy);
+            _alarmRepository.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+            _outboxSignal.Verify(signal => signal.Notify(), Times.Never);
+        }
+
+
+        /// <summary>
+        /// When saving fails the publisher of the acknowledged active alarm is loaded again, the unsaved acknowledgement is lost.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeAsyncSaveFailsReloadsPublisherTest()
+        {
+            PpcAlarmConfig faultConfig = SetupAcknowledgeConfig();
+            PpcAlarm cachedAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
+            _savedActiveAlarms.Add(cachedAlarm);
+            SetupStoredAlarms(PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature"));
+            PpcAlarmHandler handler = await CreateHandlerAsync(new PpcAlarmValueStore());
+            _alarmRepository.Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new TimeoutException("Database not available."));
+            await Assert.ThrowsExactlyAsync<TimeoutException>(() => handler.AcknowledgeAsync(new List<int> { cachedAlarm.Id }, "Operator"));
+            PpcAlarm savedAlarm = PcsAlarmConfigSampleData.CreateActiveAlarm(faultConfig, 7, "FaultStates.OverTemperature");
+            _savedActiveAlarms[0] = savedAlarm;
+
+            List<PpcAlarm> activeAlarms = await _activeCache.GetActiveAsync(Pcs7Key, _alarmRepository.Object);
+
+            Assert.AreSame(savedAlarm, activeAlarms.Single());
+            Assert.AreEqual(AlarmSequenceState.Alarm, activeAlarms.Single().AlarmSequenceState);
+        }
+
+
+        /// <summary>
+        /// Sets up the configuration cache with the PCS fault configuration with an additional acknowledge action.
+        /// </summary>
+        private PpcAlarmConfig SetupAcknowledgeConfig()
+        {
+            PpcAlarmConfig faultConfig = PcsAlarmConfigSampleData.CreatePcsFaultConfig();
+            faultConfig.AlarmActions.Add(new AlarmActionConfig
+            {
+                Id = 30,
+                ChangedBy = "Homer",
+                ChangedDate = PcsAlarmConfigSampleData.ChangedOn,
+                Name = "AcknowledgeAlarm",
+                Trigger = AlarmActionTrigger.Acknowledge
+            });
+            _configCache.Setup(cache => cache.GetEnabled(PpcAlarmType.PcsAlarm))
+                .Returns(new List<PpcAlarmConfig> { faultConfig });
+
+            return faultConfig;
+        }
+
+
+        /// <summary>
+        /// Sets up the repository to return the stored alarms by their ids.
+        /// </summary>
+        private void SetupStoredAlarms(params PpcAlarm[] storedAlarms)
+        {
+            _alarmRepository.Setup(repository => repository.GetByIdsAsync(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((IReadOnlyCollection<int> ids, CancellationToken _) => storedAlarms.Where(alarm => ids.Contains(alarm.Id)).ToList());
         }
 
 

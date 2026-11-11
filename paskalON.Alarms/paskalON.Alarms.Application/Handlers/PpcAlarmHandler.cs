@@ -304,6 +304,94 @@ namespace paskalON.Alarms.Application.Handlers
         }
 
 
+        /// <inheritdoc/>
+        /// <remarks>
+        /// - An active alarm is acknowledged on its cached instance, so that the active alarm cache and the alarm summary
+        ///   include the acknowledgement. A normal alarm is acknowledged on the instance loaded from the database.
+        /// - The acknowledge actions (Trigger=Acknowledge) carry the alarm summary after the acknowledgement.
+        /// - When saving fails the publishers of the acknowledged active alarms are invalidated and loaded again.
+        /// </remarks>
+        public async Task<int> AcknowledgeAsync(IReadOnlyCollection<int> alarmIds, string acknowledgedBy, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(alarmIds);
+            ArgumentException.ThrowIfNullOrWhiteSpace(acknowledgedBy);
+
+            using IDisposable writeLock = await _writeLock.AcquireAsync(cancellationToken);
+            List<PpcAlarm> storedAlarms = await _alarmRepository.GetByIdsAsync(alarmIds, cancellationToken);
+            List<PpcAlarm> acknowledgedAlarms = new List<PpcAlarm>();
+            HashSet<PpcAlarmKey> activeKeys = new HashSet<PpcAlarmKey>();
+            DateTimeOffset now = _timeProvider.GetUtcNow();
+
+            try
+            {
+                foreach (PpcAlarm storedAlarm in storedAlarms)
+                {
+                    PpcAlarm alarm = await GetCurrentInstanceAsync(storedAlarm, activeKeys, cancellationToken);
+
+                    if (alarm.CanBeAcknowledged is false)
+                    {
+                        continue;
+                    }
+
+                    alarm.Acknowledge(acknowledgedBy, now);
+                    acknowledgedAlarms.Add(alarm);
+                }
+
+                if (acknowledgedAlarms.Count == 0)
+                {
+                    return 0;
+                }
+
+                AlarmSummaryDto alarmSummary = await _activeCache.GetSummaryAsync(_alarmRepository, now, cancellationToken);
+                List<AlarmActionOutboxMessage> messages = acknowledgedAlarms
+                    .SelectMany(alarm => CreateOutboxMessages(alarm, AlarmActionTrigger.Acknowledge, alarmSummary))
+                    .ToList();
+                // The alarms are detached instances, they are updated before their outbox messages reference them
+                _alarmRepository.Update(acknowledgedAlarms);
+                _outboxRepository.Add(messages);
+                await _alarmRepository.SaveChangesAsync(cancellationToken);
+            }
+            catch
+            {
+                // The cached instances might be acknowledged without being saved, they are loaded again
+                foreach (PpcAlarmKey key in activeKeys)
+                {
+                    _activeCache.Invalidate(key);
+                }
+
+                throw;
+            }
+
+            _outboxSignal.Notify();
+            _logger.LogInformation("{AcknowledgedCount} of {RequestedCount} alarms acknowledged by {AcknowledgedBy}.",
+                acknowledgedAlarms.Count, alarmIds.Count, acknowledgedBy);
+
+            return acknowledgedAlarms.Count;
+        }
+
+
+        /// <summary>
+        /// Gets the cached instance of an active alarm, or the stored instance of a normal alarm.
+        /// </summary>
+        /// <param name="storedAlarm">Alarm loaded from the database.</param>
+        /// <param name="activeKeys">Collects the publishers of the active alarms.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The instance to change.</returns>
+        private async Task<PpcAlarm> GetCurrentInstanceAsync(PpcAlarm storedAlarm, HashSet<PpcAlarmKey> activeKeys, CancellationToken cancellationToken)
+        {
+            if (storedAlarm.IsActive is false)
+            {
+                return storedAlarm;
+            }
+
+            PpcAlarmKey key = new PpcAlarmKey { PpcAlarmType = storedAlarm.PpcAlarmConfig.PpcAlarmType, DeviceId = storedAlarm.DeviceId };
+            activeKeys.Add(key);
+            List<PpcAlarm> cachedAlarms = await _activeCache.GetActiveAsync(key, _alarmRepository, cancellationToken);
+
+            return cachedAlarms.FirstOrDefault(alarm => alarm.Id == storedAlarm.Id) ?? storedAlarm;
+        }
+
+
         /// <summary>
         /// Saves the raised and normalized alarms with their alarm actions in one transaction and applies them to the cache.
         /// </summary>

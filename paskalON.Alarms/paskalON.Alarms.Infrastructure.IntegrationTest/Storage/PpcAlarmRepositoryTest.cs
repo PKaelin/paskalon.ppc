@@ -144,6 +144,29 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
 
 
         /// <summary>
+        /// The alarms with the ids are returned not tracked with their configuration and its actions, active or normalized,
+        /// unknown ids are ignored.
+        /// </summary>
+        [TestMethod]
+        public async Task GetByIdsAsyncReturnsActiveAndNormalizedAlarmsTest()
+        {
+            await SeedAlarmsAsync();
+            await using AlarmContext seededContext = CreateDbContext<AlarmContext>();
+            List<int> pcs7AlarmIds = await seededContext.PpcAlarms.Where(alarm => alarm.DeviceId == 7).Select(alarm => alarm.Id).ToListAsync();
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmRepository repository = new PpcAlarmRepository(NullLogger<PpcAlarmRepository>.Instance, context);
+
+            List<PpcAlarm> alarms = await repository.GetByIdsAsync(pcs7AlarmIds.Append(999999).ToList());
+
+            CollectionAssert.AreEquivalent(pcs7AlarmIds, alarms.Select(alarm => alarm.Id).ToList());
+            CollectionAssert.AreEquivalent(new List<AlarmSequenceState> { AlarmSequenceState.Alarm, AlarmSequenceState.Normal },
+                alarms.Select(alarm => alarm.AlarmSequenceState).ToList());
+            Assert.HasCount(2, alarms.Single(alarm => alarm.PpcAlarmConfig.AlarmId == "PCS-FAULT").PpcAlarmConfig.AlarmActions);
+            Assert.IsEmpty(context.ChangeTracker.Entries());
+        }
+
+
+        /// <summary>
         /// All active alarms of all publishers are returned not tracked, the alarms of a configuration share its instance.
         /// </summary>
         [TestMethod]

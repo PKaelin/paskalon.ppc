@@ -15,6 +15,7 @@ namespace paskalON.Alarms.Domain.Configs.Actions
     ///   An alarm is also normalized when its configuration is disabled or removed (configuration reload).
     /// - An unchanged value or condition sends nothing, so every alarm occurrence sends its raise actions once and
     ///   its normalize actions once.
+    /// - An operator acknowledges the alarm (once, active or already normal): the alarm is acknowledged.
     /// All actions of the configuration with the trigger of the change are sent, each as its own message.
     /// </remarks>
     public enum AlarmActionTrigger
@@ -30,6 +31,13 @@ namespace paskalON.Alarms.Domain.Configs.Actions
         /// The action is sent when the alarm is normalized (condition became false, or its configuration was disabled or removed).
         /// E.g. ClearAlarm to clear the alarm in Luna or reset the power output of the device to 100%.
         /// </summary>
-        Normalize = 1
+        Normalize = 1,
+
+
+        /// <summary>
+        /// The action is sent when an operator acknowledged the alarm (only alarms of acknowledgeable configurations),
+        /// active or already normal. E.g. AcknowledgeAlarm to stop the blinking of the alarm in Luna.
+        /// </summary>
+        Acknowledge = 2
     }
 }

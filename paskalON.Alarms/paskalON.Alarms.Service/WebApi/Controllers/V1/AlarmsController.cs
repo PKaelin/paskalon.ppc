@@ -9,6 +9,8 @@ using paskalON.Alarms.Application.Queries;
 using paskalON.Alarms.Dto;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
+using paskalON.Alarms.Service.Dto.V1.Requests;
+using paskalON.Alarms.Service.Dto.V1.Responses;
 using paskalON.Hosting;
 
 namespace paskalON.Alarms.Service.Controllers.V1
@@ -119,6 +121,37 @@ namespace paskalON.Alarms.Service.Controllers.V1
                 _logger.LogWarning(exception, "Getting the PPC alarms failed, the database is not available.");
 
                 return Problem("The alarms could not be read, the database is not available.",
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+        }
+
+
+        /// <summary>
+        /// Acknowledges the alarms that can be acknowledged (acknowledgeable configuration, not yet acknowledged, active or normal),
+        /// e.g. from Luna. Their acknowledge actions are sent with the alarm summary.
+        /// </summary>
+        /// <param name="request">Ids of the alarms and the user who acknowledges them.</param>
+        /// <param name="cancellationToken">Cancellation token of the request.</param>
+        /// <returns>200 with the number of acknowledged alarms, 400 for an invalid request, 503 when the database is not available.</returns>
+        [HttpPost]
+        [ProducesResponseType<AcknowledgeAlarmsResponse>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+        public async Task<ActionResult<AcknowledgeAlarmsResponse>> Acknowledge([FromBody] AcknowledgeAlarmsRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            try
+            {
+                int acknowledgedCount = await _alarmHandler.AcknowledgeAsync(request.AlarmIds, request.AcknowledgedBy, cancellationToken);
+
+                return Ok(new AcknowledgeAlarmsResponse { AcknowledgedCount = acknowledgedCount });
+            }
+            catch (Exception exception) when (DatabaseTransientExceptionFilter.IsTransient(exception))
+            {
+                _logger.LogWarning(exception, "Acknowledging the alarms failed, the database is not available.");
+
+                return Problem("The alarms could not be acknowledged, the database is not available.",
                     statusCode: StatusCodes.Status503ServiceUnavailable);
             }
         }

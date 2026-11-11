@@ -5,6 +5,8 @@
 using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
+using paskalON.Alarms.Service.Dto.V1.Requests;
+using paskalON.Alarms.Service.Dto.V1.Responses;
 
 namespace paskalON.Alarms.Client
 {
@@ -41,5 +43,15 @@ namespace paskalON.Alarms.Client
         /// <returns>The texts by their localization key.</returns>
         /// <exception cref="HttpRequestException">Thrown when the alarm service is not reachable or answers with an error (e.g. 400 or 503).</exception>
         Task<LocalizedTextsDto> GetLocalizedTexts(string language, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Acknowledges the alarms that can be acknowledged (acknowledgeable configuration, not yet acknowledged, active or normal).
+        /// </summary>
+        /// <param name="request">Ids of the alarms and the user who acknowledges them.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The number of acknowledged alarms.</returns>
+        /// <exception cref="HttpRequestException">Thrown when the alarm service is not reachable or answers with an error (e.g. 400 or 503).</exception>
+        Task<AcknowledgeAlarmsResponse> AcknowledgeAlarms(AcknowledgeAlarmsRequest request, CancellationToken cancellationToken = default);
     }
 }

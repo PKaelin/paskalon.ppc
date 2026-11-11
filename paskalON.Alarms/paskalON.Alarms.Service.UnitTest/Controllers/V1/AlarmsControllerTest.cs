@@ -12,6 +12,8 @@ using paskalON.Alarms.Dto;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
 using paskalON.Alarms.Service.Controllers.V1;
+using paskalON.Alarms.Service.Dto.V1.Requests;
+using paskalON.Alarms.Service.Dto.V1.Responses;
 
 namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
 {
@@ -172,6 +174,43 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
                     PossibleCauses = "{{PCS.Fault.Causes}}"
                 }
             };
+        }
+
+
+        /// <summary>
+        /// The alarms of the request are acknowledged by the user of the request, the number of acknowledged alarms is returned.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeReturnsAcknowledgedCountTest()
+        {
+            _alarmHandler.Setup(handler => handler.AcknowledgeAsync(It.IsAny<IReadOnlyCollection<int>>(), "Operator", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(2);
+            AlarmsController controller = CreateController();
+            AcknowledgeAlarmsRequest request = new AcknowledgeAlarmsRequest { AlarmIds = new List<int> { 100, 101, 102 }, AcknowledgedBy = "Operator" };
+
+            ActionResult<AcknowledgeAlarmsResponse> result = await controller.Acknowledge(request, CancellationToken.None);
+
+            OkObjectResult okResult = (OkObjectResult)result.Result!;
+            Assert.AreEqual(2, ((AcknowledgeAlarmsResponse)okResult.Value!).AcknowledgedCount);
+            _alarmHandler.Verify(handler => handler.AcknowledgeAsync(new List<int> { 100, 101, 102 }, "Operator", It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+
+        /// <summary>
+        /// When the database is not available the acknowledgement returns 503.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeDatabaseNotAvailableReturnsServiceUnavailableTest()
+        {
+            _alarmHandler.Setup(handler => handler.AcknowledgeAsync(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new TimeoutException("Database not available."));
+            AlarmsController controller = CreateController();
+            AcknowledgeAlarmsRequest request = new AcknowledgeAlarmsRequest { AlarmIds = new List<int> { 100 }, AcknowledgedBy = "Operator" };
+
+            ActionResult<AcknowledgeAlarmsResponse> result = await controller.Acknowledge(request, CancellationToken.None);
+
+            ObjectResult problemResult = (ObjectResult)result.Result!;
+            Assert.AreEqual(StatusCodes.Status503ServiceUnavailable, problemResult.StatusCode);
         }
 
 

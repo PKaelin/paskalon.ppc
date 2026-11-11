@@ -125,6 +125,7 @@ namespace paskalON.Alarms.Application.IntegrationTest.Handlers
             };
             config.AlarmActions.Add(CreateAction("ReducePower", AlarmActionTrigger.Raise));
             config.AlarmActions.Add(CreateAction("ResetPower", AlarmActionTrigger.Normalize));
+            config.AlarmActions.Add(CreateAction("AcknowledgeAlarm", AlarmActionTrigger.Acknowledge));
             db.PpcAlarmConfigs.Add(config);
             await db.SaveChangesAsync();
         }
@@ -256,6 +257,44 @@ namespace paskalON.Alarms.Application.IntegrationTest.Handlers
             Assert.AreEqual(ReceivedOn, alarm.CreatedOn);
             Assert.AreEqual(AlarmSequenceState.Alarm, alarm.AlarmSequenceState);
             CollectionAssert.AreEqual(new List<string> { "ReducePower" }, await GetActionNamesAsync(context));
+        }
+
+
+        /// <summary>
+        /// A raised alarm is acknowledged from the cache in another context and then normalized: the acknowledgement is persisted
+        /// with its acknowledge action and kept after the normalization, the configuration is not written.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeAsyncRaisedAlarmThenNormalizePersistsAcknowledgementTest()
+        {
+            await LoadCachesAsync();
+            await HandleAsync(CreatePcsDetail(overTemperature: true, gridLoss: false), ReceivedOn);
+            await using AlarmContext raisedContext = CreateDbContext<AlarmContext>();
+            int alarmId = (await raisedContext.PpcAlarms.SingleAsync()).Id;
+
+            int acknowledgedCount = await AcknowledgeAsync(alarmId);
+            await HandleAsync(CreatePcsDetail(overTemperature: false, gridLoss: false), ReceivedOn.AddSeconds(5));
+
+            Assert.AreEqual(1, acknowledgedCount);
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarm alarm = await context.PpcAlarms.SingleAsync();
+            Assert.AreEqual(AlarmSequenceState.Normal, alarm.AlarmSequenceState);
+            Assert.AreEqual("Operator", alarm.AcknowledgedBy);
+            Assert.AreEqual(NormalizedOn, alarm.AcknowledgedOn);
+            CollectionAssert.AreEquivalent(new List<string> { "ReducePower", "AcknowledgeAlarm", "ResetPower" }, await GetActionNamesAsync(context));
+            Assert.AreEqual(ConfiguredOn, (await context.PpcAlarmConfigs.SingleAsync()).ChangedDate);
+        }
+
+
+        /// <summary>
+        /// Acknowledges an alarm in a new context (scope), like the web API.
+        /// </summary>
+        private async Task<int> AcknowledgeAsync(int alarmId)
+        {
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmHandler handler = CreateHandler(context, _configCache, _activeCache, _valueStore);
+
+            return await handler.AcknowledgeAsync(new List<int> { alarmId }, "Operator");
         }
 
 

@@ -43,6 +43,15 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
 
 
         /// <summary>
+        /// Gets the alarms with the ids (active or normalized) including their configuration with the actions, not tracked.
+        /// </summary>
+        /// <param name="ids">Ids of the alarms, unknown ids are ignored.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Found alarms ordered by id.</returns>
+        Task<List<PpcAlarm>> GetByIdsAsync(IReadOnlyCollection<int> ids, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
         /// Adds newly raised alarms, saved with <see cref="SaveChangesAsync"/>.
         /// </summary>
         /// <param name="alarms">Newly raised alarms.</param>

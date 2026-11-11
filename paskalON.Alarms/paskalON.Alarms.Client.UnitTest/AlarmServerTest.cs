@@ -8,6 +8,8 @@ using paskalON.Alarms.Dto;
 using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
+using paskalON.Alarms.Service.Dto.V1.Requests;
+using paskalON.Alarms.Service.Dto.V1.Responses;
 
 namespace paskalON.Alarms.Client.UnitTest
 {
@@ -250,6 +252,40 @@ namespace paskalON.Alarms.Client.UnitTest
 
 
         /// <summary>
+        /// The alarm ids and the user are posted to the acknowledge endpoint, the number of acknowledged alarms is returned.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeAlarmsPostsRequestTest()
+        {
+            _handler.ResponseContent = "{\"acknowledgedCount\":2}";
+            AcknowledgeAlarmsRequest request = new AcknowledgeAlarmsRequest { AlarmIds = new List<int> { 100, 101, 102 }, AcknowledgedBy = "Operator" };
+
+            AcknowledgeAlarmsResponse response = await _server.AcknowledgeAlarms(request);
+
+            Assert.AreEqual(HttpMethod.Post, _handler.Request!.Method);
+            Assert.AreEqual("/api/v1/alarms/acknowledge", _handler.Request.RequestUri!.AbsolutePath);
+            Assert.AreEqual("{\"alarmIds\":[100,101,102],\"acknowledgedBy\":\"Operator\"}", _handler.RequestContent);
+            Assert.AreEqual(2, response.AcknowledgedCount);
+        }
+
+
+        /// <summary>
+        /// An error of the alarm service (e.g. database not available) throws.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeAlarmsServiceUnavailableThrowsTest()
+        {
+            _handler.StatusCode = HttpStatusCode.ServiceUnavailable;
+            AcknowledgeAlarmsRequest request = new AcknowledgeAlarmsRequest { AlarmIds = new List<int> { 100 }, AcknowledgedBy = "Operator" };
+
+            Func<Task> acknowledge = () => _server.AcknowledgeAlarms(request);
+
+            HttpRequestException exception = await Assert.ThrowsExactlyAsync<HttpRequestException>(acknowledge);
+            Assert.AreEqual(HttpStatusCode.ServiceUnavailable, exception.StatusCode);
+        }
+
+
+        /// <summary>
         /// In-memory HTTP message handler answering with a configurable response and recording the last request.
         /// </summary>
         private sealed class StubHttpMessageHandler : HttpMessageHandler
@@ -272,12 +308,19 @@ namespace paskalON.Alarms.Client.UnitTest
             public HttpRequestMessage? Request { get; private set; }
 
 
+            /// <summary>
+            /// Gets the content of the last request, null without content.
+            /// </summary>
+            public string? RequestContent { get; private set; }
+
+
             /// <inheritdoc/>
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 Request = request;
+                RequestContent = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
 
-                return Task.FromResult(new HttpResponseMessage(StatusCode) { Content = new StringContent(ResponseContent, Encoding.UTF8, "application/json") });
+                return new HttpResponseMessage(StatusCode) { Content = new StringContent(ResponseContent, Encoding.UTF8, "application/json") };
             }
         }
     }

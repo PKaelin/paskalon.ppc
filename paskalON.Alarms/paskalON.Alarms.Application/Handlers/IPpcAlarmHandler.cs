@@ -43,6 +43,17 @@ namespace paskalON.Alarms.Application.Handlers
 
 
         /// <summary>
+        /// Acknowledges the alarms that can be acknowledged (acknowledgeable configuration, not yet acknowledged, active or normal)
+        /// and persists them with their acknowledge actions in one transaction.
+        /// </summary>
+        /// <param name="alarmIds">Ids of the alarms, unknown ids and alarms that cannot be acknowledged are skipped.</param>
+        /// <param name="acknowledgedBy">User who acknowledges the alarms.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Number of acknowledged alarms.</returns>
+        Task<int> AcknowledgeAsync(IReadOnlyCollection<int> alarmIds, string acknowledgedBy, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
         /// Gets the number of active alarms per severity level, unacknowledged and acknowledged separately.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>

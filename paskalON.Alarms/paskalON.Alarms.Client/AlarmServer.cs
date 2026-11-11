@@ -7,6 +7,8 @@ using System.Net.Http.Json;
 using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
+using paskalON.Alarms.Service.Dto.V1.Requests;
+using paskalON.Alarms.Service.Dto.V1.Responses;
 
 namespace paskalON.Alarms.Client
 {
@@ -31,6 +33,12 @@ namespace paskalON.Alarms.Client
         /// Path of the localized texts, relative to the base address of the API.
         /// </summary>
         private const string GetLocalizedTextsPath = "localizations/texts";
+
+
+        /// <summary>
+        /// Path of the acknowledgement of alarms, relative to the base address of the API.
+        /// </summary>
+        private const string AcknowledgeAlarmsPath = "alarms/acknowledge";
 
 
         /// <summary>
@@ -97,6 +105,24 @@ namespace paskalON.Alarms.Client
             }
 
             return texts;
+        }
+
+
+        /// <inheritdoc/>
+        public async Task<AcknowledgeAlarmsResponse> AcknowledgeAlarms(AcknowledgeAlarmsRequest request, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            using HttpResponseMessage response = await _client.PostAsJsonAsync(AcknowledgeAlarmsPath, request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+            AcknowledgeAlarmsResponse? result = await response.Content.ReadFromJsonAsync<AcknowledgeAlarmsResponse>(cancellationToken);
+
+            if (result == null)
+            {
+                throw new InvalidOperationException("Alarm server returned an empty acknowledge response.");
+            }
+
+            return result;
         }
 
 

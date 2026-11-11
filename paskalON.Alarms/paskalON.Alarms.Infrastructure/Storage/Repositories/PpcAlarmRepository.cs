@@ -122,6 +122,24 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
 
 
         /// <inheritdoc/>
+        public async Task<List<PpcAlarm>> GetByIdsAsync(IReadOnlyCollection<int> ids, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(ids);
+
+            List<int> distinctIds = ids.Distinct().ToList();
+
+            return await Context.PpcAlarms
+                .AsNoTrackingWithIdentityResolution()
+                .Where(alarm => distinctIds.Contains(alarm.Id))
+                .Include(alarm => alarm.PpcAlarmConfig)
+                .ThenInclude(config => config.AlarmActions)
+                .ThenInclude(action => action.AlarmActionParameters)
+                .OrderBy(alarm => alarm.Id)
+                .ToListAsync(cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await Context.SaveChangesAsync(cancellationToken);
