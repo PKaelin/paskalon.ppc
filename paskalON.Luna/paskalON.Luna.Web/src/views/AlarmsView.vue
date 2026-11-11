@@ -14,8 +14,12 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import AlarmDetails from '../components/AlarmDetails.vue';
 import AlarmFilters from '../components/AlarmFilters.vue';
 import AlarmGrid from '../components/AlarmGrid.vue';
-import { getPpcAlarms } from '../api/alarmApi';
+import ActionDialog, { type DialogAction } from '../components/ActionDialog.vue';
+import { acknowledgeAlarms, getPpcAlarms } from '../api/alarmApi';
+import { useNotifications } from '../composables/useNotifications';
 import type { PpcAlarmDto } from '../types/alarm';
+
+const { notify } = useNotifications();
 
 const filter = ref<PpcAlarmFilter>(savedFilter);
 
@@ -35,6 +39,63 @@ let abortController: AbortController | null = null;
 let deviceFilterTimer: ReturnType<typeof setTimeout> | undefined;
 
 const selectedAlarm = computed(() => alarms.value.find((alarm) => alarm.id === selectedId.value) ?? null);
+
+/** The alarms shown in the list that can be acknowledged (acknowledgeable and not acknowledged yet). */
+const acknowledgeableAlarms = computed(() => alarms.value.filter((alarm) => alarm.canBeAcknowledged));
+
+/** True while an acknowledgement is sent. */
+const acknowledging = ref(false);
+
+/** True while the confirmation of "Acknowledge Filtered" is shown. */
+const isConfirmOpen = ref(false);
+
+/** The alarm ids of the confirmation, taken when it opened so that a reload meanwhile does not change them. */
+const pendingAlarmIds = ref<number[]>([]);
+
+const confirmActions: DialogAction[] = [
+    { id: 'acknowledge', label: 'Acknowledge', variant: 'success' },
+    { id: 'cancel', label: 'Cancel', variant: 'outline-light' }
+];
+
+const confirmTitle = computed(() => `Acknowledge ${pendingAlarmIds.value.length} alarm${pendingAlarmIds.value.length === 1 ? '' : 's'}?`);
+
+/** Asks to acknowledge the alarms shown in the list that can be acknowledged. */
+function onAcknowledgeFiltered(): void {
+    pendingAlarmIds.value = acknowledgeableAlarms.value.map((alarm) => alarm.id);
+
+    if (pendingAlarmIds.value.length > 0) {
+        isConfirmOpen.value = true;
+    }
+}
+
+function onConfirm(action: string): void {
+    if (action === 'acknowledge') {
+        void acknowledge(pendingAlarmIds.value);
+    }
+}
+
+/** Acknowledges the selected alarm without confirmation. */
+function onAcknowledgeSelected(): void {
+    if (selectedAlarm.value?.canBeAcknowledged === true) {
+        void acknowledge([selectedAlarm.value.id]);
+    }
+}
+
+/** Sends the acknowledgement through the Luna service and reloads the alarms to show the result. */
+async function acknowledge(alarmIds: number[]): Promise<void> {
+    acknowledging.value = true;
+
+    try {
+        const acknowledgedCount = await acknowledgeAlarms(alarmIds);
+        notify(`${acknowledgedCount} alarm${acknowledgedCount === 1 ? '' : 's'} acknowledged.`, 'success');
+    } catch (exception) {
+        notify(exception instanceof Error ? exception.message : String(exception), 'danger');
+    } finally {
+        acknowledging.value = false;
+    }
+
+    await loadAlarms();
+}
 
 /** Loads the alarms of the current filter. The selection is kept if the alarm is still in the list. */
 async function loadAlarms(): Promise<void> {
@@ -114,6 +175,13 @@ onBeforeUnmount(() => {
                    :error="error"
                    @retry="loadAlarms" />
 
-        <AlarmDetails class="alarm-area-details" :alarm="selectedAlarm" />
+        <AlarmDetails class="alarm-area-details"
+                      :alarm="selectedAlarm"
+                      :acknowledgeable-count="acknowledgeableAlarms.length"
+                      :acknowledging="acknowledging"
+                      @acknowledge-filtered="onAcknowledgeFiltered"
+                      @acknowledge-selected="onAcknowledgeSelected" />
+
+        <ActionDialog v-model="isConfirmOpen" :title="confirmTitle" :actions="confirmActions" @choose="onConfirm" />
     </div>
 </template>

@@ -47,6 +47,17 @@ namespace paskalON.Luna.Application
 
 
         /// <summary>
+        /// Acknowledges the alarms in the alarm service, alarms that cannot be acknowledged (not acknowledgeable or already acknowledged)
+        /// are skipped.
+        /// </summary>
+        /// <param name="alarmIds">Ids of the alarms to acknowledge.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Number of acknowledged alarms.</returns>
+        /// <exception cref="HttpRequestException">Thrown when the alarm service is not reachable or answers with an error (e.g. 400 or 503).</exception>
+        Task<int> AcknowledgeAlarmsAsync(IReadOnlyCollection<int> alarmIds, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
         /// Raised after a newer alarm summary was received, e.g. to push it to the UI clients.
         /// </summary>
         event EventHandler<AlarmSummaryDto>? SummaryChanged;

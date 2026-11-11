@@ -87,3 +87,31 @@ export async function getAlarmTexts(language: string, signal?: AbortSignal): Pro
 
     return (await response.json()) as LocalizedTextsDto;
 }
+
+/**
+ * POST /v1/alarm/acknowledgealarms - acknowledges the alarms, alarms that cannot be acknowledged
+ * (not acknowledgeable or already acknowledged) are skipped by the alarm service.
+ * Returns the number of acknowledged alarms. Throws if the service cannot be reached or answers with an error.
+ */
+export async function acknowledgeAlarms(alarmIds: number[]): Promise<number> {
+    let response: Response;
+
+    try {
+        response = await fetch(`${config().apiBaseUrl}/v1/alarm/acknowledgealarms`, {
+            method: 'POST',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ alarmIds })
+        });
+    } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        throw new Error(`The Luna service could not be reached: ${reason}`);
+    }
+
+    if (response.ok === false) {
+        throw new Error(await readProblemDetail(response) ?? `The alarms could not be acknowledged (HTTP ${response.status}).`);
+    }
+
+    const result = (await response.json()) as { acknowledgedCount: number };
+
+    return result.acknowledgedCount;
+}

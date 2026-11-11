@@ -10,6 +10,8 @@ using paskalON.Alarms.Dto.Actions;
 using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
+using paskalON.Alarms.Service.Dto.V1.Requests;
+using paskalON.Alarms.Service.Dto.V1.Responses;
 
 namespace paskalON.Luna.Application
 {
@@ -33,6 +35,19 @@ namespace paskalON.Luna.Application
         /// Action sent by the alarm service when an alarm is normalized.
         /// </summary>
         public const string ClearAlarmActionName = "ClearAlarm";
+
+
+        /// <summary>
+        /// Action sent by the alarm service when an alarm is acknowledged.
+        /// </summary>
+        public const string AcknowledgeAlarmActionName = "AcknowledgeAlarm";
+
+
+        /// <summary>
+        /// User recorded as AcknowledgedBy until Luna has a login.
+        /// </summary>
+        // TODO: This shall be replaced with the user name of the Luna login, when Luna has a login.
+        public const string AcknowledgedByOperator = "Operator";
 
 
         /// <summary>
@@ -88,7 +103,7 @@ namespace paskalON.Luna.Application
 
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<string> ActionNames { get; } = new string[] { RaiseAlarmActionName, ClearAlarmActionName };
+        public IReadOnlyCollection<string> ActionNames { get; } = new string[] { RaiseAlarmActionName, ClearAlarmActionName, AcknowledgeAlarmActionName };
 
 
         /// <inheritdoc/>
@@ -131,6 +146,24 @@ namespace paskalON.Luna.Application
             ArgumentException.ThrowIfNullOrWhiteSpace(language);
 
             return await _alarmServer.GetLocalizedTexts(language.Trim(), cancellationToken);
+        }
+
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The alarms are acknowledged by <see cref="AcknowledgedByOperator"/> until Luna has a login. The changed alarm summary
+        /// reaches every Luna instance with the acknowledge actions of the alarm service.
+        /// </remarks>
+        public async Task<int> AcknowledgeAlarmsAsync(IReadOnlyCollection<int> alarmIds, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(alarmIds);
+            ArgumentOutOfRangeException.ThrowIfZero(alarmIds.Count);
+
+            AcknowledgeAlarmsRequest request = new AcknowledgeAlarmsRequest { AlarmIds = alarmIds.Distinct().ToList(), AcknowledgedBy = AcknowledgedByOperator };
+            AcknowledgeAlarmsResponse response = await _alarmServer.AcknowledgeAlarms(request, cancellationToken);
+            _logger.LogInformation("{AcknowledgedCount} of {RequestedCount} alarms acknowledged.", response.AcknowledgedCount, request.AlarmIds.Count);
+
+            return response.AcknowledgedCount;
         }
 
 

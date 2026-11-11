@@ -11,6 +11,8 @@ using paskalON.Alarms.Dto.Actions;
 using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
 using paskalON.Alarms.Dto.Summaries;
+using paskalON.Alarms.Service.Dto.V1.Requests;
+using paskalON.Alarms.Service.Dto.V1.Responses;
 
 namespace paskalON.Luna.Application.UnitTest
 {
@@ -39,16 +41,16 @@ namespace paskalON.Luna.Application.UnitTest
 
 
         /// <summary>
-        /// Luna receives the show and clear alarm actions.
+        /// Luna receives the raise, clear and acknowledge alarm actions.
         /// </summary>
         [TestMethod]
-        public void ActionNamesAreShowAndClearAlarmTest()
+        public void ActionNamesAreRaiseClearAndAcknowledgeAlarmTest()
         {
             LunaAlarmManager manager = CreateManager();
 
             IReadOnlyCollection<string> actionNames = manager.ActionNames;
 
-            CollectionAssert.AreEquivalent(new string[] { "RaiseAlarm", "ClearAlarm" }, actionNames.ToArray());
+            CollectionAssert.AreEquivalent(new string[] { "RaiseAlarm", "ClearAlarm", "AcknowledgeAlarm" }, actionNames.ToArray());
         }
 
 
@@ -308,6 +310,42 @@ namespace paskalON.Luna.Application.UnitTest
             Func<Task> getTexts = () => manager.GetLocalizedTextsAsync("en");
 
             await Assert.ThrowsExactlyAsync<HttpRequestException>(getTexts);
+        }
+
+
+        /// <summary>
+        /// The alarms are acknowledged by the operator in the alarm service, each id once, the number of acknowledged alarms is returned.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeAlarmsAsyncAcknowledgesByOperatorTest()
+        {
+            AcknowledgeAlarmsRequest? sentRequest = null;
+            _alarmServer.Setup(server => server.AcknowledgeAlarms(It.IsAny<AcknowledgeAlarmsRequest>(), It.IsAny<CancellationToken>()))
+                .Callback<AcknowledgeAlarmsRequest, CancellationToken>((request, _) => sentRequest = request)
+                .ReturnsAsync(new AcknowledgeAlarmsResponse { AcknowledgedCount = 2 });
+            LunaAlarmManager manager = CreateManager();
+
+            int acknowledgedCount = await manager.AcknowledgeAlarmsAsync(new List<int> { 100, 101, 100, 102 });
+
+            Assert.AreEqual(2, acknowledgedCount);
+            Assert.IsNotNull(sentRequest);
+            CollectionAssert.AreEqual(new List<int> { 100, 101, 102 }, sentRequest.AlarmIds);
+            Assert.AreEqual("Operator", sentRequest.AcknowledgedBy);
+        }
+
+
+        /// <summary>
+        /// Without alarm ids nothing is sent to the alarm service.
+        /// </summary>
+        [TestMethod]
+        public async Task AcknowledgeAlarmsAsyncWithoutAlarmsThrowsTest()
+        {
+            LunaAlarmManager manager = CreateManager();
+
+            Func<Task> acknowledge = () => manager.AcknowledgeAlarmsAsync(new List<int>());
+
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(acknowledge);
+            _alarmServer.Verify(server => server.AcknowledgeAlarms(It.IsAny<AcknowledgeAlarmsRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
 

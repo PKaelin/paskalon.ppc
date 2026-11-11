@@ -1250,3 +1250,11 @@ button.der-tree-toggle:disabled {
     margin: 0;
     overflow-wrap: anywhere;
 }
+
+/* Acknowledge buttons at the bottom of the details, shown with and without a selected alarm. */
+.alarm-details-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .75rem;
+}

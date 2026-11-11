@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using paskalON.Alarms.Dto;
 using paskalON.Alarms.Dto.Localizations;
 using paskalON.Alarms.Dto.Ppcs;
+using paskalON.Luna.Dto.Alarms;
 using paskalON.Luna.Application;
 
 namespace paskalON.Luna.Service.WebApi.Controllers.V1
@@ -98,6 +99,31 @@ namespace paskalON.Luna.Service.WebApi.Controllers.V1
         {
             return await ForwardAsync("alarm text", "Alarm texts not available", "The alarm service could not provide the alarm texts.",
                 () => _alarmManager.GetLocalizedTextsAsync(language, cancellationToken), cancellationToken);
+        }
+
+
+        /// <summary>
+        /// Acknowledges the alarms in the alarm service (e.g. the selected alarm or the alarms shown in the alarm list),
+        /// alarms that cannot be acknowledged are skipped.
+        /// </summary>
+        /// <param name="request">Ids of the alarms to acknowledge.</param>
+        /// <param name="cancellationToken">Token to cancel the request.</param>
+        /// <returns>
+        /// 200 with the number of acknowledged alarms, 400 for an invalid request,
+        /// the status code of the alarm service when it rejected the request (e.g. 503 without database), 503 when it is not reachable.
+        /// </returns>
+        [HttpPost]
+        [ProducesResponseType<AcknowledgeAlarmsResponseDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+        public async Task<ActionResult<AcknowledgeAlarmsResponseDto>> AcknowledgeAlarms([FromBody] AcknowledgeAlarmsRequestDto request,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            return await ForwardAsync("alarm acknowledge", "Alarms not acknowledged", "The alarm service could not acknowledge the alarms.",
+                async () => new AcknowledgeAlarmsResponseDto { AcknowledgedCount = await _alarmManager.AcknowledgeAlarmsAsync(request.AlarmIds, cancellationToken) },
+                cancellationToken);
         }
 
 
