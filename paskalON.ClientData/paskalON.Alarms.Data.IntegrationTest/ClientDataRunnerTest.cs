@@ -247,7 +247,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
             Assert.AreEqual(0, config.TimeBeforeNormalizingAlarmMilliseconds);
             Assert.IsTrue(config.IsAcknowledgeable);
             Assert.AreEqual(ClientDataLoader.ChangedBy, config.ChangedBy);
-            CollectionAssert.AreEquivalent(new List<(string, AlarmActionTrigger)> { ("RaiseAlarm", AlarmActionTrigger.Raise), ("ClearAlarm", AlarmActionTrigger.Normalize) },
+            CollectionAssert.AreEquivalent(GetExpectedActions(config),
                 config.AlarmActions.Select(action => (action.Name, action.Trigger)).ToList());
         }
 
@@ -290,19 +290,20 @@ namespace paskalON.Alarms.Data.IntegrationTest
             Assert.AreEqual(PropertyOperator.Equal, config.PropertyOperator);
             Assert.AreEqual(1, config.PropertyValue);
             Assert.AreEqual($"{{{{PCS.{propertyName}.Name}}}}", config.Name);
-            CollectionAssert.AreEquivalent(new List<(string, AlarmActionTrigger)> { ("RaiseAlarm", AlarmActionTrigger.Raise), ("ClearAlarm", AlarmActionTrigger.Normalize) },
+            CollectionAssert.AreEquivalent(GetExpectedActions(config),
                 config.AlarmActions.Select(action => (action.Name, action.Trigger)).ToList());
         }
 
 
         /// <summary>
-        /// The show and clear alarm actions are stored once and shared by all communication error configurations,
+        /// The raise, clear and acknowledge alarm actions are stored once and shared by the alarm configurations (acknowledge only by the acknowledgeable ones),
         /// their parameters pass the values of the alarm with placeholders.
         /// </summary>
         /// <param name="actionName">Name of the shared action.</param>
         [TestMethod]
         [DataRow("RaiseAlarm")]
         [DataRow("ClearAlarm")]
+        [DataRow("AcknowledgeAlarm")]
         public async Task RunAsyncImportsSharedAlarmActionTest(string actionName)
         {
             string[] args = new string[] { ClientProjectName, _clientProjectFile };
@@ -320,8 +321,9 @@ namespace paskalON.Alarms.Data.IntegrationTest
             Assert.AreEqual("{{DeviceId}}", parameters["DeviceId"]);
             Assert.AreEqual("{{PropertyName}}", parameters["PropertyName"]);
             List<PpcAlarmConfig> configs = await context.PpcAlarmConfigs.Include(x => x.AlarmActions).ToListAsync();
-            Assert.IsTrue(configs.All(config => config.AlarmActions.Count(configAction => configAction.Id == action.Id) == 1));
-            Assert.AreEqual(2, await context.AlarmActionConfigs.CountAsync());
+            Assert.IsTrue(configs.All(config => config.AlarmActions.Count(configAction => configAction.Id == action.Id)
+                == (action.Trigger != AlarmActionTrigger.Acknowledge || config.IsAcknowledgeable ? 1 : 0)));
+            Assert.AreEqual(3, await context.AlarmActionConfigs.CountAsync());
         }
 
 
@@ -395,10 +397,32 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
 
         /// <summary>
+        /// Gets the expected shared actions of a configuration: raise and clear, and acknowledge if it is acknowledgeable.
+        /// </summary>
+        /// <param name="config">The imported configuration.</param>
+        /// <returns>Names and triggers of the expected actions.</returns>
+        private List<(string, AlarmActionTrigger)> GetExpectedActions(PpcAlarmConfig config)
+        {
+            List<(string, AlarmActionTrigger)> actions = new List<(string, AlarmActionTrigger)>
+            {
+                ("RaiseAlarm", AlarmActionTrigger.Raise),
+                ("ClearAlarm", AlarmActionTrigger.Normalize)
+            };
+
+            if (config.IsAcknowledgeable)
+            {
+                actions.Add(("AcknowledgeAlarm", AlarmActionTrigger.Acknowledge));
+            }
+
+            return actions;
+        }
+
+
+        /// <summary>
         /// Creates the supplement of the localized texts as the alarm client data program does.
         /// </summary>
         /// <returns>The supplement that imports the text files of the client project file.</returns>
-        private static LocalizedTextSupplement<LocalizedText> CreateTextSupplement()
+        private LocalizedTextSupplement<LocalizedText> CreateTextSupplement()
         {
             return new LocalizedTextSupplement<LocalizedText>(text => text.Name, text => text.Language,
                 entity => entity is AlarmConfigBase config ? config.GetLocalizableValues() : [], LocalizedText.DefaultLanguage);
