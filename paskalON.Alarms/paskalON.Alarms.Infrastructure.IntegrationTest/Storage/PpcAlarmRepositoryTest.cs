@@ -70,7 +70,7 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
             Assert.AreEqual(7, alarm.DeviceId);
             Assert.AreEqual("FaultStates.OverTemperature", alarm.PropertyName);
             Assert.AreEqual(AlarmSequenceState.Alarm, alarm.AlarmSequenceState);
-            Assert.AreEqual(AlarmProcessCondition.Abnormal, alarm.AlarmProcessCondition);
+            Assert.IsNull(alarm.AcknowledgedOn);
             Assert.AreEqual(PcsAlarmSampleData.ChangedOn, alarm.CreatedOn);
             Assert.AreEqual(AlarmSeverity.Error, alarm.SeverityLevel);
             Assert.AreEqual(3, await verifyContext.PpcAlarmConfigs.CountAsync());
@@ -222,6 +222,8 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
             Assert.AreEqual(AlarmSequenceState.Acknowledged, acknowledgedAlarm.AlarmSequenceState);
             Assert.AreEqual("Homer", acknowledgedAlarm.ChangedBy);
             Assert.AreEqual(ChangedOn, acknowledgedAlarm.ChangedDate);
+            Assert.AreEqual("Homer", acknowledgedAlarm.AcknowledgedBy);
+            Assert.AreEqual(ChangedOn, acknowledgedAlarm.AcknowledgedOn);
         }
 
 
@@ -248,7 +250,6 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
             PpcAlarm normalizedAlarm = await verifyContext.PpcAlarms
                 .SingleAsync(alarm => alarm.DeviceId == 7 && alarm.PropertyName == "FaultStates.OverTemperature");
             Assert.AreEqual(AlarmSequenceState.Normal, normalizedAlarm.AlarmSequenceState);
-            Assert.AreEqual(AlarmProcessCondition.Normal, normalizedAlarm.AlarmProcessCondition);
         }
 
 
@@ -352,18 +353,16 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
         /// Only the alarms that match all set criteria are returned, the device name matches a part of it case insensitive.
         /// </summary>
         [TestMethod]
-        [DataRow(null, null, null, null, "PCS-FAULT:8,SYS-RTU:,PCS-GRIDLOSS:7,PCS-FAULT:7")]
-        [DataRow(AlarmSeverity.Critical, null, null, null, "SYS-RTU:,PCS-GRIDLOSS:7")]
-        [DataRow(AlarmSeverity.Info, null, null, null, "")]
-        [DataRow(null, AlarmProcessCondition.Normal, null, null, "PCS-GRIDLOSS:7")]
-        [DataRow(null, AlarmProcessCondition.Abnormal, null, null, "PCS-FAULT:8,SYS-RTU:,PCS-FAULT:7")]
-        [DataRow(null, null, AlarmSequenceState.Alarm, null, "SYS-RTU:,PCS-FAULT:7")]
-        [DataRow(null, null, AlarmSequenceState.Acknowledged, null, "PCS-FAULT:8")]
-        [DataRow(null, null, null, "inverter", "PCS-GRIDLOSS:7,PCS-FAULT:7")]
-        [DataRow(null, null, null, " PCS 8 ", "PCS-FAULT:8")]
-        [DataRow(AlarmSeverity.Error, AlarmProcessCondition.Abnormal, AlarmSequenceState.Alarm, "Inv", "PCS-FAULT:7")]
-        public async Task GetAsyncReturnsAlarmsMatchingAllCriteriaTest(AlarmSeverity? severityLevel, AlarmProcessCondition? processCondition,
-            AlarmSequenceState? sequenceState, string? deviceName, string expectedLabels)
+        [DataRow(null, null, null, "PCS-FAULT:8,SYS-RTU:,PCS-GRIDLOSS:7,PCS-FAULT:7")]
+        [DataRow(AlarmSeverity.Critical, null, null, "SYS-RTU:,PCS-GRIDLOSS:7")]
+        [DataRow(AlarmSeverity.Info, null, null, "")]
+        [DataRow(null, AlarmSequenceState.Normal, null, "PCS-GRIDLOSS:7")]
+        [DataRow(null, AlarmSequenceState.Alarm, null, "SYS-RTU:,PCS-FAULT:7")]
+        [DataRow(null, AlarmSequenceState.Acknowledged, null, "PCS-FAULT:8")]
+        [DataRow(null, null, "inverter", "PCS-GRIDLOSS:7,PCS-FAULT:7")]
+        [DataRow(null, null, " PCS 8 ", "PCS-FAULT:8")]
+        [DataRow(AlarmSeverity.Error, AlarmSequenceState.Alarm, "Inv", "PCS-FAULT:7")]
+        public async Task GetAsyncReturnsAlarmsMatchingAllCriteriaTest(AlarmSeverity? severityLevel, AlarmSequenceState? sequenceState, string? deviceName, string expectedLabels)
         {
             await SeedListAlarmsAsync();
             await using AlarmContext context = CreateDbContext<AlarmContext>();
@@ -372,7 +371,6 @@ namespace paskalON.Alarms.Infrastructure.IntegrationTest.Storage
             {
                 CreatedFrom = PcsAlarmSampleData.ChangedOn.AddDays(-1),
                 SeverityLevel = severityLevel,
-                AlarmProcessCondition = processCondition,
                 AlarmSequenceState = sequenceState,
                 DeviceName = deviceName
             };

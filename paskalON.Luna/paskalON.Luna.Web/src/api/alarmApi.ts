@@ -28,10 +28,6 @@ export async function getPpcAlarms(filter: PpcAlarmFilter, signal?: AbortSignal)
         query.set('severityLevel', String(filter.severityLevel));
     }
 
-    if (filter.alarmProcessCondition !== null) {
-        query.set('alarmProcessCondition', String(filter.alarmProcessCondition));
-    }
-
     if (filter.alarmSequenceState !== null) {
         query.set('alarmSequenceState', String(filter.alarmSequenceState));
     }

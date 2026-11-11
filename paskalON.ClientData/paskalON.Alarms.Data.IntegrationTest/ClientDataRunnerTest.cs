@@ -245,6 +245,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
             Assert.AreEqual(1, config.PropertyValue);
             Assert.AreEqual(0, config.TimeBeforeRaisingAlarmMilliseconds);
             Assert.AreEqual(0, config.TimeBeforeNormalizingAlarmMilliseconds);
+            Assert.IsTrue(config.IsAcknowledgeable);
             Assert.AreEqual(ClientDataLoader.ChangedBy, config.ChangedBy);
             CollectionAssert.AreEquivalent(new List<(string, AlarmActionTrigger)> { ("RaiseAlarm", AlarmActionTrigger.Raise), ("ClearAlarm", AlarmActionTrigger.Normalize) },
                 config.AlarmActions.Select(action => (action.Name, action.Trigger)).ToList());

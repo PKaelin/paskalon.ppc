@@ -23,7 +23,7 @@ class Program
     /// Arguments for DemoSuperSimpleBattery:
     /// Argument 1: "DemoSuperSimpleBattery"
     /// Argument 2: "ClientData\Demo\DemoSuperSimpleBattery.csv" (the relative path is resolved from the working directory which has to be the output directory)
-    /// Argument 3: "20261107010834_v_0_1"  (Optional schema version found in infrastructure migration folder or null to use the latest version.
+    /// Argument 3: "20261110231103_v_0_1"  (Optional schema version found in infrastructure migration folder or null to use the latest version.
     /// Important: The database in appsettings.json is deleted and recreated if the arguments and the file are valid.
     /// Set debug arguments in Visual Studio: Project Properties -> Debug -> Application arguments
     /// </remarks>

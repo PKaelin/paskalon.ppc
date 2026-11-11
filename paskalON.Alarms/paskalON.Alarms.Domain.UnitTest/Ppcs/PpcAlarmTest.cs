@@ -27,10 +27,10 @@ namespace paskalON.Alarms.Domain.UnitTest.Ppcs
 
 
         /// <summary>
-        /// A raised alarm is active, abnormal and in the sequence state alarm.
+        /// A raised alarm is active, in the sequence state alarm and not acknowledged yet.
         /// </summary>
         [TestMethod]
-        public void PpcAlarmRaisedIsActiveAndAbnormalTest()
+        public void PpcAlarmRaisedIsActiveTest()
         {
             PpcAlarm alarm = CreateAlarm(AlarmSeverity.Error);
 
@@ -38,81 +38,106 @@ namespace paskalON.Alarms.Domain.UnitTest.Ppcs
 
             Assert.IsTrue(isActive);
             Assert.AreEqual(AlarmSequenceState.Alarm, alarm.AlarmSequenceState);
-            Assert.AreEqual(AlarmProcessCondition.Abnormal, alarm.AlarmProcessCondition);
             Assert.AreEqual(AlarmSeverity.Error, alarm.SeverityLevel);
+            Assert.IsNull(alarm.AcknowledgedBy);
+            Assert.IsNull(alarm.AcknowledgedOn);
+            Assert.IsTrue(alarm.CanBeAcknowledged);
         }
 
 
         /// <summary>
-        /// A non critical alarm gets acknowledged and stays abnormal.
+        /// An active alarm of an acknowledgeable configuration gets acknowledged, whatever its severity (also critical).
         /// </summary>
         [TestMethod]
         [DataRow(AlarmSeverity.Info)]
         [DataRow(AlarmSeverity.Warning)]
         [DataRow(AlarmSeverity.Error)]
-        public void AcknowledgeNonCriticalAlarmSetsAcknowledgedTest(AlarmSeverity severity)
+        [DataRow(AlarmSeverity.Critical)]
+        public void AcknowledgeActiveAlarmSetsAcknowledgedTest(AlarmSeverity severity)
         {
             PpcAlarm alarm = CreateAlarm(severity);
 
             alarm.Acknowledge("Homer", ChangedOn);
 
             Assert.AreEqual(AlarmSequenceState.Acknowledged, alarm.AlarmSequenceState);
-            Assert.AreEqual(AlarmProcessCondition.Abnormal, alarm.AlarmProcessCondition);
+            Assert.AreEqual("Homer", alarm.AcknowledgedBy);
+            Assert.AreEqual(ChangedOn, alarm.AcknowledgedOn);
             Assert.AreEqual("Homer", alarm.ChangedBy);
             Assert.AreEqual(ChangedOn, alarm.ChangedDate);
             Assert.IsTrue(alarm.IsActive);
-        }
-
-
-        /// <summary>
-        /// A critical alarm cannot be acknowledged and stays in the sequence state alarm.
-        /// </summary>
-        [TestMethod]
-        public void AcknowledgeCriticalAlarmThrowsTest()
-        {
-            PpcAlarm alarm = CreateAlarm(AlarmSeverity.Critical);
-
-            bool canBeAcknowledged = alarm.CanBeAcknowledged;
-
-            Assert.IsFalse(canBeAcknowledged);
-            Assert.ThrowsExactly<InvalidOperationException>(() => alarm.Acknowledge("Homer", ChangedOn));
-            Assert.AreEqual(AlarmSequenceState.Alarm, alarm.AlarmSequenceState);
-        }
-
-
-        /// <summary>
-        /// Acknowledging an acknowledged or normalized alarm does nothing.
-        /// </summary>
-        [TestMethod]
-        [DataRow(AlarmSequenceState.Acknowledged)]
-        [DataRow(AlarmSequenceState.Normal)]
-        public void AcknowledgeNotInAlarmStateDoesNothingTest(AlarmSequenceState state)
-        {
-            PpcAlarm alarm = CreateAlarmInState(state);
-            string changedBy = alarm.ChangedBy;
-
-            alarm.Acknowledge("Marge", ChangedOn);
-
-            Assert.AreEqual(state, alarm.AlarmSequenceState);
-            Assert.AreEqual(changedBy, alarm.ChangedBy);
-            Assert.AreEqual(RaisedOn, alarm.ChangedDate);
             Assert.IsFalse(alarm.CanBeAcknowledged);
         }
 
 
         /// <summary>
-        /// Acknowledging a normalized critical alarm does nothing instead of throwing.
+        /// An alarm that is already back to normal can still be acknowledged, it stays normal and records the acknowledgement.
         /// </summary>
         [TestMethod]
-        public void AcknowledgeNormalizedCriticalAlarmDoesNothingTest()
+        public void AcknowledgeNormalAlarmRecordsAcknowledgementTest()
         {
-            PpcAlarm alarm = CreateAlarm(AlarmSeverity.Critical);
-            alarm.Normalize("System", RaisedOn);
+            PpcAlarm alarm = CreateAlarmInState(AlarmSequenceState.Normal);
+            bool canBeAcknowledged = alarm.CanBeAcknowledged;
 
             alarm.Acknowledge("Marge", ChangedOn);
 
+            Assert.IsTrue(canBeAcknowledged);
             Assert.AreEqual(AlarmSequenceState.Normal, alarm.AlarmSequenceState);
-            Assert.AreEqual("System", alarm.ChangedBy);
+            Assert.AreEqual("Marge", alarm.AcknowledgedBy);
+            Assert.AreEqual(ChangedOn, alarm.AcknowledgedOn);
+            Assert.AreEqual("Marge", alarm.ChangedBy);
+            Assert.IsFalse(alarm.CanBeAcknowledged);
+        }
+
+
+        /// <summary>
+        /// Acknowledging an alarm again keeps the first acknowledgement, also after it was normalized.
+        /// </summary>
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void AcknowledgeAcknowledgedAlarmKeepsFirstAcknowledgementTest(bool isNormalizedAfterAcknowledgement)
+        {
+            PpcAlarm alarm = CreateAlarmInState(AlarmSequenceState.Acknowledged);
+            AlarmSequenceState expectedState = AlarmSequenceState.Acknowledged;
+
+            if (isNormalizedAfterAcknowledgement)
+            {
+                alarm.Normalize("System", RaisedOn.AddMinutes(1));
+                expectedState = AlarmSequenceState.Normal;
+            }
+
+            string changedBy = alarm.ChangedBy;
+
+            alarm.Acknowledge("Marge", ChangedOn);
+
+            Assert.AreEqual(expectedState, alarm.AlarmSequenceState);
+            Assert.AreEqual("Homer", alarm.AcknowledgedBy);
+            Assert.AreEqual(RaisedOn, alarm.AcknowledgedOn);
+            Assert.AreEqual(changedBy, alarm.ChangedBy);
+        }
+
+
+        /// <summary>
+        /// An alarm of a configuration that is not acknowledgeable cannot be acknowledged, active or normal.
+        /// </summary>
+        [TestMethod]
+        [DataRow(AlarmSequenceState.Alarm)]
+        [DataRow(AlarmSequenceState.Normal)]
+        public void AcknowledgeNotAcknowledgeableAlarmThrowsTest(AlarmSequenceState state)
+        {
+            PpcAlarm alarm = CreateAlarm(AlarmSeverity.Warning, isAcknowledgeable: false);
+
+            if (state == AlarmSequenceState.Normal)
+            {
+                alarm.Normalize("System", RaisedOn);
+            }
+
+            bool canBeAcknowledged = alarm.CanBeAcknowledged;
+
+            Assert.IsFalse(canBeAcknowledged);
+            Assert.ThrowsExactly<InvalidOperationException>(() => alarm.Acknowledge("Homer", ChangedOn));
+            Assert.AreEqual(state, alarm.AlarmSequenceState);
+            Assert.IsNull(alarm.AcknowledgedOn);
         }
 
 
@@ -122,7 +147,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Ppcs
         [TestMethod]
         public void PpcAlarmSystemAlarmHasNoDeviceTest()
         {
-            PpcAlarmConfig config = CreateConfig(AlarmSeverity.Error, PpcAlarmType.SystemAlarm, null, "IsRtuCommunicationLost");
+            PpcAlarmConfig config = CreateConfig(AlarmSeverity.Error, PpcAlarmType.SystemAlarm, null, "IsRtuCommunicationLost", true);
 
             PpcAlarm alarm = new PpcAlarm
             {
@@ -139,7 +164,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Ppcs
 
 
         /// <summary>
-        /// An active alarm, acknowledged or not, gets normalized when the process condition reverts to normal.
+        /// An active alarm, acknowledged or not, gets normalized when its value is back to normal, an acknowledgement is kept.
         /// </summary>
         [TestMethod]
         [DataRow(AlarmSequenceState.Alarm)]
@@ -148,32 +173,32 @@ namespace paskalON.Alarms.Domain.UnitTest.Ppcs
         {
             PpcAlarm alarm = CreateAlarmInState(state);
 
-            alarm.Normalize("Homer", ChangedOn);
+            alarm.Normalize("System", ChangedOn);
 
             Assert.AreEqual(AlarmSequenceState.Normal, alarm.AlarmSequenceState);
-            Assert.AreEqual(AlarmProcessCondition.Normal, alarm.AlarmProcessCondition);
-            Assert.AreEqual("Homer", alarm.ChangedBy);
+            Assert.AreEqual("System", alarm.ChangedBy);
             Assert.AreEqual(ChangedOn, alarm.ChangedDate);
             Assert.IsFalse(alarm.IsActive);
+            Assert.AreEqual(state == AlarmSequenceState.Acknowledged, alarm.AcknowledgedOn != null);
         }
 
 
         /// <summary>
-        /// A critical alarm gets normalized without an acknowledgement.
+        /// An alarm of a configuration that is not acknowledgeable gets normalized without an acknowledgement.
         /// </summary>
         [TestMethod]
-        public void NormalizeCriticalAlarmSetsNormalTest()
+        public void NormalizeNotAcknowledgeableAlarmSetsNormalTest()
         {
-            PpcAlarm alarm = CreateAlarm(AlarmSeverity.Critical);
+            PpcAlarm alarm = CreateAlarm(AlarmSeverity.Info, isAcknowledgeable: false);
 
-            alarm.Normalize("Homer", ChangedOn);
+            alarm.Normalize("System", ChangedOn);
 
             Assert.AreEqual(AlarmSequenceState.Normal, alarm.AlarmSequenceState);
         }
 
 
         /// <summary>
-        /// A normalized alarm is final and cannot be normalized again.
+        /// A normalized alarm cannot be normalized again.
         /// </summary>
         [TestMethod]
         public void NormalizeNormalizedAlarmThrowsTest()
@@ -187,7 +212,7 @@ namespace paskalON.Alarms.Domain.UnitTest.Ppcs
 
 
         /// <summary>
-        /// The user or system that changes the alarm is required.
+        /// The user who acknowledges the alarm is required.
         /// </summary>
         [TestMethod]
         [DataRow("")]
@@ -206,9 +231,9 @@ namespace paskalON.Alarms.Domain.UnitTest.Ppcs
         /// <summary>
         /// Creates a raised PCS fault state alarm of a dictionary configuration.
         /// </summary>
-        private PpcAlarm CreateAlarm(AlarmSeverity severity)
+        private PpcAlarm CreateAlarm(AlarmSeverity severity, bool isAcknowledgeable = true)
         {
-            PpcAlarmConfig config = CreateConfig(severity, PpcAlarmType.PcsAlarm, 7, "FaultStates");
+            PpcAlarmConfig config = CreateConfig(severity, PpcAlarmType.PcsAlarm, 7, "FaultStates", isAcknowledgeable);
 
             return new PpcAlarm
             {
@@ -228,13 +253,14 @@ namespace paskalON.Alarms.Domain.UnitTest.Ppcs
         /// <summary>
         /// Creates an enabled alarm configuration that raises the alarm when the property is true.
         /// </summary>
-        private PpcAlarmConfig CreateConfig(AlarmSeverity severity, PpcAlarmType type, int? deviceId, string propertyName)
+        private PpcAlarmConfig CreateConfig(AlarmSeverity severity, PpcAlarmType type, int? deviceId, string propertyName, bool isAcknowledgeable)
         {
             return new PpcAlarmConfig
             {
                 Id = 1,
                 ChangedBy = "Homer",
                 IsEnabled = true,
+                IsAcknowledgeable = isAcknowledgeable,
                 AlarmId = $"{type}-{propertyName}",
                 Name = $"{{{{{type}.{propertyName}.Name}}}}",
                 SeverityLevel = severity,

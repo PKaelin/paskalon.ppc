@@ -32,7 +32,6 @@ namespace paskalON.Alarms.Application.Queries
             {
                 CreatedFrom = filter.CreatedFrom,
                 SeverityLevel = (AlarmSeverity?)filter.SeverityLevel,
-                AlarmProcessCondition = (AlarmProcessCondition?)filter.AlarmProcessCondition,
                 AlarmSequenceState = (AlarmSequenceState?)filter.AlarmSequenceState,
                 DeviceName = filter.DeviceName
             };
@@ -60,7 +59,9 @@ namespace paskalON.Alarms.Application.Queries
                 DeviceName = alarm.DeviceName,
                 PropertyName = alarm.PropertyName,
                 AlarmSequenceState = (AlarmSequenceStateDto)alarm.AlarmSequenceState,
-                AlarmProcessCondition = (AlarmProcessConditionDto)alarm.AlarmProcessCondition,
+                AcknowledgedBy = alarm.AcknowledgedBy,
+                AcknowledgedOn = alarm.AcknowledgedOn,
+                CanBeAcknowledged = alarm.CanBeAcknowledged,
                 CreatedOn = alarm.CreatedOn,
                 ChangedBy = alarm.ChangedBy,
                 ChangedDate = alarm.ChangedDate,
@@ -79,6 +80,7 @@ namespace paskalON.Alarms.Application.Queries
                 AlarmId = config.AlarmId,
                 Name = config.Name,
                 SeverityLevel = (AlarmSeverityDto)config.SeverityLevel,
+                IsAcknowledgeable = config.IsAcknowledgeable,
                 Description = config.Description,
                 PossibleCauses = config.PossibleCauses,
                 Response = config.Response,

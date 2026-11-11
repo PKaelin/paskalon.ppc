@@ -26,13 +26,6 @@ export const AlarmSeverity = {
 } as const;
 export type AlarmSeverity = (typeof AlarmSeverity)[keyof typeof AlarmSeverity];
 
-/** Condition of the process that caused the alarm (paskalON.Alarms.Dto AlarmProcessConditionDto), serialized as number. */
-export const AlarmProcessCondition = {
-    Normal: 0,
-    Abnormal: 1
-} as const;
-export type AlarmProcessCondition = (typeof AlarmProcessCondition)[keyof typeof AlarmProcessCondition];
-
 /** State of the alarm in the alarm sequence (paskalON.Alarms.Dto AlarmSequenceStateDto), serialized as number. */
 export const AlarmSequenceState = {
     Alarm: 0,
@@ -51,6 +44,8 @@ export interface PpcAlarmConfigDto {
     alarmId: string;
     name: string;
     severityLevel: AlarmSeverity;
+    /** False: the alarms cannot be acknowledged, the issue that caused the alarm must be resolved. */
+    isAcknowledgeable: boolean;
     description: string;
     possibleCauses: string | null;
     response: string | null;
@@ -66,7 +61,12 @@ export interface PpcAlarmDto {
     deviceName: string | null;
     propertyName: string;
     alarmSequenceState: AlarmSequenceState;
-    alarmProcessCondition: AlarmProcessCondition;
+    /** User who acknowledged the alarm, null while it is not acknowledged. */
+    acknowledgedBy: string | null;
+    /** Time of the acknowledgement (ISO 8601), null while the alarm is not acknowledged. */
+    acknowledgedOn: string | null;
+    /** True if the configuration is acknowledgeable and the alarm is not acknowledged yet (active or already normal). */
+    canBeAcknowledged: boolean;
     /** Time the alarm was triggered (ISO 8601). */
     createdOn: string;
     changedBy: string;
@@ -80,7 +80,6 @@ export interface PpcAlarmFilter {
     /** Period before now in hours in which the alarms were triggered. */
     triggeredWithinHours: number;
     severityLevel: AlarmSeverity | null;
-    alarmProcessCondition: AlarmProcessCondition | null;
     alarmSequenceState: AlarmSequenceState | null;
     /** Part of the device name (case insensitive), empty for all alarms. */
     deviceName: string;

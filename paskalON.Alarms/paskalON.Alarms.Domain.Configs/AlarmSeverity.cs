@@ -33,9 +33,6 @@ namespace paskalON.Alarms.Domain.Configs
         /// <summary>
         /// Indicates a most severe issue that requires an urgent corrective action. E.g. some PCS fault states.
         /// </summary>
-        /// <remarks>
-        /// Critical alarms cannot be acknowledged.
-        /// </remarks>
         Critical = 3
     }
 }

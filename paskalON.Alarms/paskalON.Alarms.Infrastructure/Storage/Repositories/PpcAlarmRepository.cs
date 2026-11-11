@@ -64,12 +64,6 @@ namespace paskalON.Alarms.Infrastructure.Storage.Repositories
                 query = query.Where(alarm => alarm.PpcAlarmConfig.SeverityLevel == severityLevel);
             }
 
-            if (filter.AlarmProcessCondition.HasValue)
-            {
-                AlarmProcessCondition processCondition = filter.AlarmProcessCondition.Value;
-                query = query.Where(alarm => alarm.AlarmProcessCondition == processCondition);
-            }
-
             if (filter.AlarmSequenceState.HasValue)
             {
                 AlarmSequenceState sequenceState = filter.AlarmSequenceState.Value;

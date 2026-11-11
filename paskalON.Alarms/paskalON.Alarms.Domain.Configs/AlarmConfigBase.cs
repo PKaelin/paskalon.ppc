@@ -75,6 +75,16 @@ namespace paskalON.Alarms.Domain.Configs
 
 
         /// <summary>
+        /// Indicates whether the alarms of this configuration can be acknowledged by an operator, default true.
+        /// </summary>
+        /// <remarks>
+        /// False: the alarms cannot be acknowledged, the issue that caused the alarm must be resolved.
+        /// They go Alarm -> Normal.
+        /// </remarks>
+        public bool IsAcknowledgeable { get; set; } = true;
+
+
+        /// <summary>
         /// Time in milliseconds the value must stay abnormal before the alarm is raised.
         /// </summary>
         /// <remarks>

@@ -59,7 +59,6 @@ namespace paskalON.Luna.Service.WebApi.Controllers.V1
         /// </summary>
         /// <param name="triggeredWithinHours">Period before now in hours in which the alarms were triggered (1 to 720).</param>
         /// <param name="severityLevel">Severity level of the alarms, empty for all severity levels.</param>
-        /// <param name="alarmProcessCondition">Process condition of the alarms, empty for all process conditions.</param>
         /// <param name="alarmSequenceState">Sequence state of the alarms, empty for all sequence states.</param>
         /// <param name="deviceName">Part of the device name (case insensitive), empty for all alarms.</param>
         /// <param name="cancellationToken">Token to cancel the request.</param>
@@ -72,12 +71,12 @@ namespace paskalON.Luna.Service.WebApi.Controllers.V1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<List<PpcAlarmDto>>> GetPpcAlarms([FromQuery, Range(1, MaximumTriggeredWithinHours)] int triggeredWithinHours,
-            [FromQuery] AlarmSeverityDto? severityLevel, [FromQuery] AlarmProcessConditionDto? alarmProcessCondition,
-            [FromQuery] AlarmSequenceStateDto? alarmSequenceState, [FromQuery] string? deviceName, CancellationToken cancellationToken)
+            [FromQuery] AlarmSeverityDto? severityLevel, [FromQuery] AlarmSequenceStateDto? alarmSequenceState, [FromQuery] string? deviceName,
+            CancellationToken cancellationToken)
         {
             return await ForwardAsync("alarm list", "Alarms not available", "The alarm service could not provide the alarms.",
-                () => _alarmManager.GetPpcAlarmsAsync(TimeSpan.FromHours(triggeredWithinHours), severityLevel, alarmProcessCondition,
-                    alarmSequenceState, deviceName, cancellationToken), cancellationToken);
+                () => _alarmManager.GetPpcAlarmsAsync(TimeSpan.FromHours(triggeredWithinHours), severityLevel, alarmSequenceState, deviceName,
+                    cancellationToken), cancellationToken);
         }
 
 

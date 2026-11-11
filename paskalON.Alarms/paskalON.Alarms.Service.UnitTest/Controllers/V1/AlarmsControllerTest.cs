@@ -113,8 +113,7 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
                 .ReturnsAsync(alarms);
             AlarmsController controller = CreateController();
 
-            ActionResult<List<PpcAlarmDto>> result = await controller.PpcAlarms(CreatedFrom, AlarmSeverityDto.Error, AlarmProcessConditionDto.Abnormal,
-                AlarmSequenceStateDto.Alarm, "PCS", CancellationToken.None);
+            ActionResult<List<PpcAlarmDto>> result = await controller.PpcAlarms(CreatedFrom, AlarmSeverityDto.Error, AlarmSequenceStateDto.Alarm, "PCS", CancellationToken.None);
 
             OkObjectResult okResult = (OkObjectResult)result.Result!;
             Assert.AreSame(alarms, okResult.Value);
@@ -122,7 +121,6 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
             {
                 CreatedFrom = CreatedFrom,
                 SeverityLevel = AlarmSeverityDto.Error,
-                AlarmProcessCondition = AlarmProcessConditionDto.Abnormal,
                 AlarmSequenceState = AlarmSequenceStateDto.Alarm,
                 DeviceName = "PCS"
             };
@@ -140,7 +138,7 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
                 .ThrowsAsync(new TimeoutException("Database not available."));
             AlarmsController controller = CreateController();
 
-            ActionResult<List<PpcAlarmDto>> result = await controller.PpcAlarms(CreatedFrom, null, null, null, null, CancellationToken.None);
+            ActionResult<List<PpcAlarmDto>> result = await controller.PpcAlarms(CreatedFrom, null, null, null, CancellationToken.None);
 
             ObjectResult problemResult = (ObjectResult)result.Result!;
             Assert.AreEqual(StatusCodes.Status503ServiceUnavailable, problemResult.StatusCode);
@@ -160,7 +158,7 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
                 DeviceName = "PCS 7",
                 PropertyName = "FaultStates.OverTemperature",
                 AlarmSequenceState = AlarmSequenceStateDto.Alarm,
-                AlarmProcessCondition = AlarmProcessConditionDto.Abnormal,
+                CanBeAcknowledged = true,
                 CreatedOn = CreatedFrom.AddHours(1),
                 ChangedBy = "System",
                 ChangedDate = CreatedFrom.AddHours(1),
@@ -169,6 +167,7 @@ namespace paskalON.Alarms.Service.UnitTest.Controllers.V1
                     AlarmId = "PCS-FAULT",
                     Name = "{{PCS.Fault.Name}}",
                     SeverityLevel = AlarmSeverityDto.Error,
+                    IsAcknowledgeable = true,
                     Description = "{{PCS.Fault.Desc}}",
                     PossibleCauses = "{{PCS.Fault.Causes}}"
                 }

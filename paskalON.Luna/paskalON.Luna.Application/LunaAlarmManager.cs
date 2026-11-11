@@ -106,7 +106,7 @@ namespace paskalON.Luna.Application
         /// The period is calculated with the clock of the service, not of the browser.
         /// </remarks>
         public async Task<List<PpcAlarmDto>> GetPpcAlarmsAsync(TimeSpan triggeredWithin, AlarmSeverityDto? severityLevel,
-            AlarmProcessConditionDto? processCondition, AlarmSequenceStateDto? sequenceState, string? deviceName, CancellationToken cancellationToken = default)
+            AlarmSequenceStateDto? sequenceState, string? deviceName, CancellationToken cancellationToken = default)
         {
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(triggeredWithin, TimeSpan.Zero);
 
@@ -114,7 +114,6 @@ namespace paskalON.Luna.Application
             {
                 CreatedFrom = _timeProvider.GetUtcNow() - triggeredWithin,
                 SeverityLevel = severityLevel,
-                AlarmProcessCondition = processCondition,
                 AlarmSequenceState = sequenceState,
                 DeviceName = string.IsNullOrWhiteSpace(deviceName) ? null : deviceName.Trim()
             };

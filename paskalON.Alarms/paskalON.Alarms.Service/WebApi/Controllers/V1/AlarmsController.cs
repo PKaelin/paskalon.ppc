@@ -87,7 +87,6 @@ namespace paskalON.Alarms.Service.Controllers.V1
         /// </summary>
         /// <param name="createdFrom">Earliest creation timestamp of the alarms (inclusive).</param>
         /// <param name="severityLevel">Severity level of the alarm configuration, empty for all severity levels.</param>
-        /// <param name="alarmProcessCondition">Process condition of the alarms, empty for all process conditions.</param>
         /// <param name="alarmSequenceState">Sequence state of the alarms, empty for all sequence states.</param>
         /// <param name="deviceName">Part of the device name (case insensitive), empty for all alarms.</param>
         /// <param name="cancellationToken">Cancellation token of the request.</param>
@@ -100,14 +99,13 @@ namespace paskalON.Alarms.Service.Controllers.V1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<List<PpcAlarmDto>>> PpcAlarms([FromQuery, BindRequired] DateTimeOffset createdFrom,
-            [FromQuery] AlarmSeverityDto? severityLevel, [FromQuery] AlarmProcessConditionDto? alarmProcessCondition,
+            [FromQuery] AlarmSeverityDto? severityLevel,
             [FromQuery] AlarmSequenceStateDto? alarmSequenceState, [FromQuery] string? deviceName, CancellationToken cancellationToken)
         {
             PpcAlarmFilterDto filter = new PpcAlarmFilterDto
             {
                 CreatedFrom = createdFrom,
                 SeverityLevel = severityLevel,
-                AlarmProcessCondition = alarmProcessCondition,
                 AlarmSequenceState = alarmSequenceState,
                 DeviceName = deviceName
             };

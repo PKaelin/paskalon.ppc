@@ -85,8 +85,12 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                 {
                     b.HasBaseType("paskalON.Domains.DomainBase");
 
-                    b.Property<int>("AlarmProcessCondition")
-                        .HasColumnType("integer");
+                    b.Property<string>("AcknowledgedBy")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<DateTimeOffset?>("AcknowledgedOn")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("AlarmSequenceState")
                         .HasColumnType("integer");
@@ -152,6 +156,9 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("character varying(250)");
+
+                    b.Property<bool>("IsAcknowledgeable")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("boolean");

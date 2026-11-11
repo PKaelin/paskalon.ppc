@@ -12,7 +12,7 @@ persists raised/normalized alarms and publishes the alarms and their alarm actio
 Persistent Domain Configuration layer of DDD (alarm configurations, alarm action configurations, system configuration).
 
 ### Project .Domain
-Domain layer of DDD (alarms, alarm sequence states, alarm process conditions, evaluators).
+Domain layer of DDD (alarms, alarm sequence states, evaluators).
 
 ### Project .Dto
 Data transfer objects published by the alarm service (alarms and alarm actions).

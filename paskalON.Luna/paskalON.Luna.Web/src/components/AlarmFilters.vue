@@ -2,7 +2,6 @@
 import { computed } from 'vue';
 import type { PpcAlarmFilter } from '../types/alarm';
 import {
-    conditionOptions,
     defaultAlarmFilter,
     severityOptions,
     stateOptions,
@@ -38,7 +37,6 @@ function criterion<K extends keyof PpcAlarmFilter>(key: K) {
 
 const severityLevel = criterion('severityLevel');
 const triggeredWithinHours = criterion('triggeredWithinHours');
-const alarmProcessCondition = criterion('alarmProcessCondition');
 const alarmSequenceState = criterion('alarmSequenceState');
 const deviceName = criterion('deviceName');
 
@@ -84,13 +82,6 @@ function clearAll(): void {
             <label class="om-label" for="alarm-filter-triggered">Triggered</label>
             <select id="alarm-filter-triggered" v-model="triggeredWithinHours" class="form-select form-select-sm">
                 <option v-for="option in triggeredOptions" :key="option.label" :value="option.value">{{ option.label }}</option>
-            </select>
-        </div>
-
-        <div class="alarm-filter">
-            <label class="om-label" for="alarm-filter-condition">Condition</label>
-            <select id="alarm-filter-condition" v-model="alarmProcessCondition" class="form-select form-select-sm">
-                <option v-for="option in conditionOptions" :key="option.label" :value="option.value">{{ option.label }}</option>
             </select>
         </div>
 

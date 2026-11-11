@@ -21,10 +21,12 @@ namespace paskalON.Alarms.Infrastructure.Storage.Configurations
         {
             builder.Property(x => x.CreatedOn).IsRequired();
             builder.Property(x => x.AlarmSequenceState).IsRequired();
-            builder.Property(x => x.AlarmProcessCondition).IsRequired();
+            builder.Property(x => x.AcknowledgedBy).HasMaxLength(250).IsRequired(false);
+            builder.Property(x => x.AcknowledgedOn).IsRequired(false);
 
             // Calculated by the domain, not persisted
             builder.Ignore(x => x.SeverityLevel);
+            builder.Ignore(x => x.IsAcknowledgeable);
             builder.Ignore(x => x.CanBeAcknowledged);
             builder.Ignore(x => x.IsActive);
         }

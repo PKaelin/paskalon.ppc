@@ -59,5 +59,12 @@ namespace paskalON.Alarms.Domain.Ppcs
         {
             get => PpcAlarmConfig.SeverityLevel;
         }
+
+
+        /// <inheritdoc/>
+        public override bool IsAcknowledgeable
+        {
+            get => PpcAlarmConfig.IsAcknowledgeable;
+        }
     }
 }

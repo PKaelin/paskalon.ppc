@@ -76,7 +76,6 @@ watch(filter, (current, previous) => {
     const isDeviceNameOnly = current.deviceName !== previous.deviceName
         && current.triggeredWithinHours === previous.triggeredWithinHours
         && current.severityLevel === previous.severityLevel
-        && current.alarmProcessCondition === previous.alarmProcessCondition
         && current.alarmSequenceState === previous.alarmSequenceState;
 
     if (isDeviceNameOnly) {

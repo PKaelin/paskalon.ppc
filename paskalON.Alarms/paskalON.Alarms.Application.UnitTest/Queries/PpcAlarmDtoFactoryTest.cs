@@ -47,7 +47,10 @@ namespace paskalON.Alarms.Application.UnitTest.Queries
             Assert.AreEqual("PCS 7", dto.DeviceName);
             Assert.AreEqual("FaultStates.OverTemperature", dto.PropertyName);
             Assert.AreEqual(AlarmSequenceStateDto.Acknowledged, dto.AlarmSequenceState);
-            Assert.AreEqual(AlarmProcessConditionDto.Abnormal, dto.AlarmProcessCondition);
+            Assert.AreEqual("Homer", dto.AcknowledgedBy);
+            Assert.AreEqual(PcsAlarmConfigSampleData.ChangedOn.AddMinutes(5), dto.AcknowledgedOn);
+            Assert.IsFalse(dto.CanBeAcknowledged);
+            Assert.IsTrue(dto.PpcAlarmConfig.IsAcknowledgeable);
             Assert.AreEqual(PcsAlarmConfigSampleData.ChangedOn, dto.CreatedOn);
             Assert.AreEqual("Homer", dto.ChangedBy);
             Assert.AreEqual(PcsAlarmConfigSampleData.ChangedOn.AddMinutes(5), dto.ChangedDate);
@@ -63,7 +66,7 @@ namespace paskalON.Alarms.Application.UnitTest.Queries
 
 
         /// <summary>
-        /// A normalized system alarm without device is mapped with the normal state and condition.
+        /// A normalized, not yet acknowledged system alarm without device is mapped with the normal state, it can still be acknowledged.
         /// </summary>
         [TestMethod]
         public void CreateMapsNormalizedSystemAlarmTest()
@@ -80,7 +83,8 @@ namespace paskalON.Alarms.Application.UnitTest.Queries
             Assert.IsNull(dto.DeviceId);
             Assert.IsNull(dto.DeviceName);
             Assert.AreEqual(AlarmSequenceStateDto.Normal, dto.AlarmSequenceState);
-            Assert.AreEqual(AlarmProcessConditionDto.Normal, dto.AlarmProcessCondition);
+            Assert.IsNull(dto.AcknowledgedOn);
+            Assert.IsTrue(dto.CanBeAcknowledged);
             Assert.AreEqual(AlarmSeverityDto.Critical, dto.PpcAlarmConfig.SeverityLevel);
         }
 
@@ -89,17 +93,16 @@ namespace paskalON.Alarms.Application.UnitTest.Queries
         /// Every criterion of the filter DTO is mapped to the domain filter with the same name.
         /// </summary>
         [TestMethod]
-        [DataRow(AlarmSeverityDto.Info, AlarmProcessConditionDto.Normal, AlarmSequenceStateDto.Alarm)]
-        [DataRow(AlarmSeverityDto.Warning, AlarmProcessConditionDto.Abnormal, AlarmSequenceStateDto.Acknowledged)]
-        [DataRow(AlarmSeverityDto.Error, AlarmProcessConditionDto.Abnormal, AlarmSequenceStateDto.Normal)]
-        [DataRow(AlarmSeverityDto.Critical, AlarmProcessConditionDto.Normal, AlarmSequenceStateDto.Normal)]
-        public void CreateFilterMapsCriteriaTest(AlarmSeverityDto severityLevel, AlarmProcessConditionDto processCondition, AlarmSequenceStateDto sequenceState)
+        [DataRow(AlarmSeverityDto.Info, AlarmSequenceStateDto.Alarm)]
+        [DataRow(AlarmSeverityDto.Warning, AlarmSequenceStateDto.Acknowledged)]
+        [DataRow(AlarmSeverityDto.Error, AlarmSequenceStateDto.Normal)]
+        [DataRow(AlarmSeverityDto.Critical, AlarmSequenceStateDto.Normal)]
+        public void CreateFilterMapsCriteriaTest(AlarmSeverityDto severityLevel, AlarmSequenceStateDto sequenceState)
         {
             PpcAlarmFilterDto filterDto = new PpcAlarmFilterDto
             {
                 CreatedFrom = CreatedFrom,
                 SeverityLevel = severityLevel,
-                AlarmProcessCondition = processCondition,
                 AlarmSequenceState = sequenceState,
                 DeviceName = "PCS"
             };
@@ -108,7 +111,6 @@ namespace paskalON.Alarms.Application.UnitTest.Queries
 
             Assert.AreEqual(CreatedFrom, filter.CreatedFrom);
             Assert.AreEqual(severityLevel.ToString(), filter.SeverityLevel.ToString());
-            Assert.AreEqual(processCondition.ToString(), filter.AlarmProcessCondition.ToString());
             Assert.AreEqual(sequenceState.ToString(), filter.AlarmSequenceState.ToString());
             Assert.AreEqual("PCS", filter.DeviceName);
         }

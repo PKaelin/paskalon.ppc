@@ -28,6 +28,7 @@ namespace paskalON.Alarms.Infrastructure.Storage.Configurations
         {
             builder.Property(x => x.Name).HasMaxLength(250).IsRequired();
             builder.Property(x => x.IsEnabled).IsRequired();
+            builder.Property(x => x.IsAcknowledgeable).IsRequired();
             builder.Property(x => x.AlarmId).HasMaxLength(100).IsRequired();
             builder.Property(x => x.SeverityLevel).IsRequired();
             builder.Property(x => x.Description).HasMaxLength(250).IsRequired();

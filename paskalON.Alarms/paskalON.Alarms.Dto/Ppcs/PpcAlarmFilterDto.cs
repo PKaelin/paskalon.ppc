@@ -25,12 +25,6 @@ namespace paskalON.Alarms.Dto.Ppcs
 
 
         /// <summary>
-        /// Process condition of the alarms, null for all process conditions.
-        /// </summary>
-        public AlarmProcessConditionDto? AlarmProcessCondition { get; init; }
-
-
-        /// <summary>
         /// Sequence state of the alarms, null for all sequence states.
         /// </summary>
         public AlarmSequenceStateDto? AlarmSequenceState { get; init; }

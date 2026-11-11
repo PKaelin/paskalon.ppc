@@ -2,7 +2,7 @@
 import type { AlarmSort, AlarmSortKey } from '../utils/alarmList';
 
 /** Keys of the columns of the alarm list. */
-type ColumnKey = 'severity' | 'triggered' | 'condition' | 'state' | 'device' | 'name' | 'lastChange' | 'changedBy';
+type ColumnKey = 'severity' | 'triggered' | 'acknowledged' | 'state' | 'device' | 'name' | 'lastChange' | 'acknowledgedBy';
 
 /** Column widths in pixels set by the user, null while the columns fit the content area. Kept while the tab is switched. */
 let savedWidths: Record<ColumnKey, number> | null = null;
@@ -27,12 +27,12 @@ interface AlarmColumn {
 const columns: AlarmColumn[] = [
     { key: 'severity', title: 'Severity', weight: 0.9, minWidth: 72, sortKey: 'severity', firstDirection: 'desc' },
     { key: 'triggered', title: 'Triggered', weight: 1.4, minWidth: 96, sortKey: 'triggered', firstDirection: 'desc' },
-    { key: 'condition', title: 'Condition', weight: 0.9, minWidth: 72, sortKey: 'condition', firstDirection: 'asc' },
+    { key: 'acknowledged', title: 'Acknowledged', weight: 1.4, minWidth: 96, sortKey: 'acknowledged', firstDirection: 'desc' },
     { key: 'state', title: 'State', weight: 1, minWidth: 72, sortKey: 'state', firstDirection: 'asc' },
     { key: 'device', title: 'Device', weight: 1.3, minWidth: 72, sortKey: 'device', firstDirection: 'asc' },
     { key: 'name', title: 'Name', weight: 2.4, minWidth: 96, sortKey: null, firstDirection: 'asc' },
     { key: 'lastChange', title: 'Last Change', weight: 1.4, minWidth: 96, sortKey: 'lastChange', firstDirection: 'desc' },
-    { key: 'changedBy', title: 'Changed By', weight: 1, minWidth: 72, sortKey: null, firstDirection: 'asc' }
+    { key: 'acknowledgedBy', title: 'Acknowledged By', weight: 1.1, minWidth: 72, sortKey: null, firstDirection: 'asc' }
 ];
 
 /** Step of the arrow keys on a column border in pixels. */
@@ -43,8 +43,8 @@ const KeyboardStep = 16;
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 import type { PpcAlarmDto } from '../types/alarm';
 import {
-    conditionLabels,
     defaultAlarmSort,
+    formatAcknowledgement,
     formatAlarmTime,
     severityClasses,
     severityLabels,
@@ -308,12 +308,12 @@ onBeforeUnmount(() => resizeObserver?.disconnect());
                             </span>
                         </td>
                         <td :title="formatAlarmTime(alarm.createdOn)">{{ formatAlarmTime(alarm.createdOn) }}</td>
-                        <td>{{ conditionLabels[alarm.alarmProcessCondition] }}</td>
+                        <td :title="formatAcknowledgement(alarm)">{{ formatAcknowledgement(alarm) }}</td>
                         <td>{{ stateLabels[alarm.alarmSequenceState] }}</td>
                         <td :title="alarm.deviceName ?? 'No device'">{{ alarm.deviceName ?? '—' }}</td>
                         <td :title="resolveAlarmText(alarm.ppcAlarmConfig.name)">{{ resolveAlarmText(alarm.ppcAlarmConfig.name) }}</td>
                         <td :title="formatAlarmTime(alarm.changedDate)">{{ formatAlarmTime(alarm.changedDate) }}</td>
-                        <td :title="alarm.changedBy">{{ alarm.changedBy }}</td>
+                        <td :title="alarm.acknowledgedBy ?? 'Not acknowledged'">{{ alarm.acknowledgedBy ?? '—' }}</td>
                     </tr>
                 </tbody>
             </table>

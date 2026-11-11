@@ -120,7 +120,6 @@ namespace paskalON.Alarms.Client.UnitTest
             {
                 CreatedFrom = new DateTimeOffset(2026, 11, 9, 6, 0, 0, TimeSpan.FromHours(1)),
                 SeverityLevel = AlarmSeverityDto.Critical,
-                AlarmProcessCondition = AlarmProcessConditionDto.Abnormal,
                 AlarmSequenceState = AlarmSequenceStateDto.Acknowledged,
                 DeviceName = " PCS 7 "
             };
@@ -129,7 +128,7 @@ namespace paskalON.Alarms.Client.UnitTest
 
             Assert.AreEqual(HttpMethod.Get, _handler.Request!.Method);
             Assert.AreEqual("/api/v1/alarms/ppcalarms", _handler.Request.RequestUri!.AbsolutePath);
-            Assert.AreEqual("?createdFrom=2026-11-09T06%3A00%3A00.0000000%2B01%3A00&severityLevel=Critical&alarmProcessCondition=Abnormal" +
+            Assert.AreEqual("?createdFrom=2026-11-09T06%3A00%3A00.0000000%2B01%3A00&severityLevel=Critical" +
                 "&alarmSequenceState=Acknowledged&deviceName=PCS%207", _handler.Request.RequestUri.Query);
         }
 
@@ -156,9 +155,9 @@ namespace paskalON.Alarms.Client.UnitTest
         public async Task GetPpcAlarmsReturnsAlarmsTest()
         {
             _handler.ResponseContent = "[{\"id\":100,\"ppcAlarmType\":1,\"deviceId\":7,\"deviceName\":\"PCS 7\",\"propertyName\":\"FaultStates.OverTemperature\"," +
-                "\"alarmSequenceState\":1,\"alarmProcessCondition\":1,\"createdOn\":\"2026-11-09T07:00:00+00:00\",\"changedBy\":\"Homer\"," +
+                "\"alarmSequenceState\":1,\"acknowledgedBy\":\"Homer\",\"acknowledgedOn\":\"2026-11-09T07:05:00+00:00\",\"canBeAcknowledged\":false,\"createdOn\":\"2026-11-09T07:00:00+00:00\",\"changedBy\":\"Homer\"," +
                 "\"changedDate\":\"2026-11-09T07:05:00+00:00\",\"ppcAlarmConfig\":{\"alarmId\":\"PCS-FAULT\",\"name\":\"{{PCS.Fault.Name}}\"," +
-                "\"severityLevel\":2,\"description\":\"{{PCS.Fault.Desc}}\",\"possibleCauses\":\"{{PCS.Fault.Causes}}\",\"alarmActions\":[]}}]";
+                "\"severityLevel\":2,\"isAcknowledgeable\":true,\"description\":\"{{PCS.Fault.Desc}}\",\"possibleCauses\":\"{{PCS.Fault.Causes}}\",\"alarmActions\":[]}}]";
             PpcAlarmFilterDto filter = new PpcAlarmFilterDto { CreatedFrom = new DateTimeOffset(2026, 11, 9, 6, 0, 0, TimeSpan.Zero) };
 
             List<PpcAlarmDto> alarms = await _server.GetPpcAlarms(filter);
@@ -169,7 +168,10 @@ namespace paskalON.Alarms.Client.UnitTest
             Assert.AreEqual(PpcAlarmTypeDto.PcsAlarm, alarm.PpcAlarmType);
             Assert.AreEqual("PCS 7", alarm.DeviceName);
             Assert.AreEqual(AlarmSequenceStateDto.Acknowledged, alarm.AlarmSequenceState);
-            Assert.AreEqual(AlarmProcessConditionDto.Abnormal, alarm.AlarmProcessCondition);
+            Assert.AreEqual("Homer", alarm.AcknowledgedBy);
+            Assert.AreEqual(new DateTimeOffset(2026, 11, 9, 7, 5, 0, TimeSpan.Zero), alarm.AcknowledgedOn);
+            Assert.IsFalse(alarm.CanBeAcknowledged);
+            Assert.IsTrue(alarm.PpcAlarmConfig.IsAcknowledgeable);
             Assert.AreEqual(new DateTimeOffset(2026, 11, 9, 7, 0, 0, TimeSpan.Zero), alarm.CreatedOn);
             Assert.AreEqual("Homer", alarm.ChangedBy);
             Assert.AreEqual(new DateTimeOffset(2026, 11, 9, 7, 5, 0, TimeSpan.Zero), alarm.ChangedDate);

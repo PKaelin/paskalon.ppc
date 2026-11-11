@@ -28,7 +28,7 @@ namespace paskalON.Alarms.Dto
 
 
         /// <summary>
-        /// Indicates a most severe issue that requires an urgent corrective action. Cannot be acknowledged.
+        /// Indicates a most severe issue that requires an urgent corrective action.
         /// </summary>
         Critical = 3
     }

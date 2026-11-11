@@ -34,6 +34,12 @@ namespace paskalON.Alarms.Dto.Ppcs
 
 
         /// <summary>
+        /// Indicates whether the alarms of this configuration can be acknowledged by an operator.
+        /// </summary>
+        public required bool IsAcknowledgeable { get; init; }
+
+
+        /// <summary>
         /// String identifier of the short description of the alarm.
         /// </summary>
         public required string Description { get; init; }

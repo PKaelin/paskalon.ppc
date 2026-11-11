@@ -118,11 +118,6 @@ namespace paskalON.Alarms.Client
                 parameters.Add($"severityLevel={filter.SeverityLevel.Value}");
             }
 
-            if (filter.AlarmProcessCondition.HasValue)
-            {
-                parameters.Add($"alarmProcessCondition={filter.AlarmProcessCondition.Value}");
-            }
-
             if (filter.AlarmSequenceState.HasValue)
             {
                 parameters.Add($"alarmSequenceState={filter.AlarmSequenceState.Value}");

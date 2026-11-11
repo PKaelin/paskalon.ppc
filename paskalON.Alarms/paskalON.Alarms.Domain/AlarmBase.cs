@@ -11,10 +11,14 @@ namespace paskalON.Alarms.Domain
     /// Base of all alarm domains, handles the alarm sequence.
     /// </summary>
     /// <remarks>
-    /// A new alarm is raised in the sequence state <see cref="AlarmSequenceState.Alarm"/> with an abnormal process condition.
-    /// Alarm -> Acknowledged: The operator acknowledges the alarm (not possible for critical alarms).
-    /// Alarm/Acknowledged -> Normal: The process condition reverts to normal.
-    /// A normalized alarm is final, a new occurrence raises a new alarm.
+    /// A new alarm is raised in the sequence state <see cref="AlarmSequenceState.Alarm"/>.
+    /// Alarm -> Acknowledged: The operator acknowledges the active alarm.
+    /// Alarm/Acknowledged -> Normal: The value of the alarm is back to normal.
+    /// A normalized alarm stays normal, a new occurrence raises a new alarm.
+    /// Only an alarm whose configuration is acknowledgeable can be acknowledged, once, active or already normal:
+    /// an active alarm moves to Acknowledged, a normal alarm stays Normal, both record who acknowledged it and when.
+    /// Alarms of configurations that are not acknowledgeable cannot be acknowledged, the issue that caused them must be resolved:
+    /// they go Alarm -> Normal.
     /// </remarks>
     public abstract class AlarmBase : DomainBase
     {
@@ -35,9 +39,19 @@ namespace paskalON.Alarms.Domain
 
 
         /// <summary>
-        /// Condition of the process that caused the alarm event.
+        /// User who acknowledged the alarm, null while it is not acknowledged.
         /// </summary>
-        public AlarmProcessCondition AlarmProcessCondition { get; private set; } = AlarmProcessCondition.Abnormal;
+        public string? AcknowledgedBy { get; private set; }
+
+
+        /// <summary>
+        /// Timestamp of the acknowledgement, null while the alarm is not acknowledged.
+        /// </summary>
+        public DateTimeOffset? AcknowledgedOn
+        {
+            get => field;
+            private set => field = value?.ToUniversalTime();
+        }
 
 
         /// <summary>
@@ -47,14 +61,18 @@ namespace paskalON.Alarms.Domain
 
 
         /// <summary>
-        /// Indicates whether the alarm is active and not yet acknowledged and its severity allows an acknowledgement.
+        /// Indicates whether the configuration of the alarm allows an acknowledgement.
         /// </summary>
-        /// <remarks>
-        /// Critical alarms cannot be acknowledged.
-        /// </remarks>
+        public abstract bool IsAcknowledgeable { get; }
+
+
+        /// <summary>
+        /// Indicates whether the alarm can be acknowledged: its configuration is acknowledgeable and it is not acknowledged yet,
+        /// regardless of whether it is active or already normal.
+        /// </summary>
         public bool CanBeAcknowledged
         {
-            get => AlarmSequenceState == AlarmSequenceState.Alarm && SeverityLevel != AlarmSeverity.Critical;
+            get => IsAcknowledgeable && AcknowledgedOn == null;
         }
 
 
@@ -71,33 +89,41 @@ namespace paskalON.Alarms.Domain
         /// Acknowledges the alarm.
         /// </summary>
         /// <remarks>
-        /// An alarm that is already acknowledged or normalized is left unchanged.
+        /// - An active alarm moves to the sequence state Acknowledged, a normal alarm stays Normal.
+        /// - Both record who acknowledged the alarm and when.
+        /// - An alarm that is already acknowledged is left unchanged, the first acknowledgement is kept.
         /// </remarks>
-        /// <param name="changedBy">User or system that acknowledged the alarm.</param>
+        /// <param name="changedBy">User who acknowledged the alarm.</param>
         /// <param name="changedDate">Timestamp of the acknowledgement.</param>
-        /// <exception cref="InvalidOperationException">Thrown when the alarm is critical, critical alarms cannot be acknowledged.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the configuration of the alarm is not acknowledgeable.</exception>
         public void Acknowledge(string changedBy, DateTimeOffset changedDate)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(changedBy);
 
-            if (AlarmSequenceState != AlarmSequenceState.Alarm)
+            if (IsAcknowledgeable is false)
+            {
+                throw new InvalidOperationException($"Alarm {Id} is not acknowledgeable.");
+            }
+
+            if (AcknowledgedOn != null)
             {
                 return;
             }
 
-            if (SeverityLevel == AlarmSeverity.Critical)
+            if (AlarmSequenceState == AlarmSequenceState.Alarm)
             {
-                throw new InvalidOperationException($"Alarm {Id} is critical and cannot be acknowledged.");
+                AlarmSequenceState = AlarmSequenceState.Acknowledged;
             }
 
-            AlarmSequenceState = AlarmSequenceState.Acknowledged;
+            AcknowledgedBy = changedBy;
+            AcknowledgedOn = changedDate;
             ChangedBy = changedBy;
             ChangedDate = changedDate;
         }
 
 
         /// <summary>
-        /// Normalizes the alarm because the process condition reverted to normal.
+        /// Normalizes the alarm because its value is back to normal, an acknowledgement is kept.
         /// </summary>
         /// <param name="changedBy">User or system that normalized the alarm.</param>
         /// <param name="changedDate">Timestamp of the normalization.</param>
@@ -112,7 +138,6 @@ namespace paskalON.Alarms.Domain
             }
 
             AlarmSequenceState = AlarmSequenceState.Normal;
-            AlarmProcessCondition = AlarmProcessCondition.Normal;
             ChangedBy = changedBy;
             ChangedDate = changedDate;
         }

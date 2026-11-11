@@ -1,5 +1,4 @@
 import {
-    AlarmProcessCondition,
     AlarmSequenceState,
     AlarmSeverity,
     type PpcAlarmDto,
@@ -17,11 +16,6 @@ export const severityLabels: Record<AlarmSeverity, string> = {
     [AlarmSeverity.Warning]: 'Warning',
     [AlarmSeverity.Error]: 'Error',
     [AlarmSeverity.Critical]: 'Critical'
-};
-
-export const conditionLabels: Record<AlarmProcessCondition, string> = {
-    [AlarmProcessCondition.Normal]: 'Normal',
-    [AlarmProcessCondition.Abnormal]: 'Abnormal'
 };
 
 export const stateLabels: Record<AlarmSequenceState, string> = {
@@ -53,12 +47,6 @@ export const triggeredOptions: FilterOption<number>[] = [
     { label: 'Past 30 days', value: 30 * 24 }
 ];
 
-export const conditionOptions: FilterOption<AlarmProcessCondition | null>[] = [
-    { label: 'All', value: null },
-    { label: 'Normal', value: AlarmProcessCondition.Normal },
-    { label: 'Abnormal', value: AlarmProcessCondition.Abnormal }
-];
-
 export const stateOptions: FilterOption<AlarmSequenceState | null>[] = [
     { label: 'All', value: null },
     { label: 'Alarm', value: AlarmSequenceState.Alarm },
@@ -71,7 +59,6 @@ export function defaultAlarmFilter(): PpcAlarmFilter {
     return {
         triggeredWithinHours: 8,
         severityLevel: null,
-        alarmProcessCondition: null,
         alarmSequenceState: null,
         deviceName: ''
     };
@@ -93,8 +80,25 @@ export function formatAlarmTime(isoTimestamp: string): string {
     return Number.isNaN(time) ? isoTimestamp : dateTimeFormat.format(time);
 }
 
+/**
+ * Time of the acknowledgement of an alarm, '—' while it can still be acknowledged,
+ * 'Not acknowledgeable' for a configuration that cannot be acknowledged. Who acknowledged it has its own column.
+ */
+export function formatAcknowledgement(alarm: PpcAlarmDto): string {
+    if (alarm.acknowledgedOn !== null) {
+        return formatAlarmTime(alarm.acknowledgedOn);
+    }
+
+    return alarm.ppcAlarmConfig.isAcknowledgeable ? '—' : 'Not acknowledgeable';
+}
+
+/** Time of the acknowledgement for sorting, alarms that are not acknowledged sort as the oldest. */
+function acknowledgedTime(alarm: PpcAlarmDto): number {
+    return alarm.acknowledgedOn === null ? Number.NEGATIVE_INFINITY : Date.parse(alarm.acknowledgedOn);
+}
+
 /** Columns the alarm list can be sorted by. */
-export type AlarmSortKey = 'severity' | 'triggered' | 'condition' | 'state' | 'device' | 'lastChange';
+export type AlarmSortKey = 'severity' | 'triggered' | 'acknowledged' | 'state' | 'device' | 'lastChange';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -112,8 +116,8 @@ function compareKey(left: PpcAlarmDto, right: PpcAlarmDto, key: AlarmSortKey): n
             return left.ppcAlarmConfig.severityLevel - right.ppcAlarmConfig.severityLevel;
         case 'triggered':
             return Date.parse(left.createdOn) - Date.parse(right.createdOn);
-        case 'condition':
-            return left.alarmProcessCondition - right.alarmProcessCondition;
+        case 'acknowledged':
+            return acknowledgedTime(left) - acknowledgedTime(right);
         case 'state':
             return left.alarmSequenceState - right.alarmSequenceState;
         case 'device':

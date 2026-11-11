@@ -26,13 +26,12 @@ namespace paskalON.Luna.Application
         /// </summary>
         /// <param name="triggeredWithin">Period before now in which the alarms were created (triggered).</param>
         /// <param name="severityLevel">Severity level of the alarms, null for all severity levels.</param>
-        /// <param name="processCondition">Process condition of the alarms, null for all process conditions.</param>
         /// <param name="sequenceState">Sequence state of the alarms, null for all sequence states.</param>
         /// <param name="deviceName">Part of the device name (case insensitive), null or empty for all alarms.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Matching alarms, the latest created alarm first.</returns>
         /// <exception cref="HttpRequestException">Thrown when the alarm service is not reachable or answers with an error (e.g. 503).</exception>
-        Task<List<PpcAlarmDto>> GetPpcAlarmsAsync(TimeSpan triggeredWithin, AlarmSeverityDto? severityLevel, AlarmProcessConditionDto? processCondition,
+        Task<List<PpcAlarmDto>> GetPpcAlarmsAsync(TimeSpan triggeredWithin, AlarmSeverityDto? severityLevel,
             AlarmSequenceStateDto? sequenceState, string? deviceName, CancellationToken cancellationToken = default);
 
 

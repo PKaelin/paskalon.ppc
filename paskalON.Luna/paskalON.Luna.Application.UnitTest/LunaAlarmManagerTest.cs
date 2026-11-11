@@ -184,15 +184,13 @@ namespace paskalON.Luna.Application.UnitTest
                 .ReturnsAsync(alarms);
             LunaAlarmManager manager = CreateManager();
 
-            List<PpcAlarmDto> result = await manager.GetPpcAlarmsAsync(TimeSpan.FromHours(8), AlarmSeverityDto.Error, AlarmProcessConditionDto.Abnormal,
-                AlarmSequenceStateDto.Alarm, " PCS 7 ");
+            List<PpcAlarmDto> result = await manager.GetPpcAlarmsAsync(TimeSpan.FromHours(8), AlarmSeverityDto.Error, AlarmSequenceStateDto.Alarm, " PCS 7 ");
 
             Assert.AreSame(alarms, result);
             PpcAlarmFilterDto expectedFilter = new PpcAlarmFilterDto
             {
                 CreatedFrom = new DateTimeOffset(2026, 11, 9, 6, 0, 0, TimeSpan.Zero),
                 SeverityLevel = AlarmSeverityDto.Error,
-                AlarmProcessCondition = AlarmProcessConditionDto.Abnormal,
                 AlarmSequenceState = AlarmSequenceStateDto.Alarm,
                 DeviceName = "PCS 7"
             };
@@ -215,7 +213,7 @@ namespace paskalON.Luna.Application.UnitTest
                 .ReturnsAsync(new List<PpcAlarmDto>());
             LunaAlarmManager manager = CreateManager();
 
-            await manager.GetPpcAlarmsAsync(TimeSpan.FromDays(30), null, null, null, deviceName);
+            await manager.GetPpcAlarmsAsync(TimeSpan.FromDays(30), null, null, deviceName);
 
             PpcAlarmFilterDto expectedFilter = new PpcAlarmFilterDto { CreatedFrom = new DateTimeOffset(2026, 10, 10, 14, 0, 0, TimeSpan.Zero) };
             Assert.AreEqual(expectedFilter, sentFilter);
@@ -232,7 +230,7 @@ namespace paskalON.Luna.Application.UnitTest
         {
             LunaAlarmManager manager = CreateManager();
 
-            Func<Task> getAlarms = () => manager.GetPpcAlarmsAsync(TimeSpan.FromHours(hours), null, null, null, null);
+            Func<Task> getAlarms = () => manager.GetPpcAlarmsAsync(TimeSpan.FromHours(hours), null, null, null);
 
             await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(getAlarms);
             _alarmServer.Verify(server => server.GetPpcAlarms(It.IsAny<PpcAlarmFilterDto>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -249,7 +247,7 @@ namespace paskalON.Luna.Application.UnitTest
                 .ThrowsAsync(new HttpRequestException("Alarm service not reachable."));
             LunaAlarmManager manager = CreateManager();
 
-            Func<Task> getAlarms = () => manager.GetPpcAlarmsAsync(TimeSpan.FromHours(8), null, null, null, null);
+            Func<Task> getAlarms = () => manager.GetPpcAlarmsAsync(TimeSpan.FromHours(8), null, null, null);
 
             await Assert.ThrowsExactlyAsync<HttpRequestException>(getAlarms);
         }
@@ -335,7 +333,7 @@ namespace paskalON.Luna.Application.UnitTest
                 DeviceName = "PCS 7",
                 PropertyName = "FaultStates.OverTemperature",
                 AlarmSequenceState = AlarmSequenceStateDto.Alarm,
-                AlarmProcessCondition = AlarmProcessConditionDto.Abnormal,
+                CanBeAcknowledged = true,
                 CreatedOn = new DateTimeOffset(2026, 11, 9, 13, 0, 0, TimeSpan.Zero),
                 ChangedBy = "System",
                 ChangedDate = new DateTimeOffset(2026, 11, 9, 13, 0, 0, TimeSpan.Zero),
@@ -344,6 +342,7 @@ namespace paskalON.Luna.Application.UnitTest
                     AlarmId = "PCS-FAULT",
                     Name = "{{PCS.Fault.Name}}",
                     SeverityLevel = AlarmSeverityDto.Error,
+                    IsAcknowledgeable = true,
                     Description = "{{PCS.Fault.Desc}}",
                     PossibleCauses = "{{PCS.Fault.Causes}}"
                 }

@@ -55,9 +55,22 @@ namespace paskalON.Alarms.Dto.Ppcs
 
 
         /// <summary>
-        /// Condition of the process that caused the alarm event.
+        /// User who acknowledged the alarm, null while it is not acknowledged.
         /// </summary>
-        public required AlarmProcessConditionDto AlarmProcessCondition { get; init; }
+        public string? AcknowledgedBy { get; init; }
+
+
+        /// <summary>
+        /// Timestamp of the acknowledgement, null while the alarm is not acknowledged.
+        /// </summary>
+        public DateTimeOffset? AcknowledgedOn { get; init; }
+
+
+        /// <summary>
+        /// Indicates whether the alarm can be acknowledged: its configuration is acknowledgeable and it is not acknowledged yet
+        /// (active or already normal).
+        /// </summary>
+        public required bool CanBeAcknowledged { get; init; }
 
 
         /// <summary>
