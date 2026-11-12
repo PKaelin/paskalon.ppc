@@ -125,3 +125,9 @@ Type=PpcAlarmConfig,Name={{BB.WarningStates.Unknown.Name}},IsEnabled=true,AlarmI
 Type=PpcAlarmConfig,Name={{BB.VendorEvents.MaintenanceDue.Name}},IsEnabled=true,AlarmId=BB-EVENT-MAINTENANCE-DUE,SeverityLevel=Info,Description={{BB.VendorEvents.MaintenanceDue.Desc}},PpcAlarmType=BatteryAlarm,PropertyName=VendorEvents.MaintenanceDue,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm;ClearAlarm;AcknowledgeAlarm
 Type=PpcAlarmConfig,Name={{BB.VendorEvents.EndOfLifeDue.Name}},IsEnabled=true,AlarmId=BB-EVENT-END-OF-LIFE-DUE,SeverityLevel=Info,Description={{BB.VendorEvents.EndOfLifeDue.Desc}},PpcAlarmType=BatteryAlarm,PropertyName=VendorEvents.EndOfLifeDue,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm;ClearAlarm;AcknowledgeAlarm
 Type=PpcAlarmConfig,Name={{BB.VendorEvents.Unknown.Name}},IsEnabled=true,AlarmId=BB-EVENT-UNKNOWN,SeverityLevel=Info,Description={{BB.VendorEvents.Unknown.Desc}},PpcAlarmType=BatteryAlarm,PropertyName=VendorEvents.Unknown,PropertyOperator=Equal,PropertyValue=1,AlarmActions=RaiseAlarm;ClearAlarm;AcknowledgeAlarm
+# -----------------------------------------------------------------------------
+# BB state of charge, one configuration for all BB (no DeviceId).
+# The core data publishes UsableStateOfCharge relative to the usable window: UsableMinimumStateOfCharge = 0, UsableMaximumStateOfCharge = AbsoluteMaximumStateOfCharge,
+# below the usable minimum it stays 0. Do not use StateOfCharge (preferred window, 0 already at PreferredMinimumStateOfCharge).
+# -----------------------------------------------------------------------------
+Type=PpcAlarmConfig,Name={{BB.UsableStateOfChargeMinimum.Name}},IsEnabled=true,AlarmId=BB-USABLE-SOC-MIN,SeverityLevel=Warning,Description={{BB.UsableStateOfChargeMinimum.Desc}},PpcAlarmType=BatteryAlarm,PropertyName=UsableStateOfCharge,PropertyOperator=SmallerThanOrEqual,PropertyValue=0,AlarmActions=RaiseAlarm;ClearAlarm;AcknowledgeAlarm

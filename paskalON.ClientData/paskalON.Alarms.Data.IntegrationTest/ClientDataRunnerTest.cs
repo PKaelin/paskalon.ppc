@@ -44,9 +44,15 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
 
         /// <summary>
+        /// Number of BB state of charge configurations.
+        /// </summary>
+        private const int BbStateOfChargeConfigCount = 1;
+
+
+        /// <summary>
         /// Number of all alarm configurations of a demo client project.
         /// </summary>
-        private const int PpcAlarmConfigCount = CommunicationErrorConfigCount + PcsEventConfigCount + BbEventConfigCount;
+        private const int PpcAlarmConfigCount = CommunicationErrorConfigCount + PcsEventConfigCount + BbEventConfigCount + BbStateOfChargeConfigCount;
 
 
         /// <summary>
@@ -290,6 +296,37 @@ namespace paskalON.Alarms.Data.IntegrationTest
             Assert.AreEqual(PropertyOperator.Equal, config.PropertyOperator);
             Assert.AreEqual(1, config.PropertyValue);
             Assert.AreEqual($"{{{{PCS.{propertyName}.Name}}}}", config.Name);
+            CollectionAssert.AreEquivalent(GetExpectedActions(config),
+                config.AlarmActions.Select(action => (action.Name, action.Trigger)).ToList());
+        }
+
+
+        /// <summary>
+        /// Every demo client project has an enabled configuration for all battery banks that raises a warning
+        /// when the usable state of charge reaches the usable minimum state of charge (usable state of charge 0).
+        /// </summary>
+        /// <param name="clientProjectName">Name of the demo client project.</param>
+        [TestMethod]
+        [DynamicData(nameof(DemoClientProjectNames))]
+        public async Task RunAsyncImportsUsableStateOfChargeMinimumConfigTest(string clientProjectName)
+        {
+            string[] args = new string[] { clientProjectName, Path.Combine(_demoDirectory, $"{clientProjectName}.csv") };
+
+            int exitCode = await ClientDataRunner.RunAsync(args, CreateDbContext<AlarmContext>, CreateTextSupplement());
+
+            Assert.AreEqual((int)ClientDataExitCode.Success, exitCode);
+            await using AlarmContext context = CreateDbContext<AlarmContext>();
+            PpcAlarmConfig config = await context.PpcAlarmConfigs.Include(x => x.AlarmActions).SingleAsync(x => x.AlarmId == "BB-USABLE-SOC-MIN");
+            Assert.AreEqual(PpcAlarmType.BatteryAlarm, config.PpcAlarmType);
+            Assert.IsTrue(config.IsEnabled);
+            Assert.AreEqual(AlarmSeverity.Warning, config.SeverityLevel);
+            Assert.IsNull(config.DeviceId);
+            Assert.AreEqual("UsableStateOfCharge", config.PropertyName);
+            Assert.AreEqual(PropertyOperator.SmallerThanOrEqual, config.PropertyOperator);
+            Assert.AreEqual(0, config.PropertyValue);
+            Assert.AreEqual("{{BB.UsableStateOfChargeMinimum.Name}}", config.Name);
+            Assert.AreEqual("{{BB.UsableStateOfChargeMinimum.Desc}}", config.Description);
+            Assert.IsTrue(config.IsAcknowledgeable);
             CollectionAssert.AreEquivalent(GetExpectedActions(config),
                 config.AlarmActions.Select(action => (action.Name, action.Trigger)).ToList());
         }

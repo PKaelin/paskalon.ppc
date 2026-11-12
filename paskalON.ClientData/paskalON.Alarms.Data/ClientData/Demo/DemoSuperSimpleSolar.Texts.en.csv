@@ -94,3 +94,6 @@ Type=LocalizedText,Name=BB.VendorEvents.EndOfLifeDue.Name,Language=en,Text=BB en
 Type=LocalizedText,Name=BB.VendorEvents.EndOfLifeDue.Desc,Language=en,Text=The battery bank reports that it reaches the end of its service life.
 Type=LocalizedText,Name=BB.VendorEvents.Unknown.Name,Language=en,Text=BB event: unknown vendor event
 Type=LocalizedText,Name=BB.VendorEvents.Unknown.Desc,Language=en,Text=The battery bank reports a vendor event that is not defined in its device description.
+# State of charge
+Type=LocalizedText,Name=BB.UsableStateOfChargeMinimum.Name,Language=en,Text=BB usable minimum state of charge reached
+Type=LocalizedText,Name=BB.UsableStateOfChargeMinimum.Desc,Language=en,Text=The battery bank reached its usable minimum state of charge and cannot discharge anymore until it is charged.
