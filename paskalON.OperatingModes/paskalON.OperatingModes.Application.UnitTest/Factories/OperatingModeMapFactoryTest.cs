@@ -116,17 +116,18 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
 
 
         /// <summary>
-        /// Confirms the plant-level available power sums the available power of the reachable units.
+        /// Confirms the plant-level available power sums the charge limits (minimum) and the discharge/production limits (maximum) of the reachable units.
         /// </summary>
         [TestMethod]
         public void OperatingModeMapFactoryPlantAvailablePowerTest()
         {
             OperatingModeBaseMap map = _factory.Create(CreateConfig("ActivePowerFixed"), _der!, _overrides!)!;
 
-            ActivePower? availableActive = map.AvailableActivePower.Invoke();
+            PowerRange<ActivePower>? availableActive = map.AvailableActivePower.Invoke();
             ReactivePower? availableReactive = map.AvailableReactivePower.Invoke();
 
-            Assert.AreEqual(9000000, availableActive!.Value.Watts);
+            Assert.AreEqual(-4000000, availableActive!.Value.Minimum.Watts);
+            Assert.AreEqual(9000000, availableActive!.Value.Maximum.Watts);
             Assert.AreEqual(2500000, availableReactive!.Value.VoltAmperesReactive);
         }
 
@@ -138,12 +139,15 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
         public void OperatingModeMapFactoryPlantAvailableExcludesOverriddenUnitsTest()
         {
             OperatingModeBaseMap map = _factory.Create(CreateConfig("ActivePowerFixed"), _der!, _overrides!)!;
-            double availableBeforeOverride = map.AvailableActivePower.Invoke()!.Value.Watts;
+            PowerRange<ActivePower> availableBeforeOverride = map.AvailableActivePower.Invoke()!.Value;
 
             _overriddenUnits!.Add("Bess1");
 
-            Assert.AreEqual(9000000, availableBeforeOverride);
-            Assert.AreEqual(7000000, map.AvailableActivePower.Invoke()!.Value.Watts);
+            PowerRange<ActivePower> availableAfterOverride = map.AvailableActivePower.Invoke()!.Value;
+            Assert.AreEqual(-4000000, availableBeforeOverride.Minimum.Watts);
+            Assert.AreEqual(9000000, availableBeforeOverride.Maximum.Watts);
+            Assert.AreEqual(-2500000, availableAfterOverride.Minimum.Watts);
+            Assert.AreEqual(7000000, availableAfterOverride.Maximum.Watts);
             Assert.AreEqual(1500000, map.AvailableReactivePower.Invoke()!.Value.VoltAmperesReactive);
         }
 
@@ -159,7 +163,8 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
             MaintenanceModeMap map = (MaintenanceModeMap)_factory.Create(CreateConfig("Maintenance"), _der!, _overrides!)!;
 
             Assert.AreEqual("Bess2", map.DerUnitName);
-            Assert.AreEqual(3000000, map.AvailableActivePower.Invoke()!.Value.Watts);
+            Assert.AreEqual(-2500000, map.AvailableActivePower.Invoke()!.Value.Minimum.Watts);
+            Assert.AreEqual(3000000, map.AvailableActivePower.Invoke()!.Value.Maximum.Watts);
             Assert.AreEqual(1500000, map.AvailableReactivePower.Invoke()!.Value.VoltAmperesReactive);
         }
 
@@ -280,10 +285,10 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
                 Name = "Circuit1",
                 DerUnits = new List<DerUnitDto>
                 {
-                    new DerBatteryStorageUnitDto { Name = "Bess1", PowerConversionSystem = CreatePcs(1, 2000000, 1000000, false) },
-                    new DerBatteryStorageUnitDto { Name = "Bess2", PowerConversionSystem = CreatePcs(2, 3000000, 1500000, false) },
-                    new DerSolarUnitDto { Name = "Solar1", PowerConversionSystem = CreatePcs(3, 4000000, null, false) },
-                    new DerBatteryStorageUnitDto { Name = "Bess3", PowerConversionSystem = CreatePcs(4, 5000000, 2000000, true) },
+                    new DerBatteryStorageUnitDto { Name = "Bess1", PowerConversionSystem = CreatePcs(1, -1500000, 2000000, 1000000, false) },
+                    new DerBatteryStorageUnitDto { Name = "Bess2", PowerConversionSystem = CreatePcs(2, -2500000, 3000000, 1500000, false) },
+                    new DerSolarUnitDto { Name = "Solar1", PowerConversionSystem = CreatePcs(3, 0, 4000000, null, false) },
+                    new DerBatteryStorageUnitDto { Name = "Bess3", PowerConversionSystem = CreatePcs(4, -4000000, 5000000, 2000000, true) },
                 }
             };
             PmSystemDto systemPowerMeter = new PmSystemDto(new PmSystemDefinitionDto { DeviceId = 10, Name = "SystemPowerMeter" });
@@ -299,14 +304,15 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
 
 
         /// <summary>
-        /// Creates a power conversion system that measures 100 kW less than its available active power.
+        /// Creates a power conversion system that measures 100 kW less than its maximum available active power.
         /// </summary>
         /// <param name="deviceId">The device id.</param>
-        /// <param name="availableActive">The available active power in Watts.</param>
+        /// <param name="availableActiveMinimum">The minimum available active power (charge limit) in Watts.</param>
+        /// <param name="availableActive">The maximum available active power (discharge/production limit) in Watts.</param>
         /// <param name="availableReactive">The available reactive power in Vars or null if not reported.</param>
         /// <param name="communicationError">Whether the device has a communication error.</param>
         /// <returns>The power conversion system.</returns>
-        private PcsDto CreatePcs(int deviceId, double availableActive, double? availableReactive, bool communicationError)
+        private PcsDto CreatePcs(int deviceId, double availableActiveMinimum, double availableActive, double? availableReactive, bool communicationError)
         {
             PcsDto pcs = new PcsDto(new PcsDefinitionDto { DeviceId = deviceId, Name = $"Pcs{deviceId}", TargetAddress = $"10.0.0.{deviceId}", TargetPort = 502 });
             pcs.UpdateCore(new PcsCoreDto
@@ -315,6 +321,8 @@ namespace paskalON.OperatingModes.Application.UnitTest.Factories
                 CommunicationError = communicationError,
                 ActivePower = new ActivePower(availableActive - 100000),
                 ActiveAvailablePower = new ActivePower(availableActive),
+                ActiveAvailablePowerMinimum = new ActivePower(availableActiveMinimum),
+                ActiveAvailablePowerMaximum = new ActivePower(availableActive),
                 ReactivePower = new ReactivePower(0),
                 ReactiveAvailablePower = availableReactive.HasValue ? new ReactivePower(availableReactive.Value) : null
             });

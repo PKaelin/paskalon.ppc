@@ -67,6 +67,15 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
+        /// True while active power targets are limited to 0 because the battery banks cannot follow their direction (state of charge).
+        /// </summary>
+        /// <remarks>
+        /// Only used to log the activation and release of the limit once.
+        /// </remarks>
+        private bool _isStateOfChargeLimitActive;
+
+
+        /// <summary>
         /// Delay between the attempts of the automatic initial start.
         /// </summary>
         protected virtual TimeSpan InitialStartRetryDelay { get => TimeSpan.FromSeconds(10); }
@@ -286,7 +295,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
                 if (DerUnit is DerBatteryStorageUnit)
                 {
-                    CheckSafety(((DerBatteryStorageUnit)DerUnit));
+                    CheckSafety();
 
                     if (changed == true)
                     {
@@ -339,6 +348,42 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public ActivePower? ActiveAvailablePower
         {
             get { return (ActiveAvailablePowerValue is null) ? null : new ActivePower((double)ActiveAvailablePowerValue); }
+        }
+
+
+        /// <summary>
+        /// Minimum active power the PCS can be commanded to right now in Watts (charge limit, &lt;= 0).
+        /// </summary>
+        /// <remarks>
+        /// Calculated from <see cref="ActiveAvailablePower"/>, the nameplate and the battery banks, see <see cref="ActivePowerRangeCalculator"/>.
+        /// Null if the available active power is unknown.
+        /// </remarks>
+        public ActivePower? ActiveAvailablePowerMinimum
+        {
+            get
+            {
+                (double Minimum, double Maximum)? range = CalculateActivePowerRange();
+
+                return range.HasValue ? new ActivePower(range.Value.Minimum) : null;
+            }
+        }
+
+
+        /// <summary>
+        /// Maximum active power the PCS can be commanded to right now in Watts (discharge/production limit, &gt;= 0).
+        /// </summary>
+        /// <remarks>
+        /// Calculated from <see cref="ActiveAvailablePower"/>, the nameplate and the battery banks, see <see cref="ActivePowerRangeCalculator"/>.
+        /// Null if the available active power is unknown.
+        /// </remarks>
+        public ActivePower? ActiveAvailablePowerMaximum
+        {
+            get
+            {
+                (double Minimum, double Maximum)? range = CalculateActivePowerRange();
+
+                return range.HasValue ? new ActivePower(range.Value.Maximum) : null;
+            }
         }
 
 
@@ -622,6 +667,9 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </remarks>
         public virtual async Task SetActivePowerTargetAsync(double? value)
         {
+            // Limit outside of the PCS lock: the battery banks use their own locks
+            double? limitedValue = LimitActivePowerTargetByStateOfCharge(value);
+
             lock (dataLock)
             {
                 if (State == PcsState.EnteringStandby || State == PcsState.Standby || State == PcsState.Stopping || State == PcsState.Stopped)
@@ -632,9 +680,9 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                     return;
                 }
 
-                if (_activePowerTarget != value)
+                if (_activePowerTarget != limitedValue)
                 {
-                    _activePowerTarget = value;
+                    _activePowerTarget = limitedValue;
                     _logger.LogInformation("{Name} - Set active power target to: {activePowerTarget} Watt", Name, _activePowerTarget);
                 }
             }
@@ -928,6 +976,8 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactivePowerTarget), MetricType.Gauge, x => x.ReactivePowerTarget?.VoltAmperesReactive, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActivePower), MetricType.Gauge, x => x.ActivePower?.Watts, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActiveAvailablePower), MetricType.Gauge, x => x.ActiveAvailablePower?.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActiveAvailablePowerMinimum), MetricType.Gauge, x => x.ActiveAvailablePowerMinimum?.Watts, _config.MetricsFactorClass1);
+            MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ActiveAvailablePowerMaximum), MetricType.Gauge, x => x.ActiveAvailablePowerMaximum?.Watts, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactivePower), MetricType.Gauge, x => x.ReactivePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(ReactiveAvailablePower), MetricType.Gauge, x => x.ReactiveAvailablePower?.VoltAmperesReactive, _config.MetricsFactorClass1);
             MetricsPublisher.Register<PowerConversionSystemBase, double>(this, nameof(DCCurrent), MetricType.Gauge, x => x.DCCurrent, _config.MetricsFactorClass1);
@@ -1043,33 +1093,110 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
 
 
         /// <summary>
-        /// As last defence. Check the SOC limit of the battery and react on it if hit.
+        /// As last defense. Check the SOC limit of the battery and react on it if hit.
         /// </summary>
-        /// <param name="unit">Der battery storage unit.</param>
-        /// <returns>Task</returns>
-        private void CheckSafety(DerBatteryStorageUnit unit)
+        /// <remarks>
+        /// Called with every active power update. If the current active power target discharges an empty battery
+        /// or charges a full battery (e.g. the SOC dropped below the usable minimum while discharging), the target is set to 0.
+        /// The operating modes limit their targets with the same criterion (<see cref="ActiveAvailablePowerMaximum"/>,
+        /// <see cref="ActiveAvailablePowerMinimum"/>), so this only acts before they react or if a target bypasses them.
+        /// The reactive power target is kept: it does not charge or discharge the battery.
+        /// In standby or while stopping/stopped no target can be set: the standby active power is kept and the battery management system protects the battery.
+        /// </remarks>
+        private void CheckSafety()
         {
-            bool safety = false;
+            PcsState state = State;
 
-            if (ActivePowerTarget != null)
+            if (state == PcsState.EnteringStandby || state == PcsState.Standby || state == PcsState.Stopping || state == PcsState.Stopped)
             {
-                // The usable SOC limits are on the absolute scale, the usable SOC is relative to the usable window
-                if (ActivePowerTarget.Value.Watts > 0)
-                {
-                    safety = unit.BatteryBanks.Any(b => b.AbsoluteStateOfCharge < b.UsableMinimumStateOfCharge - 1);
-                }
-                else if (ActivePowerTarget.Value.Watts < 0)
-                {
-                    safety = unit.BatteryBanks.Any(b => b.AbsoluteStateOfCharge > b.UsableMaximumStateOfCharge + 1);
-                }
-
-                if (safety == true)
-                {
-                    _logger.LogError("{Name} battery SOC safety limit hit. Set power targets to 0", Name);
-                    Task.Run(() => SetActivePowerTargetAsync(0));
-                    Task.Run(() => SetReactivePowerTargetAsync(0));
-                }
+                return;
             }
+
+            double? target = ActivePowerTarget?.Watts;
+
+            if (target.HasValue is false || target.Value == 0)
+            {
+                return;
+            }
+
+            double? limitedTarget = LimitActivePowerTargetByStateOfCharge(target);
+
+            if (limitedTarget != target)
+            {
+                // The equipment writes the target to the device in its override
+                Task.Run(() => EnforceActivePowerTargetAsync(limitedTarget));
+            }
+        }
+
+
+        /// <summary>
+        /// Limits an active power target to 0 if the battery banks cannot follow its direction because of their state of charge.
+        /// </summary>
+        /// <remarks>
+        /// Discharging (&gt; 0) is blocked if no battery bank is above its usable minimum state of charge,
+        /// charging (&lt; 0) if no battery bank is below its usable maximum state of charge, see <see cref="ActivePowerRangeCalculator"/>.
+        /// The opposite direction is never blocked, so that an empty battery can always be charged and a full one discharged.
+        /// Must not be called inside the PCS lock: the battery banks use their own locks.
+        /// </remarks>
+        /// <param name="value">The requested active power target in watts.</param>
+        /// <returns>The requested target or 0 if its direction is blocked.</returns>
+        private double? LimitActivePowerTargetByStateOfCharge(double? value)
+        {
+            if (value.HasValue is false || value.Value == 0 || DerUnit is not DerBatteryStorageUnit unit)
+            {
+                return value;
+            }
+
+            bool isDischarge = value.Value > 0;
+            bool isBlocked = isDischarge ? ActivePowerRangeCalculator.CanDischarge(unit) is false : ActivePowerRangeCalculator.CanCharge(unit) is false;
+            bool isChanged;
+
+            lock (dataLock)
+            {
+                isChanged = _isStateOfChargeLimitActive != isBlocked;
+                _isStateOfChargeLimitActive = isBlocked;
+            }
+
+            // Log only the changes, the limit can be requested every control cycle
+            if (isChanged && isBlocked)
+            {
+                _logger.LogWarning("{Name} - Battery SOC limit active: active power target {ActivePowerTarget} Watt is limited to 0, the battery banks cannot {Direction}.",
+                    Name, value.Value, isDischarge ? "discharge" : "charge");
+            }
+            else if (isChanged)
+            {
+                _logger.LogInformation("{Name} - Battery SOC limit released: active power target {ActivePowerTarget} Watt is accepted.", Name, value.Value);
+            }
+
+            return isBlocked ? 0 : value;
+        }
+
+
+        /// <summary>
+        /// Sets the active power target from the SOC safety check and logs a failed write.
+        /// </summary>
+        /// <param name="value">The limited active power target in watts.</param>
+        /// <returns>Task</returns>
+        private async Task EnforceActivePowerTargetAsync(double? value)
+        {
+            try
+            {
+                await SetActivePowerTargetAsync(value);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "{Name} - Battery SOC limit could not set the active power target to {ActivePowerTarget} Watt.", Name, value);
+            }
+        }
+
+
+        /// <summary>
+        /// Calculates the active power range the PCS can be commanded to right now.
+        /// </summary>
+        /// <returns>The minimum (charge) and maximum (discharge) active power in watts or null if the available active power is unknown.</returns>
+        private (double Minimum, double Maximum)? CalculateActivePowerRange()
+        {
+            return ActivePowerRangeCalculator.Calculate(ActiveAvailablePowerValue, NameplateMaximumActivePower.Watts, DerUnit);
         }
     }
 }

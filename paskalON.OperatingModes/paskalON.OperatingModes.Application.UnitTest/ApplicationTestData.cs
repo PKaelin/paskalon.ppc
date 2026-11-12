@@ -76,7 +76,7 @@ namespace paskalON.OperatingModes.Application.UnitTest
                 Type = PowerControlType.Bess,
                 RampConfig = CreateRampConfig()
             };
-            ActivePowerFixedModeMap map = new ActivePowerFixedModeMap { AvailableActivePower = () => new ActivePower(8000000), AvailableReactivePower = () => new ReactivePower(4000000) };
+            ActivePowerFixedModeMap map = new ActivePowerFixedModeMap { AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000)), AvailableReactivePower = () => new ReactivePower(4000000) };
 
             return new ActivePowerFixedMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, CreateSystemConfig(), config, map, CreateRampController());
         }
@@ -96,7 +96,7 @@ namespace paskalON.OperatingModes.Application.UnitTest
                 Type = PowerControlType.Bess,
                 RampConfig = CreateRampConfig()
             };
-            ReactivePowerFixedModeMap map = new ReactivePowerFixedModeMap { AvailableActivePower = () => new ActivePower(8000000), AvailableReactivePower = () => new ReactivePower(4000000) };
+            ReactivePowerFixedModeMap map = new ReactivePowerFixedModeMap { AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000)), AvailableReactivePower = () => new ReactivePower(4000000) };
 
             return new ReactivePowerFixedMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, CreateSystemConfig(), config, map, CreateRampController());
         }
@@ -116,7 +116,7 @@ namespace paskalON.OperatingModes.Application.UnitTest
                 Type = PowerControlType.Bess,
                 RampConfig = CreateRampConfig()
             };
-            MaximumPowerPointTrackingModeMap map = new MaximumPowerPointTrackingModeMap { AvailableActivePower = () => new ActivePower(8000000), AvailableReactivePower = () => null };
+            MaximumPowerPointTrackingModeMap map = new MaximumPowerPointTrackingModeMap { AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000)), AvailableReactivePower = () => null };
 
             return new MaximumPowerPointTrackingMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, CreateSystemConfig(), config, map, CreateRampController());
         }
@@ -140,7 +140,7 @@ namespace paskalON.OperatingModes.Application.UnitTest
             };
             ActivePowerLimitModeMap map = new ActivePowerLimitModeMap
             {
-                AvailableActivePower = () => new ActivePower(8000000),
+                AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000)),
                 AvailableReactivePower = () => null,
                 ActivePowerAtPoi = () => null
             };
@@ -195,7 +195,7 @@ namespace paskalON.OperatingModes.Application.UnitTest
             };
             MaintenanceModeMap map = new MaintenanceModeMap
             {
-                AvailableActivePower = () => new ActivePower(2000000),
+                AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(2000000)),
                 AvailableReactivePower = () => new ReactivePower(1000000),
                 DerUnitName = derUnitName
             };

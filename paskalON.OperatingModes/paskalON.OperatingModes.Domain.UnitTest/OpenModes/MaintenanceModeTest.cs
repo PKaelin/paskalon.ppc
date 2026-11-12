@@ -45,7 +45,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes
         {
             MaintenanceModeMap map = new MaintenanceModeMap
             {
-                AvailableActivePower = () => new ActivePower(2000000),
+                AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(2000000)),
                 AvailableReactivePower = () => new ReactivePower(1000000),
                 DerUnitName = "Bess1"
             };

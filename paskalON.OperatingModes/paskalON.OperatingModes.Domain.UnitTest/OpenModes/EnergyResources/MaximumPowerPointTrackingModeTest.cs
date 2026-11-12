@@ -43,7 +43,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.EnergyResources
         [TestInitialize]
         public void Initialize()
         {
-            _map = new MaximumPowerPointTrackingModeMap { AvailableActivePower = () => new ActivePower(6000000), AvailableReactivePower = () => null };
+            _map = new MaximumPowerPointTrackingModeMap { AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(6000000)), AvailableReactivePower = () => null };
             _rampController = OperatingModeTestData.CreateRampController();
             MaximumPowerPointTrackingModeConfig config = new MaximumPowerPointTrackingModeConfig
             {

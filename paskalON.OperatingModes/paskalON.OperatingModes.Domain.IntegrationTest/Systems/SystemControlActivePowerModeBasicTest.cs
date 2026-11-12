@@ -103,7 +103,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
 
             ActivePowerModeMap activePowerMap = new ActivePowerModeMap
             {
-                AvailableActivePower = () => ActivePower.FromMega(10),
+                AvailableActivePower = () => PowerRange.Symmetric(ActivePower.FromMega(10)),
                 AvailableReactivePower = () => null,
                 ActivePowerAtPoi = () => _activePowerMode?.ActiveControl?.Target
             };

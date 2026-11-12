@@ -205,24 +205,29 @@ namespace paskalON.OperatingModes.Application.Factories
 
 
         /// <summary>
-        /// Gets the total available active power of the DER units.
+        /// Gets the total available active power range of the DER units.
         /// </summary>
+        /// <remarks>
+        /// The minimums (charge limits) and the maximums (discharge/production limits) are summed separately,
+        /// e.g. an empty battery unit does not reduce the discharge limit of the other units.
+        /// </remarks>
         /// <param name="units">The DER units.</param>
-        /// <returns>The total available active power or null if no DER unit reports it.</returns>
-        private static ActivePower? GetAvailableActivePower(IEnumerable<DerUnitDto> units)
+        /// <returns>The total available active power range or null if no DER unit reports it.</returns>
+        private static PowerRange<ActivePower>? GetAvailableActivePower(IEnumerable<DerUnitDto> units)
         {
-            IEnumerable<PcsCoreDto> cores = GetCores(units);
-            List<double> values = cores
-                .Where(core => core.ActiveAvailablePower.HasValue)
-                .Select(core => core.ActiveAvailablePower!.Value.Watts)
+            List<PcsCoreDto> cores = GetCores(units)
+                .Where(core => core.ActiveAvailablePowerMinimum.HasValue && core.ActiveAvailablePowerMaximum.HasValue)
                 .ToList();
 
-            if (values.Count == 0)
+            if (cores.Count == 0)
             {
                 return null;
             }
 
-            return new ActivePower(values.Sum());
+            double minimum = cores.Sum(core => core.ActiveAvailablePowerMinimum!.Value.Watts);
+            double maximum = cores.Sum(core => core.ActiveAvailablePowerMaximum!.Value.Watts);
+
+            return new PowerRange<ActivePower>(new ActivePower(minimum), new ActivePower(maximum));
         }
 
 

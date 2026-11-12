@@ -44,7 +44,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
         [TestInitialize]
         public void Initialize()
         {
-            _map = new ActivePowerFixedModeMap { AvailableActivePower = () => new ActivePower(8000000), AvailableReactivePower = () => new ReactivePower(4000000) };
+            _map = new ActivePowerFixedModeMap { AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000)), AvailableReactivePower = () => new ReactivePower(4000000) };
             _rampController = OperatingModeTestData.CreateRampController();
             _mode = new ActivePowerFixedMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, OperatingModeTestData.CreateSystemConfig(),
                 CreateConfig(), _map, _rampController.Object);
@@ -92,7 +92,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.FrequencyActives
         [DataRow(-3000000, -3000000)]
         public void ActivePowerFixedModeCalculateWritesBaseActivePowerTest(double setpoint, double expectedBase)
         {
-            _map!.AvailableActivePower = () => new ActivePower(8000000 * Math.Sign(setpoint));
+            _map!.AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000 * Math.Sign(setpoint)));
             _mode!.Activate();
 
             OperatingModeSignals signals = _mode!.Calculate(CreateSignals(setpoint));

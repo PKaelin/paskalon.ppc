@@ -110,7 +110,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Controls
             PowerControl<ActivePower> control = CreateControl(rampController);
             control.Activate(start);
 
-            ActivePower target = control.Calculate(new ActivePower(1000000), null);
+            ActivePower target = control.Calculate(new ActivePower(1000000), (ActivePower?)null);
 
             Assert.AreEqual(OperatingModeState.Enabling, control.State);
             Assert.AreEqual(0, target.Watts);
@@ -142,7 +142,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Controls
             Assert.AreEqual(expectedTargetSetpoint, target.Watts);
             Assert.AreEqual(expectedTargetSetpoint, control.TargetSetpoint.Watts);
             Assert.AreEqual(setpoint, control.Setpoint.Watts);
-            Assert.AreEqual(available, control.Available!.Value.Watts);
+            Assert.AreEqual(-Math.Abs(available), control.AvailableMinimum!.Value.Watts);
+            Assert.AreEqual(Math.Abs(available), control.AvailableMaximum!.Value.Watts);
             rampController.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
         }
 
@@ -348,11 +349,89 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Controls
             control.Activate(PowerControlStart.AtTargetSetpoint);
             control.Calculate(new ActivePower(1000000), new ActivePower(8000000));
 
-            ActivePower target = control.Calculate(new ActivePower(2000000), null);
+            ActivePower target = control.Calculate(new ActivePower(2000000), (ActivePower?)null);
 
             Assert.AreEqual(OperatingModeState.Enabled, control.State);
             Assert.AreEqual(1000000, target.Watts);
             rampController.Verify(controller => controller.Start(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
+        }
+
+
+        /// <summary>
+        /// Confirms the available power range only limits the direction of the setpoint,
+        /// e.g. an empty battery [-charge limit, 0] blocks discharging but follows a charge setpoint.
+        /// </summary>
+        /// <param name="setpoint">The setpoint in Watts.</param>
+        /// <param name="minimum">The minimum available power (charge limit) in Watts.</param>
+        /// <param name="maximum">The maximum available power (discharge limit) in Watts.</param>
+        /// <param name="expectedTargetSetpoint">The expected target setpoint in Watts.</param>
+        [TestMethod]
+        [DataRow(1000000, -3000000, 0, 0)]
+        [DataRow(-1000000, -3000000, 0, -1000000)]
+        [DataRow(-5000000, -3000000, 8000000, -3000000)]
+        [DataRow(5000000, -3000000, 2000000, 2000000)]
+        [DataRow(-1000000, 0, 2000000, 0)]
+        [DataRow(1000000, 0, 2000000, 1000000)]
+        public void PowerControlCalculateRangeLimitsSetpointDirectionTest(double setpoint, double minimum, double maximum, double expectedTargetSetpoint)
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            PowerControl<ActivePower> control = CreateControl(rampController);
+            control.Activate(PowerControlStart.AtTargetSetpoint);
+            PowerRange<ActivePower> available = new PowerRange<ActivePower>(new ActivePower(minimum), new ActivePower(maximum));
+
+            ActivePower target = control.Calculate(new ActivePower(setpoint), available);
+
+            Assert.AreEqual(OperatingModeState.Enabled, control.State);
+            Assert.AreEqual(expectedTargetSetpoint, target.Watts);
+            Assert.AreEqual(setpoint, control.Setpoint.Watts);
+            Assert.AreEqual(minimum, control.AvailableMinimum!.Value.Watts);
+            Assert.AreEqual(maximum, control.AvailableMaximum!.Value.Watts);
+        }
+
+
+        /// <summary>
+        /// Confirms a battery that runs empty stops discharging, can be charged with a charge setpoint
+        /// and discharges again once the discharge limit is back, without leaving the enabled state.
+        /// </summary>
+        [TestMethod]
+        public void PowerControlCalculateEmptyBatteryRecoversTest()
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            PowerControl<ActivePower> control = CreateControl(rampController);
+            control.Activate(PowerControlStart.AtTargetSetpoint);
+            PowerRange<ActivePower> charged = new PowerRange<ActivePower>(new ActivePower(-3000000), new ActivePower(8000000));
+            PowerRange<ActivePower> empty = new PowerRange<ActivePower>(new ActivePower(-3000000), new ActivePower(0));
+            control.Calculate(new ActivePower(1000000), charged);
+
+            ActivePower emptyTarget = control.Calculate(new ActivePower(1000000), empty);
+            bool emptyChanged = control.HasTargetSetpointChanged;
+            ActivePower chargeTarget = control.Calculate(new ActivePower(-1000000), empty);
+            ActivePower rechargedTarget = control.Calculate(new ActivePower(1000000), charged);
+
+            Assert.AreEqual(0, emptyTarget.Watts);
+            Assert.IsTrue(emptyChanged);
+            Assert.AreEqual(-1000000, chargeTarget.Watts);
+            Assert.AreEqual(1000000, rechargedTarget.Watts);
+            Assert.AreEqual(OperatingModeState.Enabled, control.State);
+        }
+
+
+        /// <summary>
+        /// Confirms a change of the limit of the other direction does not change the target.
+        /// </summary>
+        [TestMethod]
+        public void PowerControlCalculateRangeChangeOfOtherDirectionKeepsTargetTest()
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            PowerControl<ActivePower> control = CreateControl(rampController);
+            control.Activate(PowerControlStart.AtTargetSetpoint);
+            control.Calculate(new ActivePower(1000000), new PowerRange<ActivePower>(new ActivePower(-3000000), new ActivePower(8000000)));
+
+            // The battery gets full: the charge limit drops to 0, the discharge setpoint is not affected
+            ActivePower target = control.Calculate(new ActivePower(1000000), new PowerRange<ActivePower>(new ActivePower(0), new ActivePower(8000000)));
+
+            Assert.AreEqual(1000000, target.Watts);
+            Assert.IsFalse(control.HasTargetSetpointChanged);
         }
 
 

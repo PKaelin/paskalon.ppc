@@ -198,7 +198,8 @@ namespace paskalON.OperatingModes.Domain.UnitTest
             VerifyAxisMetric(publisher, "ActivePowerTarget", Times.Once());
             VerifyAxisMetric(publisher, "ActivePowerSetpoint", Times.Once());
             VerifyAxisMetric(publisher, "ActivePowerTargetSetpoint", Times.Once());
-            VerifyAxisMetric(publisher, "ActivePowerAvailable", Times.Once());
+            VerifyAxisMetric(publisher, "ActivePowerAvailableMinimum", Times.Once());
+            VerifyAxisMetric(publisher, "ActivePowerAvailableMaximum", Times.Once());
             VerifyModeMetric(publisher, "ActivePowerContribution", Times.Once());
             VerifyModeMetric(publisher, "ReactivePowerContribution", Times.Never());
             publisher.Verify(p => p.Register(It.IsAny<PowerControl<ReactivePower>>(), It.IsAny<string>(), It.IsAny<MetricType>(),

@@ -51,6 +51,18 @@ namespace paskalON.Devices.Dto.PowerConversionSystems
 
 
         /// <summary>
+        /// Minimum active power the PCS can be commanded to right now in Watts (charge limit, &lt;= 0).
+        /// </summary>
+        public ActivePower? ActiveAvailablePowerMinimum { get; init; }
+
+
+        /// <summary>
+        /// Maximum active power the PCS can be commanded to right now in Watts (discharge/production limit, &gt;= 0).
+        /// </summary>
+        public ActivePower? ActiveAvailablePowerMaximum { get; init; }
+
+
+        /// <summary>
         /// Current reactive power target in Vars
         /// </summary>
         public ReactivePower? ReactivePowerTarget { get; init; }

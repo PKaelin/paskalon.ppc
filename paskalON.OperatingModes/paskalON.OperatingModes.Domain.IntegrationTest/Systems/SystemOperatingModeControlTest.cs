@@ -108,8 +108,8 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
                 DeadbandAvailable = 10000,
                 RampConfig = new RampTimeConfig { ChangedBy = "Test", RampUpTimeSeconds = 30, RampDownTimeSeconds = 30 },
             };
-            ActivePowerFixedModeMap fixedMap = new ActivePowerFixedModeMap { AvailableActivePower = () => new ActivePower(8000000), AvailableReactivePower = () => null };
-            MaximumPowerPointTrackingModeMap trackingMap = new MaximumPowerPointTrackingModeMap { AvailableActivePower = () => new ActivePower(8000000), AvailableReactivePower = () => null };
+            ActivePowerFixedModeMap fixedMap = new ActivePowerFixedModeMap { AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000)), AvailableReactivePower = () => null };
+            MaximumPowerPointTrackingModeMap trackingMap = new MaximumPowerPointTrackingModeMap { AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000)), AvailableReactivePower = () => null };
             _activePowerFixedMode = new ActivePowerFixedMode(NullLogger.Instance, _timeProvider, new Mock<IMetricsPublisher>().Object, systemConfig, fixedConfig, fixedMap,
                 new RampController(NullLogger.Instance, _timeProvider, fixedConfig.RampConfig));
             _maximumPowerPointTrackingMode = new MaximumPowerPointTrackingMode(NullLogger.Instance, _timeProvider, new Mock<IMetricsPublisher>().Object, systemConfig, trackingConfig,

@@ -66,8 +66,9 @@ namespace paskalON.OperatingModes.Domain.OpenModes.EnergyResources
         {
             ArgumentNullException.ThrowIfNull(signals);
 
-            ActivePower? available = _map.AvailableActivePower.Invoke();
-            signals.BaseActivePower = ActiveControl!.Calculate(available ?? new ActivePower(0), available);
+            // Tracks the maximum power point: produces the maximum available active power
+            PowerRange<ActivePower>? available = _map.AvailableActivePower.Invoke();
+            signals.BaseActivePower = ActiveControl!.Calculate(available?.Maximum ?? new ActivePower(0), available);
 
             return signals;
         }

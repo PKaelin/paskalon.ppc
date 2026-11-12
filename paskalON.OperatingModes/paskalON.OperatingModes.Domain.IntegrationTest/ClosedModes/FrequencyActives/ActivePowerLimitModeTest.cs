@@ -48,7 +48,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.ClosedModes.FrequencyAc
         /// <summary>
         /// Available active power of the plant.
         /// </summary>
-        private ActivePower? _availableActivePower;
+        private PowerRange<ActivePower>? _availableActivePower;
 
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.ClosedModes.FrequencyAc
         {
             _timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 10, 15, 8, 0, 0, TimeSpan.Zero));
             _activePowerAtPoi = null;
-            _availableActivePower = new ActivePower(8000000);
+            _availableActivePower = PowerRange.Symmetric(new ActivePower(8000000));
             SystemConfig systemConfig = new SystemConfig
             {
                 ChangedBy = "Test",
@@ -174,7 +174,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.ClosedModes.FrequencyAc
             _timeProvider!.Advance(TimeSpan.FromSeconds(1));
             _control!.Calculate(CancellationToken.None);
             double heldApplied = _control!.SetpointActivePowerActual.Watts;
-            _availableActivePower = new ActivePower(5000000);
+            _availableActivePower = PowerRange.Symmetric(new ActivePower(5000000));
 
             _control!.Calculate(CancellationToken.None);
             _timeProvider!.Advance(TimeSpan.FromSeconds(5));

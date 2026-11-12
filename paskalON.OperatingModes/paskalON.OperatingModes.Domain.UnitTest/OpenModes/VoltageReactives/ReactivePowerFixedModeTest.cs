@@ -37,7 +37,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.OpenModes.VoltageReactives
         [TestInitialize]
         public void Initialize()
         {
-            ReactivePowerFixedModeMap map = new ReactivePowerFixedModeMap { AvailableActivePower = () => new ActivePower(8000000), AvailableReactivePower = () => new ReactivePower(4000000) };
+            ReactivePowerFixedModeMap map = new ReactivePowerFixedModeMap { AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000)), AvailableReactivePower = () => new ReactivePower(4000000) };
             _rampController = OperatingModeTestData.CreateRampController();
             _mode = new ReactivePowerFixedMode(NullLogger.Instance, TimeProvider.System, new Mock<IMetricsPublisher>().Object, OperatingModeTestData.CreateSystemConfig(),
                 CreateConfig(), map, _rampController.Object);

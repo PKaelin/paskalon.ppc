@@ -179,6 +179,8 @@ namespace paskalON.Devices.Application
                 ActivePowerTarget = pcs.ActivePowerTarget,
                 ActivePower = pcs.ActivePower,
                 ActiveAvailablePower = pcs.ActiveAvailablePower,
+                ActiveAvailablePowerMinimum = pcs.ActiveAvailablePowerMinimum,
+                ActiveAvailablePowerMaximum = pcs.ActiveAvailablePowerMaximum,
                 ReactivePowerTarget = pcs.ReactivePowerTarget,
                 ReactivePower = pcs.ReactivePower,
                 ReactiveAvailablePower = pcs.ReactiveAvailablePower,

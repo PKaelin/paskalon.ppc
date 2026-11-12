@@ -98,7 +98,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest
 
             ActivePowerLimitModeMap limitingMap = new ActivePowerLimitModeMap
             {
-                AvailableActivePower = () => ActivePower.FromMega(10),
+                AvailableActivePower = () => PowerRange.Symmetric(ActivePower.FromMega(10)),
                 AvailableReactivePower = () => null,
                 ActivePowerAtPoi = activePowerAtPoiProvider
             };
@@ -144,7 +144,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest
 
             OperatingModeBaseMap additiveMap = new OperatingModeBaseMap
             {
-                AvailableActivePower = () => ActivePower.FromMega(10),
+                AvailableActivePower = () => PowerRange.Symmetric(ActivePower.FromMega(10)),
                 AvailableReactivePower = () => null
             };
 

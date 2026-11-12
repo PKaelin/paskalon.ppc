@@ -56,9 +56,9 @@ namespace paskalON.OperatingModes.Domain.Controls
 
 
         /// <summary>
-        /// Available power in base unit.
+        /// Available power range in base unit.
         /// </summary>
-        private double? _available;
+        private PowerRange<double>? _available;
 
 
         /// <summary>
@@ -80,9 +80,9 @@ namespace paskalON.OperatingModes.Domain.Controls
 
 
         /// <summary>
-        /// Available power of the last ramp start or restart in base unit.
+        /// Available power range of the last ramp start or restart in base unit.
         /// </summary>
-        private double? _lastAvailable;
+        private PowerRange<double>? _lastAvailable;
 
 
         /// <summary>
@@ -174,9 +174,15 @@ namespace paskalON.OperatingModes.Domain.Controls
 
 
         /// <summary>
-        /// Gets the available power of the last calculation.
+        /// Gets the minimum available power of the last calculation (charge/consumption limit, &lt;= 0).
         /// </summary>
-        public TPower? Available { get => _available.HasValue ? _converter.FromValue(_available.Value) : null; }
+        public TPower? AvailableMinimum { get => _available.HasValue ? _converter.FromValue(_available.Value.Minimum) : null; }
+
+
+        /// <summary>
+        /// Gets the maximum available power of the last calculation (discharge/production limit, &gt;= 0).
+        /// </summary>
+        public TPower? AvailableMaximum { get => _available.HasValue ? _converter.FromValue(_available.Value.Maximum) : null; }
 
 
         /// <summary>
@@ -340,16 +346,55 @@ namespace paskalON.OperatingModes.Domain.Controls
 
 
         /// <summary>
-        /// Calculates the target of this power axis.
+        /// Calculates the target of this power axis with the same available power in both directions.
         /// </summary>
         /// <param name="setpoint">The setpoint the operating mode aims for.</param>
-        /// <param name="available">The available power or null if the resources are not ready.</param>
+        /// <param name="available">The available power in both directions (-|available| to +|available|) or null if the resources are not ready.</param>
         /// <returns>The ramped target.</returns>
         internal TPower Calculate(TPower setpoint, TPower? available)
         {
-            double setpointValue = _converter.ToValue(setpoint);
-            double? availableValue = available.HasValue ? _converter.ToValue(available.Value) : null;
+            PowerRange<double>? availableValue = null;
 
+            if (available.HasValue)
+            {
+                double magnitude = Math.Abs(_converter.ToValue(available.Value));
+                availableValue = new PowerRange<double>(0 - magnitude, magnitude);
+            }
+
+            return CalculateValue(_converter.ToValue(setpoint), availableValue);
+        }
+
+
+        /// <summary>
+        /// Calculates the target of this power axis within the available power range.
+        /// </summary>
+        /// <param name="setpoint">The setpoint the operating mode aims for.</param>
+        /// <param name="available">
+        /// The available power range or null if the resources are not ready.
+        /// The minimum (&lt;= 0) limits negative setpoints (charge), the maximum (&gt;= 0) positive setpoints (discharge).
+        /// </param>
+        /// <returns>The ramped target.</returns>
+        internal TPower Calculate(TPower setpoint, PowerRange<TPower>? available)
+        {
+            PowerRange<double>? availableValue = null;
+
+            if (available.HasValue)
+            {
+                availableValue = new PowerRange<double>(_converter.ToValue(available.Value.Minimum), _converter.ToValue(available.Value.Maximum));
+            }
+
+            return CalculateValue(_converter.ToValue(setpoint), availableValue);
+        }
+
+
+        /// <summary>
+        /// Calculates the target of this power axis in base unit.
+        /// </summary>
+        /// <param name="setpointValue">The setpoint in base unit.</param>
+        /// <param name="availableValue">The available power range in base unit or null if the resources are not ready.</param>
+        /// <returns>The ramped target.</returns>
+        private TPower CalculateValue(double setpointValue, PowerRange<double>? availableValue)
+        {
             lock (_dataLock)
             {
                 HasTargetSetpointChanged = false;
@@ -390,7 +435,8 @@ namespace paskalON.OperatingModes.Domain.Controls
             string prefix = _converter.MetricPrefix;
             // MetricsFactorClass1
             publisher.Register<PowerControl<TPower>, double>(this, $"{prefix}Target", MetricType.Gauge, x => x._target, config.MetricsFactorClass1);
-            publisher.Register<PowerControl<TPower>, double>(this, $"{prefix}Available", MetricType.Gauge, x => x._available, config.MetricsFactorClass1);
+            publisher.Register<PowerControl<TPower>, double>(this, $"{prefix}AvailableMinimum", MetricType.Gauge, x => x._available?.Minimum, config.MetricsFactorClass1);
+            publisher.Register<PowerControl<TPower>, double>(this, $"{prefix}AvailableMaximum", MetricType.Gauge, x => x._available?.Maximum, config.MetricsFactorClass1);
             // MetricsFactorClass2
             publisher.Register<PowerControl<TPower>, int>(this, $"{prefix}State", MetricType.Gauge, x => (int)x.State, config.MetricsFactorClass2);
             publisher.Register<PowerControl<TPower>, double>(this, $"{prefix}Setpoint", MetricType.Gauge, x => x._setpoint, config.MetricsFactorClass2);
@@ -402,8 +448,8 @@ namespace paskalON.OperatingModes.Domain.Controls
         /// Establishes the target after the activation once the available power is known.
         /// </summary>
         /// <param name="setpoint">The setpoint.</param>
-        /// <param name="available">The available power.</param>
-        private void EstablishTarget(double setpoint, double? available)
+        /// <param name="available">The available power range.</param>
+        private void EstablishTarget(double setpoint, PowerRange<double>? available)
         {
             if (available.HasValue is false)
             {
@@ -436,8 +482,8 @@ namespace paskalON.OperatingModes.Domain.Controls
         /// Follows the target setpoint if the setpoint or available power changed outside their deadbands and the target setpoint changed.
         /// </summary>
         /// <param name="setpoint">The setpoint.</param>
-        /// <param name="available">The available power.</param>
-        private void RestartRampOnChange(double setpoint, double? available)
+        /// <param name="available">The available power range.</param>
+        private void RestartRampOnChange(double setpoint, PowerRange<double>? available)
         {
             // Keep the current ramp if the available power is temporarily unknown
             if (available.HasValue is false)
@@ -446,7 +492,9 @@ namespace paskalON.OperatingModes.Domain.Controls
             }
 
             bool isSetpointChanged = (_lastSetpoint.HasValue is false) || (Math.Abs(setpoint - _lastSetpoint.Value) > Limits.DeadbandSetpoint);
-            bool isAvailableChanged = (_lastAvailable.HasValue is false) || (Math.Abs(available.Value - _lastAvailable.Value) > Limits.DeadbandAvailable);
+            bool isAvailableChanged = (_lastAvailable.HasValue is false)
+                || (Math.Abs(available.Value.Minimum - _lastAvailable.Value.Minimum) > Limits.DeadbandAvailable)
+                || (Math.Abs(available.Value.Maximum - _lastAvailable.Value.Maximum) > Limits.DeadbandAvailable);
 
             if (isSetpointChanged is false && isAvailableChanged is false)
             {
@@ -511,14 +559,18 @@ namespace paskalON.OperatingModes.Domain.Controls
 
 
         /// <summary>
-        /// Selects the target setpoint from the setpoint and the available power.
+        /// Selects the target setpoint from the setpoint and the available power range.
         /// </summary>
+        /// <remarks>
+        /// Only the direction of the setpoint is limited: an empty battery [-charge limit, 0] limits a discharge setpoint to 0
+        /// but follows a charge setpoint, so that the resources can always leave their limit again.
+        /// </remarks>
         /// <param name="setpoint">The setpoint.</param>
-        /// <param name="available">The available power.</param>
-        /// <returns>The setpoint reduced to the magnitude of the available power so that no unachievable setpoint is set.</returns>
-        private double SelectTargetSetpoint(double setpoint, double available)
+        /// <param name="available">The available power range.</param>
+        /// <returns>The setpoint limited to the available power range so that no unachievable setpoint is set.</returns>
+        private double SelectTargetSetpoint(double setpoint, PowerRange<double> available)
         {
-            return Math.Sign(setpoint) * Math.Min(Math.Abs(setpoint), Math.Abs(available));
+            return Math.Min(Math.Max(setpoint, available.Minimum), available.Maximum);
         }
     }
 }

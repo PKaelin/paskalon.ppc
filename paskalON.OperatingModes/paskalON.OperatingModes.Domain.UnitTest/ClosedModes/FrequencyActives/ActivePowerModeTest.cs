@@ -45,7 +45,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.ClosedModes.FrequencyActives
         {
             _map = new ActivePowerModeMap
             {
-                AvailableActivePower = () => new ActivePower(8000000),
+                AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000)),
                 AvailableReactivePower = () => new ReactivePower(4000000),
                 ActivePowerAtPoi = () => null
             };

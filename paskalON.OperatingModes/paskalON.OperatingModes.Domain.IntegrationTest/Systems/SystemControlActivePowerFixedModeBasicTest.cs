@@ -90,7 +90,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.Systems
                 },
             };
 
-            ActivePowerFixedModeMap fixedMap = new ActivePowerFixedModeMap { AvailableActivePower = () => ActivePower.FromMega(10), AvailableReactivePower = () => null };
+            ActivePowerFixedModeMap fixedMap = new ActivePowerFixedModeMap { AvailableActivePower = () => PowerRange.Symmetric(ActivePower.FromMega(10)), AvailableReactivePower = () => null };
 
             _activePowerFixedMode = new ActivePowerFixedMode(NullLogger.Instance, _timeProvider, new Mock<IMetricsPublisher>().Object, _systemConfig, fixedConfig, fixedMap,
                 new RampController(NullLogger.Instance, _timeProvider, fixedConfig.RampConfig));

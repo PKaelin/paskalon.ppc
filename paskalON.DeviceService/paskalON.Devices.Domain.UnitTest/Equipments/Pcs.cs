@@ -19,6 +19,12 @@ namespace paskalON.Devices.Domain.UnitTest.Equipments
         public int PcsDeviceTest { get; set; }
 
 
+        /// <summary>
+        /// Completed with the requested value when an active power target is set, e.g. by the SOC safety check in the background.
+        /// </summary>
+        public TaskCompletionSource<double?> ActivePowerTargetSet { get; set; } = new TaskCompletionSource<double?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+
         // Do not test any communication in this tests. Do them in the Equipment tests.
         public Pcs(ILogger logger, PowerConversionSystemConfig config, DerUnit derUnit, IMetricsPublisher publisher, IModbusDataface dataface)
             : base(logger, config, derUnit, publisher, dataface)
@@ -40,6 +46,14 @@ namespace paskalON.Devices.Domain.UnitTest.Equipments
             Dataface.Register<Pcs, IModbusRegister>(r => r.Register<Pcs, double?>(this, nameof(DCCurrent), (x, v) => x.DCCurrent = v, 1004, 1, ModbusDataType.MbInt16));
             Dataface.Register<Pcs, IModbusRegister>(r => r.Register<Pcs, double?>(this, nameof(DCVoltage), (x, v) => x.DCVoltage = v, 1005, 1, ModbusDataType.MbInt16));
         }
+
+        /// <inheritdoc/>
+        public override async Task SetActivePowerTargetAsync(double? value)
+        {
+            await base.SetActivePowerTargetAsync(value);
+            ActivePowerTargetSet.TrySetResult(value);
+        }
+
 
         public override Task HeartbeatAsync(CancellationToken cancellationToken)
         {

@@ -83,7 +83,7 @@ namespace paskalON.OperatingModes.Domain.IntegrationTest.OpenModes.FrequencyActi
                 DeadbandAvailable = 10000,
                 RampConfig = new RampTimeConfig { ChangedBy = "Test", RampUpTimeSeconds = 60, RampDownTimeSeconds = 60 },
             };
-            ActivePowerFixedModeMap map = new ActivePowerFixedModeMap { AvailableActivePower = () => new ActivePower(8000000), AvailableReactivePower = () => new ReactivePower(4000000) };
+            ActivePowerFixedModeMap map = new ActivePowerFixedModeMap { AvailableActivePower = () => PowerRange.Symmetric(new ActivePower(8000000)), AvailableReactivePower = () => new ReactivePower(4000000) };
             RampController rampController = new RampController(NullLogger.Instance, _timeProvider, config.RampConfig);
             _mode = new ActivePowerFixedMode(NullLogger.Instance, _timeProvider, new Mock<IMetricsPublisher>().Object, systemConfig, config, map, rampController);
             _stackManager = new StackManager();
