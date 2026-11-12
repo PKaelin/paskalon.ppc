@@ -9,6 +9,46 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
     /// <summary>
     /// Battery bank device configuration.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// State Of Charge parameters:
+    /// <code>
+    /// [ABSOLUTE SOC: 0%  =======================================  100% ] <- Physical Cells
+    ///                    \                                     /
+    /// [USABLE SOC:    0% (5% Abs) ================ 100% (95% Abs) ]      <- Manufacturer Window
+    ///                         \                 /
+    /// [PREFERRED SOC:         0% (20% Abs) == 100% (80% Abs) ]           <- Operator Window
+    /// </code>
+    /// Most battery banks have a usable SOC endpoint.
+    /// </para>
+    /// <para>
+    /// State of charge scales with the default configuration of <see cref="BatteryBankDeviceConfig"/>:
+    /// Absolute 0..100 %, Usable 10..90 %, Preferred 20..80 %.
+    /// Usable    = (Absolute - UsableMinimum)    / (UsableMaximum - UsableMinimum)       * AbsoluteMaximum
+    /// Preferred = (Absolute - PreferredMinimum) / (PreferredMaximum - PreferredMinimum) * AbsoluteMaximum
+    /// The published values are clamped to 0..100 (unclamped value in parentheses).
+    /// <code>
+    /// | Absolute | Usable        | Preferred     | Remark                  |
+    /// |----------|---------------|---------------|-------------------------|
+    /// |    100.0 | 100.0 (112.5) | 100.0 (133.3) | Absolute maximum        |
+    /// |     90.0 | 100.0         | 100.0 (116.7) | Usable maximum          |
+    /// |     80.0 |  87.5         | 100.0         | Preferred maximum       |
+    /// |     70.0 |  75.0         |  83.3         |                         |
+    /// |     60.0 |  62.5         |  66.7         |                         |
+    /// |     50.0 |  50.0         |  50.0         |                         |
+    /// |     40.0 |  37.5         |  33.3         |                         |
+    /// |     30.0 |  25.0         |  16.7         |                         |
+    /// |     20.0 |  12.5         |   0.0         | Preferred minimum       |
+    /// |     10.0 |   0.0         |   0.0 (-16.7) | Usable minimum (alarm)  |
+    /// |      0.0 |   0.0 (-12.5) |   0.0 (-33.3) | Absolute minimum        |
+    /// </code>
+    /// </para>
+    /// <parm>
+    /// To calculate the supported maximum charge and discharge active power use the minimum DC voltage:
+    /// AbsoluteMaxDischargeCurrentAmps * MinimumDcVoltage / AbsoluteMaxChargeCurrentAmps * MinimumDcVoltage
+    /// E.g. 4600A * 1100V = 5'060'000W (5.06 MW) discharge / 4600A * 1100V = 5'060'000W (5.06 MW) charge.    
+    /// </para>
+    /// </remarks>
     public class BatteryBankDeviceConfig : NameBase
     {
         /// <summary>
@@ -71,18 +111,6 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
         /// This is used to write the batteries maximum and minimum currents that are allowed to the PCS.
         /// </summary>
         public int InverterBusNumber { get; set; }
-
-
-        //-----------------------------------------------------------------------------------------
-        // State Of Charge parameters:
-        // [ABSOLUTE SOC: 0%  =======================================  100% ] <- Physical Cells
-        //                    \                                     /
-        // [USABLE SOC:    0% (5% Abs) ================ 100% (95% Abs) ]      <- Manufacturer Window
-        //                         \                 /
-        // [PREFERRED SOC:         0% (20% Abs) == 100% (80% Abs) ]           <- Operator Window
-        //
-        // Most battery banks have a usable SOC endpoint.
-        //-----------------------------------------------------------------------------------------
 
 
         /// <summary>
@@ -274,18 +302,6 @@ namespace paskalON.Devices.Domain.Configs.EnergyStorages.Batteries
             }
         }
 
-
-        //-----------------------------------------------------------------------------------------
-        // Simplified power calculations to use when calculating the battery's power:
-        // Discharge (empty): AbsoluteMaxDischargeCurrentAmps * MinimumDcVoltage = AbsoluteMaxDischargePowerWatts (empty)
-        // Discharge (full):  AbsoluteMaxDischargeCurrentAmps * MaximumDcVoltage = AbsoluteMaxDischargePowerWatts (full)
-        // Charge (empty):    AbsoluteMaxChargeCurrentAmps * MinimumDcVoltage = AbsoluteMaxChargePowerWatts (empty)
-        // Charge (full):     AbsoluteMaxChargeCurrentAmps * MaximumDcVoltage = AbsoluteMaxChargePowerWatts (full)
-        //
-        // To calculate the supported maximum charge and discharge active power use the minimum DC voltage:
-        // AbsoluteMaxDischargeCurrentAmps * MinimumDcVoltage / AbsoluteMaxChargeCurrentAmps * MinimumDcVoltage
-        // E.g. 4600A * 1100V = 5'060'000W (5.06 MW) discharge / 4600A * 1100V = 5'060'000W (5.06 MW) charge.
-        //-----------------------------------------------------------------------------------------
 
         /// <summary>
         /// Expected maximum current (i.e. the absolute physical limit) the battery could produce.
