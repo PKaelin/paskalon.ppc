@@ -9,7 +9,9 @@ import SystemView from './views/SystemView.vue';
 import AlarmsView from './views/AlarmsView.vue';
 import SettingsView from './views/SettingsView.vue';
 import type { TabDefinition } from './types/tabs';
+import type { AlarmSeverity } from './types/alarm';
 import { createNotifications } from './composables/useNotifications';
+import { filterAlarmsBySeverity } from './composables/useAlarmFilter';
 
 const { notices, dismiss } = createNotifications();
 
@@ -25,10 +27,16 @@ const tabs: TabDefinition[] = [
 const activeTabId = ref(tabs[0].id);
 
 const activeTab = computed(() => tabs.find((tab) => tab.id === activeTabId.value) ?? tabs[0]);
+
+/** Shows the Alarms section like a click on its side tab, filtered by the severity of the clicked event shape. */
+function showAlarms(severity: AlarmSeverity): void {
+    filterAlarmsBySeverity(severity);
+    activeTabId.value = 'alarms';
+}
 </script>
 
 <template>
-    <AppHeader />
+    <AppHeader @show-alarms="showAlarms" />
 
     <div class="app-body">
         <SideTabs v-model="activeTabId" :tabs="tabs" />

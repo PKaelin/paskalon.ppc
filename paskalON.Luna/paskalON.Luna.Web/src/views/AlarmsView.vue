@@ -1,10 +1,4 @@
 <script lang="ts">
-import { defaultAlarmFilter } from '../utils/alarmList';
-import type { PpcAlarmFilter } from '../types/alarm';
-
-/** Filter of the alarm list. Kept while the tab is switched. */
-let savedFilter: PpcAlarmFilter = defaultAlarmFilter();
-
 /** Delay after the last typed character of the device filter before the alarms are loaded, in milliseconds. */
 const DeviceFilterDelay = 300;
 </script>
@@ -16,12 +10,13 @@ import AlarmFilters from '../components/AlarmFilters.vue';
 import AlarmGrid from '../components/AlarmGrid.vue';
 import ActionDialog, { type DialogAction } from '../components/ActionDialog.vue';
 import { acknowledgeAlarms, getPpcAlarms } from '../api/alarmApi';
+import { useAlarmFilter } from '../composables/useAlarmFilter';
 import { useNotifications } from '../composables/useNotifications';
 import type { PpcAlarmDto } from '../types/alarm';
 
 const { notify } = useNotifications();
 
-const filter = ref<PpcAlarmFilter>(savedFilter);
+const filter = useAlarmFilter();
 
 const alarms = ref<PpcAlarmDto[]>([]);
 
@@ -132,8 +127,6 @@ async function loadAlarms(): Promise<void> {
 
 /** Every filter change loads the alarms, typing in the device filter only after a short pause. */
 watch(filter, (current, previous) => {
-    savedFilter = current;
-
     const isDeviceNameOnly = current.deviceName !== previous.deviceName
         && current.triggeredWithinHours === previous.triggeredWithinHours
         && current.severityLevel === previous.severityLevel

@@ -129,6 +129,21 @@ body {
     display: flex;
     width: 2rem;
     height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: .25rem;
+    background: none;
+    cursor: pointer;
+}
+
+/* A click on a shape shows the alarms. */
+.event-shape:hover {
+    filter: brightness(1.2);
+}
+
+.event-shape:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
 }
 
 /* By default only the outline is drawn in the event color; the inside stays transparent. */

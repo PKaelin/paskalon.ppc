@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useAlarmSummary } from '../composables/useAlarmSummary';
-import type { AlarmSummaryDto } from '../types/alarm';
+import { AlarmSeverity, type AlarmSummaryDto } from '../types/alarm';
 
 /** Kind of event an indicator stands for; the shapes and colors follow COLORS.md. */
 type EventKind = 'info' | 'warning' | 'error' | 'critical';
@@ -10,6 +10,8 @@ type EventKind = 'info' | 'warning' | 'error' | 'critical';
 interface EventShape {
     /** Kind of event the shape stands for. */
     kind: EventKind;
+    /** Severity of the alarms the shape counts, used to filter the alarm list after a click. */
+    severity: AlarmSeverity;
     /** Name shown in the tooltip. */
     title: string;
     /** Unacknowledged alarms (sequence state Alarm) of the summary. */
@@ -34,11 +36,16 @@ interface EventShapeState extends EventShape {
 const maximumShownCount = 99;
 
 const shapes: EventShape[] = [
-    { kind: 'info', title: 'Info', unacknowledged: s => s.infoCount, acknowledged: s => s.acknowledgedInfoCount, countY: 12.5 },
-    { kind: 'warning', title: 'Warning', unacknowledged: s => s.warningCount, acknowledged: s => s.acknowledgedWarningCount, countY: 16 },
-    { kind: 'error', title: 'Error', unacknowledged: s => s.errorCount, acknowledged: s => s.acknowledgedErrorCount, countY: 12.5 },
-    { kind: 'critical', title: 'Critical', unacknowledged: s => s.criticalCount, acknowledged: s => s.acknowledgedCriticalCount, countY: 12.5 }
+    { kind: 'info', severity: AlarmSeverity.Info, title: 'Info', unacknowledged: s => s.infoCount, acknowledged: s => s.acknowledgedInfoCount, countY: 12.5 },
+    { kind: 'warning', severity: AlarmSeverity.Warning, title: 'Warning', unacknowledged: s => s.warningCount, acknowledged: s => s.acknowledgedWarningCount, countY: 16 },
+    { kind: 'error', severity: AlarmSeverity.Error, title: 'Error', unacknowledged: s => s.errorCount, acknowledged: s => s.acknowledgedErrorCount, countY: 12.5 },
+    { kind: 'critical', severity: AlarmSeverity.Critical, title: 'Critical', unacknowledged: s => s.criticalCount, acknowledged: s => s.acknowledgedCriticalCount, countY: 12.5 }
 ];
+
+const emit = defineEmits<{
+    /** The operator clicked a shape to see the alarms of its severity. */
+    (event: 'select', severity: AlarmSeverity): void;
+}>();
 
 const summary = useAlarmSummary();
 
@@ -72,20 +79,21 @@ function countText(count: number): string {
 <template>
     <div class="event-shapes">
         <span class="header-group-label">Events:</span>
-        <div v-for="state in states"
-             :key="state.kind"
-             class="event-shape"
-             :class="[
-                 `event-shape-${state.kind}`,
-                 {
-                     'event-shape-unknown': state.count === null,
-                     'event-shape-active': state.count !== null && state.count > 0,
-                     'event-shape-blinking': state.isBlinking
-                 }
-             ]"
-             role="img"
-             :title="state.tooltip"
-             :aria-label="state.tooltip">
+        <button v-for="state in states"
+                :key="state.kind"
+                type="button"
+                class="event-shape"
+                :class="[
+                    `event-shape-${state.kind}`,
+                    {
+                        'event-shape-unknown': state.count === null,
+                        'event-shape-active': state.count !== null && state.count > 0,
+                        'event-shape-blinking': state.isBlinking
+                    }
+                ]"
+                :title="state.tooltip"
+                :aria-label="`${state.tooltip}. Show ${state.title} alarms`"
+                @click="emit('select', state.severity)">
             <svg viewBox="0 0 24 24" aria-hidden="true">
                 <rect v-if="state.kind === 'info'" class="event-shape-body" x="2" y="2" width="20" height="20" rx="2" />
                 <polygon v-else-if="state.kind === 'warning'" class="event-shape-body" points="12,1.5 23,22.5 1,22.5" stroke-linejoin="round" />
@@ -100,6 +108,6 @@ function countText(count: number): string {
                       x="12"
                       :y="state.countY">{{ countText(state.count) }}</text>
             </svg>
-        </div>
+        </button>
     </div>
 </template>

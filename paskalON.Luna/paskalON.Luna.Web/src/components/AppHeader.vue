@@ -2,6 +2,12 @@
 import DependencyLeds from './DependencyLeds.vue';
 import EventShapes from './EventShapes.vue';
 import SystemCommandMenu from './SystemCommandMenu.vue';
+import type { AlarmSeverity } from '../types/alarm';
+
+const emit = defineEmits<{
+    /** The operator clicked an event shape to see the alarms of its severity. */
+    (event: 'showAlarms', severity: AlarmSeverity): void;
+}>();
 
 /** Name of the application shown right after the logo. */
 const appTitle = 'Luna';
@@ -17,7 +23,7 @@ const appTitle = 'Luna';
                 </a>
 
                 <div class="d-flex align-items-center gap-3">
-                    <EventShapes />
+                    <EventShapes @select="(severity) => emit('showAlarms', severity)" />
                     <DependencyLeds />
                     <SystemCommandMenu />
                 </div>
