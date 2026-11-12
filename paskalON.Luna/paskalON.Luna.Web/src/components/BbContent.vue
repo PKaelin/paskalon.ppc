@@ -19,6 +19,7 @@ const detail = computed(() => device.value?.detail ?? null);
 const leftRows = computed<PropertyRow[]>(() => [
     { name: 'State', value: formatEnum(core.value?.state, BatteryBankStateNames) },
     { name: 'State Of Charge', value: formatQuantity(core.value?.stateOfCharge, 1, '%') },
+    { name: 'Usable State Of Charge', value: formatQuantity(core.value?.usableStateOfCharge, 1, '%') },
     { name: 'Battery Bank Flow Direction', value: formatEnum(core.value?.batteryBankFlowDirection, BatteryBankFlowDirectionNames) },
     { name: 'Total DC Voltage', value: formatQuantity(core.value?.totalDCVoltage, Kilo, 'kV') },
     { name: 'Total DC Current', value: formatQuantity(core.value?.totalDCCurrent, Kilo, 'kA') }

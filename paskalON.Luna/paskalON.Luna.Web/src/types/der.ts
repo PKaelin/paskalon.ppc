@@ -139,6 +139,8 @@ export interface BbCoreDto {
     /** BatteryBankFlowDirection - a number, or the name if the service serializes enums as strings. */
     batteryBankFlowDirection: number | string | null;
     stateOfCharge: number | null;
+    /** State of charge in % of the usable window (usable minimum to usable maximum state of charge). */
+    usableStateOfCharge: number | null;
     totalDCVoltage: number | null;
     totalDCCurrent: number | null;
 }
