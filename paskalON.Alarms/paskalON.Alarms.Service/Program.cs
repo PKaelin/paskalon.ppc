@@ -30,8 +30,10 @@ using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.Hosting;
 using paskalON.Infrastructure.Repositories;
 using paskalON.Messaging;
+using paskalON.Messaging.Heartbeats;
 using paskalON.Messaging.RabbitMq;
 using paskalON.Messaging.Redis;
+using paskalON.Messaging.Sequences;
 using paskalON.OperatingModes.Dto.Powers;
 using paskalON.PowerControls.Dto.Powers;
 using StackExchange.Redis;
@@ -152,6 +154,10 @@ try
     builder.Services.AddSingleton<IPpcAlarmMessageQueue>(provider => new PpcAlarmMessageQueue(provider.GetRequiredService<ILogger<PpcAlarmMessageQueue>>()));
     builder.Services.AddSingleton<IPpcAlarmSubscriber, PpcAlarmSubscriber>();
     builder.Services.AddHostedService<PpcAlarmHandlerService>();
+    // Heartbeat of this service published on Redis, every instance publishes it (independent of START_PUBLISHERS)
+    builder.Services.AddSingleton<IMessagePublisher, RedisMessagePublisher>();
+    builder.Services.AddSingleton<HeartbeatService>();
+    builder.Services.AddHostedService<HeartbeatService>(provider => provider.GetRequiredService<HeartbeatService>());
 
     // Add alarm actions: the publisher keeps the RabbitMQ connection (singleton), the sender uses the repository (scoped).
     // The publisher is created on the first send, after the system configuration is loaded.
@@ -253,6 +259,8 @@ try
 
         // Subscribe to the published data, the received data is queued and evaluated once the application runs
         SubscribePublishedData(app, systemConfig);
+        // A new source instance per process start, so that the receivers do not drop the restarted sequences
+        InitializeHeartbeat(app, systemConfig, MessageSequencer.CreateSourceInstance(serviceName));
     }
 
     if (app.Environment.IsDevelopment())
@@ -359,6 +367,29 @@ static void SubscribeIfConfigured(WebApplication app, string? topic, Action<stri
     }
 
     subscribe(topic);
+}
+
+
+/// <summary>
+/// Initialize the heartbeat service that publishes the heartbeat of this alarm service.
+/// </summary>
+/// <remarks>
+/// Without a configured heartbeat topic the alarm service is reported as lost by its dependents (e.g. Luna).
+/// </remarks>
+static void InitializeHeartbeat(WebApplication app, SystemConfig config, string sourceInstance)
+{
+    if (string.IsNullOrWhiteSpace(config.PublisherTopicHeartbeat))
+    {
+        app.Logger.LogWarning("No heartbeat topic is configured, the heartbeat of the alarm service is not published.");
+
+        return;
+    }
+
+    MessageSequencer sequencer = new MessageSequencer(sourceInstance, TimeProvider.System);
+    HeartbeatPublisher heartbeatPublisher = new HeartbeatPublisher(app.Services.GetRequiredService<ILogger<HeartbeatPublisher>>(),
+        app.Services.GetRequiredService<IMessagePublisher>(), sequencer, serviceName, config.PublisherTopicHeartbeat,
+        TimeSpan.FromMilliseconds(config.DependencyHeartbeatIntervalMilliseconds), TimeProvider.System);
+    app.Services.GetRequiredService<HeartbeatService>().Initialize(heartbeatPublisher);
 }
 
 

@@ -103,6 +103,8 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     AlarmActionSendIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     AlarmActionRetryIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
                     AlarmDelayCheckIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    DependencyHeartbeatIntervalMilliseconds = table.Column<int>(type: "integer", nullable: false),
+                    PublisherTopicHeartbeat = table.Column<string>(type: "text", nullable: true),
                     PublisherExchangeAlarmActions = table.Column<string>(type: "text", nullable: true),
                     SubscriberTopicPcsDetail = table.Column<string>(type: "text", nullable: true),
                     SubscriberTopicPcsCore = table.Column<string>(type: "text", nullable: true),

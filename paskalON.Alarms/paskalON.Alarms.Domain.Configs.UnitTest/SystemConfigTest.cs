@@ -29,7 +29,13 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
 
 
         /// <summary>
-        /// A new configuration has the default intervals and no exchange.
+        /// Name of the heartbeat interval property.
+        /// </summary>
+        private const string HeartbeatInterval = nameof(SystemConfig.DependencyHeartbeatIntervalMilliseconds);
+
+
+        /// <summary>
+        /// A new configuration has the default intervals, no exchange and no heartbeat topic.
         /// </summary>
         [TestMethod]
         public void SystemConfigDefaultsTest()
@@ -39,11 +45,14 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
             int sendInterval = config.AlarmActionSendIntervalMilliseconds;
             int retryInterval = config.AlarmActionRetryIntervalMilliseconds;
             int delayCheckInterval = config.AlarmDelayCheckIntervalMilliseconds;
+            int heartbeatInterval = config.DependencyHeartbeatIntervalMilliseconds;
 
             Assert.AreEqual(1000, sendInterval);
             Assert.AreEqual(5000, retryInterval);
             Assert.AreEqual(500, delayCheckInterval);
+            Assert.AreEqual(500, heartbeatInterval);
             Assert.IsNull(config.PublisherExchangeAlarmActions);
+            Assert.IsNull(config.PublisherTopicHeartbeat);
         }
 
 
@@ -57,6 +66,8 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
         [DataRow(RetryInterval, int.MaxValue)]
         [DataRow(DelayCheckInterval, 100)]
         [DataRow(DelayCheckInterval, int.MaxValue)]
+        [DataRow(HeartbeatInterval, 100)]
+        [DataRow(HeartbeatInterval, int.MaxValue)]
         public void IntervalAtOrAboveMinimumTest(string propertyName, int interval)
         {
             SystemConfig config = CreateConfig();
@@ -78,6 +89,8 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
         [DataRow(RetryInterval, 0, 5000)]
         [DataRow(DelayCheckInterval, 99, 500)]
         [DataRow(DelayCheckInterval, 0, 500)]
+        [DataRow(HeartbeatInterval, 99, 500)]
+        [DataRow(HeartbeatInterval, 0, 500)]
         public void IntervalBelowMinimumThrowsTest(string propertyName, int interval, int expectedInterval)
         {
             SystemConfig config = CreateConfig();
@@ -118,6 +131,9 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
                 case DelayCheckInterval:
                     config.AlarmDelayCheckIntervalMilliseconds = interval;
                     break;
+                case HeartbeatInterval:
+                    config.DependencyHeartbeatIntervalMilliseconds = interval;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(propertyName));
             }
@@ -134,6 +150,7 @@ namespace paskalON.Alarms.Domain.Configs.UnitTest
                 SendInterval => config.AlarmActionSendIntervalMilliseconds,
                 RetryInterval => config.AlarmActionRetryIntervalMilliseconds,
                 DelayCheckInterval => config.AlarmDelayCheckIntervalMilliseconds,
+                HeartbeatInterval => config.DependencyHeartbeatIntervalMilliseconds,
                 _ => throw new ArgumentOutOfRangeException(nameof(propertyName))
             };
         }

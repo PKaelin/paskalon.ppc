@@ -12,7 +12,7 @@ using paskalON.Alarms.Infrastructure.Storage;
 namespace paskalON.Alarms.Infrastructure.Storage.Migrations
 {
     [DbContext(typeof(AlarmContext))]
-    [Migration("20261110231103_v_0_1")]
+    [Migration("20261113183719_v_0_1")]
     partial class v_0_1
     {
         /// <inheritdoc />
@@ -229,7 +229,13 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     b.Property<int>("AlarmDelayCheckIntervalMilliseconds")
                         .HasColumnType("integer");
 
+                    b.Property<int>("DependencyHeartbeatIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PublisherExchangeAlarmActions")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicHeartbeat")
                         .HasColumnType("text");
 
                     b.Property<string>("SubscriberTopicAuxiliaryPowerMeterCore")

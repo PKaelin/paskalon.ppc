@@ -33,6 +33,13 @@ namespace paskalON.Alarms.Domain.Configs
 
 
         /// <summary>
+        /// Indicates the minimum interval, in milliseconds, between two heartbeats.
+        /// If this value is less than this constant it will cause an exception.
+        /// </summary>
+        private const int MinimumDependencyHeartbeatIntervalMilliseconds = 100;
+
+
+        /// <summary>
         /// The interval, in milliseconds, between two sends of the pending alarm actions in the outbox.
         /// </summary>
         public int AlarmActionSendIntervalMilliseconds
@@ -79,6 +86,32 @@ namespace paskalON.Alarms.Domain.Configs
                 field = value;
             }
         } = 500;
+
+
+        /// <summary>
+        /// The interval, in milliseconds, between two heartbeats of this service.
+        /// </summary>
+        /// <remarks>
+        /// Every instance of the alarm service publishes its heartbeat, the dependency is available while at least one instance is alive.
+        /// </remarks>
+        public int DependencyHeartbeatIntervalMilliseconds
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyHeartbeatIntervalMilliseconds);
+                field = value;
+            }
+        } = 500;
+
+
+        /// <summary>
+        /// Publisher topic for the heartbeat of this service used for the message publisher, e.g. ppc:alarms:heartbeat.
+        /// </summary>
+        /// <remarks>
+        /// Null means the heartbeat is not published and the alarm service is reported as lost by its dependents.
+        /// </remarks>
+        public string? PublisherTopicHeartbeat { get; set; }
 
 
         /// <summary>

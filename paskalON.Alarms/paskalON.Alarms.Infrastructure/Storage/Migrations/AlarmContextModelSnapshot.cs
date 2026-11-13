@@ -226,7 +226,13 @@ namespace paskalON.Alarms.Infrastructure.Storage.Migrations
                     b.Property<int>("AlarmDelayCheckIntervalMilliseconds")
                         .HasColumnType("integer");
 
+                    b.Property<int>("DependencyHeartbeatIntervalMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PublisherExchangeAlarmActions")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherTopicHeartbeat")
                         .HasColumnType("text");
 
                     b.Property<string>("SubscriberTopicAuxiliaryPowerMeterCore")
