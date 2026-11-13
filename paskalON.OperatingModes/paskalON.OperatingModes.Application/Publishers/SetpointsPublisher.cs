@@ -68,13 +68,19 @@ namespace paskalON.OperatingModes.Application.Publishers
 
 
         /// <inheritdoc/>
-        public void Publish(ActivePower setpointActivePower, ReactivePower setpointReactivePower)
+        public void Publish(ActivePower setpointActivePower, ReactivePower setpointReactivePower, SetpointsStatus status)
         {
+            ArgumentNullException.ThrowIfNull(status);
+
             MessageStamp stamp = _sequencer.Next();
             CurrentSetpointsDto dto = new CurrentSetpointsDto
             {
                 SetpointActivePowerWatts = setpointActivePower.Watts,
                 SetpointReactivePowerVars = setpointReactivePower.VoltAmperesReactive,
+                SupervisorySetpointActivePowerWatts = status.SupervisoryActivePower.Watts,
+                SupervisorySetpointReactivePowerVars = status.SupervisoryReactivePower.VoltAmperesReactive,
+                ActivePowerLimitReason = (int)status.ActivePowerLimitReason,
+                ReactivePowerLimitReason = (int)status.ReactivePowerLimitReason,
                 SourceInstance = stamp.SourceInstance,
                 Sequence = stamp.Sequence,
                 Timestamp = stamp.Timestamp

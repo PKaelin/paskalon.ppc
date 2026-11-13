@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 import { getSetpoint, setSetpoint } from '../api/operatingModeApi';
 import { useNotifications } from '../composables/useNotifications';
+import SetpointStatus from './SetpointStatus.vue';
 import { formatLocaleNumber, isLocaleNumberKey, parseLocaleNumber } from '../utils/localeNumber';
 
 /** The service works in watts and vars, the operator in megawatts and megavars. */
@@ -185,5 +186,7 @@ onBeforeUnmount(() => abortController?.abort());
                 </button>
             </div>
         </div>
+
+        <SetpointStatus />
     </form>
 </template>

@@ -8,6 +8,8 @@ using Moq;
 using paskalON.Messaging;
 using paskalON.Messaging.Sequences;
 using paskalON.OperatingModes.Application.Publishers;
+using paskalON.OperatingModes.Domain.Controls;
+using paskalON.OperatingModes.Domain.Systems;
 using paskalON.OperatingModes.Dto.Powers;
 using paskalON.PhysicalUnits.Electricals.Powers;
 using System.Text.Json;
@@ -117,20 +119,27 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
 
 
         /// <summary>
-        /// Confirms the setpoints are published as stamped current setpoints DTO to the current setpoint topic.
+        /// Confirms the setpoints are published as stamped current setpoints DTO to the current setpoint topic,
+        /// with the supervisory setpoints and the limit reasons as numbers.
         /// </summary>
         [TestMethod]
         public void SetpointsPublisherPublishSendsCurrentSetpointsTest()
         {
             SetpointsPublisher setpointsPublisher = CreatePublisher(CreateTopics());
+            SetpointsStatus status = new SetpointsStatus(ActivePower.FromMega(8), new ReactivePower(-1200000), PowerLimitReason.AvailablePower, PowerLimitReason.None);
 
-            setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(-1200000));
+            setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(-1200000), status);
 
             CurrentSetpointsDto? dto = JsonSerializer.Deserialize<CurrentSetpointsDto>(_publishedJson!);
             Assert.AreEqual("ppc:om:setpoints", _publishedTopic);
             Assert.IsNotNull(dto);
             Assert.AreEqual(5000000, dto.SetpointActivePowerWatts);
             Assert.AreEqual(-1200000, dto.SetpointReactivePowerVars);
+            Assert.AreEqual(8000000, dto.SupervisorySetpointActivePowerWatts);
+            Assert.AreEqual(-1200000, dto.SupervisorySetpointReactivePowerVars);
+            Assert.AreEqual((int)PowerLimitReasonDto.AvailablePower, dto.ActivePowerLimitReason);
+            Assert.AreEqual((int)PowerLimitReasonDto.None, dto.ReactivePowerLimitReason);
+            Assert.Contains("\"ActivePowerLimitReason\":4", _publishedJson!);
             Assert.AreEqual(SourceInstance, dto.SourceInstance);
             Assert.AreEqual(1, dto.Sequence);
             Assert.AreEqual(Now, dto.Timestamp);
@@ -171,9 +180,9 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
                 .Returns(Task.CompletedTask);
             SetpointsPublisher setpointsPublisher = CreatePublisher(CreateTopics());
 
-            setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(0));
+            setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(0), CreateStatus());
             setpointsPublisher.PublishUnit("Bess1", ActivePower.FromMega(2), new ReactivePower(0));
-            setpointsPublisher.Publish(ActivePower.FromMega(6), new ReactivePower(0));
+            setpointsPublisher.Publish(ActivePower.FromMega(6), new ReactivePower(0), CreateStatus());
 
             Assert.HasCount(3, messages);
             Assert.AreEqual(1, JsonSerializer.Deserialize<CurrentSetpointsDto>(messages[0])!.Sequence);
@@ -205,7 +214,7 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
         {
             SetpointsPublisher setpointsPublisher = CreatePublisher(new PublisherTopic());
 
-            setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(0));
+            setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(0), CreateStatus());
             setpointsPublisher.PublishUnit("Bess1", ActivePower.FromMega(2), new ReactivePower(0));
 
             _messagePublisher!.Verify(publisher => publisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
@@ -222,10 +231,46 @@ namespace paskalON.OperatingModes.Application.UnitTest.Publishers
                 .Returns(Task.FromException(new InvalidOperationException("Broker not reachable.")));
             SetpointsPublisher setpointsPublisher = CreatePublisher(CreateTopics());
 
-            setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(0));
+            setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(0), CreateStatus());
             setpointsPublisher.PublishUnit("Bess1", ActivePower.FromMega(2), new ReactivePower(0));
 
             _messagePublisher!.Verify(publisher => publisher.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
+        }
+
+
+        /// <summary>
+        /// Confirms the status is required.
+        /// </summary>
+        [TestMethod]
+        public void SetpointsPublisherPublishNullStatusThrowsTest()
+        {
+            SetpointsPublisher setpointsPublisher = CreatePublisher(CreateTopics());
+
+            Assert.ThrowsExactly<ArgumentNullException>(() => setpointsPublisher.Publish(ActivePower.FromMega(5), new ReactivePower(0), null!));
+        }
+
+
+        /// <summary>
+        /// Confirms the published limit reasons (DTO) have the same names and numbers as the limit reasons of the domain.
+        /// </summary>
+        [TestMethod]
+        public void SetpointsPublisherPowerLimitReasonDtoMatchesDomainTest()
+        {
+            Dictionary<string, int> domain = Enum.GetValues<PowerLimitReason>().ToDictionary(reason => reason.ToString(), reason => (int)reason);
+
+            Dictionary<string, int> dto = Enum.GetValues<PowerLimitReasonDto>().ToDictionary(reason => reason.ToString(), reason => (int)reason);
+
+            CollectionAssert.AreEquivalent(domain, dto);
+        }
+
+
+        /// <summary>
+        /// Creates the status of setpoints that follow the supervisory setpoints.
+        /// </summary>
+        /// <returns>The setpoints status.</returns>
+        private SetpointsStatus CreateStatus()
+        {
+            return new SetpointsStatus(ActivePower.FromMega(5), new ReactivePower(0), PowerLimitReason.None, PowerLimitReason.None);
         }
 
 

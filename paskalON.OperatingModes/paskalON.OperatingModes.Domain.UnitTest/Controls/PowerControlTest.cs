@@ -417,6 +417,58 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Controls
 
 
         /// <summary>
+        /// Confirms the limit reason of an established target: none, limited by the available power range or by the configured limits.
+        /// </summary>
+        /// <param name="setpoint">The setpoint in Watts.</param>
+        /// <param name="minimum">The minimum available power in Watts.</param>
+        /// <param name="maximum">The maximum available power in Watts.</param>
+        /// <param name="expectedReason">The expected limit reason.</param>
+        [TestMethod]
+        [DataRow(1000000, -8000000, 8000000, PowerLimitReason.None)]
+        [DataRow(1000000, -3000000, 0, PowerLimitReason.AvailablePower)]
+        [DataRow(-1000000, -3000000, 0, PowerLimitReason.None)]
+        [DataRow(9000000, -8000000, 8000000, PowerLimitReason.AvailablePower)]
+        [DataRow(12000000, -20000000, 20000000, PowerLimitReason.ConfigurationLimit)]
+        public void PowerControlLimitReasonEstablishedTargetTest(double setpoint, double minimum, double maximum, PowerLimitReason expectedReason)
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            PowerControl<ActivePower> control = CreateControl(rampController);
+            control.Activate(PowerControlStart.AtTargetSetpoint);
+            control.Calculate(new ActivePower(setpoint), new PowerRange<ActivePower>(new ActivePower(minimum), new ActivePower(maximum)));
+
+            PowerLimitReason reason = control.LimitReason;
+
+            Assert.AreEqual(expectedReason, reason);
+        }
+
+
+        /// <summary>
+        /// Confirms the limit reason while disabled, waiting for the available power and ramping.
+        /// </summary>
+        [TestMethod]
+        public void PowerControlLimitReasonStatesTest()
+        {
+            Mock<IRampController> rampController = new Mock<IRampController>();
+            rampController.Setup(controller => controller.Calculate()).Returns(400000);
+            PowerControl<ActivePower> control = CreateControl(rampController);
+
+            PowerLimitReason disabledReason = control.LimitReason;
+            control.Activate(PowerControlStart.RampFromCurrentTarget);
+            control.Calculate(new ActivePower(1000000), (ActivePower?)null);
+            PowerLimitReason enablingReason = control.LimitReason;
+            control.Calculate(new ActivePower(1000000), new ActivePower(8000000));
+            PowerLimitReason rampingReason = control.LimitReason;
+            control.Deactivate();
+            PowerLimitReason deactivatedReason = control.LimitReason;
+
+            Assert.AreEqual(PowerLimitReason.None, disabledReason);
+            Assert.AreEqual(PowerLimitReason.AvailablePower, enablingReason);
+            Assert.AreEqual(PowerLimitReason.Ramping, rampingReason);
+            Assert.AreEqual(PowerLimitReason.None, deactivatedReason);
+        }
+
+
+        /// <summary>
         /// Confirms a change of the limit of the other direction does not change the target.
         /// </summary>
         [TestMethod]

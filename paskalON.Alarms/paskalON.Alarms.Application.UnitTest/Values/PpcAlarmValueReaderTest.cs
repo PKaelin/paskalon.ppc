@@ -134,6 +134,10 @@ namespace paskalON.Alarms.Application.UnitTest.Values
             {
                 SetpointActivePowerWatts = 2500000,
                 SetpointReactivePowerVars = -300000,
+                SupervisorySetpointActivePowerWatts = 4000000,
+                SupervisorySetpointReactivePowerVars = null,
+                ActivePowerLimitReason = (int)PowerLimitReasonDto.AvailablePower,
+                ReactivePowerLimitReason = (int)PowerLimitReasonDto.None,
                 SourceInstance = "OperatingMode-1a2b3c",
                 Sequence = 4711,
                 Timestamp = new DateTimeOffset(2026, 11, 6, 8, 15, 30, TimeSpan.Zero)
@@ -141,9 +145,13 @@ namespace paskalON.Alarms.Application.UnitTest.Values
 
             Dictionary<string, double> values = PpcAlarmValueReader.Read(setpoints);
 
-            CollectionAssert.AreEquivalent(new List<string> { "SetpointActivePowerWatts", "SetpointReactivePowerVars" }, values.Keys.ToList());
+            // The limit reasons are numbers, so that an operating mode alarm can be configured on them, an unknown supervisory setpoint is skipped
+            CollectionAssert.AreEquivalent(new List<string> { "SetpointActivePowerWatts", "SetpointReactivePowerVars", "SupervisorySetpointActivePowerWatts",
+                "ActivePowerLimitReason", "ReactivePowerLimitReason" }, values.Keys.ToList());
             Assert.AreEqual(2500000, values["SetpointActivePowerWatts"]);
             Assert.AreEqual(-300000, values["SetpointReactivePowerVars"]);
+            Assert.AreEqual(4000000, values["SupervisorySetpointActivePowerWatts"]);
+            Assert.AreEqual(4, values["ActivePowerLimitReason"]);
         }
 
 

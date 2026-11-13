@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, markRaw, ref } from 'vue';
+import { computed, markRaw } from 'vue';
 import AppHeader from './components/AppHeader.vue';
 import AppFooter from './components/AppFooter.vue';
 import SideTabs from './components/SideTabs.vue';
@@ -12,6 +12,7 @@ import type { TabDefinition } from './types/tabs';
 import type { AlarmSeverity } from './types/alarm';
 import { createNotifications } from './composables/useNotifications';
 import { filterAlarmsBySeverity } from './composables/useAlarmFilter';
+import { showTab, useActiveTab } from './composables/useNavigation';
 
 const { notices, dismiss } = createNotifications();
 
@@ -24,14 +25,15 @@ const tabs: TabDefinition[] = [
     { id: 'settings', label: 'Settings', icon: 'bi-gear', component: markRaw(SettingsView), pinnedBottom: true }
 ];
 
-const activeTabId = ref(tabs[0].id);
+/** Shared, so that a component (e.g. the setpoint status) can switch the tab as well. */
+const activeTabId = useActiveTab();
 
 const activeTab = computed(() => tabs.find((tab) => tab.id === activeTabId.value) ?? tabs[0]);
 
 /** Shows the Alarms section like a click on its side tab, filtered by the severity of the clicked event shape. */
 function showAlarms(severity: AlarmSeverity): void {
     filterAlarmsBySeverity(severity);
-    activeTabId.value = 'alarms';
+    showTab('alarms');
 }
 </script>
 

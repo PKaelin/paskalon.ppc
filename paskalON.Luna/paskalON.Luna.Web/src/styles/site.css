@@ -409,6 +409,69 @@ body {
     margin-bottom: .5rem;
 }
 
+/* Setpoint status: operator setpoint vs. commanded power with the reason why they differ. */
+.om-status {
+    margin-top: .75rem;
+    padding-top: .5rem;
+    border-top: 1px solid rgba(235, 235, 235, .15);
+}
+
+.om-status-table {
+    width: 100%;
+    font-size: .8125rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.om-status-table th,
+.om-status-table td {
+    padding: .125rem .25rem;
+    font-weight: normal;
+}
+
+.om-status-table thead th {
+    color: rgba(235, 235, 235, .75);
+}
+
+.om-status-table .om-status-number {
+    text-align: right;
+    white-space: nowrap;
+    padding-right: .125rem;
+}
+
+.om-status-table .om-status-unit {
+    text-align: left;
+    white-space: nowrap;
+    padding-left: 0;
+    width: 3rem;
+}
+
+/* The commanded value is highlighted by the colour of the reason while it differs from the setpoint
+   (not bold: bold digits are wider and would shift the decimal point). */
+.om-status-differs {
+    font-weight: normal;
+}
+
+.om-status-reason-row td {
+    padding-top: 0;
+    padding-bottom: .375rem;
+}
+
+.om-status-reason {
+    font-size: .75rem;
+}
+
+.om-status-reason-info {
+    color: rgba(235, 235, 235, .75);
+}
+
+.om-status-reason-warning {
+    color: var(--bs-warning, #f0ad4e);
+}
+
+.om-status-reason-danger {
+    color: var(--bs-danger, #d9534f);
+}
+
 .om-list {
     /* Height of one item and the gap between two items - together one item slot. */
     --om-item-height: 2.25rem;

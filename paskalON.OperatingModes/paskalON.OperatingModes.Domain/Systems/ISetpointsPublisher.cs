@@ -22,7 +22,8 @@ namespace paskalON.OperatingModes.Domain.Systems
         /// </remarks>
         /// <param name="setpointActivePower">The applied active power setpoint.</param>
         /// <param name="setpointReactivePower">The applied reactive power setpoint.</param>
-        void Publish(ActivePower setpointActivePower, ReactivePower setpointReactivePower);
+        /// <param name="status">The supervisory setpoints and why the applied setpoints differ from them, e.g. shown to the operator.</param>
+        void Publish(ActivePower setpointActivePower, ReactivePower setpointReactivePower, SetpointsStatus status);
 
 
         /// <summary>

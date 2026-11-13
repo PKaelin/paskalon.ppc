@@ -138,6 +138,25 @@ namespace paskalON.OperatingModes.Domain.Controls
 
 
         /// <summary>
+        /// Gets why the target setpoint of this power axis differs from its setpoint.
+        /// </summary>
+        /// <remarks>
+        /// Only the reasons this power axis knows itself: waiting for or limited by the available power, limited by the configured limits or ramping.
+        /// The system operating mode control adds the reasons of the stack (limiting operating modes, transitions, nameplate, overrides).
+        /// </remarks>
+        public PowerLimitReason LimitReason
+        {
+            get
+            {
+                lock (_dataLock)
+                {
+                    return DetermineLimitReason();
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Gets whether the target setpoint of an established target changed in the last calculation (setpoint or available power change).
         /// </summary>
         /// <remarks>
@@ -555,6 +574,47 @@ namespace paskalON.OperatingModes.Domain.Controls
 
                 _logger.LogDebug("{Name} {Axis} power reached target setpoint: {TargetSetpoint}", _operatingModeName, Axis, _targetSetpoint);
             }
+        }
+
+
+        /// <summary>
+        /// Determines why the target setpoint differs from the setpoint. Must be called inside the lock.
+        /// </summary>
+        /// <returns>The reason or <see cref="PowerLimitReason.None"/> if the target setpoint is the setpoint.</returns>
+        private PowerLimitReason DetermineLimitReason()
+        {
+            if (ControlState == OperatingModeState.Disabled)
+            {
+                return PowerLimitReason.None;
+            }
+
+            // Waits for the available power before the target is established
+            if (ControlState == OperatingModeState.Enabling)
+            {
+                return PowerLimitReason.AvailablePower;
+            }
+
+            if (_lastAvailable.HasValue)
+            {
+                double selected = SelectTargetSetpoint(_setpoint, _lastAvailable.Value);
+
+                if (Math.Abs(selected - _setpoint) > Limits.DeadbandSetpoint)
+                {
+                    return PowerLimitReason.AvailablePower;
+                }
+
+                if (Math.Abs(Limits.Clamp(selected) - selected) > Limits.DeadbandSetpoint)
+                {
+                    return PowerLimitReason.ConfigurationLimit;
+                }
+            }
+
+            if (ControlState == OperatingModeState.RampingToEnabled)
+            {
+                return PowerLimitReason.Ramping;
+            }
+
+            return PowerLimitReason.None;
         }
 
 

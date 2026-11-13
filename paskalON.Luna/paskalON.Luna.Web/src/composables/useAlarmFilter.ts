@@ -1,6 +1,6 @@
 import { ref, type Ref } from 'vue';
 import { defaultAlarmFilter } from '../utils/alarmList';
-import type { AlarmSeverity, PpcAlarmFilter } from '../types/alarm';
+import { AlarmSequenceState, type AlarmSeverity, type PpcAlarmFilter } from '../types/alarm';
 
 /** Filter of the alarm list. Shared by the whole app, so it is kept while the tab is switched. */
 const filter = ref<PpcAlarmFilter>(defaultAlarmFilter());
@@ -19,4 +19,12 @@ export function useAlarmFilter(): Ref<PpcAlarmFilter> {
  */
 export function filterAlarmsBySeverity(severityLevel: AlarmSeverity): void {
     filter.value = { ...defaultAlarmFilter(), severityLevel };
+}
+
+/**
+ * Filters the alarm list to the alarms that are still active (not acknowledged, not normal), e.g. to find
+ * why the operating modes cannot follow the setpoints. The other criteria are reset to their defaults.
+ */
+export function filterActiveAlarms(): void {
+    filter.value = { ...defaultAlarmFilter(), alarmSequenceState: AlarmSequenceState.Alarm };
 }

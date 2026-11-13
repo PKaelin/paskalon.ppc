@@ -117,6 +117,12 @@ namespace paskalON.OperatingModes.Domain.Systems
 
 
         /// <summary>
+        /// Difference in base unit (W, var) below which the applied target is considered to be the supervisory setpoint.
+        /// </summary>
+        private const double LimitReasonTolerance = 1;
+
+
+        /// <summary>
         /// Number of completed calculation cycles since the applied targets were published the last time.
         /// </summary>
         private int _cyclesSincePublish;
@@ -264,6 +270,26 @@ namespace paskalON.OperatingModes.Domain.Systems
         }
 
 
+        /// <summary>
+        /// Gets why the applied active power differs from the supervisory active power setpoint in the last calculation cycle.
+        /// </summary>
+        public PowerLimitReason ActivePowerLimitReason
+        {
+            get { lock (_dataLock) { return field; } }
+            private set { lock (_dataLock) { field = value; } }
+        }
+
+
+        /// <summary>
+        /// Gets why the applied reactive power differs from the supervisory reactive power setpoint in the last calculation cycle.
+        /// </summary>
+        public PowerLimitReason ReactivePowerLimitReason
+        {
+            get { lock (_dataLock) { return field; } }
+            private set { lock (_dataLock) { field = value; } }
+        }
+
+
         /// <inheritdoc/>
         public IReadOnlyList<UnitOverrideSetpoint> OverrideSetpoints
         {
@@ -388,13 +414,21 @@ namespace paskalON.OperatingModes.Domain.Systems
                 IOverrideMode? plantOverride = overrides.OperatingModes.FirstOrDefault(overrideMode => overrideMode.TargetDerUnit is null);
                 // Applied target = objective + ramped transition offsets, then forced by the plant-wide override and clamped to the nameplate
                 double activeApplied = ResolveAxis(PowerAxis.Active, signals.FinalActivePower.Watts, changes, plantOverride?.ActiveControl?.Target.Watts,
-                    stack.OperatingModes, isResuming);
+                    stack.OperatingModes, isResuming, out bool isActiveNameplateLimited);
                 double reactiveApplied = ResolveAxis(PowerAxis.Reactive, signals.FinalReactivePower.VoltAmperesReactive, changes,
-                    plantOverride?.ReactiveControl?.Target.VoltAmperesReactive, stack.OperatingModes, isResuming);
+                    plantOverride?.ReactiveControl?.Target.VoltAmperesReactive, stack.OperatingModes, isResuming, out bool isReactiveNameplateLimited);
                 // Update the modes IsTransitioning state and remove the finished ones from the transition tracking
                 UpdateTransitionStates(stack.OperatingModes, changes);
                 ActivePower setpointActivePowerActual = new ActivePower(activeApplied);
                 ReactivePower setpointReactivePowerActual = new ReactivePower(reactiveApplied);
+                bool isActiveLimitedByMode = signals.LimitedActivePower.HasValue && (signals.LimitedActivePower.Value != signals.BaseActivePower + signals.AdditiveActivePowerDelta);
+                bool isReactiveLimitedByMode = signals.LimitedReactivePower.HasValue && (signals.LimitedReactivePower.Value != signals.BaseReactivePower + signals.AdditiveReactivePowerDelta);
+                // Explains the operator why the applied setpoints differ from the supervisory setpoints
+                PowerLimitReason activeReason = DetermineLimitReason(PowerAxis.Active, signals.SetpointActivePower.Watts, activeApplied,
+                    plantOverride?.ActiveControl is not null, isActiveNameplateLimited, isActiveLimitedByMode, stack.OperatingModes);
+                PowerLimitReason reactiveReason = DetermineLimitReason(PowerAxis.Reactive, signals.SetpointReactivePower.VoltAmperesReactive, reactiveApplied,
+                    plantOverride?.ReactiveControl is not null, isReactiveNameplateLimited, isReactiveLimitedByMode, stack.OperatingModes);
+                SetpointsStatus status = new SetpointsStatus(signals.SetpointActivePower, signals.SetpointReactivePower, activeReason, reactiveReason);
                 bool isSetpointChanged;
                 bool isRepublishDue;
 
@@ -411,8 +445,12 @@ namespace paskalON.OperatingModes.Domain.Systems
                     BaseReactivePower = signals.BaseReactivePower;
                     AdditiveActivePowerDelta = signals.AdditiveActivePowerDelta;
                     AdditiveReactivePowerDelta = signals.AdditiveReactivePowerDelta;
-                    IsActivePowerLimited = signals.LimitedActivePower.HasValue && (signals.LimitedActivePower.Value != signals.BaseActivePower + signals.AdditiveActivePowerDelta);
-                    IsReactivePowerLimited = signals.LimitedReactivePower.HasValue && (signals.LimitedReactivePower.Value != signals.BaseReactivePower + signals.AdditiveReactivePowerDelta);
+                    IsActivePowerLimited = isActiveLimitedByMode;
+                    IsReactivePowerLimited = isReactiveLimitedByMode;
+                    // A changed reason is published immediately, so that the operator sees it without waiting for the republish
+                    isSetpointChanged = isSetpointChanged || (ActivePowerLimitReason != activeReason) || (ReactivePowerLimitReason != reactiveReason);
+                    ActivePowerLimitReason = activeReason;
+                    ReactivePowerLimitReason = reactiveReason;
                     OverrideSetpoints = overrideSetpoints;
                     _hasAppliedTargets = true;
                     State = SystemState.Running;
@@ -424,7 +462,7 @@ namespace paskalON.OperatingModes.Domain.Systems
                 {
                     // Publishes the applied setpoints to the power control and other subscribers
                     _cyclesSincePublish = 0;
-                    PublishSetpoints(setpointActivePowerActual, setpointReactivePowerActual);
+                    PublishSetpoints(setpointActivePowerActual, setpointReactivePowerActual, status);
                 }
             }
             catch (OperationCanceledException)
@@ -507,11 +545,12 @@ namespace paskalON.OperatingModes.Domain.Systems
         /// </remarks>
         /// <param name="setpointActivePower">The applied active power setpoint.</param>
         /// <param name="setpointReactivePower">The applied reactive power setpoint.</param>
-        private void PublishSetpoints(ActivePower setpointActivePower, ReactivePower setpointReactivePower)
+        /// <param name="status">The supervisory setpoints and why the applied setpoints differ from them.</param>
+        private void PublishSetpoints(ActivePower setpointActivePower, ReactivePower setpointReactivePower, SetpointsStatus status)
         {
             try
             {
-                _setpointsPublisher.Publish(setpointActivePower, setpointReactivePower);
+                _setpointsPublisher.Publish(setpointActivePower, setpointReactivePower, status);
             }
             catch (Exception ex)
             {
@@ -703,9 +742,10 @@ namespace paskalON.OperatingModes.Domain.Systems
         /// <param name="forcedTarget">The target forced by a plant-wide override or null.</param>
         /// <param name="stackModes">The selected operating modes of the current cycle.</param>
         /// <param name="isResuming">Whether this is the first cycle after holding.</param>
+        /// <param name="isNameplateLimited">Whether the applied target was clamped to the nameplate.</param>
         /// <returns>The applied target in base unit.</returns>
         private double ResolveAxis(PowerAxis axis, double objective, List<AxisChange> changes, double? forcedTarget, IReadOnlyList<IStackableMode> stackModes,
-            bool isResuming)
+            bool isResuming, out bool isNameplateLimited)
         {
             AxisTransition transition = axis == PowerAxis.Active ? ActivePowerTransition : ReactivePowerTransition;
 
@@ -750,7 +790,92 @@ namespace paskalON.OperatingModes.Domain.Systems
                 transition.Constrain(constrained - objective);
             }
 
+            isNameplateLimited = constrained != applied;
+
             return constrained;
+        }
+
+
+        /// <summary>
+        /// Determines why the applied target of a power axis differs from the supervisory setpoint.
+        /// </summary>
+        /// <remarks>
+        /// The reasons of the system (override, no operating mode, limiting operating mode, nameplate, transition) and
+        /// of the operating modes controlling the power axis (available power, configured limits, ramp) are combined,
+        /// the reason with the highest priority is reported (see <see cref="PowerLimitReason"/>).
+        /// </remarks>
+        /// <param name="axis">The power axis.</param>
+        /// <param name="setpoint">The supervisory setpoint in base unit.</param>
+        /// <param name="applied">The applied target in base unit.</param>
+        /// <param name="isOverridden">Whether a plant-wide override forces the applied target.</param>
+        /// <param name="isNameplateLimited">Whether the applied target was clamped to the nameplate.</param>
+        /// <param name="isLimitedByMode">Whether a limiting operating mode limited the power axis.</param>
+        /// <param name="stackModes">The operating modes of the stack.</param>
+        /// <returns>The reason or <see cref="PowerLimitReason.None"/> if the applied target is the setpoint.</returns>
+        private PowerLimitReason DetermineLimitReason(PowerAxis axis, double setpoint, double applied, bool isOverridden, bool isNameplateLimited,
+            bool isLimitedByMode, IReadOnlyList<IStackableMode> stackModes)
+        {
+            if (isOverridden)
+            {
+                return PowerLimitReason.Override;
+            }
+
+            if (Math.Abs(applied - setpoint) < LimitReasonTolerance)
+            {
+                return PowerLimitReason.None;
+            }
+
+            OperatingModeClassification limiting = axis == PowerAxis.Active ? OperatingModeClassification.LimitingActive : OperatingModeClassification.LimitingReactive;
+            List<PowerLimitReason> modeReasons = stackModes
+                .Where(operatingMode => (operatingMode.Classification & limiting) == OperatingModeClassification.None)
+                .Select(operatingMode => GetLimitReason(operatingMode, axis))
+                .OfType<PowerLimitReason>()
+                .ToList();
+
+            if (modeReasons.Count == 0)
+            {
+                return PowerLimitReason.NoOperatingMode;
+            }
+
+            AxisTransition transition = axis == PowerAxis.Active ? ActivePowerTransition : ReactivePowerTransition;
+            // The operating modes calculate another power by design if no limit applies (e.g. feedback, droop)
+            PowerLimitReason reason = modeReasons.Append(PowerLimitReason.OperatingMode).Max();
+
+            if (transition.Segments.Count > 0)
+            {
+                reason = (PowerLimitReason)Math.Max((int)reason, (int)PowerLimitReason.Ramping);
+            }
+
+            if (isNameplateLimited)
+            {
+                reason = (PowerLimitReason)Math.Max((int)reason, (int)PowerLimitReason.ConfigurationLimit);
+            }
+
+            if (isLimitedByMode)
+            {
+                reason = (PowerLimitReason)Math.Max((int)reason, (int)PowerLimitReason.LimitingMode);
+            }
+
+            return reason;
+        }
+
+
+        /// <summary>
+        /// Gets the limit reason of the power axis of an operating mode that controls it.
+        /// </summary>
+        /// <param name="operatingMode">The operating mode.</param>
+        /// <param name="axis">The power axis.</param>
+        /// <returns>The limit reason or null if the operating mode has no such power axis or it is disabled.</returns>
+        private static PowerLimitReason? GetLimitReason(IOperatingMode operatingMode, PowerAxis axis)
+        {
+            OperatingModeState? state = axis == PowerAxis.Active ? operatingMode.ActiveControl?.State : operatingMode.ReactiveControl?.State;
+
+            if (state.HasValue is false || state.Value == OperatingModeState.Disabled)
+            {
+                return null;
+            }
+
+            return axis == PowerAxis.Active ? operatingMode.ActiveControl!.LimitReason : operatingMode.ReactiveControl!.LimitReason;
         }
 
 
@@ -1014,6 +1139,8 @@ namespace paskalON.OperatingModes.Domain.Systems
             _publisher.Register<SystemOperatingModeControl, double>(this, nameof(AdditiveReactivePowerDelta), MetricType.Gauge, x => x.AdditiveReactivePowerDelta.VoltAmperesReactive, 1);
             _publisher.Register<SystemOperatingModeControl, int>(this, nameof(IsActivePowerLimited), MetricType.Gauge, x => x.IsActivePowerLimited ? 1 : 0, 1);
             _publisher.Register<SystemOperatingModeControl, int>(this, nameof(IsReactivePowerLimited), MetricType.Gauge, x => x.IsReactivePowerLimited ? 1 : 0, 1);
+            _publisher.Register<SystemOperatingModeControl, int>(this, nameof(ActivePowerLimitReason), MetricType.Gauge, x => (int)x.ActivePowerLimitReason, 1);
+            _publisher.Register<SystemOperatingModeControl, int>(this, nameof(ReactivePowerLimitReason), MetricType.Gauge, x => (int)x.ReactivePowerLimitReason, 1);
             _publisher.Register<SystemOperatingModeControl, int>(this, "OverrideCount", MetricType.Gauge, x => x.OverrideSetpoints.Count, 1);
         }
 

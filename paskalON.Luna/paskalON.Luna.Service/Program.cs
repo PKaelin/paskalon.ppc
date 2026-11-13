@@ -189,6 +189,13 @@ try
         sp.GetRequiredService<IHubContext<SystemHub, ISystemClient>>(),
         sp.GetRequiredService<HubConnectionCounter>(),
         TimeSpan.FromSeconds(2)));
+    // Push the applied setpoints with their limit reasons to the UI clients connected to the system hub
+    builder.Services.AddHostedService(sp => new SetpointStatusPublisher(
+        sp.GetRequiredService<ILogger<SetpointStatusPublisher>>(),
+        sp.GetRequiredService<ILunaOperatingModeManager>(),
+        sp.GetRequiredService<IHubContext<SystemHub, ISystemClient>>(),
+        sp.GetRequiredService<HubConnectionCounter>(),
+        TimeSpan.FromSeconds(2)));
 
     // Push the values of the device shown in the system tab to the UI client that subscribed to it on the device hub
     builder.Services.AddSingleton<DeviceSubscriptions>();

@@ -8,6 +8,7 @@ using paskalON.OperatingModes.Domain.Abstractions;
 using paskalON.Domains.Configs;
 using paskalON.OperatingModes.Domain.Configs;
 using paskalON.OperatingModes.Domain.Configs.SafetyFunctions;
+using paskalON.OperatingModes.Domain.Controls;
 using paskalON.OperatingModes.Domain.Overrides;
 using paskalON.OperatingModes.Domain.Ramps;
 using paskalON.OperatingModes.Domain.SafetyFunctions;
@@ -195,9 +196,9 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             _control!.Calculate(CancellationToken.None);
 
             Assert.AreEqual(5000000, _control!.SetpointActivePowerActual.Watts);
-            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 0), It.Is<ReactivePower>(power => power.VoltAmperesReactive == 0)), Times.Once);
-            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 5000000), It.Is<ReactivePower>(power => power.VoltAmperesReactive == 0)), Times.Once);
-            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Exactly(2));
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 0), It.Is<ReactivePower>(power => power.VoltAmperesReactive == 0), It.IsAny<SetpointsStatus>()), Times.Once);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 5000000), It.Is<ReactivePower>(power => power.VoltAmperesReactive == 0), It.IsAny<SetpointsStatus>()), Times.Once);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>(), It.IsAny<SetpointsStatus>()), Times.Exactly(2));
         }
 
 
@@ -216,7 +217,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             _control!.Calculate(CancellationToken.None);
 
             Assert.AreEqual(SystemState.Faulted, _control!.State);
-            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>(), It.IsAny<SetpointsStatus>()), Times.Never);
         }
 
 
@@ -227,7 +228,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
         public void SystemOperatingModeControlCalculatePublisherThrowsKeepsRunningTest()
         {
             _stack!.Add(CreateBaseActiveMode("ActivePowerMode", 5000000), 1);
-            _setpointsPublisher!.Setup(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>())).Throws(new InvalidOperationException("Broker not reachable."));
+            _setpointsPublisher!.Setup(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>(), It.IsAny<SetpointsStatus>())).Throws(new InvalidOperationException("Broker not reachable."));
 
             CalculateSettled();
 
@@ -861,7 +862,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
                 _control.Calculate(CancellationToken.None);
             }
 
-            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Exactly(expectedPublishes));
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>(), It.IsAny<SetpointsStatus>()), Times.Exactly(expectedPublishes));
         }
 
 
@@ -890,7 +891,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             Assert.AreEqual("Lost dependencies: PowerControl", _control!.HoldReason);
             Assert.AreEqual(1000000, _control!.SetpointActivePowerActual.Watts);
             Assert.AreEqual(calculationsBefore, calculations);
-            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>()), Times.Never);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.IsAny<ActivePower>(), It.IsAny<ReactivePower>(), It.IsAny<SetpointsStatus>()), Times.Never);
         }
 
 
@@ -914,7 +915,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             Assert.IsNull(_control!.HoldReason);
             Assert.AreEqual(TransitionKind.InitialActivation, _control!.ActivePowerTransition.Kind);
             transitionRamp.Verify(controller => controller.Start(-5000000, 0), Times.Once);
-            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 0), It.IsAny<ReactivePower>()), Times.Once);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 0), It.IsAny<ReactivePower>(), It.IsAny<SetpointsStatus>()), Times.Once);
         }
 
 
@@ -955,7 +956,7 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             Assert.AreEqual(-4000000, _control!.ActivePowerTransition.Offset);
             transitionRamp.Verify(controller => controller.Stop(), Times.AtLeastOnce);
             transitionRamp.Verify(controller => controller.Start(-4000000, 0), Times.Once);
-            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 3000000), It.IsAny<ReactivePower>()), Times.Once);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 3000000), It.IsAny<ReactivePower>(), It.IsAny<SetpointsStatus>()), Times.Once);
         }
 
 
@@ -1006,6 +1007,148 @@ namespace paskalON.OperatingModes.Domain.UnitTest.Systems
             Assert.AreEqual(3000000, _control!.ActivePowerObjective.Watts);
             Assert.AreEqual(2000000, _control!.SetpointActivePowerActual.Watts);
             Assert.AreEqual(-1000000, _control!.ActivePowerTransition.Offset);
+        }
+
+
+        /// <summary>
+        /// Confirms no limit reason is reported while the applied setpoints follow the supervisory setpoints.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateLimitReasonNoneTest()
+        {
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", null), 1);
+            _control!.UpdateSetpoints(new ActivePower(1000000), new ReactivePower(0));
+
+            CalculateSettled();
+
+            Assert.AreEqual(1000000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(PowerLimitReason.None, _control!.ActivePowerLimitReason);
+            Assert.AreEqual(PowerLimitReason.None, _control!.ReactivePowerLimitReason);
+        }
+
+
+        /// <summary>
+        /// Confirms a supervisory setpoint without an operating mode controlling the power axis reports no operating mode.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateLimitReasonNoOperatingModeTest()
+        {
+            _control!.UpdateSetpoints(new ActivePower(1000000), new ReactivePower(500000));
+
+            CalculateSettled();
+
+            Assert.AreEqual(0, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(PowerLimitReason.NoOperatingMode, _control!.ActivePowerLimitReason);
+            Assert.AreEqual(PowerLimitReason.NoOperatingMode, _control!.ReactivePowerLimitReason);
+        }
+
+
+        /// <summary>
+        /// Confirms an empty battery reports the available power as reason of a discharge setpoint, publishes it with the
+        /// supervisory setpoint and reports no reason anymore for a charge setpoint.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateLimitReasonAvailablePowerTest()
+        {
+            PowerRange<ActivePower> empty = new PowerRange<ActivePower>(new ActivePower(-3000000), new ActivePower(0));
+            TestBaseActiveMode battery = new TestBaseActiveMode("ActivePowerMode", rampController: CreateModeRamp(null));
+            battery.CalculateAction = signals =>
+            {
+                signals.BaseActivePower = battery.ActiveControl!.Calculate(signals.SetpointActivePower, empty);
+
+                return signals;
+            };
+            _stack!.Add(battery, 1);
+            _control!.UpdateSetpoints(new ActivePower(1000000), new ReactivePower(0));
+
+            CalculateSettled();
+            PowerLimitReason dischargeReason = _control!.ActivePowerLimitReason;
+            _control!.UpdateSetpoints(new ActivePower(-1000000), new ReactivePower(0));
+            CalculateSettled();
+
+            Assert.AreEqual(PowerLimitReason.AvailablePower, dischargeReason);
+            Assert.AreEqual(-1000000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(PowerLimitReason.None, _control!.ActivePowerLimitReason);
+            _setpointsPublisher!.Verify(publisher => publisher.Publish(It.Is<ActivePower>(power => power.Watts == 0), It.IsAny<ReactivePower>(),
+                It.Is<SetpointsStatus>(status => status.ActivePowerLimitReason == PowerLimitReason.AvailablePower && status.SupervisoryActivePower.Watts == 1000000)),
+                Times.AtLeastOnce);
+        }
+
+
+        /// <summary>
+        /// Confirms a limiting operating mode is reported as reason.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateLimitReasonLimitingModeTest()
+        {
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", null), 1);
+            _stack!.Add(CreateLimitingActiveMode("ActivePowerLimitMode", 3000000), 2);
+            _control!.UpdateSetpoints(new ActivePower(5000000), new ReactivePower(0));
+
+            CalculateSettled();
+
+            Assert.AreEqual(3000000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(PowerLimitReason.LimitingMode, _control!.ActivePowerLimitReason);
+        }
+
+
+        /// <summary>
+        /// Confirms an operating mode that calculates another power by design (here an additive delta) is reported as such.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateLimitReasonOperatingModeTest()
+        {
+            // The additive mode calculates its delta with its power control like a real operating mode
+            TestAdditiveActiveMode droop = new TestAdditiveActiveMode("FrequencyDroopMode", CreateModeRamp(null));
+            droop.CalculateAction = signals =>
+            {
+                signals.AdditiveActivePowerDelta += droop.ActiveControl!.Calculate(new ActivePower(200000), new ActivePower(8000000));
+
+                return signals;
+            };
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", null), 1);
+            _stack!.Add(droop, 2);
+            _control!.UpdateSetpoints(new ActivePower(1000000), new ReactivePower(0));
+
+            CalculateSettled();
+
+            Assert.AreEqual(1200000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(PowerLimitReason.OperatingMode, _control!.ActivePowerLimitReason);
+        }
+
+
+        /// <summary>
+        /// Confirms the configured limits of an operating mode are reported as reason.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateLimitReasonConfigurationLimitTest()
+        {
+            // The mode aims for 12 MW, its limits are the 10 MW nameplate
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", 12000000, available: () => new ActivePower(20000000)), 1);
+
+            CalculateSettled();
+
+            Assert.AreEqual(10000000, _control!.SetpointActivePowerActual.Watts);
+            Assert.AreEqual(PowerLimitReason.ConfigurationLimit, _control!.ActivePowerLimitReason);
+        }
+
+
+        /// <summary>
+        /// Confirms a plant-wide override is reported as reason while it forces the applied setpoint.
+        /// </summary>
+        [TestMethod]
+        public void SystemOperatingModeControlCalculateLimitReasonOverrideTest()
+        {
+            _stack!.Add(CreateBaseActiveMode("ActivePowerMode", null), 1);
+            _control!.UpdateSetpoints(new ActivePower(1000000), new ReactivePower(0));
+            TestOverrideMode shutdown = new TestOverrideMode("ShutdownMode", null, rampController: CreateModeRamp(null));
+            shutdown.CalculateAction = signals => { shutdown.ActiveControl!.Calculate(new ActivePower(0), new ActivePower(8000000)); return signals; };
+            CalculateSettled();
+            _overrides!.Add(shutdown);
+
+            _control!.Calculate(CancellationToken.None);
+
+            Assert.AreEqual(PowerLimitReason.Override, _control!.ActivePowerLimitReason);
         }
 
 
