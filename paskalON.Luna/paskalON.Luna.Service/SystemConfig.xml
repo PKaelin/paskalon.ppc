@@ -7,6 +7,7 @@
     <!-- Dependency heartbeat subscriber topics -->
     <SubscriberTopicPowerControlHeartbeat>ppc:pc:heartbeat</SubscriberTopicPowerControlHeartbeat>
     <SubscriberTopicOperatingModeHeartbeat>ppc:om:heartbeat</SubscriberTopicOperatingModeHeartbeat>
+    <SubscriberTopicAlarmServiceHeartbeat>ppc:alarms:heartbeat</SubscriberTopicAlarmServiceHeartbeat>
     <!-- Alarm service RabbitMQ exchange of the alarm actions -->
     <SubscriberExchangeAlarmActions>ppc:alarms:actions</SubscriberExchangeAlarmActions>
     <!-- Devices subscriber topics -->
@@ -36,4 +37,5 @@
     <DeviceServiceLossTimeoutMilliseconds>3000</DeviceServiceLossTimeoutMilliseconds>
     <PowerControlLossTimeoutMilliseconds>3000</PowerControlLossTimeoutMilliseconds>
     <OperatingModeLossTimeoutMilliseconds>3000</OperatingModeLossTimeoutMilliseconds>
+    <AlarmServiceLossTimeoutMilliseconds>3000</AlarmServiceLossTimeoutMilliseconds>
 </SystemConfig>

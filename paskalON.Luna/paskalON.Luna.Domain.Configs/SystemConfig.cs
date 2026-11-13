@@ -50,6 +50,12 @@ namespace paskalON.Luna.Domain.Configs
 
 
         /// <summary>
+        /// Subscriber topic for the alarm service heartbeat used to monitor the alarm service.
+        /// </summary>
+        public string? SubscriberTopicAlarmServiceHeartbeat { get; set; }
+
+
+        /// <summary>
         /// RabbitMQ topic exchange of the alarm actions of the alarm service (e.g. ppc:alarms:actions).
         /// Every Luna instance subscribes with its own queue.
         /// </summary>
@@ -216,6 +222,19 @@ namespace paskalON.Luna.Domain.Configs
         /// Must be a multiple of the operating mode heartbeat interval.
         /// </remarks>
         public int OperatingModeLossTimeoutMilliseconds
+        {
+            get;
+            set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyLossTimeoutMilliseconds); field = value; }
+        } = 3000;
+
+
+        /// <summary>
+        /// The time, in milliseconds, without an alarm service heartbeat after which the alarm service is lost.
+        /// </summary>
+        /// <remarks>
+        /// Must be a multiple of the alarm service heartbeat interval.
+        /// </remarks>
+        public int AlarmServiceLossTimeoutMilliseconds
         {
             get;
             set { ArgumentOutOfRangeException.ThrowIfLessThan(value, MinimumDependencyLossTimeoutMilliseconds); field = value; }

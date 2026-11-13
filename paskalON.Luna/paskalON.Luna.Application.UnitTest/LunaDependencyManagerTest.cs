@@ -22,6 +22,7 @@ namespace paskalON.Luna.Application.UnitTest
         [DataRow(DependencyNames.PowerControl)]
         [DataRow(DependencyNames.OperatingMode)]
         [DataRow(DependencyNames.DeviceService)]
+        [DataRow(DependencyNames.AlarmService)]
         [DataRow(DependencyNames.Redis)]
         public void GetDependencyStatusReportsOnlyLostDependencyAsUnavailableTest(string lostDependency)
         {
@@ -32,7 +33,7 @@ namespace paskalON.Luna.Application.UnitTest
 
             IReadOnlyList<DependencyStatusDto> statuses = manager.GetDependencyStatus();
 
-            Assert.HasCount(4, statuses);
+            Assert.HasCount(5, statuses);
 
             foreach (DependencyStatusDto status in statuses)
             {

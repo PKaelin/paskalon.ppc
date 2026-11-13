@@ -31,5 +31,11 @@ namespace paskalON.Luna.Application.Dependencies
         /// The device service, lost without device core data.
         /// </summary>
         public const string DeviceService = "DeviceService";
+
+
+        /// <summary>
+        /// The alarm service, lost without heartbeats.
+        /// </summary>
+        public const string AlarmService = "AlarmService";
     }
 }

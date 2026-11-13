@@ -21,6 +21,7 @@ namespace paskalON.Luna.Application
             DependencyNames.PowerControl,
             DependencyNames.OperatingMode,
             DependencyNames.DeviceService,
+            DependencyNames.AlarmService,
             DependencyNames.Redis
         ];
 

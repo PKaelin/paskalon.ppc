@@ -19,6 +19,7 @@ const dependencies: DependencyLed[] = [
     { name: 'OperatingMode', label: 'OM', title: 'Operating Mode' },
     { name: 'PowerControl', label: 'PC', title: 'Power Control' },
     { name: 'DeviceService', label: 'DS', title: 'Device Service' },
+    { name: 'AlarmService', label: 'AL', title: 'Alarm Service' },
     { name: 'Redis', label: 'RE', title: 'Redis' }
 ];
 

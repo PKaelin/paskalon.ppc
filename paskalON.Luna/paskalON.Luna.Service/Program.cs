@@ -224,8 +224,10 @@ try
     dependencyHealthMonitor.RegisterSignal(DependencyNames.DeviceService, TimeSpan.FromMilliseconds(config.DeviceServiceLossTimeoutMilliseconds));
     dependencyHealthMonitor.RegisterSignal(DependencyNames.PowerControl, TimeSpan.FromMilliseconds(config.PowerControlLossTimeoutMilliseconds));
     dependencyHealthMonitor.RegisterSignal(DependencyNames.OperatingMode, TimeSpan.FromMilliseconds(config.OperatingModeLossTimeoutMilliseconds));
+    dependencyHealthMonitor.RegisterSignal(DependencyNames.AlarmService, TimeSpan.FromMilliseconds(config.AlarmServiceLossTimeoutMilliseconds));
     SubscribeHeartbeat(app, dependencyHealthMonitor, config.SubscriberTopicPowerControlHeartbeat, DependencyNames.PowerControl);
     SubscribeHeartbeat(app, dependencyHealthMonitor, config.SubscriberTopicOperatingModeHeartbeat, DependencyNames.OperatingMode);
+    SubscribeHeartbeat(app, dependencyHealthMonitor, config.SubscriberTopicAlarmServiceHeartbeat, DependencyNames.AlarmService);
 
     // Initialize the device client with the subscriber topics of the system configuration, retry while the device service is not reachable. Received device data signals the device service.
     SubscriberTopic topics = GetSubscriberTopic(config);
@@ -303,7 +305,8 @@ static TimeSpan GetDependencyStatusInterval(SystemConfig config)
         config.RedisLossTimeoutMilliseconds,
         config.DeviceServiceLossTimeoutMilliseconds,
         config.PowerControlLossTimeoutMilliseconds,
-        config.OperatingModeLossTimeoutMilliseconds
+        config.OperatingModeLossTimeoutMilliseconds,
+        config.AlarmServiceLossTimeoutMilliseconds
     };
 
     return TimeSpan.FromMilliseconds(lossTimeoutsMilliseconds.Min());
