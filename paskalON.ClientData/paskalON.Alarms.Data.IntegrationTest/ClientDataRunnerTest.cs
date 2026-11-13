@@ -181,7 +181,7 @@ namespace paskalON.Alarms.Data.IntegrationTest
 
 
         /// <summary>
-        /// The configuration and the system configuration with the alarm action exchange, intervals and subscriber topics are imported.
+        /// The configuration and the system configuration with the alarm action exchange, heartbeat, intervals and subscriber topics are imported.
         /// </summary>
         [TestMethod]
         public async Task RunAsyncImportsSystemConfigTest()
@@ -197,6 +197,8 @@ namespace paskalON.Alarms.Data.IntegrationTest
             Assert.AreEqual("60", configuration.Value);
             SystemConfig systemConfig = await context.SystemConfigs.SingleAsync();
             Assert.AreEqual("ppc:alarms:actions", systemConfig.PublisherExchangeAlarmActions);
+            Assert.AreEqual("ppc:alarms:heartbeat", systemConfig.PublisherTopicHeartbeat);
+            Assert.AreEqual(500, systemConfig.DependencyHeartbeatIntervalMilliseconds);
             Assert.AreEqual(1000, systemConfig.AlarmActionSendIntervalMilliseconds);
             Assert.AreEqual(5000, systemConfig.AlarmActionRetryIntervalMilliseconds);
             Assert.AreEqual(500, systemConfig.AlarmDelayCheckIntervalMilliseconds);
