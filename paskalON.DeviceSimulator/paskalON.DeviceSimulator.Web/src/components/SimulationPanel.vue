@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue';
 import BitmaskEditor from './BitmaskEditor.vue';
 import CollapseTransition from './CollapseTransition.vue';
 import { SimulationDeviceType, type SimulationDeviceTypeValue, type SimulationDto } from '@/types/der';
-import { setCommunication, setEvents, slowDownPower } from '@/api/derApi';
+import { setChargeSpeed, setCommunication, setEvents, setStateOfCharge, slowDownPower } from '@/api/derApi';
 import { useNotifications } from '@/composables/useNotifications';
 
 /**
@@ -11,6 +11,7 @@ import { useNotifications } from '@/composables/useNotifications';
  *   - warning / fault / vendor event bitmask injection (PCS, battery bank)
  *   - communication loss (the Modbus server stops answering / the C37 server stops streaming)
  *   - PCS only: slow down the power response
+ *   - battery bank only: set the preferred state of charge and the charge speed (1x real time .. 100x)
  *
  * Successful changes are written into the simulation DTO right away, the next refresh /
  * live update confirms them.
@@ -53,9 +54,25 @@ const stateBadge = computed(() => {
 const isOpen = ref(false);
 const panelId = computed(() => `simulation-${props.deviceType}-${props.deviceId}`);
 
+const isBatteryBank = computed(() => props.deviceType === SimulationDeviceType.BatteryBank);
+
 const hasStateOfCharge = computed(
     () => props.simulation.usableStateOfCharge !== null && props.simulation.usableStateOfCharge !== undefined
 );
+
+/** State of charge with 2 decimals, missing values as '–'. */
+function formatStateOfCharge(value: number | null | undefined): string {
+    return value === null || value === undefined ? '–' : value.toFixed(2);
+}
+
+const MIN_CHARGE_SPEED = 1;
+const MAX_CHARGE_SPEED = 100;
+
+/** Preferred SOC entered by the user, prefilled with the current value (not overwritten by live updates while typing). */
+const preferredSoc = ref<number>(Math.round(props.simulation.preferredStateOfCharge ?? 100));
+const chargeSpeed = ref<number>(props.simulation.chargeSpeedFactor ?? MIN_CHARGE_SPEED);
+
+const isAccelerated = computed(() => (props.simulation.chargeSpeedFactor ?? MIN_CHARGE_SPEED) > MIN_CHARGE_SPEED);
 
 function toHex(value: number): string {
     return value.toString(16).toUpperCase().padStart(4, '0');
@@ -89,6 +106,15 @@ watch(
         if (!busy.value) {
             slowActive.value = active ?? 0;
             slowReactive.value = reactive ?? 0;
+        }
+    }
+);
+
+watch(
+    () => props.simulation.chargeSpeedFactor,
+    (factor) => {
+        if (!busy.value) {
+            chargeSpeed.value = factor ?? MIN_CHARGE_SPEED;
         }
     }
 );
@@ -180,6 +206,41 @@ async function applySlowDown(): Promise<void> {
         props.simulation.slowReactivePowerByPercent = reactive;
     }
 }
+
+async function applyStateOfCharge(): Promise<void> {
+    const value = Number(preferredSoc.value);
+
+    if (!Number.isFinite(value) || value < 0 || value > 100) {
+        notify('Preferred SOC must be between 0 and 100 %.', 'danger', 8000);
+        return;
+    }
+
+    const applied = await run(
+        () => setStateOfCharge({ deviceId: props.deviceId, preferredStateOfCharge: value }),
+        `${props.deviceName} / Preferred SOC set to ${value} %.`
+    );
+
+    if (applied) {
+        props.simulation.preferredStateOfCharge = value;
+    }
+}
+
+async function applyChargeSpeed(): Promise<void> {
+    const factor = Math.min(MAX_CHARGE_SPEED, Math.max(MIN_CHARGE_SPEED, Math.round(Number(chargeSpeed.value) || MIN_CHARGE_SPEED)));
+
+    const applied = await run(
+        () => setChargeSpeed({ deviceId: props.deviceId, chargeSpeedFactor: factor }),
+        factor === MIN_CHARGE_SPEED
+            ? `${props.deviceName} charges and discharges in real time again.`
+            : `${props.deviceName} charges and discharges ${factor}x faster (1 s = ${factor} s).`
+    );
+
+    if (applied) {
+        props.simulation.chargeSpeedFactor = factor;
+    } else {
+        chargeSpeed.value = props.simulation.chargeSpeedFactor ?? MIN_CHARGE_SPEED;
+    }
+}
 </script>
 
 <template>
@@ -196,8 +257,9 @@ async function applySlowDown(): Promise<void> {
             <span v-for="active in activeEvents" :key="active.label" class="badge" :class="active.css">
                 {{ active.label }} 0x{{ active.hex }}
             </span>
+            <span v-if="isAccelerated" class="badge bg-warning text-dark">Charge speed ×{{ simulation.chargeSpeedFactor }}</span>
             <span v-if="hasStateOfCharge" class="simulation-soc font-monospace">
-                SOC {{ simulation.usableStateOfCharge!.toFixed(2) }} %
+                Preferred SOC {{ formatStateOfCharge(simulation.preferredStateOfCharge) }} %
             </span>
         </button>
 
@@ -205,7 +267,10 @@ async function applySlowDown(): Promise<void> {
             <div v-show="isOpen" :id="panelId" class="simulation-body">
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
                     <span v-if="hasStateOfCharge">
-                        Usable SOC <span class="font-monospace">{{ simulation.usableStateOfCharge!.toFixed(2) }} %</span>
+                        Preferred SOC <span class="font-monospace">{{ formatStateOfCharge(simulation.preferredStateOfCharge) }} %</span>
+                    </span>
+                    <span v-if="hasStateOfCharge">
+                        Usable SOC <span class="font-monospace">{{ formatStateOfCharge(simulation.usableStateOfCharge) }} %</span>
                     </span>
 
                     <div class="form-check form-switch mb-0">
@@ -290,6 +355,51 @@ async function applySlowDown(): Promise<void> {
                         each in percent of its nameplate per second (e.g. 10 = 10% of the nameplate per second). 0 = instant (ideal PCS).
                     </div>
                 </div>
+
+                <div v-if="isBatteryBank && hasStateOfCharge" class="battery-settings ramp-settings">
+                    <div>
+                        <div class="ramp-caption">State of charge</div>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <div class="input-group input-group-sm ramp-input">
+                                <span class="input-group-text">Preferred SOC</span>
+                                <input v-model.number="preferredSoc"
+                                       class="form-control font-monospace"
+                                       type="number"
+                                       min="0"
+                                       max="100"
+                                       step="any"
+                                       :disabled="busy"
+                                       aria-label="Preferred state of charge in percent"
+                                       @keyup.enter="applyStateOfCharge" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <button class="btn btn-sm btn-primary" type="button" :disabled="busy" @click="applyStateOfCharge">Set</button>
+                        </div>
+                        <div class="simulation-hint mt-1">
+                            Sets the state of charge in the preferred (operator) window, 0–100 %. The value is limited to the usable window.
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="ramp-caption">Charge speed</div>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <input v-model.number="chargeSpeed"
+                                   class="form-range charge-speed-range"
+                                   type="range"
+                                   :min="MIN_CHARGE_SPEED"
+                                   :max="MAX_CHARGE_SPEED"
+                                   step="1"
+                                   :disabled="busy"
+                                   aria-label="Charge speed factor, 1 is real time, 100 means one second charges or discharges like 100 seconds"
+                                   @change="applyChargeSpeed" />
+                            <span class="font-monospace">×{{ chargeSpeed }}</span>
+                        </div>
+                        <div class="simulation-hint mt-1">
+                            1 = real time. 100 = one second charges or discharges like 100 seconds. Overrides the physical definition
+                            for the state of charge only; the active power stays as allocated by the PCS.
+                        </div>
+                    </div>
+                </div>
             </div>
         </CollapseTransition>
     </div>
@@ -357,6 +467,18 @@ async function applySlowDown(): Promise<void> {
 
 .ramp-input input {
     max-width: 5rem;
+}
+
+/* State of charge and charge speed side by side, stacked when the panel is narrow. */
+.battery-settings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: .5rem 1.5rem;
+}
+
+.charge-speed-range {
+    width: 16.5rem;
+    max-width: 100%;
 }
 
 .simulation-panel :deep(.input-group-sm > .form-control),

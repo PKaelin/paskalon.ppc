@@ -119,5 +119,59 @@ namespace paskalON.DeviceSimulator.Service.WebApi.Controllers.V1
 
             return Ok();
         }
+
+
+        /// <summary>
+        /// Sets the preferred state of charge of a simulated battery bank.
+        /// </summary>
+        /// <param name="request">The state of charge request.</param>
+        /// <returns>Ok, NotFound when the battery bank does not exist or BadRequest for values outside 0..100%.</returns>
+        [HttpPost]
+        public IActionResult SetStateOfCharge(SetStateOfChargeRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            try
+            {
+                _deviceManager.SetStateOfCharge(request.DeviceId, request.PreferredStateOfCharge);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok();
+        }
+
+
+        /// <summary>
+        /// Sets how much faster a simulated battery bank charges and discharges than its physical definition.
+        /// </summary>
+        /// <param name="request">The charge speed request.</param>
+        /// <returns>Ok, NotFound when the battery bank does not exist or BadRequest for factors outside 1..100.</returns>
+        [HttpPost]
+        public IActionResult SetChargeSpeed(SetChargeSpeedRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            try
+            {
+                _deviceManager.SetChargeSpeed(request.DeviceId, request.ChargeSpeedFactor);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok();
+        }
     }
 }

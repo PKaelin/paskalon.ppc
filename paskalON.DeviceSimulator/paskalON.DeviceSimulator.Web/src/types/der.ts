@@ -72,6 +72,10 @@ export interface SimulationDto {
     slowReactivePowerByPercent?: number | null;
     /** Battery bank only. */
     usableStateOfCharge?: number | null;
+    /** Battery bank only: preferred (operator window) state of charge, can be below 0 % or above 100 %. */
+    preferredStateOfCharge?: number | null;
+    /** Battery bank only: 1 = real time, 100 = one real second charges or discharges like 100 seconds. */
+    chargeSpeedFactor?: number | null;
 }
 
 export interface PcsDto extends IDevice {

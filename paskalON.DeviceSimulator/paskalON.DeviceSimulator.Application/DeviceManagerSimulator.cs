@@ -272,6 +272,40 @@ namespace paskalON.DeviceSimulator.Application
         }
 
 
+        /// <inheritdoc/>
+        public void SetStateOfCharge(int deviceId, double preferredStateOfCharge)
+        {
+            BatteryBankSimulationBase device = FindBatteryBank(deviceId);
+
+            device.SetPreferredStateOfCharge(preferredStateOfCharge);
+            _logger.LogInformation("State of charge of battery bank {DeviceId} set to {PreferredStateOfCharge}% preferred.",
+                deviceId, preferredStateOfCharge);
+        }
+
+
+        /// <inheritdoc/>
+        public void SetChargeSpeed(int deviceId, double chargeSpeedFactor)
+        {
+            BatteryBankSimulationBase device = FindBatteryBank(deviceId);
+
+            device.SetChargeSpeedFactor(chargeSpeedFactor);
+            _logger.LogInformation("Charge speed of battery bank {DeviceId} set to factor {ChargeSpeedFactor}.", deviceId, chargeSpeedFactor);
+        }
+
+
+        /// <summary>
+        /// Finds a simulated battery bank.
+        /// </summary>
+        /// <param name="deviceId">Device ID of the simulated battery bank.</param>
+        /// <returns>The simulated battery bank.</returns>
+        /// <exception cref="KeyNotFoundException">The simulated battery bank does not exist.</exception>
+        private BatteryBankSimulationBase FindBatteryBank(int deviceId)
+        {
+            return SimulationDevices.Find<BatteryBankSimulationBase>(deviceId)
+                ?? throw new KeyNotFoundException($"No simulated {SimulationDeviceType.BatteryBank} with device ID {deviceId} exists.");
+        }
+
+
         /// <summary>
         /// Starts or stops the Modbus server of a PCS or battery bank.
         /// </summary>

@@ -318,7 +318,9 @@ namespace paskalON.DeviceSimulator.Application
 
             return MapEvents(simulation, SimulationDeviceType.BatteryBank, simulation.State.ToString(), address, port) with
             {
-                UsableStateOfCharge = Math.Round(simulation.UsableStateOfCharge, 3)
+                UsableStateOfCharge = Math.Round(simulation.UsableStateOfCharge, 3),
+                PreferredStateOfCharge = Math.Round(simulation.PreferredStateOfCharge, 3),
+                ChargeSpeedFactor = simulation.ChargeSpeedFactor
             };
         }
 

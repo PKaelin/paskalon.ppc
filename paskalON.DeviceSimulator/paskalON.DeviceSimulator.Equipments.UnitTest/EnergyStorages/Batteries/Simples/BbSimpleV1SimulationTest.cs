@@ -217,6 +217,89 @@ namespace paskalON.DeviceSimulator.Equipments.UnitTest.EnergyStorages.Batteries.
         }
 
 
+        [TestMethod]
+        [DataRow(0d, 12.5d, DisplayName = "0% preferred = 20% absolute = 12.5% usable")]
+        [DataRow(50d, 50d, DisplayName = "50% preferred = 50% absolute = 50% usable")]
+        [DataRow(100d, 87.5d, DisplayName = "100% preferred = 80% absolute = 87.5% usable")]
+        public void SetPreferredStateOfChargeSetsUsableStateOfChargeTest(double preferred, double expectedUsable)
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(store, CreateSettings());
+
+            simulation.SetPreferredStateOfCharge(preferred);
+
+            Assert.AreEqual(expectedUsable, simulation.UsableStateOfCharge, 0.000001);
+            Assert.AreEqual(preferred, simulation.PreferredStateOfCharge, 0.000001);
+        }
+
+
+        [TestMethod]
+        public async Task SetPreferredStateOfChargeWritesRegisterOnNextTickTest()
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            BbSimpleV1Simulation simulation = await CreateConnectedAsync(store);
+
+            simulation.SetPreferredStateOfCharge(50);
+            await simulation.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+
+            Assert.AreEqual((ushort)5000, ReadRegister(store, BbSimpleV1Description.Register.TotalStateOfCharge));
+        }
+
+
+        [TestMethod]
+        [DataRow(-0.1d)]
+        [DataRow(100.1d)]
+        public void SetPreferredStateOfChargeOutOfRangeThrowsTest(double preferred)
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(store, CreateSettings());
+
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => simulation.SetPreferredStateOfCharge(preferred));
+        }
+
+
+        [TestMethod]
+        public void BbSimpleV1SimulationStartsWithRealTimeChargeSpeedTest()
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(store, CreateSettings());
+
+            Assert.AreEqual(BatteryBankSimulationBase.MinimumChargeSpeedFactor, simulation.ChargeSpeedFactor);
+            Assert.AreEqual(100, simulation.PreferredStateOfCharge, 0.000001);
+        }
+
+
+        [TestMethod]
+        [DataRow(1d, 87.375d, DisplayName = "Real time: 2MW * 9s / 4MWh = 0.125%")]
+        [DataRow(100d, 75d, DisplayName = "100 times faster: 2MW * 900s / 4MWh = 12.5%")]
+        public async Task TickAsyncChargeSpeedFactorAcceleratesStateOfChargeTest(double factor, double expectedUsable)
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            BbSimpleV1Simulation simulation = await CreateConnectedAsync(store);
+            simulation.SetChargeSpeedFactor(factor);
+            simulation.SetAllocatedActivePower(2000000);
+
+            await simulation.TickAsync(TimeSpan.FromSeconds(9), CancellationToken.None);
+
+            Assert.AreEqual(factor, simulation.ChargeSpeedFactor);
+            Assert.AreEqual(expectedUsable, simulation.UsableStateOfCharge, 0.000001);
+            Assert.AreEqual(2000000, simulation.ActivePower);
+        }
+
+
+        [TestMethod]
+        [DataRow(0.9d)]
+        [DataRow(100.1d)]
+        public void SetChargeSpeedFactorOutOfRangeThrowsTest(double factor)
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(store, CreateSettings());
+
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => simulation.SetChargeSpeedFactor(factor));
+        }
+
+
         /// <summary>
         /// 5MWh battery bank with a usable window of 10..90% (4MWh usable capacity) and 2.5MW charge and discharge rate.
         /// </summary>

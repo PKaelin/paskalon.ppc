@@ -91,5 +91,25 @@ namespace paskalON.DeviceSimulator.Application
         /// <param name="slowReactivePowerByPercent">Maximum reactive power change per second in percent of the nameplate. 0 means instant.</param>
         /// <exception cref="KeyNotFoundException">The simulated PCS does not exist.</exception>
         void SlowDownPower(int deviceId, double slowActivePowerByPercent, double slowReactivePowerByPercent);
+
+
+        /// <summary>
+        /// Sets the state of charge of a simulated battery bank.
+        /// </summary>
+        /// <param name="deviceId">Device ID of the simulated battery bank.</param>
+        /// <param name="preferredStateOfCharge">Preferred (operator window) state of charge in percent (0..100).</param>
+        /// <exception cref="KeyNotFoundException">The simulated battery bank does not exist.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The state of charge is outside 0..100%.</exception>
+        void SetStateOfCharge(int deviceId, double preferredStateOfCharge);
+
+
+        /// <summary>
+        /// Sets how much faster a simulated battery bank charges and discharges than its physical definition.
+        /// </summary>
+        /// <param name="deviceId">Device ID of the simulated battery bank.</param>
+        /// <param name="chargeSpeedFactor">Charge speed factor from 1 (real time) to 100 (one real second charges or discharges like 100 seconds).</param>
+        /// <exception cref="KeyNotFoundException">The simulated battery bank does not exist.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The factor is outside 1..100.</exception>
+        void SetChargeSpeed(int deviceId, double chargeSpeedFactor);
     }
 }

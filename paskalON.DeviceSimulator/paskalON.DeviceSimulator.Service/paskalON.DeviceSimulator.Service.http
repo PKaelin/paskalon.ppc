@@ -35,3 +35,25 @@ Content-Type: application/json
 
 
 ###
+
+POST {{paskalON.DeviceSimulator.Service_HostAddress}}/api/v1/simulation/setstateofcharge
+Content-Type: application/json
+
+{
+  "DeviceId": 1,
+  "PreferredStateOfCharge": 50
+}
+
+
+###
+
+POST {{paskalON.DeviceSimulator.Service_HostAddress}}/api/v1/simulation/setchargespeed
+Content-Type: application/json
+
+{
+  "DeviceId": 1,
+  "ChargeSpeedFactor": 100
+}
+
+
+###

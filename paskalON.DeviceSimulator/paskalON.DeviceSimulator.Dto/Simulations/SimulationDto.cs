@@ -79,5 +79,18 @@ namespace paskalON.DeviceSimulator.Dto.Simulations
         /// Battery bank only: usable state of charge in percent.
         /// </summary>
         public double? UsableStateOfCharge { get; init; }
+
+
+        /// <summary>
+        /// Battery bank only: preferred (operator window) state of charge in percent. Can be below 0% or above 100%.
+        /// </summary>
+        public double? PreferredStateOfCharge { get; init; }
+
+
+        /// <summary>
+        /// Battery bank only: factor by which the state of charge changes faster than the physical definition
+        /// (1 = real time, 100 = one real second charges or discharges like 100 seconds).
+        /// </summary>
+        public double? ChargeSpeedFactor { get; init; }
     }
 }

@@ -154,7 +154,36 @@ namespace paskalON.DeviceSimulator.Application.UnitTest
             Assert.AreEqual("paskalon.devicesimulator.service", requestedAddress);
             Assert.AreEqual(503, requestedPort);
             Assert.AreEqual(87.5, dto.UsableStateOfCharge);
+            Assert.AreEqual(100, dto.PreferredStateOfCharge);
+            Assert.AreEqual(BatteryBankSimulationBase.MinimumChargeSpeedFactor, dto.ChargeSpeedFactor);
             Assert.AreEqual((ushort)0, dto.Fault);
+            Assert.IsNull(dto.SlowActivePowerByPercent);
+        }
+
+
+        [TestMethod]
+        public void MapSimulationBatteryBankMapsPreferredStateOfChargeAndChargeSpeedTest()
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            BbSimpleV1Simulation bank = new BbSimpleV1Simulation(store, new BatteryBankSimulationSettings
+            {
+                DeviceId = 11,
+                Name = "BB 1.1",
+                NameplateCapacity = 5000000,
+                NameplateMaximumChargeRate = 2500000,
+                NameplateMaximumDischargeRate = 2500000,
+                MinimumDcVoltage = 1000,
+                MaximumDcVoltage = 1500
+            });
+            bank.SetPreferredStateOfCharge(50);
+            bank.SetChargeSpeedFactor(100);
+            DeviceMapperSimulator mapper = CreateMapper((address, port) => true);
+
+            SimulationDto dto = mapper.MapSimulation(bank, "paskalon.devicesimulator.service", 503);
+
+            Assert.AreEqual(50, dto.PreferredStateOfCharge);
+            Assert.AreEqual(50, dto.UsableStateOfCharge);
+            Assert.AreEqual(100, dto.ChargeSpeedFactor);
             Assert.IsNull(dto.SlowActivePowerByPercent);
         }
 

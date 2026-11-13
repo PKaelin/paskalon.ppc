@@ -231,6 +231,30 @@ export async function slowDownPower(request: SlowDownPowerRequest): Promise<void
     await postSimulation('slowdownpower', request, 'Slowing down the power');
 }
 
+/** Body of POST {apiBaseUrl}/v1/simulation/setstateofcharge. */
+export interface SetStateOfChargeRequest {
+    deviceId: number;
+    /** Preferred (operator window) state of charge in percent (0..100). */
+    preferredStateOfCharge: number;
+}
+
+/** Sets the preferred state of charge of a simulated battery bank. */
+export async function setStateOfCharge(request: SetStateOfChargeRequest): Promise<void> {
+    await postSimulation('setstateofcharge', request, 'Setting the state of charge');
+}
+
+/** Body of POST {apiBaseUrl}/v1/simulation/setchargespeed. */
+export interface SetChargeSpeedRequest {
+    deviceId: number;
+    /** 1 = real time, 100 = one real second charges or discharges like 100 seconds. */
+    chargeSpeedFactor: number;
+}
+
+/** Sets how much faster a simulated battery bank charges and discharges than its physical definition. */
+export async function setChargeSpeed(request: SetChargeSpeedRequest): Promise<void> {
+    await postSimulation('setchargespeed', request, 'Setting the charge speed');
+}
+
 /** Absolute URL of the SignalR hub (resolves a relative path against the current origin). */
 export function hubUrl(): string {
     const configured = config().signalRHubUrl;

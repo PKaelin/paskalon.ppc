@@ -20,6 +20,18 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
     public abstract class BatteryBankSimulationBase : ISimulatedDevice, IEventInjectable
     {
         /// <summary>
+        /// Minimum charge speed factor (1 = real time).
+        /// </summary>
+        public const double MinimumChargeSpeedFactor = 1;
+
+
+        /// <summary>
+        /// Maximum charge speed factor (100 = 100 times faster than minimum charge speed so 100 seconds).
+        /// </summary>
+        public const double MaximumChargeSpeedFactor = 100;
+
+
+        /// <summary>
         /// Random walker for the state of health.
         /// </summary>
         private readonly RandomWalker<double> _sohWalker = new RandomWalker<double>(80, 0.1, 60, 90, 5);
@@ -106,6 +118,30 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
                     Settings.UsableMaximumStateOfCharge, Settings.AbsoluteMaximumStateOfCharge) ?? 0;
             }
         }
+
+
+        /// <summary>
+        /// Preferred (operator window) state of charge in percent. Can be below 0% or above 100% outside the preferred window.
+        /// </summary>
+        public double PreferredStateOfCharge
+        {
+            get
+            {
+                return StateOfChargeCalculator.GetPreferredStateOfChargeFromAbsolute(AbsoluteStateOfCharge, Settings.PreferredMinimumStateOfCharge,
+                    Settings.PreferredMaximumStateOfCharge, Settings.AbsoluteMaximumStateOfCharge) ?? 0;
+            }
+        }
+
+
+        /// <summary>
+        /// Factor by which the state of charge changes faster than the physical definition (1 = real time,
+        /// 100 = one real second charges or discharges like 100 seconds).
+        /// </summary>
+        public double ChargeSpeedFactor
+        {
+            get { lock (_dataLock) { return field; } }
+            private set { lock (_dataLock) { field = value; } }
+        } = MinimumChargeSpeedFactor;
 
 
         /// <summary>
@@ -251,6 +287,46 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
         }
 
 
+        /// <summary>
+        /// Sets the state of charge to a preferred (operator window) state of charge.
+        /// </summary>
+        /// <param name="preferredStateOfCharge">Preferred state of charge in percent (0..100).</param>
+        /// <remarks>
+        /// The value is converted to the usable state of charge and clamped to the usable window.
+        /// </remarks>
+        public void SetPreferredStateOfCharge(double preferredStateOfCharge)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(preferredStateOfCharge, 0);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(preferredStateOfCharge, 100);
+
+            double absoluteStateOfCharge = StateOfChargeCalculator.GetAbsoluteStateOfChargeFromPreferred(preferredStateOfCharge,
+                Settings.PreferredMinimumStateOfCharge, Settings.PreferredMaximumStateOfCharge, Settings.AbsoluteMaximumStateOfCharge);
+            double usableStateOfCharge = StateOfChargeCalculator.GetUsableStateOfChargeFromAbsolute(absoluteStateOfCharge,
+                Settings.UsableMinimumStateOfCharge, Settings.UsableMaximumStateOfCharge, Settings.AbsoluteMaximumStateOfCharge);
+
+            UsableStateOfCharge = Math.Clamp(usableStateOfCharge, 0, 100);
+        }
+
+
+        /// <summary>
+        /// Sets how much faster the state of charge changes than the physical definition.
+        /// </summary>
+        /// <param name="chargeSpeedFactor">
+        /// Charge speed factor from <see cref="MinimumChargeSpeedFactor"/> (1 = real time) to <see cref="MaximumChargeSpeedFactor"/>
+        /// (100 = one real second charges or discharges like 100 seconds).
+        /// </param>
+        /// <remarks>
+        /// Only the state of charge integration is accelerated. The active power and the pre-charge delay stay real time.
+        /// </remarks>
+        public void SetChargeSpeedFactor(double chargeSpeedFactor)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(chargeSpeedFactor, MinimumChargeSpeedFactor);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(chargeSpeedFactor, MaximumChargeSpeedFactor);
+
+            ChargeSpeedFactor = chargeSpeedFactor;
+        }
+
+
         /// <inheritdoc/>
         public void SetEvents(ushort? warning, ushort? fault, ushort? vendorEvent)
         {
@@ -333,6 +409,7 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
         /// ActivePower in watts, elapsed.TotalHours in hours, UsableCapacity in watt-hours.
         /// E.g. NameplateCapacity=5MWh / Absolute=0..100% / Usable=10..90% => UsableCapacity=5MWh*0.8=4MWh.
         /// Discharging with 4MW for 30 minutes reduces the usable state of charge by 50%.
+        /// The elapsed time is multiplied by the <see cref="ChargeSpeedFactor"/>.
         /// </remarks>
         private void IntegrateStateOfCharge(TimeSpan elapsed)
         {
@@ -341,7 +418,7 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
                 return;
             }
 
-            double socDelta = ActivePower * elapsed.TotalHours / UsableCapacity * 100;
+            double socDelta = ActivePower * elapsed.TotalHours * ChargeSpeedFactor / UsableCapacity * 100;
 
             UsableStateOfCharge = Math.Clamp(UsableStateOfCharge - socDelta, 0, 100);
         }
@@ -357,10 +434,7 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
                 case StateOfChargeType.Absolute:
                     return AbsoluteStateOfCharge;
                 case StateOfChargeType.Preferred:
-                    double preferred = StateOfChargeCalculator.GetPreferredStateOfChargeFromAbsolute(AbsoluteStateOfCharge, Settings.PreferredMinimumStateOfCharge,
-                        Settings.PreferredMaximumStateOfCharge, Settings.AbsoluteMaximumStateOfCharge) ?? 0;
-
-                    return Math.Clamp(preferred, 0, 100);
+                    return Math.Clamp(PreferredStateOfCharge, 0, 100);
                 default:
                     return UsableStateOfCharge;
             }
