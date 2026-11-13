@@ -35,11 +35,8 @@ start %dev% %ppc%\paskalON.ClientData\paskalON.ClientData.slnx
 timeout /t %wait%
 
 REM Open command prompt for Client Data and show
-start "Client Data" /D %ppc%\paskalON.ClientData cmd /k ImportClientData.bat
+start "Client Data" /D %ppc%\paskalON.ClientData cmd /T:1b /k ImportClientData.bat
 
 REM Launch Docker Desktop after a short delay
 timeout /t 45
 start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe"
-
-
-pause
