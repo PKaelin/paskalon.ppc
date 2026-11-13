@@ -3,7 +3,6 @@
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
 using paskalON.Alarms.Application.Values;
-using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.OperatingModes.Dto.Powers;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -179,7 +178,7 @@ namespace paskalON.Alarms.Application.UnitTest.Values
             return new PcsCoreDto
             {
                 DeviceId = 7,
-                State = PcsState.Fault,
+                State = PcsStateDto.Fault,
                 CommunicationError = true,
                 ActivePowerTarget = new ActivePower(1000000),
                 ActivePower = new ActivePower(998500),

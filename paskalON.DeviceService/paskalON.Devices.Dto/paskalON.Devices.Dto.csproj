@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\paskalON.Devices.Domain\paskalON.Devices.Domain.csproj" />
+    <ProjectReference Include="..\..\paskalON.Common\paskalON.PhysicalUnits\paskalON.PhysicalUnits.csproj" />
   </ItemGroup>
 
 </Project>

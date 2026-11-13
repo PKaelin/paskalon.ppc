@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
-    <ProjectReference Include="..\paskalON.OperatingModes.Domain\paskalON.OperatingModes.Domain.csproj" />
   </ItemGroup>
 
 </Project>

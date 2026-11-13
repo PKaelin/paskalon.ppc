@@ -2,8 +2,6 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Devices.Domain.EnergyStorages.Batteries;
-using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.PowerConversionSystems;
@@ -143,10 +141,10 @@ namespace paskalON.Devices.Dto.UnitTest.Ders
         /// </summary>
         /// <param name="state">The state of the PCS core, null for a PCS without core data.</param>
         [TestMethod]
-        [DataRow(PcsState.Started)]
-        [DataRow(PcsState.Standby)]
+        [DataRow(PcsStateDto.Started)]
+        [DataRow(PcsStateDto.Standby)]
         [DataRow(null)]
-        public void PcsStateIsTakenFromPcsCoreTest(PcsState? state)
+        public void PcsStateIsTakenFromPcsCoreTest(PcsStateDto? state)
         {
             PcsDto pcs = CreatePcs(1);
 
@@ -157,7 +155,7 @@ namespace paskalON.Devices.Dto.UnitTest.Ders
 
             DerBatteryStorageUnitDto unit = CreateUnit(pcs, new List<BbDto>());
 
-            PcsState? pcsState = unit.PcsState;
+            PcsStateDto? pcsState = unit.PcsState;
 
             Assert.AreEqual(state, pcsState);
         }
@@ -170,15 +168,15 @@ namespace paskalON.Devices.Dto.UnitTest.Ders
         /// <param name="expected">The expected combined state.</param>
         [TestMethod]
         [DataRow(new object?[] { }, BatteryStorageUnitBatteryBankState.UnknownCombination)]
-        [DataRow(new object?[] { BatteryBankState.Standby }, BatteryStorageUnitBatteryBankState.Standby)]
-        [DataRow(new object?[] { BatteryBankState.Fault }, BatteryStorageUnitBatteryBankState.Fault)]
+        [DataRow(new object?[] { BatteryBankStateDto.Standby }, BatteryStorageUnitBatteryBankState.Standby)]
+        [DataRow(new object?[] { BatteryBankStateDto.Fault }, BatteryStorageUnitBatteryBankState.Fault)]
         [DataRow(new object?[] { null }, BatteryStorageUnitBatteryBankState.Unknown)]
-        [DataRow(new object?[] { BatteryBankState.Connected, BatteryBankState.Connected }, BatteryStorageUnitBatteryBankState.Connected)]
-        [DataRow(new object?[] { BatteryBankState.Connected, BatteryBankState.Fault }, BatteryStorageUnitBatteryBankState.PartiallyConnected)]
-        [DataRow(new object?[] { BatteryBankState.Connected, BatteryBankState.Connected, null }, BatteryStorageUnitBatteryBankState.PartiallyConnected)]
-        [DataRow(new object?[] { BatteryBankState.Disconnected, BatteryBankState.Disconnected }, BatteryStorageUnitBatteryBankState.Disconnected)]
-        [DataRow(new object?[] { BatteryBankState.Disconnected, BatteryBankState.Connecting }, BatteryStorageUnitBatteryBankState.UnknownCombination)]
-        [DataRow(new object?[] { BatteryBankState.Disconnected, null }, BatteryStorageUnitBatteryBankState.UnknownCombination)]
+        [DataRow(new object?[] { BatteryBankStateDto.Connected, BatteryBankStateDto.Connected }, BatteryStorageUnitBatteryBankState.Connected)]
+        [DataRow(new object?[] { BatteryBankStateDto.Connected, BatteryBankStateDto.Fault }, BatteryStorageUnitBatteryBankState.PartiallyConnected)]
+        [DataRow(new object?[] { BatteryBankStateDto.Connected, BatteryBankStateDto.Connected, null }, BatteryStorageUnitBatteryBankState.PartiallyConnected)]
+        [DataRow(new object?[] { BatteryBankStateDto.Disconnected, BatteryBankStateDto.Disconnected }, BatteryStorageUnitBatteryBankState.Disconnected)]
+        [DataRow(new object?[] { BatteryBankStateDto.Disconnected, BatteryBankStateDto.Connecting }, BatteryStorageUnitBatteryBankState.UnknownCombination)]
+        [DataRow(new object?[] { BatteryBankStateDto.Disconnected, null }, BatteryStorageUnitBatteryBankState.UnknownCombination)]
         public void BatteryBankStateCombinesBatteryBankStatesTest(object?[] states, BatteryStorageUnitBatteryBankState expected)
         {
             List<BbDto> batteryBanks = new List<BbDto>();
@@ -187,7 +185,7 @@ namespace paskalON.Devices.Dto.UnitTest.Ders
             {
                 BbDto batteryBank = CreateBatteryBank(index + 2);
 
-                if (states[index] is BatteryBankState state)
+                if (states[index] is BatteryBankStateDto state)
                 {
                     batteryBank.UpdateCore(new BbCoreDto { DeviceId = index + 2, State = state });
                 }
@@ -209,7 +207,7 @@ namespace paskalON.Devices.Dto.UnitTest.Ders
         [TestMethod]
         public void BatteryBankStateHasAllBatteryBankStatesTest()
         {
-            BatteryBankState[] states = Enum.GetValues<BatteryBankState>();
+            BatteryBankStateDto[] states = Enum.GetValues<BatteryBankStateDto>();
 
             List<string> mismatches = states
                 .Where(state => ((BatteryStorageUnitBatteryBankState)state).ToString() != state.ToString())

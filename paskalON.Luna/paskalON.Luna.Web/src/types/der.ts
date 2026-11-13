@@ -10,7 +10,7 @@ export interface DeviceDto {
     name: string;
 }
 
-/** PowerMeterState (paskalON.Devices.Domain), by its numeric value. */
+/** PowerMeterStateDto (paskalON.Devices.Dto), by its numeric value. */
 export const PowerMeterStateNames: Record<number, string> = {
     0: 'Unknown',
     1: 'Disconnected',
@@ -21,7 +21,7 @@ export const PowerMeterStateNames: Record<number, string> = {
 
 /** PmCoreBase, the frequently updated values of a power meter. Voltages in V, currents in A. */
 export interface PmCoreDto {
-    /** PowerMeterState - a number, or the name if the service serializes enums as strings. */
+    /** PowerMeterStateDto - a number, or the name if the service serializes enums as strings. */
     state: number | string;
     communicationError: boolean;
     activePower: ActivePowerDto | null;
@@ -65,7 +65,7 @@ export interface PowerMeterDto extends DeviceDto {
     detail: PmDetailDto | null;
 }
 
-/** PcsState (paskalON.Devices.Domain), by its numeric value. */
+/** PcsStateDto (paskalON.Devices.Dto), by its numeric value. */
 export const PcsStateNames: Record<number, string> = {
     0: 'Unknown',
     1: 'Stopped',
@@ -82,7 +82,7 @@ export const PcsStateNames: Record<number, string> = {
 
 /** PcsCoreDto, the frequently updated values of a power conversion system. Currents in A, voltages in V. */
 export interface PcsCoreDto {
-    /** PcsState - a number, or the name if the service serializes enums as strings. */
+    /** PcsStateDto - a number, or the name if the service serializes enums as strings. */
     state: number | string;
     communicationError: boolean;
     activePowerTarget: ActivePowerDto | null;
@@ -111,7 +111,7 @@ export interface PcsDto extends DeviceDto {
     detail: PcsDetailDto | null;
 }
 
-/** BatteryBankState (paskalON.Devices.Domain), by its numeric value. */
+/** BatteryBankStateDto (paskalON.Devices.Dto), by its numeric value. */
 export const BatteryBankStateNames: Record<number, string> = {
     0: 'Unknown',
     1: 'Disconnected',
@@ -124,7 +124,7 @@ export const BatteryBankStateNames: Record<number, string> = {
     99: 'Fault'
 };
 
-/** BatteryBankFlowDirection (paskalON.Devices.Domain), by its numeric value. */
+/** BatteryBankFlowDirectionDto (paskalON.Devices.Dto), by its numeric value. */
 export const BatteryBankFlowDirectionNames: Record<number, string> = {
     0: 'Idle',
     1: 'Charging',
@@ -133,10 +133,10 @@ export const BatteryBankFlowDirectionNames: Record<number, string> = {
 
 /** BbCoreDto, the frequently updated values of a battery bank. State of charge in %, voltage in V, current in A. */
 export interface BbCoreDto {
-    /** BatteryBankState - a number, or the name if the service serializes enums as strings. */
+    /** BatteryBankStateDto - a number, or the name if the service serializes enums as strings. */
     state: number | string;
     communicationError: boolean;
-    /** BatteryBankFlowDirection - a number, or the name if the service serializes enums as strings. */
+    /** BatteryBankFlowDirectionDto - a number, or the name if the service serializes enums as strings. */
     batteryBankFlowDirection: number | string | null;
     stateOfCharge: number | null;
     /** State of charge in % of the usable window (usable minimum to usable maximum state of charge). */
@@ -174,7 +174,7 @@ export interface DerBatteryStorageUnitDto {
     availableActivePower: ActivePowerDto | null;
     /** The reactive available power of the PCS. */
     availableReactivePower: ReactivePowerDto | null;
-    /** PcsState of the PCS core, null until the PCS delivered core data. */
+    /** PcsStateDto of the PCS core, null until the PCS delivered core data. */
     pcsState: number | string | null;
     /** BatteryStorageUnitBatteryBankState, the combined state of the battery banks. */
     batteryBankState: number | string;

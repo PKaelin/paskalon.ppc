@@ -2,8 +2,6 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Devices.Domain.EnergyStorages.Batteries;
-
 namespace paskalON.Devices.Dto.EnergyStorages.Batteries
 {
     /// <summary>
@@ -21,7 +19,7 @@ namespace paskalON.Devices.Dto.EnergyStorages.Batteries
         /// <summary>
         /// Battery bank state.
         /// </summary>
-        public BatteryBankState State { get; init; }
+        public BatteryBankStateDto State { get; init; }
 
 
         /// <summary>
@@ -33,7 +31,7 @@ namespace paskalON.Devices.Dto.EnergyStorages.Batteries
         /// <summary>
         /// The flow direction of the battery bank, indicating whether it is charging, discharging, or idle.
         /// </summary>
-        public BatteryBankFlowDirection? BatteryBankFlowDirection { get; init; }
+        public BatteryBankFlowDirectionDto? BatteryBankFlowDirection { get; init; }
 
 
         /// <summary>

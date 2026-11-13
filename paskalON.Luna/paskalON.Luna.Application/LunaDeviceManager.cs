@@ -4,7 +4,6 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging;
 using paskalON.Devices.Client;
-using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.Meters.PowerMeters;
@@ -63,7 +62,7 @@ namespace paskalON.Luna.Application
             DerDto der = _deviceClient.Der;
             PmSystemCoreDto? core = der.SystemPowerMeters
                 .Select(meter => meter.Core)
-                .FirstOrDefault(meterCore => meterCore is { CommunicationError: false, State: PowerMeterState.Connected });
+                .FirstOrDefault(meterCore => meterCore is { CommunicationError: false, State: PowerMeterStateDto.Connected });
 
             if (core == null)
             {

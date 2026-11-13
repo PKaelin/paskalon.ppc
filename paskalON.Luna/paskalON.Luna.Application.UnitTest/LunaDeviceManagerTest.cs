@@ -5,7 +5,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using paskalON.Devices.Client;
-using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.Meters.PowerMeters;
@@ -53,10 +52,10 @@ namespace paskalON.Luna.Application.UnitTest
         {
             List<PmSystemDto> meters = new List<PmSystemDto>
             {
-                CreateSystemMeter(1, true, PowerMeterState.Connected, 1000000),
-                CreateSystemMeter(2, false, PowerMeterState.Disconnected, 2000000),
-                CreateSystemMeter(3, false, PowerMeterState.Connected, 3000000),
-                CreateSystemMeter(4, false, PowerMeterState.Connected, 4000000)
+                CreateSystemMeter(1, true, PowerMeterStateDto.Connected, 1000000),
+                CreateSystemMeter(2, false, PowerMeterStateDto.Disconnected, 2000000),
+                CreateSystemMeter(3, false, PowerMeterStateDto.Connected, 3000000),
+                CreateSystemMeter(4, false, PowerMeterStateDto.Connected, 4000000)
             };
             _deviceClient.Setup(client => client.Der).Returns(CreateDer(meters, new List<BbDto>()));
 
@@ -76,12 +75,12 @@ namespace paskalON.Luna.Application.UnitTest
         /// <param name="communicationError">The communication error of the system power meter.</param>
         /// <param name="state">The state of the system power meter.</param>
         [TestMethod]
-        [DataRow(true, PowerMeterState.Connected)]
-        [DataRow(false, PowerMeterState.Unknown)]
-        [DataRow(false, PowerMeterState.Disconnected)]
-        [DataRow(false, PowerMeterState.Connecting)]
-        [DataRow(false, PowerMeterState.Disconnecting)]
-        public void GetSystemMeterSummaryWithoutAvailableMeterReturnsNullTest(bool communicationError, PowerMeterState state)
+        [DataRow(true, PowerMeterStateDto.Connected)]
+        [DataRow(false, PowerMeterStateDto.Unknown)]
+        [DataRow(false, PowerMeterStateDto.Disconnected)]
+        [DataRow(false, PowerMeterStateDto.Connecting)]
+        [DataRow(false, PowerMeterStateDto.Disconnecting)]
+        public void GetSystemMeterSummaryWithoutAvailableMeterReturnsNullTest(bool communicationError, PowerMeterStateDto state)
         {
             List<PmSystemDto> meters = new List<PmSystemDto>
             {
@@ -117,7 +116,7 @@ namespace paskalON.Luna.Application.UnitTest
         public void GetSystemMeterSummaryMissingMeterValuesAreZeroTest()
         {
             PmSystemDto meter = new PmSystemDto(CreateSystemMeterDefinition(1));
-            meter.UpdateCore(new PmSystemCoreDto { DeviceId = 1, CommunicationError = false, State = PowerMeterState.Connected });
+            meter.UpdateCore(new PmSystemCoreDto { DeviceId = 1, CommunicationError = false, State = PowerMeterStateDto.Connected });
             _deviceClient.Setup(client => client.Der).Returns(CreateDer(new List<PmSystemDto> { meter }, new List<BbDto>()));
 
             SystemMeterSummaryDto? summary = _manager.GetSystemMeterSummary();
@@ -144,7 +143,7 @@ namespace paskalON.Luna.Application.UnitTest
                 CreateBatteryBank(4, false, null),
                 new BbDto(CreateBatteryBankDefinition(5))
             };
-            List<PmSystemDto> meters = new List<PmSystemDto> { CreateSystemMeter(1, false, PowerMeterState.Connected, 1000000) };
+            List<PmSystemDto> meters = new List<PmSystemDto> { CreateSystemMeter(1, false, PowerMeterStateDto.Connected, 1000000) };
             _deviceClient.Setup(client => client.Der).Returns(CreateDer(meters, batteryBanks));
 
             SystemMeterSummaryDto? summary = _manager.GetSystemMeterSummary();
@@ -165,7 +164,7 @@ namespace paskalON.Luna.Application.UnitTest
                 CreateBatteryBank(1, true, 80),
                 CreateBatteryBank(2, false, null)
             };
-            List<PmSystemDto> meters = new List<PmSystemDto> { CreateSystemMeter(1, false, PowerMeterState.Connected, 1000000) };
+            List<PmSystemDto> meters = new List<PmSystemDto> { CreateSystemMeter(1, false, PowerMeterStateDto.Connected, 1000000) };
             _deviceClient.Setup(client => client.Der).Returns(CreateDer(meters, batteryBanks));
 
             SystemMeterSummaryDto? summary = _manager.GetSystemMeterSummary();
@@ -186,8 +185,8 @@ namespace paskalON.Luna.Application.UnitTest
         {
             List<PmSystemDto> meters = new List<PmSystemDto>
             {
-                CreateSystemMeter(1, false, PowerMeterState.Connected, 1000000),
-                CreateSystemMeter(2, true, PowerMeterState.Disconnected, 2000000)
+                CreateSystemMeter(1, false, PowerMeterStateDto.Connected, 1000000),
+                CreateSystemMeter(2, true, PowerMeterStateDto.Disconnected, 2000000)
             };
             _deviceClient.Setup(client => client.Der).Returns(CreateDer(meters, new List<BbDto>()));
 
@@ -204,7 +203,7 @@ namespace paskalON.Luna.Application.UnitTest
         [TestMethod]
         public void GetSystemPowerMeterWithUnknownDeviceIdReturnsNullTest()
         {
-            List<PmSystemDto> meters = new List<PmSystemDto> { CreateSystemMeter(1, false, PowerMeterState.Connected, 1000000) };
+            List<PmSystemDto> meters = new List<PmSystemDto> { CreateSystemMeter(1, false, PowerMeterStateDto.Connected, 1000000) };
             _deviceClient.Setup(client => client.Der).Returns(CreateDer(meters, new List<BbDto>()));
 
             PmSystemDto? meter = _manager.GetSystemPowerMeter(5);
@@ -454,7 +453,7 @@ namespace paskalON.Luna.Application.UnitTest
         /// <param name="state">The state.</param>
         /// <param name="activePowerWatts">The active power in watts, the reactive power is the negative half of it.</param>
         /// <returns>The system power meter DTO.</returns>
-        private PmSystemDto CreateSystemMeter(int deviceId, bool communicationError, PowerMeterState state, double activePowerWatts)
+        private PmSystemDto CreateSystemMeter(int deviceId, bool communicationError, PowerMeterStateDto state, double activePowerWatts)
         {
             PmSystemDto meter = new PmSystemDto(CreateSystemMeterDefinition(deviceId));
             meter.UpdateCore(new PmSystemCoreDto

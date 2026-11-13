@@ -11,7 +11,6 @@ using paskalON.ConstraintEngine.Domain.Configs.Systems;
 using paskalON.ConstraintEngine.Domain.Ders;
 using paskalON.ConstraintEngine.Domain.Systems;
 using paskalON.Devices.Client;
-using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.PhysicalUnits.Electricals.Powers;
@@ -338,7 +337,7 @@ namespace paskalON.PowerControls.Application
                 return DerState.Maintenance;
             }
 
-            return pcs?.Core?.State == PcsState.Started ? DerState.Started : DerState.Stopped;
+            return pcs?.Core?.State == PcsStateDto.Started ? DerState.Started : DerState.Stopped;
         }
 
 
@@ -350,7 +349,7 @@ namespace paskalON.PowerControls.Application
         {
             return new SystemPowerControlMap
             {
-                State = () => GetDerUnits().Any(u => GetPcs(u)?.Core?.State == PcsState.Started && u.IsInMaintenanceMode == false)
+                State = () => GetDerUnits().Any(u => GetPcs(u)?.Core?.State == PcsStateDto.Started && u.IsInMaintenanceMode == false)
                     ? SystemState.Started : SystemState.Stopped
             };
         }

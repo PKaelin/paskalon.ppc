@@ -2,7 +2,6 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Devices.Domain.Meters.PowerMeters;
 using paskalON.PhysicalUnits.Electricals.Powers;
 
 namespace paskalON.Devices.Dto.Meters.PowerMeters
@@ -22,7 +21,7 @@ namespace paskalON.Devices.Dto.Meters.PowerMeters
         /// <summary>
         /// State of the Power Meter.
         /// </summary>
-        public PowerMeterState State { get; init; }
+        public PowerMeterStateDto State { get; init; }
 
 
         /// <summary>

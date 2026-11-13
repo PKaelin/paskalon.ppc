@@ -2,8 +2,6 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Devices.Domain.EnergyResources.Solars;
-
 namespace paskalON.Devices.Dto.EnergyResources.Solars
 {
     /// <summary>
@@ -21,7 +19,7 @@ namespace paskalON.Devices.Dto.EnergyResources.Solars
         /// <summary>
         /// State of the solar panel.
         /// </summary>
-        public SolarPanelState State { get; init; }
+        public SolarPanelStateDto State { get; init; }
 
 
         /// <summary>

@@ -4,7 +4,6 @@
 //----------------------------------------‐------------------------------------
 using Microsoft.Extensions.Logging.Abstractions;
 using paskalON.Devices.Client.Registers;
-using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.PhysicalUnits.Electricals.Powers;
 
@@ -119,7 +118,7 @@ namespace paskalON.Devices.Client.UnitTest.Registers
 
             ActivePower activePower = new ActivePower(11);
             ReactivePower reactivePower = new ReactivePower(22);
-            PcsCoreDto update = new PcsCoreDto { DeviceId = 1, State = PcsState.Starting, ActivePowerTarget = activePower, ReactivePowerTarget = reactivePower };
+            PcsCoreDto update = new PcsCoreDto { DeviceId = 1, State = PcsStateDto.Starting, ActivePowerTarget = activePower, ReactivePowerTarget = reactivePower };
             register.UpdateCore(update);
 
             Assert.HasCount(1, register.Devices.Where(d => d.DeviceId == device.DeviceId));

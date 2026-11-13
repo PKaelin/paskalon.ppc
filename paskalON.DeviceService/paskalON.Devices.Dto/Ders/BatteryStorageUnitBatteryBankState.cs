@@ -8,7 +8,7 @@ namespace paskalON.Devices.Dto.Ders
     /// Combined state of the battery banks of a battery storage unit.
     /// </summary>
     /// <remarks>
-    /// Has the values of BatteryBankState (paskalON.Devices.Domain) with the same numbers, used for a single battery bank,
+    /// Has the values of BatteryBankStateDto with the same numbers, used for a single battery bank,
     /// plus the combinations of multiple battery banks.
     /// </remarks>
     public enum BatteryStorageUnitBatteryBankState

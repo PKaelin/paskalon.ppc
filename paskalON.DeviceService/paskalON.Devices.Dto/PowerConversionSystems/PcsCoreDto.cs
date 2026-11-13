@@ -2,7 +2,6 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.PhysicalUnits.Electricals.Powers;
 
 namespace paskalON.Devices.Dto.PowerConversionSystems
@@ -23,7 +22,7 @@ namespace paskalON.Devices.Dto.PowerConversionSystems
         /// State of the Power Conversion System (PCS).
         /// Specialized PCS has to map its states to the these states.
         /// </summary>
-        public PcsState State { get; init; }
+        public PcsStateDto State { get; init; }
 
 
         /// <summary>

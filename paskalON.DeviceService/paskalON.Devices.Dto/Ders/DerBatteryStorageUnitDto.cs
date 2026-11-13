@@ -2,11 +2,9 @@
 // Licensed under the paskalON Source-Available License (PSAL).
 // See LICENSE for the full license terms.
 //----------------------------------------‐------------------------------------
-using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.PowerConversionSystems;
 using paskalON.PhysicalUnits.Electricals.Powers;
-using DomainBatteryBankState = paskalON.Devices.Domain.EnergyStorages.Batteries.BatteryBankState;
 
 namespace paskalON.Devices.Dto.Ders
 {
@@ -75,7 +73,7 @@ namespace paskalON.Devices.Dto.Ders
         /// <summary>
         /// State of the PCS of this battery storage unit, null until the PCS delivered core data.
         /// </summary>
-        public PcsState? PcsState { get => PowerConversionSystem.Core?.State; }
+        public PcsStateDto? PcsState { get => PowerConversionSystem.Core?.State; }
 
 
         /// <summary>
@@ -92,7 +90,7 @@ namespace paskalON.Devices.Dto.Ders
         {
             get
             {
-                List<DomainBatteryBankState> states = BatteryBanks.Select(batteryBank => batteryBank.Core?.State ?? DomainBatteryBankState.Unknown).ToList();
+                List<BatteryBankStateDto> states = BatteryBanks.Select(batteryBank => batteryBank.Core?.State ?? BatteryBankStateDto.Unknown).ToList();
 
                 if (states.Count == 0)
                 {
@@ -104,17 +102,17 @@ namespace paskalON.Devices.Dto.Ders
                     return (BatteryStorageUnitBatteryBankState)states[0];
                 }
 
-                if (states.All(state => state == DomainBatteryBankState.Connected))
+                if (states.All(state => state == BatteryBankStateDto.Connected))
                 {
                     return BatteryStorageUnitBatteryBankState.Connected;
                 }
 
-                if (states.Any(state => state == DomainBatteryBankState.Connected))
+                if (states.Any(state => state == BatteryBankStateDto.Connected))
                 {
                     return BatteryStorageUnitBatteryBankState.PartiallyConnected;
                 }
 
-                if (states.All(state => state == DomainBatteryBankState.Disconnected))
+                if (states.All(state => state == BatteryBankStateDto.Disconnected))
                 {
                     return BatteryStorageUnitBatteryBankState.Disconnected;
                 }

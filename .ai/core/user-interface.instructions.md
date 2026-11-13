@@ -16,10 +16,17 @@
 - TypeScript types in `src/types/` mirror the DTOs in `paskalON.Luna.Dto`. When a DTO changes, update the matching type in the same change.
 
 ### Real-Time Data (SignalR)
-- Data is published to Luna Web only while the page or component that needs it is shown. E.g. on the "Dashboard" page only dashboard data is published.
-- A component subscribes on mount and unsubscribes on unmount via a `use...` composable (pattern: `useDeviceSubscription`). Subscriptions must be re-established after a reconnect.
-- The server tracks subscriptions per connection and publishes only to subscribed connections. Unsubscribed or disconnected clients cause no publishing work.
-- Show the hub connection status. When the connection is lost or values are not yet received, mark the values as stale/unavailable instead of showing the last values as if they were current
+- **Publish on demand:** Data is published to Luna Web only while the page or component that needs it is shown. E.g. on the "Dashboard" page only dashboard data is published, not the setpoints of the "Operating Modes" page.
+    - Exception: data shown in the always-visible app header (alarm summary, dependency status) may be published to all connected clients.
+- **Server subscriptions:** The server only publishes to connections that want the data:
+    - A hub carries one topic (e.g. system meter summary or setpoints), or tracks per connection which topic/device is subscribed (pattern: `DeviceSubscriptions`).
+    - Never send a topic with `Clients.All` on a hub that also serves other topics.
+    - Publishers skip the work (reading and serializing the data) when no connection is subscribed.
+    - Subscriptions are removed in once the component is unmounted.
+- **Initial value:** On connect or subscribe, the hub sends the current value to the caller immediately, so the client does not wait for the next publishing interval.
+- **Connection status & stale values:** Show the hub connection status (Connecting…, Live, Reconnecting…, Disconnected) next to the data (pattern: `DeviceSummary`). The composable exposes the status and a `received` flag (false until the first value arrived).
+    - Not yet received: show a loading indicator, not empty or zero values.
+    - Connection lost (reconnecting/disconnected): keep the last values visible but show the warning hint "The Luna service cannot be reached, the values are not updated." Never show the last values without this hint.
 
 ### Values & Formatting
 - Always display the unit with a value (kW, kVAr, %, V, Hz ...) and use a consistent number of decimals per quantity.

@@ -10,7 +10,10 @@ using paskalON.Devices.Domain.Configs;
 using paskalON.Devices.Domain.Configs.Ders;
 using paskalON.Devices.Domain.Configs.EnergyStorages.Batteries;
 using paskalON.Devices.Domain.Ders;
+using paskalON.Devices.Domain.EnergyResources.Solars;
 using paskalON.Devices.Domain.EnergyStorages.Batteries;
+using paskalON.Devices.Domain.Meters.PowerMeters;
+using paskalON.Devices.Domain.PowerConversionSystems;
 using paskalON.Devices.Dto.Ders;
 using paskalON.Devices.Dto.EnergyStorages.Batteries;
 using paskalON.Devices.Dto.Meters.PowerMeters.Concretes;
@@ -284,6 +287,99 @@ namespace paskalON.Devices.Application.UnitTest
         public void DeviceMapperMapPowerMeterDetailNullTest()
         {
             Assert.ThrowsExactly<ArgumentNullException>(() => _mapper.MapPowerMeterDetail<PmSystemDetailDto>(null!));
+        }
+
+
+        [TestMethod]
+        public void DeviceMapperMapPcsStateAllValuesTest()
+        {
+            PcsState[] states = Enum.GetValues<PcsState>();
+
+            List<string> mismatches = states
+                .Where(state => IsSameValue(state, _mapper.MapPcsState(state)) is false)
+                .Select(state => state.ToString())
+                .ToList();
+
+            Assert.IsEmpty(mismatches);
+        }
+
+
+        [TestMethod]
+        public void DeviceMapperMapBatteryBankStateAllValuesTest()
+        {
+            BatteryBankState[] states = Enum.GetValues<BatteryBankState>();
+
+            List<string> mismatches = states
+                .Where(state => IsSameValue(state, _mapper.MapBatteryBankState(state)) is false)
+                .Select(state => state.ToString())
+                .ToList();
+
+            Assert.IsEmpty(mismatches);
+        }
+
+
+        [TestMethod]
+        public void DeviceMapperMapBatteryBankFlowDirectionAllValuesTest()
+        {
+            BatteryBankFlowDirection[] flowDirections = Enum.GetValues<BatteryBankFlowDirection>();
+
+            List<string> mismatches = flowDirections
+                .Where(flowDirection => IsSameValue(flowDirection, _mapper.MapBatteryBankFlowDirection(flowDirection)) is false)
+                .Select(flowDirection => flowDirection.ToString())
+                .ToList();
+
+            Assert.IsEmpty(mismatches);
+        }
+
+
+        [TestMethod]
+        public void DeviceMapperMapSolarPanelStateAllValuesTest()
+        {
+            SolarPanelState[] states = Enum.GetValues<SolarPanelState>();
+
+            List<string> mismatches = states
+                .Where(state => IsSameValue(state, _mapper.MapSolarPanelState(state)) is false)
+                .Select(state => state.ToString())
+                .ToList();
+
+            Assert.IsEmpty(mismatches);
+        }
+
+
+        [TestMethod]
+        public void DeviceMapperMapPowerMeterStateAllValuesTest()
+        {
+            PowerMeterState[] states = Enum.GetValues<PowerMeterState>();
+
+            List<string> mismatches = states
+                .Where(state => IsSameValue(state, _mapper.MapPowerMeterState(state)) is false)
+                .Select(state => state.ToString())
+                .ToList();
+
+            Assert.IsEmpty(mismatches);
+        }
+
+
+        [TestMethod]
+        public void DeviceMapperMapPcsStateUndefinedTest()
+        {
+            PcsState undefined = (PcsState)1234;
+
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _mapper.MapPcsState(undefined));
+        }
+
+
+        /// <summary>
+        /// Confirms a domain value and its mapped DTO value have the same name and number.
+        /// </summary>
+        private bool IsSameValue<TDomain, TDto>(TDomain domainValue, TDto dtoValue)
+            where TDomain : struct, Enum
+            where TDto : struct, Enum
+        {
+            bool isSameName = domainValue.ToString() == dtoValue.ToString();
+            bool isSameNumber = Convert.ToInt32(domainValue) == Convert.ToInt32(dtoValue);
+
+            return isSameName && isSameNumber;
         }
 
 

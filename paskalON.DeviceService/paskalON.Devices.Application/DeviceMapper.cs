@@ -174,7 +174,7 @@ namespace paskalON.Devices.Application
             return new PcsCoreDto
             {
                 DeviceId = pcs.DeviceId,
-                State = pcs.State,
+                State = MapPcsState(pcs.State),
                 CommunicationError = pcs.CommunicationError,
                 ActivePowerTarget = pcs.ActivePowerTarget,
                 ActivePower = pcs.ActivePower,
@@ -278,9 +278,9 @@ namespace paskalON.Devices.Application
             return new BbCoreDto
             {
                 DeviceId = batteryBank.DeviceId,
-                State = batteryBank.State,
+                State = MapBatteryBankState(batteryBank.State),
                 CommunicationError = batteryBank.CommunicationError,
-                BatteryBankFlowDirection = batteryBank.BatteryBankFlowDirection,
+                BatteryBankFlowDirection = batteryBank.BatteryBankFlowDirection is null ? null : MapBatteryBankFlowDirection(batteryBank.BatteryBankFlowDirection.Value),
                 StateOfCharge = batteryBank.StateOfCharge,
                 UsableStateOfCharge = batteryBank.UsableStateOfCharge,
                 AbsoluteStateOfCharge = batteryBank.AbsoluteStateOfCharge,
@@ -364,7 +364,7 @@ namespace paskalON.Devices.Application
             return new PvCoreDto
             {
                 DeviceId = solarPanel.DeviceId,
-                State = solarPanel.State,
+                State = MapSolarPanelState(solarPanel.State),
                 CommunicationError = solarPanel.CommunicationError
             };
         }
@@ -477,7 +477,7 @@ namespace paskalON.Devices.Application
             return new TCore() with
             {
                 DeviceId = meter.DeviceId,
-                State = meter.State,
+                State = MapPowerMeterState(meter.State),
                 CommunicationError = meter.CommunicationError,
                 ActivePower = meter.ActivePower,
                 ReactivePower = meter.ReactivePower,
@@ -510,6 +510,98 @@ namespace paskalON.Devices.Application
                 EnergyReceived = meter.EnergyReceived,
                 ReactiveEnergyDelivered = meter.ReactiveEnergyDelivered,
                 ReactiveEnergyReceived = meter.ReactiveEnergyReceived
+            };
+        }
+
+
+        /// <summary>
+        /// Maps a PCS domain state to its DTO state.
+        /// </summary>
+        public PcsStateDto MapPcsState(PcsState state)
+        {
+            return state switch
+            {
+                PcsState.Unknown => PcsStateDto.Unknown,
+                PcsState.Stopped => PcsStateDto.Stopped,
+                PcsState.Starting => PcsStateDto.Starting,
+                PcsState.Started => PcsStateDto.Started,
+                PcsState.Stopping => PcsStateDto.Stopping,
+                PcsState.Sleeping => PcsStateDto.Sleeping,
+                PcsState.EnteringStandby => PcsStateDto.EnteringStandby,
+                PcsState.Standby => PcsStateDto.Standby,
+                PcsState.ExitingStandby => PcsStateDto.ExitingStandby,
+                PcsState.NightMode => PcsStateDto.NightMode,
+                PcsState.Fault => PcsStateDto.Fault,
+                _ => throw new ArgumentOutOfRangeException(nameof(state), state, "Unsupported PCS state.")
+            };
+        }
+
+
+        /// <summary>
+        /// Maps a battery bank domain state to its DTO state.
+        /// </summary>
+        public BatteryBankStateDto MapBatteryBankState(BatteryBankState state)
+        {
+            return state switch
+            {
+                BatteryBankState.Unknown => BatteryBankStateDto.Unknown,
+                BatteryBankState.Disconnected => BatteryBankStateDto.Disconnected,
+                BatteryBankState.Connecting => BatteryBankStateDto.Connecting,
+                BatteryBankState.Initializing => BatteryBankStateDto.Initializing,
+                BatteryBankState.Connected => BatteryBankStateDto.Connected,
+                BatteryBankState.Standby => BatteryBankStateDto.Standby,
+                BatteryBankState.Disconnecting => BatteryBankStateDto.Disconnecting,
+                BatteryBankState.SocProtection => BatteryBankStateDto.SocProtection,
+                BatteryBankState.Fault => BatteryBankStateDto.Fault,
+                _ => throw new ArgumentOutOfRangeException(nameof(state), state, "Unsupported battery bank state.")
+            };
+        }
+
+
+        /// <summary>
+        /// Maps a battery bank domain flow direction to its DTO flow direction.
+        /// </summary>
+        public BatteryBankFlowDirectionDto MapBatteryBankFlowDirection(BatteryBankFlowDirection flowDirection)
+        {
+            return flowDirection switch
+            {
+                BatteryBankFlowDirection.Idle => BatteryBankFlowDirectionDto.Idle,
+                BatteryBankFlowDirection.Charging => BatteryBankFlowDirectionDto.Charging,
+                BatteryBankFlowDirection.Discharging => BatteryBankFlowDirectionDto.Discharging,
+                _ => throw new ArgumentOutOfRangeException(nameof(flowDirection), flowDirection, "Unsupported battery bank flow direction.")
+            };
+        }
+
+
+        /// <summary>
+        /// Maps a solar panel domain state to its DTO state.
+        /// </summary>
+        public SolarPanelStateDto MapSolarPanelState(SolarPanelState state)
+        {
+            return state switch
+            {
+                SolarPanelState.Disconnected => SolarPanelStateDto.Disconnected,
+                SolarPanelState.Connecting => SolarPanelStateDto.Connecting,
+                SolarPanelState.Connected => SolarPanelStateDto.Connected,
+                SolarPanelState.Disconnecting => SolarPanelStateDto.Disconnecting,
+                _ => throw new ArgumentOutOfRangeException(nameof(state), state, "Unsupported solar panel state.")
+            };
+        }
+
+
+        /// <summary>
+        /// Maps a power meter domain state to its DTO state.
+        /// </summary>
+        public PowerMeterStateDto MapPowerMeterState(PowerMeterState state)
+        {
+            return state switch
+            {
+                PowerMeterState.Unknown => PowerMeterStateDto.Unknown,
+                PowerMeterState.Disconnected => PowerMeterStateDto.Disconnected,
+                PowerMeterState.Connecting => PowerMeterStateDto.Connecting,
+                PowerMeterState.Connected => PowerMeterStateDto.Connected,
+                PowerMeterState.Disconnecting => PowerMeterStateDto.Disconnecting,
+                _ => throw new ArgumentOutOfRangeException(nameof(state), state, "Unsupported power meter state.")
             };
         }
     }
