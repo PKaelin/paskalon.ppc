@@ -92,5 +92,12 @@ namespace paskalON.DeviceSimulator.Dto.Simulations
         /// (1 = real time, 100 = one real second charges or discharges like 100 seconds).
         /// </summary>
         public double? ChargeSpeedFactor { get; init; }
+
+
+        /// <summary>
+        /// Battery bank only: flag whether the available power tapers off below 10% and above 90% usable state of charge
+        /// instead of cutting off hard at 0% and 100%.
+        /// </summary>
+        public bool? IsPowerTaperEnabled { get; init; }
     }
 }

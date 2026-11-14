@@ -320,7 +320,8 @@ namespace paskalON.DeviceSimulator.Application
             {
                 UsableStateOfCharge = Math.Round(simulation.UsableStateOfCharge, 3),
                 PreferredStateOfCharge = Math.Round(simulation.PreferredStateOfCharge, 3),
-                ChargeSpeedFactor = simulation.ChargeSpeedFactor
+                ChargeSpeedFactor = simulation.ChargeSpeedFactor,
+                IsPowerTaperEnabled = simulation.IsPowerTaperEnabled
             };
         }
 

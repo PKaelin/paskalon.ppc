@@ -111,5 +111,14 @@ namespace paskalON.DeviceSimulator.Application
         /// <exception cref="KeyNotFoundException">The simulated battery bank does not exist.</exception>
         /// <exception cref="ArgumentOutOfRangeException">The factor is outside 1..100.</exception>
         void SetChargeSpeed(int deviceId, double chargeSpeedFactor);
+
+
+        /// <summary>
+        /// Enables or disables the power taper of a simulated battery bank near empty and full.
+        /// </summary>
+        /// <param name="deviceId">Device ID of the simulated battery bank.</param>
+        /// <param name="isEnabled">True to taper the available power below 10% and above 90% usable state of charge, false to cut off hard.</param>
+        /// <exception cref="KeyNotFoundException">The simulated battery bank does not exist.</exception>
+        void SetPowerTaper(int deviceId, bool isEnabled);
     }
 }

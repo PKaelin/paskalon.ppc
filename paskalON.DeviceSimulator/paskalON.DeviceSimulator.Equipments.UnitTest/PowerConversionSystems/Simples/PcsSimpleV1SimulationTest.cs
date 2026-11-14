@@ -100,6 +100,36 @@ namespace paskalON.DeviceSimulator.Equipments.UnitTest.PowerConversionSystems.Si
 
 
         [TestMethod]
+        [DataRow(true, -1250, DisplayName = "Taper on: 95% usable SOC halves the 2.5MW charge rate")]
+        [DataRow(false, -2000, DisplayName = "Taper off: limited by the PCS nameplate only")]
+        public async Task TickAsyncChargeFollowsBatteryPowerTaperTest(bool isTaperEnabled, int expectedKw)
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            PcsSimpleV1Simulation pcs = new PcsSimpleV1Simulation(store, CreatePcsSettings(), new SimulatedGrid());
+            SimulationModbusDataStore bankStore = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            BatteryBankSimulationSettings bankSettings = CreateBankSettings(11, 5000000, 2500000) with
+            {
+                PreferredMinimumStateOfCharge = 10,
+                PreferredMaximumStateOfCharge = 90
+            };
+            BbSimpleV1Simulation bank = new BbSimpleV1Simulation(bankStore, bankSettings);
+            bankStore.HoldingRegisters.WritePoints((ushort)BbSimpleV1Description.Register.SelectorState, new ushort[] { (ushort)BbSimpleV1Description.State.Connected });
+            await bank.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+            bank.SetPreferredStateOfCharge(95);
+            bank.SetPowerTaper(isTaperEnabled);
+            pcs.AttachBatteryBanks(new[] { bank });
+            WriteCommand(store, PcsSimpleV1Description.Register.SelectorState, (short)PcsSimpleV1Description.State.On);
+            WriteCommand(store, PcsSimpleV1Description.Register.PReference, -2000);
+
+            await pcs.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+
+            Assert.AreEqual(expectedKw, ReadRegister(store, PcsSimpleV1Description.Register.P));
+            Assert.AreEqual(expectedKw, ReadRegister(store, PcsSimpleV1Description.Register.PAvailable));
+            Assert.AreEqual(expectedKw * 1000d, bank.ActivePower, 0.001);
+        }
+
+
+        [TestMethod]
         public async Task TickAsyncWithoutConnectedBankStartsWithoutAvailablePowerTest()
         {
             SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());

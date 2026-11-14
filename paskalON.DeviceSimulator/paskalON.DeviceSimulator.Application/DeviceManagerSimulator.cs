@@ -293,6 +293,16 @@ namespace paskalON.DeviceSimulator.Application
         }
 
 
+        /// <inheritdoc/>
+        public void SetPowerTaper(int deviceId, bool isEnabled)
+        {
+            BatteryBankSimulationBase device = FindBatteryBank(deviceId);
+
+            device.SetPowerTaper(isEnabled);
+            _logger.LogInformation("Power taper of battery bank {DeviceId} enabled: {IsEnabled}.", deviceId, isEnabled);
+        }
+
+
         /// <summary>
         /// Finds a simulated battery bank.
         /// </summary>

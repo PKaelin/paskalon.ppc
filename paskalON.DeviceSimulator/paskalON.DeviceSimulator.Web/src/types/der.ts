@@ -76,6 +76,8 @@ export interface SimulationDto {
     preferredStateOfCharge?: number | null;
     /** Battery bank only: 1 = real time, 100 = one real second charges or discharges like 100 seconds. */
     chargeSpeedFactor?: number | null;
+    /** Battery bank only: true = power tapers below 10 % and above 90 % usable SOC, false = hard cut-off. */
+    isPowerTaperEnabled?: boolean | null;
 }
 
 export interface PcsDto extends IDevice {

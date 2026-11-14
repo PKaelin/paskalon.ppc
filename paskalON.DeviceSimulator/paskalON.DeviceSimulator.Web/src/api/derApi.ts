@@ -255,6 +255,18 @@ export async function setChargeSpeed(request: SetChargeSpeedRequest): Promise<vo
     await postSimulation('setchargespeed', request, 'Setting the charge speed');
 }
 
+/** Body of POST {apiBaseUrl}/v1/simulation/setpowertaper. */
+export interface SetPowerTaperRequest {
+    deviceId: number;
+    /** True = taper the power below 10 % and above 90 % usable SOC, false = hard cut-off at 0 % and 100 %. */
+    isEnabled: boolean;
+}
+
+/** Enables or disables the power taper of a simulated battery bank near empty and full. */
+export async function setPowerTaper(request: SetPowerTaperRequest): Promise<void> {
+    await postSimulation('setpowertaper', request, 'Changing the power taper');
+}
+
 /** Absolute URL of the SignalR hub (resolves a relative path against the current origin). */
 export function hubUrl(): string {
     const configured = config().signalRHubUrl;

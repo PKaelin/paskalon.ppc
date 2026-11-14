@@ -300,6 +300,65 @@ namespace paskalON.DeviceSimulator.Equipments.UnitTest.EnergyStorages.Batteries.
         }
 
 
+        [TestMethod]
+        public void BbSimpleV1SimulationStartsWithPowerTaperDisabledTest()
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(store, CreateSettings());
+
+            Assert.IsFalse(simulation.IsPowerTaperEnabled);
+        }
+
+
+        [TestMethod]
+        [DataRow(true, 0d, 0d, 2500000d, DisplayName = "Taper on, empty: no discharge, full charge")]
+        [DataRow(true, 5d, 1250000d, 2500000d, DisplayName = "Taper on, 5%: half discharge, full charge")]
+        [DataRow(true, 10d, 2500000d, 2500000d, DisplayName = "Taper on, 10%: full discharge, full charge")]
+        [DataRow(true, 50d, 2500000d, 2500000d, DisplayName = "Taper on, 50%: full discharge, full charge")]
+        [DataRow(true, 90d, 2500000d, 2500000d, DisplayName = "Taper on, 90%: full discharge, full charge")]
+        [DataRow(true, 95d, 2500000d, 1250000d, DisplayName = "Taper on, 95%: full discharge, half charge")]
+        [DataRow(true, 100d, 2500000d, 0d, DisplayName = "Taper on, full: full discharge, no charge")]
+        [DataRow(false, 5d, 2500000d, 2500000d, DisplayName = "Taper off, 5%: full discharge, full charge")]
+        [DataRow(false, 95d, 2500000d, 2500000d, DisplayName = "Taper off, 95%: full discharge, full charge")]
+        public async Task SetPowerTaperLimitsAvailablePowerTest(bool isEnabled, double usableStateOfCharge, double expectedDischarge, double expectedCharge)
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            BbSimpleV1Simulation simulation = await CreateConnectedAsync(store, CreateSettingsWithPreferredEqualsUsable());
+            simulation.SetPreferredStateOfCharge(usableStateOfCharge);
+
+            simulation.SetPowerTaper(isEnabled);
+
+            Assert.AreEqual(isEnabled, simulation.IsPowerTaperEnabled);
+            Assert.AreEqual(usableStateOfCharge, simulation.UsableStateOfCharge, 0.000001);
+            Assert.AreEqual(expectedDischarge, simulation.AvailableDischargePower, 0.001);
+            Assert.AreEqual(expectedCharge, simulation.AvailableChargePower, 0.001);
+        }
+
+
+        [TestMethod]
+        public void SetPowerTaperWhileDisconnectedHasNoAvailablePowerTest()
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(store, CreateSettings());
+
+            simulation.SetPowerTaper(true);
+
+            Assert.AreEqual(0, simulation.AvailableDischargePower);
+            Assert.AreEqual(0, simulation.AvailableChargePower);
+        }
+
+
+        /// <summary>
+        /// Same as <see cref="CreateSettings"/> but with the preferred window equal to the usable window (10..90% absolute),
+        /// so the preferred state of charge equals the usable state of charge.
+        /// </summary>
+        private BatteryBankSimulationSettings CreateSettingsWithPreferredEqualsUsable()
+        {
+            return CreateSettings() with { PreferredMinimumStateOfCharge = 10, PreferredMaximumStateOfCharge = 90 };
+        }
+
+
         /// <summary>
         /// 5MWh battery bank with a usable window of 10..90% (4MWh usable capacity) and 2.5MW charge and discharge rate.
         /// </summary>
@@ -332,7 +391,13 @@ namespace paskalON.DeviceSimulator.Equipments.UnitTest.EnergyStorages.Batteries.
 
         private async Task<BbSimpleV1Simulation> CreateConnectedAsync(SimulationModbusDataStore store)
         {
-            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(store, CreateSettings());
+            return await CreateConnectedAsync(store, CreateSettings());
+        }
+
+
+        private async Task<BbSimpleV1Simulation> CreateConnectedAsync(SimulationModbusDataStore store, BatteryBankSimulationSettings settings)
+        {
+            BbSimpleV1Simulation simulation = new BbSimpleV1Simulation(store, settings);
             store.HoldingRegisters.WritePoints((ushort)BbSimpleV1Description.Register.SelectorState, new ushort[] { (ushort)BbSimpleV1Description.State.Connected });
             await simulation.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
 

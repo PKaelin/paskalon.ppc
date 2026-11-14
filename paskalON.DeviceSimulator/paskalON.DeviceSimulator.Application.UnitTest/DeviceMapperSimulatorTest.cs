@@ -156,6 +156,7 @@ namespace paskalON.DeviceSimulator.Application.UnitTest
             Assert.AreEqual(87.5, dto.UsableStateOfCharge);
             Assert.AreEqual(100, dto.PreferredStateOfCharge);
             Assert.AreEqual(BatteryBankSimulationBase.MinimumChargeSpeedFactor, dto.ChargeSpeedFactor);
+            Assert.IsFalse(dto.IsPowerTaperEnabled);
             Assert.AreEqual((ushort)0, dto.Fault);
             Assert.IsNull(dto.SlowActivePowerByPercent);
         }
@@ -177,6 +178,7 @@ namespace paskalON.DeviceSimulator.Application.UnitTest
             });
             bank.SetPreferredStateOfCharge(50);
             bank.SetChargeSpeedFactor(100);
+            bank.SetPowerTaper(true);
             DeviceMapperSimulator mapper = CreateMapper((address, port) => true);
 
             SimulationDto dto = mapper.MapSimulation(bank, "paskalon.devicesimulator.service", 503);
@@ -184,6 +186,7 @@ namespace paskalON.DeviceSimulator.Application.UnitTest
             Assert.AreEqual(50, dto.PreferredStateOfCharge);
             Assert.AreEqual(50, dto.UsableStateOfCharge);
             Assert.AreEqual(100, dto.ChargeSpeedFactor);
+            Assert.IsTrue(dto.IsPowerTaperEnabled);
             Assert.IsNull(dto.SlowActivePowerByPercent);
         }
 

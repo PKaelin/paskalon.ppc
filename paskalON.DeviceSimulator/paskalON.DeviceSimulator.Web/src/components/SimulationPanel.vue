@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue';
 import BitmaskEditor from './BitmaskEditor.vue';
 import CollapseTransition from './CollapseTransition.vue';
 import { SimulationDeviceType, type SimulationDeviceTypeValue, type SimulationDto } from '@/types/der';
-import { setChargeSpeed, setCommunication, setEvents, setStateOfCharge, slowDownPower } from '@/api/derApi';
+import { setChargeSpeed, setCommunication, setEvents, setPowerTaper, setStateOfCharge, slowDownPower } from '@/api/derApi';
 import { useNotifications } from '@/composables/useNotifications';
 
 /**
@@ -11,7 +11,7 @@ import { useNotifications } from '@/composables/useNotifications';
  *   - warning / fault / vendor event bitmask injection (PCS, battery bank)
  *   - communication loss (the Modbus server stops answering / the C37 server stops streaming)
  *   - PCS only: slow down the power response
- *   - battery bank only: set the preferred state of charge and the charge speed (1x real time .. 100x)
+ *   - battery bank only: set the preferred state of charge, the charge speed (1x real time .. 100x) and the power taper
  *
  * Successful changes are written into the simulation DTO right away, the next refresh /
  * live update confirms them.
@@ -241,6 +241,24 @@ async function applyChargeSpeed(): Promise<void> {
         chargeSpeed.value = props.simulation.chargeSpeedFactor ?? MIN_CHARGE_SPEED;
     }
 }
+
+async function onPowerTaperChange(event: Event): Promise<void> {
+    const checkbox = event.target as HTMLInputElement;
+    const isEnabled = checkbox.checked;
+
+    const applied = await run(
+        () => setPowerTaper({ deviceId: props.deviceId, isEnabled }),
+        isEnabled
+            ? `${props.deviceName} tapers the power below 10 % and above 90 % usable SOC.`
+            : `${props.deviceName} uses full power until 0 % and 100 % usable SOC.`
+    );
+
+    if (applied) {
+        props.simulation.isPowerTaperEnabled = isEnabled;
+    } else {
+        checkbox.checked = props.simulation.isPowerTaperEnabled ?? false;
+    }
+}
 </script>
 
 <template>
@@ -258,6 +276,7 @@ async function applyChargeSpeed(): Promise<void> {
                 {{ active.label }} 0x{{ active.hex }}
             </span>
             <span v-if="isAccelerated" class="badge bg-warning text-dark">Charge speed ×{{ simulation.chargeSpeedFactor }}</span>
+            <span v-if="simulation.isPowerTaperEnabled" class="badge bg-info text-dark">Power taper</span>
             <span v-if="hasStateOfCharge" class="simulation-soc font-monospace">
                 Preferred SOC {{ formatStateOfCharge(simulation.preferredStateOfCharge) }} %
             </span>
@@ -399,6 +418,27 @@ async function applyChargeSpeed(): Promise<void> {
                             for the state of charge only; the active power stays as allocated by the PCS.
                         </div>
                     </div>
+
+                    <div class="battery-settings-full">
+                        <div class="ramp-caption">Power taper</div>
+                        <div class="form-check form-switch mb-0">
+                            <input :id="`power-taper-${deviceType}-${deviceId}`"
+                                   class="form-check-input"
+                                   type="checkbox"
+                                   role="switch"
+                                   :checked="simulation.isPowerTaperEnabled ?? false"
+                                   :disabled="busy"
+                                   @change="onPowerTaperChange" />
+                            <label class="form-check-label" :for="`power-taper-${deviceType}-${deviceId}`">
+                                Taper power near empty and full
+                            </label>
+                        </div>
+                        <div class="simulation-hint mt-1">
+                            On: the available discharge power reduces linearly from the battery bank's max. discharge rate at 10 % to 0 at 0 % usable SOC,
+                            the available charge power from the max. charge rate at 90 % to 0 at 100 % usable SOC.
+                            Off: full power until the hard cut-off at 0 % and 100 % usable SOC.
+                        </div>
+                    </div>
                 </div>
             </div>
         </CollapseTransition>
@@ -474,6 +514,10 @@ async function applyChargeSpeed(): Promise<void> {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
     gap: .5rem 1.5rem;
+}
+
+.battery-settings-full {
+    grid-column: 1 / -1;
 }
 
 .charge-speed-range {

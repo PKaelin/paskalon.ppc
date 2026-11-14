@@ -173,5 +173,28 @@ namespace paskalON.DeviceSimulator.Service.WebApi.Controllers.V1
 
             return Ok();
         }
+
+
+        /// <summary>
+        /// Enables or disables the power taper of a simulated battery bank near empty and full.
+        /// </summary>
+        /// <param name="request">The power taper request.</param>
+        /// <returns>Ok or NotFound when the battery bank does not exist.</returns>
+        [HttpPost]
+        public IActionResult SetPowerTaper(SetPowerTaperRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            try
+            {
+                _deviceManager.SetPowerTaper(request.DeviceId, request.IsEnabled);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+            return Ok();
+        }
     }
 }

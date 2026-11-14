@@ -14,7 +14,8 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
     /// <remarks>
     /// The battery bank starts disconnected and fully charged (100% preferred state of charge).
     /// Its active power is allocated by the PCS simulation of the same DER unit. The state of charge is integrated
-    /// from the allocated active power and cut off hard at 0% and 100% usable state of charge.
+    /// from the allocated active power and cut off hard at 0% and 100% usable state of charge. With the power taper enabled
+    /// the available power reduces linearly near empty and full instead.
     /// Vendor simulations only map the command and telemetry registers.
     /// </remarks>
     public abstract class BatteryBankSimulationBase : ISimulatedDevice, IEventInjectable
@@ -29,6 +30,18 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
         /// Maximum charge speed factor (100 = 100 times faster than minimum charge speed so 100 seconds).
         /// </summary>
         public const double MaximumChargeSpeedFactor = 100;
+
+
+        /// <summary>
+        /// Usable state of charge in percent below which the discharge power tapers off linearly to 0 at 0% (power taper enabled).
+        /// </summary>
+        public const double LowerTaperStateOfCharge = 10;
+
+
+        /// <summary>
+        /// Usable state of charge in percent above which the charge power tapers off linearly to 0 at 100% (power taper enabled).
+        /// </summary>
+        public const double UpperTaperStateOfCharge = 90;
 
 
         /// <summary>
@@ -145,6 +158,16 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
 
 
         /// <summary>
+        /// Flag whether the available power tapers off near empty and full instead of cutting off hard at 0% and 100% usable state of charge.
+        /// </summary>
+        public bool IsPowerTaperEnabled
+        {
+            get { lock (_dataLock) { return field; } }
+            private set { lock (_dataLock) { field = value; } }
+        }
+
+
+        /// <summary>
         /// Usable capacity in watt-hours.
         /// </summary>
         public double UsableCapacity { get; }
@@ -189,13 +212,24 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
         /// <summary>
         /// Active power in watts the battery bank can discharge right now.
         /// </summary>
+        /// <remarks>
+        /// With the power taper enabled the power reduces linearly from the nameplate at <see cref="LowerTaperStateOfCharge"/>
+        /// to 0 at 0% usable state of charge.
+        /// </remarks>
         public double AvailableDischargePower
         {
             get
             {
                 lock (_dataLock)
                 {
-                    return IsConnected && UsableStateOfCharge > 0 ? Settings.NameplateMaximumDischargeRate : 0;
+                    if (IsConnected is false || UsableStateOfCharge <= 0)
+                    {
+                        return 0;
+                    }
+
+                    double taper = IsPowerTaperEnabled ? Math.Min(1, UsableStateOfCharge / LowerTaperStateOfCharge) : 1;
+
+                    return Settings.NameplateMaximumDischargeRate * taper;
                 }
             }
         }
@@ -204,13 +238,24 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
         /// <summary>
         /// Active power in watts (positive value) the battery bank can charge right now.
         /// </summary>
+        /// <remarks>
+        /// With the power taper enabled the power reduces linearly from the nameplate at <see cref="UpperTaperStateOfCharge"/>
+        /// to 0 at 100% usable state of charge.
+        /// </remarks>
         public double AvailableChargePower
         {
             get
             {
                 lock (_dataLock)
                 {
-                    return IsConnected && UsableStateOfCharge < 100 ? Settings.NameplateMaximumChargeRate : 0;
+                    if (IsConnected is false || UsableStateOfCharge >= 100)
+                    {
+                        return 0;
+                    }
+
+                    double taper = IsPowerTaperEnabled ? Math.Min(1, (100 - UsableStateOfCharge) / (100 - UpperTaperStateOfCharge)) : 1;
+
+                    return Settings.NameplateMaximumChargeRate * taper;
                 }
             }
         }
@@ -324,6 +369,19 @@ namespace paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries
             ArgumentOutOfRangeException.ThrowIfGreaterThan(chargeSpeedFactor, MaximumChargeSpeedFactor);
 
             ChargeSpeedFactor = chargeSpeedFactor;
+        }
+
+
+        /// <summary>
+        /// Enables or disables the power taper near empty and full.
+        /// </summary>
+        /// <param name="isEnabled">
+        /// True to reduce the available power linearly below <see cref="LowerTaperStateOfCharge"/> and above <see cref="UpperTaperStateOfCharge"/>
+        /// usable state of charge, false to cut off hard at 0% and 100%.
+        /// </param>
+        public void SetPowerTaper(bool isEnabled)
+        {
+            IsPowerTaperEnabled = isEnabled;
         }
 
 

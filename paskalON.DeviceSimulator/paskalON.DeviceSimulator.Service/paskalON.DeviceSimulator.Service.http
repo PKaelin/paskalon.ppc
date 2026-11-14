@@ -57,3 +57,14 @@ Content-Type: application/json
 
 
 ###
+
+POST {{paskalON.DeviceSimulator.Service_HostAddress}}/api/v1/simulation/setpowertaper
+Content-Type: application/json
+
+{
+  "DeviceId": 1,
+  "IsEnabled": true
+}
+
+
+###
