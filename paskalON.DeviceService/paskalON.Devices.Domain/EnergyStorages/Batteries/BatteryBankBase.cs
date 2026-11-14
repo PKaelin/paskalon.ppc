@@ -508,14 +508,24 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <remarks>
         /// Fault states indicate a critical failure that requires the system to shut down immediately to prevent damage.
         /// Do not set these states directly us <see cref="SetFault(string, bool)"/> method instead.
+        /// Returns a copy, later changes of the device are not reflected in it.
         /// </remarks>
-        public Dictionary<string, bool> FaultStates { get; } = new Dictionary<string, bool>();
+        public IReadOnlyDictionary<string, bool> FaultStates
+        {
+            get { lock (dataLock) { return new Dictionary<string, bool>(_faultStates); } }
+        }
+
+
+        /// <summary>
+        /// Fault definitions and their states, only access it while holding the data lock.
+        /// </summary>
+        private readonly Dictionary<string, bool> _faultStates = new Dictionary<string, bool>();
 
 
         /// <summary>
         /// Indicates whether there are any active alarms.
         /// </summary>
-        public bool HasActiveFaults { get => FaultStates.Any(a => a.Value == true); }
+        public bool HasActiveFaults { get { lock (dataLock) { return _faultStates.ContainsValue(true); } } }
 
 
         /// <summary>
@@ -524,14 +534,24 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <remarks>
         /// Warning states indicate that the system is operating outside its optimal range but can continue running.
         /// Do not set these states directly us <see cref="SetWarning(string, bool)"/> method instead.
+        /// Returns a copy, later changes of the device are not reflected in it.
         /// </remarks>
-        public Dictionary<string, bool> WarningStates { get; } = new Dictionary<string, bool>();
+        public IReadOnlyDictionary<string, bool> WarningStates
+        {
+            get { lock (dataLock) { return new Dictionary<string, bool>(_warningStates); } }
+        }
+
+
+        /// <summary>
+        /// Warning definitions and their states, only access it while holding the data lock.
+        /// </summary>
+        private readonly Dictionary<string, bool> _warningStates = new Dictionary<string, bool>();
 
 
         /// <summary>
         /// Indicates whether there are any active warnings.
         /// </summary>
-        public bool HasActiveWarnings { get => WarningStates.Any(a => a.Value == true); }
+        public bool HasActiveWarnings { get { lock (dataLock) { return _warningStates.ContainsValue(true); } } }
 
 
         /// <summary>
@@ -540,14 +560,24 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <remarks>
         /// Vendor events can are vendor specific events like maintenance due etc.
         /// Do not set these states directly us <see cref="SetVendorEvent(string, bool)"/> method instead.
+        /// Returns a copy, later changes of the device are not reflected in it.
         /// </remarks>
-        public Dictionary<string, bool> VendorEvents { get; } = new Dictionary<string, bool>();
+        public IReadOnlyDictionary<string, bool> VendorEvents
+        {
+            get { lock (dataLock) { return new Dictionary<string, bool>(_vendorEvents); } }
+        }
+
+
+        /// <summary>
+        /// Vendor event definitions and their states, only access it while holding the data lock.
+        /// </summary>
+        private readonly Dictionary<string, bool> _vendorEvents = new Dictionary<string, bool>();
 
 
         /// <summary>
         /// Indicates whether there are any vendor events.
         /// </summary>
-        public bool HasVendorEvents { get => VendorEvents.Any(a => a.Value == true); }
+        public bool HasVendorEvents { get { lock (dataLock) { return _vendorEvents.ContainsValue(true); } } }
 
 
         /// <summary>
@@ -804,8 +834,16 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <param name="state">State of the alarm.</param>
         protected void SetFault(string name, bool state)
         {
+            bool changed;
+
             // TODO: clean out if state is false and havent been updated for a while.
-            if (FaultStates.ContainsKey(name) == false || FaultStates[name] != state)
+            lock (dataLock)
+            {
+                changed = _faultStates.TryGetValue(name, out bool current) == false || current != state;
+                _faultStates[name] = state;
+            }
+
+            if (changed)
             {
                 if (state == true)
                 {
@@ -816,8 +854,6 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
                     _logger.LogInformation("{Name} Fault state changed to normal. Fault: {Fault}", Name, name);
                 }
             }
-
-            FaultStates[name] = state;
         }
 
 
@@ -828,8 +864,16 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <param name="state">State of the warning.</param>
         protected void SetWarning(string name, bool state)
         {
+            bool changed;
+
             // TODO: clean out if state is false and havent been updated for a while.
-            if (WarningStates.ContainsKey(name) == false || WarningStates[name] != state)
+            lock (dataLock)
+            {
+                changed = _warningStates.TryGetValue(name, out bool current) == false || current != state;
+                _warningStates[name] = state;
+            }
+
+            if (changed)
             {
                 if (state == true)
                 {
@@ -840,8 +884,6 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
                     _logger.LogInformation("{Name} Warning state changed to normal. Warning: {Warning}", Name, name);
                 }
             }
-
-            WarningStates[name] = state;
         }
 
 
@@ -852,8 +894,16 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <param name="vendorEvents">Vendor event.</param>
         protected void SetVendorEvent(string name, bool vendorEvents)
         {
+            bool changed;
+
             // TODO: clean out if state is false and havent been updated for a while.
-            if (VendorEvents.ContainsKey(name) == false || VendorEvents[name] != vendorEvents)
+            lock (dataLock)
+            {
+                changed = _vendorEvents.TryGetValue(name, out bool current) == false || current != vendorEvents;
+                _vendorEvents[name] = vendorEvents;
+            }
+
+            if (changed)
             {
                 if (vendorEvents == true)
                 {
@@ -864,8 +914,6 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
                     _logger.LogInformation("{Name} Vendor event changed to normal. Event: {Event}", Name, name);
                 }
             }
-
-            VendorEvents[name] = vendorEvents;
         }
 
 
