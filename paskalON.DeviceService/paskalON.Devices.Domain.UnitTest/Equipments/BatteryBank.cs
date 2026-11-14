@@ -41,6 +41,16 @@ namespace paskalON.Devices.Domain.UnitTest.Equipments
             Dataface.Register<BatteryBank, IModbusRegister>(r => r.Register<BatteryBank, double?>(this, nameof(TotalDCCurrent), (x, v) => x.TotalDCCurrent = v, 1005, 1, ModbusDataType.MbInt16));
         }
 
+        /// <summary>
+        /// Simulates a state reported by the device, like the equipments do after reading the state register.
+        /// </summary>
+        /// <param name="reportedState">The state reported by the device.</param>
+        public void ReportState(BatteryBankState reportedState)
+        {
+            UpdateState(reportedState);
+        }
+
+
         public override Task HeartbeatAsync(CancellationToken cancellationToken)
         {
             // Not required for unit tests.

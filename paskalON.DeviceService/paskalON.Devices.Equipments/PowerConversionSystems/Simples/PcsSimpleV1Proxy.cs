@@ -78,11 +78,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                 }
                 catch
                 {
-                    lock (dataLock)
-                    {
-                        RaiseCommunicationError();
-                        throw;
-                    }
+                    RaiseCommunicationError();
+                    throw;
                 }
             }
             finally
@@ -111,11 +108,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                     }
                     catch
                     {
-                        lock (dataLock)
-                        {
-                            RaiseCommunicationError();
-                            throw;
-                        }
+                        RaiseCommunicationError();
+                        throw;
                     }
                 }
             }
@@ -155,11 +149,8 @@ namespace paskalON.Devices.Equipments.PowerConversionSystems.Simples
                 }
                 catch
                 {
-                    lock (dataLock)
-                    {
-                        RaiseCommunicationError();
-                        throw;
-                    }
+                    RaiseCommunicationError();
+                    throw;
                 }
             }
         }

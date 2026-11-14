@@ -116,5 +116,61 @@ namespace paskalON.Devices.Domain.UnitTest.PowerConversionSystems
             Assert.IsNotNull(logs.FirstOrDefault(m => m.Message.Contains("state changed", StringComparison.OrdinalIgnoreCase)));
         }
 
+
+        [TestMethod]
+        public async Task UpdateStateOfSiblingBatteryBanksAtTheSameTimeDoesNotDeadlockTest()
+        {
+            // Both battery banks of one unit report their state at the same time. The barrier holds both inside their state change
+            // event until the other one arrived as well, then the unit handler reads the state of the sibling. The state change event
+            // must not be raised inside the data lock, otherwise both battery banks wait for the lock of each other forever.
+            DerBatteryStorageUnit unit = CreateBatteryStorageUnit();
+            Mock<IMetricsPublisher> publisher = new Mock<IMetricsPublisher>();
+            Mock<BatteryBankConfig> firstConfig = new Mock<BatteryBankConfig>();
+            firstConfig.SetupGet(x => x.Name).Returns("BB 44.1");
+            Mock<BatteryBankConfig> secondConfig = new Mock<BatteryBankConfig>();
+            secondConfig.SetupGet(x => x.Name).Returns("BB 44.2");
+            BatteryBank first = new BatteryBank(NullLogger.Instance, firstConfig.Object, unit, publisher.Object, new ModbusRegister("BB 44.1"));
+            BatteryBank second = new BatteryBank(NullLogger.Instance, secondConfig.Object, unit, publisher.Object, new ModbusRegister("BB 44.2"));
+            using Barrier barrier = new Barrier(2);
+            // Subscribed before the battery banks are added to the unit, so it runs before the handler of the unit
+            first.StateChanged += (_, _) => barrier.SignalAndWait(TimeSpan.FromSeconds(5));
+            second.StateChanged += (_, _) => barrier.SignalAndWait(TimeSpan.FromSeconds(5));
+            unit.BatteryBanks.Add(first);
+            unit.BatteryBanks.Add(second);
+            Task firstReport = Task.Factory.StartNew(() => first.ReportState(BatteryBankState.Disconnected), CancellationToken.None,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            Task secondReport = Task.Factory.StartNew(() => second.ReportState(BatteryBankState.Disconnected), CancellationToken.None,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+            Task reports = Task.WhenAll(firstReport, secondReport);
+            Task completed = await Task.WhenAny(reports, Task.Delay(TimeSpan.FromSeconds(10)));
+
+            Assert.AreSame(reports, completed, "The state updates of the sibling battery banks deadlocked");
+            await reports;
+            Assert.AreEqual(BatteryBankState.Disconnected, first.State);
+            Assert.AreEqual(BatteryBankState.Disconnected, second.State);
+        }
+
+
+        /// <summary>
+        /// Creates a battery storage unit that handles the state changes of its battery banks.
+        /// </summary>
+        /// <returns>The battery storage unit.</returns>
+        private static DerBatteryStorageUnit CreateBatteryStorageUnit()
+        {
+            Mock<DerConfig> derConfig = new Mock<DerConfig>();
+            derConfig.SetupGet(x => x.Name).Returns("DerConfig");
+            Mock<Der> der = new Mock<Der>(NullLogger.Instance, derConfig.Object);
+            Mock<DerGroupConfig> groupConfig = new Mock<DerGroupConfig>();
+            groupConfig.SetupGet(x => x.Name).Returns("DerGroupConfig");
+            Mock<DerGroup> group = new Mock<DerGroup>(NullLogger.Instance, groupConfig.Object, der.Object);
+            Mock<DerCircuitConfig> circuitConfig = new Mock<DerCircuitConfig>();
+            circuitConfig.SetupGet(x => x.Name).Returns("DerCircuitConfig");
+            DerCircuit circuit = new DerCircuit(NullLogger.Instance, circuitConfig.Object, group.Object);
+            DerBatteryStorageUnitConfig unitConfig = new DerBatteryStorageUnitConfig { ChangedBy = "Test", Name = "Bess 44", DerCircuitConfig = circuitConfig.Object };
+
+            return new DerBatteryStorageUnit(NullLogger.Instance, unitConfig, circuit);
+        }
+
     }
 }

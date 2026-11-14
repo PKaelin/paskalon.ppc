@@ -85,19 +85,14 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// </summary>
         public BatteryBankState State
         {
-            get { lock (dataLock) { return field; } }
+            get { lock (dataLock) { return _state; } }
             set
             {
                 bool changed;
 
                 lock (dataLock)
                 {
-                    changed = field != value;
-
-                    if (changed)
-                    {
-                        field = value;
-                    }
+                    changed = ChangeState(value);
                 }
 
                 if (changed)
@@ -106,6 +101,12 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
                 }
             }
         }
+
+
+        /// <summary>
+        /// Backing field of <see cref="State"/>, only access it while holding the data lock.
+        /// </summary>
+        private BatteryBankState _state;
 
 
         /// <summary>
@@ -605,6 +606,8 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// <param name="reportedState">The reported state from the device.</param>
         protected void UpdateState(BatteryBankState reportedState)
         {
+            bool changed;
+
             lock (dataLock)
             {
                 if (_pendingState.HasValue == true)
@@ -625,7 +628,37 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
                     }
                 }
 
-                State = reportedState;
+                changed = ChangeState(reportedState);
+            }
+
+            if (changed)
+            {
+                SetState(reportedState);
+            }
+        }
+
+
+        /// <summary>
+        /// Changes the state.
+        /// </summary>
+        /// <param name="state">The new state.</param>
+        /// <returns>True if the state changed otherwise false.</returns>
+        /// <remarks>
+        /// The lock is reentrant, callers that check the pending state hold the data lock around this call to keep both atomic.
+        /// Does not raise <see cref="StateChanged"/>, call <see cref="SetState(BatteryBankState)"/> after the data lock is released.
+        /// </remarks>
+        private bool ChangeState(BatteryBankState state)
+        {
+            lock (dataLock)
+            {
+                if (_state == state)
+                {
+                    return false;
+                }
+
+                _state = state;
+
+                return true;
             }
         }
 
@@ -866,9 +899,20 @@ namespace paskalON.Devices.Domain.EnergyStorages.Batteries
         /// </summary>
         protected void RaiseCommunicationError()
         {
-            ClearPendingState();
+            bool changed;
+
             CommunicationError = true;
-            State = BatteryBankState.Fault;
+
+            lock (dataLock)
+            {
+                ClearPendingState();
+                changed = ChangeState(BatteryBankState.Fault);
+            }
+
+            if (changed)
+            {
+                SetState(BatteryBankState.Fault);
+            }
         }
     }
 }

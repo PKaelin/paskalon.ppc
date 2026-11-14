@@ -111,19 +111,14 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>
         public PcsState State
         {
-            get { lock (dataLock) { return field; } }
+            get { lock (dataLock) { return _state; } }
             set
             {
                 bool changed;
 
                 lock (dataLock)
                 {
-                    changed = field != value;
-
-                    if (changed)
-                    {
-                        field = value;
-                    }
+                    changed = ChangeState(value);
                 }
 
                 if (changed)
@@ -132,6 +127,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                 }
             }
         }
+
+
+        /// <summary>
+        /// Backing field of <see cref="State"/>, only access it while holding the data lock.
+        /// </summary>
+        private PcsState _state;
 
 
         /// <summary>
@@ -607,12 +608,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public virtual async Task StartAsync()
         {
             _logger.LogInformation("{Name} start requested.", Name);
-
-            lock (dataLock)
-            {
-                SetPendingState(PcsState.Starting);
-                State = PcsState.Starting;
-            }
+            ChangeToPendingState(PcsState.Starting);
 
             if (DerUnit is DerBatteryStorageUnit)
             {
@@ -625,12 +621,7 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public virtual async Task StopAsync()
         {
             _logger.LogInformation("{Name} stop requested.", Name);
-
-            lock (dataLock)
-            {
-                SetPendingState(PcsState.Stopping);
-                State = PcsState.Stopping;
-            }
+            ChangeToPendingState(PcsState.Stopping);
 
             _activePowerTarget = 0;
             _reactivePowerTarget = 0;
@@ -641,6 +632,8 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         public virtual async Task StandbyAsync(double? standbyActivePower = null)
         {
             _logger.LogInformation("{Name} standby requested with standby active power: {StandbyActivePower}.", Name, standbyActivePower ?? StandbyActivePowerWatts);
+
+            bool changed;
 
             lock (dataLock)
             {
@@ -656,7 +649,12 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                 }
 
                 SetPendingState(PcsState.EnteringStandby);
-                State = PcsState.EnteringStandby;
+                changed = ChangeState(PcsState.EnteringStandby);
+            }
+
+            if (changed)
+            {
+                SetState(PcsState.EnteringStandby);
             }
         }
 
@@ -728,6 +726,8 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// <param name="reportedState">The reported state from the device.</param>
         protected void UpdateState(PcsState reportedState)
         {
+            bool changed;
+
             lock (dataLock)
             {
                 if (_pendingState.HasValue == true)
@@ -748,7 +748,58 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
                     }
                 }
 
-                State = reportedState;
+                changed = ChangeState(reportedState);
+            }
+
+            if (changed)
+            {
+                SetState(reportedState);
+            }
+        }
+
+
+        /// <summary>
+        /// Sets the pending state and changes the state to it.
+        /// </summary>
+        /// <param name="pending">The pending state.</param>
+        private void ChangeToPendingState(PcsState pending)
+        {
+            bool changed;
+
+            lock (dataLock)
+            {
+                SetPendingState(pending);
+                changed = ChangeState(pending);
+            }
+
+            if (changed)
+            {
+                SetState(pending);
+            }
+        }
+
+
+        /// <summary>
+        /// Changes the state.
+        /// </summary>
+        /// <param name="state">The new state.</param>
+        /// <returns>True if the state changed otherwise false.</returns>
+        /// <remarks>
+        /// The lock is reentrant, callers that check the pending state hold the data lock around this call to keep both atomic.
+        /// Does not raise <see cref="StateChanged"/>, call <see cref="SetState(PcsState)"/> after the data lock is released.
+        /// </remarks>
+        private bool ChangeState(PcsState state)
+        {
+            lock (dataLock)
+            {
+                if (_state == state)
+                {
+                    return false;
+                }
+
+                _state = state;
+
+                return true;
             }
         }
 
@@ -1086,9 +1137,20 @@ namespace paskalON.Devices.Domain.PowerConversionSystems
         /// </summary>
         protected void RaiseCommunicationError()
         {
-            ClearPendingState();
+            bool changed;
+
+            lock (dataLock)
+            {
+                ClearPendingState();
+                changed = ChangeState(PcsState.Fault);
+            }
+
+            if (changed)
+            {
+                SetState(PcsState.Fault);
+            }
+
             CommunicationError = true;
-            State = PcsState.Fault;
         }
 
 

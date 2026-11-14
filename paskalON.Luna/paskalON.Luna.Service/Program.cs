@@ -112,7 +112,7 @@ try
     builder.Services.AddKeyedSingleton(nameof(DeviceServer), (_, _) => new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
     {
         BaseAddress = dsBaseAddress,
-        Timeout = TimeSpan.FromSeconds(10)
+        Timeout = TimeSpan.FromSeconds(30)
     });
     builder.Services.AddSingleton<IDeviceServer>(sp => new DeviceServer(sp.GetRequiredKeyedService<HttpClient>(nameof(DeviceServer))));
     builder.Services.AddSingleton<IDeviceClient, DeviceClient>();
@@ -122,7 +122,7 @@ try
     builder.Services.AddKeyedSingleton(nameof(OperatingModeServer), (_, _) => new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
     {
         BaseAddress = omBaseAddress,
-        Timeout = TimeSpan.FromSeconds(10)
+        Timeout = TimeSpan.FromSeconds(30)
     });
     builder.Services.AddSingleton<IOperatingModeServer>(sp => new OperatingModeServer(sp.GetRequiredKeyedService<HttpClient>(nameof(OperatingModeServer))));
 
@@ -131,7 +131,7 @@ try
     builder.Services.AddKeyedSingleton(nameof(AlarmServer), (_, _) => new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
     {
         BaseAddress = alBaseAddress,
-        Timeout = TimeSpan.FromSeconds(10)
+        Timeout = TimeSpan.FromSeconds(30)
     });
     builder.Services.AddSingleton<IAlarmServer>(sp => new AlarmServer(sp.GetRequiredKeyedService<HttpClient>(nameof(AlarmServer))));
 

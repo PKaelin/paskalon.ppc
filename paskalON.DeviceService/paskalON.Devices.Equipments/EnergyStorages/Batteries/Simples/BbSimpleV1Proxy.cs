@@ -109,11 +109,8 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                 }
                 catch
                 {
-                    lock (dataLock)
-                    {
-                        RaiseCommunicationError();
-                        throw;
-                    }
+                    RaiseCommunicationError();
+                    throw;
                 }
             }
             finally
@@ -140,11 +137,8 @@ namespace paskalON.Devices.Equipments.EnergyStorages.Batteries.Simples
                     }
                     catch
                     {
-                        lock (dataLock)
-                        {
-                            RaiseCommunicationError();
-                            throw;
-                        }
+                        RaiseCommunicationError();
+                        throw;
                     }
                 }
             }
