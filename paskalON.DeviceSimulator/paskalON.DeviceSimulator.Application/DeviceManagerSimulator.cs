@@ -273,6 +273,18 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <inheritdoc/>
+        public void SetResponseDynamics(int deviceId, double deadTimeMilliseconds, double timeConstantMilliseconds)
+        {
+            PowerConversionSystemSimulationBase device = SimulationDevices.Find<PowerConversionSystemSimulationBase>(deviceId)
+                ?? throw new KeyNotFoundException($"No simulated {SimulationDeviceType.PowerConversionSystem} with device ID {deviceId} exists.");
+
+            device.SetResponseDynamics(TimeSpan.FromMilliseconds(deadTimeMilliseconds), TimeSpan.FromMilliseconds(timeConstantMilliseconds));
+            _logger.LogInformation("Response of PCS {DeviceId} changed. Dead time: {DeadTime} ms Time constant: {TimeConstant} ms",
+                deviceId, deadTimeMilliseconds, timeConstantMilliseconds);
+        }
+
+
+        /// <inheritdoc/>
         public void SetStateOfCharge(int deviceId, double preferredStateOfCharge)
         {
             BatteryBankSimulationBase device = FindBatteryBank(deviceId);

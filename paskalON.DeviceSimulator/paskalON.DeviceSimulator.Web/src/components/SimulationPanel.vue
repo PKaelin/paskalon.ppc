@@ -3,14 +3,14 @@ import { computed, ref, watch } from 'vue';
 import BitmaskEditor from './BitmaskEditor.vue';
 import CollapseTransition from './CollapseTransition.vue';
 import { SimulationDeviceType, type SimulationDeviceTypeValue, type SimulationDto } from '@/types/der';
-import { setChargeSpeed, setCommunication, setEvents, setPowerTaper, setStateOfCharge, slowDownPower } from '@/api/derApi';
+import { setChargeSpeed, setCommunication, setEvents, setPowerTaper, setResponseDynamics, setStateOfCharge, slowDownPower } from '@/api/derApi';
 import { useNotifications } from '@/composables/useNotifications';
 
 /**
  * Simulation controls of a simulated PCS, battery bank or power meter:
  *   - warning / fault / vendor event bitmask injection (PCS, battery bank)
  *   - communication loss (the Modbus server stops answering / the C37 server stops streaming)
- *   - PCS only: slow down the power response
+ *   - PCS only: slow down the power response (ramp limit, dead time and first-order lag)
  *   - battery bank only: set the preferred state of charge, the charge speed (1x real time .. 100x) and the power taper
  *
  * Successful changes are written into the simulation DTO right away, the next refresh /
@@ -110,6 +110,21 @@ watch(
     }
 );
 
+const MAX_DEAD_TIME_MS = 10000;
+const MAX_TIME_CONSTANT_MS = 60000;
+const deadTime = ref<number>(props.simulation.responseDeadTimeMilliseconds ?? 0);
+const timeConstant = ref<number>(props.simulation.responseTimeConstantMilliseconds ?? 0);
+
+watch(
+    () => [props.simulation.responseDeadTimeMilliseconds, props.simulation.responseTimeConstantMilliseconds],
+    ([dead, constant]) => {
+        if (!busy.value) {
+            deadTime.value = dead ?? 0;
+            timeConstant.value = constant ?? 0;
+        }
+    }
+);
+
 watch(
     () => props.simulation.chargeSpeedFactor,
     (factor) => {
@@ -204,6 +219,33 @@ async function applySlowDown(): Promise<void> {
     if (applied) {
         props.simulation.slowActivePowerByPercent = active;
         props.simulation.slowReactivePowerByPercent = reactive;
+    }
+}
+
+async function applyResponseDynamics(): Promise<void> {
+    const dead = Number(deadTime.value);
+    const constant = Number(timeConstant.value);
+
+    if (!Number.isFinite(dead) || dead < 0 || dead > MAX_DEAD_TIME_MS) {
+        notify(`Dead time must be between 0 and ${MAX_DEAD_TIME_MS} ms.`, 'danger', 8000);
+        return;
+    }
+
+    if (!Number.isFinite(constant) || constant < 0 || constant > MAX_TIME_CONSTANT_MS) {
+        notify(`Time constant must be between 0 and ${MAX_TIME_CONSTANT_MS} ms.`, 'danger', 8000);
+        return;
+    }
+
+    const applied = await run(
+        () => setResponseDynamics({ deviceId: props.deviceId, deadTimeMilliseconds: dead, timeConstantMilliseconds: constant }),
+        dead === 0 && constant === 0
+            ? `${props.deviceName} reacts without delay and lag again.`
+            : `${props.deviceName} reacts after ${dead} ms and settles with a time constant of ${constant} ms.`
+    );
+
+    if (applied) {
+        props.simulation.responseDeadTimeMilliseconds = dead;
+        props.simulation.responseTimeConstantMilliseconds = constant;
     }
 }
 
@@ -372,6 +414,42 @@ async function onPowerTaperChange(event: Event): Promise<void> {
                     <div class="simulation-hint mt-1">
                         Two separate limits: P limits how fast the active power changes, Q how fast the reactive power changes,
                         each in percent of its nameplate per second (e.g. 10 = 10% of the nameplate per second). 0 = instant (ideal PCS).
+                    </div>
+                </div>
+
+                <div v-if="isPowerConversionSystem" class="ramp-settings">
+                    <div class="ramp-caption">Response delay</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="input-group input-group-sm ramp-input">
+                            <span class="input-group-text">Dead time</span>
+                            <input v-model.number="deadTime"
+                                   class="form-control font-monospace"
+                                   type="number"
+                                   min="0"
+                                   :max="MAX_DEAD_TIME_MS"
+                                   step="100"
+                                   :disabled="busy"
+                                   aria-label="Dead time in milliseconds before the PCS reacts to a new setpoint" />
+                            <span class="input-group-text">ms</span>
+                        </div>
+                        <div class="input-group input-group-sm ramp-input">
+                            <span class="input-group-text">Time constant</span>
+                            <input v-model.number="timeConstant"
+                                   class="form-control font-monospace"
+                                   type="number"
+                                   min="0"
+                                   :max="MAX_TIME_CONSTANT_MS"
+                                   step="100"
+                                   :disabled="busy"
+                                   aria-label="Time constant in milliseconds of the first-order lag of the power response" />
+                            <span class="input-group-text">ms</span>
+                        </div>
+                        <button class="btn btn-sm btn-primary" type="button" :disabled="busy" @click="applyResponseDynamics">Apply</button>
+                    </div>
+                    <div class="simulation-hint mt-1">
+                        Applies to P and Q. Dead time: the PCS reacts to a new setpoint only after this delay (0..10000 ms).
+                        Time constant: after the dead time the power settles exponentially, 63% of the step after one time constant,
+                        95% after three (0..60000 ms). The ramp limit above still applies. 0 = ideal PCS. Typical real PCS: 200..1000 ms dead time.
                     </div>
                 </div>
 

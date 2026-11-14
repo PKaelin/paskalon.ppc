@@ -17,10 +17,24 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
     /// in proportion to their usable capacity. An injected fault puts the PCS into the fault state (no power, AC breaker
     /// open). Commands are rejected while the fault is active. After the fault is cleared the PCS stays in the fault state
     /// until the controller writes the next start, stop or standby command.
+    /// The power response can be made non-ideal: a dead time delays the setpoints, a first-order lag (time constant)
+    /// lets the power settle exponentially and a ramp limits the change per second. All of them are 0 (ideal) by default.
     /// Vendor simulations only map the command and telemetry registers.
     /// </remarks>
     public abstract class PowerConversionSystemSimulationBase : ISimulatedDevice, IEventInjectable
     {
+        /// <summary>
+        /// Maximum response dead time.
+        /// </summary>
+        public static readonly TimeSpan MaximumResponseDeadTime = TimeSpan.FromSeconds(10);
+
+
+        /// <summary>
+        /// Maximum response time constant of the first-order lag.
+        /// </summary>
+        public static readonly TimeSpan MaximumResponseTimeConstant = TimeSpan.FromSeconds(60);
+
+
         /// <summary>
         /// Warning, fault and vendor event registers.
         /// </summary>
@@ -28,9 +42,24 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
 
 
         /// <summary>
+        /// Setpoints read from the controller with the simulation time from which they are effective, oldest first.
+        /// </summary>
+        /// <remarks>
+        /// Holds the setpoints of the last dead time plus the last setpoint older than the dead time.
+        /// </remarks>
+        private readonly List<SetpointSample> _setpointHistory = new List<SetpointSample>();
+
+
+        /// <summary>
         /// Battery banks connected to the DC side of this PCS.
         /// </summary>
         private IReadOnlyList<BatteryBankSimulationBase> _batteryBanks = Array.Empty<BatteryBankSimulationBase>();
+
+
+        /// <summary>
+        /// Simulation time, the sum of all elapsed tick times.
+        /// </summary>
+        private TimeSpan _simulationTime = TimeSpan.Zero;
 
 
         /// <summary>
@@ -146,6 +175,27 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
 
 
         /// <summary>
+        /// Time after which the PCS starts to react to a new active or reactive power setpoint. Zero means no delay (ideal).
+        /// </summary>
+        public TimeSpan ResponseDeadTime
+        {
+            get { lock (_dataLock) { return field; } }
+            private set { lock (_dataLock) { field = value; } }
+        } = TimeSpan.Zero;
+
+
+        /// <summary>
+        /// Time constant of the first-order lag: after the dead time the power reaches 63% of a setpoint step after one
+        /// time constant and 95% after three. Zero means instant (ideal).
+        /// </summary>
+        public TimeSpan ResponseTimeConstant
+        {
+            get { lock (_dataLock) { return field; } }
+            private set { lock (_dataLock) { field = value; } }
+        } = TimeSpan.Zero;
+
+
+        /// <summary>
         /// Flag whether a fault is active (fault register other than 0). An active fault rejects all commands.
         /// </summary>
         public bool IsFaultActive { get => (_events.Fault ?? 0) != 0; }
@@ -231,6 +281,29 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
         }
 
 
+        /// <summary>
+        /// Sets the dead time and the first-order lag of the active and reactive power response of the PCS.
+        /// </summary>
+        /// <param name="deadTime">Time after which the PCS starts to react to a new setpoint (0..10 s). Zero means no delay.</param>
+        /// <param name="timeConstant">Time constant of the first-order lag (0..60 s). Zero means instant.</param>
+        /// <remarks>
+        /// The dead time and the lag act before the ramp of <see cref="SlowDownPower(double, double)"/>, so all three can be combined.
+        /// </remarks>
+        public void SetResponseDynamics(TimeSpan deadTime, TimeSpan timeConstant)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(deadTime, TimeSpan.Zero);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(deadTime, MaximumResponseDeadTime);
+            ArgumentOutOfRangeException.ThrowIfLessThan(timeConstant, TimeSpan.Zero);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(timeConstant, MaximumResponseTimeConstant);
+
+            lock (_dataLock)
+            {
+                ResponseDeadTime = deadTime;
+                ResponseTimeConstant = timeConstant;
+            }
+        }
+
+
         /// <inheritdoc/>
         /// <remarks>
         /// A fault bitmask other than 0 puts the PCS into the fault state. While the fault register is not 0, all start,
@@ -266,7 +339,12 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
                     State = command.Value;
                 }
 
+                // The setpoints written since the last tick are effective from the start of this tick
                 (double activeSetpoint, double reactiveSetpoint) = ReadSetpoints();
+                TimeSpan tickStart = _simulationTime;
+                _simulationTime += elapsed;
+                _setpointHistory.Add(new SetpointSample(tickStart, activeSetpoint, reactiveSetpoint));
+
                 List<BatteryBankSimulationBase> connected = _batteryBanks.Where(bank => bank.IsConnected).ToList();
                 double dischargeLimit = Math.Min(Settings.NameplateMaximumActivePower, connected.Sum(bank => bank.AvailableDischargePower));
                 double chargeLimit = Math.Min(Settings.NameplateMaximumActivePower, connected.Sum(bank => bank.AvailableChargePower));
@@ -274,28 +352,16 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
 
                 if (isConverting)
                 {
-                    double activeTarget = Math.Clamp(activeSetpoint, -chargeLimit, dischargeLimit);
-                    double active = Ramp(ActivePower, activeTarget, SlowActivePowerByPercent, Settings.NameplateMaximumActivePower, elapsed);
-                    ActivePower = Math.Clamp(active, -chargeLimit, dischargeLimit);
+                    FollowSetpoints(tickStart, _simulationTime, chargeLimit, dischargeLimit, connected.Count > 0);
                 }
                 else
                 {
                     ActivePower = 0;
-                }
-
-                double reactiveLimit = connected.Count > 0 ? GetReactiveLimit(ActivePower) : 0;
-
-                if (isConverting)
-                {
-                    double reactiveTarget = Math.Clamp(reactiveSetpoint, -reactiveLimit, reactiveLimit);
-                    double reactive = Ramp(ReactivePower, reactiveTarget, SlowReactivePowerByPercent, Settings.NameplateMaximumReactivePower, elapsed);
-                    ReactivePower = Math.Clamp(reactive, -reactiveLimit, reactiveLimit);
-                }
-                else
-                {
                     ReactivePower = 0;
                 }
 
+                PruneSetpointHistory();
+                double reactiveLimit = connected.Count > 0 ? GetReactiveLimit(ActivePower) : 0;
                 ActiveAvailablePower = ActivePower < 0 ? -chargeLimit : dischargeLimit;
                 ReactiveAvailablePower = reactiveLimit;
                 DistributeActivePower();
@@ -328,6 +394,90 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
         /// </summary>
         /// <param name="telemetry">Telemetry of the PCS.</param>
         protected abstract void WriteTelemetry(PowerConversionSystemSimulationTelemetry telemetry);
+
+
+        /// <summary>
+        /// Moves the active and reactive power towards the delayed setpoints during one tick.
+        /// </summary>
+        /// <param name="tickStart">Simulation time at the start of the tick.</param>
+        /// <param name="tickEnd">Simulation time at the end of the tick.</param>
+        /// <param name="chargeLimit">Charge limit in watts (positive value).</param>
+        /// <param name="dischargeLimit">Discharge limit in watts (positive value).</param>
+        /// <param name="hasConnectedBank">Flag whether at least one battery bank is connected.</param>
+        /// <remarks>
+        /// The tick is split at the times where a delayed setpoint becomes effective, so the dead time is not rounded to
+        /// the tick interval. Before the first setpoint passed the dead time, the PCS holds its power.
+        /// </remarks>
+        private void FollowSetpoints(TimeSpan tickStart, TimeSpan tickEnd, double chargeLimit, double dischargeLimit, bool hasConnectedBank)
+        {
+            TimeSpan cursor = tickStart;
+
+            while (cursor < tickEnd)
+            {
+                TimeSpan delayedTime = cursor - ResponseDeadTime;
+                int index = _setpointHistory.FindLastIndex(sample => sample.EffectiveFrom <= delayedTime);
+                TimeSpan segmentEnd = tickEnd;
+
+                if (index + 1 < _setpointHistory.Count)
+                {
+                    TimeSpan nextChange = _setpointHistory[index + 1].EffectiveFrom + ResponseDeadTime;
+                    segmentEnd = nextChange < tickEnd ? nextChange : tickEnd;
+                }
+
+                TimeSpan segment = segmentEnd - cursor;
+                double activeSetpoint = index >= 0 ? _setpointHistory[index].ActivePower : ActivePower;
+                double reactiveSetpoint = index >= 0 ? _setpointHistory[index].ReactivePower : ReactivePower;
+
+                double activeTarget = Math.Clamp(activeSetpoint, -chargeLimit, dischargeLimit);
+                double active = Lag(ActivePower, activeTarget, ResponseTimeConstant, segment);
+                active = Ramp(ActivePower, active, SlowActivePowerByPercent, Settings.NameplateMaximumActivePower, segment);
+                ActivePower = Math.Clamp(active, -chargeLimit, dischargeLimit);
+
+                double reactiveLimit = hasConnectedBank ? GetReactiveLimit(ActivePower) : 0;
+                double reactiveTarget = Math.Clamp(reactiveSetpoint, -reactiveLimit, reactiveLimit);
+                double reactive = Lag(ReactivePower, reactiveTarget, ResponseTimeConstant, segment);
+                reactive = Ramp(ReactivePower, reactive, SlowReactivePowerByPercent, Settings.NameplateMaximumReactivePower, segment);
+                ReactivePower = Math.Clamp(reactive, -reactiveLimit, reactiveLimit);
+
+                cursor = segmentEnd;
+            }
+        }
+
+
+        /// <summary>
+        /// Removes the setpoints that can no longer become effective, keeping the last setpoint older than the dead time.
+        /// </summary>
+        private void PruneSetpointHistory()
+        {
+            TimeSpan delayedTime = _simulationTime - ResponseDeadTime;
+            int index = _setpointHistory.FindLastIndex(sample => sample.EffectiveFrom <= delayedTime);
+
+            if (index > 0)
+            {
+                _setpointHistory.RemoveRange(0, index);
+            }
+        }
+
+
+        /// <summary>
+        /// Moves a value towards its target along a first-order lag.
+        /// </summary>
+        /// <param name="current">Current value.</param>
+        /// <param name="target">Target value.</param>
+        /// <param name="timeConstant">Time constant. Zero means instant.</param>
+        /// <param name="elapsed">Elapsed time.</param>
+        /// <returns>The new value.</returns>
+        private static double Lag(double current, double target, TimeSpan timeConstant, TimeSpan elapsed)
+        {
+            if (timeConstant <= TimeSpan.Zero)
+            {
+                return target;
+            }
+
+            double factor = 1 - Math.Exp(-elapsed.TotalSeconds / timeConstant.TotalSeconds);
+
+            return current + (target - current) * factor;
+        }
 
 
         /// <summary>
@@ -415,5 +565,14 @@ namespace paskalON.DeviceSimulator.Equipments.PowerConversionSystems
                 AcCurrent = acVoltage > 0 ? apparentPower / (Math.Sqrt(3) * acVoltage) : 0
             };
         }
+
+
+        /// <summary>
+        /// Setpoints read from the controller.
+        /// </summary>
+        /// <param name="EffectiveFrom">Simulation time from which the setpoints are effective (without dead time).</param>
+        /// <param name="ActivePower">Active power setpoint in watts.</param>
+        /// <param name="ReactivePower">Reactive power setpoint in volt-amperes reactive.</param>
+        private readonly record struct SetpointSample(TimeSpan EffectiveFrom, double ActivePower, double ReactivePower);
     }
 }

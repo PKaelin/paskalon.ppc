@@ -101,6 +101,7 @@ namespace paskalON.DeviceSimulator.Application.UnitTest
             }, new SimulatedGrid());
             pcs.SetEvents(0b0000_0100, 0b0000_0001, 0b0000_0010);
             pcs.SlowDownPower(10, 5);
+            pcs.SetResponseDynamics(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(2000));
             DeviceMapperSimulator mapper = CreateMapper((address, port) => true);
 
             SimulationDto dto = mapper.MapSimulation(pcs, "paskalon.devicesimulator.service", 502);
@@ -116,6 +117,8 @@ namespace paskalON.DeviceSimulator.Application.UnitTest
             Assert.AreEqual((ushort)0b0000_0010, dto.VendorEvent);
             Assert.AreEqual(10, dto.SlowActivePowerByPercent);
             Assert.AreEqual(5, dto.SlowReactivePowerByPercent);
+            Assert.AreEqual(500, dto.ResponseDeadTimeMilliseconds);
+            Assert.AreEqual(2000, dto.ResponseTimeConstantMilliseconds);
             Assert.IsNull(dto.UsableStateOfCharge);
         }
 

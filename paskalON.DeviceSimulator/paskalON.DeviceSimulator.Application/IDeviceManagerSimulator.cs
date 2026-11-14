@@ -94,6 +94,17 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
+        /// Sets the dead time and the first-order lag of the active and reactive power response of a simulated PCS.
+        /// </summary>
+        /// <param name="deviceId">Device ID of the simulated PCS.</param>
+        /// <param name="deadTimeMilliseconds">Time after which the PCS starts to react to a new setpoint (0..10000 ms). 0 means no delay.</param>
+        /// <param name="timeConstantMilliseconds">Time constant of the first-order lag (0..60000 ms). 0 means instant.</param>
+        /// <exception cref="KeyNotFoundException">The simulated PCS does not exist.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The dead time or the time constant is out of range.</exception>
+        void SetResponseDynamics(int deviceId, double deadTimeMilliseconds, double timeConstantMilliseconds);
+
+
+        /// <summary>
         /// Sets the state of charge of a simulated battery bank.
         /// </summary>
         /// <param name="deviceId">Device ID of the simulated battery bank.</param>

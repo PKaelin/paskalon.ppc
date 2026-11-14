@@ -70,6 +70,10 @@ export interface SimulationDto {
     /** PCS only: maximum power change per second in percent of the nameplate (0 = instant). */
     slowActivePowerByPercent?: number | null;
     slowReactivePowerByPercent?: number | null;
+    /** PCS only: delay in ms before the PCS reacts to a new setpoint (0 = no delay). */
+    responseDeadTimeMilliseconds?: number | null;
+    /** PCS only: first-order lag time constant in ms (0 = instant). */
+    responseTimeConstantMilliseconds?: number | null;
     /** Battery bank only. */
     usableStateOfCharge?: number | null;
     /** Battery bank only: preferred (operator window) state of charge, can be below 0 % or above 100 %. */

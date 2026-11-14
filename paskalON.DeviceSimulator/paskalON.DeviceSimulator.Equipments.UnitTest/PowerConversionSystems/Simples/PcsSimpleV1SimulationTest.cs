@@ -326,6 +326,103 @@ namespace paskalON.DeviceSimulator.Equipments.UnitTest.PowerConversionSystems.Si
 
 
         [TestMethod]
+        [DataRow(500d, 5, 0d, DisplayName = "Holds the power until the dead time passed")]
+        [DataRow(500d, 6, 1000000d, DisplayName = "Follows the setpoint after the dead time")]
+        [DataRow(0d, 1, 1000000d, DisplayName = "Follows the setpoint immediately without dead time")]
+        public async Task SetResponseDynamicsDeadTimeDelaysSetpointTest(double deadTimeMilliseconds, int ticks, double expectedPower)
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            PcsSimpleV1Simulation pcs = new PcsSimpleV1Simulation(store, CreatePcsSettings(), new SimulatedGrid());
+            pcs.AttachBatteryBanks(new[] { await CreateConnectedBankAsync(11, 5000000, 2500000) });
+            pcs.SetResponseDynamics(TimeSpan.FromMilliseconds(deadTimeMilliseconds), TimeSpan.Zero);
+            WriteCommand(store, PcsSimpleV1Description.Register.SelectorState, (short)PcsSimpleV1Description.State.On);
+            WriteCommand(store, PcsSimpleV1Description.Register.PReference, 1000);
+            WriteCommand(store, PcsSimpleV1Description.Register.QReference, 500);
+
+            await TickAsync(pcs, TimeSpan.FromMilliseconds(100), ticks);
+
+            Assert.AreEqual(expectedPower, pcs.ActivePower, 0.001);
+            Assert.AreEqual(expectedPower / 2, pcs.ReactivePower, 0.001);
+            Assert.AreEqual((short)(expectedPower / 1000), ReadRegister(store, PcsSimpleV1Description.Register.P));
+        }
+
+
+        [TestMethod]
+        public async Task SetResponseDynamicsDeadTimeDelaysEverySetpointChangeTest()
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            PcsSimpleV1Simulation pcs = new PcsSimpleV1Simulation(store, CreatePcsSettings(), new SimulatedGrid());
+            pcs.AttachBatteryBanks(new[] { await CreateConnectedBankAsync(11, 5000000, 2500000) });
+            pcs.SetResponseDynamics(TimeSpan.FromMilliseconds(500), TimeSpan.Zero);
+            WriteCommand(store, PcsSimpleV1Description.Register.SelectorState, (short)PcsSimpleV1Description.State.On);
+            WriteCommand(store, PcsSimpleV1Description.Register.PReference, 1000);
+            await TickAsync(pcs, TimeSpan.FromMilliseconds(100), 2);
+            WriteCommand(store, PcsSimpleV1Description.Register.PReference, 500);
+
+            await TickAsync(pcs, TimeSpan.FromMilliseconds(100), 4);
+            double afterSixHundredMilliseconds = pcs.ActivePower;
+            await TickAsync(pcs, TimeSpan.FromMilliseconds(100), 2);
+
+            Assert.AreEqual(1000000, afterSixHundredMilliseconds, 0.001);
+            Assert.AreEqual(500000, pcs.ActivePower, 0.001);
+        }
+
+
+        [TestMethod]
+        [DataRow(0d, 1, 632120.559, DisplayName = "63% of the step after one time constant")]
+        [DataRow(0d, 3, 950212.932, DisplayName = "95% of the step after three time constants")]
+        [DataRow(300d, 1, 503414.696, DisplayName = "Dead time within the tick shortens the lag to 700 ms")]
+        public async Task SetResponseDynamicsTimeConstantSettlesExponentiallyTest(double deadTimeMilliseconds, int ticks, double expectedPower)
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            PcsSimpleV1Simulation pcs = new PcsSimpleV1Simulation(store, CreatePcsSettings(), new SimulatedGrid());
+            pcs.AttachBatteryBanks(new[] { await CreateConnectedBankAsync(11, 5000000, 2500000) });
+            pcs.SetResponseDynamics(TimeSpan.FromMilliseconds(deadTimeMilliseconds), TimeSpan.FromSeconds(1));
+            WriteCommand(store, PcsSimpleV1Description.Register.SelectorState, (short)PcsSimpleV1Description.State.On);
+            WriteCommand(store, PcsSimpleV1Description.Register.PReference, 1000);
+
+            await TickAsync(pcs, TimeSpan.FromSeconds(1), ticks);
+
+            Assert.AreEqual(expectedPower, pcs.ActivePower, 0.001);
+            Assert.AreEqual(TimeSpan.FromSeconds(1), pcs.ResponseTimeConstant);
+            Assert.AreEqual(TimeSpan.FromMilliseconds(deadTimeMilliseconds), pcs.ResponseDeadTime);
+        }
+
+
+        [TestMethod]
+        public async Task SetResponseDynamicsTimeConstantIsLimitedByRampTest()
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            PcsSimpleV1Simulation pcs = new PcsSimpleV1Simulation(store, CreatePcsSettings(), new SimulatedGrid());
+            pcs.AttachBatteryBanks(new[] { await CreateConnectedBankAsync(11, 5000000, 2500000) });
+            pcs.SetResponseDynamics(TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            pcs.SlowDownPower(10, 0);
+            WriteCommand(store, PcsSimpleV1Description.Register.SelectorState, (short)PcsSimpleV1Description.State.On);
+            WriteCommand(store, PcsSimpleV1Description.Register.PReference, 1000);
+
+            await pcs.TickAsync(TimeSpan.FromSeconds(1), CancellationToken.None);
+
+            // The lag alone reaches 632kW, the ramp limits it to 10% of 2MW per second
+            Assert.AreEqual(200000, pcs.ActivePower, 0.001);
+        }
+
+
+        [TestMethod]
+        [DataRow(-1d, 0d, DisplayName = "Negative dead time")]
+        [DataRow(10001d, 0d, DisplayName = "Dead time above 10 s")]
+        [DataRow(0d, -1d, DisplayName = "Negative time constant")]
+        [DataRow(0d, 60001d, DisplayName = "Time constant above 60 s")]
+        public void SetResponseDynamicsOutOfRangeThrowsTest(double deadTimeMilliseconds, double timeConstantMilliseconds)
+        {
+            SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
+            PcsSimpleV1Simulation pcs = new PcsSimpleV1Simulation(store, CreatePcsSettings(), new SimulatedGrid());
+
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+                pcs.SetResponseDynamics(TimeSpan.FromMilliseconds(deadTimeMilliseconds), TimeSpan.FromMilliseconds(timeConstantMilliseconds)));
+        }
+
+
+        [TestMethod]
         public void SetEventsWritesWarningAndVendorEventBitmasksTest()
         {
             SimulationModbusDataStore store = new SimulationModbusDataStore(new ModbusDataMemoryStore());
@@ -385,6 +482,15 @@ namespace paskalON.DeviceSimulator.Equipments.UnitTest.PowerConversionSystems.Si
             await bank.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
 
             return bank;
+        }
+
+
+        private async Task TickAsync(PcsSimpleV1Simulation pcs, TimeSpan elapsed, int ticks)
+        {
+            for (int tick = 0; tick < ticks; tick++)
+            {
+                await pcs.TickAsync(elapsed, CancellationToken.None);
+            }
         }
 
 

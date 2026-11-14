@@ -76,6 +76,18 @@ namespace paskalON.DeviceSimulator.Dto.Simulations
 
 
         /// <summary>
+        /// PCS only: time in milliseconds after which the PCS starts to react to a new setpoint. 0 means no delay.
+        /// </summary>
+        public double? ResponseDeadTimeMilliseconds { get; init; }
+
+
+        /// <summary>
+        /// PCS only: time constant in milliseconds of the first-order lag of the power response. 0 means instant.
+        /// </summary>
+        public double? ResponseTimeConstantMilliseconds { get; init; }
+
+
+        /// <summary>
         /// Battery bank only: usable state of charge in percent.
         /// </summary>
         public double? UsableStateOfCharge { get; init; }

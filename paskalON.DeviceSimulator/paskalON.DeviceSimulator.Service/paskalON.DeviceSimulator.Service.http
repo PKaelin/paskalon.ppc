@@ -36,6 +36,18 @@ Content-Type: application/json
 
 ###
 
+POST {{paskalON.DeviceSimulator.Service_HostAddress}}/api/v1/simulation/setresponsedynamics
+Content-Type: application/json
+
+{
+  "DeviceId": 1,
+  "DeadTimeMilliseconds": 500,
+  "TimeConstantMilliseconds": 2000
+}
+
+
+###
+
 POST {{paskalON.DeviceSimulator.Service_HostAddress}}/api/v1/simulation/setstateofcharge
 Content-Type: application/json
 

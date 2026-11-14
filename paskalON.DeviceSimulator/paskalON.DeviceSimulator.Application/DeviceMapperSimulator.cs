@@ -300,7 +300,9 @@ namespace paskalON.DeviceSimulator.Application
             return MapEvents(simulation, SimulationDeviceType.PowerConversionSystem, simulation.State.ToString(), address, port) with
             {
                 SlowActivePowerByPercent = simulation.SlowActivePowerByPercent,
-                SlowReactivePowerByPercent = simulation.SlowReactivePowerByPercent
+                SlowReactivePowerByPercent = simulation.SlowReactivePowerByPercent,
+                ResponseDeadTimeMilliseconds = simulation.ResponseDeadTime.TotalMilliseconds,
+                ResponseTimeConstantMilliseconds = simulation.ResponseTimeConstant.TotalMilliseconds
             };
         }
 

@@ -122,6 +122,33 @@ namespace paskalON.DeviceSimulator.Service.WebApi.Controllers.V1
 
 
         /// <summary>
+        /// Sets the dead time and the first-order lag of the active and reactive power response of a simulated PCS.
+        /// </summary>
+        /// <param name="request">The response dynamics request.</param>
+        /// <returns>Ok, NotFound when the PCS does not exist or BadRequest when a value is out of range.</returns>
+        [HttpPost]
+        public IActionResult SetResponseDynamics(SetResponseDynamicsRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            try
+            {
+                _deviceManager.SetResponseDynamics(request.DeviceId, request.DeadTimeMilliseconds, request.TimeConstantMilliseconds);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok();
+        }
+
+
+        /// <summary>
         /// Sets the preferred state of charge of a simulated battery bank.
         /// </summary>
         /// <param name="request">The state of charge request.</param>

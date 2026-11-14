@@ -231,6 +231,20 @@ export async function slowDownPower(request: SlowDownPowerRequest): Promise<void
     await postSimulation('slowdownpower', request, 'Slowing down the power');
 }
 
+/** Body of POST {apiBaseUrl}/v1/simulation/setresponsedynamics. */
+export interface SetResponseDynamicsRequest {
+    deviceId: number;
+    /** Delay before the PCS reacts to a new setpoint in ms (0..10000). 0 = no delay. */
+    deadTimeMilliseconds: number;
+    /** First-order lag time constant in ms (0..60000). 0 = instant. */
+    timeConstantMilliseconds: number;
+}
+
+/** Sets the dead time and the first-order lag of the power response of a simulated PCS. */
+export async function setResponseDynamics(request: SetResponseDynamicsRequest): Promise<void> {
+    await postSimulation('setresponsedynamics', request, 'Changing the response dynamics');
+}
+
 /** Body of POST {apiBaseUrl}/v1/simulation/setstateofcharge. */
 export interface SetStateOfChargeRequest {
     deviceId: number;

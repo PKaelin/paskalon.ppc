@@ -29,7 +29,7 @@ export interface AppConfig {
     signalRHubUrl: string;
     /** Set to true if the web service serializes PascalCase instead of camelCase. */
     pascalCaseApi?: boolean;
-    /** Relative path of the simulation control controller (setevents, setcommunication, slowdownpower, setstateofcharge, setchargespeed, setpowertaper). */
+    /** Relative path of the simulation control controller (setevents, setcommunication, slowdownpower, setresponsedynamics, setstateofcharge, setchargespeed, setpowertaper). */
     simulationEndpoint: string;
 }
 
