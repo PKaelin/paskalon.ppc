@@ -64,6 +64,30 @@ namespace paskalON.DeviceSimulator.Dto.Simulations
 
 
         /// <summary>
+        /// System power meter only: flag whether active power updates are dropped randomly (last value is kept).
+        /// </summary>
+        public bool? IsActivePowerDropoutEnabled { get; init; }
+
+
+        /// <summary>
+        /// System power meter only: chance in percent (0..100) that an active power update is dropped.
+        /// </summary>
+        public double? ActivePowerDropoutPercent { get; init; }
+
+
+        /// <summary>
+        /// System power meter only: flag whether reactive power updates are dropped randomly (last value is kept).
+        /// </summary>
+        public bool? IsReactivePowerDropoutEnabled { get; init; }
+
+
+        /// <summary>
+        /// System power meter only: chance in percent (0..100) that a reactive power update is dropped.
+        /// </summary>
+        public double? ReactivePowerDropoutPercent { get; init; }
+
+
+        /// <summary>
         /// PCS only: maximum active power change per second in percent of the nameplate. 0 means instant.
         /// </summary>
         public double? SlowActivePowerByPercent { get; init; }

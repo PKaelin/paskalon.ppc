@@ -3,13 +3,23 @@ import { computed, ref, watch } from 'vue';
 import BitmaskEditor from './BitmaskEditor.vue';
 import CollapseTransition from './CollapseTransition.vue';
 import { SimulationDeviceType, type SimulationDeviceTypeValue, type SimulationDto } from '@/types/der';
-import { setChargeSpeed, setCommunication, setEvents, setPowerTaper, setResponseDynamics, setStateOfCharge, slowDownPower } from '@/api/derApi';
+import {
+    setChargeSpeed,
+    setCommunication,
+    setEvents,
+    setPowerDropout,
+    setPowerTaper,
+    setResponseDynamics,
+    setStateOfCharge,
+    slowDownPower
+} from '@/api/derApi';
 import { useNotifications } from '@/composables/useNotifications';
 
 /**
  * Simulation controls of a simulated PCS, battery bank or power meter:
  *   - warning / fault / vendor event bitmask injection (PCS, battery bank)
  *   - communication loss (the Modbus server stops answering / the C37 server stops streaming)
+ *   - system power meter only: randomly skip active (P) / reactive (Q) power updates (the last value is kept)
  *   - PCS only: slow down the power response (ramp limit, dead time and first-order lag)
  *   - battery bank only: set the preferred state of charge, the charge speed (1x real time .. 100x) and the power taper
  *
@@ -95,6 +105,41 @@ const activeEvents = computed(() => {
     }
 
     return events;
+});
+
+const DEFAULT_DROPOUT_PERCENT = 5;
+
+/** Only simulated system power meters report the power dropout. */
+const hasPowerDropout = computed(
+    () => props.simulation.activePowerDropoutPercent !== null && props.simulation.activePowerDropoutPercent !== undefined
+);
+const dropoutActive = ref<number>(props.simulation.activePowerDropoutPercent ?? DEFAULT_DROPOUT_PERCENT);
+const dropoutReactive = ref<number>(props.simulation.reactivePowerDropoutPercent ?? DEFAULT_DROPOUT_PERCENT);
+
+watch(
+    () => [props.simulation.activePowerDropoutPercent, props.simulation.reactivePowerDropoutPercent],
+    ([active, reactive]) => {
+        if (!busy.value) {
+            dropoutActive.value = active ?? DEFAULT_DROPOUT_PERCENT;
+            dropoutReactive.value = reactive ?? DEFAULT_DROPOUT_PERCENT;
+        }
+    }
+);
+
+/** Header badge while P and/or Q updates are skipped. */
+const dropoutBadge = computed(() => {
+    const active = props.simulation.isActivePowerDropoutEnabled === true;
+    const reactive = props.simulation.isReactivePowerDropoutEnabled === true;
+
+    if (active && reactive) {
+        return 'P/Q skipped';
+    }
+
+    if (active) {
+        return 'P skipped';
+    }
+
+    return reactive ? 'Q skipped' : '';
 });
 
 const slowActive = ref<number>(props.simulation.slowActivePowerByPercent ?? 0);
@@ -203,6 +248,79 @@ async function onCommunicationChange(event: Event): Promise<void> {
     } else {
         checkbox.checked = props.simulation.isResponding;
     }
+}
+
+function isValidPercent(value: number): boolean {
+    return Number.isFinite(value) && value >= 0 && value <= 100;
+}
+
+/** Sends both P and Q dropout settings, returns false when the change was rejected or invalid. */
+async function applyPowerDropout(isActiveEnabled: boolean, isReactiveEnabled: boolean): Promise<boolean> {
+    const active = Number(dropoutActive.value);
+    const reactive = Number(dropoutReactive.value);
+
+    if (!isValidPercent(active) || !isValidPercent(reactive)) {
+        notify('The skip chance must be between 0 and 100 %.', 'danger', 8000);
+        return false;
+    }
+
+    const parts: string[] = [];
+
+    if (isActiveEnabled) {
+        parts.push(`${active} % of the active power updates`);
+    }
+
+    if (isReactiveEnabled) {
+        parts.push(`${reactive} % of the reactive power updates`);
+    }
+
+    const applied = await run(
+        () =>
+            setPowerDropout({
+                deviceId: props.deviceId,
+                isActivePowerDropoutEnabled: isActiveEnabled,
+                activePowerDropoutPercent: active,
+                isReactivePowerDropoutEnabled: isReactiveEnabled,
+                reactivePowerDropoutPercent: reactive
+            }),
+        parts.length === 0
+            ? `${props.deviceName} reports every active and reactive power update again.`
+            : `${props.deviceName} skips ${parts.join(' and ')} (the last value is kept).`
+    );
+
+    if (applied) {
+        props.simulation.isActivePowerDropoutEnabled = isActiveEnabled;
+        props.simulation.activePowerDropoutPercent = active;
+        props.simulation.isReactivePowerDropoutEnabled = isReactiveEnabled;
+        props.simulation.reactivePowerDropoutPercent = reactive;
+    }
+
+    return applied;
+}
+
+async function onActiveDropoutChange(event: Event): Promise<void> {
+    const checkbox = event.target as HTMLInputElement;
+    const applied = await applyPowerDropout(checkbox.checked, props.simulation.isReactivePowerDropoutEnabled === true);
+
+    if (!applied) {
+        checkbox.checked = props.simulation.isActivePowerDropoutEnabled === true;
+    }
+}
+
+async function onReactiveDropoutChange(event: Event): Promise<void> {
+    const checkbox = event.target as HTMLInputElement;
+    const applied = await applyPowerDropout(props.simulation.isActivePowerDropoutEnabled === true, checkbox.checked);
+
+    if (!applied) {
+        checkbox.checked = props.simulation.isReactivePowerDropoutEnabled === true;
+    }
+}
+
+async function applyDropoutPercent(): Promise<void> {
+    await applyPowerDropout(
+        props.simulation.isActivePowerDropoutEnabled === true,
+        props.simulation.isReactivePowerDropoutEnabled === true
+    );
 }
 
 async function applySlowDown(): Promise<void> {
@@ -314,6 +432,7 @@ async function onPowerTaperChange(event: Event): Promise<void> {
             <span class="simulation-title">Simulation</span>
             <span class="badge" :class="stateBadge">{{ simulation.state }}</span>
             <span v-if="!simulation.isResponding" class="badge bg-danger">Communication loss</span>
+            <span v-if="dropoutBadge" class="badge bg-warning text-dark">{{ dropoutBadge }}</span>
             <span v-for="active in activeEvents" :key="active.label" class="badge" :class="active.css">
                 {{ active.label }} 0x{{ active.hex }}
             </span>
@@ -359,6 +478,67 @@ async function onPowerTaperChange(event: Event): Promise<void> {
                     only every {{ protocol }}ReconnectIntervalMilliseconds (system configuration of the device service, default 30 s).
                     Until then the device keeps its communication error, a lost system power meter keeps the operating modes holding.
                 </p>
+
+                <div v-if="hasPowerDropout" class="ramp-settings">
+                    <div class="ramp-caption">Measurement dropout</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="form-check form-switch mb-0">
+                            <input :id="`dropout-active-${deviceType}-${deviceId}`"
+                                   class="form-check-input"
+                                   type="checkbox"
+                                   role="switch"
+                                   :checked="simulation.isActivePowerDropoutEnabled ?? false"
+                                   :disabled="busy"
+                                   @change="onActiveDropoutChange" />
+                            <label class="form-check-label" :for="`dropout-active-${deviceType}-${deviceId}`">
+                                Skip active power (P)
+                            </label>
+                        </div>
+                        <div class="input-group input-group-sm ramp-input">
+                            <span class="input-group-text">Chance</span>
+                            <input v-model.number="dropoutActive"
+                                   class="form-control font-monospace"
+                                   type="number"
+                                   min="0"
+                                   max="100"
+                                   step="any"
+                                   :disabled="busy"
+                                   aria-label="Chance in percent that an active power update is skipped" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input :id="`dropout-reactive-${deviceType}-${deviceId}`"
+                                   class="form-check-input"
+                                   type="checkbox"
+                                   role="switch"
+                                   :checked="simulation.isReactivePowerDropoutEnabled ?? false"
+                                   :disabled="busy"
+                                   @change="onReactiveDropoutChange" />
+                            <label class="form-check-label" :for="`dropout-reactive-${deviceType}-${deviceId}`">
+                                Skip reactive power (Q)
+                            </label>
+                        </div>
+                        <div class="input-group input-group-sm ramp-input">
+                            <span class="input-group-text">Chance</span>
+                            <input v-model.number="dropoutReactive"
+                                   class="form-control font-monospace"
+                                   type="number"
+                                   min="0"
+                                   max="100"
+                                   step="any"
+                                   :disabled="busy"
+                                   aria-label="Chance in percent that a reactive power update is skipped" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <button class="btn btn-sm btn-primary" type="button" :disabled="busy" @click="applyDropoutPercent">Apply</button>
+                    </div>
+                    <div class="simulation-hint mt-1">
+                        Intermittent measurement updates: while switched on, each C37 frame skips the P or Q update with the given chance
+                        and repeats the last value instead (e.g. 1 kW, 1 kW, 3 kW instead of 1 kW, 2 kW, 3 kW). P and Q are skipped
+                        independently, the total and the phase values together. Apparent power, voltages and currents are not affected.
+                        Off after every simulator start.
+                    </div>
+                </div>
 
                 <div v-if="!isPowerMeter" class="d-flex flex-column gap-1">
                     <BitmaskEditor v-if="simulation.hasFaultRegister"

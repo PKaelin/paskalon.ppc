@@ -273,6 +273,26 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <inheritdoc/>
+        public void SetPowerDropout(int deviceId, bool isActivePowerDropoutEnabled, double activePowerDropoutPercent,
+            bool isReactivePowerDropoutEnabled, double reactivePowerDropoutPercent)
+        {
+            // Validate both values first, so an invalid reactive value does not apply the active one
+            ArgumentOutOfRangeException.ThrowIfLessThan(activePowerDropoutPercent, 0);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(activePowerDropoutPercent, 100);
+            ArgumentOutOfRangeException.ThrowIfLessThan(reactivePowerDropoutPercent, 0);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(reactivePowerDropoutPercent, 100);
+
+            IPowerDropoutInjectable device = SimulationDevices.Find<IPowerDropoutInjectable>(deviceId)
+                ?? throw new KeyNotFoundException($"No simulated system power meter with device ID {deviceId} exists.");
+
+            device.ActivePowerDropout.Set(isActivePowerDropoutEnabled, activePowerDropoutPercent);
+            device.ReactivePowerDropout.Set(isReactivePowerDropoutEnabled, reactivePowerDropoutPercent);
+            _logger.LogInformation("Power dropout of system power meter {DeviceId} set. Active: {IsActiveEnabled} ({Active}%) Reactive: {IsReactiveEnabled} ({Reactive}%)",
+                deviceId, isActivePowerDropoutEnabled, activePowerDropoutPercent, isReactivePowerDropoutEnabled, reactivePowerDropoutPercent);
+        }
+
+
+        /// <inheritdoc/>
         public void SetResponseDynamics(int deviceId, double deadTimeMilliseconds, double timeConstantMilliseconds)
         {
             PowerConversionSystemSimulationBase device = SimulationDevices.Find<PowerConversionSystemSimulationBase>(deviceId)

@@ -218,6 +218,25 @@ export async function setCommunication(request: SetCommunicationRequest): Promis
     await postSimulation('setcommunication', request, 'Changing the communication');
 }
 
+/** Body of POST {apiBaseUrl}/v1/simulation/setpowerdropout. */
+export interface SetPowerDropoutRequest {
+    deviceId: number;
+    isActivePowerDropoutEnabled: boolean;
+    /** Chance in percent (0..100) that an active power update is dropped. */
+    activePowerDropoutPercent: number;
+    isReactivePowerDropoutEnabled: boolean;
+    /** Chance in percent (0..100) that a reactive power update is dropped. */
+    reactivePowerDropoutPercent: number;
+}
+
+/**
+ * Switches the random dropout of the active (P) and reactive (Q) power updates of a simulated system power meter
+ * on or off. A dropped update keeps the last reported value.
+ */
+export async function setPowerDropout(request: SetPowerDropoutRequest): Promise<void> {
+    await postSimulation('setpowerdropout', request, 'Changing the power dropout');
+}
+
 /** Body of POST {apiBaseUrl}/v1/simulation/slowdownpower. */
 export interface SlowDownPowerRequest {
     deviceId: number;

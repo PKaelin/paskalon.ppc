@@ -94,6 +94,21 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
+        /// Switches the random dropout of the active and reactive power updates of a simulated system power meter on or off.
+        /// A dropped update keeps the last reported value (telemetry impairment).
+        /// </summary>
+        /// <param name="deviceId">Device ID of the simulated system power meter.</param>
+        /// <param name="isActivePowerDropoutEnabled">True to drop active power updates randomly.</param>
+        /// <param name="activePowerDropoutPercent">Chance in percent (0..100) that an active power update is dropped.</param>
+        /// <param name="isReactivePowerDropoutEnabled">True to drop reactive power updates randomly.</param>
+        /// <param name="reactivePowerDropoutPercent">Chance in percent (0..100) that a reactive power update is dropped.</param>
+        /// <exception cref="KeyNotFoundException">The simulated system power meter does not exist.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">A percent is not within 0..100.</exception>
+        void SetPowerDropout(int deviceId, bool isActivePowerDropoutEnabled, double activePowerDropoutPercent,
+            bool isReactivePowerDropoutEnabled, double reactivePowerDropoutPercent);
+
+
+        /// <summary>
         /// Sets the dead time and the first-order lag of the active and reactive power response of a simulated PCS.
         /// </summary>
         /// <param name="deviceId">Device ID of the simulated PCS.</param>

@@ -18,8 +18,10 @@ namespace paskalON.DeviceSimulator.Equipments.Meters.PowerMeters.Simples
     /// The meter measures the sum of all simulated PCS active and reactive powers (including units in maintenance mode),
     /// split evenly over the three phases. Voltages are the nominal grid voltages and currents follow from
     /// I = S / (√3 · V). Phasor angles are in radians.
+    /// The active and reactive power updates can be dropped randomly (telemetry impairment, switched on at runtime and
+    /// off by default). A dropped update keeps the last reported values of the total and phase powers.
     /// </remarks>
-    public sealed class SystemPowerMeterSimpleV1Simulation : ISimulatedDevice
+    public sealed class SystemPowerMeterSimpleV1Simulation : IPowerDropoutInjectable
     {
         /// <summary>
         /// Phase shift between two phases in radians (120°).
@@ -59,6 +61,14 @@ namespace paskalON.DeviceSimulator.Equipments.Meters.PowerMeters.Simples
         public string Name { get => _device.Name; }
 
 
+        /// <inheritdoc/>
+        public MeasurementDropout ActivePowerDropout { get; }
+
+
+        /// <inheritdoc/>
+        public MeasurementDropout ReactivePowerDropout { get; }
+
+
         /// <summary>
         /// Constructor of <see cref="SystemPowerMeterSimpleV1Simulation"/>.
         /// </summary>
@@ -66,18 +76,22 @@ namespace paskalON.DeviceSimulator.Equipments.Meters.PowerMeters.Simples
         /// <param name="device">Simulated device.</param>
         /// <param name="powerConversionSystems">All simulated power conversion systems measured by this meter.</param>
         /// <param name="grid">Shared simulated grid.</param>
+        /// <param name="random">Source of random numbers for the telemetry impairments.</param>
         public SystemPowerMeterSimpleV1Simulation(PmuDataSimulation stream, SystemPowerMeterSimpleV1Proxy device,
-            IReadOnlyCollection<PowerConversionSystemSimulationBase> powerConversionSystems, SimulatedGrid grid)
+            IReadOnlyCollection<PowerConversionSystemSimulationBase> powerConversionSystems, SimulatedGrid grid, Random random)
         {
             ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(device);
             ArgumentNullException.ThrowIfNull(powerConversionSystems);
             ArgumentNullException.ThrowIfNull(grid);
+            ArgumentNullException.ThrowIfNull(random);
 
             _stream = stream;
             _device = device;
             _powerConversionSystems = powerConversionSystems;
             _grid = grid;
+            ActivePowerDropout = new MeasurementDropout(random);
+            ReactivePowerDropout = new MeasurementDropout(random);
         }
 
 
@@ -103,15 +117,23 @@ namespace paskalON.DeviceSimulator.Equipments.Meters.PowerMeters.Simples
                 return Task.CompletedTask;
             }
 
-            // Power
-            SetAnalog(map.ActivePower, activePower);
-            SetAnalog(map.ActivePowerA, activePower / 3);
-            SetAnalog(map.ActivePowerB, activePower / 3);
-            SetAnalog(map.ActivePowerC, activePower / 3);
-            SetAnalog(map.ReactivePower, reactivePower);
-            SetAnalog(map.ReactivePowerA, reactivePower / 3);
-            SetAnalog(map.ReactivePowerB, reactivePower / 3);
-            SetAnalog(map.ReactivePowerC, reactivePower / 3);
+            // Power (a dropped update keeps the last reported values)
+            if (ActivePowerDropout.IsDropped() is false)
+            {
+                SetAnalog(map.ActivePower, activePower);
+                SetAnalog(map.ActivePowerA, activePower / 3);
+                SetAnalog(map.ActivePowerB, activePower / 3);
+                SetAnalog(map.ActivePowerC, activePower / 3);
+            }
+
+            if (ReactivePowerDropout.IsDropped() is false)
+            {
+                SetAnalog(map.ReactivePower, reactivePower);
+                SetAnalog(map.ReactivePowerA, reactivePower / 3);
+                SetAnalog(map.ReactivePowerB, reactivePower / 3);
+                SetAnalog(map.ReactivePowerC, reactivePower / 3);
+            }
+
             SetAnalog(map.ApparentPower, apparentPower);
             SetAnalog(map.VoltageLLAvg, voltageLineToLine);
             // Voltage phase to neutral and positive sequence

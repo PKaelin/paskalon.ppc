@@ -13,6 +13,7 @@ using paskalON.DeviceSimulator.Dto.Simulations;
 using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries;
 using paskalON.DeviceSimulator.Equipments.EnergyStorages.Batteries.Simples;
 using paskalON.DeviceSimulator.Equipments.Grids;
+using paskalON.DeviceSimulator.Equipments.Meters.PowerMeters.Simples;
 using paskalON.DeviceSimulator.Equipments.PowerConversionSystems;
 using paskalON.DeviceSimulator.Equipments.PowerConversionSystems.Simples;
 using paskalON.DeviceSimulator.Equipments.Simulations;
@@ -223,6 +224,32 @@ namespace paskalON.DeviceSimulator.Application.UnitTest
             Assert.IsNull(dto.Warning);
             Assert.IsNull(dto.Fault);
             Assert.IsNull(dto.VendorEvent);
+            Assert.IsNull(dto.IsActivePowerDropoutEnabled);
+            Assert.IsNull(dto.ActivePowerDropoutPercent);
+            Assert.IsNull(dto.IsReactivePowerDropoutEnabled);
+            Assert.IsNull(dto.ReactivePowerDropoutPercent);
+        }
+
+
+        [TestMethod]
+        public void MapPowerMeterSimulationMapsPowerDropoutTest()
+        {
+            SystemPowerMeterSimpleV1Proxy meter = CreateSystemPowerMeter();
+            SimulationStreamRegistry streams = new SimulationStreamRegistry();
+            SimulationDeviceRegistry simulations = new SimulationDeviceRegistry();
+            SystemPowerMeterSimpleV1Simulation simulation = new SystemPowerMeterSimpleV1Simulation(streams.GetOrCreate(meter), meter,
+                Array.Empty<PowerConversionSystemSimulationBase>(), new SimulatedGrid(), new Random(1));
+            simulation.ActivePowerDropout.Set(true, 40);
+            simulation.ReactivePowerDropout.Set(false, 15);
+            simulations.Add(simulation);
+            DeviceMapperSimulator mapper = new DeviceMapperSimulator(new SimulationStoreRegistry(), streams, simulations, (address, port) => true);
+
+            SimulationDto dto = mapper.MapPowerMeterSimulation(meter);
+
+            Assert.IsTrue(dto.IsActivePowerDropoutEnabled);
+            Assert.AreEqual(40, dto.ActivePowerDropoutPercent);
+            Assert.IsFalse(dto.IsReactivePowerDropoutEnabled);
+            Assert.AreEqual(15, dto.ReactivePowerDropoutPercent);
         }
 
 

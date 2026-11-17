@@ -408,15 +408,18 @@ namespace paskalON.DeviceSimulator.Application
 
 
         /// <summary>
-        /// Maps the simulation state (C37 communication) of a power meter.
+        /// Maps the simulation state (C37 communication and power dropout) of a power meter.
         /// </summary>
         /// <param name="device">The power meter.</param>
-        /// <returns>The simulation DTO. Power meters have no event registers.</returns>
+        /// <returns>
+        /// The simulation DTO. Power meters have no event registers. The power dropout is only set for simulated meters that support it.
+        /// </returns>
         public SimulationDto MapPowerMeterSimulation(PowerMeterBase device)
         {
             ArgumentNullException.ThrowIfNull(device);
 
             bool isResponding = _isResponding(device.TargetAddress, device.TargetPort);
+            IPowerDropoutInjectable? dropout = _simulations.Find<IPowerDropoutInjectable>(device.DeviceId);
 
             return new SimulationDto
             {
@@ -425,7 +428,11 @@ namespace paskalON.DeviceSimulator.Application
                 IsResponding = isResponding,
                 HasWarningRegister = false,
                 HasFaultRegister = false,
-                HasVendorEventRegister = false
+                HasVendorEventRegister = false,
+                IsActivePowerDropoutEnabled = dropout?.ActivePowerDropout.IsEnabled,
+                ActivePowerDropoutPercent = dropout?.ActivePowerDropout.Percent,
+                IsReactivePowerDropoutEnabled = dropout?.ReactivePowerDropout.IsEnabled,
+                ReactivePowerDropoutPercent = dropout?.ReactivePowerDropout.Percent
             };
         }
 

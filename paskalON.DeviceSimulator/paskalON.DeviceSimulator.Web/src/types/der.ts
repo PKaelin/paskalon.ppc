@@ -67,6 +67,14 @@ export interface SimulationDto {
     warning?: number | null;
     fault?: number | null;
     vendorEvent?: number | null;
+    /** System power meter only: true while P updates are dropped randomly (the last value is kept). */
+    isActivePowerDropoutEnabled?: boolean | null;
+    /** System power meter only: chance in percent (0..100) that a P update is dropped. */
+    activePowerDropoutPercent?: number | null;
+    /** System power meter only: true while Q updates are dropped randomly (the last value is kept). */
+    isReactivePowerDropoutEnabled?: boolean | null;
+    /** System power meter only: chance in percent (0..100) that a Q update is dropped. */
+    reactivePowerDropoutPercent?: number | null;
     /** PCS only: maximum power change per second in percent of the nameplate (0 = instant). */
     slowActivePowerByPercent?: number | null;
     slowReactivePowerByPercent?: number | null;

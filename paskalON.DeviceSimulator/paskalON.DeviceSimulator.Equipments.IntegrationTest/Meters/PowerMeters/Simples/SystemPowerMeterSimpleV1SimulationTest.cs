@@ -173,7 +173,7 @@ namespace paskalON.DeviceSimulator.Equipments.IntegrationTest.Meters.PowerMeters
                 await CreateRunningPcsAsync(1, 1200, 500, grid),
                 await CreateRunningPcsAsync(2, 600, 0, grid)
             };
-            SystemPowerMeterSimpleV1Simulation simulation = new SystemPowerMeterSimpleV1Simulation(stream, meter, pcs, grid);
+            SystemPowerMeterSimpleV1Simulation simulation = new SystemPowerMeterSimpleV1Simulation(stream, meter, pcs, grid, Random.Shared);
 
             await simulation.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
 
@@ -193,7 +193,7 @@ namespace paskalON.DeviceSimulator.Equipments.IntegrationTest.Meters.PowerMeters
             SystemPowerMeterSimpleV1Proxy meter = CreateMeter(false);
             PmuDataSimulation stream = new SimulationStreamRegistry().GetOrCreate(meter);
             PowerConversionSystemSimulationBase[] pcs = new[] { await CreateRunningPcsAsync(1, 1800, 500, grid) };
-            SystemPowerMeterSimpleV1Simulation simulation = new SystemPowerMeterSimpleV1Simulation(stream, meter, pcs, grid);
+            SystemPowerMeterSimpleV1Simulation simulation = new SystemPowerMeterSimpleV1Simulation(stream, meter, pcs, grid, Random.Shared);
 
             await simulation.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
 
@@ -213,13 +213,61 @@ namespace paskalON.DeviceSimulator.Equipments.IntegrationTest.Meters.PowerMeters
 
 
         [TestMethod]
+        public async Task TickAsyncDroppedActivePowerKeepsLastValueTest()
+        {
+            SimulatedGrid grid = new SimulatedGrid();
+            grid.Configure(60, 34500);
+            SystemPowerMeterSimpleV1Proxy meter = CreateMeter(false);
+            PmuDataSimulation stream = new SimulationStreamRegistry().GetOrCreate(meter);
+            // Draw order per tick: active power, reactive power. Below 0.5 (50 %) drops the update.
+            Mock<Random> random = new Mock<Random>();
+            random.SetupSequence(x => x.NextDouble())
+                .Returns(0.9).Returns(0.9)
+                .Returns(0.1).Returns(0.9)
+                .Returns(0.9).Returns(0.9);
+            List<PowerConversionSystemSimulationBase> pcs = new List<PowerConversionSystemSimulationBase> { await CreateRunningPcsAsync(1, 1000, 100, grid) };
+            PowerConversionSystemSimulationBase secondPcs = await CreateRunningPcsAsync(2, 1000, 100, grid);
+            PowerConversionSystemSimulationBase thirdPcs = await CreateRunningPcsAsync(3, 1000, 100, grid);
+            SystemPowerMeterSimpleV1Simulation simulation = new SystemPowerMeterSimpleV1Simulation(stream, meter, pcs, grid, random.Object);
+            simulation.ActivePowerDropout.Set(true, 50);
+            simulation.ReactivePowerDropout.Set(true, 50);
+
+            // 1000 kW / 100 kVAr: both reported
+            await simulation.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+            float firstActivePower = stream.Analogs["Analog1"].Measurement;
+            float firstReactivePower = stream.Analogs["Analog5"].Measurement;
+            // 2000 kW / 200 kVAr: active power dropped
+            pcs.Add(secondPcs);
+            await simulation.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+            float secondActivePower = stream.Analogs["Analog1"].Measurement;
+            float secondActivePowerA = stream.Analogs["Analog2"].Measurement;
+            float secondReactivePower = stream.Analogs["Analog5"].Measurement;
+            float secondApparentPower = stream.Analogs["Analog0"].Measurement;
+            // 3000 kW / 300 kVAr: both reported
+            pcs.Add(thirdPcs);
+            await simulation.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
+            float thirdActivePower = stream.Analogs["Analog1"].Measurement;
+            float thirdReactivePower = stream.Analogs["Analog5"].Measurement;
+
+            Assert.AreEqual(1000000, firstActivePower, 0.5);
+            Assert.AreEqual(1000000, secondActivePower, 0.5, "The dropped 2000 kW update keeps the last reported value.");
+            Assert.AreEqual(3000000, thirdActivePower, 0.5);
+            Assert.AreEqual(1000000d / 3, secondActivePowerA, 0.5, "The phase powers are dropped together with the total.");
+            Assert.AreEqual(100000, firstReactivePower, 0.5);
+            Assert.AreEqual(200000, secondReactivePower, 0.5, "The reactive power is dropped independently.");
+            Assert.AreEqual(300000, thirdReactivePower, 0.5);
+            Assert.AreEqual(Math.Sqrt(2000000d * 2000000d + 200000d * 200000d), secondApparentPower, 1, "The apparent power is not affected.");
+        }
+
+
+        [TestMethod]
         public async Task TickAsyncWithoutPowerConversionSystemsMeasuresNothingTest()
         {
             SimulatedGrid grid = new SimulatedGrid();
             SystemPowerMeterSimpleV1Proxy meter = CreateMeter(false);
             PmuDataSimulation stream = new SimulationStreamRegistry().GetOrCreate(meter);
             SystemPowerMeterSimpleV1Simulation simulation = new SystemPowerMeterSimpleV1Simulation(stream, meter,
-                Array.Empty<PowerConversionSystemSimulationBase>(), grid);
+                Array.Empty<PowerConversionSystemSimulationBase>(), grid, Random.Shared);
 
             await simulation.TickAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
 

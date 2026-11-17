@@ -95,6 +95,35 @@ namespace paskalON.DeviceSimulator.Service.WebApi.Controllers.V1
 
 
         /// <summary>
+        /// Switches the random dropout of the active and reactive power updates of a simulated system power meter on or off
+        /// (telemetry impairment, a dropped update keeps the last reported value).
+        /// </summary>
+        /// <param name="request">The power dropout request.</param>
+        /// <returns>Ok, NotFound when the system power meter does not exist or BadRequest for a percent outside 0..100.</returns>
+        [HttpPost]
+        public IActionResult SetPowerDropout(SetPowerDropoutRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            try
+            {
+                _deviceManager.SetPowerDropout(request.DeviceId, request.IsActivePowerDropoutEnabled, request.ActivePowerDropoutPercent,
+                    request.IsReactivePowerDropoutEnabled, request.ReactivePowerDropoutPercent);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok();
+        }
+
+
+        /// <summary>
         /// Slows down the active and reactive power response of a simulated PCS.
         /// </summary>
         /// <param name="request">The slow down request.</param>

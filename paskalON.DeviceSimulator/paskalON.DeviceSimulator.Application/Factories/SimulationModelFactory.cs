@@ -69,7 +69,7 @@ namespace paskalON.DeviceSimulator.Application.Factories
 
             return device switch
             {
-                SystemPowerMeterSimpleV1Proxy proxy => new SystemPowerMeterSimpleV1Simulation(stream, proxy, powerConversionSystems, grid),
+                SystemPowerMeterSimpleV1Proxy proxy => new SystemPowerMeterSimpleV1Simulation(stream, proxy, powerConversionSystems, grid, Random.Shared),
                 _ => null
             };
         }
