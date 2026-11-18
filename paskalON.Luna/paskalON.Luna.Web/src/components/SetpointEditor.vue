@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 import { getSetpoint, setSetpoint } from '../api/operatingModeApi';
+import { getNameplate } from '../api/systemApi';
 import { useNotifications } from '../composables/useNotifications';
 import SetpointStatus from './SetpointStatus.vue';
+import type { SystemNameplateDto } from '../types/system';
 import { formatLocaleNumber, isLocaleNumberKey, parseLocaleNumber } from '../utils/localeNumber';
 
 /** The service works in watts and vars, the operator in megawatts and megavars. */
@@ -25,9 +27,12 @@ const applying = ref(false);
 /** The active power input gets the focus once the setpoints are loaded. */
 const activePowerInput = useTemplateRef<HTMLInputElement>('activePowerInput');
 
-let abortController: AbortController | undefined;
+/** System nameplate limiting the setpoints, null until loaded (or if it could not be loaded). */
+const nameplate = ref<SystemNameplateDto | null>(null);
+const nameplateError = ref<string | null>(null);
 
-const isValid = computed(() => Number.isFinite(activePowerMegawatts.value) && Number.isFinite(reactivePowerMegavars.value));
+let abortController: AbortController | undefined;
+let nameplateAbortController: AbortController | undefined;
 
 /** Watts to megawatts without floating point noise (e.g. 1100000 W -> 1.1 MW). */
 function toMega(value: number): number {
@@ -37,6 +42,63 @@ function toMega(value: number): number {
 /** Megawatts to whole watts (e.g. 1.1 MW -> 1100000 W). */
 function fromMega(value: number): number {
     return Math.round(value * megaFactor);
+}
+
+/**
+ * Validation message of an entered setpoint, null if it is valid.
+ * The nameplate range is only checked once the nameplate is loaded - the service validates it in any case.
+ */
+function validate(label: string, text: string, megaValue: number, minimum: number | undefined, maximum: number | undefined, unit: string): string | null {
+    if (Number.isFinite(megaValue) === false) {
+        return text === '' ? `Enter the ${label} setpoint.` : `The ${label} setpoint is not a valid number.`;
+    }
+
+    const value = fromMega(megaValue);
+
+    if (maximum !== undefined && value > maximum) {
+        return `The ${label} setpoint exceeds the system nameplate maximum of ${formatLocaleNumber(toMega(maximum))} ${unit}.`;
+    }
+
+    if (minimum !== undefined && value < minimum) {
+        return `The ${label} setpoint is below the system nameplate minimum of ${formatLocaleNumber(toMega(minimum))} ${unit}.`;
+    }
+
+    return null;
+}
+
+const activePowerError = computed(() => validate(
+    'active power',
+    activePowerText.value,
+    activePowerMegawatts.value,
+    nameplate.value?.minimumActivePowerWatts,
+    nameplate.value?.maximumActivePowerWatts,
+    'MW'));
+
+const reactivePowerError = computed(() => validate(
+    'reactive power',
+    reactivePowerText.value,
+    reactivePowerMegavars.value,
+    nameplate.value?.minimumReactivePowerVars,
+    nameplate.value?.maximumReactivePowerVars,
+    'Mvar'));
+
+const isValid = computed(() => activePowerError.value === null && reactivePowerError.value === null);
+
+/** Loads the system nameplate used to validate the setpoints. */
+async function loadNameplate(): Promise<void> {
+    nameplateAbortController?.abort();
+    nameplateAbortController = new AbortController();
+    nameplateError.value = null;
+
+    try {
+        nameplate.value = await getNameplate(nameplateAbortController.signal);
+    } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+            return;
+        }
+
+        nameplateError.value = error instanceof Error ? error.message : String(error);
+    }
 }
 
 /** Only digits, the locale's decimal and digit group separators, a minus and the editing keys may be typed. */
@@ -133,9 +195,15 @@ async function applyZero(): Promise<boolean> {
 // The operating mode stack applies the setpoints as its last step.
 defineExpose({ apply, applyZero, isValid });
 
-onMounted(load);
+onMounted(() => {
+    void loadNameplate();
+    void load();
+});
 
-onBeforeUnmount(() => abortController?.abort());
+onBeforeUnmount(() => {
+    abortController?.abort();
+    nameplateAbortController?.abort();
+});
 </script>
 
 <template>
@@ -147,6 +215,11 @@ onBeforeUnmount(() => abortController?.abort());
             <button class="btn btn-sm btn-outline-light" type="button" @click="load">Retry</button>
         </div>
 
+        <p v-if="nameplateError" class="om-hint">
+            <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>The setpoints cannot be checked against the system nameplate. {{ nameplateError }}
+            <button class="btn btn-link btn-sm p-0 align-baseline" type="button" @click="loadNameplate">Retry</button>
+        </p>
+
         <div class="row g-2 align-items-end">
             <div class="col-12 col-sm-5">
                 <label class="form-label om-label" for="setpoint-active">Active power</label>
@@ -155,9 +228,12 @@ onBeforeUnmount(() => abortController?.abort());
                            ref="activePowerInput"
                            v-model.trim="activePowerText"
                            class="form-control text-end"
+                           :class="{ 'is-invalid': loading === false && activePowerError !== null }"
                            type="text"
                            inputmode="decimal"
                            autocomplete="off"
+                           :aria-invalid="loading === false && activePowerError !== null"
+                           aria-describedby="setpoint-errors"
                            :disabled="loading"
                            @keydown="onKeydown"
                            @blur="activePowerText = reformat(activePowerText)" />
@@ -170,9 +246,12 @@ onBeforeUnmount(() => abortController?.abort());
                     <input id="setpoint-reactive"
                            v-model.trim="reactivePowerText"
                            class="form-control text-end"
+                           :class="{ 'is-invalid': loading === false && reactivePowerError !== null }"
                            type="text"
                            inputmode="decimal"
                            autocomplete="off"
+                           :aria-invalid="loading === false && reactivePowerError !== null"
+                           aria-describedby="setpoint-errors"
                            :disabled="loading"
                            @keydown="onKeydown"
                            @blur="reactivePowerText = reformat(reactivePowerText)" />
@@ -185,6 +264,13 @@ onBeforeUnmount(() => abortController?.abort());
                     Apply
                 </button>
             </div>
+        </div>
+
+        <div id="setpoint-errors" aria-live="polite">
+            <template v-if="loading === false">
+                <div v-if="activePowerError" class="invalid-feedback d-block">{{ activePowerError }}</div>
+                <div v-if="reactivePowerError" class="invalid-feedback d-block">{{ reactivePowerError }}</div>
+            </template>
         </div>
 
         <SetpointStatus />
