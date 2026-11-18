@@ -28,7 +28,9 @@ class Program
     public static async Task<int> Main(string[] args)
     {
         int code = await ClientDataRunner.RunAsync(args, CreateContext);
+        Console.ForegroundColor = code == (int)ClientDataExitCode.Success ? ConsoleColor.Green : ConsoleColor.Red;
         Console.WriteLine("Finished processing OperatingModes database recreate with exit code: " + code);
+        Console.ResetColor();
 
         return code;
     }

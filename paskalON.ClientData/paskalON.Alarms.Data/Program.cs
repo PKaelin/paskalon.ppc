@@ -33,7 +33,9 @@ class Program
         LocalizedTextSupplement<LocalizedText> texts = new LocalizedTextSupplement<LocalizedText>(text => text.Name, text => text.Language,
             entity => entity is AlarmConfigBase config ? config.GetLocalizableValues() : [], LocalizedText.DefaultLanguage);
         int code = await ClientDataRunner.RunAsync(args, CreateContext, texts);
+        Console.ForegroundColor = code == (int)ClientDataExitCode.Success ? ConsoleColor.Green : ConsoleColor.Red;
         Console.WriteLine("Finished processing Alarm database recreate with exit code: " + code);
+        Console.ResetColor();
 
         return code;
     }
