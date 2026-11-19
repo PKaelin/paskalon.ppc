@@ -11,7 +11,7 @@ Operating Modes DependencyHealthMonitor tracks three dependencies and each one s
 - Redis: the monitor checks the connection itself and an open connection counts as seen.
 A dependency is Lost from startup until it is first seen and again whenever it has not been seen for its loss timeout.
 
-![Who talks to whom](./Docs/Dependency%20Health%20Who%20Talks%20To%20Whom.drawio.svg)
+![Who talks to whom](./Docs/Assets/Diagrams/Dependency%20Health%20Who%20Talks%20To%20Whom.drawio.svg)
 
 
 ### Dependency health states
@@ -19,5 +19,5 @@ A dependency is Lost from startup until it is first seen and again whenever it h
 - **Operating Mode control:** shows how an outage is kept from causing wrong setpoints or a sudden jump when the dependency returns.
 - **Heartbeat publishing:** shows how a service keeps signaling that it is alive during a message broker outage.
 
-![Dependency health states](./Docs/Dependency%20Health%20States.drawio.svg)
+![Dependency health states](./Docs/Assets/Diagrams/Dependency%20Health%20States.drawio.svg)
 

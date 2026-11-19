@@ -6,11 +6,11 @@ This project is not yet an actual power plant controller.
 
 
 ## Core Power Control Overview
-![test](./Docs/Core%20Power%20Control%20Controller%20Overview.drawio.svg)
+![test](./Docs/Assets/Diagrams/Core%20Power%20Control%20Controller%20Overview.drawio.svg)
 
 
 ## Network and Deployment Architecture Overview
-![Network and Deployment Architecture Overview](./Docs/Network%20and%20Deployment%20Architecture%20Overview.svg)  
+![Network and Deployment Architecture Overview](./Docs/Assets/Diagrams/Network%20and%20Deployment%20Architecture%20Overview.svg)  
 *Overview does not show platform and infrastructure services*
 
 
@@ -70,25 +70,25 @@ Configurations are stored in a database to ensure accountability and to track ch
 PlantControl, OperatingMode, PowerControl, DeviceService are all setup using the same concept. The configuration and structure of the microservice is stored in a database. During startup the configuration is read and factories create the domains and domain structure passing in the domain mappers that reference the subscribed data.
 
 
-![Config-Domain-Application Overview](./Docs/Config-Domain-Application%20Overview.drawio.svg)
+![Config-Domain-Application Overview](./Docs/Assets/Diagrams/Config-Domain-Application%20Overview.drawio.svg)
 
 
 ## Telemetry
 For detailed setup and telemetry procedures see the [TELEMETRY](./TELEMETRY.md)
 
-![Telemetry](./Docs/Telemetry.drawio.svg)
+![Telemetry](./Docs/Assets/Diagrams/Telemetry.drawio.svg)
 
 
 ## Fault Tolerance
 For detailed setup and fault tolerance procedures see the [FAULT TOLERANCE](./FAULT_TOLERANCE.md)
 
-![Fault Tolerance](./Docs/Fault%20Tolerance.drawio.svg)
+![Fault Tolerance](./Docs/Assets/Diagrams/Fault%20Tolerance.drawio.svg)
 
 
 ## Failover 
 For detailed setup and recovery procedures see the [FAILOVER](./FAILOVER.md)
 
-![Failover](./Docs/Failover.drawio.svg)
+![Failover](./Docs/Assets/Diagrams/Failover.drawio.svg)
 
 ---
 

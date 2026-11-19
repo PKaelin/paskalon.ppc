@@ -22,4 +22,4 @@ MetricsPublisher.Initialize("MeasurementName", tags);
 MetricsPublisher.Register<Device, double>(this, nameof(Power), MetricType.Gauge, x => x.Power, MetricsFactorClass1);
 ```
 
-![Metrics Publisher Design](./Docs/Metrics%20Publisher%20Design.drawio.svg)
+![Metrics Publisher Design](./Docs/Assets/Diagrams/Metrics%20Publisher%20Design.drawio.svg)

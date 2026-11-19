@@ -5,8 +5,9 @@ Defines where documentation lives in this repository, what each part contains an
 ## Principles
 - **Ownership decides location:** content that spans multiple solutions lives at repository level (`/Docs`); content owned by one solution lives in that solution's `Docs` folder, next to its code.
 - **A solution** is one independently deployable microservice folder (e.g. `paskalON.OperatingModes`) including its domain, application, infrastructure, service and test projects.
-- **A library** is a project that supports one or more solutions (e.g. `paskalON.Common`) and is not independently deployable.
-- **Every folder has an `Overview.md`** as its entry point.
+- **A library** is a project that supports one or more solutions (e.g. `paskalON.Common`, `paskalON.Communication`) and is not independently deployable. A library gets the same README and `Docs` structure as a solution.
+- **Every documentation content folder has an `Overview.md`** as its entry point (Not assets, version, manual, marketing).
+- **Diagrams and images live in `Assets`:** repository-level ones in `/Docs/Assets`, solution- and project-level ones in the solution's `Docs/Assets` folder. Projects have no `Docs` folder of their own.
 - **Docs change with the code:** documentation is updated in the same pull request as the change it describes.
 
 
@@ -38,14 +39,13 @@ README.md                            -> What is in the repository.
     |__06-Release/
     |  |__Overview.md                -> Overview of the release process, including links to standards, guidelines, strategy, checklists, notes etc.
     |__Manual/                      -> End-user manual, versioned in subfolders (V0.1, V1.0, etc.)
-    |  |__Overview.md
     |  |__V0.1/                     -> End-user manual, versioned in subfolders (V0.1, V1.0, etc.)
     |  |__V1.0/
     |__Marketing/                   -> Moving out of the engineering repo later
     |  |__V0.1/                     -> Product Marketing, versioned in subfolders (V0.1, V1.0, etc.)
     |  |__V1.0/
     |__Assets/                      -> Assets for the root documentation, like diagrams, images, logos, icons, etc.
-       |__Diagrams/                 -> Dont put solutions diagrams here, put them in the solution Doc folder.
+       |__Diagrams/                 -> Don't put solution diagrams here, put them in the solution's Docs/Assets/Diagrams folder.
        |__Images/
        |__Logos/
        |__Icons/
@@ -58,7 +58,7 @@ The solution root contains the following structure:
 README.md                             -> Features, Solution Structure, Link to solutions Overview.md, Links to main documentation.
 |__ Docs/                             -> Base folder for all documentation that is owned by this solution, including definitions, designs, etc.
     |__Overview.md                    -> Purpose, scope, responsibilities, and boundaries of the solution
-    │__Dependencies.md                -> Links or content of internal and external dependencies including other solutions, services, and systems.
+    |__Dependencies.md                -> Links or content of internal and external dependencies including other solutions, services, and systems.
     |__Interfaces.md                  -> Links or content of APIs, messaging contracts, events, and interfaces exposed to or consumed by the solution.
     |__DomainModel.md                 -> Links or content of the domain model for the solution.
     |__Configuration.md               -> Links or content of configuration settings and parameters for the solution.
@@ -93,7 +93,7 @@ Every .NET solution shall have a README.md file in its root folder. The README.m
 - Section called "Structure" with link to the solution's projects README.md files and its purpose. Exclude the unit, integration, and performance test projects.
 - Section called "Repository Documentation" as described above.
 - If the solution has a docker compose project, include a section called "Docker Compose" with short description of its purpose.
-- If the solution has a WEB API project, include a section called "Web API" with short description of its purpose and link to the REST Client file(s) (*.http.
+- If the solution has a WEB API project, include a section called "Web API" with short description of its purpose and link to the REST Client file(s) (*.http).
  
 
 ## Project README Documentation Requirements (*.csproj)
