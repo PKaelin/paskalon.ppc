@@ -10,6 +10,8 @@ device tree of the paskalON DeviceSimulator and lets you edit the writeable endp
 * Modbus grids (Address / Name / Data type / Value) and C37 grids (Name / Signal type / Value).
 * Search-as-you-type box under the header that filters the whole section tree by name.
 
+Part of the [Device Simulator solution](../README.md).
+
 ---
 
 ## 1. Prerequisites
@@ -139,3 +141,12 @@ JavaScript is still used for the navbar toggler and the Admin dropdown.
 | `npm run preview` | serve the production build locally |
 | `npm run type-check` | type check only |
 | `npm run mock-api` | start the mock web service on port 45500 |
+
+
+## Repository Documentation
+- [Repository README](/README.md)
+- [Architecture](/Docs/02-Architect/Overview.md)
+- [Design](/Docs/03-Design/Overview.md)
+- [Development](/Docs/04-Develop/Overview.md)
+- [Test](/Docs/05-Test/Overview.md)
+- [Release](/Docs/06-Release/Overview.md)

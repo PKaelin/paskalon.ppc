@@ -53,13 +53,13 @@ The actual devices (power resource) which can be a simulation, emulation or phys
 ## Supporting Solutions
 - [Alarms](/paskalON.Alarms/README.md): evaluation and lifecycle of PPC alarms.
 - [Luna](/paskalON.Luna/README.md): operator user interface (Luna Web) and its API.
-- [Device Simulator](/paskalON.DeviceSimulator): simulated devices for development and test.
+- [Device Simulator](/paskalON.DeviceSimulator/README.md): simulated devices for development and test.
 - [Client Data](/paskalON.ClientData/README.md): loads client or sample data into the microservice databases.
 
 
 ## Libraries
 - [Common](/paskalON.Common/README.md): reusable domain, hosting, infrastructure, maths, physical units and telemetry code.
-- [Communication](/paskalON.Communication): messaging (RabbitMQ, Redis) and protocols (C37.118, Modbus).
+- [Communication](/paskalON.Communication/README.md): messaging (RabbitMQ, Redis) and protocols (C37.118, Modbus).
 
 
 ## Open Topics

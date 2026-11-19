@@ -1,19 +1,17 @@
-﻿# Device Domain Configs
-This project contains all persistent configuration related code.
+# paskalON.Devices.Domain.Configs
+Persistent domain configuration of the system, the DER structure, the devices and their communications (Modbus, C37). It is stored in the database and used by the factories to create the domain.
+
+Part of the [Device Service solution](../README.md).
 
 
-## General concept overview
-We define a specific "Devices" just once (PCS, Battery, etc.) and have multiple "Communications" (C37 or Modbus Addressable), communicate with actual device. "Logicals" are groups of things like DerCircuit, DerUnit, etc.  
-![DeviceService Domain Configs Concept](./Docs/DeviceService%20Domain%20Configs%20Concept.drawio.svg)
+## Documentation
+The configuration concept is described in [Configuration](../Docs/Configuration.md#device-configuration).
 
 
-## Device domain config design
-![DeviceService Domain Configs](./Docs/DeviceService%20Domain%20Configs.drawio.svg)
-
-
-## Device domain meter config design
-![DeviceService Domain Meter Configs](./Docs/DeviceService%20Domain%20Meter%20Configs.drawio.svg)
-
-
-## Device domain GMD config design
-![DeviceService Domain GMD Configs](./Docs/DeviceService%20Domain%20GMD%20Configs.drawio.svg)
+## Repository Documentation
+- [Repository README](/README.md)
+- [Architecture](/Docs/02-Architect/Overview.md)
+- [Design](/Docs/03-Design/Overview.md)
+- [Development](/Docs/04-Develop/Overview.md)
+- [Test](/Docs/05-Test/Overview.md)
+- [Release](/Docs/06-Release/Overview.md)

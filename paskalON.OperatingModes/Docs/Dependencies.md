@@ -37,8 +37,8 @@ All provided by [InfrastructureInternal](/InfrastructureInternal/README.md) in D
 | paskalON.Telemetry | [Common](/paskalON.Common/README.md) | Metrics publisher. |
 | paskalON.Hosting | [Common](/paskalON.Common/README.md) | Startup retry while dependencies are not reachable. |
 | paskalON.Infrastructure | [Common](/paskalON.Common/README.md) | Generic repositories and database version. |
-| paskalON.Messaging | Communication | Message publisher/subscriber abstractions, heartbeats, sequencing and dependency health. |
-| paskalON.Messaging.Redis | Communication | Redis implementation of the message publisher/subscriber. |
+| paskalON.Messaging | [Communication](/paskalON.Communication/README.md) | Message publisher/subscriber abstractions, heartbeats, sequencing and dependency health. |
+| paskalON.Messaging.Redis | [Communication](/paskalON.Communication/README.md) | Redis implementation of the message publisher/subscriber. |
 | paskalON.Devices.Client | [Device Service](/paskalON.DeviceService/README.md) | Client to receive the DER structure and device data. |
 
 *Note: paskalON.Common and paskalON.Communication libraries are project references during initial development.*

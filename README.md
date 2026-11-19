@@ -15,7 +15,7 @@ This project is not yet an actual power plant controller.
 | [Device Service](./paskalON.DeviceService/README.md) | Translator between the power control and the physical devices. |
 | [Alarms](./paskalON.Alarms/README.md) | Evaluation and lifecycle of PPC alarms. |
 | [Luna](./paskalON.Luna/README.md) | Operator user interface (Luna Web) and its API. |
-| [Device Simulator](./paskalON.DeviceSimulator) | Simulated devices for development and test. |
+| [Device Simulator](./paskalON.DeviceSimulator/README.md) | Simulated devices for development and test. |
 | [Client Data](./paskalON.ClientData/README.md) | Loads client or sample data into the microservice databases. |
 
 
@@ -24,7 +24,7 @@ This project is not yet an actual power plant controller.
 | Library | Purpose |
 |---------|---------|
 | [Common](./paskalON.Common/README.md) | Reusable domain, hosting, infrastructure, maths, physical units and telemetry code. |
-| [Communication](./paskalON.Communication) | Messaging (RabbitMQ, Redis) and protocols (C37.118, Modbus). |
+| [Communication](./paskalON.Communication/README.md) | Messaging (RabbitMQ, Redis) and protocols (C37.118, Modbus). |
 
 
 ## Infrastructure

@@ -1,6 +1,19 @@
-﻿# Devices Domain
-This project contains all domain related code.   
-Most of the domains have a related configuration(s) in [Domain.Config](../paskalON.Devices.Domain.Configs/README.md).  
-The structure (Group, Unit, Circuit, etc.) and devices (BB, PCS, Meter, etc.) will only be apparent once the domain configurations are loaded.
+# paskalON.Devices.Domain
+Domain layer of DDD: the DER structure (groups, units, circuits) and the devices (PCS, battery banks, solar, power meters, generic Modbus devices).
+**Do not modify base classes without consulting the Lead Engineer.**
 
-![DeviceService Domain](./Docs/DeviceService%20Domain.drawio.svg)
+
+Part of the [Device Service solution](../README.md).
+
+
+## Documentation
+The domain is described in [Domain Model](../Docs/DomainModel.md).
+
+
+## Repository Documentation
+- [Repository README](/README.md)
+- [Architecture](/Docs/02-Architect/Overview.md)
+- [Design](/Docs/03-Design/Overview.md)
+- [Development](/Docs/04-Develop/Overview.md)
+- [Test](/Docs/05-Test/Overview.md)
+- [Release](/Docs/06-Release/Overview.md)

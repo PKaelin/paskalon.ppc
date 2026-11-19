@@ -1,4 +1,8 @@
-﻿# Maths Library
+# paskalON.Maths
+Mathematical functions used by the services: curves, interpolation, exponential and logarithmic functions, sums, coordinates and random walkers.
+
+Part of the [Common solution](../README.md).
+
 
 ## Namespaces
 
@@ -8,13 +12,11 @@ The mathematical study of continuous change
 - Differentials: concerns instantaneous rates of change, and the slopes of curves
 - Integrals: concerns accumulation of quantities, and areas under or between curves
 
-
-### Geometries
-The study of shapes
+Sub namespaces: Coordinates, Curves, Exponents, Logarithmics, Sums.
 
 
-### Algebras
-The study of generalizations of arithmetic operations
+### Randoms
+Random walkers and random extensions, e.g. for simulations.
 
 
 ## Writing Mathematics in Plain Text
@@ -42,3 +44,12 @@ Vector:         vector{x}
 Infinity:       'infinity'
 Derivatives:    'derivatives'
 ```
+
+
+## Repository Documentation
+- [Repository README](/README.md)
+- [Architecture](/Docs/02-Architect/Overview.md)
+- [Design](/Docs/03-Design/Overview.md)
+- [Development](/Docs/04-Develop/Overview.md)
+- [Test](/Docs/05-Test/Overview.md)
+- [Release](/Docs/06-Release/Overview.md)

@@ -1,13 +1,17 @@
-﻿# Constraint Engine Domain Configs
-This project contains all persistent configuration related code.
+# paskalON.ConstraintEngine.Domain.Configs
+Persistent domain configuration of the constraints (power and ramp constraints for the system and DER units).
+
+Part of the [Power Control solution](../README.md).
 
 
-## Constraint Engine Configuration Diagram 
-At this point we only have two major constraints:
-- Power constraints
-- Ramp constraints
-Those two constraints are for the System or for DerUnit's.
+## Documentation
+The constraint configuration is described in [Configuration](../Docs/Configuration.md#constraint-configuration).
 
-![ConstraintEngine Diagram](./Docs/ConstraintConfigs%20Diagram.drawio.svg)
 
-For related power control see: [PowerControl Diagram](../paskalON.PowerControls.Domain.Configs/README.md)
+## Repository Documentation
+- [Repository README](/README.md)
+- [Architecture](/Docs/02-Architect/Overview.md)
+- [Design](/Docs/03-Design/Overview.md)
+- [Development](/Docs/04-Develop/Overview.md)
+- [Test](/Docs/05-Test/Overview.md)
+- [Release](/Docs/06-Release/Overview.md)
