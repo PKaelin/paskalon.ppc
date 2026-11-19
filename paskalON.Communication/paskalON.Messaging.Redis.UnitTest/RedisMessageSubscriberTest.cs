@@ -4,11 +4,11 @@
 //----------------------------------------‐------------------------------------
 using Moq;
 using paskalON.Messaging.Redis;
-using paskalON.Messaging.UnitTest.TestDoubles;
+using paskalON.Messaging.Redis.UnitTest.TestDoubles;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 
-namespace paskalON.Messaging.UnitTest.Redis
+namespace paskalON.Messaging.Redis.UnitTest
 {
     [TestClass]
     public sealed class RedisMessageSubscriberTest

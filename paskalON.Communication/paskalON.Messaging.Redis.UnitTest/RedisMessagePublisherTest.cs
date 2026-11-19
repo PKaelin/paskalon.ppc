@@ -7,7 +7,7 @@ using paskalON.Messaging.Redis;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 
-namespace paskalON.Messaging.UnitTest.Redis
+namespace paskalON.Messaging.Redis.UnitTest
 {
     [TestClass]
     public sealed class RedisMessagePublisherTest

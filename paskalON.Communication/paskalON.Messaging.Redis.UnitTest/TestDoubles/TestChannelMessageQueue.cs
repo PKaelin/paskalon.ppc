@@ -5,7 +5,7 @@
 using StackExchange.Redis;
 using System.Reflection;
 
-namespace paskalON.Messaging.UnitTest.TestDoubles
+namespace paskalON.Messaging.Redis.UnitTest.TestDoubles
 {
     /// <summary>
     /// In-memory driver for a real <see cref="ChannelMessageQueue"/> without a Redis connection.

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
+    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Messaging\paskalON.Messaging.csproj" />
     <ProjectReference Include="..\paskalON.PowerControls.Dto\paskalON.PowerControls.Dto.csproj" />
   </ItemGroup>
 

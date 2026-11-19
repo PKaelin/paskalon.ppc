@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Infrastructure.PostgreSql\paskalON.Infrastructure.PostgreSql.csproj" />
-    <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging.RabbitMq.Testing\paskalON.Messaging.RabbitMq.Testing.csproj" />
+    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Messaging.RabbitMq.Testing\paskalON.Messaging.RabbitMq.Testing.csproj" />
     <ProjectReference Include="..\paskalON.Alarms.Application\paskalON.Alarms.Application.csproj" />
     <ProjectReference Include="..\paskalON.Alarms.Infrastructure\paskalON.Alarms.Infrastructure.csproj" />
   </ItemGroup>

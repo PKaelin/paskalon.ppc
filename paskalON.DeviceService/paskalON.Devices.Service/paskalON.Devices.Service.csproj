@@ -26,7 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
+    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Messaging\paskalON.Messaging.csproj" />
+    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Messaging.Redis\paskalON.Messaging.Redis.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Telemetry\paskalON.Telemetry.csproj" />
     <ProjectReference Include="..\paskalON.Devices.Application\paskalON.Devices.Application.csproj" />
     <ProjectReference Include="..\paskalON.Devices.Dto\paskalON.Devices.Dto.csproj" />

@@ -9,7 +9,6 @@ using Microsoft.Extensions.Time.Testing;
 using Moq;
 using paskalON.Messaging.Heartbeats;
 using paskalON.Messaging.Sequences;
-using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Text.Json;
 
@@ -174,9 +173,9 @@ namespace paskalON.Messaging.UnitTest.Heartbeats
         }
 
 
-        private RedisConnectionException CreateConnectionError()
+        private InvalidOperationException CreateConnectionError()
         {
-            return new RedisConnectionException(ConnectionFailureType.UnableToConnect, CommandFlags.None, "No connection is available to service this operation: PUBLISH ppc:pc:heartbeat", null, CommandStatus.Unknown);
+            return new InvalidOperationException("No connection is available to service this operation: PUBLISH ppc:pc:heartbeat");
         }
     }
 }

@@ -15,7 +15,7 @@
     <ProjectReference Include="..\paskalON.OperatingModes.Domain\paskalON.OperatingModes.Domain.csproj" />
     <ProjectReference Include="..\paskalON.OperatingModes.Dto\paskalON.OperatingModes.Dto.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
-    <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
+    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Messaging\paskalON.Messaging.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Maths\paskalON.Maths.csproj" />
     <ProjectReference Include="..\..\paskalON.Common\paskalON.PhysicalUnits\paskalON.PhysicalUnits.csproj" />
     <ProjectReference Include="..\paskalON.OperatingModes.Infrastructure\paskalON.OperatingModes.Infrastructure.csproj" />

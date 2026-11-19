@@ -12,8 +12,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\paskalON.Common\paskalON.Domains\paskalON.Domains.csproj" />
-    <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging\paskalON.Messaging.csproj" />
-    <ProjectReference Include="..\..\paskalON.Common\paskalON.Messaging.RabbitMq\paskalON.Messaging.RabbitMq.csproj" />
+    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Messaging\paskalON.Messaging.csproj" />
+    <ProjectReference Include="..\..\paskalON.Communication\paskalON.Messaging.RabbitMq\paskalON.Messaging.RabbitMq.csproj" />
     <!-- Published data (public contracts) of the services the alarms are evaluated of -->
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Client\paskalON.Devices.Client.csproj" />
     <ProjectReference Include="..\..\paskalON.DeviceService\paskalON.Devices.Dto\paskalON.Devices.Dto.csproj" />
