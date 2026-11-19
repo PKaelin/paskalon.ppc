@@ -1,12 +1,17 @@
-﻿# Operating Modes Domain Configs
-This project contains all persistent configuration related code.
+# paskalON.OperatingModes.Domain.Configs
+Persistent domain configuration of the system and the operating modes (system, operating mode, ramp, curve and custom configurations). It is stored in the database and used by the factories to create the domain.
 
-## General concept overview
-- Every operating mode shall have at least one type assigned but can be assigned multiple types.
-- Every operating mode has configuration data. 
-- Each operating mode must include a ramp configuration.
-- Each operating mode may include a curve configuration. 
-- Each operating mode may include a custom configuration for future or unplanned configuration types, allowing the database schema to remain unchanged as project specific configurations are introduced.
+Part of the [Operating Modes solution](../README.md).
 
-![Operating Modes Domain Overview](./Docs/Operating%20Mode%20Config%20Overivew.drawio.svg)
 
+## Documentation
+The configuration concept is described in [Configuration](../Docs/Configuration.md#operating-mode-configuration).
+
+
+## Repository Documentation
+- [Repository README](/README.md)
+- [Architecture](/Docs/02-Architect/Overview.md)
+- [Design](/Docs/03-Design/Overview.md)
+- [Development](/Docs/04-Develop/Overview.md)
+- [Test](/Docs/05-Test/Overview.md)
+- [Release](/Docs/06-Release/Overview.md)

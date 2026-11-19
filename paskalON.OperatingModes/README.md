@@ -1,82 +1,40 @@
 # Operating Modes
 This solution is to self contain all logic regarding the implementation of Operating Modes.
-An Operating Mode defines the specific behavior and control strategy the system uses to interact with the power grid.  
-*Note: paskalON.Common libraries are project references during initial development*  
+An Operating Mode defines the specific behavior and control strategy the system uses to interact with the power grid.
 
-
-## Operating Mode Overview
-![Operating Mode Overview](./Docs/Operating%20Mode%20Overview.drawio.svg)
+Purpose, responsibilities and the full documentation of the solution are in the [Operating Modes Overview](./Docs/Overview.md).
 
 
 ## Structure
 
-### Project .Domain.Configs
-Persistent Domain Configuration layer of DDD described in [README.md](./paskalON.OperatingModes.Domain.Configs/README.md)
+| Project | Purpose |
+|---------|---------|
+| [paskalON.OperatingModes.Domain.Configs](./paskalON.OperatingModes.Domain.Configs/README.md) | Persistent domain configuration layer of DDD. |
+| [paskalON.OperatingModes.Domain](./paskalON.OperatingModes.Domain/README.md) | Domain layer of DDD: operating modes, stack, transitions, ramps and curves. |
+| [paskalON.OperatingModes.Infrastructure](./paskalON.OperatingModes.Infrastructure/README.md) | Infrastructure layer of DDD: database context, repositories and migrations. |
+| [paskalON.OperatingModes.Application](./paskalON.OperatingModes.Application/README.md) | Application layer of DDD: factories, stack and override management, setpoint publishing. |
+| [paskalON.OperatingModes.Dto](./paskalON.OperatingModes.Dto/README.md) | Messages and response DTOs shared with other services. |
+| [paskalON.OperatingModes.Client](./paskalON.OperatingModes.Client/README.md) | Setpoint subscriber for other services. |
+| [paskalON.OperatingModes.Service.Dto](./paskalON.OperatingModes.Service.Dto/README.md) | Request DTOs of the Web API. |
+| [paskalON.OperatingModes.Service](./paskalON.OperatingModes.Service/README.md) | Service/interface layer: Web API, calculation worker and metrics publisher. |
 
-### Project .Domain
-Domain layer of DDD described in [README.md](./paskalON.OperatingModes.Domain/README.md)
-
-### Project .Infrastructure
-Infrastructure layer of DDD described in [README.md](./paskalON.OperatingModes.Infrastructure/README.md)
-
----
-
-TODO: Add general add readmes for not yet created projects below.
-
-### Project .Application
-Application layer of DDD described in [README.md](./paskalON.OperatingModes.Application/README.md)
+*Note: paskalON.Common and paskalON.Communication libraries are project references during initial development.*
 
 
-### Project .Service
-Service/Interface layer described in [README.md](./paskalON.OperatingModes.Service/README.md)
-
----
-
-
-## Types of operating modes
+## Docker Compose
+[docker-compose.yml](./docker-compose.yml) builds and starts the Operating Modes service container (`paskalon.operatingmodes.service`, port 45020) in the network `ppc.network`.
+The database, Redis and telemetry run in [InfrastructureInternal](/InfrastructureInternal/README.md), which must be started first.
 
 
-### Open Mode (Open-Loop Control)
-- How it works: The controller sends targets and assumes the action happens perfectly.
-- Feedback: None. It does not measure any actual output or adjust any changes.
-- Power plant use: In predictable scenarios.
-
-![Non-Metered Operating Mode Overview](./Docs/Non-Metered%20Operating%20Mode%20Overview.drawio.svg)
- 
-
-### Closed Mode (Closed-Loop Control)
-- How it works: Consistently checks the output using signals and compares it to the target.
-- Feedback: Continuous. If output drifts the controller calculates an error signal and makes adjustments in real time.
-- Power plant use: Industry standard for safe and stable operation. Used in Automatic Generation Control (AGC) and Automatic Voltage Regulators (AVR) to ensure grid compliance and prevent outages.
-
-![Metered Operating Mode Overview](./Docs/Metered%20Operating%20Mode%20Overview.drawio.svg)
+## Web API
+The Web API manages the operating mode stack, the overrides and the operator setpoints and starts, stops or puts all PCS in standby. The endpoints are described in [Interfaces](./Docs/Interfaces.md#web-api).
+REST Client file: [paskalON.OperatingModes.Service.http](./paskalON.OperatingModes.Service/paskalON.OperatingModes.Service.http).
 
 
-## High level concept
-- Operating modes can be stacked. 
-- Operating modes can be defined as "Additive"(each layer calculates output and adds it to its previous output) or "Exclusive" (uses its output only).
-
-![Operating Modes High Level Concept](./Docs/Operating%20Modes%20High%20Level%20Concept.drawio.svg)
-
-
-## Ramp Model 
-Every operating mode has a ramp model. The ramp model provides the ability to smoothly change power targets between set points.
-
-![Ramp Models Overview](./Docs/Ramp%20Models%20Overview.drawio.svg)
-
-
-## Curve Configuration
-Every operating mode can have a curve configuration.
-
-![Curve Overview](./Docs/Curve%20Configuration%20Overview.drawio.svg)
-
-- If latest signal reading is below or above first/last configured then assume first/last (Input +50/-50 in chart are not configured but are virtually as they are beyond the first/last).
-- If latest signal reading is between two IF values, then calculate the appropriate system output by a linear interpolation between the two corresponding THEN values.
-- If two adjoining then values are both the same then this would be called a deadband area.
-- If you want respond to ascending system readings with one set of conditions, and descending readings with a different set of conditions, you can configure a bi-directional curve.
-- Curve changes a target according to a source but does not overrule the ramp model.
-- Directional curve: all points going up or all down. Bi-Directional curve: points going up then down then up or points going down then up then down.
-
-
-## More information
-[See project readmes in structure section](./README.md#structure)
+## Repository Documentation
+- [Repository README](/README.md)
+- [Architecture](/Docs/02-Architect/Overview.md)
+- [Design](/Docs/03-Design/Overview.md)
+- [Development](/Docs/04-Develop/Overview.md)
+- [Test](/Docs/05-Test/Overview.md)
+- [Release](/Docs/06-Release/Overview.md)
