@@ -1,20 +1,15 @@
-# Failover 
+# Failover
+How the PPC core services hand over from a primary to a secondary instance and how the services are kept highly available.
+The failover requirements are defined in [Define](../01-Define/Overview.md#failover-requirements).
+
+![Failover](../Assets/Diagrams/Failover.drawio.svg)
+
 
 ## Definitions
 - PPC core services: Plant Control (controls plants), Operating Mode (controls modes and setpoints), Power Control (controls constraints), Device Service (controls devices)
 - PPC-DMZ (Power Plant Control Demilitarized Zone): A network that functions like a standard DMZ but is isolated specifically for power plant control systems.
 - Core-Control network: A network for all PPC core services and platform services. 
 - Docker Swarm serves as the primary container orchestration platform, responsible for clustering Docker hosts and automating container lifecycle management.
-
-
-## Failover Requirements
-- Failover within the PPC core services shall use a primary and secondary application level concept. The customized protocol shall be less then 25 bytes.
-- Failover within the PPC core services from loss of the primary until the secondary publishes its first event shall be <= 500 ms. Docker Swarm takes seconds to reschedule a container, so this target can only be met by the application-level primary/secondary handover. 
-- The system accepts rare scenarios where two primary instances are online and concurrently publishing data. However, this condition must be actively monitored and an automated notification must be dispatched upon occurrence.
-- Two replicas of one microservice type shall never be on the same node.
-- mTLS shall be used between the External and Internal API Gateway communication. That mTLS must have a monitored renewal process.
-- Orchestration cluster shall have at least 3 managers.
-- Redis Cluster (Sharded + Failover) shall be used instead of Redis Sentinel to minimize failover time.
 
 
 ## Failover Strategy
@@ -64,3 +59,8 @@
 
 
 TODO: Add HA-Failover details and database failover details
+
+
+## Repository Documentation
+- [Design Overview](./Overview.md)
+- [Repository README](/README.md)

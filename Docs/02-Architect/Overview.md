@@ -1,11 +1,12 @@
 # Architect
 Big picture of the Power Plant Controller and the relationships between its major building blocks.
 
-> TBD: The following pages are planned:
-> - System Context: external systems and actors.
-> - Solution Landscape: internal solutions and how they relate.
-> - System Deployment: networks, hosts and deployment details.
-> - System Security: security considerations.
+
+## Architecture
+- [Solution Landscape](./SolutionLandscape.md): the PPC solutions and how they relate to each other.
+- [System Deployment](./SystemDeployment.md): networks, containers and high availability.
+- System Context (TBD): external systems and actors.
+- System Security (TBD): security considerations.
 
 
 ## Repository Documentation

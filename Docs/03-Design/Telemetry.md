@@ -1,8 +1,12 @@
 # Telemetry
+How the PPC services publish metrics, logs and traces.
 
 TODO: Add more infos
 
-### Metrics publisher
+![Telemetry](../Assets/Diagrams/Telemetry.drawio.svg)
+
+
+## Metrics publisher
 Any class can publish metrics as long as a metrics publisher interface gets injected to the class and an instance (MetricsPublisher) of that injected interface is kept within the class. E.g. 
 ```
 public IMetricsPublisher MetricsPublisher { get; init; }
@@ -22,4 +26,9 @@ MetricsPublisher.Initialize("MeasurementName", tags);
 MetricsPublisher.Register<Device, double>(this, nameof(Power), MetricType.Gauge, x => x.Power, MetricsFactorClass1);
 ```
 
-![Metrics Publisher Design](./Docs/Assets/Diagrams/Metrics%20Publisher%20Design.drawio.svg)
+![Metrics Publisher Design](../Assets/Diagrams/Metrics%20Publisher%20Design.drawio.svg)
+
+
+## Repository Documentation
+- [Design Overview](./Overview.md)
+- [Repository README](/README.md)

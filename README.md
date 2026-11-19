@@ -5,97 +5,43 @@
 This project is not yet an actual power plant controller.  
 
 
-## Core Power Control Overview
-![test](./Docs/Assets/Diagrams/Core%20Power%20Control%20Controller%20Overview.drawio.svg)
+## Solutions
+
+| Solution | Purpose |
+|----------|---------|
+| [Plant Control](./paskalON.PlantControls/README.md) | Power Plant Controller that manages an energy facility. |
+| [Operating Modes](./paskalON.OperatingModes/README.md) | Control strategy the plant uses to interact with the power grid. |
+| [Power Controls](./paskalON.PowerControls/README.md) | Power distribution and constraint engine that keep the equipment safe. |
+| [Device Service](./paskalON.DeviceService/README.md) | Translator between the power control and the physical devices. |
+| [Alarms](./paskalON.Alarms/README.md) | Evaluation and lifecycle of PPC alarms. |
+| [Luna](./paskalON.Luna/README.md) | Operator user interface (Luna Web) and its API. |
+| [Device Simulator](./paskalON.DeviceSimulator) | Simulated devices for development and test. |
+| [Client Data](./paskalON.ClientData/README.md) | Loads client or sample data into the microservice databases. |
 
 
-## Network and Deployment Architecture Overview
-![Network and Deployment Architecture Overview](./Docs/Assets/Diagrams/Network%20and%20Deployment%20Architecture%20Overview.svg)  
-*Overview does not show platform and infrastructure services*
+## Libraries
+
+| Library | Purpose |
+|---------|---------|
+| [Common](./paskalON.Common/README.md) | Reusable domain, hosting, infrastructure, maths, physical units and telemetry code. |
+| [Communication](./paskalON.Communication) | Messaging (RabbitMQ, Redis) and protocols (C37.118, Modbus). |
 
 
-## Core Power Control Components
+## Infrastructure
+[InfrastructureInternal](./InfrastructureInternal/README.md) runs the platform services (databases, message broker, cache, telemetry) with Docker Compose in DEV and TST.
 
 
-### Portfolio
-Is a centralized platform that monitors, coordinates and controls multiple Power Plant Controls (PPCs) across different energy sites (Plants).   
-[See Portfolio details](./paskalON.Portfolio/README.md)  
-
-
-### Plant Control
-Is a Power Plant Controller that manages an energy facility.
-- Plant can be different locations like Hawaii, Oregon, etc.
-- Plant can be different types like BESS, Solar, Nuclear, etc.
-- Plant can be scaled like BESS1, BESS2, etc.
-
-[See Plant Control details](./paskalON.PlantControls/README.md)
-
-
-### Operating Mode
-Is a specific configuration and control how the plant produces energy.
-- Operating Mode per location, type, scaled.
-
-[See Operating Mode details](./paskalON.OperatingModes/README.md)
-
-
-### Power Control 
-Manages and maintains the safety of equipment.
-- Gets configuration from one or more Device component(s) and manages the power distribution.
-
-[See Power Control details](./paskalON.PowerControls/README.md)
-
-
-### Constraint Engine 
-Constraints the targets to physical, operational and regulatory constraints. This component resides within the power control solution.
-
-
-### Device Service 
-Manages physical devices and keeps a constant connection to the devices.
-- Device Service can manage groups of energy resources like PCS-1-99, PCS-100-199, etc. 
-
-[See Device Service details](./paskalON.DeviceService/README.md)
-
-
-### Device
-The actual devices (power resource) which can be a simulation, emulation or physical representation.
-
-
-## Common design
-
-### Configurations
-Configurations are stored in a database to ensure accountability and to track changes.
-
-
-### Config - Domain - Application Overview
-PlantControl, OperatingMode, PowerControl, DeviceService are all setup using the same concept. The configuration and structure of the microservice is stored in a database. During startup the configuration is read and factories create the domains and domain structure passing in the domain mappers that reference the subscribed data.
-
-
-![Config-Domain-Application Overview](./Docs/Assets/Diagrams/Config-Domain-Application%20Overview.drawio.svg)
-
-
-## Telemetry
-For detailed setup and telemetry procedures see the [TELEMETRY](./TELEMETRY.md)
-
-![Telemetry](./Docs/Assets/Diagrams/Telemetry.drawio.svg)
-
-
-## Fault Tolerance
-For detailed setup and fault tolerance procedures see the [FAULT TOLERANCE](./FAULT_TOLERANCE.md)
-
-![Fault Tolerance](./Docs/Assets/Diagrams/Fault%20Tolerance.drawio.svg)
-
-
-## Failover 
-For detailed setup and recovery procedures see the [FAILOVER](./FAILOVER.md)
-
-![Failover](./Docs/Assets/Diagrams/Failover.drawio.svg)
+## Documentation
+- [Define](./Docs/01-Define/Overview.md): requirements.
+- [Architect](./Docs/02-Architect/Overview.md): solution landscape and deployment.
+- [Design](./Docs/03-Design/Overview.md): designs that span multiple solutions.
+- [Develop](./Docs/04-Develop/Overview.md): development environment, database migrations and AI instructions.
+- [Test](./Docs/05-Test/Overview.md): test levels and how to run the tests.
+- [Release](./Docs/06-Release/Overview.md): release process.
+- [Documentation Structure And Definition](./Docs/Documentation.md): where documentation lives and how it is kept current.
 
 ---
 
 *Please note the Monorepo for a small early development.*  
 *Also note that all the solutions contain a folder initial develpment which one day will be replaced with nuget packages.*
 *Use Multirepo if you have multiple independent teams or for better separation.*
-
----
-TODO: Decide whether to include and document:  
-*Telemetry, User Interfaces, Alarms, Monitoring, Outstation, DeviceWarrantyService, API Gateways, DMZ (In/Out) Components, Deployment Components.*

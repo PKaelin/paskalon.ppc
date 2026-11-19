@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { useAlarmSummary } from '../composables/useAlarmSummary';
 import { AlarmSeverity, type AlarmSummaryDto } from '../types/alarm';
 
-/** Kind of event an indicator stands for; the shapes and colors follow COLORS.md. */
+/** Kind of event an indicator stands for; the shapes and colors follow Docs/03-Design/Colors.md. */
 type EventKind = 'info' | 'warning' | 'error' | 'critical';
 
 /** One event indicator shown as a shape. */
