@@ -18,7 +18,6 @@ A power plant earns money only when its controller does exactly what the grid as
 - **Built to keep running.** The Controller runs as independent microservices, each with its own job and its own data. If one service drops out, the plant holds its last setpoint and resumes automatically when the service returns. You can update or restart a single service without touching the rest, and the live service status in the header shows where to look when something goes wrong. The architecture is also ready for redundant, failover deployments as your plant grows.
 
 ![PPC Controller – operating modes with setpoint and commanded value](Images/PPC-OperatingMode.png)
-<!-- Picture tip: replace with a screenshot where a limit mode is active and "Commanded" differs from "Setpoint" (e.g. setpoint 20 MW, commanded 15 MW). That shows the "when limited" story at a glance. -->
 
 ![PPC Controller – event handling with acknowledge history](Images/PPC-Alarms.png)
 

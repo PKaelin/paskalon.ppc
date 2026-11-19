@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>paskalON PPC Carousel</title>
+<style>
+  @page { size: 1080px 1350px; margin: 0; }
+  :root {
+    --bg1: #2b3a4c;
+    --bg2: #1d2733;
+    --text: #f2f5f8;
+    --muted: #b4c0cc;
+    --accent: #6c9bc8;
+    --accent-strong: #8fb8e0;
+    --orange: #e3a33a;
+    --purple: #8a6fd1;
+    --green: #33c27a;
+    --frame: #5b8ec2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg2); }
+  body {
+    font-family: "Segoe UI", "Segoe UI Variable", system-ui, sans-serif;
+    color: var(--text);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .slide {
+    width: 1080px;
+    height: 1350px;
+    padding: 84px 80px 64px;
+    display: flex;
+    flex-direction: column;
+    background: radial-gradient(ellipse at 50% 0%, var(--bg1) 0%, var(--bg2) 75%);
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+  }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
+  .eyebrow {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-strong);
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 72px;
+    line-height: 1.08;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+  }
+  h1 .hl { color: var(--orange); }
+  p.lead {
+    font-size: 34px;
+    line-height: 1.4;
+    color: var(--muted);
+    margin-bottom: 36px;
+  }
+  p.lead b { color: var(--text); font-weight: 600; }
+  ul.points { list-style: none; margin-bottom: 40px; }
+  ul.points li {
+    font-size: 32px;
+    line-height: 1.35;
+    color: var(--muted);
+    padding-left: 44px;
+    position: relative;
+    margin-bottom: 16px;
+  }
+  ul.points li::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 15px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  ul.points li b { color: var(--text); font-weight: 600; }
+  .shot {
+    display: block;
+    width: 100%;
+    border: 3px solid var(--frame);
+    border-radius: 10px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+  .fill { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 24px;
+    color: var(--muted);
+    padding-top: 28px;
+  }
+  .brand { font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+  .brand span { color: var(--accent-strong); }
+  .swipe { color: var(--accent-strong); font-weight: 600; }
+
+  /* Slide 1 */
+  .hero-title { font-size: 88px; line-height: 1.04; margin-bottom: 32px; }
+  .hero-img { width: calc(100% + 80px); margin-left: -40px; border-radius: 12px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); }
+
+  /* Slide 3: requested / commanded / limited */
+  .rcl { display: flex; gap: 20px; margin-bottom: 40px; }
+  .rcl div {
+    flex: 1;
+    border-radius: 12px;
+    padding: 22px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+  }
+  .rcl .k { font-size: 24px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .rcl .v { font-size: 34px; font-weight: 700; margin-top: 6px; }
+  .rcl .req { border-color: var(--accent); }
+  .rcl .cmd { border-color: var(--purple); }
+  .rcl .lim { border-color: var(--orange); }
+
+  /* Slide 5: services */
+  .services { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 44px; }
+  .svc {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 26px 28px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+  }
+  .led {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 18px rgba(51, 194, 122, 0.7);
+    flex: none;
+  }
+  .svc .tag { font-size: 22px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; }
+  .svc .name { font-size: 32px; font-weight: 600; }
+
+  /* Slide 6: simulator */
+  .chips { display: flex; gap: 20px; margin-bottom: 36px; }
+  .chip {
+    flex: 1;
+    border-radius: 12px;
+    padding: 20px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    font-size: 27px;
+    line-height: 1.35;
+    color: var(--muted);
+  }
+  .chip b { display: block; font-size: 30px; color: var(--text); margin-bottom: 4px; }
+  .stack { position: relative; flex: 1; }
+  .stack img { position: absolute; width: 700px; }
+  .stack .a { left: 0; top: 0; }
+  .stack .b { right: 0; bottom: 0; }
+
+  /* Slide 8: call to action */
+  .cta-title { font-size: 120px; line-height: 1; margin-bottom: 36px; }
+  .pair { display: flex; gap: 24px; margin: 20px 0 56px; }
+  .pair div {
+    flex: 1;
+    border-radius: 14px;
+    padding: 34px 32px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 3px solid var(--frame);
+  }
+  .pair .t { font-size: 42px; font-weight: 700; margin-bottom: 10px; }
+  .pair .s { font-size: 28px; color: var(--muted); line-height: 1.4; }
+  .button {
+    align-self: flex-start;
+    font-size: 36px;
+    font-weight: 600;
+    padding: 24px 44px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #ffffff;
+  }
+</style>
+</head>
+<body>
+
+<!-- 1. Hook -->
+<section class="slide">
+  <div class="eyebrow">Product Spotlight</div>
+  <h1 class="hero-title">Control it live.<br><span class="hl">Prove it virtually.</span></h1>
+  <p class="lead" style="font-size: 31px;"><b>Your power plant controller does exactly what the grid asks.</b><br>But can you prove it before you energize a single device?<br>And once it runs live on site, can you see how the real plant reacts compared with how a near-ideal plant should?</p>
+  <div class="fill"><img class="hero-img" src="../Images/PPC-Hero.png" alt=""></div>
+  <div class="footer"><div class="brand">paskal<span>ON</span> Power Plant Control</div><div class="swipe">Swipe &rarr;</div></div>
+</section>
+
+<!-- 2. Dashboard -->
+<section class="slide">
+  <div class="eyebrow">PPC Controller</div>
+  <h1>Your plant, <span class="hl">every view</span></h1>
+  <ul class="points">
+    <li><b>Multiple dashboards</b>, each showing a different view of your plant's status and activity. Switch with one click.</li>
+    <li>Active and reactive power, state of charge, power factor and frequency, <b>live</b>.</li>
+  </ul>
+  <div class="fill"><img class="shot" src="../Images/PPC-Dashboard.png" alt=""></div>
+  <div class="footer"><div class="brand">paskal<span>ON</span></div><div>2 / 8</div></div>
+</section>
+
+<!-- 3. Operating modes -->
+<section class="slide">
+  <div class="eyebrow">PPC Controller &middot; Operating modes</div>
+  <h1>Never guess what<br>the plant <span class="hl">really does</span></h1>
+  <p class="lead">Stack the modes, enter a setpoint, apply. The controller shows you:</p>
+  <div class="rcl">
+    <div class="req"><div class="k">You</div><div class="v">Requested</div></div>
+    <div class="cmd"><div class="k">It</div><div class="v">Commanded</div></div>
+    <div class="lim"><div class="k">When</div><div class="v">A limit took over</div></div>
+  </div>
+  <div class="fill"><img class="shot" src="../Images/PPC-OperatingMode.png" alt=""></div>
+  <div class="footer"><div class="brand">paskal<span>ON</span></div><div>3 / 8</div></div>
+</section>
+
+<!-- 4. Event handling -->
+<section class="slide">
+  <div class="eyebrow">PPC Controller &middot; Event handling</div>
+  <h1>Every event.<br><span class="hl">Every acknowledgement.</span></h1>
+  <ul class="points">
+    <li>Every event, <b>from info to critical</b>, is captured and can be filtered.</li>
+    <li>Operators <b>acknowledge with one click</b>.</li>
+    <li>The history records <b>who acknowledged what and when</b>.</li>
+  </ul>
+  <div class="fill"><img class="shot" src="../Images/PPC-Alarms.png" alt=""></div>
+  <div class="footer"><div class="brand">paskal<span>ON</span></div><div>4 / 8</div></div>
+</section>
+
+<!-- 5. Built to keep running -->
+<section class="slide">
+  <div class="eyebrow">PPC Controller &middot; Architecture</div>
+  <h1>Built to <span class="hl">keep running</span></h1>
+  <p class="lead">Independent microservices, each with its own job and its own data.</p>
+  <div class="services">
+    <div class="svc"><div class="led"></div><div><div class="tag">OM</div><div class="name">Operating Mode</div></div></div>
+    <div class="svc"><div class="led"></div><div><div class="tag">PC</div><div class="name">Power Control</div></div></div>
+    <div class="svc"><div class="led"></div><div><div class="tag">DS</div><div class="name">Device Service</div></div></div>
+    <div class="svc"><div class="led"></div><div><div class="tag">AL</div><div class="name">Alarm Service</div></div></div>
+  </div>
+  <ul class="points">
+    <li>A service drops out? The plant <b>holds its last setpoint</b> and <b>resumes automatically</b>.</li>
+    <li><b>Update or restart one service</b> without touching the rest.</li>
+    <li>Live service status in the header shows <b>where to look</b>.</li>
+    <li>Ready for <b>redundant, failover deployments</b> as your plant grows.</li>
+  </ul>
+  <div class="fill"></div>
+  <div class="footer"><div class="brand">paskal<span>ON</span></div><div>5 / 8</div></div>
+</section>
+
+<!-- 6. Device simulation -->
+<section class="slide">
+  <div class="eyebrow">PPC Simulator</div>
+  <h1>Your whole plant, <span class="hl">virtual</span></h1>
+  <p class="lead">A <b>near-ideal reference plant</b>: compare it with how your real plant reacts. Every device speaks the <b>real protocol</b> (Modbus, IEEE C37.118). Inject faults or cut communication, then watch your controller react.</p>
+  <div class="chips">
+    <div class="chip"><b>PCS</b>Ramp limits for P and Q, realistic response delay</div>
+    <div class="chip"><b>Battery bank</b>Set SoC, 100&times; charging, taper near empty and full</div>
+  </div>
+  <div class="stack">
+    <img class="shot a" src="../Images/PPC-Sim-PCS.png" alt="">
+    <img class="shot b" src="../Images/PPC-Sim-Battery.png" alt="">
+  </div>
+  <div class="footer"><div class="brand">paskal<span>ON</span></div><div>6 / 8</div></div>
+</section>
+
+<!-- 7. Device filtering -->
+<section class="slide">
+  <div class="eyebrow">PPC Simulator &middot; Device filtering</div>
+  <h1>100+ devices.<br><span class="hl">Found in seconds.</span></h1>
+  <ul class="points">
+    <li>Groups, circuits, units and devices sit in <b>one live tree</b>.</li>
+    <li>Type a name and you find <b>any device in seconds</b>.</li>
+  </ul>
+  <div class="fill"><img class="shot" src="../Images/PPC-Sim-Filter.png" alt=""></div>
+  <div class="footer"><div class="brand">paskal<span>ON</span></div><div>7 / 8</div></div>
+</section>
+
+<!-- 8. Call to action -->
+<section class="slide">
+  <div class="eyebrow">paskalON Power Plant Control</div>
+  <div class="fill">
+    <h1 class="cta-title">See it <span class="hl">live.</span></h1>
+    <p class="lead">See how your real plant reacts next to how a near-ideal plant should. Contact paskalON for a demo and put your next plant through its paces.</p>
+    <div class="pair">
+      <div><div class="t">PPC Controller</div><div class="s">Operate &middot; Monitor &middot; Acknowledge</div></div>
+      <div><div class="t">PPC Simulator</div><div class="s">Model &middot; Inject faults &middot; Validate</div></div>
+    </div>
+    <div class="button">Send a message for a demo</div>
+  </div>
+  <div class="footer"><div class="brand">paskal<span>ON</span></div><div>8 / 8</div></div>
+</section>
+
+</body>
+</html>

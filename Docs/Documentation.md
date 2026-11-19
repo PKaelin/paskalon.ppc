@@ -5,6 +5,7 @@ Defines where documentation lives in this repository, what each part contains an
 ## Principles
 - **Ownership decides location:** content that spans multiple solutions lives at repository level (`/Docs`); content owned by one solution lives in that solution's `Docs` folder, next to its code.
 - **A solution** is one independently deployable microservice folder (e.g. `paskalON.OperatingModes`) including its domain, application, infrastructure, service and test projects.
+- **A library** is a project that supports one or more solutions (e.g. `paskalON.Common`) and is not independently deployable.
 - **Every folder has an `Overview.md`** as its entry point.
 - **Docs change with the code:** documentation is updated in the same pull request as the change it describes.
 
@@ -12,10 +13,10 @@ Defines where documentation lives in this repository, what each part contains an
 ## Repository Root
 The repository root contains the following structure:
 ```
-README.md                               -> What is in the repository.
-|__ Docs/                               -> Base folder for all documentation that spans multiple solutions, including architecture, design, development, test, etc.
+README.md                            -> What is in the repository.
+|__Docs/                             -> Base folder for all documentation that spans multiple solutions, including architecture, design, development, test, etc.
     |__01-Define/
-        |__Overview.md                -> Links or content of functional, non-functional, quality, availability, security, and other requirements of the solution.
+       |__Overview.md                -> Links or content of functional, non-functional, quality, availability, security, and other requirements of the solution.
     |__02-Architect/                 -> Architecture describes the big picture and the relationships between major building blocks.
     |  |__Overview.md                -> Overview of the solution referencing context, landscape, deployment and security.
     |  |__SystemContext.md           -> Links or content of the context of the solution, including external systems and actors.
@@ -36,39 +37,39 @@ README.md                               -> What is in the repository.
     |  |__Overview.md                -> Overview of the testing process, including links to standards, guidelines, unit, integration, performance, HIL, etc.
     |__06-Release/
     |  |__Overview.md                -> Overview of the release process, including links to standards, guidelines, strategy, checklists, notes etc.
-    |__ Manual/                      -> End-user manual, versioned in subfolders (V0.1, V1.0, etc.)
-    |   |__Overview.md
-    |   |__V0.1/                     -> End-user manual, versioned in subfolders (V0.1, V1.0, etc.)
-    |   |__V1.0/
-    |__ Marketing/                   -> Moving out of the engineering repo later
-    |   |__V0.1/                     -> Product Marketing, versioned in subfolders (V0.1, V1.0, etc.)
-    |   |__V1.0/
-    |__Assets/                       -> Assets for the root documentation, like diagrams, images, logos, icons, etc.
-        |__Diagrams/                  -> Dont put solutions diagrams here, put them in the solution Doc folder.
-        |__Images/
-        |__Logos/
-        |__Icons/
+    |__Manual/                      -> End-user manual, versioned in subfolders (V0.1, V1.0, etc.)
+    |  |__Overview.md
+    |  |__V0.1/                     -> End-user manual, versioned in subfolders (V0.1, V1.0, etc.)
+    |  |__V1.0/
+    |__Marketing/                   -> Moving out of the engineering repo later
+    |  |__V0.1/                     -> Product Marketing, versioned in subfolders (V0.1, V1.0, etc.)
+    |  |__V1.0/
+    |__Assets/                      -> Assets for the root documentation, like diagrams, images, logos, icons, etc.
+       |__Diagrams/                 -> Dont put solutions diagrams here, put them in the solution Doc folder.
+       |__Images/
+       |__Logos/
+       |__Icons/
 ```
 
 
 ## Solution Root
 The solution root contains the following structure:
 ```
-README.md                               -> Features, Solution Structure, Link to solutions Overview.md, Links to main documentation.
-|__ Docs/                               -> Base folder for all documentation that is owned by this solution, including definitions, designs, etc.
-    |__ Overview.md                   -> Purpose, scope, responsibilities, and boundaries of the solution
-    │__ Dependencies.md               -> Links or content of internal and external dependencies including other solutions, services, and systems.
-    |__ Interfaces.md                 -> Links or content of APIs, messaging contracts, events, and interfaces exposed to or consumed by the solution.
-    |__ DomainModel.md                -> Links or content of the domain model for the solution.
-    |__ Configuration.md              -> Links or content of configuration settings and parameters for the solution.
+README.md                             -> Features, Solution Structure, Link to solutions Overview.md, Links to main documentation.
+|__ Docs/                             -> Base folder for all documentation that is owned by this solution, including definitions, designs, etc.
+    |__Overview.md                    -> Purpose, scope, responsibilities, and boundaries of the solution
+    │__Dependencies.md                -> Links or content of internal and external dependencies including other solutions, services, and systems.
+    |__Interfaces.md                  -> Links or content of APIs, messaging contracts, events, and interfaces exposed to or consumed by the solution.
+    |__DomainModel.md                 -> Links or content of the domain model for the solution.
+    |__Configuration.md               -> Links or content of configuration settings and parameters for the solution.
     |__Design/                        -> How functionality within this solution works (Power allocation, operating mode evaluation, ramping).
     |  |__Overview.md                 -> Overview of the solution's important functional and technical designs.
     |  |__DeviceState.md              -> E.g. the device states like a PCS device.
     |  |__PowerAllocation.md          -> E.g. the power allocator.
     |  |__etc.
     |__Assets/
-        |__Diagrams/
-        |__Images/
+       |__Diagrams/
+       |__Images/
 ```
 
 
