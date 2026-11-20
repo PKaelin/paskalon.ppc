@@ -431,3 +431,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# draw.io editor backup files
+*.bkp
