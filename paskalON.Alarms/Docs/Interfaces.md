@@ -5,7 +5,7 @@ Back to the [Overview](./Overview.md).
 
 
 ## Web API
-Base address in DEV: `http://localhost:45030`. There is no REST Client file yet.
+Base address in DEV: `http://localhost:45030`. Requests are in the REST Client file [paskalON.Alarms.Service.http](../paskalON.Alarms.Service/paskalON.Alarms.Service.http).
 
 | Method | Path | Description |
 |--------|------|-------------|

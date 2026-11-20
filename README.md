@@ -1,8 +1,9 @@
 # Power Plant Controller (PPC)
 **This repository is source-available and not open source, with commercial/production use requiring a separate license!**
 
-## !!!This repo is under initial development!!!
-This project is not yet an actual power plant controller.  
+## !!!This repo is under development!!!
+This project is not yet feature complete.  
+Version 0.1 of the power plant controller is currently in pre-release.
 
 
 ## What The PPC Does

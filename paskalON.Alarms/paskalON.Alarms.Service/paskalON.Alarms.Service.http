@@ -1,0 +1,52 @@
+#------------------------------------------------------------------------------
+# Variables
+#------------------------------------------------------------------------------
+@paskalON.Alarms.Service_HostAddress = http://localhost:45030
+
+#------------------------------------------------------------------------------
+# Alarms controller
+#------------------------------------------------------------------------------
+GET {{paskalON.Alarms.Service_HostAddress}}/api/v1/alarms/summary
+Accept: application/json
+
+###
+
+GET {{paskalON.Alarms.Service_HostAddress}}/api/v1/alarms/ppcalarms?createdFrom=2026-01-01T00:00:00Z
+Accept: application/json
+
+###
+
+GET {{paskalON.Alarms.Service_HostAddress}}/api/v1/alarms/ppcalarms?createdFrom=2026-01-01T00:00:00Z&severityLevel=Error&alarmSequenceState=Alarm&deviceName=PCS
+Accept: application/json
+
+###
+
+POST {{paskalON.Alarms.Service_HostAddress}}/api/v1/alarms/acknowledge
+Content-Type: application/json
+
+{
+  "AlarmIds": [1, 2],
+  "AcknowledgedBy": "Operator"
+}
+
+###
+
+#------------------------------------------------------------------------------
+# Alarm configs controller
+#------------------------------------------------------------------------------
+POST {{paskalON.Alarms.Service_HostAddress}}/api/v1/alarmconfigs/reload
+
+###
+
+#------------------------------------------------------------------------------
+# Localizations controller
+#------------------------------------------------------------------------------
+GET {{paskalON.Alarms.Service_HostAddress}}/api/v1/localizations/texts?language=en
+Accept: application/json
+
+###
+
+GET {{paskalON.Alarms.Service_HostAddress}}/api/v1/localizations/texts?language=de-CH
+Accept: application/json
+
+###

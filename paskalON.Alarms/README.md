@@ -29,7 +29,7 @@ The database, Redis, RabbitMQ and telemetry run in [InfrastructureInternal](/Inf
 
 ## Web API
 The Web API provides the active alarms, the alarm summary, acknowledgement, the localized texts and reloads the alarm configurations. The endpoints are described in [Interfaces](./Docs/Interfaces.md#web-api).
-There is no REST Client file (`*.http`) yet.
+Requests are in the REST Client file [paskalON.Alarms.Service.http](./paskalON.Alarms.Service/paskalON.Alarms.Service.http).
 
 
 ## Repository Documentation

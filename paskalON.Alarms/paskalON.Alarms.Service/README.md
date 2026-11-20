@@ -5,7 +5,7 @@ Part of the [Alarms solution](../README.md).
 
 
 ## Web API
-The endpoints are described in [Interfaces](../Docs/Interfaces.md#web-api). There is no REST Client file yet.
+The endpoints are described in [Interfaces](../Docs/Interfaces.md#web-api). Requests are in the REST Client file [paskalON.Alarms.Service.http](./paskalON.Alarms.Service.http).
 
 
 ## Configuration
