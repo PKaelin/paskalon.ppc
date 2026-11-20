@@ -5,7 +5,16 @@
 This project is not yet an actual power plant controller.  
 
 
+## What The PPC Does
+The operator sets targets, the PPC turns them into setpoints for every device and keeps the plant on target at the grid connection.
+
+![PPC Product Overview](./Docs/Assets/Diagrams/PPC%20Product%20Overview.drawio.svg)
+
+
 ## Solutions
+How the solutions of this repository work together. Details are in the [Solution Landscape](./Docs/02-Architect/SolutionLandscape.md).
+
+![PPC Solution Landscape](./Docs/Assets/Diagrams/PPC%20Solution%20Landscape.drawio.svg)
 
 | Solution | Purpose |
 |----------|---------|
