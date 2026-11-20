@@ -7,3 +7,4 @@ Read and follow the guidelines located in:
 ../.ai/testing/testing-unit.instructions.md
 ../.ai/testing/testing-integration.instructions.md
 ../.ai/core/user-interface.instructions.md
+../.ai/core/documentation.instructions.md

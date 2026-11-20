@@ -10,6 +10,7 @@ The instructions are kept in `.ai` and shared by all assistants:
 | [coding-standards.instructions.md](/.ai/core/coding-standards.instructions.md) | Coding standard: headers, formatting, naming, exception handling, build and test commands. |
 | [architecture.instructions.md](/.ai/core/architecture.instructions.md) | Domain-Driven Design and microservice boundaries. |
 | [user-interface.instructions.md](/.ai/core/user-interface.instructions.md) | User interface rules, Luna Web data access and real-time data. |
+| [documentation.instructions.md](/.ai/core/documentation.instructions.md) | Which documentation to update with which code change, new project READMEs and the documentation check. |
 | [testing-general.instructions.md](/.ai/testing/testing-general.instructions.md) | General testing rules. |
 | [testing-unit.instructions.md](/.ai/testing/testing-unit.instructions.md) | Unit test rules. |
 | [testing-integration.instructions.md](/.ai/testing/testing-integration.instructions.md) | Integration test rules. |

@@ -103,3 +103,11 @@ Every .NET project shall have a README.md file in its root folder. The README.md
 - Section called "Repository Documentation" as described above.
 - If the project is a unit test project (*.UnitTest.csproj), include a section called "Unit Test" with short description that all UnitTests should be mocked and independent.
 - If the project is a integration test project (*.IntegrationTest.csproj), include a section called "Integration Test" with short description of the configuration and running requirements.
+
+
+## Documentation Check
+The rules above are checked by [Test-Documentation.ps1](/.github/scripts/Test-Documentation.ps1), locally and in the GitHub workflow `Documentation`:
+```
+powershell -NoProfile -File .github/scripts/Test-Documentation.ps1
+```
+Which documentation to update with which code change is defined in [documentation.instructions.md](/.ai/core/documentation.instructions.md).

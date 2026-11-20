@@ -1,0 +1,60 @@
+#-------------------------------------------------------------------------------
+# Documentation check for pushes and pull requests on the main branch.
+# Checks that the documentation follows Docs/Documentation.md
+# (structure, required files and sections, links and anchors).
+#-------------------------------------------------------------------------------
+name: Documentation
+
+#-------------------------------------------------------------------------------
+# Permissions on repository
+#-------------------------------------------------------------------------------
+permissions:
+  contents: read
+
+#-------------------------------------------------------------------------------
+# Triggers
+#-------------------------------------------------------------------------------
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.md'
+      - '**/*.csproj'
+      - '**/*.slnx'
+      - '**/*.drawio*'
+      - '**/docker-compose.yml'
+      - '.github/scripts/Test-Documentation.ps1'
+      - '.github/workflows/Documentation.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.md'
+      - '**/*.csproj'
+      - '**/*.slnx'
+      - '**/*.drawio*'
+      - '**/docker-compose.yml'
+      - '.github/scripts/Test-Documentation.ps1'
+      - '.github/workflows/Documentation.yml'
+
+
+#-------------------------------------------------------------------------------
+# Jobs
+#-------------------------------------------------------------------------------
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+
+    steps:
+      #--------------------------------------------------------------------------
+      # Checkout
+      #--------------------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v5
+      #--------------------------------------------------------------------------
+      # Check documentation
+      #--------------------------------------------------------------------------
+      - name: Check documentation
+        shell: pwsh
+        run: ./.github/scripts/Test-Documentation.ps1
