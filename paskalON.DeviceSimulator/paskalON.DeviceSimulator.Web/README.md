@@ -34,34 +34,15 @@ The dev server proxies everything under `/api` to `http://localhost:45500`, so t
 ever talks to one origin — **no CORS configuration is needed on the web service**. Override the
 target with the `DER_API_URL` environment variable if your service listens somewhere else.
 
-### No web service at hand?
-
-A mock of the web service is included:
-
-```
-node mock-api\server.mjs          (or: npm run mock-api, or: start-dev.cmd)
-```
-
-It serves realistic `DerDto` data (2 groups, battery + solar units, banks, panels, meters,
-read-only and writeable endpoints) on `http://localhost:45500/api/v1/der/getder`.
-
 ## 3. Run in Docker
 
 ```powershell
 docker compose up --build            # or: start-docker.cmd
 ```
 
-→ <http://localhost:8080>
-
 The image is a two-stage build: Node builds the bundle, nginx serves it and reverse proxies
 `/api/` to `DER_API_URL` (default `http://host.docker.internal:45500`, i.e. the service running on
 your Windows host).
-
-To run the app *and* the mock service in containers:
-
-```powershell
-docker compose -f docker-compose.yml -f docker-compose.mock.yml up --build   # or: start-docker-with-mock.cmd
-```
 
 ### Container settings (environment variables)
 
@@ -84,8 +65,6 @@ re-pointed at another service **without a rebuild**. Outside Docker the same fil
 
 ```
 paskalON.DeviceSimulator.Web.sln
-docker-compose.yml / docker-compose.mock.yml
-mock-api/server.mjs                     mock of the DeviceSimulator web service
 src/paskalON.DeviceSimulator.Web/
     paskalON.DeviceSimulator.Web.esproj Visual Studio project (F5 = npm run dev)
     Dockerfile                          multi stage build -> nginx
@@ -140,7 +119,6 @@ JavaScript is still used for the navbar toggler and the Admin dropdown.
 | `npm run build` | type check (`vue-tsc`) + production build into `dist/` |
 | `npm run preview` | serve the production build locally |
 | `npm run type-check` | type check only |
-| `npm run mock-api` | start the mock web service on port 45500 |
 
 
 ## Repository Documentation
